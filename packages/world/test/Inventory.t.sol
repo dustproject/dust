@@ -70,8 +70,8 @@ contract InventoryTest is DustTest {
     assertTrue(airEntityId.exists(), "Drop entity does not exist");
     assertInventoryHasObject(aliceEntityId, transferObjectTypeId, 0);
     assertInventoryHasObject(airEntityId, transferObjectTypeId, numToTransfer);
-    assertEq(Inventory.length(aliceEntityId), 0, "Inventory slots is not 0");
-    assertEq(Inventory.length(airEntityId), 1, "Inventory slots is not 0");
+    assertEq(Inventory.length(aliceEntityId), 0, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(airEntityId), 1, "Wrong number of occupied inventory slots");
   }
 
   function testDropNonTerrain() public {
@@ -96,8 +96,8 @@ contract InventoryTest is DustTest {
 
     assertInventoryHasObject(aliceEntityId, transferObjectTypeId, 0);
     assertInventoryHasObject(airEntityId, transferObjectTypeId, numToTransfer);
-    assertEq(Inventory.length(aliceEntityId), 0, "Inventory slots is not 0");
-    assertEq(Inventory.length(airEntityId), 1, "Inventory slots is not 0");
+    assertEq(Inventory.length(aliceEntityId), 0, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(airEntityId), 1, "Wrong number of occupied inventory slots");
   }
 
   function testDropToolTerrain() public {
@@ -123,8 +123,8 @@ contract InventoryTest is DustTest {
     assertTrue(airEntityId.exists(), "Drop entity does not exist");
     assertInventoryHasTool(aliceEntityId, toolEntityId, 0);
     assertInventoryHasTool(airEntityId, toolEntityId, 1);
-    assertEq(Inventory.length(aliceEntityId), 0, "Inventory slots is not 0");
-    assertEq(Inventory.length(airEntityId), 1, "Inventory slots is not 0");
+    assertEq(Inventory.length(aliceEntityId), 0, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(airEntityId), 1, "Wrong number of occupied inventory slots");
   }
 
   function testDropToolNonTerrain() public {
@@ -148,8 +148,8 @@ contract InventoryTest is DustTest {
 
     assertInventoryHasTool(aliceEntityId, toolEntityId, 0);
     assertInventoryHasTool(airEntityId, toolEntityId, 1);
-    assertEq(Inventory.length(aliceEntityId), 0, "Inventory slots is not 0");
-    assertEq(Inventory.length(airEntityId), 1, "Inventory slots is not 0");
+    assertEq(Inventory.length(aliceEntityId), 0, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(airEntityId), 1, "Wrong number of occupied inventory slots");
   }
 
   function testDropNonAirButPassable() public {
@@ -172,8 +172,8 @@ contract InventoryTest is DustTest {
 
     assertInventoryHasObject(aliceEntityId, transferObjectTypeId, 0);
     assertInventoryHasObject(airEntityId, transferObjectTypeId, numToTransfer);
-    assertEq(Inventory.length(aliceEntityId), 0, "Inventory slots is not 0");
-    assertEq(Inventory.length(airEntityId), 1, "Inventory slots is not 0");
+    assertEq(Inventory.length(aliceEntityId), 0, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(airEntityId), 1, "Wrong number of occupied inventory slots");
   }
 
   function testPickup() public {
@@ -197,8 +197,8 @@ contract InventoryTest is DustTest {
 
     assertInventoryHasObject(aliceEntityId, transferObjectTypeId, numToPickup);
     assertInventoryHasObject(airEntityId, transferObjectTypeId, 0);
-    assertEq(Inventory.length(aliceEntityId), 1, "Inventory slots is not 0");
-    assertEq(Inventory.length(airEntityId), 0, "Inventory slots is not 0");
+    assertEq(Inventory.length(aliceEntityId), 1, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(airEntityId), 0, "Wrong number of occupied inventory slots");
   }
 
   function testPickupTool() public {
@@ -221,8 +221,8 @@ contract InventoryTest is DustTest {
 
     assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
     assertInventoryHasTool(airEntityId, toolEntityId, 0);
-    assertEq(Inventory.length(aliceEntityId), 1, "Inventory slots is not 0");
-    assertEq(Inventory.length(airEntityId), 0, "Inventory slots is not 0");
+    assertEq(Inventory.length(aliceEntityId), 1, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(airEntityId), 0, "Wrong number of occupied inventory slots");
   }
 
   function testPickupMultiple() public {
@@ -252,8 +252,8 @@ contract InventoryTest is DustTest {
     assertInventoryHasObject(aliceEntityId, objectObjectTypeId, numToPickup);
     assertInventoryHasObject(airEntityId, objectObjectTypeId, 0);
     assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
-    assertEq(Inventory.length(aliceEntityId), 2, "Inventory slots is not 0");
-    assertEq(Inventory.length(airEntityId), 0, "Inventory slots is not 0");
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(airEntityId), 0, "Wrong number of occupied inventory slots");
   }
 
   function testPickupAll() public {
@@ -283,8 +283,8 @@ contract InventoryTest is DustTest {
     assertInventoryHasTool(airEntityId, toolEntityId1, 0);
     assertInventoryHasTool(aliceEntityId, toolEntityId2, 1);
     assertInventoryHasTool(airEntityId, toolEntityId2, 0);
-    assertEq(Inventory.length(aliceEntityId), 3, "Inventory slots is not 0");
-    assertEq(Inventory.length(airEntityId), 0, "Inventory slots is not 0");
+    assertEq(Inventory.length(aliceEntityId), 3, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(airEntityId), 0, "Wrong number of occupied inventory slots");
   }
 
   function testPickupMinedChestDrops() public {
@@ -312,8 +312,8 @@ contract InventoryTest is DustTest {
 
     assertInventoryHasObject(aliceEntityId, transferObjectTypeId, numToPickup);
     assertInventoryHasObject(airEntityId, transferObjectTypeId, 0);
-    assertEq(Inventory.length(aliceEntityId), 2, "Inventory slots is not 0");
-    assertEq(Inventory.length(airEntityId), 0, "Inventory slots is not 0");
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(airEntityId), 0, "Wrong number of occupied inventory slots");
   }
 
   function testPickupFromNonAirButPassable() public {
@@ -335,8 +335,8 @@ contract InventoryTest is DustTest {
 
     assertInventoryHasObject(aliceEntityId, transferObjectTypeId, numToPickup);
     assertInventoryHasObject(airEntityId, transferObjectTypeId, 0);
-    assertEq(Inventory.length(aliceEntityId), 1, "Inventory slots is not 0");
-    assertEq(Inventory.length(airEntityId), 0, "Inventory slots is not 0");
+    assertEq(Inventory.length(aliceEntityId), 1, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(airEntityId), 0, "Wrong number of occupied inventory slots");
   }
 
   function testPickupFailsIfInventoryFull() public {
@@ -358,15 +358,12 @@ contract InventoryTest is DustTest {
     assertEq(
       Inventory.length(aliceEntityId),
       ObjectTypeMetadata.getMaxInventorySlots(ObjectTypes.Player),
-      "Inventory slots is not max"
+      "Wrong number of occupied inventory slots"
     );
-
-    SlotTransfer[] memory pickup = new SlotTransfer[](1);
-    pickup[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
 
     vm.prank(alice);
     vm.expectRevert("All slots used");
-    world.pickup(aliceEntityId, pickup, pickupCoord);
+    world.pickupAll(aliceEntityId, pickupCoord);
   }
 
   function testDropFailsIfDoesntHaveBlock() public {
@@ -379,7 +376,7 @@ contract InventoryTest is DustTest {
     drop[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
 
     vm.prank(alice);
-    vm.expectRevert("Not enough objects in slot");
+    vm.expectRevert("Empty slot");
     world.drop(aliceEntityId, drop, dropCoord);
   }
 

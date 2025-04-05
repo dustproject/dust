@@ -159,7 +159,7 @@ contract MineTest is DustTest {
     assertEq(ObjectType.get(mineEntityId), ObjectTypes.Air, "Entity should be air");
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
     assertInventoryHasObject(aliceEntityId, ObjectTypes.AnyOre, 0);
-    assertEq(Inventory.length(aliceEntityId), 1, "Inventory slots is not 1");
+    assertEq(Inventory.length(aliceEntityId), 1, "Wrong number of occupied inventory slots");
     oreAmounts = inventoryGetOreAmounts(aliceEntityId);
     assertEq(oreAmounts.length, 1, "No ores in inventory");
     assertEq(oreAmounts[0].amount, 1, "Did not get exactly one ore");
@@ -397,7 +397,7 @@ contract MineTest is DustTest {
     assertEq(
       Inventory.length(aliceEntityId),
       ObjectTypeMetadata.getMaxInventorySlots(ObjectTypes.Player),
-      "Inventory slots is not max"
+      "Wrong number of occupied inventory slots"
     );
 
     vm.prank(alice);

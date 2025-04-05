@@ -116,8 +116,8 @@ contract TransferTest is DustTest {
 
     assertInventoryHasObject(aliceEntityId, transferObjectTypeId, 0);
     assertInventoryHasObject(chestEntityId, transferObjectTypeId, numToTransfer);
-    assertEq(Inventory.length(aliceEntityId), 0, "Inventory slots is not 0");
-    assertEq(Inventory.length(chestEntityId), 1, "Inventory slots is not 0");
+    assertEq(Inventory.length(aliceEntityId), 0, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(chestEntityId), 1, "Wrong number of occupied inventory slots");
   }
 
   function testTransferToolToChest() public {
@@ -141,8 +141,8 @@ contract TransferTest is DustTest {
 
     assertInventoryHasTool(chestEntityId, toolEntityId, 1);
     assertInventoryHasTool(aliceEntityId, toolEntityId, 0);
-    assertEq(Inventory.length(chestEntityId), 1, "Inventory slots is not 0");
-    assertEq(Inventory.length(aliceEntityId), 0, "Inventory slots is not 0");
+    assertEq(Inventory.length(chestEntityId), 1, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(aliceEntityId), 0, "Wrong number of occupied inventory slots");
   }
 
   function testTransferFromChest() public {
@@ -167,7 +167,7 @@ contract TransferTest is DustTest {
     assertInventoryHasObject(aliceEntityId, transferObjectTypeId, numToTransfer);
     assertInventoryHasObject(chestEntityId, transferObjectTypeId, 0);
     assertEq(Inventory.length(aliceEntityId), 1, "Inventory not set");
-    assertEq(Inventory.length(chestEntityId), 0, "Inventory slots is not 0");
+    assertEq(Inventory.length(chestEntityId), 0, "Wrong number of occupied inventory slots");
   }
 
   function testTransferToolFromChest() public {
@@ -195,8 +195,8 @@ contract TransferTest is DustTest {
     assertInventoryHasTool(aliceEntityId, toolEntityId2, 1);
     assertInventoryHasTool(chestEntityId, toolEntityId1, 0);
     assertInventoryHasTool(chestEntityId, toolEntityId2, 0);
-    assertEq(Inventory.length(aliceEntityId), 2, "Inventory slots is not 0");
-    assertEq(Inventory.length(chestEntityId), 0, "Inventory slots is not 0");
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(chestEntityId), 0, "Wrong number of occupied inventory slots");
   }
 
   function testTransferToChestFailsIfChestFull() public {
@@ -211,7 +211,7 @@ contract TransferTest is DustTest {
       transferObjectTypeId,
       ObjectTypeMetadata.getStackable(transferObjectTypeId) * maxChestInventorySlots
     );
-    assertEq(Inventory.length(chestEntityId), maxChestInventorySlots, "Inventory slots is not max");
+    assertEq(Inventory.length(chestEntityId), maxChestInventorySlots, "Wrong number of occupied inventory slots");
 
     TestInventoryUtils.addObject(aliceEntityId, transferObjectTypeId, 1);
     assertInventoryHasObject(aliceEntityId, transferObjectTypeId, 1);
@@ -236,7 +236,7 @@ contract TransferTest is DustTest {
       transferObjectTypeId,
       ObjectTypeMetadata.getStackable(transferObjectTypeId) * maxPlayerInventorySlots
     );
-    assertEq(Inventory.length(aliceEntityId), maxPlayerInventorySlots, "Inventory slots is not max");
+    assertEq(Inventory.length(aliceEntityId), maxPlayerInventorySlots, "Wrong number of occupied inventory slots");
 
     TestInventoryUtils.addObject(chestEntityId, transferObjectTypeId, 1);
     assertInventoryHasObject(chestEntityId, transferObjectTypeId, 1);

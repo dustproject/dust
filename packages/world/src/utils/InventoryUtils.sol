@@ -51,8 +51,6 @@ library InventoryUtils {
       // Destroy equipped item
       recycleSlot(owner, slot);
       Mass._deleteRecord(tool);
-
-      // Burn ores and make them available for respawn
       toolType.burnOres();
 
       // TODO: return energy to local pool
@@ -64,12 +62,10 @@ library InventoryUtils {
   function addEntity(EntityId owner, EntityId entityId, uint16 slot) internal {
     ObjectTypeId objectType = ObjectType._get(entityId);
 
-    // Set the slot data
     InventorySlot._setEntityId(owner, slot, entityId);
     InventorySlot._setObjectType(owner, slot, objectType);
     InventorySlot._setAmount(owner, slot, 1);
 
-    // Add to type slots for this tool type
     addToTypeSlots(owner, objectType, slot);
   }
 
@@ -78,22 +74,28 @@ library InventoryUtils {
     addEntity(owner, entityId, slot);
   }
 
-  function addObject(EntityId owner, ObjectTypeId objectType, uint16 amount, uint16 slot) public {
+  function addObjectToSlot(EntityId owner, ObjectTypeId objectType, uint16 amount, uint16 slot) public {
     require(amount > 0, "Amount must be greater than 0");
     uint16 stackable = ObjectTypeMetadata._getStackable(objectType);
     require(stackable > 0, "Object type cannot be added to inventory");
+    uint16 maxSlots = ObjectTypeMetadata._getMaxInventorySlots(ObjectType._get(owner));
+    require(slot < maxSlots, "All slots used");
 
     InventorySlotData memory slotData = InventorySlot._get(owner, slot);
     uint16 newAmount = slotData.amount + amount;
     require(newAmount <= stackable, "Object does not fit in slot");
 
     if (slotData.objectType.isNull()) {
+      InventorySlot._setObjectType(owner, slot, objectType);
+      InventorySlot._setOccupiedIndex(owner, slot, uint16(Inventory._length(owner)));
+      Inventory._push(owner, slot);
+      // TODO: we should only do this if this slot was already created
+      removeFromTypeSlots(owner, ObjectTypes.Null, slot);
       addToTypeSlots(owner, objectType, slot);
     } else {
       require(slotData.objectType == objectType, "Cannot store different object types in the same slot");
     }
 
-    InventorySlot._setObjectType(owner, slot, objectType);
     InventorySlot._setAmount(owner, slot, newAmount);
   }
 
@@ -111,14 +113,12 @@ library InventoryUtils {
       uint16 currentAmount = InventorySlot._getAmount(owner, slot);
 
       // Skip slots that are already full
-      if (currentAmount >= stackable) {
+      if (currentAmount == stackable) {
         continue;
       }
 
       uint16 canAdd = stackable - currentAmount;
       uint16 toAdd = remaining < canAdd ? remaining : canAdd;
-
-      // Update the slot with the new amount
       InventorySlot._setAmount(owner, slot, currentAmount + toAdd);
       remaining -= toAdd;
     }
@@ -128,11 +128,9 @@ library InventoryUtils {
       uint16 slot = useEmptySlot(owner);
       uint16 toAdd = remaining < stackable ? remaining : stackable;
 
-      // Set slot data
       InventorySlot._setObjectType(owner, slot, objectType);
       InventorySlot._setAmount(owner, slot, toAdd);
 
-      // Add to type slots
       addToTypeSlots(owner, objectType, slot);
 
       remaining -= toAdd;
@@ -143,11 +141,11 @@ library InventoryUtils {
     require(amount > 0, "Amount must be greater than 0");
     require(!objectType.isNull(), "Empty slot");
 
-    uint16 remaining = amount;
-
     // Check if there are any slots with this object type
     uint256 numTypeSlots = InventoryTypeSlots._length(owner, objectType);
     require(numTypeSlots > 0, "Not enough objects of this type in inventory");
+
+    uint16 remaining = amount;
 
     // Iterate from end to minimize array shifts
     for (uint256 i = numTypeSlots; i > 0 && remaining > 0; i--) {
@@ -169,11 +167,10 @@ library InventoryUtils {
     require(remaining == 0, "Not enough objects of this type in inventory");
   }
 
-  function removeObject(EntityId owner, ObjectTypeId objectType, uint16 amount, uint16 slot) public {
+  function removeObjectFromSlot(EntityId owner, ObjectTypeId objectType, uint16 amount, uint16 slot) public {
     require(amount > 0, "Amount must be greater than 0");
     require(!objectType.isNull(), "Empty slot");
 
-    // Verify the slot contains the correct object type
     ObjectTypeId slotObjectType = InventorySlot._getObjectType(owner, slot);
     require(slotObjectType == objectType, "Slot does not contain the specified object type");
 
@@ -240,8 +237,8 @@ library InventoryUtils {
         addEntity(to, entityId, slotTo);
       } else {
         require(amount <= sourceSlot.amount, "Not enough objects in slot");
-        removeObject(from, sourceSlot.objectType, amount, slotFrom);
-        addObject(to, sourceSlot.objectType, amount, slotTo);
+        removeObjectFromSlot(from, sourceSlot.objectType, amount, slotFrom);
+        addObjectToSlot(to, sourceSlot.objectType, amount, slotTo);
       }
     }
   }
@@ -303,47 +300,32 @@ library InventoryUtils {
 
   // Gets a slot to use - either reuses an empty slot or creates a new one - O(1)
   function useEmptySlot(EntityId owner) private returns (uint16) {
-    // First try to find an empty slot from the Null objectType
-    uint256 numEmptySlots = InventoryTypeSlots._length(owner, ObjectTypes.Null);
+    uint256 emptyLength = InventoryTypeSlots._length(owner, ObjectTypes.Null);
     uint16 occupiedIndex = uint16(Inventory._length(owner));
 
-    if (numEmptySlots > 0) {
-      // Reuse the last empty slot
-      uint16 emptySlot = InventoryTypeSlots._getItem(owner, ObjectTypes.Null, numEmptySlots - 1);
-
-      // Remove from null type slots
-      removeFromTypeSlots(owner, ObjectTypes.Null, emptySlot);
-
-      // Add to occupied slots and track its index
-      Inventory._push(owner, emptySlot);
-      InventorySlot._setOccupiedIndex(owner, emptySlot, occupiedIndex);
-
-      return emptySlot;
+    // If there is already a null slot, use it
+    if (emptyLength > 0) {
+      uint16 slot = InventoryTypeSlots._getItem(owner, ObjectTypes.Null, emptyLength - 1);
+      removeFromTypeSlots(owner, ObjectTypes.Null, slot);
+      Inventory._push(owner, slot);
+      InventorySlot._setOccupiedIndex(owner, slot, occupiedIndex);
+      return slot;
     }
 
-    // No empty slots available, try to use a new slot
+    // Otherwise try to add a new slot
     uint16 maxSlots = ObjectTypeMetadata._getMaxInventorySlots(ObjectType._get(owner));
     require(occupiedIndex < maxSlots, "All slots used");
-
-    // Add to occupied slots and track its index
     Inventory._push(owner, occupiedIndex);
     InventorySlot._setOccupiedIndex(owner, occupiedIndex, occupiedIndex);
-
-    // Initialize typeIndex as 0 (not in any type slots yet)
-    InventorySlot._setTypeIndex(owner, occupiedIndex, 0);
-
     return occupiedIndex;
   }
 
   // Marks a slot as empty - O(1)
   function recycleSlot(EntityId owner, uint16 slot) private {
-    // Get the object type before emptying the slot
     ObjectTypeId objectType = InventorySlot._getObjectType(owner, slot);
 
-    // Remove from type-specific slots if needed
+    // Move to null slots
     removeFromTypeSlots(owner, objectType, slot);
-
-    // Add to null object type's slots
     addToTypeSlots(owner, ObjectTypes.Null, slot);
 
     // Swap and pop occupied slots to remove from active inventory
@@ -357,10 +339,7 @@ library InventoryUtils {
       InventorySlot._setOccupiedIndex(owner, lastSlot, occupiedIndex);
     }
 
-    // The slot should be emptied
     InventorySlot._deleteRecord(owner, slot);
-
-    // Pop the last element from occupied slots
     Inventory._pop(owner);
   }
 }

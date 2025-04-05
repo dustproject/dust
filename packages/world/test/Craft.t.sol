@@ -430,7 +430,7 @@ contract CraftTest is DustTest {
     assertEq(
       Inventory.length(aliceEntityId),
       ObjectTypeMetadata.getMaxInventorySlots(ObjectTypes.Player),
-      "Inventory slots is not max"
+      "Wrong number of occupied inventory slots"
     );
 
     vm.prank(alice);
