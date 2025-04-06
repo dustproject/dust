@@ -198,7 +198,7 @@ library InventoryUtils {
 
       if (sourceSlot.entityId.exists()) {
         // Entities are unique and always have amount=1
-        require(amount == 1, "Entities must transfer with amount=1");
+        require(amount == 1, "Entity transfer amount should be 1");
         EntityId entityId = sourceSlot.entityId;
         _recycleSlot(from, slotFrom);
         addEntityToSlot(to, entityId, slotTo);
