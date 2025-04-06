@@ -37,21 +37,22 @@ contract TransferSystem is System {
 
     transferEnergyToPool(caller, SMART_CHEST_ENERGY_COST);
 
+    (EntityId[] memory entities, ObjectAmount[] memory objectAmounts) =
+      InventoryUtils.getObjectsAndEntities(from, slotTransfers);
+
     InventoryUtils.transfer(from, to, slotTransfers);
 
-    // TODO: hook might need to change
     // Note: we call this after the transfer state has been updated, to prevent re-entrancy attacks
-    // TransferLib._onTransfer(caller, from, to, new EntityId[](0), objectAmounts, extraData);
+    TransferLib._onTransfer(caller, from, to, entities, objectAmounts, extraData);
   }
 }
 
-// TODO: adapt
 library TransferLib {
   function _onTransfer(
     EntityId caller,
     EntityId from,
     EntityId to,
-    EntityId[] memory tools,
+    EntityId[] memory entities,
     ObjectAmount[] memory objectAmounts,
     bytes calldata extraData
   ) public {
@@ -60,11 +61,11 @@ library TransferLib {
     require(ObjectType._get(target) != ObjectTypes.Player, "Cannot transfer to player");
 
     bytes memory onTransfer =
-      abi.encodeCall(ITransferHook.onTransfer, (caller, target, from, to, objectAmounts, tools, extraData));
+      abi.encodeCall(ITransferHook.onTransfer, (caller, target, from, to, objectAmounts, entities, extraData));
 
     target.getProgram().callOrRevert(onTransfer);
 
-    notify(caller, TransferNotification({ transferEntityId: target, tools: tools, objectAmounts: objectAmounts }));
+    notify(caller, TransferNotification({ transferEntityId: target, tools: entities, objectAmounts: objectAmounts }));
   }
 
   function _getTarget(EntityId caller, EntityId from, EntityId to) internal pure returns (EntityId) {

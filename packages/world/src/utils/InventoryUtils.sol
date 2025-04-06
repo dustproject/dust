@@ -24,7 +24,7 @@ using ObjectTypeLib for ObjectTypeId;
 struct SlotTransfer {
   uint16 slotFrom;
   uint16 slotTo;
-  uint16 amount;
+  uint16 amount; // For entities, this should always be 1
 }
 
 library InventoryUtils {
@@ -62,20 +62,23 @@ library InventoryUtils {
   function addEntityToSlot(EntityId owner, EntityId entityId, uint16 slot) internal {
     uint16 maxSlots = ObjectTypeMetadata._getMaxInventorySlots(ObjectType._get(owner));
     require(slot < maxSlots, "Invalid slot");
+    require(entityId.exists(), "Entity must exist");
 
     ObjectTypeId objectType = ObjectType._get(entityId);
 
     Inventory._push(owner, slot);
     InventorySlot._setEntityId(owner, slot, entityId);
     InventorySlot._setObjectType(owner, slot, objectType);
+    // Entities always have amount 1
     InventorySlot._setAmount(owner, slot, 1);
 
-    addToTypeSlots(owner, objectType, slot);
+    _addToTypeSlots(owner, objectType, slot);
   }
 
-  function addEntity(EntityId owner, EntityId entityId) internal {
-    uint16 slot = _useEmptySlot(owner);
+  function addEntity(EntityId owner, EntityId entityId) internal returns (uint16 slot) {
+    slot = _useEmptySlot(owner);
     addEntityToSlot(owner, entityId, slot);
+    return slot;
   }
 
   function addObjectToSlot(EntityId owner, ObjectTypeId objectType, uint16 amount, uint16 slot) public {
@@ -97,10 +100,10 @@ library InventoryUtils {
         uint16 typeIndex = InventorySlot._getTypeIndex(owner, slot);
         uint16 nullSlot = InventoryTypeSlots._getItem(owner, ObjectTypes.Null, typeIndex);
         if (nullSlot == slot) {
-          removeFromTypeSlots(owner, ObjectTypes.Null, slot);
+          _removeFromTypeSlots(owner, ObjectTypes.Null, slot);
         }
       }
-      addToTypeSlots(owner, objectType, slot);
+      _addToTypeSlots(owner, objectType, slot);
     } else {
       require(slotData.objectType == objectType, "Cannot store different object types in the same slot");
     }
@@ -132,7 +135,7 @@ library InventoryUtils {
       remaining -= toAdd;
     }
 
-    // If we still have objects to add, try to use empty slots
+    // If we still have objects to add, use empty slots
     while (remaining > 0) {
       uint16 slot = _useEmptySlot(owner);
       uint16 toAdd = remaining < stackable ? remaining : stackable;
@@ -141,7 +144,7 @@ library InventoryUtils {
       InventorySlot._setObjectType(owner, slot, objectType);
       InventorySlot._setAmount(owner, slot, toAdd);
 
-      addToTypeSlots(owner, objectType, slot);
+      _addToTypeSlots(owner, objectType, slot);
 
       remaining -= toAdd;
     }
@@ -223,7 +226,6 @@ library InventoryUtils {
   }
 
   function transfer(EntityId from, EntityId to, SlotTransfer[] memory slotTransfers) public {
-    // Transfer tools
     for (uint256 i = 0; i < slotTransfers.length; i++) {
       uint16 slotFrom = slotTransfers[i].slotFrom;
       uint16 slotTo = slotTransfers[i].slotTo;
@@ -241,11 +243,13 @@ library InventoryUtils {
       );
 
       if (sourceSlot.entityId.exists()) {
-        require(amount == sourceSlot.amount, "Invalid amount for entity slot");
+        // Entities are unique and always have amount=1
+        require(amount == 1, "Entities must transfer with amount=1");
         EntityId entityId = sourceSlot.entityId;
         _recycleSlot(from, slotFrom);
         addEntityToSlot(to, entityId, slotTo);
       } else {
+        // Regular objects can be transferred in partial amounts
         require(amount <= sourceSlot.amount, "Not enough objects in slot");
         removeObjectFromSlot(from, sourceSlot.objectType, amount, slotFrom);
         addObjectToSlot(to, sourceSlot.objectType, amount, slotTo);
@@ -262,20 +266,21 @@ library InventoryUtils {
     // Inventory is empty
     if (slots.length == 0) return;
 
+    // Group slots by object type to optimize transfers
     for (uint256 i = 0; i < slots.length; i++) {
       InventorySlotData memory slotData = InventorySlot._get(from, slots[i]);
 
       if (slotData.entityId.exists()) {
-        // No need to remove from owner as we will clean the whole inventory later
+        // Handle entities (always amount=1)
         addEntity(to, slotData.entityId);
       } else {
-        // Transfer regular objects
+        // Handle regular objects (stackable)
         addObject(to, slotData.objectType, slotData.amount);
       }
 
       InventorySlot._deleteRecord(from, slots[i]);
 
-      // We only need to delete the record once per type, so we arbitrarily select the first slot
+      // We only need to delete the record once per type, so we use the first slot with typeIndex 0
       if (slotData.typeIndex == 0) {
         InventoryTypeSlots._deleteRecord(from, slotData.objectType);
       }
@@ -285,15 +290,54 @@ library InventoryUtils {
     Inventory._deleteRecord(from);
   }
 
+  function getObjectsAndEntities(EntityId owner, SlotTransfer[] memory slotTransfers)
+    internal
+    view
+    returns (EntityId[] memory entities, ObjectAmount[] memory objects)
+  {
+    // First pass: count entities and objects
+    uint256 entityCount = 0;
+    uint256 objectCount = 0;
+
+    for (uint256 i = 0; i < slotTransfers.length; i++) {
+      SlotTransfer memory slotTransfer = slotTransfers[i];
+      if (InventorySlot._getEntityId(owner, slotTransfer.slotFrom).exists()) {
+        entityCount++;
+      } else {
+        objectCount++;
+      }
+    }
+
+    // Allocate arrays
+    entities = new EntityId[](entityCount);
+    objects = new ObjectAmount[](objectCount);
+
+    // Second pass: fill arrays
+    uint256 entityIndex = 0;
+    uint256 objectIndex = 0;
+
+    for (uint256 i = 0; i < slotTransfers.length; i++) {
+      SlotTransfer memory slotTransfer = slotTransfers[i];
+      InventorySlotData memory slotData = InventorySlot._get(owner, slotTransfer.slotFrom);
+      if (slotData.entityId.exists()) {
+        entities[entityIndex++] = slotData.entityId;
+      } else {
+        objects[objectIndex++] = ObjectAmount(slotData.objectType, slotTransfer.amount);
+      }
+    }
+
+    return (entities, objects);
+  }
+
   // Add a slot to type slots - O(1)
-  function addToTypeSlots(EntityId owner, ObjectTypeId objectType, uint16 slot) private {
+  function _addToTypeSlots(EntityId owner, ObjectTypeId objectType, uint16 slot) private {
     uint256 numTypeSlots = InventoryTypeSlots._length(owner, objectType);
     InventoryTypeSlots._push(owner, objectType, slot);
     InventorySlot._setTypeIndex(owner, slot, uint16(numTypeSlots));
   }
 
   // Remove a slot from type slots - O(1)
-  function removeFromTypeSlots(EntityId owner, ObjectTypeId objectType, uint16 slot) private {
+  function _removeFromTypeSlots(EntityId owner, ObjectTypeId objectType, uint16 slot) private {
     uint16 typeIndex = InventorySlot._getTypeIndex(owner, slot);
     uint256 numTypeSlots = InventoryTypeSlots._length(owner, objectType);
 
@@ -316,27 +360,29 @@ library InventoryUtils {
     // If there is already a null slot, use it
     if (emptyLength > 0) {
       uint16 slot = InventoryTypeSlots._getItem(owner, ObjectTypes.Null, emptyLength - 1);
-      removeFromTypeSlots(owner, ObjectTypes.Null, slot);
+      _removeFromTypeSlots(owner, ObjectTypes.Null, slot);
       InventorySlot._setOccupiedIndex(owner, slot, occupiedIndex);
       return slot;
     }
 
-    // Otherwise try to add a new slot
     uint16 maxSlots = ObjectTypeMetadata._getMaxInventorySlots(ObjectType._get(owner));
     require(occupiedIndex < maxSlots, "All slots used");
     InventorySlot._setOccupiedIndex(owner, occupiedIndex, occupiedIndex);
     return occupiedIndex;
   }
 
-  function _addToInventory(EntityId owner) private { }
+  // function _addToInventory(EntityId owner, uint16 slot) private {
+  //   uint16 occupiedIndex = uint16(Inventory._length(owner));
+  //   InventorySlot._setOccupiedIndex(owner, slot, occupiedIndex);
+  // }
 
   // Marks a slot as empty - O(1)
   function _recycleSlot(EntityId owner, uint16 slot) private {
     ObjectTypeId objectType = InventorySlot._getObjectType(owner, slot);
 
     // Move to null slots
-    removeFromTypeSlots(owner, objectType, slot);
-    addToTypeSlots(owner, ObjectTypes.Null, slot);
+    _removeFromTypeSlots(owner, objectType, slot);
+    _addToTypeSlots(owner, ObjectTypes.Null, slot);
 
     // Swap and pop occupied slots to remove from active inventory
     uint16 occupiedIndex = InventorySlot._getOccupiedIndex(owner, slot);
