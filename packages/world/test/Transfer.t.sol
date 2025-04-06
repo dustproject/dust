@@ -122,7 +122,6 @@ contract TransferTest is DustTest {
 
   function testTransferToolToChest() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
-
     Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
     EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
 
@@ -211,7 +210,7 @@ contract TransferTest is DustTest {
       transferObjectTypeId,
       ObjectTypeMetadata.getStackable(transferObjectTypeId) * maxChestInventorySlots
     );
-    assertEq(Inventory.length(chestEntityId), maxChestInventorySlots, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(chestEntityId), maxChestInventorySlots, "Inventory slots is not max");
 
     TestInventoryUtils.addObject(aliceEntityId, transferObjectTypeId, 1);
     assertInventoryHasObject(aliceEntityId, transferObjectTypeId, 1);
@@ -236,7 +235,7 @@ contract TransferTest is DustTest {
       transferObjectTypeId,
       ObjectTypeMetadata.getStackable(transferObjectTypeId) * maxPlayerInventorySlots
     );
-    assertEq(Inventory.length(aliceEntityId), maxPlayerInventorySlots, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(aliceEntityId), maxPlayerInventorySlots, "Inventory slots is not max");
 
     TestInventoryUtils.addObject(chestEntityId, transferObjectTypeId, 1);
     assertInventoryHasObject(chestEntityId, transferObjectTypeId, 1);
@@ -265,7 +264,7 @@ contract TransferTest is DustTest {
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
 
     vm.prank(alice);
-    vm.expectRevert("All slots used");
+    vm.expectRevert("Invalid slot");
     world.transfer(aliceEntityId, aliceEntityId, nonChestEntityId, slotsToTransfer, "");
   }
 
@@ -284,7 +283,7 @@ contract TransferTest is DustTest {
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 2 });
 
     vm.prank(alice);
-    vm.expectRevert("Empty slot");
+    vm.expectRevert("Not enough objects in slot");
     world.transfer(aliceEntityId, aliceEntityId, chestEntityId, slotsToTransfer, "");
 
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
@@ -314,13 +313,13 @@ contract TransferTest is DustTest {
     assertInventoryHasObject(aliceEntityId, transferObjectTypeId, 0);
     assertInventoryHasObject(chestEntityId, transferObjectTypeId, 1);
 
-    slotsToTransfer[0] = SlotTransfer({ slotFrom: 1, slotTo: 0, amount: 1 });
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 1, slotTo: 1, amount: 1 });
 
     vm.prank(alice);
-    vm.expectRevert("Not enough objects in slot");
+    vm.expectRevert("Empty slot");
     world.transfer(aliceEntityId, aliceEntityId, chestEntityId, slotsToTransfer, "");
 
-    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 1, amount: 1 });
 
     // Transfer tool from chest to alice
     vm.prank(alice);
@@ -329,7 +328,7 @@ contract TransferTest is DustTest {
     assertInventoryHasObject(chestEntityId, transferObjectTypeId, 0);
 
     vm.prank(alice);
-    vm.expectRevert("Not enough objects in slot");
+    vm.expectRevert("Empty slot");
     world.transfer(aliceEntityId, chestEntityId, aliceEntityId, slotsToTransfer, "");
   }
 

@@ -389,7 +389,7 @@ contract InventoryTest is DustTest {
     SlotTransfer[] memory pickup = new SlotTransfer[](1);
     pickup[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
     vm.prank(alice);
-    vm.expectRevert("Not enough objects in slot");
+    vm.expectRevert("Empty slot");
     world.pickup(aliceEntityId, pickup, dropCoord);
   }
 
