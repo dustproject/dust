@@ -133,6 +133,17 @@ library ObjectTypeLib {
     return self == ObjectTypes.TextSign;
   }
 
+  function isOre(ObjectTypeId self) internal pure returns (bool) {
+    ObjectTypeId[] memory oreTypes = getOreObjectTypes();
+    for (uint256 i = 0; i < oreTypes.length; i++) {
+      if (self == oreTypes[i]) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   function isFood(ObjectTypeId self) internal pure returns (bool) {
     return self.isCrop();
   }
@@ -301,8 +312,7 @@ library ObjectTypeLib {
     }
 
     if (self == ObjectTypes.Chest) {
-      return sig == ITransferSystem.transfer.selector || sig == ITransferSystem.transferTool.selector
-        || sig == ITransferSystem.transferTools.selector || sig == IMachineSystem.fuelMachine.selector;
+      return sig == ITransferSystem.transfer.selector || sig == IMachineSystem.fuelMachine.selector;
     }
 
     return false;

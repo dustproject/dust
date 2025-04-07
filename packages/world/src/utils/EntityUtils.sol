@@ -60,15 +60,20 @@ function getOrCreateEntityAt(Vec3 coord) returns (EntityId, ObjectTypeId) {
 }
 
 function createEntityAt(Vec3 coord, ObjectTypeId objectTypeId) returns (EntityId) {
-  EntityId entityId = getUniqueEntity();
+  EntityId entityId = createEntity(objectTypeId);
   Position._set(entityId, coord);
   ReversePosition._set(coord, entityId);
-  ObjectType._set(entityId, objectTypeId);
-  // We assume all terrain blocks are only 1 voxel (no relative entities)
-  uint128 mass = ObjectTypeMetadata._getMass(objectTypeId);
+  return entityId;
+}
+
+function createEntity(ObjectTypeId objectType) returns (EntityId) {
+  EntityId entityId = getUniqueEntity();
+  ObjectType._set(entityId, objectType);
+  uint128 mass = ObjectTypeMetadata._getMass(objectType);
   if (mass > 0) {
     Mass._setMass(entityId, mass);
   }
+
   return entityId;
 }
 

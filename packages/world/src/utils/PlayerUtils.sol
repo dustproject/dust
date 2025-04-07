@@ -6,7 +6,6 @@ import { WorldContextConsumerLib } from "@latticexyz/world/src/WorldContext.sol"
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
-import { Equipped } from "../codegen/tables/Equipped.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
@@ -24,7 +23,7 @@ import { updatePlayerEnergy } from "./EnergyUtils.sol";
 
 import { getMovableEntityAt, getOrCreateEntityAt, safeGetObjectTypeIdAt, setMovableEntityAt } from "./EntityUtils.sol";
 import { getForceField } from "./ForceFieldUtils.sol";
-import { transferAllInventoryEntities } from "./InventoryUtils.sol";
+import { InventoryUtils } from "./InventoryUtils.sol";
 
 import { FRAGMENT_SIZE, PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
@@ -111,8 +110,8 @@ library PlayerUtils {
     if (ReverseMovablePosition._get(coord) != player) {
       return;
     }
-    (EntityId to, ObjectTypeId objectTypeId) = getOrCreateEntityAt(coord);
-    transferAllInventoryEntities(player, to, objectTypeId);
+    (EntityId to,) = getOrCreateEntityAt(coord);
+    InventoryUtils.transferAll(player, to);
     removePlayerFromGrid(player, coord);
     notify(player, DeathNotification({ deathCoord: coord }));
   }

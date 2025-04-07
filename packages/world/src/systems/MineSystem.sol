@@ -40,7 +40,7 @@ import {
   getOrCreateEntityAt
 } from "../utils/EntityUtils.sol";
 import { destroyForceField, getForceField } from "../utils/ForceFieldUtils.sol";
-import { addToInventory, useEquipped } from "../utils/InventoryUtils.sol";
+import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { DeathNotification, MineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
@@ -84,7 +84,7 @@ contract MineSystem is System {
     ObjectAmount[] memory amounts = mineObjectTypeId.getMineDrop();
 
     for (uint256 i = 0; i < amounts.length; i++) {
-      addToInventory(caller, ObjectType._get(caller), amounts[i].objectTypeId, amounts[i].amount);
+      InventoryUtils.addObject(caller, amounts[i].objectTypeId, amounts[i].amount);
     }
   }
 
@@ -97,49 +97,75 @@ contract MineSystem is System {
     return ore;
   }
 
-  function mine(EntityId caller, Vec3 coord, bytes calldata extraData) public payable returns (EntityId) {
+  function mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) external returns (EntityId) {
+    return _mine(caller, coord, toolSlot, extraData);
+  }
+
+  function mine(EntityId caller, Vec3 coord, bytes calldata extraData) external returns (EntityId) {
+    return _mine(caller, coord, type(uint16).max, extraData);
+  }
+
+  function mineUntilDestroyed(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) public payable {
+    uint128 massLeft = 0;
+    do {
+      // TODO: factor out the mass reduction logic so it's cheaper to call
+      EntityId entityId = _mine(caller, coord, toolSlot, extraData);
+      massLeft = Mass._getMass(entityId);
+    } while (massLeft > 0);
+  }
+
+  function mineUntilDestroyed(EntityId caller, Vec3 coord, bytes calldata extraData) public payable {
+    uint128 massLeft = 0;
+    do {
+      // TODO: factor out the mass reduction logic so it's cheaper to call
+      EntityId entityId = _mine(caller, coord, type(uint16).max, extraData);
+      massLeft = Mass._getMass(entityId);
+    } while (massLeft > 0);
+  }
+
+  function _mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) internal returns (EntityId) {
     caller.activate();
     caller.requireConnected(coord);
 
-    (EntityId entityId, ObjectTypeId mineObjectTypeId) = getOrCreateEntityAt(coord);
+    (EntityId mined, ObjectTypeId mineObjectTypeId) = getOrCreateEntityAt(coord);
     require(mineObjectTypeId.isMineable(), "Object is not mineable");
 
-    entityId = entityId.baseEntityId();
-    Vec3 baseCoord = Position._get(entityId);
+    mined = mined.baseEntityId();
+    Vec3 baseCoord = Position._get(mined);
 
     if (mineObjectTypeId.isMachine()) {
-      (EnergyData memory machineData,) = updateMachineEnergy(entityId);
+      (EnergyData memory machineData,) = updateMachineEnergy(mined);
       require(machineData.energy == 0, "Cannot mine a machine that has energy");
     } else if (mineObjectTypeId.isSeed()) {
-      _requireSeedNotFullyGrown(entityId);
+      _requireSeedNotFullyGrown(mined);
     } else if (mineObjectTypeId == ObjectTypes.AnyOre) {
-      mineObjectTypeId = RandomOreLib._mineRandomOre(entityId, coord);
+      mineObjectTypeId = RandomOreLib._mineRandomOre(mined, coord);
     }
 
     // First coord will be the base coord, the rest is relative schema coords
-    Vec3[] memory coords = mineObjectTypeId.getRelativeCoords(baseCoord, Orientation._get(entityId));
+    Vec3[] memory coords = mineObjectTypeId.getRelativeCoords(baseCoord, Orientation._get(mined));
 
-    uint128 finalMass;
+    uint128 finalMass = MassReductionLib._processMassReduction(caller, mined, toolSlot);
+
     {
-      finalMass = MassReductionLib._processMassReduction(caller, entityId);
       if (finalMass == 0) {
         if (mineObjectTypeId == ObjectTypes.Bed) {
           // If mining a bed with a sleeping player, kill the player
-          MineLib._mineBed(entityId, baseCoord);
+          MineLib._mineBed(mined, baseCoord);
         }
 
-        if (bytes(DisplayURI._get(entityId)).length > 0) {
-          DisplayURI._deleteRecord(entityId);
+        if (bytes(DisplayURI._get(mined)).length > 0) {
+          DisplayURI._deleteRecord(mined);
         }
 
-        Mass._deleteRecord(entityId);
+        Mass._deleteRecord(mined);
 
         {
           // Remove seeds placed on top of this block
           Vec3 aboveCoord = baseCoord + vec3(0, 1, 0);
           (EntityId above, ObjectTypeId aboveTypeId) = getEntityAt(aboveCoord);
           if (aboveTypeId.isSeed()) {
-            _requireSeedNotFullyGrown(entityId);
+            _requireSeedNotFullyGrown(mined);
             if (!above.exists()) {
               above = createEntityAt(aboveCoord, aboveTypeId);
             }
@@ -148,7 +174,7 @@ contract MineSystem is System {
           }
         }
 
-        _removeBlock(entityId, baseCoord);
+        _removeBlock(mined, baseCoord);
         _handleDrop(caller, mineObjectTypeId);
 
         // If object being mined is a seed, return its energy to local pool
@@ -165,7 +191,7 @@ contract MineSystem is System {
           _removeBlock(relative, relativeCoord);
         }
       } else {
-        Mass._setMass(entityId, finalMass);
+        Mass._setMass(mined, finalMass);
       }
     }
 
@@ -173,29 +199,20 @@ contract MineSystem is System {
 
     if (finalMass == 0) {
       // Detach program if it exists
-      ProgramId program = entityId.getProgram();
+      ProgramId program = mined.getProgram();
       if (program.exists()) {
-        bytes memory onDetachProgram = abi.encodeCall(IDetachProgramHook.onDetachProgram, (caller, entityId, extraData));
+        bytes memory onDetachProgram = abi.encodeCall(IDetachProgramHook.onDetachProgram, (caller, mined, extraData));
         program.call({ gas: SAFE_PROGRAM_GAS, hook: onDetachProgram });
       }
 
       if (mineObjectTypeId == ObjectTypes.ForceField) {
-        destroyForceField(entityId);
+        destroyForceField(mined);
       }
     }
 
-    notify(caller, MineNotification({ mineEntityId: entityId, mineCoord: coord, mineObjectTypeId: mineObjectTypeId }));
+    notify(caller, MineNotification({ mineEntityId: mined, mineCoord: coord, mineObjectTypeId: mineObjectTypeId }));
 
-    return entityId;
-  }
-
-  function mineUntilDestroyed(EntityId caller, Vec3 coord, bytes calldata extraData) public payable {
-    uint128 massLeft = 0;
-    do {
-      // TODO: factor out the mass reduction logic so it's cheaper to call
-      EntityId entityId = mine(caller, coord, extraData);
-      massLeft = Mass._getMass(entityId);
-    } while (massLeft > 0);
+    return mined;
   }
 }
 
@@ -245,13 +262,13 @@ library MineLib {
 }
 
 library MassReductionLib {
-  function _processMassReduction(EntityId caller, EntityId mined) public returns (uint128) {
+  function _processMassReduction(EntityId caller, EntityId mined, uint16 toolSlot) public returns (uint128) {
     uint128 massLeft = Mass._getMass(mined);
     if (massLeft == 0) {
-      return massLeft;
+      return 0;
     }
 
-    (uint128 toolMassReduction,) = useEquipped(caller, massLeft);
+    (uint128 toolMassReduction,) = InventoryUtils.useTool(caller, toolSlot, massLeft);
 
     // if tool mass reduction is not enough, consume energy from player up to mine energy cost
     if (toolMassReduction < massLeft) {

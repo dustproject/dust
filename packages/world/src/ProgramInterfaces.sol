@@ -45,7 +45,7 @@ interface ITransferHook {
     EntityId from,
     EntityId to,
     ObjectAmount[] memory objectAmounts,
-    EntityId[] memory toolEntities,
+    EntityId[] memory entities,
     bytes memory extraData
   ) external;
 }
