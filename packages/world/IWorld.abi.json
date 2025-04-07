@@ -590,6 +590,11 @@
         "name": "waterCoord",
         "type": "uint96",
         "internalType": "Vec3"
+      },
+      {
+        "name": "bucketSlot",
+        "type": "uint16",
+        "internalType": "uint16"
       }
     ],
     "outputs": [],
@@ -3299,6 +3304,11 @@
         "name": "coord",
         "type": "uint96",
         "internalType": "Vec3"
+      },
+      {
+        "name": "bucketSlot",
+        "type": "uint16",
+        "internalType": "uint16"
       }
     ],
     "outputs": [],

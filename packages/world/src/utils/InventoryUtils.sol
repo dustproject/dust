@@ -120,6 +120,36 @@ library InventoryUtils {
     }
   }
 
+  function addObjectToSlot(EntityId owner, ObjectTypeId objectType, uint16 amount, uint16 slot) internal {
+    require(amount > 0, "Amount must be greater than 0");
+    uint16 stackable = ObjectTypeMetadata._getStackable(objectType);
+    require(stackable > 0, "Object type cannot be added to inventory");
+    uint16 maxSlots = ObjectTypeMetadata._getMaxInventorySlots(ObjectType._get(owner));
+    require(slot < maxSlots, "Invalid slot");
+
+    InventorySlotData memory slotData = InventorySlot._get(owner, slot);
+    uint16 newAmount = slotData.amount + amount;
+    require(newAmount <= stackable, "Object does not fit in slot");
+
+    if (slotData.objectType.isNull()) {
+      InventorySlot._setObjectType(owner, slot, objectType);
+      InventorySlot._setOccupiedIndex(owner, slot, uint16(Inventory._length(owner)));
+      Inventory._push(owner, slot);
+      if (InventoryTypeSlots._length(owner, ObjectTypes.Null) > 0) {
+        uint16 typeIndex = InventorySlot._getTypeIndex(owner, slot);
+        uint16 nullSlot = InventoryTypeSlots._getItem(owner, ObjectTypes.Null, typeIndex);
+        if (nullSlot == slot) {
+          _removeFromTypeSlots(owner, ObjectTypes.Null, slot);
+        }
+      }
+      _addToTypeSlots(owner, objectType, slot);
+    } else {
+      require(slotData.objectType == objectType, "Cannot store different object types in the same slot");
+    }
+
+    InventorySlot._setAmount(owner, slot, newAmount);
+  }
+
   function removeObject(EntityId owner, ObjectTypeId objectType, uint16 amount) public {
     require(amount > 0, "Amount must be greater than 0");
     require(!objectType.isNull(), "Empty slot");
@@ -150,11 +180,30 @@ library InventoryUtils {
     require(remaining == 0, "Not enough objects of this type in inventory");
   }
 
-  function removeAny(EntityId owner, ObjectTypeId objectType, uint16 amount) public {
+  function removeObjectFromSlot(EntityId owner, ObjectTypeId objectType, uint16 amount, uint16 slot) internal {
+    require(amount > 0, "Amount must be greater than 0");
+    require(!objectType.isNull(), "Empty slot");
+
+    ObjectTypeId slotObjectType = InventorySlot._getObjectType(owner, slot);
+    require(slotObjectType == objectType, "Slot does not contain the specified object type");
+
+    uint16 currentAmount = InventorySlot._getAmount(owner, slot);
+    require(currentAmount >= amount, "Not enough objects in slot");
+
+    if (currentAmount == amount) {
+      // Remove entire slot contents
+      _recycleSlot(owner, slot);
+    } else {
+      // Remove partial amount
+      InventorySlot._setAmount(owner, slot, currentAmount - amount);
+    }
+  }
+
+  function removeAny(EntityId owner, ObjectTypeId anyType, uint16 amount) public {
     require(amount > 0, "Amount must be greater than 0");
 
     uint16 remaining = amount;
-    ObjectTypeId[] memory objectTypes = objectType.getObjectTypes();
+    ObjectTypeId[] memory objectTypes = anyType.getObjectTypes();
 
     for (uint256 i = 0; i < objectTypes.length && remaining > 0; i++) {
       ObjectTypeId currentType = objectTypes[i];
@@ -205,8 +254,8 @@ library InventoryUtils {
       } else {
         // Regular objects can be transferred in partial amounts
         require(amount <= sourceSlot.amount, "Not enough objects in slot");
-        _removeObjectFromSlot(from, sourceSlot.objectType, amount, slotFrom);
-        _addObjectToSlot(to, sourceSlot.objectType, amount, slotTo);
+        removeObjectFromSlot(from, sourceSlot.objectType, amount, slotFrom);
+        addObjectToSlot(to, sourceSlot.objectType, amount, slotTo);
       }
     }
   }
@@ -281,55 +330,6 @@ library InventoryUtils {
     }
 
     return (entities, objects);
-  }
-
-  function _addObjectToSlot(EntityId owner, ObjectTypeId objectType, uint16 amount, uint16 slot) private {
-    require(amount > 0, "Amount must be greater than 0");
-    uint16 stackable = ObjectTypeMetadata._getStackable(objectType);
-    require(stackable > 0, "Object type cannot be added to inventory");
-    uint16 maxSlots = ObjectTypeMetadata._getMaxInventorySlots(ObjectType._get(owner));
-    require(slot < maxSlots, "Invalid slot");
-
-    InventorySlotData memory slotData = InventorySlot._get(owner, slot);
-    uint16 newAmount = slotData.amount + amount;
-    require(newAmount <= stackable, "Object does not fit in slot");
-
-    if (slotData.objectType.isNull()) {
-      InventorySlot._setObjectType(owner, slot, objectType);
-      InventorySlot._setOccupiedIndex(owner, slot, uint16(Inventory._length(owner)));
-      Inventory._push(owner, slot);
-      if (InventoryTypeSlots._length(owner, ObjectTypes.Null) > 0) {
-        uint16 typeIndex = InventorySlot._getTypeIndex(owner, slot);
-        uint16 nullSlot = InventoryTypeSlots._getItem(owner, ObjectTypes.Null, typeIndex);
-        if (nullSlot == slot) {
-          _removeFromTypeSlots(owner, ObjectTypes.Null, slot);
-        }
-      }
-      _addToTypeSlots(owner, objectType, slot);
-    } else {
-      require(slotData.objectType == objectType, "Cannot store different object types in the same slot");
-    }
-
-    InventorySlot._setAmount(owner, slot, newAmount);
-  }
-
-  function _removeObjectFromSlot(EntityId owner, ObjectTypeId objectType, uint16 amount, uint16 slot) private {
-    require(amount > 0, "Amount must be greater than 0");
-    require(!objectType.isNull(), "Empty slot");
-
-    ObjectTypeId slotObjectType = InventorySlot._getObjectType(owner, slot);
-    require(slotObjectType == objectType, "Slot does not contain the specified object type");
-
-    uint16 currentAmount = InventorySlot._getAmount(owner, slot);
-    require(currentAmount >= amount, "Not enough objects in slot");
-
-    if (currentAmount == amount) {
-      // Remove entire slot contents
-      _recycleSlot(owner, slot);
-    } else {
-      // Remove partial amount
-      InventorySlot._setAmount(owner, slot, currentAmount - amount);
-    }
   }
 
   // Add a slot to type slots - O(1)

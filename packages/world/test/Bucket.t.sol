@@ -41,7 +41,7 @@ contract BucketTest is DustTest {
 
     vm.prank(alice);
     startGasReport("fill bucket");
-    world.fillBucket(aliceEntityId, waterCoord);
+    world.fillBucket(aliceEntityId, waterCoord, 0);
     endGasReport();
 
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Bucket, 0);
@@ -60,7 +60,7 @@ contract BucketTest is DustTest {
 
     vm.prank(alice);
     startGasReport("wet farmland");
-    world.wetFarmland(aliceEntityId, farmlandCoord);
+    world.wetFarmland(aliceEntityId, farmlandCoord, 0);
     endGasReport();
 
     assertEq(ObjectType.get(farmlandEntityId), ObjectTypes.WetFarmland, "Farmland was not converted to wet farmland");
@@ -79,7 +79,7 @@ contract BucketTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Not water");
-    world.fillBucket(aliceEntityId, nonWaterCoord);
+    world.fillBucket(aliceEntityId, nonWaterCoord, 0);
   }
 
   function testFillBucketFailsIfNoBucket() public {
@@ -91,8 +91,8 @@ contract BucketTest is DustTest {
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Bucket, 0);
 
     vm.prank(alice);
-    vm.expectRevert("Not enough objects of this type in inventory");
-    world.fillBucket(aliceEntityId, waterCoord);
+    vm.expectRevert("Must use an empty Bucket");
+    world.fillBucket(aliceEntityId, waterCoord, 0);
   }
 
   function testFillBucketFailsIfTooFar() public {
@@ -104,7 +104,7 @@ contract BucketTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Entity is too far");
-    world.fillBucket(aliceEntityId, waterCoord);
+    world.fillBucket(aliceEntityId, waterCoord, 0);
   }
 
   function testWetFarmlandFailsIfNotFarmland() public {
@@ -117,7 +117,7 @@ contract BucketTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Not farmland");
-    world.wetFarmland(aliceEntityId, nonFarmlandCoord);
+    world.wetFarmland(aliceEntityId, nonFarmlandCoord, 0);
   }
 
   function testWetFarmlandFailsIfNoWaterBucket() public {
@@ -129,8 +129,8 @@ contract BucketTest is DustTest {
     assertInventoryHasObject(aliceEntityId, ObjectTypes.WaterBucket, 0);
 
     vm.prank(alice);
-    vm.expectRevert("Not enough objects of this type in inventory");
-    world.wetFarmland(aliceEntityId, farmlandCoord);
+    vm.expectRevert("Must use a Water Bucket");
+    world.wetFarmland(aliceEntityId, farmlandCoord, 0);
   }
 
   function testWetFarmlandFailsIfTooFar() public {
@@ -143,6 +143,6 @@ contract BucketTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Entity is too far");
-    world.wetFarmland(aliceEntityId, farmlandCoord);
+    world.wetFarmland(aliceEntityId, farmlandCoord, 0);
   }
 }
