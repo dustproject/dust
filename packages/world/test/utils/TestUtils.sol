@@ -9,6 +9,9 @@ import { EntityId } from "../../src/EntityId.sol";
 import { Vec3 } from "../../src/Vec3.sol";
 
 import { EnergyData } from "../../src/codegen/tables/Energy.sol";
+
+import { InventorySlot } from "../../src/codegen/tables/InventorySlot.sol";
+import { InventoryTypeSlots } from "../../src/codegen/tables/InventoryTypeSlots.sol";
 import { ObjectType } from "../../src/codegen/tables/ObjectType.sol";
 
 import { ObjectTypeId } from "../../src/ObjectTypeId.sol";
@@ -18,6 +21,8 @@ import {
   updateMachineEnergy as _updateMachineEnergy,
   updatePlayerEnergy as _updatePlayerEnergy
 } from "../../src/utils/EnergyUtils.sol";
+
+import { createEntity } from "../../src/utils/EntityUtils.sol";
 import {
   destroyForceField as _destroyForceField,
   getForceField as _getForceField,
@@ -25,18 +30,7 @@ import {
   isForceFieldFragment as _isForceFieldFragment,
   setupForceField as _setupForceField
 } from "../../src/utils/ForceFieldUtils.sol";
-import {
-  addToInventory as _addToInventory,
-  addToolToInventory as _addToolToInventory,
-  removeFromInventory as _removeFromInventory,
-  removeFromReverseInventoryEntity as _removeFromReverseInventoryEntity,
-  removeObjectTypeIdFromInventoryObjects as _removeObjectTypeIdFromInventoryObjects,
-  removeToolFromInventory as _removeToolFromInventory,
-  transferAllInventoryEntities as _transferAllInventoryEntities,
-  transferInventoryEntity as _transferInventoryEntity,
-  transferInventoryNonEntity as _transferInventoryNonEntity,
-  useEquipped as _useEquipped
-} from "../../src/utils/InventoryUtils.sol";
+import { InventoryUtils } from "../../src/utils/InventoryUtils.sol";
 
 Vm constant vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
@@ -83,67 +77,38 @@ library TestInventoryUtils {
     TestUtils.init(LIB_ADDRESS_SLOT, libAddress);
   }
 
-  function addToInventory(EntityId ownerEntityId, ObjectTypeId objectTypeId, uint16 numObjectsToAdd) public asWorld {
-    require(!objectTypeId.isTool(), "To add a tool, you must use addToolToInventory");
-    _addToInventory(ownerEntityId, ObjectType._get(ownerEntityId), objectTypeId, numObjectsToAdd);
+  function addObject(EntityId ownerEntityId, ObjectTypeId objectTypeId, uint16 numObjectsToAdd) public asWorld {
+    InventoryUtils.addObject(ownerEntityId, objectTypeId, numObjectsToAdd);
   }
 
-  function addToolToInventory(EntityId ownerEntityId, ObjectTypeId toolObjectTypeId) public asWorld returns (EntityId) {
-    return _addToolToInventory(ownerEntityId, toolObjectTypeId);
+  function addEntity(EntityId ownerEntityId, ObjectTypeId toolObjectTypeId) public asWorld returns (EntityId) {
+    EntityId entityId = createEntity(toolObjectTypeId);
+    InventoryUtils.addEntity(ownerEntityId, entityId);
+    return entityId;
   }
 
   function removeFromInventory(EntityId ownerEntityId, ObjectTypeId objectTypeId, uint16 numObjectsToRemove)
     public
     asWorld
   {
-    require(!objectTypeId.isTool(), "To remove a tool, you must pass in the tool entity id");
-    _removeFromInventory(ownerEntityId, objectTypeId, numObjectsToRemove);
+    InventoryUtils.removeObject(ownerEntityId, objectTypeId, numObjectsToRemove);
   }
 
-  function removeFromInventory(EntityId ownerEntityId, EntityId toolEntityId) public asWorld {
-    _removeToolFromInventory(ownerEntityId, toolEntityId, ObjectType.get(toolEntityId));
+  function transferAll(EntityId fromEntityId, EntityId toEntityId) public asWorld {
+    InventoryUtils.transferAll(fromEntityId, toEntityId);
   }
 
-  function useEquipped(EntityId entityId, uint128 useMassMax) public asWorld {
-    _useEquipped(entityId, useMassMax);
-  }
+  function getEntitySlot(EntityId owner, EntityId entityId) public asWorld returns (uint16) {
+    ObjectTypeId objectType = ObjectType._get(entityId);
+    uint16[] memory slots = InventoryTypeSlots._get(owner, objectType);
+    for (uint256 i = 0; i < slots.length; i++) {
+      EntityId slotEntityId = InventorySlot._getEntityId(owner, slots[i]);
 
-  function removeFromReverseInventoryEntity(EntityId ownerEntityId, EntityId removeInventoryEntityId) public asWorld {
-    _removeFromReverseInventoryEntity(ownerEntityId, removeInventoryEntityId);
-  }
-
-  function removeObjectTypeIdFromInventoryObjects(EntityId ownerEntityId, ObjectTypeId removeObjectTypeId)
-    public
-    asWorld
-  {
-    _removeObjectTypeIdFromInventoryObjects(ownerEntityId, removeObjectTypeId);
-  }
-
-  function transferAllInventoryEntities(EntityId fromEntityId, EntityId toEntityId, ObjectTypeId toObjectTypeId)
-    public
-    asWorld
-    returns (uint256)
-  {
-    return _transferAllInventoryEntities(fromEntityId, toEntityId, toObjectTypeId);
-  }
-
-  function transferInventoryNonEntity(
-    EntityId srcEntityId,
-    EntityId dstEntityId,
-    ObjectTypeId dstObjectTypeId,
-    ObjectTypeId transferObjectTypeId,
-    uint16 numObjectsToTransfer
-  ) public asWorld {
-    _transferInventoryNonEntity(srcEntityId, dstEntityId, dstObjectTypeId, transferObjectTypeId, numObjectsToTransfer);
-  }
-
-  function transferInventoryEntity(
-    EntityId srcEntityId,
-    EntityId dstEntityId,
-    ObjectTypeId dstObjectTypeId,
-    EntityId inventoryEntityId
-  ) public asWorld returns (ObjectTypeId) {
-    return _transferInventoryEntity(srcEntityId, dstEntityId, dstObjectTypeId, inventoryEntityId);
+      if (slotEntityId == entityId) {
+        return slots[i];
+      }
+    }
+    revert("Entity not found in owner's inventory");
   }
 }
 

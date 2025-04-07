@@ -19,9 +19,9 @@ import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 // Import user types
 import { EntityId } from "../../EntityId.sol";
 
-library InventoryObjects {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "InventoryObjects", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x74620000000000000000000000000000496e76656e746f72794f626a65637473);
+library Inventory {
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "Inventory", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x74620000000000000000000000000000496e76656e746f727900000000000000);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0000000100000000000000000000000000000000000000000000000000000000);
@@ -37,7 +37,7 @@ library InventoryObjects {
    */
   function getKeyNames() internal pure returns (string[] memory keyNames) {
     keyNames = new string[](1);
-    keyNames[0] = "ownerEntityId";
+    keyNames[0] = "owner";
   }
 
   /**
@@ -46,7 +46,7 @@ library InventoryObjects {
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
     fieldNames = new string[](1);
-    fieldNames[0] = "objectTypeIds";
+    fieldNames[0] = "occupiedSlots";
   }
 
   /**
@@ -64,95 +64,95 @@ library InventoryObjects {
   }
 
   /**
-   * @notice Get objectTypeIds.
+   * @notice Get occupiedSlots.
    */
-  function getObjectTypeIds(EntityId ownerEntityId) internal view returns (uint16[] memory objectTypeIds) {
+  function getOccupiedSlots(EntityId owner) internal view returns (uint16[] memory occupiedSlots) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     bytes memory _blob = StoreSwitch.getDynamicField(_tableId, _keyTuple, 0);
     return (SliceLib.getSubslice(_blob, 0, _blob.length).decodeArray_uint16());
   }
 
   /**
-   * @notice Get objectTypeIds.
+   * @notice Get occupiedSlots.
    */
-  function _getObjectTypeIds(EntityId ownerEntityId) internal view returns (uint16[] memory objectTypeIds) {
+  function _getOccupiedSlots(EntityId owner) internal view returns (uint16[] memory occupiedSlots) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     bytes memory _blob = StoreCore.getDynamicField(_tableId, _keyTuple, 0);
     return (SliceLib.getSubslice(_blob, 0, _blob.length).decodeArray_uint16());
   }
 
   /**
-   * @notice Get objectTypeIds.
+   * @notice Get occupiedSlots.
    */
-  function get(EntityId ownerEntityId) internal view returns (uint16[] memory objectTypeIds) {
+  function get(EntityId owner) internal view returns (uint16[] memory occupiedSlots) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     bytes memory _blob = StoreSwitch.getDynamicField(_tableId, _keyTuple, 0);
     return (SliceLib.getSubslice(_blob, 0, _blob.length).decodeArray_uint16());
   }
 
   /**
-   * @notice Get objectTypeIds.
+   * @notice Get occupiedSlots.
    */
-  function _get(EntityId ownerEntityId) internal view returns (uint16[] memory objectTypeIds) {
+  function _get(EntityId owner) internal view returns (uint16[] memory occupiedSlots) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     bytes memory _blob = StoreCore.getDynamicField(_tableId, _keyTuple, 0);
     return (SliceLib.getSubslice(_blob, 0, _blob.length).decodeArray_uint16());
   }
 
   /**
-   * @notice Set objectTypeIds.
+   * @notice Set occupiedSlots.
    */
-  function setObjectTypeIds(EntityId ownerEntityId, uint16[] memory objectTypeIds) internal {
+  function setOccupiedSlots(EntityId owner, uint16[] memory occupiedSlots) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
-    StoreSwitch.setDynamicField(_tableId, _keyTuple, 0, EncodeArray.encode((objectTypeIds)));
+    StoreSwitch.setDynamicField(_tableId, _keyTuple, 0, EncodeArray.encode((occupiedSlots)));
   }
 
   /**
-   * @notice Set objectTypeIds.
+   * @notice Set occupiedSlots.
    */
-  function _setObjectTypeIds(EntityId ownerEntityId, uint16[] memory objectTypeIds) internal {
+  function _setOccupiedSlots(EntityId owner, uint16[] memory occupiedSlots) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
-    StoreCore.setDynamicField(_tableId, _keyTuple, 0, EncodeArray.encode((objectTypeIds)));
+    StoreCore.setDynamicField(_tableId, _keyTuple, 0, EncodeArray.encode((occupiedSlots)));
   }
 
   /**
-   * @notice Set objectTypeIds.
+   * @notice Set occupiedSlots.
    */
-  function set(EntityId ownerEntityId, uint16[] memory objectTypeIds) internal {
+  function set(EntityId owner, uint16[] memory occupiedSlots) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
-    StoreSwitch.setDynamicField(_tableId, _keyTuple, 0, EncodeArray.encode((objectTypeIds)));
+    StoreSwitch.setDynamicField(_tableId, _keyTuple, 0, EncodeArray.encode((occupiedSlots)));
   }
 
   /**
-   * @notice Set objectTypeIds.
+   * @notice Set occupiedSlots.
    */
-  function _set(EntityId ownerEntityId, uint16[] memory objectTypeIds) internal {
+  function _set(EntityId owner, uint16[] memory occupiedSlots) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
-    StoreCore.setDynamicField(_tableId, _keyTuple, 0, EncodeArray.encode((objectTypeIds)));
+    StoreCore.setDynamicField(_tableId, _keyTuple, 0, EncodeArray.encode((occupiedSlots)));
   }
 
   /**
-   * @notice Get the length of objectTypeIds.
+   * @notice Get the length of occupiedSlots.
    */
-  function lengthObjectTypeIds(EntityId ownerEntityId) internal view returns (uint256) {
+  function lengthOccupiedSlots(EntityId owner) internal view returns (uint256) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     uint256 _byteLength = StoreSwitch.getDynamicFieldLength(_tableId, _keyTuple, 0);
     unchecked {
@@ -161,11 +161,11 @@ library InventoryObjects {
   }
 
   /**
-   * @notice Get the length of objectTypeIds.
+   * @notice Get the length of occupiedSlots.
    */
-  function _lengthObjectTypeIds(EntityId ownerEntityId) internal view returns (uint256) {
+  function _lengthOccupiedSlots(EntityId owner) internal view returns (uint256) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     uint256 _byteLength = StoreCore.getDynamicFieldLength(_tableId, _keyTuple, 0);
     unchecked {
@@ -174,11 +174,11 @@ library InventoryObjects {
   }
 
   /**
-   * @notice Get the length of objectTypeIds.
+   * @notice Get the length of occupiedSlots.
    */
-  function length(EntityId ownerEntityId) internal view returns (uint256) {
+  function length(EntityId owner) internal view returns (uint256) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     uint256 _byteLength = StoreSwitch.getDynamicFieldLength(_tableId, _keyTuple, 0);
     unchecked {
@@ -187,11 +187,11 @@ library InventoryObjects {
   }
 
   /**
-   * @notice Get the length of objectTypeIds.
+   * @notice Get the length of occupiedSlots.
    */
-  function _length(EntityId ownerEntityId) internal view returns (uint256) {
+  function _length(EntityId owner) internal view returns (uint256) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     uint256 _byteLength = StoreCore.getDynamicFieldLength(_tableId, _keyTuple, 0);
     unchecked {
@@ -200,12 +200,12 @@ library InventoryObjects {
   }
 
   /**
-   * @notice Get an item of objectTypeIds.
+   * @notice Get an item of occupiedSlots.
    * @dev Reverts with Store_IndexOutOfBounds if `_index` is out of bounds for the array.
    */
-  function getItemObjectTypeIds(EntityId ownerEntityId, uint256 _index) internal view returns (uint16) {
+  function getItemOccupiedSlots(EntityId owner, uint256 _index) internal view returns (uint16) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     unchecked {
       bytes memory _blob = StoreSwitch.getDynamicFieldSlice(_tableId, _keyTuple, 0, _index * 2, (_index + 1) * 2);
@@ -214,12 +214,12 @@ library InventoryObjects {
   }
 
   /**
-   * @notice Get an item of objectTypeIds.
+   * @notice Get an item of occupiedSlots.
    * @dev Reverts with Store_IndexOutOfBounds if `_index` is out of bounds for the array.
    */
-  function _getItemObjectTypeIds(EntityId ownerEntityId, uint256 _index) internal view returns (uint16) {
+  function _getItemOccupiedSlots(EntityId owner, uint256 _index) internal view returns (uint16) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     unchecked {
       bytes memory _blob = StoreCore.getDynamicFieldSlice(_tableId, _keyTuple, 0, _index * 2, (_index + 1) * 2);
@@ -228,12 +228,12 @@ library InventoryObjects {
   }
 
   /**
-   * @notice Get an item of objectTypeIds.
+   * @notice Get an item of occupiedSlots.
    * @dev Reverts with Store_IndexOutOfBounds if `_index` is out of bounds for the array.
    */
-  function getItem(EntityId ownerEntityId, uint256 _index) internal view returns (uint16) {
+  function getItem(EntityId owner, uint256 _index) internal view returns (uint16) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     unchecked {
       bytes memory _blob = StoreSwitch.getDynamicFieldSlice(_tableId, _keyTuple, 0, _index * 2, (_index + 1) * 2);
@@ -242,12 +242,12 @@ library InventoryObjects {
   }
 
   /**
-   * @notice Get an item of objectTypeIds.
+   * @notice Get an item of occupiedSlots.
    * @dev Reverts with Store_IndexOutOfBounds if `_index` is out of bounds for the array.
    */
-  function _getItem(EntityId ownerEntityId, uint256 _index) internal view returns (uint16) {
+  function _getItem(EntityId owner, uint256 _index) internal view returns (uint16) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     unchecked {
       bytes memory _blob = StoreCore.getDynamicFieldSlice(_tableId, _keyTuple, 0, _index * 2, (_index + 1) * 2);
@@ -256,91 +256,91 @@ library InventoryObjects {
   }
 
   /**
-   * @notice Push an element to objectTypeIds.
+   * @notice Push an element to occupiedSlots.
    */
-  function pushObjectTypeIds(EntityId ownerEntityId, uint16 _element) internal {
+  function pushOccupiedSlots(EntityId owner, uint16 _element) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     StoreSwitch.pushToDynamicField(_tableId, _keyTuple, 0, abi.encodePacked((_element)));
   }
 
   /**
-   * @notice Push an element to objectTypeIds.
+   * @notice Push an element to occupiedSlots.
    */
-  function _pushObjectTypeIds(EntityId ownerEntityId, uint16 _element) internal {
+  function _pushOccupiedSlots(EntityId owner, uint16 _element) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     StoreCore.pushToDynamicField(_tableId, _keyTuple, 0, abi.encodePacked((_element)));
   }
 
   /**
-   * @notice Push an element to objectTypeIds.
+   * @notice Push an element to occupiedSlots.
    */
-  function push(EntityId ownerEntityId, uint16 _element) internal {
+  function push(EntityId owner, uint16 _element) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     StoreSwitch.pushToDynamicField(_tableId, _keyTuple, 0, abi.encodePacked((_element)));
   }
 
   /**
-   * @notice Push an element to objectTypeIds.
+   * @notice Push an element to occupiedSlots.
    */
-  function _push(EntityId ownerEntityId, uint16 _element) internal {
+  function _push(EntityId owner, uint16 _element) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     StoreCore.pushToDynamicField(_tableId, _keyTuple, 0, abi.encodePacked((_element)));
   }
 
   /**
-   * @notice Pop an element from objectTypeIds.
+   * @notice Pop an element from occupiedSlots.
    */
-  function popObjectTypeIds(EntityId ownerEntityId) internal {
+  function popOccupiedSlots(EntityId owner) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     StoreSwitch.popFromDynamicField(_tableId, _keyTuple, 0, 2);
   }
 
   /**
-   * @notice Pop an element from objectTypeIds.
+   * @notice Pop an element from occupiedSlots.
    */
-  function _popObjectTypeIds(EntityId ownerEntityId) internal {
+  function _popOccupiedSlots(EntityId owner) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     StoreCore.popFromDynamicField(_tableId, _keyTuple, 0, 2);
   }
 
   /**
-   * @notice Pop an element from objectTypeIds.
+   * @notice Pop an element from occupiedSlots.
    */
-  function pop(EntityId ownerEntityId) internal {
+  function pop(EntityId owner) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     StoreSwitch.popFromDynamicField(_tableId, _keyTuple, 0, 2);
   }
 
   /**
-   * @notice Pop an element from objectTypeIds.
+   * @notice Pop an element from occupiedSlots.
    */
-  function _pop(EntityId ownerEntityId) internal {
+  function _pop(EntityId owner) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     StoreCore.popFromDynamicField(_tableId, _keyTuple, 0, 2);
   }
 
   /**
-   * @notice Update an element of objectTypeIds at `_index`.
+   * @notice Update an element of occupiedSlots at `_index`.
    */
-  function updateObjectTypeIds(EntityId ownerEntityId, uint256 _index, uint16 _element) internal {
+  function updateOccupiedSlots(EntityId owner, uint256 _index, uint16 _element) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     unchecked {
       bytes memory _encoded = abi.encodePacked((_element));
@@ -349,11 +349,11 @@ library InventoryObjects {
   }
 
   /**
-   * @notice Update an element of objectTypeIds at `_index`.
+   * @notice Update an element of occupiedSlots at `_index`.
    */
-  function _updateObjectTypeIds(EntityId ownerEntityId, uint256 _index, uint16 _element) internal {
+  function _updateOccupiedSlots(EntityId owner, uint256 _index, uint16 _element) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     unchecked {
       bytes memory _encoded = abi.encodePacked((_element));
@@ -362,11 +362,11 @@ library InventoryObjects {
   }
 
   /**
-   * @notice Update an element of objectTypeIds at `_index`.
+   * @notice Update an element of occupiedSlots at `_index`.
    */
-  function update(EntityId ownerEntityId, uint256 _index, uint16 _element) internal {
+  function update(EntityId owner, uint256 _index, uint16 _element) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     unchecked {
       bytes memory _encoded = abi.encodePacked((_element));
@@ -375,11 +375,11 @@ library InventoryObjects {
   }
 
   /**
-   * @notice Update an element of objectTypeIds at `_index`.
+   * @notice Update an element of occupiedSlots at `_index`.
    */
-  function _update(EntityId ownerEntityId, uint256 _index, uint16 _element) internal {
+  function _update(EntityId owner, uint256 _index, uint16 _element) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     unchecked {
       bytes memory _encoded = abi.encodePacked((_element));
@@ -390,9 +390,9 @@ library InventoryObjects {
   /**
    * @notice Delete all data for given keys.
    */
-  function deleteRecord(EntityId ownerEntityId) internal {
+  function deleteRecord(EntityId owner) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     StoreSwitch.deleteRecord(_tableId, _keyTuple);
   }
@@ -400,9 +400,9 @@ library InventoryObjects {
   /**
    * @notice Delete all data for given keys.
    */
-  function _deleteRecord(EntityId ownerEntityId) internal {
+  function _deleteRecord(EntityId owner) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     StoreCore.deleteRecord(_tableId, _keyTuple, _fieldLayout);
   }
@@ -411,10 +411,10 @@ library InventoryObjects {
    * @notice Tightly pack dynamic data lengths using this table's schema.
    * @return _encodedLengths The lengths of the dynamic fields (packed into a single bytes32 value).
    */
-  function encodeLengths(uint16[] memory objectTypeIds) internal pure returns (EncodedLengths _encodedLengths) {
+  function encodeLengths(uint16[] memory occupiedSlots) internal pure returns (EncodedLengths _encodedLengths) {
     // Lengths are effectively checked during copy by 2**40 bytes exceeding gas limits
     unchecked {
-      _encodedLengths = EncodedLengthsLib.pack(objectTypeIds.length * 2);
+      _encodedLengths = EncodedLengthsLib.pack(occupiedSlots.length * 2);
     }
   }
 
@@ -422,8 +422,8 @@ library InventoryObjects {
    * @notice Tightly pack dynamic (variable length) data using this table's schema.
    * @return The dynamic data, encoded into a sequence of bytes.
    */
-  function encodeDynamic(uint16[] memory objectTypeIds) internal pure returns (bytes memory) {
-    return abi.encodePacked(EncodeArray.encode((objectTypeIds)));
+  function encodeDynamic(uint16[] memory occupiedSlots) internal pure returns (bytes memory) {
+    return abi.encodePacked(EncodeArray.encode((occupiedSlots)));
   }
 
   /**
@@ -432,10 +432,10 @@ library InventoryObjects {
    * @return The lengths of the dynamic fields (packed into a single bytes32 value).
    * @return The dynamic (variable length) data, encoded into a sequence of bytes.
    */
-  function encode(uint16[] memory objectTypeIds) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
+  function encode(uint16[] memory occupiedSlots) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
     bytes memory _staticData;
-    EncodedLengths _encodedLengths = encodeLengths(objectTypeIds);
-    bytes memory _dynamicData = encodeDynamic(objectTypeIds);
+    EncodedLengths _encodedLengths = encodeLengths(occupiedSlots);
+    bytes memory _dynamicData = encodeDynamic(occupiedSlots);
 
     return (_staticData, _encodedLengths, _dynamicData);
   }
@@ -443,9 +443,9 @@ library InventoryObjects {
   /**
    * @notice Encode keys as a bytes32 array using this table's field layout.
    */
-  function encodeKeyTuple(EntityId ownerEntityId) internal pure returns (bytes32[] memory) {
+  function encodeKeyTuple(EntityId owner) internal pure returns (bytes32[] memory) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = EntityId.unwrap(ownerEntityId);
+    _keyTuple[0] = EntityId.unwrap(owner);
 
     return _keyTuple;
   }

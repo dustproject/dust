@@ -6,7 +6,7 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { Action, Direction } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
-import { InventoryObjects } from "../codegen/tables/InventoryObjects.sol";
+import { Inventory } from "../codegen/tables/Inventory.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
@@ -22,7 +22,7 @@ import { getUniqueEntity } from "../Utils.sol";
 import { removeEnergyFromLocalPool, transferEnergyToPool, updateMachineEnergy } from "../utils/EnergyUtils.sol";
 import { getMovableEntityAt, getObjectTypeIdAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
 import { getForceField, setupForceField } from "../utils/ForceFieldUtils.sol";
-import { removeFromInventory } from "../utils/InventoryUtils.sol";
+import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { BuildNotification, MoveNotification, notify } from "../utils/NotifUtils.sol";
 
 import { MoveLib } from "./libraries/MoveLib.sol";
@@ -40,11 +40,77 @@ import { Vec3, vec3 } from "../Vec3.sol";
 
 using ObjectTypeLib for ObjectTypeId;
 
+contract BuildSystem is System {
+  function buildWithDirection(
+    EntityId caller,
+    ObjectTypeId buildObjectTypeId,
+    Vec3 baseCoord,
+    Direction direction,
+    bytes calldata extraData
+  ) public payable returns (EntityId) {
+    caller.activate();
+    caller.requireConnected(baseCoord);
+    require(buildObjectTypeId.isBlock(), "Cannot build non-block object");
+
+    (EntityId base, Vec3[] memory coords) = BuildLib._addBlocks(baseCoord, buildObjectTypeId, direction);
+
+    if (buildObjectTypeId.isSeed()) {
+      BuildLib._handleSeed(base, buildObjectTypeId, baseCoord);
+    }
+
+    InventoryUtils.removeObject(caller, buildObjectTypeId, 1);
+
+    transferEnergyToPool(caller, BUILD_ENERGY_COST);
+
+    // Note: we call this after the build state has been updated, to prevent re-entrancy attacks
+    BuildLib._requireBuildsAllowed(caller, base, buildObjectTypeId, coords, extraData);
+
+    notify(
+      caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectTypeId: buildObjectTypeId })
+    );
+
+    return base;
+  }
+
+  function build(EntityId caller, ObjectTypeId buildObjectTypeId, Vec3 baseCoord, bytes calldata extraData)
+    public
+    payable
+    returns (EntityId)
+  {
+    return buildWithDirection(caller, buildObjectTypeId, baseCoord, Direction.PositiveZ, extraData);
+  }
+
+  function jumpBuildWithDirection(
+    EntityId caller,
+    ObjectTypeId buildObjectTypeId,
+    Direction direction,
+    bytes calldata extraData
+  ) public payable {
+    caller.activate();
+
+    Vec3 coord = MovablePosition._get(caller);
+
+    Vec3[] memory moveCoords = new Vec3[](1);
+    moveCoords[0] = coord + vec3(0, 1, 0);
+    MoveLib.moveWithoutGravity(caller, coord, moveCoords);
+
+    notify(caller, MoveNotification({ moveCoords: moveCoords }));
+
+    require(!ObjectTypeMetadata._getCanPassThrough(buildObjectTypeId), "Cannot jump build on a pass-through block");
+
+    buildWithDirection(caller, buildObjectTypeId, coord, direction, extraData);
+  }
+
+  function jumpBuild(EntityId caller, ObjectTypeId buildObjectTypeId, bytes calldata extraData) public payable {
+    jumpBuildWithDirection(caller, buildObjectTypeId, Direction.PositiveZ, extraData);
+  }
+}
+
 library BuildLib {
   function _addBlock(ObjectTypeId buildObjectTypeId, Vec3 coord) internal returns (EntityId) {
     (EntityId terrain, ObjectTypeId terrainObjectTypeId) = getOrCreateEntityAt(coord);
     require(terrainObjectTypeId == ObjectTypes.Air, "Cannot build on a non-air block");
-    require(InventoryObjects._lengthObjectTypeIds(terrain) == 0, "Cannot build where there are dropped objects");
+    require(Inventory._length(terrain) == 0, "Cannot build where there are dropped objects");
     if (!ObjectTypeMetadata._getCanPassThrough(buildObjectTypeId)) {
       require(!getMovableEntityAt(coord).exists(), "Cannot build on a movable entity");
     }
@@ -118,71 +184,5 @@ library BuildLib {
         }
       }
     }
-  }
-}
-
-contract BuildSystem is System {
-  function buildWithDirection(
-    EntityId caller,
-    ObjectTypeId buildObjectTypeId,
-    Vec3 baseCoord,
-    Direction direction,
-    bytes calldata extraData
-  ) public payable returns (EntityId) {
-    caller.activate();
-    caller.requireConnected(baseCoord);
-    require(buildObjectTypeId.isBlock(), "Cannot build non-block object");
-
-    (EntityId base, Vec3[] memory coords) = BuildLib._addBlocks(baseCoord, buildObjectTypeId, direction);
-
-    if (buildObjectTypeId.isSeed()) {
-      BuildLib._handleSeed(base, buildObjectTypeId, baseCoord);
-    }
-
-    removeFromInventory(caller, buildObjectTypeId, 1);
-
-    transferEnergyToPool(caller, BUILD_ENERGY_COST);
-
-    // Note: we call this after the build state has been updated, to prevent re-entrancy attacks
-    BuildLib._requireBuildsAllowed(caller, base, buildObjectTypeId, coords, extraData);
-
-    notify(
-      caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectTypeId: buildObjectTypeId })
-    );
-
-    return base;
-  }
-
-  function build(EntityId caller, ObjectTypeId buildObjectTypeId, Vec3 baseCoord, bytes calldata extraData)
-    public
-    payable
-    returns (EntityId)
-  {
-    return buildWithDirection(caller, buildObjectTypeId, baseCoord, Direction.PositiveZ, extraData);
-  }
-
-  function jumpBuildWithDirection(
-    EntityId caller,
-    ObjectTypeId buildObjectTypeId,
-    Direction direction,
-    bytes calldata extraData
-  ) public payable {
-    caller.activate();
-
-    Vec3 coord = MovablePosition._get(caller);
-
-    Vec3[] memory moveCoords = new Vec3[](1);
-    moveCoords[0] = coord + vec3(0, 1, 0);
-    MoveLib.moveWithoutGravity(caller, coord, moveCoords);
-
-    notify(caller, MoveNotification({ moveCoords: moveCoords }));
-
-    require(!ObjectTypeMetadata._getCanPassThrough(buildObjectTypeId), "Cannot jump build on a pass-through block");
-
-    buildWithDirection(caller, buildObjectTypeId, coord, direction, extraData);
-  }
-
-  function jumpBuild(EntityId caller, ObjectTypeId buildObjectTypeId, bytes calldata extraData) public payable {
-    jumpBuildWithDirection(caller, buildObjectTypeId, Direction.PositiveZ, extraData);
   }
 }
