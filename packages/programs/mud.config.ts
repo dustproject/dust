@@ -35,6 +35,12 @@ export default defineWorld({
       },
       key: ["entityId"],
     },
+    DefaultPrograms: {
+      schema: {
+        programs: "bytes32[]", // ProgramId[]
+      },
+      key: [],
+    },
     AllowedPrograms: {
       schema: {
         entityId: "EntityId",

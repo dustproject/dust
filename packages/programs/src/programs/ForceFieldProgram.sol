@@ -24,6 +24,7 @@ import {
 import { Admin } from "../codegen/tables/Admin.sol";
 import { AllowedPlayers } from "../codegen/tables/AllowedPlayers.sol";
 import { AllowedPrograms } from "../codegen/tables/AllowedPrograms.sol";
+import { DefaultPrograms } from "../codegen/tables/DefaultPrograms.sol";
 
 /**
  * @title ForceFieldProgram
@@ -65,6 +66,12 @@ contract ForceFieldProgram is
     ProgramId program,
     bytes memory extraData
   ) external view onlyWorld {
+    bytes32[] memory defaultPrograms = DefaultPrograms.get();
+    for (uint256 i = 0; i < defaultPrograms.length; i++) {
+      if (defaultPrograms[i] == program.unwrap()) {
+        return;
+      }
+    }
     require(AllowedPrograms.getAllowed(target, program), "Program is not allowed");
   }
 

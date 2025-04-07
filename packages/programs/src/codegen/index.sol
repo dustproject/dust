@@ -5,4 +5,6 @@ pragma solidity >=0.8.24;
 
 import { Admin } from "./tables/Admin.sol";
 import { AllowedPlayers } from "./tables/AllowedPlayers.sol";
+
 import { AllowedPrograms } from "./tables/AllowedPrograms.sol";
+import { DefaultPrograms } from "./tables/DefaultPrograms.sol";
