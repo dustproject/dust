@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { LibPRNG } from "solady/utils/LibPRNG.sol";
-
 import { ResourceCount } from "./codegen/tables/ResourceCount.sol";
 import { ChunkCommitment } from "./utils/Vec3Storage.sol";
 
@@ -21,13 +19,12 @@ import { ObjectTypes } from "./ObjectTypes.sol";
 import { Vec3 } from "./Vec3.sol";
 
 library NatureLib {
-  using LibPRNG for LibPRNG.PRNG;
   using ObjectTypeLib for ObjectTypeId;
 
   function getMineDrops(ObjectTypeId objectTypeId, Vec3 coord) internal view returns (ObjectAmount[] memory result) {
     // Wheat drops wheat + 0-3 wheat seeds
     if (objectTypeId == ObjectTypes.Wheat) {
-      return getWheatDrops(objectTypeId, getRandomSeed(coord));
+      return getWheatDrops(getRandomSeed(coord));
     }
 
     // FescueGrass has a chance to drop wheat seeds
@@ -48,11 +45,7 @@ library NatureLib {
     return result;
   }
 
-  function getWheatDrops(ObjectTypeId objectTypeId, uint256 randomSeed)
-    internal
-    view
-    returns (ObjectAmount[] memory result)
-  {
+  function getWheatDrops(uint256 randomSeed) internal view returns (ObjectAmount[] memory result) {
     // Distribution with expected value of exactly 1
     uint256[] memory distribution = new uint256[](4);
     distribution[0] = 40; // 0 seeds: 40%
@@ -69,11 +62,11 @@ library NatureLib {
     // Always drop wheat, plus seeds if any were selected
     if (seedDrop.objectTypeId != ObjectTypes.Null) {
       result = new ObjectAmount[](2);
-      result[0] = ObjectAmount(objectTypeId, 1);
+      result[0] = ObjectAmount(ObjectTypes.Wheat, 1);
       result[1] = seedDrop;
     } else {
       result = new ObjectAmount[](1);
-      result[0] = ObjectAmount(objectTypeId, 1);
+      result[0] = ObjectAmount(ObjectTypes.Wheat, 1);
     }
 
     return result;
@@ -98,7 +91,7 @@ library NatureLib {
   }
 
   function getRandomOre(Vec3 coord) internal view returns (ObjectTypeId) {
-    uint256 seed = getRandomSeed(coord);
+    uint256 randomSeed = getRandomSeed(coord);
 
     // Get ore options and their weights (based on remaining amounts)
     ObjectAmount[] memory oreOptions = new ObjectAmount[](5);
@@ -112,7 +105,7 @@ library NatureLib {
     }
 
     // Select ore based on availability
-    ObjectAmount memory selectedOre = selectObjectByWeight(oreOptions, weights, seed);
+    ObjectAmount memory selectedOre = selectObjectByWeight(oreOptions, weights, randomSeed);
 
     // Return selected ore type and current mined count
     return selectedOre.objectTypeId;
@@ -151,16 +144,16 @@ library NatureLib {
   }
 
   // Simple random selection based on weights
-  function selectObjectByWeight(ObjectAmount[] memory options, uint256[] memory weights, uint256 seed)
+  function selectObjectByWeight(ObjectAmount[] memory options, uint256[] memory weights, uint256 randomSeed)
     internal
     pure
     returns (ObjectAmount memory)
   {
-    return options[selectByWeight(weights, seed)];
+    return options[selectByWeight(weights, randomSeed)];
   }
 
   // Simple weighted selection from an array of weights
-  function selectByWeight(uint256[] memory weights, uint256 seed) internal pure returns (uint256) {
+  function selectByWeight(uint256[] memory weights, uint256 randomSeed) internal pure returns (uint256) {
     uint256 totalWeight = 0;
     for (uint256 i = 0; i < weights.length; i++) {
       totalWeight += weights[i];
@@ -168,13 +161,8 @@ library NatureLib {
 
     require(totalWeight > 0, "No options available");
 
-    // Initialize PRNG
-    // TODO: maybe this is not necessary as we already have a random seed
-    LibPRNG.PRNG memory prng;
-    prng.seed(seed);
-
     // Select option based on weights
-    uint256 randomValue = prng.uniform(totalWeight);
+    uint256 randomValue = randomSeed % totalWeight;
     uint256 cumulativeWeight = 0;
 
     uint256 j = 0;

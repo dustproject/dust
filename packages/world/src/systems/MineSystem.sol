@@ -2,7 +2,6 @@
 pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
-import { LibPRNG } from "solady/utils/LibPRNG.sol";
 
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
@@ -60,38 +59,6 @@ import { Vec3, vec3 } from "../Vec3.sol";
 contract MineSystem is System {
   using ObjectTypeLib for ObjectTypeId;
 
-  function _removeBlock(EntityId entityId, Vec3 coord) internal {
-    ObjectType._set(entityId, ObjectTypes.Air);
-
-    Vec3 aboveCoord = coord + vec3(0, 1, 0);
-    EntityId above = getMovableEntityAt(aboveCoord);
-    // Note: currently it is not possible for the above player to not be the base entity,
-    // but if we add other types of movable entities we should check that it is a base entity
-    if (above.exists()) {
-      MoveLib.runGravity(above, aboveCoord);
-    }
-  }
-
-  function _handleDrop(EntityId caller, ObjectTypeId mineObjectTypeId, Vec3 coord) internal {
-    // Get drops with all metadata for resource tracking
-    ObjectAmount[] memory result = RandomResourceLib._getMineDrops(mineObjectTypeId, coord);
-
-    for (uint256 i = 0; i < result.length; i++) {
-      (ObjectTypeId dropType, uint16 amount) = (result[i].objectTypeId, uint16(result[i].amount));
-      InventoryUtils.addObject(caller, dropType, amount);
-
-      // Track mined resource count for seeds
-      // TODO: could make it more general like .isCappedResource() or something
-      if (dropType.isSeed()) {
-        ResourceCount._set(dropType, ResourceCount._get(dropType) + amount);
-      }
-    }
-  }
-
-  function _requireSeedNotFullyGrown(EntityId entityId) internal view {
-    require(SeedGrowth._getFullyGrownAt(entityId) > block.timestamp, "Cannot mine fully grown seed");
-  }
-
   function getRandomOreType(Vec3 coord) external view returns (ObjectTypeId) {
     return RandomResourceLib._getRandomOre(coord);
   }
@@ -146,52 +113,50 @@ contract MineSystem is System {
 
     uint128 finalMass = MassReductionLib._processMassReduction(caller, mined, toolSlot);
 
-    {
-      if (finalMass == 0) {
-        if (mineObjectTypeId == ObjectTypes.Bed) {
-          // If mining a bed with a sleeping player, kill the player
-          MineLib._mineBed(mined, baseCoord);
-        }
-
-        if (bytes(DisplayURI._get(mined)).length > 0) {
-          DisplayURI._deleteRecord(mined);
-        }
-
-        Mass._deleteRecord(mined);
-
-        {
-          // Remove seeds placed on top of this block
-          Vec3 aboveCoord = baseCoord + vec3(0, 1, 0);
-          (EntityId above, ObjectTypeId aboveTypeId) = getEntityAt(aboveCoord);
-          if (aboveTypeId.isSeed()) {
-            _requireSeedNotFullyGrown(mined);
-            if (!above.exists()) {
-              above = createEntityAt(aboveCoord, aboveTypeId);
-            }
-            _removeBlock(above, aboveCoord);
-            _handleDrop(caller, aboveTypeId, aboveCoord);
-          }
-        }
-
-        _removeBlock(mined, baseCoord);
-        _handleDrop(caller, mineObjectTypeId, baseCoord);
-
-        // If object being mined is a seed, return its energy to local pool
-        if (mineObjectTypeId.isSeed()) {
-          addEnergyToLocalPool(coord, ObjectTypeMetadata._getEnergy(mineObjectTypeId));
-        }
-
-        // Only iterate through relative schema coords
-        for (uint256 i = 1; i < coords.length; i++) {
-          Vec3 relativeCoord = coords[i];
-          (EntityId relative,) = getEntityAt(relativeCoord);
-          BaseEntity._deleteRecord(relative);
-
-          _removeBlock(relative, relativeCoord);
-        }
-      } else {
-        Mass._setMass(mined, finalMass);
+    if (finalMass == 0) {
+      if (mineObjectTypeId == ObjectTypes.Bed) {
+        // If mining a bed with a sleeping player, kill the player
+        MineLib._mineBed(mined, baseCoord);
       }
+
+      if (bytes(DisplayURI._get(mined)).length > 0) {
+        DisplayURI._deleteRecord(mined);
+      }
+
+      Mass._deleteRecord(mined);
+
+      {
+        // Remove seeds placed on top of this block
+        Vec3 aboveCoord = baseCoord + vec3(0, 1, 0);
+        (EntityId above, ObjectTypeId aboveTypeId) = getEntityAt(aboveCoord);
+        if (aboveTypeId.isSeed()) {
+          _requireSeedNotFullyGrown(mined);
+          if (!above.exists()) {
+            above = createEntityAt(aboveCoord, aboveTypeId);
+          }
+          _removeBlock(above, aboveCoord);
+          _handleDrop(caller, aboveTypeId, aboveCoord);
+        }
+      }
+
+      _removeBlock(mined, baseCoord);
+      _handleDrop(caller, mineObjectTypeId, baseCoord);
+
+      // If object being mined is a seed, return its energy to local pool
+      if (mineObjectTypeId.isSeed()) {
+        addEnergyToLocalPool(coord, ObjectTypeMetadata._getEnergy(mineObjectTypeId));
+      }
+
+      // Only iterate through relative schema coords
+      for (uint256 i = 1; i < coords.length; i++) {
+        Vec3 relativeCoord = coords[i];
+        (EntityId relative,) = getEntityAt(relativeCoord);
+        BaseEntity._deleteRecord(relative);
+
+        _removeBlock(relative, relativeCoord);
+      }
+    } else {
+      Mass._setMass(mined, finalMass);
     }
 
     MineLib._requireMinesAllowed(caller, mineObjectTypeId, coord, extraData);
@@ -212,6 +177,38 @@ contract MineSystem is System {
     notify(caller, MineNotification({ mineEntityId: mined, mineCoord: coord, mineObjectTypeId: mineObjectTypeId }));
 
     return mined;
+  }
+
+  function _removeBlock(EntityId entityId, Vec3 coord) internal {
+    ObjectType._set(entityId, ObjectTypes.Air);
+
+    Vec3 aboveCoord = coord + vec3(0, 1, 0);
+    EntityId above = getMovableEntityAt(aboveCoord);
+    // Note: currently it is not possible for the above player to not be the base entity,
+    // but if we add other types of movable entities we should check that it is a base entity
+    if (above.exists()) {
+      MoveLib.runGravity(above, aboveCoord);
+    }
+  }
+
+  function _handleDrop(EntityId caller, ObjectTypeId mineObjectTypeId, Vec3 coord) internal {
+    // Get drops with all metadata for resource tracking
+    ObjectAmount[] memory result = RandomResourceLib._getMineDrops(mineObjectTypeId, coord);
+
+    for (uint256 i = 0; i < result.length; i++) {
+      (ObjectTypeId dropType, uint16 amount) = (result[i].objectTypeId, uint16(result[i].amount));
+      InventoryUtils.addObject(caller, dropType, amount);
+
+      // Track mined resource count for seeds
+      // TODO: could make it more general like .isCappedResource() or something
+      if (dropType.isSeed()) {
+        ResourceCount._set(dropType, ResourceCount._get(dropType) + amount);
+      }
+    }
+  }
+
+  function _requireSeedNotFullyGrown(EntityId entityId) internal view {
+    require(SeedGrowth._getFullyGrownAt(entityId) > block.timestamp, "Cannot mine fully grown seed");
   }
 }
 
@@ -282,8 +279,6 @@ library MassReductionLib {
 }
 
 library RandomResourceLib {
-  using LibPRNG for LibPRNG.PRNG;
-
   function _getMineDrops(ObjectTypeId objectTypeId, Vec3 coord) public view returns (ObjectAmount[] memory) {
     return NatureLib.getMineDrops(objectTypeId, coord);
   }

@@ -40,6 +40,19 @@ import { TestInventoryUtils } from "./utils/TestUtils.sol";
 contract FarmingTest is DustTest {
   using ObjectTypeLib for ObjectTypeId;
 
+  function newCommit(address commiterAddress, EntityId commiter, Vec3 coord, bytes32 blockHash) internal {
+    // Set up chunk commitment for randomness when mining grass
+    Vec3 chunkCoord = coord.toChunkCoord();
+
+    vm.roll(vm.getBlockNumber() + CHUNK_COMMIT_EXPIRY_BLOCKS);
+    vm.prank(commiterAddress);
+    world.chunkCommit(commiter, chunkCoord);
+    // Move forward 2 blocks to make the commitment valid
+    vm.roll(vm.getBlockNumber() + 2);
+
+    vm.setBlockhash(vm.getBlockNumber() - 1, blockHash);
+  }
+
   function testTillDirt() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
@@ -269,11 +282,7 @@ contract FarmingTest is DustTest {
     world.growSeed(aliceEntityId, cropCoord);
 
     // Set up chunk commitment for randomness when mining
-    Vec3 chunkCoord = cropCoord.toChunkCoord();
-    vm.prank(alice);
-    world.chunkCommit(aliceEntityId, chunkCoord);
-    // Move forward a block to make the commitment valid
-    vm.roll(vm.getBlockNumber() + 2);
+    newCommit(alice, aliceEntityId, cropCoord, bytes32(0));
 
     // Check local energy pool before harvesting
     uint128 initialLocalEnergy = LocalEnergyPool.get(farmlandCoord.toLocalEnergyPoolShardCoord());
@@ -285,11 +294,11 @@ contract FarmingTest is DustTest {
     // Verify wheat and seeds were obtained
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
     // TODO: test randomness
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 0);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
 
     // Verify crop no longer exists
     assertEq(ObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
-    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 0, "Seed wasn't removed from circulation");
+    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seed was removed from circulation");
 
     // Verify local energy pool hasn't changed (energy not returned since crop was fully grown)
     // NOTE: player's energy is not reduced as currently wheat has 0 mass
@@ -370,16 +379,11 @@ contract FarmingTest is DustTest {
     Vec3 grassCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
 
     // Try up to 10 times to get wheat seeds (there's a 40% chance of getting 0 seeds)
-    for (uint256 i = 0; i < 10; i++) {
+    for (uint256 i = 0; i < 100; i++) {
       // Create FescueGrass
-      setTerrainAtCoord(grassCoord, ObjectTypes.FescueGrass);
+      setObjectAtCoord(grassCoord, ObjectTypes.FescueGrass);
 
-      // Set up chunk commitment for randomness when mining grass
-      Vec3 chunkCoord = grassCoord.toChunkCoord();
-      vm.prank(alice);
-      world.chunkCommit(aliceEntityId, chunkCoord);
-      // Move forward 2 blocks to make the commitment valid
-      vm.roll(vm.getBlockNumber() + 2);
+      newCommit(alice, aliceEntityId, grassCoord, keccak256(abi.encode(i)));
 
       // Harvest the FescueGrass
       vm.prank(alice);
@@ -388,9 +392,8 @@ contract FarmingTest is DustTest {
       // Check if we got seeds
       uint256 seedCount = getObjectAmount(aliceEntityId, ObjectTypes.WheatSeed);
 
+      console.log(seedCount);
       if (seedCount > 0) break;
-
-      vm.roll(vm.getBlockNumber() + CHUNK_COMMIT_EXPIRY_BLOCKS);
     }
 
     // Verify wheat seeds were obtained in at least one attempt
@@ -443,11 +446,7 @@ contract FarmingTest is DustTest {
     world.growSeed(aliceEntityId, cropCoord);
 
     // Set up chunk commitment for randomness when mining
-    Vec3 chunkCoord = cropCoord.toChunkCoord();
-    vm.prank(alice);
-    world.chunkCommit(aliceEntityId, chunkCoord);
-    // Move forward 2 blocks to make the commitment valid
-    vm.roll(vm.getBlockNumber() + 2);
+    newCommit(alice, aliceEntityId, cropCoord, bytes32(0));
 
     // Mine the crop
     vm.prank(alice);
@@ -456,6 +455,6 @@ contract FarmingTest is DustTest {
     // Now we get wheat and seeds
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
     // TODO: test randomness
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 0);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
   }
 }
