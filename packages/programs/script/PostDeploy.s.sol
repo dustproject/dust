@@ -7,6 +7,19 @@ import { console } from "forge-std/console.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 
+import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
+
+import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
+import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
+
+import { BedProgram } from "../src/programs/BedProgram.sol";
+import { ChestProgram } from "../src/programs/ChestProgram.sol";
+import { ForceFieldProgram } from "../src/programs/ForceFieldProgram.sol";
+
+import { DefaultPrograms } from "../src/codegen/tables/DefaultPrograms.sol";
+
+bytes14 constant DEFAULT_NAMESPACE = "default-1";
+
 contract PostDeploy is Script {
   function run(address worldAddress) external {
     // Specify a store so that you can use tables directly in PostDeploy
@@ -17,6 +30,37 @@ contract PostDeploy is Script {
 
     // Start broadcasting transactions from the deployer account
     vm.startBroadcast(deployerPrivateKey);
+
+    IWorld world = IWorld(worldAddress);
+
+    // Create the programs
+    ResourceId ffProgramId =
+      WorldResourceIdLib.encode({ typeId: RESOURCE_SYSTEM, namespace: DEFAULT_NAMESPACE, name: "ForceFieldProgra" });
+    if (Systems.getSystem(ffProgramId) == address(0)) {
+      ForceFieldProgram forceFieldProgram = new ForceFieldProgram(world);
+      world.registerSystem(ffProgramId, forceFieldProgram, false);
+    }
+
+    ResourceId chestProgramId =
+      WorldResourceIdLib.encode({ typeId: RESOURCE_SYSTEM, namespace: DEFAULT_NAMESPACE, name: "ChestProgram" });
+    if (Systems.getSystem(chestProgramId) == address(0)) {
+      ChestProgram chestProgram = new ChestProgram(world);
+      world.registerSystem(chestProgramId, chestProgram, false);
+    }
+
+    ResourceId bedProgramId =
+      WorldResourceIdLib.encode({ typeId: RESOURCE_SYSTEM, namespace: DEFAULT_NAMESPACE, name: "BedProgram" });
+    if (Systems.getSystem(bedProgramId) == address(0)) {
+      BedProgram bedProgram = new BedProgram(world);
+      world.registerSystem(bedProgramId, bedProgram, false);
+    }
+
+    // Set the default programs
+    bytes32[] memory defaultPrograms = new bytes32[](3);
+    defaultPrograms[0] = ffProgramId.unwrap();
+    defaultPrograms[1] = chestProgramId.unwrap();
+    defaultPrograms[2] = bedProgramId.unwrap();
+    DefaultPrograms.set(defaultPrograms);
 
     vm.stopBroadcast();
   }
