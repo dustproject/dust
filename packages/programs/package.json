@@ -1,0 +1,38 @@
+{
+  "name": "@dust/programs",
+  "version": "0.0.1",
+  "exports": {
+    "./mud.config": "./dist/mud.config.js"
+  },
+  "scripts": {
+    "build": "mud build && pnpm run build:js",
+    "build:js": "tsup",
+    "clean": "forge clean && shx rm -rf src/**/codegen",
+    "deploy:local": "pnpm entrykit-deploy && pnpm run build && mud deploy",
+    "dev": "pnpm entrykit-deploy && pnpm run build && pnpm mud dev-contracts --rpc http://127.0.0.1:8545",
+    "fix": "pnpm run fix:format",
+    "fix:format": "forge fmt",
+    "fix:lint": "solhint --config ./.solhint.json '**/*.sol' --fix"
+  },
+  "dependencies": {
+    "@dust/world": "workspace:*",
+    "@latticexyz/cli": "2.2.21-b18c0ef0edeab2378b08d9f4a328a5d0d817f6bf",
+    "@latticexyz/config": "2.2.21-b18c0ef0edeab2378b08d9f4a328a5d0d817f6bf",
+    "@latticexyz/gas-report": "2.2.21-b18c0ef0edeab2378b08d9f4a328a5d0d817f6bf",
+    "@latticexyz/schema-type": "2.2.21-b18c0ef0edeab2378b08d9f4a328a5d0d817f6bf",
+    "@latticexyz/store": "2.2.21-b18c0ef0edeab2378b08d9f4a328a5d0d817f6bf",
+    "@latticexyz/world": "2.2.21-b18c0ef0edeab2378b08d9f4a328a5d0d817f6bf",
+    "@latticexyz/world-consumer": "2.2.21-b18c0ef0edeab2378b08d9f4a328a5d0d817f6bf",
+    "@latticexyz/world-modules": "2.2.21-b18c0ef0edeab2378b08d9f4a328a5d0d817f6bf",
+    "@openzeppelin/contracts": "^4.9.6",
+    "solady": "^0.1.12",
+    "solhint-config-mud": "2.2.21-b18c0ef0edeab2378b08d9f4a328a5d0d817f6bf",
+    "solhint-plugin-mud": "2.2.21-b18c0ef0edeab2378b08d9f4a328a5d0d817f6bf"
+  },
+  "devDependencies": {
+    "forge-std": "https://github.com/foundry-rs/forge-std.git#3b20d60d14b343ee4f908cb8079495c07f5e8981",
+    "solhint": "^3.4.1",
+    "tsup": "8.3.0",
+    "tsx": "^4.7.2"
+  }
+}
