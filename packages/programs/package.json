@@ -8,8 +8,7 @@
     "build": "mud build && pnpm run build:js",
     "build:js": "tsup",
     "clean": "forge clean && shx rm -rf src/**/codegen",
-    "deploy:local": "pnpm run build && mud deploy",
-    "dev": "pnpm run build && pnpm mud dev-contracts --rpc http://127.0.0.1:8545",
+    "deploy:local": "pnpm run build && ./deployToWorld.bash",
     "fix": "pnpm run fix:format",
     "fix:format": "forge fmt",
     "fix:lint": "solhint --config ./.solhint.json '**/*.sol' --fix"

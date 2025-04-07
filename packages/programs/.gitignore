@@ -8,3 +8,6 @@ broadcast/
 # Ignore MUD deploy artifacts
 deploys/**/*.json
 dist/
+
+# We ignore this file because we use the one in the world package as the source of truth
+worlds.json
