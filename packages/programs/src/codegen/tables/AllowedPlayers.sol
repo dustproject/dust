@@ -20,6 +20,9 @@ import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 
 import { EncodeArray } from "@latticexyz/store/src/tightcoder/EncodeArray.sol";
 
+// Import user types
+import { EntityId } from "@dust/world/src/EntityId.sol";
+
 library AllowedPlayers {
   // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "default-1", name: "AllowedPlayers", typeId: RESOURCE_TABLE });`
   ResourceId constant _tableId = ResourceId.wrap(0x746264656661756c742d310000000000416c6c6f776564506c61796572730000);
@@ -67,9 +70,9 @@ library AllowedPlayers {
   /**
    * @notice Get players.
    */
-  function getPlayers(bytes32 entityId) internal view returns (address[] memory players) {
+  function getPlayers(EntityId entityId) internal view returns (address[] memory players) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     bytes memory _blob = StoreSwitch.getDynamicField(_tableId, _keyTuple, 0);
     return (SliceLib.getSubslice(_blob, 0, _blob.length).decodeArray_address());
@@ -78,9 +81,9 @@ library AllowedPlayers {
   /**
    * @notice Get players.
    */
-  function _getPlayers(bytes32 entityId) internal view returns (address[] memory players) {
+  function _getPlayers(EntityId entityId) internal view returns (address[] memory players) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     bytes memory _blob = StoreCore.getDynamicField(_tableId, _keyTuple, 0);
     return (SliceLib.getSubslice(_blob, 0, _blob.length).decodeArray_address());
@@ -89,9 +92,9 @@ library AllowedPlayers {
   /**
    * @notice Get players.
    */
-  function get(bytes32 entityId) internal view returns (address[] memory players) {
+  function get(EntityId entityId) internal view returns (address[] memory players) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     bytes memory _blob = StoreSwitch.getDynamicField(_tableId, _keyTuple, 0);
     return (SliceLib.getSubslice(_blob, 0, _blob.length).decodeArray_address());
@@ -100,9 +103,9 @@ library AllowedPlayers {
   /**
    * @notice Get players.
    */
-  function _get(bytes32 entityId) internal view returns (address[] memory players) {
+  function _get(EntityId entityId) internal view returns (address[] memory players) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     bytes memory _blob = StoreCore.getDynamicField(_tableId, _keyTuple, 0);
     return (SliceLib.getSubslice(_blob, 0, _blob.length).decodeArray_address());
@@ -111,9 +114,9 @@ library AllowedPlayers {
   /**
    * @notice Set players.
    */
-  function setPlayers(bytes32 entityId, address[] memory players) internal {
+  function setPlayers(EntityId entityId, address[] memory players) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     StoreSwitch.setDynamicField(_tableId, _keyTuple, 0, EncodeArray.encode((players)));
   }
@@ -121,9 +124,9 @@ library AllowedPlayers {
   /**
    * @notice Set players.
    */
-  function _setPlayers(bytes32 entityId, address[] memory players) internal {
+  function _setPlayers(EntityId entityId, address[] memory players) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     StoreCore.setDynamicField(_tableId, _keyTuple, 0, EncodeArray.encode((players)));
   }
@@ -131,9 +134,9 @@ library AllowedPlayers {
   /**
    * @notice Set players.
    */
-  function set(bytes32 entityId, address[] memory players) internal {
+  function set(EntityId entityId, address[] memory players) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     StoreSwitch.setDynamicField(_tableId, _keyTuple, 0, EncodeArray.encode((players)));
   }
@@ -141,9 +144,9 @@ library AllowedPlayers {
   /**
    * @notice Set players.
    */
-  function _set(bytes32 entityId, address[] memory players) internal {
+  function _set(EntityId entityId, address[] memory players) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     StoreCore.setDynamicField(_tableId, _keyTuple, 0, EncodeArray.encode((players)));
   }
@@ -151,9 +154,9 @@ library AllowedPlayers {
   /**
    * @notice Get the length of players.
    */
-  function lengthPlayers(bytes32 entityId) internal view returns (uint256) {
+  function lengthPlayers(EntityId entityId) internal view returns (uint256) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     uint256 _byteLength = StoreSwitch.getDynamicFieldLength(_tableId, _keyTuple, 0);
     unchecked {
@@ -164,9 +167,9 @@ library AllowedPlayers {
   /**
    * @notice Get the length of players.
    */
-  function _lengthPlayers(bytes32 entityId) internal view returns (uint256) {
+  function _lengthPlayers(EntityId entityId) internal view returns (uint256) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     uint256 _byteLength = StoreCore.getDynamicFieldLength(_tableId, _keyTuple, 0);
     unchecked {
@@ -177,9 +180,9 @@ library AllowedPlayers {
   /**
    * @notice Get the length of players.
    */
-  function length(bytes32 entityId) internal view returns (uint256) {
+  function length(EntityId entityId) internal view returns (uint256) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     uint256 _byteLength = StoreSwitch.getDynamicFieldLength(_tableId, _keyTuple, 0);
     unchecked {
@@ -190,9 +193,9 @@ library AllowedPlayers {
   /**
    * @notice Get the length of players.
    */
-  function _length(bytes32 entityId) internal view returns (uint256) {
+  function _length(EntityId entityId) internal view returns (uint256) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     uint256 _byteLength = StoreCore.getDynamicFieldLength(_tableId, _keyTuple, 0);
     unchecked {
@@ -204,9 +207,9 @@ library AllowedPlayers {
    * @notice Get an item of players.
    * @dev Reverts with Store_IndexOutOfBounds if `_index` is out of bounds for the array.
    */
-  function getItemPlayers(bytes32 entityId, uint256 _index) internal view returns (address) {
+  function getItemPlayers(EntityId entityId, uint256 _index) internal view returns (address) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     unchecked {
       bytes memory _blob = StoreSwitch.getDynamicFieldSlice(_tableId, _keyTuple, 0, _index * 20, (_index + 1) * 20);
@@ -218,9 +221,9 @@ library AllowedPlayers {
    * @notice Get an item of players.
    * @dev Reverts with Store_IndexOutOfBounds if `_index` is out of bounds for the array.
    */
-  function _getItemPlayers(bytes32 entityId, uint256 _index) internal view returns (address) {
+  function _getItemPlayers(EntityId entityId, uint256 _index) internal view returns (address) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     unchecked {
       bytes memory _blob = StoreCore.getDynamicFieldSlice(_tableId, _keyTuple, 0, _index * 20, (_index + 1) * 20);
@@ -232,9 +235,9 @@ library AllowedPlayers {
    * @notice Get an item of players.
    * @dev Reverts with Store_IndexOutOfBounds if `_index` is out of bounds for the array.
    */
-  function getItem(bytes32 entityId, uint256 _index) internal view returns (address) {
+  function getItem(EntityId entityId, uint256 _index) internal view returns (address) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     unchecked {
       bytes memory _blob = StoreSwitch.getDynamicFieldSlice(_tableId, _keyTuple, 0, _index * 20, (_index + 1) * 20);
@@ -246,9 +249,9 @@ library AllowedPlayers {
    * @notice Get an item of players.
    * @dev Reverts with Store_IndexOutOfBounds if `_index` is out of bounds for the array.
    */
-  function _getItem(bytes32 entityId, uint256 _index) internal view returns (address) {
+  function _getItem(EntityId entityId, uint256 _index) internal view returns (address) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     unchecked {
       bytes memory _blob = StoreCore.getDynamicFieldSlice(_tableId, _keyTuple, 0, _index * 20, (_index + 1) * 20);
@@ -259,9 +262,9 @@ library AllowedPlayers {
   /**
    * @notice Push an element to players.
    */
-  function pushPlayers(bytes32 entityId, address _element) internal {
+  function pushPlayers(EntityId entityId, address _element) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     StoreSwitch.pushToDynamicField(_tableId, _keyTuple, 0, abi.encodePacked((_element)));
   }
@@ -269,9 +272,9 @@ library AllowedPlayers {
   /**
    * @notice Push an element to players.
    */
-  function _pushPlayers(bytes32 entityId, address _element) internal {
+  function _pushPlayers(EntityId entityId, address _element) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     StoreCore.pushToDynamicField(_tableId, _keyTuple, 0, abi.encodePacked((_element)));
   }
@@ -279,9 +282,9 @@ library AllowedPlayers {
   /**
    * @notice Push an element to players.
    */
-  function push(bytes32 entityId, address _element) internal {
+  function push(EntityId entityId, address _element) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     StoreSwitch.pushToDynamicField(_tableId, _keyTuple, 0, abi.encodePacked((_element)));
   }
@@ -289,9 +292,9 @@ library AllowedPlayers {
   /**
    * @notice Push an element to players.
    */
-  function _push(bytes32 entityId, address _element) internal {
+  function _push(EntityId entityId, address _element) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     StoreCore.pushToDynamicField(_tableId, _keyTuple, 0, abi.encodePacked((_element)));
   }
@@ -299,9 +302,9 @@ library AllowedPlayers {
   /**
    * @notice Pop an element from players.
    */
-  function popPlayers(bytes32 entityId) internal {
+  function popPlayers(EntityId entityId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     StoreSwitch.popFromDynamicField(_tableId, _keyTuple, 0, 20);
   }
@@ -309,9 +312,9 @@ library AllowedPlayers {
   /**
    * @notice Pop an element from players.
    */
-  function _popPlayers(bytes32 entityId) internal {
+  function _popPlayers(EntityId entityId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     StoreCore.popFromDynamicField(_tableId, _keyTuple, 0, 20);
   }
@@ -319,9 +322,9 @@ library AllowedPlayers {
   /**
    * @notice Pop an element from players.
    */
-  function pop(bytes32 entityId) internal {
+  function pop(EntityId entityId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     StoreSwitch.popFromDynamicField(_tableId, _keyTuple, 0, 20);
   }
@@ -329,9 +332,9 @@ library AllowedPlayers {
   /**
    * @notice Pop an element from players.
    */
-  function _pop(bytes32 entityId) internal {
+  function _pop(EntityId entityId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     StoreCore.popFromDynamicField(_tableId, _keyTuple, 0, 20);
   }
@@ -339,9 +342,9 @@ library AllowedPlayers {
   /**
    * @notice Update an element of players at `_index`.
    */
-  function updatePlayers(bytes32 entityId, uint256 _index, address _element) internal {
+  function updatePlayers(EntityId entityId, uint256 _index, address _element) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     unchecked {
       bytes memory _encoded = abi.encodePacked((_element));
@@ -352,9 +355,9 @@ library AllowedPlayers {
   /**
    * @notice Update an element of players at `_index`.
    */
-  function _updatePlayers(bytes32 entityId, uint256 _index, address _element) internal {
+  function _updatePlayers(EntityId entityId, uint256 _index, address _element) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     unchecked {
       bytes memory _encoded = abi.encodePacked((_element));
@@ -365,9 +368,9 @@ library AllowedPlayers {
   /**
    * @notice Update an element of players at `_index`.
    */
-  function update(bytes32 entityId, uint256 _index, address _element) internal {
+  function update(EntityId entityId, uint256 _index, address _element) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     unchecked {
       bytes memory _encoded = abi.encodePacked((_element));
@@ -378,9 +381,9 @@ library AllowedPlayers {
   /**
    * @notice Update an element of players at `_index`.
    */
-  function _update(bytes32 entityId, uint256 _index, address _element) internal {
+  function _update(EntityId entityId, uint256 _index, address _element) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     unchecked {
       bytes memory _encoded = abi.encodePacked((_element));
@@ -391,9 +394,9 @@ library AllowedPlayers {
   /**
    * @notice Delete all data for given keys.
    */
-  function deleteRecord(bytes32 entityId) internal {
+  function deleteRecord(EntityId entityId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     StoreSwitch.deleteRecord(_tableId, _keyTuple);
   }
@@ -401,9 +404,9 @@ library AllowedPlayers {
   /**
    * @notice Delete all data for given keys.
    */
-  function _deleteRecord(bytes32 entityId) internal {
+  function _deleteRecord(EntityId entityId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     StoreCore.deleteRecord(_tableId, _keyTuple, _fieldLayout);
   }
@@ -444,9 +447,9 @@ library AllowedPlayers {
   /**
    * @notice Encode keys as a bytes32 array using this table's field layout.
    */
-  function encodeKeyTuple(bytes32 entityId) internal pure returns (bytes32[] memory) {
+  function encodeKeyTuple(EntityId entityId) internal pure returns (bytes32[] memory) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = entityId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     return _keyTuple;
   }

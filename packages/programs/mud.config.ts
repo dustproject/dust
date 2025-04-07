@@ -26,7 +26,7 @@ export default defineWorld({
     },
     AllowedPlayers: {
       schema: {
-        entityId: "bytes32",
+        entityId: "EntityId",
         players: "address[]",
       },
       key: ["entityId"],
