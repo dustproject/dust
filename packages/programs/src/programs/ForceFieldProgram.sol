@@ -26,7 +26,7 @@ import { AllowedPlayers } from "../codegen/tables/AllowedPlayers.sol";
 import { AllowedPrograms } from "../codegen/tables/AllowedPrograms.sol";
 
 /**
- * @title ChestProgram
+ * @title ForceFieldProgram
  */
 contract ForceFieldProgram is
   IAttachProgramHook,
@@ -39,7 +39,7 @@ contract ForceFieldProgram is
   WorldConsumer
 {
   /**
-   * @notice Initializes the ChestProgram
+   * @notice Initializes the ForceFieldProgram
    * @param _world The world contract
    */
   constructor(IBaseWorld _world) WorldConsumer(_world) { }
