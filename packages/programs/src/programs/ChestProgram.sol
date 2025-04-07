@@ -8,7 +8,6 @@ import { ObjectTypeId } from "@dust/world/src/ObjectTypeId.sol";
 import { ObjectAmount } from "@dust/world/src/ObjectTypeLib.sol";
 
 import { ITransferHook } from "@dust/world/src/ProgramInterfaces.sol";
-import { ReversePlayer } from "@dust/world/src/codegen/tables/ReversePlayer.sol";
 
 import { DefaultProgram } from "./DefaultProgram.sol";
 
@@ -31,8 +30,6 @@ contract ChestProgram is DefaultProgram, ITransferHook {
     EntityId[] memory toolEntities,
     bytes memory extraData
   ) external onlyWorld {
-    require(
-      _isApprovedPlayer(target, ReversePlayer.get(caller)), "Only approved players can transfer to/from the chest"
-    );
+    require(_isApproved(target, caller), "Only approved callers can transfer to/from the chest");
   }
 }

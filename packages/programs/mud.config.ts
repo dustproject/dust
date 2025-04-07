@@ -22,33 +22,19 @@ export default defineWorld({
     },
   },
   tables: {
-    Admin: {
+    Owner: {
       schema: {
         entityId: "EntityId",
-        admin: "address",
+        owner: "EntityId",
       },
       key: ["entityId"],
     },
-    AllowedPlayers: {
+    AllowedCallers: {
       schema: {
-        entityId: "EntityId",
-        players: "address[]",
+        target: "EntityId",
+        callers: "bytes32[]", // EntityId[]
       },
-      key: ["entityId"],
-    },
-    DefaultPrograms: {
-      schema: {
-        programs: "bytes32[]", // ProgramId[]
-      },
-      key: [],
-    },
-    AllowedPrograms: {
-      schema: {
-        entityId: "EntityId",
-        program: "ProgramId",
-        allowed: "bool",
-      },
-      key: ["entityId", "program"],
+      key: ["target"],
     },
   },
 });

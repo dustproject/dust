@@ -16,8 +16,6 @@ import { BedProgram } from "../src/programs/BedProgram.sol";
 import { ChestProgram } from "../src/programs/ChestProgram.sol";
 import { ForceFieldProgram } from "../src/programs/ForceFieldProgram.sol";
 
-import { DefaultPrograms } from "../src/codegen/tables/DefaultPrograms.sol";
-
 bytes14 constant DEFAULT_NAMESPACE = "default-1";
 
 contract PostDeploy is Script {
@@ -54,13 +52,6 @@ contract PostDeploy is Script {
       BedProgram bedProgram = new BedProgram(world);
       world.registerSystem(bedProgramId, bedProgram, false);
     }
-
-    // Set the default programs
-    bytes32[] memory defaultPrograms = new bytes32[](3);
-    defaultPrograms[0] = ffProgramId.unwrap();
-    defaultPrograms[1] = chestProgramId.unwrap();
-    defaultPrograms[2] = bedProgramId.unwrap();
-    DefaultPrograms.set(defaultPrograms);
 
     vm.stopBroadcast();
   }

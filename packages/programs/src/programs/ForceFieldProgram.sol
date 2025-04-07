@@ -9,8 +9,6 @@ import { ObjectAmount } from "@dust/world/src/ObjectTypeLib.sol";
 import { ProgramId } from "@dust/world/src/ProgramId.sol";
 import { Vec3 } from "@dust/world/src/Vec3.sol";
 
-import { ReversePlayer } from "@dust/world/src/codegen/tables/ReversePlayer.sol";
-
 import {
   IAddFragmentHook,
   IBuildHook,
@@ -19,10 +17,7 @@ import {
   IRemoveFragmentHook
 } from "@dust/world/src/ProgramInterfaces.sol";
 
-import { Admin } from "../codegen/tables/Admin.sol";
-import { AllowedPlayers } from "../codegen/tables/AllowedPlayers.sol";
-import { AllowedPrograms } from "../codegen/tables/AllowedPrograms.sol";
-import { DefaultPrograms } from "../codegen/tables/DefaultPrograms.sol";
+import { Owner } from "../codegen/tables/Owner.sol";
 
 import { DefaultProgram } from "./DefaultProgram.sol";
 
@@ -50,29 +45,19 @@ contract ForceFieldProgram is
     ProgramId program,
     bytes memory extraData
   ) external view onlyWorld {
-    bytes32[] memory defaultPrograms = DefaultPrograms.get();
-    for (uint256 i = 0; i < defaultPrograms.length; i++) {
-      if (defaultPrograms[i] == program.unwrap()) {
-        return;
-      }
-    }
-    require(AllowedPrograms.getAllowed(target, program), "Program is not allowed");
+    // Allow all programs
+    // TODO: should we add a method to restrict programs?
   }
 
   function onAddFragment(EntityId caller, EntityId target, EntityId added, bytes memory extraData) external onlyWorld {
-    require(
-      _isApprovedPlayer(target, ReversePlayer.get(caller)), "Only approved players can add fragments to the force field"
-    );
+    require(_isApproved(target, caller), "Only approved callers can add fragments to the force field");
   }
 
   function onRemoveFragment(EntityId caller, EntityId target, EntityId removed, bytes memory extraData)
     external
     onlyWorld
   {
-    require(
-      _isApprovedPlayer(target, ReversePlayer.get(caller)),
-      "Only approved players can remove fragments from the force field"
-    );
+    require(_isApproved(target, caller), "Only approved callers can remove fragments from the force field");
   }
 
   function onBuild(EntityId caller, EntityId target, ObjectTypeId objectTypeId, Vec3 coord, bytes memory extraData)
@@ -80,7 +65,7 @@ contract ForceFieldProgram is
     payable
     onlyWorld
   {
-    require(_isApprovedPlayer(target, ReversePlayer.get(caller)), "Only approved players can build in the force field");
+    require(_isApproved(target, caller), "Only approved callers can build in the force field");
   }
 
   function onMine(EntityId caller, EntityId target, ObjectTypeId objectTypeId, Vec3 coord, bytes memory extraData)
@@ -88,11 +73,6 @@ contract ForceFieldProgram is
     payable
     onlyWorld
   {
-    require(_isApprovedPlayer(target, ReversePlayer.get(caller)), "Only approved players can mine in the force field");
-  }
-
-  function setAllowedPrograms(EntityId target, ProgramId program, bool allowed) external {
-    require(Admin.get(target) == _msgSender(), "Only the admin can set allowed programs");
-    AllowedPrograms.set(target, program, allowed);
+    require(_isApproved(target, caller), "Only approved callers can mine in the force field");
   }
 }

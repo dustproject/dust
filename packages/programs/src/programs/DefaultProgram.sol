@@ -4,13 +4,12 @@ pragma solidity >=0.8.24;
 import { IBaseWorld, WorldConsumer } from "@latticexyz/world-consumer/src/experimental/WorldConsumer.sol";
 
 import { EntityId } from "@dust/world/src/EntityId.sol";
-
-import { ReversePlayer } from "@dust/world/src/codegen/tables/ReversePlayer.sol";
+import { Player } from "@dust/world/src/codegen/tables/Player.sol";
 
 import { IAttachProgramHook, IDetachProgramHook } from "@dust/world/src/ProgramInterfaces.sol";
 
-import { Admin } from "../codegen/tables/Admin.sol";
-import { AllowedPlayers } from "../codegen/tables/AllowedPlayers.sol";
+import { AllowedCallers } from "../codegen/tables/AllowedCallers.sol";
+import { Owner } from "../codegen/tables/Owner.sol";
 
 /**
  * @title DefaultProgram
@@ -23,40 +22,42 @@ contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, WorldConsumer
   constructor(IBaseWorld _world) WorldConsumer(_world) { }
 
   function onAttachProgram(EntityId caller, EntityId target, bytes memory extraData) external onlyWorld {
-    address player = ReversePlayer.get(caller);
-    require(player != address(0), "Caller is not a player");
-    Admin.set(target, player);
-    address[] memory approvedPlayers = new address[](1);
-    approvedPlayers[0] = player;
-    AllowedPlayers.set(target, approvedPlayers);
+    Owner.set(target, caller);
+    bytes32[] memory callers = new bytes32[](1);
+    callers[0] = caller.unwrap();
+    AllowedCallers.set(target, callers);
   }
 
   function onDetachProgram(EntityId caller, EntityId target, bytes memory extraData) external onlyWorld {
-    address admin = Admin.get(target);
-    if (admin != address(0)) {
-      require(ReversePlayer.get(caller) == admin, "Only the admin can detach this program");
-      Admin.deleteRecord(target);
+    EntityId owner = Owner.get(target);
+    if (owner.exists()) {
+      require(owner == caller, "Only the owner can detach this program");
+      Owner.deleteRecord(target);
     }
-    AllowedPlayers.deleteRecord(target);
+    AllowedCallers.deleteRecord(target);
   }
 
-  function _isApprovedPlayer(EntityId target, address player) internal view returns (bool) {
-    address[] memory approvedPlayers = AllowedPlayers.get(target);
-    for (uint256 i = 0; i < approvedPlayers.length; i++) {
-      if (approvedPlayers[i] == player) {
+  function _isApproved(EntityId target, EntityId caller) internal view returns (bool) {
+    bytes32[] memory callers = AllowedCallers.get(target);
+    for (uint256 i = 0; i < callers.length; i++) {
+      if (callers[i] == caller.unwrap()) {
         return true;
       }
     }
     return false;
   }
 
-  function setApprovedPlayers(EntityId target, address[] memory players) external {
-    require(Admin.get(target) == _msgSender(), "Only the admin can set approved players");
-    AllowedPlayers.set(target, players);
+  function setApprovedCallers(EntityId target, EntityId[] memory callers) external {
+    require(Owner.get(target) == Player.get(_msgSender()), "Only the owner can set approved callers");
+    bytes32[] memory callersBytes = new bytes32[](callers.length);
+    for (uint256 i = 0; i < callers.length; i++) {
+      callersBytes[i] = callers[i].unwrap();
+    }
+    AllowedCallers.set(target, callersBytes);
   }
 
-  function setAdmin(EntityId target, address admin) external {
-    require(Admin.get(target) == _msgSender(), "Only the admin can set a new admin");
-    Admin.set(target, admin);
+  function setOwner(EntityId target, EntityId owner) external {
+    require(Owner.get(target) == Player.get(_msgSender()), "Only the owner can set a new owner");
+    Owner.set(target, owner);
   }
 }

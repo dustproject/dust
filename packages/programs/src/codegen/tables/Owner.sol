@@ -23,17 +23,17 @@ import { EncodeArray } from "@latticexyz/store/src/tightcoder/EncodeArray.sol";
 // Import user types
 import { EntityId } from "@dust/world/src/EntityId.sol";
 
-library Admin {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "default-1", name: "Admin", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x746264656661756c742d31000000000041646d696e0000000000000000000000);
+library Owner {
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "default-1", name: "Owner", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x746264656661756c742d3100000000004f776e65720000000000000000000000);
 
   FieldLayout constant _fieldLayout =
-    FieldLayout.wrap(0x0014010014000000000000000000000000000000000000000000000000000000);
+    FieldLayout.wrap(0x0020010020000000000000000000000000000000000000000000000000000000);
 
   // Hex-encoded key schema of (bytes32)
   Schema constant _keySchema = Schema.wrap(0x002001005f000000000000000000000000000000000000000000000000000000);
-  // Hex-encoded value schema of (address)
-  Schema constant _valueSchema = Schema.wrap(0x0014010061000000000000000000000000000000000000000000000000000000);
+  // Hex-encoded value schema of (bytes32)
+  Schema constant _valueSchema = Schema.wrap(0x002001005f000000000000000000000000000000000000000000000000000000);
 
   /**
    * @notice Get the table's key field names.
@@ -50,7 +50,7 @@ library Admin {
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
     fieldNames = new string[](1);
-    fieldNames[0] = "admin";
+    fieldNames[0] = "owner";
   }
 
   /**
@@ -68,87 +68,87 @@ library Admin {
   }
 
   /**
-   * @notice Get admin.
+   * @notice Get owner.
    */
-  function getAdmin(EntityId entityId) internal view returns (address admin) {
+  function getOwner(EntityId entityId) internal view returns (EntityId owner) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return (address(bytes20(_blob)));
+    return EntityId.wrap(bytes32(_blob));
   }
 
   /**
-   * @notice Get admin.
+   * @notice Get owner.
    */
-  function _getAdmin(EntityId entityId) internal view returns (address admin) {
+  function _getOwner(EntityId entityId) internal view returns (EntityId owner) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return (address(bytes20(_blob)));
+    return EntityId.wrap(bytes32(_blob));
   }
 
   /**
-   * @notice Get admin.
+   * @notice Get owner.
    */
-  function get(EntityId entityId) internal view returns (address admin) {
+  function get(EntityId entityId) internal view returns (EntityId owner) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return (address(bytes20(_blob)));
+    return EntityId.wrap(bytes32(_blob));
   }
 
   /**
-   * @notice Get admin.
+   * @notice Get owner.
    */
-  function _get(EntityId entityId) internal view returns (address admin) {
+  function _get(EntityId entityId) internal view returns (EntityId owner) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return (address(bytes20(_blob)));
+    return EntityId.wrap(bytes32(_blob));
   }
 
   /**
-   * @notice Set admin.
+   * @notice Set owner.
    */
-  function setAdmin(EntityId entityId, address admin) internal {
+  function setOwner(EntityId entityId, EntityId owner) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((admin)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(EntityId.unwrap(owner)), _fieldLayout);
   }
 
   /**
-   * @notice Set admin.
+   * @notice Set owner.
    */
-  function _setAdmin(EntityId entityId, address admin) internal {
+  function _setOwner(EntityId entityId, EntityId owner) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((admin)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(EntityId.unwrap(owner)), _fieldLayout);
   }
 
   /**
-   * @notice Set admin.
+   * @notice Set owner.
    */
-  function set(EntityId entityId, address admin) internal {
+  function set(EntityId entityId, EntityId owner) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((admin)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(EntityId.unwrap(owner)), _fieldLayout);
   }
 
   /**
-   * @notice Set admin.
+   * @notice Set owner.
    */
-  function _set(EntityId entityId, address admin) internal {
+  function _set(EntityId entityId, EntityId owner) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((admin)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(EntityId.unwrap(owner)), _fieldLayout);
   }
 
   /**
@@ -175,8 +175,8 @@ library Admin {
    * @notice Tightly pack static (fixed length) data using this table's schema.
    * @return The static data, encoded into a sequence of bytes.
    */
-  function encodeStatic(address admin) internal pure returns (bytes memory) {
-    return abi.encodePacked(admin);
+  function encodeStatic(EntityId owner) internal pure returns (bytes memory) {
+    return abi.encodePacked(owner);
   }
 
   /**
@@ -185,8 +185,8 @@ library Admin {
    * @return The lengths of the dynamic fields (packed into a single bytes32 value).
    * @return The dynamic (variable length) data, encoded into a sequence of bytes.
    */
-  function encode(address admin) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
-    bytes memory _staticData = encodeStatic(admin);
+  function encode(EntityId owner) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
+    bytes memory _staticData = encodeStatic(owner);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;

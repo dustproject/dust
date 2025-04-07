@@ -2,21 +2,20 @@
 
 The Dust client auto selects a default program when a player builds a smart object.
 
-Default programs will make the builder the admin of that smart object. As an admin they are the only ones allowed to manage it, but they can change the admin to someone else (or to address(0) to freeze it).
+Default programs will make the builder the owner of that smart object. As an owner they are the only ones allowed to manage it, but they can change the owner to someone else (or to address(0) to freeze it).
 
 ## Force Field Program
-- Allows admin to set the list of approved players
-- Allows admin to set the list of approved programs
-  - All the default programs are approved automatically
-- Approved players can build, mine, add and remove fragments
+- Allows owner to set the list of approved callers
+- Approved callers can build, mine, add and remove fragments
+- The force field allows all programs
 
 ## Chest Program
-- Allows admin to set the list of approved players
-- Approved players can transfer any items in and out
+- Allows owner to set the list of approved callers
+- Approved callers can transfer any items in and out
 
 ## Bed Program
-- Allows admin to set the list of approved players
-- Approved players can sleep and wakeup
+- Allows admin to set the list of approved callers
+- Approved callers can sleep and wakeup
 
 
 
