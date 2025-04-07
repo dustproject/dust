@@ -21,6 +21,11 @@ import { EntityId } from "../EntityId.sol";
 
 using ObjectTypeLib for ObjectTypeId;
 
+struct SlotAmount {
+  uint16 slot;
+  uint16 amount; // For entities, this should always be 1
+}
+
 struct SlotTransfer {
   uint16 slotFrom;
   uint16 slotTo;
