@@ -15,6 +15,10 @@ export default defineWorld({
       filePath: "@latticexyz/store/src/ResourceId.sol",
       type: "bytes32",
     },
+    ProgramId: {
+      filePath: "@dust/world/src/ProgramId.sol",
+      type: "bytes32",
+    },
   },
   tables: {
     Admin: {
@@ -33,10 +37,11 @@ export default defineWorld({
     },
     AllowedPrograms: {
       schema: {
-        programResourceId: "ResourceId",
+        entityId: "EntityId",
+        program: "ProgramId",
         allowed: "bool",
       },
-      key: ["programResourceId"],
+      key: ["entityId", "program"],
     },
   },
 });

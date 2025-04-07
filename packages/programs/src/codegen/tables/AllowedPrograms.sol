@@ -21,7 +21,8 @@ import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 import { EncodeArray } from "@latticexyz/store/src/tightcoder/EncodeArray.sol";
 
 // Import user types
-import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
+import { EntityId } from "@dust/world/src/EntityId.sol";
+import { ProgramId } from "@dust/world/src/ProgramId.sol";
 
 library AllowedPrograms {
   // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "default-1", name: "AllowedPrograms", typeId: RESOURCE_TABLE });`
@@ -30,8 +31,8 @@ library AllowedPrograms {
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0001010001000000000000000000000000000000000000000000000000000000);
 
-  // Hex-encoded key schema of (bytes32)
-  Schema constant _keySchema = Schema.wrap(0x002001005f000000000000000000000000000000000000000000000000000000);
+  // Hex-encoded key schema of (bytes32, bytes32)
+  Schema constant _keySchema = Schema.wrap(0x004002005f5f0000000000000000000000000000000000000000000000000000);
   // Hex-encoded value schema of (bool)
   Schema constant _valueSchema = Schema.wrap(0x0001010060000000000000000000000000000000000000000000000000000000);
 
@@ -40,8 +41,9 @@ library AllowedPrograms {
    * @return keyNames An array of strings with the names of key fields.
    */
   function getKeyNames() internal pure returns (string[] memory keyNames) {
-    keyNames = new string[](1);
-    keyNames[0] = "programResourceId";
+    keyNames = new string[](2);
+    keyNames[0] = "entityId";
+    keyNames[1] = "program";
   }
 
   /**
@@ -70,9 +72,10 @@ library AllowedPrograms {
   /**
    * @notice Get allowed.
    */
-  function getAllowed(ResourceId programResourceId) internal view returns (bool allowed) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = ResourceId.unwrap(programResourceId);
+  function getAllowed(EntityId entityId, ProgramId program) internal view returns (bool allowed) {
+    bytes32[] memory _keyTuple = new bytes32[](2);
+    _keyTuple[0] = EntityId.unwrap(entityId);
+    _keyTuple[1] = ProgramId.unwrap(program);
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
@@ -81,9 +84,10 @@ library AllowedPrograms {
   /**
    * @notice Get allowed.
    */
-  function _getAllowed(ResourceId programResourceId) internal view returns (bool allowed) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = ResourceId.unwrap(programResourceId);
+  function _getAllowed(EntityId entityId, ProgramId program) internal view returns (bool allowed) {
+    bytes32[] memory _keyTuple = new bytes32[](2);
+    _keyTuple[0] = EntityId.unwrap(entityId);
+    _keyTuple[1] = ProgramId.unwrap(program);
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
@@ -92,9 +96,10 @@ library AllowedPrograms {
   /**
    * @notice Get allowed.
    */
-  function get(ResourceId programResourceId) internal view returns (bool allowed) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = ResourceId.unwrap(programResourceId);
+  function get(EntityId entityId, ProgramId program) internal view returns (bool allowed) {
+    bytes32[] memory _keyTuple = new bytes32[](2);
+    _keyTuple[0] = EntityId.unwrap(entityId);
+    _keyTuple[1] = ProgramId.unwrap(program);
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
@@ -103,9 +108,10 @@ library AllowedPrograms {
   /**
    * @notice Get allowed.
    */
-  function _get(ResourceId programResourceId) internal view returns (bool allowed) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = ResourceId.unwrap(programResourceId);
+  function _get(EntityId entityId, ProgramId program) internal view returns (bool allowed) {
+    bytes32[] memory _keyTuple = new bytes32[](2);
+    _keyTuple[0] = EntityId.unwrap(entityId);
+    _keyTuple[1] = ProgramId.unwrap(program);
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
@@ -114,9 +120,10 @@ library AllowedPrograms {
   /**
    * @notice Set allowed.
    */
-  function setAllowed(ResourceId programResourceId, bool allowed) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = ResourceId.unwrap(programResourceId);
+  function setAllowed(EntityId entityId, ProgramId program, bool allowed) internal {
+    bytes32[] memory _keyTuple = new bytes32[](2);
+    _keyTuple[0] = EntityId.unwrap(entityId);
+    _keyTuple[1] = ProgramId.unwrap(program);
 
     StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((allowed)), _fieldLayout);
   }
@@ -124,9 +131,10 @@ library AllowedPrograms {
   /**
    * @notice Set allowed.
    */
-  function _setAllowed(ResourceId programResourceId, bool allowed) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = ResourceId.unwrap(programResourceId);
+  function _setAllowed(EntityId entityId, ProgramId program, bool allowed) internal {
+    bytes32[] memory _keyTuple = new bytes32[](2);
+    _keyTuple[0] = EntityId.unwrap(entityId);
+    _keyTuple[1] = ProgramId.unwrap(program);
 
     StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((allowed)), _fieldLayout);
   }
@@ -134,9 +142,10 @@ library AllowedPrograms {
   /**
    * @notice Set allowed.
    */
-  function set(ResourceId programResourceId, bool allowed) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = ResourceId.unwrap(programResourceId);
+  function set(EntityId entityId, ProgramId program, bool allowed) internal {
+    bytes32[] memory _keyTuple = new bytes32[](2);
+    _keyTuple[0] = EntityId.unwrap(entityId);
+    _keyTuple[1] = ProgramId.unwrap(program);
 
     StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((allowed)), _fieldLayout);
   }
@@ -144,9 +153,10 @@ library AllowedPrograms {
   /**
    * @notice Set allowed.
    */
-  function _set(ResourceId programResourceId, bool allowed) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = ResourceId.unwrap(programResourceId);
+  function _set(EntityId entityId, ProgramId program, bool allowed) internal {
+    bytes32[] memory _keyTuple = new bytes32[](2);
+    _keyTuple[0] = EntityId.unwrap(entityId);
+    _keyTuple[1] = ProgramId.unwrap(program);
 
     StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((allowed)), _fieldLayout);
   }
@@ -154,9 +164,10 @@ library AllowedPrograms {
   /**
    * @notice Delete all data for given keys.
    */
-  function deleteRecord(ResourceId programResourceId) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = ResourceId.unwrap(programResourceId);
+  function deleteRecord(EntityId entityId, ProgramId program) internal {
+    bytes32[] memory _keyTuple = new bytes32[](2);
+    _keyTuple[0] = EntityId.unwrap(entityId);
+    _keyTuple[1] = ProgramId.unwrap(program);
 
     StoreSwitch.deleteRecord(_tableId, _keyTuple);
   }
@@ -164,9 +175,10 @@ library AllowedPrograms {
   /**
    * @notice Delete all data for given keys.
    */
-  function _deleteRecord(ResourceId programResourceId) internal {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = ResourceId.unwrap(programResourceId);
+  function _deleteRecord(EntityId entityId, ProgramId program) internal {
+    bytes32[] memory _keyTuple = new bytes32[](2);
+    _keyTuple[0] = EntityId.unwrap(entityId);
+    _keyTuple[1] = ProgramId.unwrap(program);
 
     StoreCore.deleteRecord(_tableId, _keyTuple, _fieldLayout);
   }
@@ -197,9 +209,10 @@ library AllowedPrograms {
   /**
    * @notice Encode keys as a bytes32 array using this table's field layout.
    */
-  function encodeKeyTuple(ResourceId programResourceId) internal pure returns (bytes32[] memory) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = ResourceId.unwrap(programResourceId);
+  function encodeKeyTuple(EntityId entityId, ProgramId program) internal pure returns (bytes32[] memory) {
+    bytes32[] memory _keyTuple = new bytes32[](2);
+    _keyTuple[0] = EntityId.unwrap(entityId);
+    _keyTuple[1] = ProgramId.unwrap(program);
 
     return _keyTuple;
   }
