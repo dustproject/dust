@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { IBaseWorld, WorldConsumer } from "@latticexyz/world-consumer/src/experimental/WorldConsumer.sol";
+import { IBaseWorld } from "@latticexyz/world-consumer/src/experimental/WorldConsumer.sol";
 
 import { EntityId } from "@dust/world/src/EntityId.sol";
 import { ObjectTypeId } from "@dust/world/src/ObjectTypeId.sol";
@@ -13,9 +13,7 @@ import { ReversePlayer } from "@dust/world/src/codegen/tables/ReversePlayer.sol"
 
 import {
   IAddFragmentHook,
-  IAttachProgramHook,
   IBuildHook,
-  IDetachProgramHook,
   IMineHook,
   IProgramValidator,
   IRemoveFragmentHook
@@ -26,42 +24,24 @@ import { AllowedPlayers } from "../codegen/tables/AllowedPlayers.sol";
 import { AllowedPrograms } from "../codegen/tables/AllowedPrograms.sol";
 import { DefaultPrograms } from "../codegen/tables/DefaultPrograms.sol";
 
+import { DefaultProgram } from "./DefaultProgram.sol";
+
 /**
  * @title ForceFieldProgram
  */
 contract ForceFieldProgram is
-  IAttachProgramHook,
-  IDetachProgramHook,
+  DefaultProgram,
   IProgramValidator,
   IAddFragmentHook,
   IRemoveFragmentHook,
   IBuildHook,
-  IMineHook,
-  WorldConsumer
+  IMineHook
 {
   /**
    * @notice Initializes the ForceFieldProgram
    * @param _world The world contract
    */
-  constructor(IBaseWorld _world) WorldConsumer(_world) { }
-
-  function onAttachProgram(EntityId caller, EntityId target, bytes memory extraData) external onlyWorld {
-    address player = ReversePlayer.get(caller);
-    require(player != address(0), "Caller is not a player");
-    Admin.set(target, player);
-    address[] memory approvedPlayers = new address[](1);
-    approvedPlayers[0] = player;
-    AllowedPlayers.set(target, approvedPlayers);
-  }
-
-  function onDetachProgram(EntityId caller, EntityId target, bytes memory extraData) external onlyWorld {
-    address admin = Admin.get(target);
-    if (admin != address(0)) {
-      require(ReversePlayer.get(caller) == admin, "Only the admin can detach the chest program");
-      Admin.deleteRecord(target);
-    }
-    AllowedPlayers.deleteRecord(target);
-  }
+  constructor(IBaseWorld _world) DefaultProgram(_world) { }
 
   function validateProgram(
     EntityId caller,
@@ -111,28 +91,8 @@ contract ForceFieldProgram is
     require(_isApprovedPlayer(target, ReversePlayer.get(caller)), "Only approved players can mine in the force field");
   }
 
-  function _isApprovedPlayer(EntityId target, address player) internal view returns (bool) {
-    address[] memory approvedPlayers = AllowedPlayers.get(target);
-    for (uint256 i = 0; i < approvedPlayers.length; i++) {
-      if (approvedPlayers[i] == player) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   function setAllowedPrograms(EntityId target, ProgramId program, bool allowed) external {
     require(Admin.get(target) == _msgSender(), "Only the admin can set allowed programs");
     AllowedPrograms.set(target, program, allowed);
-  }
-
-  function setApprovedPlayers(EntityId target, address[] memory players) external {
-    require(Admin.get(target) == _msgSender(), "Only the admin can set approved players");
-    AllowedPlayers.set(target, players);
-  }
-
-  function setAdmin(EntityId target, address admin) external {
-    require(Admin.get(target) == _msgSender(), "Only the admin can set a new admin");
-    Admin.set(target, admin);
   }
 }
