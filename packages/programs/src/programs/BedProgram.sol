@@ -22,9 +22,7 @@ contract BedProgram is DefaultProgram, ISleepHook, IWakeupHook {
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
 
   function onSleep(EntityId caller, EntityId target, bytes memory extraData) external onlyWorld {
-    require(
-      _isApprovedPlayer(target, ReversePlayer.get(caller)), "Only approved players can transfer to/from the chest"
-    );
+    require(_isApprovedPlayer(target, ReversePlayer.get(caller)), "Only approved players can sleep in the bed");
   }
 
   function onWakeup(EntityId caller, EntityId target, bytes memory extraData) external onlyWorld {
