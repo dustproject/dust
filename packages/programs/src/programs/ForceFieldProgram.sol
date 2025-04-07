@@ -49,6 +49,9 @@ contract ForceFieldProgram is
     address player = ReversePlayer.get(caller);
     require(player != address(0), "Caller is not a player");
     Admin.set(target, player);
+    address[] memory approvedPlayers = new address[](1);
+    approvedPlayers[0] = player;
+    AllowedPlayers.set(target, approvedPlayers);
   }
 
   function onDetachProgram(EntityId caller, EntityId target, bytes memory extraData) external onlyWorld {
@@ -57,6 +60,7 @@ contract ForceFieldProgram is
       require(ReversePlayer.get(caller) == admin, "Only the admin can detach the chest program");
       Admin.deleteRecord(target);
     }
+    AllowedPlayers.deleteRecord(target);
   }
 
   function validateProgram(
