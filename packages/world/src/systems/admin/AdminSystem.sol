@@ -43,6 +43,17 @@ contract AdminSystem is System {
     return tool;
   }
 
+  function adminRemoveFromInventory(EntityId owner, ObjectTypeId objectTypeId, uint16 numObjectsToRemove)
+    public
+    onlyAdmin
+  {
+    InventoryUtils.removeObject(owner, objectTypeId, numObjectsToRemove);
+  }
+
+  function adminRemoveToolFromInventory(EntityId owner, EntityId tool) public onlyAdmin {
+    InventoryUtils.removeEntity(owner, tool);
+  }
+
   function adminTeleportPlayer(address playerAddress, Vec3 finalCoord) public onlyAdmin {
     EntityId player = Player.get(playerAddress);
     player.activate();

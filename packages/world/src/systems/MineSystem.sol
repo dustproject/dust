@@ -97,15 +97,30 @@ contract MineSystem is System {
     return ore;
   }
 
-  function mineWithTool(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData)
-    external
-    returns (EntityId)
-  {
+  function mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) external returns (EntityId) {
     return _mine(caller, coord, toolSlot, extraData);
   }
 
   function mine(EntityId caller, Vec3 coord, bytes calldata extraData) external returns (EntityId) {
     return _mine(caller, coord, type(uint16).max, extraData);
+  }
+
+  function mineUntilDestroyed(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) public payable {
+    uint128 massLeft = 0;
+    do {
+      // TODO: factor out the mass reduction logic so it's cheaper to call
+      EntityId entityId = _mine(caller, coord, toolSlot, extraData);
+      massLeft = Mass._getMass(entityId);
+    } while (massLeft > 0);
+  }
+
+  function mineUntilDestroyed(EntityId caller, Vec3 coord, bytes calldata extraData) public payable {
+    uint128 massLeft = 0;
+    do {
+      // TODO: factor out the mass reduction logic so it's cheaper to call
+      EntityId entityId = _mine(caller, coord, type(uint16).max, extraData);
+      massLeft = Mass._getMass(entityId);
+    } while (massLeft > 0);
   }
 
   function _mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) internal returns (EntityId) {
@@ -198,24 +213,6 @@ contract MineSystem is System {
     notify(caller, MineNotification({ mineEntityId: mined, mineCoord: coord, mineObjectTypeId: mineObjectTypeId }));
 
     return mined;
-  }
-
-  function mineUntilDestroyed(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) public payable {
-    uint128 massLeft = 0;
-    do {
-      // TODO: factor out the mass reduction logic so it's cheaper to call
-      EntityId entityId = _mine(caller, coord, toolSlot, extraData);
-      massLeft = Mass._getMass(entityId);
-    } while (massLeft > 0);
-  }
-
-  function mineUntilDestroyed(EntityId caller, Vec3 coord, bytes calldata extraData) public payable {
-    uint128 massLeft = 0;
-    do {
-      // TODO: factor out the mass reduction logic so it's cheaper to call
-      EntityId entityId = _mine(caller, coord, type(uint16).max, extraData);
-      massLeft = Mass._getMass(entityId);
-    } while (massLeft > 0);
   }
 }
 

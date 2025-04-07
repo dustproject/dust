@@ -35,9 +35,16 @@ contract HitMachineSystem is System {
   using ObjectTypeLib for ObjectTypeId;
 
   function hitForceField(EntityId caller, Vec3 coord, uint16 toolSlot) public {
+    _hitForceField(caller, coord, toolSlot);
+  }
+
+  function hitForceField(EntityId caller, Vec3 coord) public {
+    _hitForceField(caller, coord, type(uint16).max);
+  }
+
+  function _hitForceField(EntityId caller, Vec3 coord, uint16 toolSlot) internal {
     caller.activate();
     (Vec3 callerCoord,) = caller.requireConnected(coord);
-
     (EntityId forceField,) = getForceField(coord);
     require(forceField.exists(), "No force field at this location");
     Vec3 forceFieldCoord = Position._get(forceField);

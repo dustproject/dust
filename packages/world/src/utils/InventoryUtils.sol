@@ -150,6 +150,20 @@ library InventoryUtils {
     InventorySlot._setAmount(owner, slot, newAmount);
   }
 
+  // IMPORTANT: this does not burn tool ores
+  function removeEntity(EntityId owner, EntityId entity) public {
+    uint16[] memory slots = Inventory._get(owner);
+    for (uint256 i = 0; i < slots.length; i++) {
+      if (entity == InventorySlot._getEntityId(owner, slots[i])) {
+        _recycleSlot(owner, slots[i]);
+        Mass._deleteRecord(entity);
+        return;
+      }
+    }
+
+    revert("Entity not found");
+  }
+
   function removeObject(EntityId owner, ObjectTypeId objectType, uint16 amount) public {
     require(amount > 0, "Amount must be greater than 0");
     require(!objectType.isNull(), "Empty slot");

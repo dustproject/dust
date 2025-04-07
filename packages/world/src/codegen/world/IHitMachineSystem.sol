@@ -13,4 +13,6 @@ import { Vec3 } from "../../Vec3.sol";
  */
 interface IHitMachineSystem {
   function hitForceField(EntityId caller, Vec3 coord, uint16 toolSlot) external;
+
+  function hitForceField(EntityId caller, Vec3 coord) external;
 }

@@ -3,6 +3,8 @@ pragma solidity >=0.8.24;
 
 import { ObjectTypeId } from "../../ObjectTypeId.sol";
 import { Vec3, vec3 } from "../../Vec3.sol";
+
+import { InventorySlot, InventorySlotData } from "../../codegen/tables/InventorySlot.sol";
 import { System } from "@latticexyz/world/src/System.sol";
 import { ResourceId } from "@latticexyz/world/src/WorldResourceId.sol";
 
@@ -10,6 +12,7 @@ import { Direction } from "../../codegen/common.sol";
 import { BaseEntity } from "../../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../../codegen/tables/Energy.sol";
 import { EntityProgram } from "../../codegen/tables/EntityProgram.sol";
+import { Inventory } from "../../codegen/tables/Inventory.sol";
 
 import { Machine, MachineData } from "../../codegen/tables/Machine.sol";
 import { Mass } from "../../codegen/tables/Mass.sol";
@@ -24,26 +27,13 @@ import { MovablePosition, Position, ReverseMovablePosition, ReversePosition } fr
 
 import { EntityId } from "../../EntityId.sol";
 import { ObjectTypes } from "../../ObjectTypes.sol";
-import { EntityData, InventoryObject, PlayerEntityData, getEntityInventory } from "../../utils/ReadUtils.sol";
 
 import { TerrainLib } from "../libraries/TerrainLib.sol";
 
+import { EntityData, InventoryEntity, InventoryObject, PlayerEntityData } from "./ReadUtils.sol";
+
 // Public getters so clients can read the world state more easily
 contract ReadSystem is System {
-  function getCoordFor(EntityId entityId) internal view returns (Vec3) {
-    ObjectTypeId objectTypeId = ObjectType._get(entityId);
-    if (objectTypeId == ObjectTypes.Player) {
-      EntityId bed = PlayerStatus._getBedEntityId(entityId);
-      if (bed.exists()) {
-        return Position._get(bed);
-      } else {
-        return MovablePosition._get(entityId);
-      }
-    } else {
-      return entityId.getPosition();
-    }
-  }
-
   function getEntityData(EntityId entityId) public view returns (EntityData memory) {
     if (!entityId.exists()) {
       return EntityData({
@@ -146,5 +136,104 @@ contract ReadSystem is System {
       playersEntityData[i] = getPlayerEntityData(players[i]);
     }
     return playersEntityData;
+  }
+
+  function getEntityInventory(EntityId owner) internal view returns (InventoryObject[] memory) {
+    uint16[] memory slots = Inventory._get(owner);
+
+    // Count unique object types to determine array size
+    uint256 uniqueTypeCount = 0;
+    ObjectTypeId[] memory uniqueTypes = new ObjectTypeId[](slots.length);
+    bool[] memory typeExists = new bool[](slots.length);
+
+    for (uint256 i = 0; i < slots.length; i++) {
+      InventorySlotData memory slotData = InventorySlot._get(owner, uint8(i));
+
+      bool found = false;
+      for (uint256 j = 0; j < uniqueTypeCount; j++) {
+        if (uniqueTypes[j] == slotData.objectType) {
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        uniqueTypes[uniqueTypeCount] = slotData.objectType;
+        typeExists[uniqueTypeCount] = true;
+        uniqueTypeCount++;
+      }
+    }
+
+    InventoryObject[] memory result = new InventoryObject[](uniqueTypeCount);
+
+    for (uint256 i = 0; i < uniqueTypeCount; i++) {
+      result[i].objectTypeId = uniqueTypes[i];
+      result[i].numObjects = 0;
+      result[i].inventoryEntities = new InventoryEntity[](0);
+    }
+
+    uint256[] memory entityCounts = new uint256[](uniqueTypeCount);
+
+    for (uint256 i = 0; i < slots.length; i++) {
+      InventorySlotData memory slotData = InventorySlot._get(owner, uint8(i));
+
+      // Find the index of this type in the result array
+      uint256 typeIndex = 0;
+      for (uint256 j = 0; j < uniqueTypeCount; j++) {
+        if (uniqueTypes[j] == slotData.objectType) {
+          typeIndex = j;
+          break;
+        }
+      }
+
+      result[typeIndex].numObjects += slotData.amount;
+
+      entityCounts[typeIndex]++;
+    }
+
+    // Allocate entity arrays with the correct sizes
+    for (uint256 i = 0; i < uniqueTypeCount; i++) {
+      if (entityCounts[i] > 0) {
+        result[i].inventoryEntities = new InventoryEntity[](entityCounts[i]);
+      }
+    }
+
+    // Populate entity arrays
+    uint256[] memory entityIndices = new uint256[](uniqueTypeCount);
+
+    for (uint256 i = 0; i < slots.length; i++) {
+      InventorySlotData memory slotData = InventorySlot._get(owner, uint8(i));
+
+      if (!slotData.entityId.exists()) continue;
+
+      uint256 typeIndex = 0;
+      for (uint256 j = 0; j < uniqueTypeCount; j++) {
+        if (uniqueTypes[j] == slotData.objectType) {
+          typeIndex = j;
+          break;
+        }
+      }
+
+      result[typeIndex].inventoryEntities[entityIndices[typeIndex]] =
+        InventoryEntity({ entityId: slotData.entityId, mass: uint128(Mass._get(slotData.entityId)) });
+
+      entityIndices[typeIndex]++;
+    }
+
+    return result;
+  }
+
+  function getCoordFor(EntityId entityId) internal view returns (Vec3) {
+    ObjectTypeId objectTypeId = ObjectType._get(entityId);
+    if (objectTypeId == ObjectTypes.Player) {
+      EntityId bed = PlayerStatus._getBedEntityId(entityId);
+      if (bed.exists()) {
+        return Position._get(bed);
+      } else {
+        return MovablePosition._get(entityId);
+      }
+    } else {
+      return entityId.getPosition();
+    }
   }
 }

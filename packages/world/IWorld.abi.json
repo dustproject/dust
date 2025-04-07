@@ -107,6 +107,47 @@
   },
   {
     "type": "function",
+    "name": "adminRemoveFromInventory",
+    "inputs": [
+      {
+        "name": "owner",
+        "type": "bytes32",
+        "internalType": "EntityId"
+      },
+      {
+        "name": "objectTypeId",
+        "type": "uint16",
+        "internalType": "ObjectTypeId"
+      },
+      {
+        "name": "numObjectsToRemove",
+        "type": "uint16",
+        "internalType": "uint16"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "adminRemoveToolFromInventory",
+    "inputs": [
+      {
+        "name": "owner",
+        "type": "bytes32",
+        "internalType": "EntityId"
+      },
+      {
+        "name": "tool",
+        "type": "bytes32",
+        "internalType": "EntityId"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "adminTeleportPlayer",
     "inputs": [
       {
@@ -1994,6 +2035,24 @@
   },
   {
     "type": "function",
+    "name": "hitForceField",
+    "inputs": [
+      {
+        "name": "caller",
+        "type": "bytes32",
+        "internalType": "EntityId"
+      },
+      {
+        "name": "coord",
+        "type": "uint96",
+        "internalType": "Vec3"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "initialize",
     "inputs": [
       {
@@ -2126,6 +2185,40 @@
         "internalType": "Vec3"
       },
       {
+        "name": "toolSlot",
+        "type": "uint16",
+        "internalType": "uint16"
+      },
+      {
+        "name": "extraData",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "EntityId"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "mine",
+    "inputs": [
+      {
+        "name": "caller",
+        "type": "bytes32",
+        "internalType": "EntityId"
+      },
+      {
+        "name": "coord",
+        "type": "uint96",
+        "internalType": "Vec3"
+      },
+      {
         "name": "extraData",
         "type": "bytes",
         "internalType": "bytes"
@@ -2190,40 +2283,6 @@
     ],
     "outputs": [],
     "stateMutability": "payable"
-  },
-  {
-    "type": "function",
-    "name": "mineWithTool",
-    "inputs": [
-      {
-        "name": "caller",
-        "type": "bytes32",
-        "internalType": "EntityId"
-      },
-      {
-        "name": "coord",
-        "type": "uint96",
-        "internalType": "Vec3"
-      },
-      {
-        "name": "toolSlot",
-        "type": "uint16",
-        "internalType": "uint16"
-      },
-      {
-        "name": "extraData",
-        "type": "bytes",
-        "internalType": "bytes"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bytes32",
-        "internalType": "EntityId"
-      }
-    ],
-    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
