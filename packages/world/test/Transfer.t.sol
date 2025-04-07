@@ -20,19 +20,13 @@ import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 
-import { MinedOreCount } from "../src/codegen/tables/MinedOreCount.sol";
-
-import { MinedOrePosition } from "../src/codegen/tables/MinedOrePosition.sol";
 import { MovablePosition } from "../src/codegen/tables/MovablePosition.sol";
 import { ObjectType } from "../src/codegen/tables/ObjectType.sol";
 import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
-import { OreCommitment } from "../src/codegen/tables/OreCommitment.sol";
 import { Player } from "../src/codegen/tables/Player.sol";
 
 import { PlayerStatus } from "../src/codegen/tables/PlayerStatus.sol";
 import { ReverseMovablePosition } from "../src/codegen/tables/ReverseMovablePosition.sol";
-import { TotalBurnedOreCount } from "../src/codegen/tables/TotalBurnedOreCount.sol";
-import { TotalMinedOreCount } from "../src/codegen/tables/TotalMinedOreCount.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { DustTest } from "./DustTest.sol";

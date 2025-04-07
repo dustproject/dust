@@ -323,9 +323,9 @@ export default defineWorld({
       key: ["entityId"],
     },
     // ------------------------------------------------------------
-    // Ores
+    // Resources
     // ------------------------------------------------------------
-    OreCommitment: {
+    ChunkCommitment: {
       schema: {
         x: "int32",
         y: "int32",
@@ -334,33 +334,29 @@ export default defineWorld({
       },
       key: ["x", "y", "z"],
     },
-    TotalMinedOreCount: {
+    ResourcePosition: {
       schema: {
-        count: "uint256",
-      },
-      key: [],
-    },
-    MinedOrePosition: {
-      schema: {
+        objectTypeId: "ObjectTypeId",
         index: "uint256",
         x: "int32",
         y: "int32",
         z: "int32",
       },
-      key: ["index"],
+      key: ["objectTypeId", "index"],
     },
-    MinedOreCount: {
+    ResourceCount: {
       schema: {
         objectTypeId: "ObjectTypeId",
         count: "uint256",
       },
       key: ["objectTypeId"],
     },
-    TotalBurnedOreCount: {
+    BurnedResourceCount: {
       schema: {
+        objectTypeId: "ObjectTypeId",
         count: "uint256",
       },
-      key: [],
+      key: ["objectTypeId"],
     },
     // ------------------------------------------------------------
     // Farming

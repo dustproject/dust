@@ -10,26 +10,16 @@ import { Direction } from "../src/codegen/common.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
-import { MinedOreCount } from "../src/codegen/tables/MinedOreCount.sol";
 import { ObjectType } from "../src/codegen/tables/ObjectType.sol";
 import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
 import { Player } from "../src/codegen/tables/Player.sol";
 
 import { PlayerStatus } from "../src/codegen/tables/PlayerStatus.sol";
-import { TotalBurnedOreCount } from "../src/codegen/tables/TotalBurnedOreCount.sol";
-import { TotalMinedOreCount } from "../src/codegen/tables/TotalMinedOreCount.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 
-import {
-  MinedOrePosition,
-  MovablePosition,
-  OreCommitment,
-  Position,
-  ReverseMovablePosition,
-  ReversePosition
-} from "../src/utils/Vec3Storage.sol";
+import { MovablePosition, Position, ReverseMovablePosition, ReversePosition } from "../src/utils/Vec3Storage.sol";
 
 import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";

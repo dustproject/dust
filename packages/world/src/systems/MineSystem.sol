@@ -2,7 +2,6 @@
 pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
-import { LibPRNG } from "solady/utils/LibPRNG.sol";
 
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
@@ -10,16 +9,16 @@ import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 import { DisplayURI } from "../codegen/tables/DisplayURI.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
-import { MinedOreCount } from "../codegen/tables/MinedOreCount.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { Orientation } from "../codegen/tables/Orientation.sol";
+import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
+
+import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
-import { TotalMinedOreCount } from "../codegen/tables/TotalMinedOreCount.sol";
 
 import { Position } from "../utils/Vec3Storage.sol";
-import { MinedOrePosition } from "../utils/Vec3Storage.sol";
-import { OreCommitment } from "../utils/Vec3Storage.sol";
+import { ResourcePosition } from "../utils/Vec3Storage.sol";
 
 import { getUniqueEntity } from "../Utils.sol";
 
@@ -44,21 +43,13 @@ import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { DeathNotification, MineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
-import { MoveLib } from "./libraries/MoveLib.sol";
-
-import {
-  CHUNK_COMMIT_EXPIRY_BLOCKS,
-  MAX_COAL,
-  MAX_DIAMOND,
-  MAX_EMERALD,
-  MAX_GOLD,
-  MAX_IRON,
-  SAFE_PROGRAM_GAS
-} from "../Constants.sol";
-import { MINE_ENERGY_COST } from "../Constants.sol";
+import { MINE_ENERGY_COST, SAFE_PROGRAM_GAS } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectTypeId } from "../ObjectTypeId.sol";
 import { ObjectAmount, ObjectTypeLib } from "../ObjectTypeLib.sol";
+import { MoveLib } from "./libraries/MoveLib.sol";
+
+import { NatureLib } from "../NatureLib.sol";
 import { ObjectTypes } from "../ObjectTypes.sol";
 
 import { ProgramId } from "../ProgramId.sol";
@@ -68,33 +59,8 @@ import { Vec3, vec3 } from "../Vec3.sol";
 contract MineSystem is System {
   using ObjectTypeLib for ObjectTypeId;
 
-  function _removeBlock(EntityId entityId, Vec3 coord) internal {
-    ObjectType._set(entityId, ObjectTypes.Air);
-
-    Vec3 aboveCoord = coord + vec3(0, 1, 0);
-    EntityId above = getMovableEntityAt(aboveCoord);
-    // Note: currently it is not possible for the above player to not be the base entity,
-    // but if we add other types of movable entities we should check that it is a base entity
-    if (above.exists()) {
-      MoveLib.runGravity(above, aboveCoord);
-    }
-  }
-
-  function _handleDrop(EntityId caller, ObjectTypeId mineObjectTypeId) internal {
-    ObjectAmount[] memory amounts = mineObjectTypeId.getMineDrop();
-
-    for (uint256 i = 0; i < amounts.length; i++) {
-      InventoryUtils.addObject(caller, amounts[i].objectTypeId, amounts[i].amount);
-    }
-  }
-
-  function _requireSeedNotFullyGrown(EntityId entityId) internal view {
-    require(SeedGrowth._getFullyGrownAt(entityId) > block.timestamp, "Cannot mine fully grown seed");
-  }
-
   function getRandomOreType(Vec3 coord) external view returns (ObjectTypeId) {
-    (ObjectTypeId ore,) = RandomOreLib._getRandomOreType(coord);
-    return ore;
+    return RandomResourceLib._getRandomOre(coord);
   }
 
   function mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) external returns (EntityId) {
@@ -139,7 +105,7 @@ contract MineSystem is System {
     } else if (mineObjectTypeId.isSeed()) {
       _requireSeedNotFullyGrown(mined);
     } else if (mineObjectTypeId == ObjectTypes.AnyOre) {
-      mineObjectTypeId = RandomOreLib._mineRandomOre(mined, coord);
+      mineObjectTypeId = RandomResourceLib._collapseRandomOre(mined, coord);
     }
 
     // First coord will be the base coord, the rest is relative schema coords
@@ -147,52 +113,50 @@ contract MineSystem is System {
 
     uint128 finalMass = MassReductionLib._processMassReduction(caller, mined, toolSlot);
 
-    {
-      if (finalMass == 0) {
-        if (mineObjectTypeId == ObjectTypes.Bed) {
-          // If mining a bed with a sleeping player, kill the player
-          MineLib._mineBed(mined, baseCoord);
-        }
-
-        if (bytes(DisplayURI._get(mined)).length > 0) {
-          DisplayURI._deleteRecord(mined);
-        }
-
-        Mass._deleteRecord(mined);
-
-        {
-          // Remove seeds placed on top of this block
-          Vec3 aboveCoord = baseCoord + vec3(0, 1, 0);
-          (EntityId above, ObjectTypeId aboveTypeId) = getEntityAt(aboveCoord);
-          if (aboveTypeId.isSeed()) {
-            _requireSeedNotFullyGrown(mined);
-            if (!above.exists()) {
-              above = createEntityAt(aboveCoord, aboveTypeId);
-            }
-            _removeBlock(above, aboveCoord);
-            _handleDrop(caller, aboveTypeId);
-          }
-        }
-
-        _removeBlock(mined, baseCoord);
-        _handleDrop(caller, mineObjectTypeId);
-
-        // If object being mined is a seed, return its energy to local pool
-        if (mineObjectTypeId.isSeed()) {
-          addEnergyToLocalPool(coord, ObjectTypeMetadata._getEnergy(mineObjectTypeId));
-        }
-
-        // Only iterate through relative schema coords
-        for (uint256 i = 1; i < coords.length; i++) {
-          Vec3 relativeCoord = coords[i];
-          (EntityId relative,) = getEntityAt(relativeCoord);
-          BaseEntity._deleteRecord(relative);
-
-          _removeBlock(relative, relativeCoord);
-        }
-      } else {
-        Mass._setMass(mined, finalMass);
+    if (finalMass == 0) {
+      if (mineObjectTypeId == ObjectTypes.Bed) {
+        // If mining a bed with a sleeping player, kill the player
+        MineLib._mineBed(mined, baseCoord);
       }
+
+      if (bytes(DisplayURI._get(mined)).length > 0) {
+        DisplayURI._deleteRecord(mined);
+      }
+
+      Mass._deleteRecord(mined);
+
+      {
+        // Remove seeds placed on top of this block
+        Vec3 aboveCoord = baseCoord + vec3(0, 1, 0);
+        (EntityId above, ObjectTypeId aboveTypeId) = getEntityAt(aboveCoord);
+        if (aboveTypeId.isSeed()) {
+          _requireSeedNotFullyGrown(mined);
+          if (!above.exists()) {
+            above = createEntityAt(aboveCoord, aboveTypeId);
+          }
+          _removeBlock(above, aboveCoord);
+          _handleDrop(caller, aboveTypeId, aboveCoord);
+        }
+      }
+
+      _removeBlock(mined, baseCoord);
+      _handleDrop(caller, mineObjectTypeId, baseCoord);
+
+      // If object being mined is a seed, return its energy to local pool
+      if (mineObjectTypeId.isSeed()) {
+        addEnergyToLocalPool(coord, ObjectTypeMetadata._getEnergy(mineObjectTypeId));
+      }
+
+      // Only iterate through relative schema coords
+      for (uint256 i = 1; i < coords.length; i++) {
+        Vec3 relativeCoord = coords[i];
+        (EntityId relative,) = getEntityAt(relativeCoord);
+        BaseEntity._deleteRecord(relative);
+
+        _removeBlock(relative, relativeCoord);
+      }
+    } else {
+      Mass._setMass(mined, finalMass);
     }
 
     MineLib._requireMinesAllowed(caller, mineObjectTypeId, coord, extraData);
@@ -213,6 +177,38 @@ contract MineSystem is System {
     notify(caller, MineNotification({ mineEntityId: mined, mineCoord: coord, mineObjectTypeId: mineObjectTypeId }));
 
     return mined;
+  }
+
+  function _removeBlock(EntityId entityId, Vec3 coord) internal {
+    ObjectType._set(entityId, ObjectTypes.Air);
+
+    Vec3 aboveCoord = coord + vec3(0, 1, 0);
+    EntityId above = getMovableEntityAt(aboveCoord);
+    // Note: currently it is not possible for the above player to not be the base entity,
+    // but if we add other types of movable entities we should check that it is a base entity
+    if (above.exists()) {
+      MoveLib.runGravity(above, aboveCoord);
+    }
+  }
+
+  function _handleDrop(EntityId caller, ObjectTypeId mineObjectTypeId, Vec3 coord) internal {
+    // Get drops with all metadata for resource tracking
+    ObjectAmount[] memory result = RandomResourceLib._getMineDrops(mineObjectTypeId, coord);
+
+    for (uint256 i = 0; i < result.length; i++) {
+      (ObjectTypeId dropType, uint16 amount) = (result[i].objectTypeId, uint16(result[i].amount));
+      InventoryUtils.addObject(caller, dropType, amount);
+
+      // Track mined resource count for seeds
+      // TODO: could make it more general like .isCappedResource() or something
+      if (dropType.isSeed()) {
+        ResourceCount._set(dropType, ResourceCount._get(dropType) + amount);
+      }
+    }
+  }
+
+  function _requireSeedNotFullyGrown(EntityId entityId) internal view {
+    require(SeedGrowth._getFullyGrownAt(entityId) > block.timestamp, "Cannot mine fully grown seed");
   }
 }
 
@@ -282,71 +278,33 @@ library MassReductionLib {
   }
 }
 
-library RandomOreLib {
-  using LibPRNG for LibPRNG.PRNG;
-
-  function _getRandomOreType(Vec3 coord) public view returns (ObjectTypeId, uint256) {
-    Vec3 chunkCoord = coord.toChunkCoord();
-    uint256 commitment = OreCommitment._get(chunkCoord);
-    // We can't get blockhash of current block
-    require(block.number > commitment, "Not within commitment blocks");
-    require(block.number <= commitment + CHUNK_COMMIT_EXPIRY_BLOCKS, "Ore commitment expired");
-
-    // TODO: can optimize by not storing these in memory and returning the type depending on for loop index
-    ObjectTypeId[5] memory ores =
-      [ObjectTypes.CoalOre, ObjectTypes.IronOre, ObjectTypes.GoldOre, ObjectTypes.DiamondOre, ObjectTypes.EmeraldOre];
-
-    uint256[5] memory max = [MAX_COAL, MAX_IRON, MAX_GOLD, MAX_DIAMOND, MAX_EMERALD];
-
-    // For y > -50: More common ores (coal, iron)
-    // For y <= -50: More rare ores (gold, diamond, emerald)
-    // uint256[5] memory depthMultiplier;
-    // if (coord.y > -50) {
-    //   depthMultiplier = [uint256(4), 3, 1, 1, 1];
-    // } else {
-    //   depthMultiplier = [uint256(1), 1, 3, 4, 4];
-    // }
-
-    // Calculate remaining amounts for each ore and total remaining
-    uint256[5] memory remaining;
-    uint256 totalRemaining = 0;
-    for (uint256 i = 0; i < remaining.length; i++) {
-      // remaining[i] = (max[i] - mined[i]) * depthMultiplier[i];
-      remaining[i] = max[i] - MinedOreCount._get(ores[i]);
-      totalRemaining += remaining[i];
-    }
-
-    require(totalRemaining > 0, "No ores available to mine");
-
-    uint256 oreIndex = 0;
-    {
-      // Get pseudo random number between 0 and totalRemaining
-      LibPRNG.PRNG memory prng;
-      prng.seed(uint256(keccak256(abi.encodePacked(blockhash(commitment), coord))));
-      uint256 scaledRand = prng.uniform(totalRemaining);
-
-      uint256 acc;
-      for (; oreIndex < remaining.length - 1; oreIndex++) {
-        acc += remaining[oreIndex];
-        if (scaledRand < acc) break;
-      }
-    }
-
-    // Return ore type and mined ore count
-    return (ores[oreIndex], max[oreIndex] - remaining[oreIndex] + 1);
+library RandomResourceLib {
+  function _getMineDrops(ObjectTypeId objectTypeId, Vec3 coord) public view returns (ObjectAmount[] memory) {
+    return NatureLib.getMineDrops(objectTypeId, coord);
   }
 
-  function _mineRandomOre(EntityId entityId, Vec3 coord) public returns (ObjectTypeId) {
-    (ObjectTypeId ore, uint256 minedOreCount) = _getRandomOreType(coord);
-    // Set total mined ore and add position
-    uint256 totalMinedOre = TotalMinedOreCount._get();
-    MinedOrePosition._set(totalMinedOre, coord);
-    TotalMinedOreCount._set(totalMinedOre + 1);
+  function _getRandomOre(Vec3 coord) public view returns (ObjectTypeId) {
+    return NatureLib.getRandomOre(coord);
+  }
 
-    MinedOreCount._set(ore, minedOreCount);
+  function _collapseRandomOre(EntityId entityId, Vec3 coord) public returns (ObjectTypeId) {
+    ObjectTypeId ore = _getRandomOre(coord);
+
+    // We use AnyOre as we want to track for all ores
+    _trackPosition(coord, ObjectTypes.AnyOre);
+
+    // Set mined resource count for the specific ore
+    ResourceCount._set(ore, ResourceCount._get(ore) + 1);
     ObjectType._set(entityId, ore);
     Mass._setMass(entityId, ObjectTypeMetadata._getMass(ore));
 
     return ore;
+  }
+
+  function _trackPosition(Vec3 coord, ObjectTypeId objectType) public {
+    // Track resource position for mining/respawning
+    uint256 count = ResourceCount._get(objectType);
+    ResourcePosition._set(objectType, count, coord);
+    ResourceCount._set(objectType, count + 1);
   }
 }
