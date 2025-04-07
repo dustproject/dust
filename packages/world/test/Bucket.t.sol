@@ -8,8 +8,7 @@ import { console } from "forge-std/console.sol";
 import { EntityId } from "../src/EntityId.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
-import { InventoryCount } from "../src/codegen/tables/InventoryCount.sol";
-import { InventorySlots } from "../src/codegen/tables/InventorySlots.sol";
+import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 import { ObjectType } from "../src/codegen/tables/ObjectType.sol";
 import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
@@ -36,13 +35,13 @@ contract BucketTest is DustTest {
     Vec3 waterCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
     assertEq(TerrainLib.getBlockType(waterCoord), ObjectTypes.Water, "Water coord is not water");
 
-    TestInventoryUtils.addToInventory(aliceEntityId, ObjectTypes.Bucket, 1);
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Bucket, 1);
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Bucket, 1);
     assertInventoryHasObject(aliceEntityId, ObjectTypes.WaterBucket, 0);
 
     vm.prank(alice);
     startGasReport("fill bucket");
-    world.fillBucket(aliceEntityId, waterCoord);
+    world.fillBucket(aliceEntityId, waterCoord, 0);
     endGasReport();
 
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Bucket, 0);
@@ -55,13 +54,13 @@ contract BucketTest is DustTest {
     Vec3 farmlandCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
     EntityId farmlandEntityId = setObjectAtCoord(farmlandCoord, ObjectTypes.Farmland);
 
-    TestInventoryUtils.addToInventory(aliceEntityId, ObjectTypes.WaterBucket, 1);
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.WaterBucket, 1);
     assertInventoryHasObject(aliceEntityId, ObjectTypes.WaterBucket, 1);
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Bucket, 0);
 
     vm.prank(alice);
     startGasReport("wet farmland");
-    world.wetFarmland(aliceEntityId, farmlandCoord);
+    world.wetFarmland(aliceEntityId, farmlandCoord, 0);
     endGasReport();
 
     assertEq(ObjectType.get(farmlandEntityId), ObjectTypes.WetFarmland, "Farmland was not converted to wet farmland");
@@ -76,11 +75,11 @@ contract BucketTest is DustTest {
     setTerrainAtCoord(nonWaterCoord, ObjectTypes.Dirt);
     assertEq(TerrainLib.getBlockType(nonWaterCoord), ObjectTypes.Dirt, "Non-water coord is not dirt");
 
-    TestInventoryUtils.addToInventory(aliceEntityId, ObjectTypes.Bucket, 1);
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Bucket, 1);
 
     vm.prank(alice);
     vm.expectRevert("Not water");
-    world.fillBucket(aliceEntityId, nonWaterCoord);
+    world.fillBucket(aliceEntityId, nonWaterCoord, 0);
   }
 
   function testFillBucketFailsIfNoBucket() public {
@@ -92,8 +91,8 @@ contract BucketTest is DustTest {
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Bucket, 0);
 
     vm.prank(alice);
-    vm.expectRevert("Not enough objects in the inventory");
-    world.fillBucket(aliceEntityId, waterCoord);
+    vm.expectRevert("Must use an empty Bucket");
+    world.fillBucket(aliceEntityId, waterCoord, 0);
   }
 
   function testFillBucketFailsIfTooFar() public {
@@ -101,11 +100,11 @@ contract BucketTest is DustTest {
 
     Vec3 waterCoord = vec3(playerCoord.x() + int32(MAX_ENTITY_INFLUENCE_HALF_WIDTH) + 1, 0, playerCoord.z());
 
-    TestInventoryUtils.addToInventory(aliceEntityId, ObjectTypes.Bucket, 1);
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Bucket, 1);
 
     vm.prank(alice);
     vm.expectRevert("Entity is too far");
-    world.fillBucket(aliceEntityId, waterCoord);
+    world.fillBucket(aliceEntityId, waterCoord, 0);
   }
 
   function testWetFarmlandFailsIfNotFarmland() public {
@@ -114,11 +113,11 @@ contract BucketTest is DustTest {
     Vec3 nonFarmlandCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
     setObjectAtCoord(nonFarmlandCoord, ObjectTypes.Dirt);
 
-    TestInventoryUtils.addToInventory(aliceEntityId, ObjectTypes.WaterBucket, 1);
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.WaterBucket, 1);
 
     vm.prank(alice);
     vm.expectRevert("Not farmland");
-    world.wetFarmland(aliceEntityId, nonFarmlandCoord);
+    world.wetFarmland(aliceEntityId, nonFarmlandCoord, 0);
   }
 
   function testWetFarmlandFailsIfNoWaterBucket() public {
@@ -130,8 +129,8 @@ contract BucketTest is DustTest {
     assertInventoryHasObject(aliceEntityId, ObjectTypes.WaterBucket, 0);
 
     vm.prank(alice);
-    vm.expectRevert("Not enough objects in the inventory");
-    world.wetFarmland(aliceEntityId, farmlandCoord);
+    vm.expectRevert("Must use a Water Bucket");
+    world.wetFarmland(aliceEntityId, farmlandCoord, 0);
   }
 
   function testWetFarmlandFailsIfTooFar() public {
@@ -140,10 +139,10 @@ contract BucketTest is DustTest {
     Vec3 farmlandCoord = vec3(playerCoord.x() + int32(MAX_ENTITY_INFLUENCE_HALF_WIDTH) + 1, 0, playerCoord.z());
     setObjectAtCoord(farmlandCoord, ObjectTypes.Farmland);
 
-    TestInventoryUtils.addToInventory(aliceEntityId, ObjectTypes.WaterBucket, 1);
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.WaterBucket, 1);
 
     vm.prank(alice);
     vm.expectRevert("Entity is too far");
-    world.wetFarmland(aliceEntityId, farmlandCoord);
+    world.wetFarmland(aliceEntityId, farmlandCoord, 0);
   }
 }

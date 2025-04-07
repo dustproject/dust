@@ -10,22 +10,19 @@ import { IBucketSystem } from "./IBucketSystem.sol";
 import { IBuildSystem } from "./IBuildSystem.sol";
 import { ICraftSystem } from "./ICraftSystem.sol";
 import { IDisplaySystem } from "./IDisplaySystem.sol";
-import { IDropSystem } from "./IDropSystem.sol";
-import { IEquipSystem } from "./IEquipSystem.sol";
 import { IFarmingSystem } from "./IFarmingSystem.sol";
 import { IFoodSystem } from "./IFoodSystem.sol";
 import { IForceFieldSystem } from "./IForceFieldSystem.sol";
 import { IHitMachineSystem } from "./IHitMachineSystem.sol";
+import { IInventorySystem } from "./IInventorySystem.sol";
 import { IMachineSystem } from "./IMachineSystem.sol";
 import { IMineSystem } from "./IMineSystem.sol";
 import { IMoveSystem } from "./IMoveSystem.sol";
 import { INatureSystem } from "./INatureSystem.sol";
-import { IPickupSystem } from "./IPickupSystem.sol";
 import { IProgramSystem } from "./IProgramSystem.sol";
 import { ISpawnSystem } from "./ISpawnSystem.sol";
 import { ITerrainSystem } from "./ITerrainSystem.sol";
 import { ITransferSystem } from "./ITransferSystem.sol";
-import { IUnequipSystem } from "./IUnequipSystem.sol";
 import { IAdminSystem } from "./IAdminSystem.sol";
 import { IReadSystem } from "./IReadSystem.sol";
 
@@ -44,22 +41,19 @@ interface IWorld is
   IBuildSystem,
   ICraftSystem,
   IDisplaySystem,
-  IDropSystem,
-  IEquipSystem,
   IFarmingSystem,
   IFoodSystem,
   IForceFieldSystem,
   IHitMachineSystem,
+  IInventorySystem,
   IMachineSystem,
   IMineSystem,
   IMoveSystem,
   INatureSystem,
-  IPickupSystem,
   IProgramSystem,
   ISpawnSystem,
   ITerrainSystem,
   ITransferSystem,
-  IUnequipSystem,
   IAdminSystem,
   IReadSystem
 {}

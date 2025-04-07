@@ -9,8 +9,9 @@ import { console } from "forge-std/console.sol";
 import { EntityId } from "../src/EntityId.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
-import { InventoryCount } from "../src/codegen/tables/InventoryCount.sol";
-import { InventorySlots } from "../src/codegen/tables/InventorySlots.sol";
+import { Inventory } from "../src/codegen/tables/Inventory.sol";
+import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
+import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 import { LocalEnergyPool } from "../src/codegen/tables/LocalEnergyPool.sol";
 
 import { Mass } from "../src/codegen/tables/Mass.sol";
@@ -21,7 +22,6 @@ import { Player } from "../src/codegen/tables/Player.sol";
 
 import { PlayerStatus } from "../src/codegen/tables/PlayerStatus.sol";
 import { Position } from "../src/codegen/tables/Position.sol";
-import { ReverseInventoryEntity } from "../src/codegen/tables/ReverseInventoryEntity.sol";
 import { ReversePosition } from "../src/codegen/tables/ReversePosition.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
@@ -63,7 +63,7 @@ contract CraftTest is DustTest {
     bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
     for (uint256 i = 0; i < inputTypes.length; i++) {
-      TestInventoryUtils.addToInventory(aliceEntityId, inputTypes[i], inputAmounts[i]);
+      TestInventoryUtils.addObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
       assertInventoryHasObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
     }
 
@@ -101,7 +101,7 @@ contract CraftTest is DustTest {
     bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
     for (uint256 i = 0; i < inputTypes.length; i++) {
-      TestInventoryUtils.addToInventory(aliceEntityId, inputTypes[i], inputAmounts[i]);
+      TestInventoryUtils.addObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
       assertInventoryHasObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
     }
 
@@ -137,7 +137,7 @@ contract CraftTest is DustTest {
     bytes32 recipeId = hashRecipe(ObjectTypes.Thermoblaster, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
     for (uint256 i = 0; i < inputTypes.length; i++) {
-      TestInventoryUtils.addToInventory(aliceEntityId, inputTypes[i], inputAmounts[i]);
+      TestInventoryUtils.addObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
       assertInventoryHasObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
     }
 
@@ -178,9 +178,9 @@ contract CraftTest is DustTest {
     ObjectTypeId inputObjectTypeId1 = ObjectTypes.OakPlanks;
     ObjectTypeId inputObjectTypeId2 = ObjectTypes.BirchPlanks;
     ObjectTypeId inputObjectTypeId3 = ObjectTypes.JunglePlanks;
-    TestInventoryUtils.addToInventory(aliceEntityId, inputObjectTypeId1, 2);
-    TestInventoryUtils.addToInventory(aliceEntityId, inputObjectTypeId2, 3);
-    TestInventoryUtils.addToInventory(aliceEntityId, inputObjectTypeId3, 3);
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId1, 2);
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId2, 3);
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId3, 3);
     assertInventoryHasObject(aliceEntityId, inputObjectTypeId1, 2);
     assertInventoryHasObject(aliceEntityId, inputObjectTypeId2, 3);
     assertInventoryHasObject(aliceEntityId, inputObjectTypeId3, 3);
@@ -219,7 +219,7 @@ contract CraftTest is DustTest {
     bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
     ObjectTypeId inputObjectTypeId = ObjectTypes.SakuraLog;
-    TestInventoryUtils.addToInventory(aliceEntityId, inputObjectTypeId, 4);
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId, 4);
     assertInventoryHasObject(aliceEntityId, inputObjectTypeId, 4);
 
     EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
@@ -230,9 +230,10 @@ contract CraftTest is DustTest {
     endGasReport();
 
     assertInventoryHasObject(aliceEntityId, inputObjectTypeId, 0);
-    bytes32[] memory toolEntityIds = ReverseInventoryEntity.get(aliceEntityId);
-    assertEq(toolEntityIds.length, 1, "should have 1 tool");
-    EntityId toolEntityId = EntityId.wrap(toolEntityIds[0]);
+    assertInventoryHasObject(aliceEntityId, outputTypes[0], 1);
+    uint16[] memory toolSlots = InventoryTypeSlots.get(aliceEntityId, outputTypes[0]);
+    assertEq(toolSlots.length, 1, "should have 1 tool");
+    EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
     assertTrue(toolEntityId.exists(), "tool entity id should exist");
     ObjectTypeId toolObjectTypeId = ObjectType.get(toolEntityId);
     assertEq(toolObjectTypeId, outputTypes[0], "tool object type should be equal to expected output object type");
@@ -257,7 +258,7 @@ contract CraftTest is DustTest {
     bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
     ObjectTypeId inputObjectTypeId = ObjectTypes.SakuraLog;
-    TestInventoryUtils.addToInventory(aliceEntityId, inputObjectTypeId, 8);
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId, 8);
     assertInventoryHasObject(aliceEntityId, inputObjectTypeId, 8);
 
     EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
@@ -266,9 +267,9 @@ contract CraftTest is DustTest {
     world.craft(aliceEntityId, recipeId);
 
     assertInventoryHasObject(aliceEntityId, inputObjectTypeId, 4);
-    bytes32[] memory toolEntityIds = ReverseInventoryEntity.get(aliceEntityId);
-    assertEq(toolEntityIds.length, 1, "should have 1 tool");
-    EntityId toolEntityId = EntityId.wrap(toolEntityIds[0]);
+    uint16[] memory toolSlots = InventoryTypeSlots.get(aliceEntityId, outputTypes[0]);
+    assertEq(toolSlots.length, 1, "should have 1 of the crafted tool");
+    EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
     assertTrue(toolEntityId.exists(), "tool entity id should exist");
     ObjectTypeId toolObjectTypeId = ObjectType.get(toolEntityId);
     assertEq(toolObjectTypeId, outputTypes[0], "tool object type should be equal to expected output object type");
@@ -287,9 +288,9 @@ contract CraftTest is DustTest {
     world.craft(aliceEntityId, recipeId);
 
     assertInventoryHasObject(aliceEntityId, inputObjectTypeId, 0);
-    toolEntityIds = ReverseInventoryEntity.get(aliceEntityId);
-    assertEq(toolEntityIds.length, 2, "should have 2 tools");
-    EntityId toolEntityId2 = EntityId.wrap(toolEntityIds[1]);
+    toolSlots = InventoryTypeSlots.get(aliceEntityId, outputTypes[0]);
+    assertEq(toolSlots.length, 1, "should have 1 of the crafted tool");
+    EntityId toolEntityId2 = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
     assertTrue(toolEntityId2.exists(), "tool entity id should exist");
     ObjectTypeId toolObjectTypeId2 = ObjectType.get(toolEntityId2);
     assertEq(toolObjectTypeId2, outputTypes[0], "tool object type should be equal to expected output object type");
@@ -318,7 +319,7 @@ contract CraftTest is DustTest {
     bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
     vm.prank(alice);
-    vm.expectRevert("Not enough objects in the inventory");
+    vm.expectRevert("Not enough objects of this type in inventory");
     world.craft(aliceEntityId, recipeId);
 
     inputTypes = new ObjectTypeId[](1);
@@ -334,9 +335,9 @@ contract CraftTest is DustTest {
     ObjectTypeId inputObjectTypeId1 = ObjectTypes.OakPlanks;
     ObjectTypeId inputObjectTypeId2 = ObjectTypes.BirchPlanks;
     ObjectTypeId inputObjectTypeId3 = ObjectTypes.JunglePlanks;
-    TestInventoryUtils.addToInventory(aliceEntityId, inputObjectTypeId1, 1);
-    TestInventoryUtils.addToInventory(aliceEntityId, inputObjectTypeId2, 1);
-    TestInventoryUtils.addToInventory(aliceEntityId, inputObjectTypeId3, 1);
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId1, 1);
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId2, 1);
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId3, 1);
     assertInventoryHasObject(aliceEntityId, inputObjectTypeId1, 1);
     assertInventoryHasObject(aliceEntityId, inputObjectTypeId2, 1);
     assertInventoryHasObject(aliceEntityId, inputObjectTypeId3, 1);
@@ -344,7 +345,7 @@ contract CraftTest is DustTest {
     EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
 
     vm.prank(alice);
-    vm.expectRevert("Not enough objects in the inventory");
+    vm.expectRevert("Not enough objects of this type in inventory");
     world.craftWithStation(aliceEntityId, recipeId, stationEntityId);
   }
 
@@ -380,7 +381,7 @@ contract CraftTest is DustTest {
     bytes32 recipeId = hashRecipe(ObjectTypes.Thermoblaster, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
     for (uint256 i = 0; i < inputTypes.length; i++) {
-      TestInventoryUtils.addToInventory(aliceEntityId, inputTypes[i], inputAmounts[i]);
+      TestInventoryUtils.addObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
       assertInventoryHasObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
     }
 
@@ -416,19 +417,19 @@ contract CraftTest is DustTest {
     outputAmounts[0] = 4;
     bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
-    TestInventoryUtils.addToInventory(
+    TestInventoryUtils.addObject(
       aliceEntityId,
       ObjectTypes.OakLog,
       ObjectTypeMetadata.getMaxInventorySlots(ObjectTypes.Player) * ObjectTypeMetadata.getStackable(ObjectTypes.OakLog)
     );
     assertEq(
-      InventorySlots.get(aliceEntityId),
+      Inventory.length(aliceEntityId),
       ObjectTypeMetadata.getMaxInventorySlots(ObjectTypes.Player),
-      "Inventory slots is not max"
+      "Wrong number of occupied inventory slots"
     );
 
     vm.prank(alice);
-    vm.expectRevert("Inventory is full");
+    vm.expectRevert("All slots used");
     world.craft(aliceEntityId, recipeId);
   }
 
@@ -446,7 +447,7 @@ contract CraftTest is DustTest {
     bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
     for (uint256 i = 0; i < inputTypes.length; i++) {
-      TestInventoryUtils.addToInventory(aliceEntityId, inputTypes[i], inputAmounts[i]);
+      TestInventoryUtils.addObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
       assertInventoryHasObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
     }
 
@@ -471,7 +472,7 @@ contract CraftTest is DustTest {
     bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
     for (uint256 i = 0; i < inputTypes.length; i++) {
-      TestInventoryUtils.addToInventory(aliceEntityId, inputTypes[i], inputAmounts[i]);
+      TestInventoryUtils.addObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
       assertInventoryHasObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
     }
 
@@ -493,7 +494,7 @@ contract CraftTest is DustTest {
     bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
     for (uint256 i = 0; i < inputTypes.length; i++) {
-      TestInventoryUtils.addToInventory(aliceEntityId, inputTypes[i], inputAmounts[i]);
+      TestInventoryUtils.addObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
       assertInventoryHasObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
     }
 

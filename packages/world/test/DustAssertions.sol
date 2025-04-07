@@ -14,15 +14,15 @@ import { Vec3 } from "../src/Vec3.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
-import { InventoryCount } from "../src/codegen/tables/InventoryCount.sol";
-import { InventoryEntity } from "../src/codegen/tables/InventoryEntity.sol";
-import { InventoryObjects } from "../src/codegen/tables/InventoryObjects.sol";
+import { Inventory } from "../src/codegen/tables/Inventory.sol";
+
+import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
+import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 import { ObjectType } from "../src/codegen/tables/ObjectType.sol";
 import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
 
 import { Player } from "../src/codegen/tables/Player.sol";
-import { ReverseInventoryEntity } from "../src/codegen/tables/ReverseInventoryEntity.sol";
 import { ReversePlayer } from "../src/codegen/tables/ReversePlayer.sol";
 
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
@@ -52,32 +52,22 @@ abstract contract DustAssertions is MudTest, GasReporter {
     uint128 forceFieldEnergy;
   }
 
-  function inventoryObjectsHasObjectType(EntityId ownerEntityId, ObjectTypeId objectTypeId)
-    internal
-    view
-    returns (bool)
-  {
-    uint16[] memory inventoryObjectTypes = InventoryObjects.get(ownerEntityId);
-    for (uint256 i = 0; i < inventoryObjectTypes.length; i++) {
-      if (inventoryObjectTypes[i] == ObjectTypeId.unwrap(objectTypeId)) {
-        return true;
-      }
+  function getObjectAmount(EntityId owner, ObjectTypeId objectType) internal view returns (uint16) {
+    uint16[] memory slots = InventoryTypeSlots.get(owner, objectType);
+    if (slots.length == 0) {
+      return 0;
     }
-    return false;
+
+    uint16 total;
+    for (uint256 i; i < slots.length; i++) {
+      total += InventorySlot.getAmount(owner, slots[i]);
+    }
+
+    return total;
   }
 
-  function reverseInventoryEntityHasEntity(EntityId ownerEntityId, EntityId inventoryEntityId)
-    internal
-    view
-    returns (bool)
-  {
-    bytes32[] memory inventoryEntityIds = ReverseInventoryEntity.get(ownerEntityId);
-    for (uint256 i = 0; i < inventoryEntityIds.length; i++) {
-      if (inventoryEntityIds[i] == EntityId.unwrap(inventoryEntityId)) {
-        return true;
-      }
-    }
-    return false;
+  function inventoryHasObjectType(EntityId ownerEntityId, ObjectTypeId objectTypeId) internal view returns (bool) {
+    return InventoryTypeSlots.length(ownerEntityId, objectTypeId) > 0;
   }
 
   function inventoryGetOreAmounts(EntityId owner) internal view returns (ObjectAmount[] memory) {
@@ -85,14 +75,14 @@ abstract contract DustAssertions is MudTest, GasReporter {
 
     uint256 numOres = 0;
     for (uint256 i = 0; i < ores.length; i++) {
-      if (InventoryCount.get(owner, ores[i]) > 0) numOres++;
+      if (InventoryTypeSlots.length(owner, ores[i]) > 0) numOres++;
     }
 
     ObjectAmount[] memory oreAmounts = new ObjectAmount[](numOres);
     for (uint256 i = 0; i < ores.length; i++) {
-      uint16 count = InventoryCount.get(owner, ores[i]);
+      uint256 count = getObjectAmount(owner, ores[i]);
       if (count > 0) {
-        oreAmounts[numOres - 1] = ObjectAmount(ores[i], count);
+        oreAmounts[numOres - 1] = ObjectAmount(ores[i], uint16(count));
         numOres--;
       }
     }
@@ -100,28 +90,24 @@ abstract contract DustAssertions is MudTest, GasReporter {
     return oreAmounts;
   }
 
-  function assertInventoryHasObject(EntityId entityId, ObjectTypeId objectTypeId, uint16 amount) internal view {
-    assertEq(InventoryCount.get(entityId, objectTypeId), amount, "Inventory count is not correct");
-    if (amount > 0) {
-      assertTrue(inventoryObjectsHasObjectType(entityId, objectTypeId), "Inventory objects does not have object type");
-    } else {
-      assertFalse(inventoryObjectsHasObjectType(entityId, objectTypeId), "Inventory objects has object type");
-    }
+  function assertInventoryHasObject(EntityId owner, ObjectTypeId objectTypeId, uint16 amount) internal view {
+    uint256 actualAmount = getObjectAmount(owner, objectTypeId);
+    assertEq(actualAmount, amount, "Inventory object amount is not correct");
   }
 
-  function assertInventoryHasTool(EntityId entityId, EntityId toolEntityId, uint16 amount) internal view {
-    assertInventoryHasObject(entityId, ObjectType.get(toolEntityId), amount);
-    if (amount > 0) {
-      assertEq(InventoryEntity.get(toolEntityId), entityId, "Inventory entity is not owned by entity");
-      assertTrue(
-        reverseInventoryEntityHasEntity(entityId, toolEntityId), "Inventory entity is not in reverse inventory entity"
-      );
-    } else {
-      assertFalse(InventoryEntity.get(toolEntityId) == entityId, "Inventory entity is not owned by entity");
-      assertFalse(
-        reverseInventoryEntityHasEntity(entityId, toolEntityId), "Inventory entity is in reverse inventory entity"
-      );
+  function assertInventoryHasTool(EntityId owner, EntityId toolEntityId, uint16 amount) internal view {
+    uint16[] memory slots = InventoryTypeSlots.get(owner, ObjectType.get(toolEntityId));
+    bool found;
+    if (slots.length > 0) {
+      for (uint256 i; i < slots.length; i++) {
+        if (toolEntityId == InventorySlot.getEntityId(owner, slots[i])) {
+          found = true;
+          break;
+        }
+      }
     }
+
+    assertEq(found ? 1 : 0, amount, "Inventory entity doesn't match");
   }
 
   function getEnergyDataSnapshot(EntityId playerEntityId, Vec3 snapshotCoord)

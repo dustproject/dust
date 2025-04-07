@@ -3,7 +3,7 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
-import { InventoryObjects } from "../codegen/tables/InventoryObjects.sol";
+import { Inventory } from "../codegen/tables/Inventory.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
 import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
@@ -51,7 +51,7 @@ contract NatureSystem is System {
     EntityId entityId = ReversePosition._get(resourceCoord);
     ObjectTypeId objectTypeId = ObjectType._get(entityId);
     require(objectTypeId == ObjectTypes.Air, "Resource coordinate is not air");
-    require(InventoryObjects._lengthObjectTypeIds(entityId) == 0, "Cannot respawn where there are dropped objects");
+    require(Inventory._length(entityId) == 0, "Cannot respawn where there are dropped objects");
 
     // Remove from collected resource array
     if (resourceIdx < collected) {

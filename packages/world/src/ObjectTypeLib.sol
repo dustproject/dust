@@ -70,10 +70,20 @@ library ObjectTypeLib {
     coords[0] = baseCoord;
 
     for (uint256 i = 0; i < schemaCoords.length; i++) {
+      require(isDirectionSupported(self, direction), "Direction not supported");
       coords[i + 1] = baseCoord + schemaCoords[i].rotate(direction);
     }
 
     return coords;
+  }
+
+  function isDirectionSupported(ObjectTypeId self, Direction direction) internal pure returns (bool) {
+    if (self == ObjectTypes.Bed) {
+      // Note: before supporting more directions, we need to ensure clients can render it
+      return direction == Direction.NegativeX || direction == Direction.NegativeZ;
+    }
+
+    return true;
   }
 
   function getRelativeCoords(ObjectTypeId self, Vec3 baseCoord) internal pure returns (Vec3[] memory) {
@@ -122,6 +132,17 @@ library ObjectTypeLib {
 
   function canHoldDisplay(ObjectTypeId self) internal pure returns (bool) {
     return self == ObjectTypes.TextSign;
+  }
+
+  function isOre(ObjectTypeId self) internal pure returns (bool) {
+    ObjectTypeId[] memory oreTypes = getOreObjectTypes();
+    for (uint256 i = 0; i < oreTypes.length; i++) {
+      if (self == oreTypes[i]) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   function isFood(ObjectTypeId self) internal pure returns (bool) {
@@ -255,8 +276,7 @@ library ObjectTypeLib {
     }
 
     if (self == ObjectTypes.Chest) {
-      return sig == ITransferSystem.transfer.selector || sig == ITransferSystem.transferTool.selector
-        || sig == ITransferSystem.transferTools.selector || sig == IMachineSystem.fuelMachine.selector;
+      return sig == ITransferSystem.transfer.selector || sig == IMachineSystem.fuelMachine.selector;
     }
 
     return false;

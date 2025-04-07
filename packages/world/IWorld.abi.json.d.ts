@@ -151,7 +151,7 @@ declare const abi: [
     "name": "adminTeleportPlayer",
     "inputs": [
       {
-        "name": "player",
+        "name": "playerAddress",
         "type": "address",
         "internalType": "address"
       },
@@ -537,60 +537,26 @@ declare const abi: [
         "internalType": "EntityId"
       },
       {
-        "name": "dropObjectTypeId",
-        "type": "uint16",
-        "internalType": "ObjectTypeId"
-      },
-      {
-        "name": "numToDrop",
-        "type": "uint16",
-        "internalType": "uint16"
-      },
-      {
-        "name": "coord",
-        "type": "uint96",
-        "internalType": "Vec3"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "dropTool",
-    "inputs": [
-      {
-        "name": "caller",
-        "type": "bytes32",
-        "internalType": "EntityId"
-      },
-      {
-        "name": "tool",
-        "type": "bytes32",
-        "internalType": "EntityId"
-      },
-      {
-        "name": "coord",
-        "type": "uint96",
-        "internalType": "Vec3"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "dropTools",
-    "inputs": [
-      {
-        "name": "caller",
-        "type": "bytes32",
-        "internalType": "EntityId"
-      },
-      {
-        "name": "tools",
-        "type": "bytes32[]",
-        "internalType": "EntityId[]"
+        "name": "slotTransfers",
+        "type": "tuple[]",
+        "internalType": "struct SlotTransfer[]",
+        "components": [
+          {
+            "name": "slotFrom",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "slotTo",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "amount",
+            "type": "uint16",
+            "internalType": "uint16"
+          }
+        ]
       },
       {
         "name": "coord",
@@ -619,24 +585,6 @@ declare const abi: [
         "name": "numToEat",
         "type": "uint16",
         "internalType": "uint16"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "equip",
-    "inputs": [
-      {
-        "name": "caller",
-        "type": "bytes32",
-        "internalType": "EntityId"
-      },
-      {
-        "name": "inventoryEntityId",
-        "type": "bytes32",
-        "internalType": "EntityId"
       }
     ],
     "outputs": [],
@@ -701,6 +649,11 @@ declare const abi: [
         "name": "waterCoord",
         "type": "uint96",
         "internalType": "Vec3"
+      },
+      {
+        "name": "bucketSlot",
+        "type": "uint16",
+        "internalType": "uint16"
       }
     ],
     "outputs": [],
@@ -1586,11 +1539,6 @@ declare const abi: [
             "internalType": "EntityId"
           },
           {
-            "name": "equipped",
-            "type": "bytes32",
-            "internalType": "EntityId"
-          },
-          {
             "name": "entityData",
             "type": "tuple",
             "internalType": "struct EntityData",
@@ -1733,11 +1681,6 @@ declare const abi: [
           },
           {
             "name": "bed",
-            "type": "bytes32",
-            "internalType": "EntityId"
-          },
-          {
-            "name": "equipped",
             "type": "bytes32",
             "internalType": "EntityId"
           },
@@ -2098,6 +2041,29 @@ declare const abi: [
         "name": "coord",
         "type": "uint96",
         "internalType": "Vec3"
+      },
+      {
+        "name": "toolSlot",
+        "type": "uint16",
+        "internalType": "uint16"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "hitForceField",
+    "inputs": [
+      {
+        "name": "caller",
+        "type": "bytes32",
+        "internalType": "EntityId"
+      },
+      {
+        "name": "coord",
+        "type": "uint96",
+        "internalType": "Vec3"
       }
     ],
     "outputs": [],
@@ -2237,6 +2203,11 @@ declare const abi: [
         "internalType": "Vec3"
       },
       {
+        "name": "toolSlot",
+        "type": "uint16",
+        "internalType": "uint16"
+      },
+      {
         "name": "extraData",
         "type": "bytes",
         "internalType": "bytes"
@@ -2249,6 +2220,63 @@ declare const abi: [
         "internalType": "EntityId"
       }
     ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "mine",
+    "inputs": [
+      {
+        "name": "caller",
+        "type": "bytes32",
+        "internalType": "EntityId"
+      },
+      {
+        "name": "coord",
+        "type": "uint96",
+        "internalType": "Vec3"
+      },
+      {
+        "name": "extraData",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "EntityId"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "mineUntilDestroyed",
+    "inputs": [
+      {
+        "name": "caller",
+        "type": "bytes32",
+        "internalType": "EntityId"
+      },
+      {
+        "name": "coord",
+        "type": "uint96",
+        "internalType": "Vec3"
+      },
+      {
+        "name": "toolSlot",
+        "type": "uint16",
+        "internalType": "uint16"
+      },
+      {
+        "name": "extraData",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [],
     "stateMutability": "payable"
   },
   {
@@ -2320,14 +2348,26 @@ declare const abi: [
         "internalType": "EntityId"
       },
       {
-        "name": "pickupObjectTypeId",
-        "type": "uint16",
-        "internalType": "ObjectTypeId"
-      },
-      {
-        "name": "numToPickup",
-        "type": "uint16",
-        "internalType": "uint16"
+        "name": "slotTransfers",
+        "type": "tuple[]",
+        "internalType": "struct SlotTransfer[]",
+        "components": [
+          {
+            "name": "slotFrom",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "slotTo",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "amount",
+            "type": "uint16",
+            "internalType": "uint16"
+          }
+        ]
       },
       {
         "name": "coord",
@@ -2344,69 +2384,6 @@ declare const abi: [
     "inputs": [
       {
         "name": "caller",
-        "type": "bytes32",
-        "internalType": "EntityId"
-      },
-      {
-        "name": "coord",
-        "type": "uint96",
-        "internalType": "Vec3"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "pickupMultiple",
-    "inputs": [
-      {
-        "name": "caller",
-        "type": "bytes32",
-        "internalType": "EntityId"
-      },
-      {
-        "name": "pickupObjects",
-        "type": "tuple[]",
-        "internalType": "struct ObjectAmount[]",
-        "components": [
-          {
-            "name": "objectTypeId",
-            "type": "uint16",
-            "internalType": "ObjectTypeId"
-          },
-          {
-            "name": "amount",
-            "type": "uint16",
-            "internalType": "uint16"
-          }
-        ]
-      },
-      {
-        "name": "pickupTools",
-        "type": "bytes32[]",
-        "internalType": "EntityId[]"
-      },
-      {
-        "name": "coord",
-        "type": "uint96",
-        "internalType": "Vec3"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "pickupTool",
-    "inputs": [
-      {
-        "name": "caller",
-        "type": "bytes32",
-        "internalType": "EntityId"
-      },
-      {
-        "name": "tool",
         "type": "bytes32",
         "internalType": "EntityId"
       },
@@ -3140,6 +3117,11 @@ declare const abi: [
         "name": "coord",
         "type": "uint96",
         "internalType": "Vec3"
+      },
+      {
+        "name": "toolSlot",
+        "type": "uint16",
+        "internalType": "uint16"
       }
     ],
     "outputs": [],
@@ -3165,14 +3147,26 @@ declare const abi: [
         "internalType": "EntityId"
       },
       {
-        "name": "transferObjectTypeId",
-        "type": "uint16",
-        "internalType": "ObjectTypeId"
-      },
-      {
-        "name": "numToTransfer",
-        "type": "uint16",
-        "internalType": "uint16"
+        "name": "slotTransfers",
+        "type": "tuple[]",
+        "internalType": "struct SlotTransfer[]",
+        "components": [
+          {
+            "name": "slotFrom",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "slotTo",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "amount",
+            "type": "uint16",
+            "internalType": "uint16"
+          }
+        ]
       },
       {
         "name": "extraData",
@@ -3242,85 +3236,6 @@ declare const abi: [
         "name": "newOwner",
         "type": "address",
         "internalType": "address"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "transferTool",
-    "inputs": [
-      {
-        "name": "caller",
-        "type": "bytes32",
-        "internalType": "EntityId"
-      },
-      {
-        "name": "from",
-        "type": "bytes32",
-        "internalType": "EntityId"
-      },
-      {
-        "name": "to",
-        "type": "bytes32",
-        "internalType": "EntityId"
-      },
-      {
-        "name": "tool",
-        "type": "bytes32",
-        "internalType": "EntityId"
-      },
-      {
-        "name": "extraData",
-        "type": "bytes",
-        "internalType": "bytes"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "payable"
-  },
-  {
-    "type": "function",
-    "name": "transferTools",
-    "inputs": [
-      {
-        "name": "caller",
-        "type": "bytes32",
-        "internalType": "EntityId"
-      },
-      {
-        "name": "from",
-        "type": "bytes32",
-        "internalType": "EntityId"
-      },
-      {
-        "name": "to",
-        "type": "bytes32",
-        "internalType": "EntityId"
-      },
-      {
-        "name": "tools",
-        "type": "bytes32[]",
-        "internalType": "EntityId[]"
-      },
-      {
-        "name": "extraData",
-        "type": "bytes",
-        "internalType": "bytes"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "payable"
-  },
-  {
-    "type": "function",
-    "name": "unequip",
-    "inputs": [
-      {
-        "name": "caller",
-        "type": "bytes32",
-        "internalType": "EntityId"
       }
     ],
     "outputs": [],
@@ -3453,6 +3368,11 @@ declare const abi: [
         "name": "coord",
         "type": "uint96",
         "internalType": "Vec3"
+      },
+      {
+        "name": "bucketSlot",
+        "type": "uint16",
+        "internalType": "uint16"
       }
     ],
     "outputs": [],

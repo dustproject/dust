@@ -6,13 +6,11 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
-import { InventoryEntity } from "../codegen/tables/InventoryEntity.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { Recipes, RecipesData } from "../codegen/tables/Recipes.sol";
-import { ReverseInventoryEntity } from "../codegen/tables/ReverseInventoryEntity.sol";
 
 import { CRAFT_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
@@ -22,9 +20,8 @@ import { ObjectTypes } from "../ObjectTypes.sol";
 
 import { Vec3 } from "../Vec3.sol";
 import { transferEnergyToPool } from "../utils/EnergyUtils.sol";
-import {
-  addToInventory, addToolToInventory, removeAnyFromInventory, removeFromInventory
-} from "../utils/InventoryUtils.sol";
+import { createEntity } from "../utils/EntityUtils.sol";
+import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { CraftNotification, notify } from "../utils/NotifUtils.sol";
 
 contract CraftSystem is System {
@@ -50,9 +47,9 @@ contract CraftSystem is System {
       // totalInputObjectMass += ObjectTypeMetadata._getMass(inputObjectTypeId);
       // totalInputObjectEnergy += ObjectTypeMetadata._getEnergy(inputObjectTypeId);
       if (inputObjectTypeId.isAny()) {
-        removeAnyFromInventory(caller, inputObjectTypeId, recipeData.inputAmounts[i]);
+        InventoryUtils.removeAny(caller, inputObjectTypeId, recipeData.inputAmounts[i]);
       } else {
-        removeFromInventory(caller, inputObjectTypeId, recipeData.inputAmounts[i]);
+        InventoryUtils.removeObject(caller, inputObjectTypeId, recipeData.inputAmounts[i]);
       }
     }
 
@@ -62,10 +59,11 @@ contract CraftSystem is System {
       uint16 outputAmount = recipeData.outputAmounts[i];
       if (outputType.isTool()) {
         for (uint256 j = 0; j < outputAmount; j++) {
-          addToolToInventory(caller, outputType);
+          EntityId tool = createEntity(outputType);
+          InventoryUtils.addEntity(caller, tool);
         }
       } else {
-        addToInventory(caller, ObjectType._get(caller), outputType, outputAmount);
+        InventoryUtils.addObject(caller, outputType, outputAmount);
       }
     }
 

@@ -14,8 +14,6 @@ export default defineWorld({
       "Drop",
       "Pickup",
       "Transfer",
-      "Equip",
-      "Unequip",
       "Spawn",
       "Sleep",
       "Wakeup",
@@ -196,48 +194,33 @@ export default defineWorld({
     // ------------------------------------------------------------
     // Inventory
     // ------------------------------------------------------------
-    InventorySlots: {
+    Inventory: {
       schema: {
-        ownerEntityId: "EntityId",
-        numSlotsUsed: "uint16",
+        owner: "EntityId",
+        occupiedSlots: "uint16[]", // Slots with at least 1 item
       },
-      key: ["ownerEntityId"],
+      key: ["owner"],
     },
-    InventoryObjects: {
+    InventorySlot: {
       schema: {
-        ownerEntityId: "EntityId",
-        objectTypeIds: "uint16[]",
-      },
-      key: ["ownerEntityId"],
-    },
-    InventoryCount: {
-      schema: {
-        ownerEntityId: "EntityId",
-        objectTypeId: "ObjectTypeId",
-        count: "uint16",
-      },
-      key: ["ownerEntityId", "objectTypeId"],
-    },
-    InventoryEntity: {
-      schema: {
+        owner: "EntityId",
+        slot: "uint16",
         entityId: "EntityId",
-        ownerEntityId: "EntityId",
+        objectType: "ObjectTypeId",
+        amount: "uint16",
+        // TODO: we could make them bigger but not sure if neeed
+        occupiedIndex: "uint16",
+        typeIndex: "uint16", // Index in InventoryTypeSlots
       },
-      key: ["entityId"],
+      key: ["owner", "slot"],
     },
-    ReverseInventoryEntity: {
+    InventoryTypeSlots: {
       schema: {
-        ownerEntityId: "EntityId",
-        entityIds: "bytes32[]",
+        owner: "EntityId",
+        objectType: "ObjectTypeId",
+        slots: "uint16[]", // All slots containing this object type
       },
-      key: ["ownerEntityId"],
-    },
-    Equipped: {
-      schema: {
-        ownerEntityId: "EntityId",
-        entityId: "EntityId",
-      },
-      key: ["ownerEntityId"],
+      key: ["owner", "objectType"],
     },
     // ------------------------------------------------------------
     // Movable positions

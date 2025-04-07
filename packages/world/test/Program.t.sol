@@ -8,8 +8,6 @@ import { console } from "forge-std/console.sol";
 import { EntityId } from "../src/EntityId.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
-import { InventoryCount } from "../src/codegen/tables/InventoryCount.sol";
-import { InventorySlots } from "../src/codegen/tables/InventorySlots.sol";
 import { LocalEnergyPool } from "../src/codegen/tables/LocalEnergyPool.sol";
 
 import { MovablePosition } from "../src/codegen/tables/MovablePosition.sol";
