@@ -17,16 +17,6 @@ import { UniqueEntity } from "../codegen/tables/UniqueEntity.sol";
 contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, WorldConsumer {
   constructor(IBaseWorld _world) WorldConsumer(_world) { }
 
-  function _requireOwner(EntityId target) internal view returns (bytes32) {
-    bytes32 smartItemId = SmartItem.get(target);
-    require(Owner.get(smartItemId) == Player.get(_msgSender()), "Only the owner can call this function");
-    return smartItemId;
-  }
-
-  function _isAllowed(EntityId target, EntityId caller) internal view returns (bool) {
-    return AllowedCaller.get(SmartItem.get(target), caller);
-  }
-
   function onAttachProgram(EntityId caller, EntityId target, bytes memory extraData) external onlyWorld {
     uint256 uniqueEntity = UniqueEntity.get() + 1;
     UniqueEntity.set(uniqueEntity);
@@ -38,16 +28,28 @@ contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, WorldConsumer
   }
 
   function onDetachProgram(EntityId caller, EntityId target, bytes memory extraData) external onlyWorld {
+    // TODO: dont call require if force field has no energy, so we can still perform the cleanup
     require(Owner.get(SmartItem.get(target)) == caller, "Only the owner can detach this program");
+    SmartItem.deleteRecord(target);
   }
 
   function setAllowed(EntityId target, EntityId caller, bool allowed) external {
-    bytes32 smartItemId = _requireOwner(target);
+    bytes32 smartItemId = SmartItem.get(target);
+    _requireOwner(smartItemId);
     AllowedCaller.set(smartItemId, caller, allowed);
   }
 
   function setOwner(EntityId target, EntityId newOwner) external {
-    bytes32 smartItemId = _requireOwner(target);
+    bytes32 smartItemId = SmartItem.get(target);
+    _requireOwner(smartItemId);
     Owner.set(smartItemId, newOwner);
+  }
+
+  function _requireOwner(bytes32 smartItemId) internal view {
+    require(Owner.get(smartItemId) == Player.get(_msgSender()), "Only the owner can call this function");
+  }
+
+  function _isAllowed(EntityId target, EntityId caller) internal view returns (bool) {
+    return AllowedCaller.get(SmartItem.get(target), caller);
   }
 }
