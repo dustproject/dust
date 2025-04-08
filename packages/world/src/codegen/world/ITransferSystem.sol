@@ -18,5 +18,5 @@ interface ITransferSystem {
     EntityId to,
     SlotTransfer[] memory slotTransfers,
     bytes calldata extraData
-  ) external payable;
+  ) external;
 }

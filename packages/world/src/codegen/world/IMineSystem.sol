@@ -19,7 +19,7 @@ interface IMineSystem {
 
   function mine(EntityId caller, Vec3 coord, bytes calldata extraData) external returns (EntityId);
 
-  function mineUntilDestroyed(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) external payable;
+  function mineUntilDestroyed(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) external;
 
-  function mineUntilDestroyed(EntityId caller, Vec3 coord, bytes calldata extraData) external payable;
+  function mineUntilDestroyed(EntityId caller, Vec3 coord, bytes calldata extraData) external;
 }

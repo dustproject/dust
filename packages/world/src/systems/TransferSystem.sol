@@ -27,7 +27,7 @@ contract TransferSystem is System {
     EntityId to,
     SlotTransfer[] memory slotTransfers,
     bytes calldata extraData
-  ) public payable {
+  ) public {
     caller.activate();
 
     if (caller != from) {

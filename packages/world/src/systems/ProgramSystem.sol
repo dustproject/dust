@@ -27,7 +27,7 @@ import { IAttachProgramHook, IDetachProgramHook, IProgramValidator } from "../Pr
 import { Vec3 } from "../Vec3.sol";
 
 contract ProgramSystem is System {
-  function attachProgram(EntityId caller, EntityId target, ProgramId program, bytes calldata extraData) public payable {
+  function attachProgram(EntityId caller, EntityId target, ProgramId program, bytes calldata extraData) public {
     caller.activate();
     (, Vec3 targetCoord) = caller.requireConnected(target);
     target = target.baseEntityId();
@@ -52,7 +52,7 @@ contract ProgramSystem is System {
     notify(caller, AttachProgramNotification({ attachedTo: target, programSystemId: program.toResourceId() }));
   }
 
-  function detachProgram(EntityId caller, EntityId target, bytes calldata extraData) public payable {
+  function detachProgram(EntityId caller, EntityId target, bytes calldata extraData) public {
     caller.activate();
     (, Vec3 targetCoord) = caller.requireConnected(target);
     target = target.baseEntityId();

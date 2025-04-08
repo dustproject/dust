@@ -53,7 +53,7 @@ Each hook corresponds to a specific action or event within the world, allowing p
 The `ProgramSystem` contract manages the attachment and detachment of programs to entities:
 
 ```solidity
-function attachProgram(EntityId caller, EntityId target, ProgramId program, bytes calldata extraData) public payable {
+function attachProgram(EntityId caller, EntityId target, ProgramId program, bytes calldata extraData) public {
   // Validation logic
   // ...
 
@@ -65,7 +65,7 @@ function attachProgram(EntityId caller, EntityId target, ProgramId program, byte
   // ...
 }
 
-function detachProgram(EntityId caller, EntityId target, bytes calldata extraData) public payable {
+function detachProgram(EntityId caller, EntityId target, bytes calldata extraData) public {
   // Validation logic
   // ...
 

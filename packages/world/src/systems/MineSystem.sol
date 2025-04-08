@@ -71,7 +71,7 @@ contract MineSystem is System {
     return _mine(caller, coord, type(uint16).max, extraData);
   }
 
-  function mineUntilDestroyed(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) public payable {
+  function mineUntilDestroyed(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) public {
     uint128 massLeft = 0;
     do {
       // TODO: factor out the mass reduction logic so it's cheaper to call
@@ -80,7 +80,7 @@ contract MineSystem is System {
     } while (massLeft > 0);
   }
 
-  function mineUntilDestroyed(EntityId caller, Vec3 coord, bytes calldata extraData) public payable {
+  function mineUntilDestroyed(EntityId caller, Vec3 coord, bytes calldata extraData) public {
     uint128 massLeft = 0;
     do {
       // TODO: factor out the mass reduction logic so it's cheaper to call

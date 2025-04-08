@@ -12,12 +12,7 @@ import { ProgramId } from "../../ProgramId.sol";
  * @dev This interface is automatically generated from the corresponding system contract. Do not edit manually.
  */
 interface IProgramSystem {
-  function attachProgram(
-    EntityId caller,
-    EntityId target,
-    ProgramId program,
-    bytes calldata extraData
-  ) external payable;
+  function attachProgram(EntityId caller, EntityId target, ProgramId program, bytes calldata extraData) external;
 
-  function detachProgram(EntityId caller, EntityId target, bytes calldata extraData) external payable;
+  function detachProgram(EntityId caller, EntityId target, bytes calldata extraData) external;
 }
