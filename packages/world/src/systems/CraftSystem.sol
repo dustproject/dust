@@ -40,16 +40,17 @@ contract CraftSystem is System {
 
     // Require that the entity has all the ingredients in its inventory
     // And delete the ingredients from the inventory as they are used
-    // uint128 totalInputObjectMass = 0;
-    // uint128 totalInputObjectEnergy = 0;
     for (uint256 i = 0; i < recipeData.inputTypes.length; i++) {
       ObjectTypeId inputObjectTypeId = ObjectTypeId.wrap(recipeData.inputTypes[i]);
-      // totalInputObjectMass += ObjectTypeMetadata._getMass(inputObjectTypeId);
-      // totalInputObjectEnergy += ObjectTypeMetadata._getEnergy(inputObjectTypeId);
       if (inputObjectTypeId.isAny()) {
         InventoryUtils.removeAny(caller, inputObjectTypeId, recipeData.inputAmounts[i]);
       } else {
         InventoryUtils.removeObject(caller, inputObjectTypeId, recipeData.inputAmounts[i]);
+      }
+
+      // TODO: add a time cost to burning the coal
+      if (inputObjectTypeId == ObjectTypes.CoalOre) {
+        inputObjectTypeId.burnOre(recipeData.inputAmounts[i]);
       }
     }
 
@@ -66,8 +67,6 @@ contract CraftSystem is System {
         InventoryUtils.addObject(caller, outputType, outputAmount);
       }
     }
-
-    // TODO: handle dyes
 
     transferEnergyToPool(caller, CRAFT_ENERGY_COST);
 

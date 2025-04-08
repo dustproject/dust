@@ -253,15 +253,18 @@ library ObjectTypeLib {
     return ObjectAmount(ObjectTypes.Null, 0);
   }
 
+  function burnOre(ObjectTypeId self, uint256 amount) internal {
+    // This increases the availability of the ores being burned
+    ResourceCount._set(self, ResourceCount._get(self) - amount);
+    // This allows the same amount of ores to respawn
+    BurnedResourceCount._set(ObjectTypes.AnyOre, BurnedResourceCount._get(ObjectTypes.AnyOre) + amount);
+  }
+
   function burnOres(ObjectTypeId self) internal {
     ObjectAmount memory ores = self.getOreAmount();
     ObjectTypeId objectTypeId = ores.objectTypeId;
     if (!objectTypeId.isNull()) {
-      uint256 amount = ores.amount;
-      // This increases the availability of the ores being burned
-      ResourceCount._set(objectTypeId, ResourceCount._get(objectTypeId) - amount);
-      // This allows the same amount of ores to respawn
-      BurnedResourceCount._set(ObjectTypes.AnyOre, BurnedResourceCount._get(ObjectTypes.AnyOre) + amount);
+      objectTypeId.burnOre(ores.amount);
     }
   }
 
