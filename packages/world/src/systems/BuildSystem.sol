@@ -47,7 +47,7 @@ contract BuildSystem is System {
     Vec3 baseCoord,
     Direction direction,
     bytes calldata extraData
-  ) public payable returns (EntityId) {
+  ) public returns (EntityId) {
     caller.activate();
     caller.requireConnected(baseCoord);
     require(buildObjectTypeId.isBlock(), "Cannot build non-block object");
@@ -74,7 +74,6 @@ contract BuildSystem is System {
 
   function build(EntityId caller, ObjectTypeId buildObjectTypeId, Vec3 baseCoord, bytes calldata extraData)
     public
-    payable
     returns (EntityId)
   {
     return buildWithDirection(caller, buildObjectTypeId, baseCoord, Direction.PositiveZ, extraData);
@@ -85,7 +84,7 @@ contract BuildSystem is System {
     ObjectTypeId buildObjectTypeId,
     Direction direction,
     bytes calldata extraData
-  ) public payable {
+  ) public {
     caller.activate();
 
     Vec3 coord = MovablePosition._get(caller);
@@ -101,7 +100,7 @@ contract BuildSystem is System {
     buildWithDirection(caller, buildObjectTypeId, coord, direction, extraData);
   }
 
-  function jumpBuild(EntityId caller, ObjectTypeId buildObjectTypeId, bytes calldata extraData) public payable {
+  function jumpBuild(EntityId caller, ObjectTypeId buildObjectTypeId, bytes calldata extraData) public {
     jumpBuildWithDirection(caller, buildObjectTypeId, Direction.PositiveZ, extraData);
   }
 }

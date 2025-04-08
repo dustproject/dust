@@ -20,21 +20,21 @@ interface IBuildSystem {
     Vec3 baseCoord,
     Direction direction,
     bytes calldata extraData
-  ) external payable returns (EntityId);
+  ) external returns (EntityId);
 
   function build(
     EntityId caller,
     ObjectTypeId buildObjectTypeId,
     Vec3 baseCoord,
     bytes calldata extraData
-  ) external payable returns (EntityId);
+  ) external returns (EntityId);
 
   function jumpBuildWithDirection(
     EntityId caller,
     ObjectTypeId buildObjectTypeId,
     Direction direction,
     bytes calldata extraData
-  ) external payable;
+  ) external;
 
-  function jumpBuild(EntityId caller, ObjectTypeId buildObjectTypeId, bytes calldata extraData) external payable;
+  function jumpBuild(EntityId caller, ObjectTypeId buildObjectTypeId, bytes calldata extraData) external;
 }

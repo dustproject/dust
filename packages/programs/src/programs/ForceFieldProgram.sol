@@ -55,7 +55,6 @@ contract ForceFieldProgram is
 
   function onBuild(EntityId caller, EntityId target, ObjectTypeId objectTypeId, Vec3 coord, bytes memory extraData)
     external
-    payable
     onlyWorld
   {
     require(_isAllowed(target, caller), "Only approved callers can build in the force field");
@@ -63,7 +62,6 @@ contract ForceFieldProgram is
 
   function onMine(EntityId caller, EntityId target, ObjectTypeId objectTypeId, Vec3 coord, bytes memory extraData)
     external
-    payable
     onlyWorld
   {
     require(_isAllowed(target, caller), "Only approved callers can mine in the force field");

@@ -68,14 +68,12 @@ interface IRemoveFragmentHook {
 
 interface IBuildHook {
   function onBuild(EntityId caller, EntityId target, ObjectTypeId objectTypeId, Vec3 coord, bytes memory extraData)
-    external
-    payable;
+    external;
 }
 
 interface IMineHook {
   function onMine(EntityId caller, EntityId target, ObjectTypeId objectTypeId, Vec3 coord, bytes memory extraData)
-    external
-    payable;
+    external;
 }
 
 interface ISpawnHook {
