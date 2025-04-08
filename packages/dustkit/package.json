@@ -3,14 +3,15 @@
   "version": "0.0.0",
   "type": "module",
   "exports": {
-    ".": "./dist/src/exports/index.js"
+    ".": "./dist/src/exports/index.js",
+    "./out/*": "./out/*"
   },
   "typesVersions": {
     "*": {
       "index": ["./dist/src/exports/index.d.ts"]
     }
   },
-  "files": ["dist", "json-schemas"],
+  "files": ["dist", "json-schemas", "contracts", "out"],
   "scripts": {
     "build": "pnpm run build:json-schema && pnpm run build:mud && pnpm run build:js",
     "build:js": "tsc",
