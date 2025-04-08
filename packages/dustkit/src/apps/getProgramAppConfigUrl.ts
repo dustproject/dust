@@ -5,6 +5,8 @@ import appAbi from "../../out/IAppConfigURI.sol/IAppConfigURI.abi";
 import worldCallAbi from "../../out/IWorldKernel.sol/IWorldCall.abi";
 import type { EntityId, ProgramId } from "../common";
 
+// TODO: add data URI support (currently assumes URL)
+
 export async function getProgramAppConfigUrl({
   client,
   worldAddress,
@@ -16,8 +18,6 @@ export async function getProgramAppConfigUrl({
   program: ProgramId;
   entity?: EntityId;
 }): Promise<string | undefined> {
-  // currently assumes a URL is returned from `appConfigURI`
-  // TODO: add data URI support
   const url = await readContract(client, {
     address: worldAddress,
     abi: worldCallAbi,
@@ -29,9 +29,7 @@ export async function getProgramAppConfigUrl({
       args: [entity ?? "0x"],
     }),
   });
-
-  // TODO: if no url or if revert (not implemented), fallback to program default URL
-
-  if (url === "") return;
-  return url;
+  if (url !== "") {
+    return url;
+  }
 }
