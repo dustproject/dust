@@ -1134,8 +1134,8 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 3125000000000000,
-      energy: 1325000000000000,
+      mass: 4450000000000000,
+      energy: 0,
       canPassThrough: false
     })
   );
@@ -1144,8 +1144,8 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 3125000000000000,
-      energy: 1325000000000000,
+      mass: 4450000000000000,
+      energy: 0,
       canPassThrough: false
     })
   );
@@ -1154,8 +1154,8 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 3125000000000000,
-      energy: 1325000000000000,
+      mass: 4450000000000000,
+      energy: 0,
       canPassThrough: false
     })
   );
@@ -1164,8 +1164,8 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 3125000000000000,
-      energy: 1325000000000000,
+      mass: 4450000000000000,
+      energy: 0,
       canPassThrough: false
     })
   );
@@ -1174,8 +1174,8 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 3125000000000000,
-      energy: 1325000000000000,
+      mass: 4450000000000000,
+      energy: 0,
       canPassThrough: false
     })
   );
@@ -1184,8 +1184,8 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 3125000000000000,
-      energy: 1325000000000000,
+      mass: 4450000000000000,
+      energy: 0,
       canPassThrough: false
     })
   );
@@ -1194,8 +1194,8 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 3125000000000000,
-      energy: 1325000000000000,
+      mass: 4450000000000000,
+      energy: 0,
       canPassThrough: false
     })
   );
@@ -1204,8 +1204,8 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 3125000000000000,
-      energy: 1325000000000000,
+      mass: 4450000000000000,
+      energy: 0,
       canPassThrough: false
     })
   );
@@ -1224,7 +1224,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 0,
-      mass: 12500000000000000,
+      mass: 3125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1354,7 +1354,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 27,
-      mass: 12500000000000000,
+      mass: 3125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1364,7 +1364,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 12500000000000000,
+      mass: 3125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1384,7 +1384,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 36,
-      mass: 12500000000000000,
+      mass: 3125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1394,7 +1394,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 0,
-      mass: 12500000000000000,
+      mass: 3125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1404,7 +1404,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 0,
-      mass: 12500000000000000,
+      mass: 3125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1414,7 +1414,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 0,
-      mass: 12500000000000000,
+      mass: 3125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1424,7 +1424,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 0,
-      mass: 12500000000000000,
+      mass: 3125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1434,7 +1434,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 0,
-      mass: 687500000000000000,
+      mass: 678125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1444,7 +1444,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 0,
-      mass: 687500000000000000,
+      mass: 678125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1454,7 +1454,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 0,
-      mass: 687500000000000000,
+      mass: 678125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1464,7 +1464,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 0,
-      mass: 687500000000000000,
+      mass: 678125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1474,7 +1474,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 0,
-      mass: 687500000000000000,
+      mass: 678125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1484,7 +1484,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 0,
-      mass: 687500000000000000,
+      mass: 678125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1494,7 +1494,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 0,
-      mass: 1612500000000000000,
+      mass: 1603125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1504,7 +1504,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 0,
-      mass: 1612500000000000000,
+      mass: 1603125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1514,7 +1514,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 0,
-      mass: 5012500000000000000,
+      mass: 5003125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1524,7 +1524,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 0,
-      mass: 5012500000000000000,
+      mass: 5003125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1534,7 +1534,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 0,
-      mass: 5012500000000000000,
+      mass: 5003125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1544,7 +1544,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 1,
       maxInventorySlots: 0,
-      mass: 5012500000000000000,
+      mass: 5003125000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1601,7 +1601,13 @@ function initObjects() {
   );
   ObjectTypeMetadata.set(
     ObjectTypes.WaterBucket,
-    ObjectTypeMetadataData({ stackable: 1, maxInventorySlots: 0, mass: 0, energy: 0, canPassThrough: false })
+    ObjectTypeMetadataData({
+      stackable: 1,
+      maxInventorySlots: 0,
+      mass: 675000000000000000,
+      energy: 0,
+      canPassThrough: false
+    })
   );
   ObjectTypeMetadata.set(
     ObjectTypes.Fuel,
@@ -1632,21 +1638,9 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 12500000000000000,
+      mass: 3125000000000000,
       energy: 0,
       canPassThrough: false
     })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.AnyReinforcedPlanks,
-    ObjectTypeMetadataData({ stackable: 99, maxInventorySlots: 0, mass: 0, energy: 0, canPassThrough: false })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.AnyGlass,
-    ObjectTypeMetadataData({ stackable: 99, maxInventorySlots: 0, mass: 0, energy: 0, canPassThrough: false })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.AnyCottonBlock,
-    ObjectTypeMetadataData({ stackable: 99, maxInventorySlots: 0, mass: 0, energy: 0, canPassThrough: false })
   );
 }

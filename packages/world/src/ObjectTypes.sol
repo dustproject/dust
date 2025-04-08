@@ -233,7 +233,4 @@ library ObjectTypes {
   ObjectTypeId constant ForceFieldFragment = ObjectTypeId.wrap(Misc | 1);
   ObjectTypeId constant AnyLog = ObjectTypeId.wrap(Misc | 2047);
   ObjectTypeId constant AnyPlanks = ObjectTypeId.wrap(Misc | 2046);
-  ObjectTypeId constant AnyReinforcedPlanks = ObjectTypeId.wrap(Misc | 2045);
-  ObjectTypeId constant AnyGlass = ObjectTypeId.wrap(Misc | 2044);
-  ObjectTypeId constant AnyCottonBlock = ObjectTypeId.wrap(Misc | 2043);
 }
