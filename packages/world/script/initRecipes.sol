@@ -1089,7 +1089,7 @@ function initRecipes() {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
     inputTypes[0] = ObjectTypes.AnyPlanks;
-    inputTypes[1] = ObjectTypes.IronOre;
+    inputTypes[1] = ObjectTypes.IronBar;
     uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 2;
     inputAmounts[1] = 3;
@@ -1121,7 +1121,7 @@ function initRecipes() {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
     inputTypes[0] = ObjectTypes.AnyPlanks;
-    inputTypes[1] = ObjectTypes.IronOre;
+    inputTypes[1] = ObjectTypes.IronBar;
     uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 2;
     inputAmounts[1] = 3;
@@ -1153,7 +1153,7 @@ function initRecipes() {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
     inputTypes[0] = ObjectTypes.AnyPlanks;
-    inputTypes[1] = ObjectTypes.IronOre;
+    inputTypes[1] = ObjectTypes.IronBar;
     uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 2;
     inputAmounts[1] = 6;
@@ -1185,7 +1185,7 @@ function initRecipes() {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
     inputTypes[0] = ObjectTypes.AnyPlanks;
-    inputTypes[1] = ObjectTypes.GoldOre;
+    inputTypes[1] = ObjectTypes.GoldBar;
     uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 2;
     inputAmounts[1] = 3;
@@ -1217,7 +1217,7 @@ function initRecipes() {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
     inputTypes[0] = ObjectTypes.AnyPlanks;
-    inputTypes[1] = ObjectTypes.GoldOre;
+    inputTypes[1] = ObjectTypes.GoldBar;
     uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 2;
     inputAmounts[1] = 3;
@@ -1252,7 +1252,7 @@ function initRecipes() {
     inputTypes[1] = ObjectTypes.Diamond;
     uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 2;
-    inputAmounts[1] = 4;
+    inputAmounts[1] = 3;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
     outputTypes[0] = ObjectTypes.DiamondPick;
     uint16[] memory outputAmounts = new uint16[](1);
@@ -1284,7 +1284,7 @@ function initRecipes() {
     inputTypes[1] = ObjectTypes.Diamond;
     uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 2;
-    inputAmounts[1] = 4;
+    inputAmounts[1] = 3;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
     outputTypes[0] = ObjectTypes.DiamondAxe;
     uint16[] memory outputAmounts = new uint16[](1);

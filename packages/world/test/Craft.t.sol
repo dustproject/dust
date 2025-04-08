@@ -95,7 +95,7 @@ contract CraftTest is DustTest {
     inputAmounts[0] = 4;
     inputAmounts[1] = 4;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
-    outputTypes[0] = ObjectTypes.Dyeomatic;
+    outputTypes[0] = ObjectTypes.Furnace;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
     bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
@@ -126,15 +126,17 @@ contract CraftTest is DustTest {
   function testCraftWithStation() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
     inputTypes[0] = ObjectTypes.IronOre;
-    uint16[] memory inputAmounts = new uint16[](1);
+    inputTypes[1] = ObjectTypes.CoalOre;
+    uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 1;
+    inputAmounts[1] = 1;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
-    outputTypes[0] = ObjectTypes.SilverBar;
+    outputTypes[0] = ObjectTypes.IronBar;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
-    bytes32 recipeId = hashRecipe(ObjectTypes.Thermoblaster, inputTypes, inputAmounts, outputTypes, outputAmounts);
+    bytes32 recipeId = hashRecipe(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
     for (uint256 i = 0; i < inputTypes.length; i++) {
       TestInventoryUtils.addObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
@@ -142,7 +144,7 @@ contract CraftTest is DustTest {
     }
 
     Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
-    EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Thermoblaster);
+    EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Furnace);
 
     EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
 
@@ -370,15 +372,17 @@ contract CraftTest is DustTest {
   function testCraftFailsIfInvalidStation() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
     inputTypes[0] = ObjectTypes.IronOre;
-    uint16[] memory inputAmounts = new uint16[](1);
+    inputTypes[1] = ObjectTypes.CoalOre;
+    uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 1;
+    inputAmounts[1] = 1;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
-    outputTypes[0] = ObjectTypes.SilverBar;
+    outputTypes[0] = ObjectTypes.IronBar;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
-    bytes32 recipeId = hashRecipe(ObjectTypes.Thermoblaster, inputTypes, inputAmounts, outputTypes, outputAmounts);
+    bytes32 recipeId = hashRecipe(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
     for (uint256 i = 0; i < inputTypes.length; i++) {
       TestInventoryUtils.addObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
@@ -397,7 +401,7 @@ contract CraftTest is DustTest {
     world.craftWithStation(aliceEntityId, recipeId, stationEntityId);
 
     stationCoord = playerCoord + vec3(int32(MAX_ENTITY_INFLUENCE_HALF_WIDTH) + 1, 0, 0);
-    stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Thermoblaster);
+    stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Furnace);
 
     vm.prank(alice);
     vm.expectRevert("Entity is too far");
