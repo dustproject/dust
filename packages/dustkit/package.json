@@ -4,13 +4,16 @@
   "type": "module",
   "exports": {
     ".": "./dist/src/exports/index.js",
+    "./internal": "./dist/src/exports/internal.js",
     "./mud.config": "./dist/mud.config.js",
-    "./out/*": "./out/*"
+    "./out/*": "./dist/out/*"
   },
   "typesVersions": {
     "*": {
       "index": ["./dist/src/exports/index.d.ts"],
-      "mud.config": ["./dist/mud.config.d.ts"]
+      "internal": ["./dist/src/exports/internal.d.ts"],
+      "mud.config": ["./dist/mud.config.d.ts"],
+      "out/*": ["./dist/out/*.d.ts"]
     }
   },
   "files": ["dist", "json-schemas", "contracts", "out"],
