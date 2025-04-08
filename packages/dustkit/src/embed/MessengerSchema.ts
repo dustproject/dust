@@ -10,7 +10,7 @@ export type MessengerSchema = [
     response: undefined;
   },
   {
-    topic: "client:openApp";
+    topic: "app:open";
     payload: {
       config: Config;
       via?: {
@@ -21,7 +21,7 @@ export type MessengerSchema = [
     response: undefined;
   },
   {
-    topic: "app:setWaypoint";
+    topic: "client:setWaypoint";
     payload: {
       target: EntityId;
       label: string;
