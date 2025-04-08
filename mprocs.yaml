@@ -2,6 +2,16 @@ procs:
   world:
     cwd: packages/world
     shell: pnpm run dev
+  default-programs:
+    cwd: packages/programs
+    shell: |
+      while [ ! -f ../world/deploys/31337/latest.json ]; do
+        echo "Waiting for world deployment..."
+        sleep 2
+      done
+      worldAddress=$(awk -v id="31337" -F'"' '$2 == id {getline; print $4}' ../world/worlds.json)
+      echo "Using world address: $worldAddress"
+      pnpm mud deploy --worldAddress=$worldAddress --alwaysRunPostDeploy=true --rpcBatch=true
   explorer:
     cwd: packages/world
     shell: pnpm explorer --indexer-port 3008
