@@ -9,6 +9,7 @@ export default defineWorld({
       filePath: "@latticexyz/store/src/ResourceId.sol",
     },
     EntityId: { type: "bytes32", filePath: "@dust/world/src/EntityId.sol" },
+    ProgramId: { type: "bytes32", filePath: "@dust/world/src/ProgramId.sol" },
   },
   tables: {
     App: {
