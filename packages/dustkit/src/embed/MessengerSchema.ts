@@ -4,11 +4,9 @@ import type { Config } from "./config";
 // TODO: split schema out into directional specific schemas (app->client, client->app)
 
 export type MessengerSchema = [
-  {
-    topic: "internal:ready";
-    payload: undefined;
-    response: undefined;
-  },
+  /**
+   * Client -> App messages
+   */
   {
     topic: "app:open";
     payload: {
@@ -20,12 +18,23 @@ export type MessengerSchema = [
     };
     response: undefined;
   },
+  /**
+   * Client -> App messages
+   */
   {
     topic: "client:setWaypoint";
     payload: {
       target: EntityId;
       label: string;
     };
+    response: undefined;
+  },
+  /**
+   * Internal messages
+   */
+  {
+    topic: "internal:ready";
+    payload: undefined;
     response: undefined;
   },
 ];
