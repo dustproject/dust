@@ -21,8 +21,8 @@ import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 import { EncodeArray } from "@latticexyz/store/src/tightcoder/EncodeArray.sol";
 
 library UniqueEntity {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "default-1", name: "UniqueEntity", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x746264656661756c742d310000000000556e69717565456e7469747900000000);
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "dfprograms_1", name: "UniqueEntity", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x7462646670726f6772616d735f310000556e69717565456e7469747900000000);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0020010020000000000000000000000000000000000000000000000000000000);

@@ -16,7 +16,7 @@ import { BedProgram } from "../src/programs/BedProgram.sol";
 import { ChestProgram } from "../src/programs/ChestProgram.sol";
 import { ForceFieldProgram } from "../src/programs/ForceFieldProgram.sol";
 
-bytes14 constant DEFAULT_NAMESPACE = "default-1";
+bytes14 constant DEFAULT_NAMESPACE = "dfprograms_1";
 
 contract PostDeploy is Script {
   function run(address worldAddress) external {

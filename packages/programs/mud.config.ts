@@ -1,7 +1,7 @@
 import { defineWorld } from "@latticexyz/world";
 
 export default defineWorld({
-  namespace: "default-1",
+  namespace: "dfprograms_1",
   userTypes: {
     EntityId: { filePath: "@dust/world/src/EntityId.sol", type: "bytes32" },
   },

@@ -24,8 +24,8 @@ import { EncodeArray } from "@latticexyz/store/src/tightcoder/EncodeArray.sol";
 import { EntityId } from "@dust/world/src/EntityId.sol";
 
 library AllowedCaller {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "default-1", name: "AllowedCaller", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x746264656661756c742d310000000000416c6c6f77656443616c6c6572000000);
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "dfprograms_1", name: "AllowedCaller", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x7462646670726f6772616d735f310000416c6c6f77656443616c6c6572000000);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0001010001000000000000000000000000000000000000000000000000000000);
