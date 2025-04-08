@@ -1,2 +1,2 @@
-export * from "../embed/config";
-export * as Messenger from "../embed/Messenger";
+export * from "../apps/config";
+export * as Messenger from "../apps/Messenger";

@@ -123,7 +123,7 @@ export function bridge(parameters: bridge.Parameters): Bridge {
   const { from: from_, to, waitForReady = false } = parameters;
 
   const ready = Promise.withResolvers<void>();
-  from_.on("ready", () => ready.resolve());
+  from_.on("internal:ready", () => ready.resolve());
 
   const messenger = from({
     destroy() {
@@ -147,7 +147,7 @@ export function bridge(parameters: bridge.Parameters): Bridge {
   return {
     ...messenger,
     ready() {
-      messenger.send("ready", undefined);
+      messenger.send("internal:ready", undefined);
     },
   };
 }

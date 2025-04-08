@@ -4,14 +4,14 @@
 
 ## Dust apps
 
-Dust supports "embedded apps" - modular web apps that integrate directly into the game client UI and interact with in-game objects and physics. Apps let developers build on top of the world and extend the game client with custom functionality like shops and marketplaces.
+Dust client supports embedded apps - web apps that integrate directly into the game client UI and interact with in-game objects and physics. Apps let developers build on top of the world and extend the game client with custom functionality like shops and marketplaces.
 
 ### What is a Dust app?
 
 A Dust app is:
 
 - A web app hosted at a URL
-- Described by a JSON manifest ([schema](https://esm.sh/pr/dustproject/dust/dustkit@d9cb17b/json-schemas/embed-config.json))
+- Described by a JSON manifest ([schema](https://esm.sh/pr/dustproject/dust/dustkit@d9cb17b/json-schemas/app-config.json))
 - Registered onchain (once per manifest URL)
 - Launched manually (e.g. installing into client's "desktop" view) or contextually (e.g. opening a chest)
 
