@@ -1,15 +1,14 @@
-import { Hex } from "viem";
-import { setupNetwork } from "./setupNetwork";
-import { EMPTY_BYTES_32 } from "./constants";
-import fs from "fs";
+import fs from "node:fs";
 import prompts from "prompts";
+import { Hex } from "viem";
+import { EMPTY_BYTES_32 } from "./constants";
+import { setupNetwork } from "./setupNetwork";
 
 async function main() {
-  const { publicClient, worldAddress, IWorldAbi, account, txOptions, callTx } = await setupNetwork();
+  const { publicClient, worldAddress, IWorldAbi, account, txOptions, callTx } =
+    await setupNetwork();
 
   const players = JSON.parse(fs.readFileSync("gen/allPlayers.json", "utf8"));
-
-  console.log("Players to delete hooks for", players);
   // check if user added a --skip-confirm flag
   if (!process.argv.includes("--skip-confirm")) {
     const respose = await prompts({
@@ -23,7 +22,6 @@ async function main() {
   }
 
   for (const player of players) {
-    console.log(`Deleting all hooks for player ${player}`);
     // for (const systemId of ALL_SYSTEM_IDS) {
     //   const systemHooks = await publicClient.readContract({
     //     address: worldAddress as Hex,
@@ -36,7 +34,6 @@ async function main() {
     //     continue;
     //   }
     //   console.log(`Got ${systemHooks.length} hooks for player ${player} and system ${systemId}`);
-
     //   await callTx(
     //     {
     //       ...txOptions,

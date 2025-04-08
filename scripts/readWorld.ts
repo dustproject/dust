@@ -1,15 +1,16 @@
-import { Hex, parseAbi } from "viem";
-import { setupNetwork } from "./setupNetwork";
 import { resourceToHex } from "@latticexyz/common";
 import { storeEventsAbi } from "@latticexyz/store";
 import prompts from "prompts";
+import { type Hex, parseAbi } from "viem";
+import { setupNetwork } from "./setupNetwork";
 
 export function isDefined<T>(argument: T | undefined): argument is T {
   return argument !== undefined;
 }
 
 async function main() {
-  const { publicClient, worldAddress, IWorldAbi, account, txOptions, callTx } = await setupNetwork();
+  const { publicClient, worldAddress, IWorldAbi, account, txOptions, callTx } =
+    await setupNetwork();
 
   const l1BaseFee = await publicClient.readContract({
     address: "0x420000000000000000000000000000000000000F" as Hex,
@@ -18,7 +19,6 @@ async function main() {
     args: [],
     account,
   });
-  console.log("l1BaseFee", l1BaseFee);
 
   const inventory = await publicClient.readContract({
     address: worldAddress as Hex,
@@ -27,7 +27,6 @@ async function main() {
     args: ["0xE0ae70caBb529336e25FA7a1f036b77ad0089d2a"],
     account,
   });
-  console.log("inventory:", inventory);
 
   const objectTypeIdAtCoord = await publicClient.readContract({
     address: worldAddress as Hex,
@@ -36,7 +35,6 @@ async function main() {
     args: [{ x: -292, y: 30, z: -1312 }],
     account,
   });
-  console.log("objectTypeIdAtCoord:", objectTypeIdAtCoord);
 
   // const emptyInitCallData = "0x0000000000000000000000000000000000000000000000000000000000000000";
   // const UNLIMITED_DELEGATION = resourceToHex({ type: "system", namespace: "", name: "unlimited" });
@@ -60,7 +58,6 @@ async function main() {
     args: [{ x: -320, y: 35, z: -1281 }],
     account,
   });
-  console.log("Object Type:", objectTypeAtCoord);
 
   // const simGas = await publicClient.estimateContractGas({
   //   ...txOptions,

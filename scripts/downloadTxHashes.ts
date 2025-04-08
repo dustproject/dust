@@ -1,9 +1,9 @@
-import { Hex } from "viem";
+import fs from "node:fs";
+import type { Hex } from "viem";
 import { setupNetwork } from "./setupNetwork";
-import fs from "fs";
 
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 async function saveToJson(
   transactions: Hex[],
@@ -33,14 +33,21 @@ async function saveToJson(
 
     const filePath = path.join(outputDir, fileName);
     await fs.promises.writeFile(filePath, JSON.stringify(data, null, 2));
-    console.log(`Saved transactions to ${filePath}`);
   } catch (error) {
     console.error("Error saving to JSON:", error);
   }
 }
 
 async function main() {
-  const { publicClient, fromBlock, worldAddress, IWorldAbi, account, txOptions, callTx } = await setupNetwork();
+  const {
+    publicClient,
+    fromBlock,
+    worldAddress,
+    IWorldAbi,
+    account,
+    txOptions,
+    callTx,
+  } = await setupNetwork();
 
   // Read worlds JSON
 
@@ -50,8 +57,6 @@ async function main() {
     const batchSize = 200; // Adjust based on RPC provider limits
     // const startBlock = fromBlock;
     const startBlock = 12267630;
-
-    console.log(`Starting scan from block ${startBlock} to ${currentBlock}`);
 
     // Process blocks in batches to avoid RPC timeout
     let numBlocksProcessed = 0;
@@ -69,21 +74,23 @@ async function main() {
         // Get unique transaction hashes from the logs
         const txHashes = [...new Set(logs.map((log) => log.transactionHash))];
         transactions.push(...txHashes);
-
-        console.log(`Processed blocks ${i} to ${toBlock}. Found ${txHashes.length} transactions in this batch.`);
         numBlocksProcessed += batchSize;
 
         // Save progress periodically
         if (numBlocksProcessed > 0 && numBlocksProcessed % 10_000 === 0) {
-          await saveToJson(transactions, worldAddress, startBlock, i, "progress");
+          await saveToJson(
+            transactions,
+            worldAddress,
+            startBlock,
+            i,
+            "progress",
+          );
         }
       } catch (error) {
         console.error(`Error processing blocks ${i} to ${toBlock}:`, error);
         throw Error("Error processing blocks");
       }
     }
-
-    console.log("Total transactions found:", transactions.length);
 
     // Save final results
     await saveToJson(transactions, worldAddress, startBlock, currentBlock);

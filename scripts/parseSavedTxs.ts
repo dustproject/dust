@@ -1,9 +1,9 @@
-import { Worker } from "worker_threads";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { Worker } from "node:worker_threads";
 import { formatEther } from "viem";
 import { setupNetwork } from "./setupNetwork";
-import os from "os";
 import { replacer } from "./utils";
 
 // Number of CPU cores to use (leave one core free for system processes)
@@ -16,7 +16,8 @@ async function createWorker(allWork) {
     worker.on("message", resolve);
     worker.on("error", reject);
     worker.on("exit", (code) => {
-      if (code !== 0) reject(new Error(`Worker stopped with exit code ${code}`));
+      if (code !== 0)
+        reject(new Error(`Worker stopped with exit code ${code}`));
     });
 
     worker.postMessage(allWork);
@@ -27,14 +28,21 @@ async function main() {
   const startTime = Date.now();
 
   // Setup initial configuration
-  const { publicClient, worldAddress, allAbis, account, txOptions, callTx, fromBlock } = await setupNetwork();
+  const {
+    publicClient,
+    worldAddress,
+    allAbis,
+    account,
+    txOptions,
+    callTx,
+    fromBlock,
+  } = await setupNetwork();
 
   const referenceStartBlock = BigInt(fromBlock);
   const block = await publicClient.getBlock({
     blockNumber: referenceStartBlock,
   });
   const referenceStartTimestamp = block.timestamp;
-  console.log(`Block ${fromBlock} timestamp: ${referenceStartTimestamp}`);
 
   // Get list of files to process
   const dirPath = path.join(process.cwd(), "gen/server_gen");
@@ -51,19 +59,15 @@ async function main() {
     batchedFiles.push(files.slice(i, i + BATCH_SIZE));
   }
 
-  console.log(
-    `Processing ${files.length} files using ${NUM_WORKERS} workers, batch size ${BATCH_SIZE} and ${batchedFiles.length} total batches...`,
-  );
-
   // Create worker pool and process batches
   const workers = new Array(NUM_WORKERS).fill(null).map(() => []);
   let currentWorker = 0;
 
   // Distribute batches across workers
-  batchedFiles.forEach((batch) => {
+  for (const batch of batchedFiles) {
     workers[currentWorker].push(batch);
     currentWorker = (currentWorker + 1) % NUM_WORKERS;
-  });
+  }
 
   let processedBatches = 0;
 
@@ -90,10 +94,10 @@ async function main() {
 
       // Log progress
       const completedFiles = processedBatches * BATCH_SIZE;
-      const progress = Math.min((completedFiles / totalFiles) * 100, 100).toFixed(2);
-      console.log(
-        `Worker ${index}: Processed batch ${index + 1}/${workerBatches.length}. Progress: ${progress}% (${completedFiles}/${totalFiles} files).`,
-      );
+      const progress = Math.min(
+        (completedFiles / totalFiles) * 100,
+        100,
+      ).toFixed(2);
     }
     return results;
   });
@@ -116,12 +120,12 @@ async function main() {
   let totalContractCreations = 0;
   let totalNonWorldTxs = 0;
   let totalUnknownTxs = 0;
-  let finalEarliestFromBlock = Infinity;
+  let finalEarliestFromBlock = Number.POSITIVE_INFINITY;
   let finalLatestToBlock = 0;
 
   const allUserStats = new Map();
 
-  workerResults.flat().forEach((result) => {
+  for (const result of workerResults.flat()) {
     finalResults.baseFeeTotal += result.aggregatedFees.baseFeeTotal;
     finalResults.l2FeeTotal += result.aggregatedFees.l2FeeTotal;
     finalResults.l1FeeTotal += result.aggregatedFees.l1FeeTotal;
@@ -169,10 +173,16 @@ async function main() {
       userStat.totalFees += stat.totalFees;
       userStat.numTxs += stat.numTxs;
       userStat.numActions += stat.numActions;
-      if (userStat.firstTxDate === null || stat.firstTxDate < userStat.firstTxDate) {
+      if (
+        userStat.firstTxDate === null ||
+        stat.firstTxDate < userStat.firstTxDate
+      ) {
         userStat.firstTxDate = stat.firstTxDate;
       }
-      if (userStat.lastTxDate === null || stat.lastTxDate > userStat.lastTxDate) {
+      if (
+        userStat.lastTxDate === null ||
+        stat.lastTxDate > userStat.lastTxDate
+      ) {
         userStat.lastTxDate = stat.lastTxDate;
       }
       userStat.numContractCreations += stat.numContractCreations;
@@ -198,23 +208,9 @@ async function main() {
       }
       finalDailyStats.set(date, dailyStat);
     }
-  });
+  }
 
-  // Print results
-  console.log("\nProcessing completed!");
-  // console.log(`Time taken: ${((endTime - startTime) / 1000).toFixed(2)} seconds`);
-  console.log(`From block: ${finalEarliestFromBlock}`);
-  console.log(`To block: ${finalLatestToBlock}`);
-  console.log(`Processed ${totalTransactions} unique transactions`);
-  console.log("\nAggregated fees:");
-  console.log("Base fee total:", formatEther(finalResults.baseFeeTotal));
-  console.log("Priority fee total:", formatEther(finalResults.priorityFeeTotal));
-  console.log("L2 fee total:", formatEther(finalResults.l2FeeTotal));
-  console.log("L1 fee total:", formatEther(finalResults.l1FeeTotal));
-  console.log("Total fee sum:", formatEther(finalResults.totalFeeSum));
-  console.log("\nTransaction counts:");
   for (const [txType, count] of finalTxCounts.entries()) {
-    console.log(`${txType}: ${count}`);
   }
 
   // console.log("\nDaily Statistics:");
@@ -246,9 +242,6 @@ async function main() {
   fs.writeFileSync("gen/stats.json", JSON.stringify(stats, replacer, 2));
 
   const endTime = Date.now();
-  console.log(`\nProcessing completed in ${(endTime - startTime) / 1000} seconds.`);
-
-  console.log("Finished!");
 }
 
 main().catch(console.error);

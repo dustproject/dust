@@ -1,10 +1,11 @@
-import { Hex } from "viem";
-import { setupNetwork } from "./setupNetwork";
-import fs from "fs";
+import fs from "node:fs";
 import prompts from "prompts";
+import type { Hex } from "viem";
+import { setupNetwork } from "./setupNetwork";
 
 async function main() {
-  const { publicClient, worldAddress, IWorldAbi, account, txOptions, callTx } = await setupNetwork();
+  const { publicClient, worldAddress, IWorldAbi, account, txOptions, callTx } =
+    await setupNetwork();
 
   const build = JSON.parse(fs.readFileSync("gen/build.json", "utf8"));
 
@@ -12,9 +13,6 @@ async function main() {
   if (baseWorldCoord === undefined) {
     throw new Error("baseWorldCoord is not defined in build");
   }
-  console.log(
-    `Building ${build.relativePositions.length} blocks at ${baseWorldCoord.x}, ${baseWorldCoord.y}, ${baseWorldCoord.z}`,
-  );
 
   const response = await prompts({
     type: "confirm",
@@ -28,11 +26,10 @@ async function main() {
   let numTx = 0;
   const batchSize = 50;
   let batchPositions: Array<{ x: number; y: number; z: number }> = [];
-  let batchObjectIds: Array<number> = [];
+  let batchObjectIds: number[] = [];
 
   for (let i = 0; i < build.relativePositions.length; i++) {
     if (i % 1000 === 0) {
-      console.log(`Complete: ${(i / build.relativePositions.length) * 100}%`);
     }
 
     const relativePos = build.relativePositions[i];
@@ -53,7 +50,6 @@ async function main() {
     });
 
     if (objectTypeIdAtCoord === objectTypeId) {
-      console.log(`Object ${objectTypeId} already exists at ${worldPos.x}, ${worldPos.y}, ${worldPos.z}`);
       continue;
     }
 
@@ -91,8 +87,6 @@ async function main() {
       `Building final batch of ${batchPositions.length} objects`,
     );
   }
-
-  console.log(`Finished! Sent ${numTx} transactions`);
 
   process.exit(0);
 }

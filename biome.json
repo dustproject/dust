@@ -7,7 +7,7 @@
     "defaultBranch": "main"
   },
   "files": {
-    "ignore": ["./packages/world", "./scripts"]
+    "ignore": ["./packages/world"]
   },
   "formatter": {
     "enabled": true,
@@ -29,7 +29,7 @@
         "noAssignInExpressions": "off",
         "noConfusingVoidType": "off",
         "noConsoleLog": "error",
-        "noExplicitAny": "off",
+        "noExplicitAny": "warn",
         "noRedeclare": "off"
       }
     }

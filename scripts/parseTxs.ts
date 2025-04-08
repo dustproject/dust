@@ -1,12 +1,16 @@
-import { Hex, decodeFunctionData, formatEther } from "viem";
-import { setupNetwork } from "./setupNetwork";
+import fs from "node:fs";
 import { resourceToHex } from "@latticexyz/common";
 import { storeEventsAbi } from "@latticexyz/store";
-import prompts from "prompts";
-import fs from "fs";
 import csv from "csv-parser";
+import prompts from "prompts";
+import { Hex, decodeFunctionData, formatEther } from "viem";
+import { setupNetwork } from "./setupNetwork";
 
-function calculateCalldataGasCost(calldataHex: string): { gasCost: number; nonZeroBytes: number; zeroBytes: number } {
+function calculateCalldataGasCost(calldataHex: string): {
+  gasCost: number;
+  nonZeroBytes: number;
+  zeroBytes: number;
+} {
   // Remove '0x' prefix and convert to bytes
   const calldata = Buffer.from(calldataHex.slice(2), "hex");
 
@@ -33,7 +37,8 @@ function calculateCalldataGasCost(calldataHex: string): { gasCost: number; nonZe
 }
 
 async function main() {
-  const { publicClient, worldAddress, IWorldAbi, account, txOptions, callTx } = await setupNetwork();
+  const { publicClient, worldAddress, IWorldAbi, account, txOptions, callTx } =
+    await setupNetwork();
 
   // Path to the CSV file
   const csvFilePath = "gen/transactions.csv";
@@ -44,7 +49,8 @@ async function main() {
   // This will store all the rows to be processed serially
   const rows: any[] = [
     {
-      TxHash: "0x3cbc1dab0b2e4bad13add1eac9ac49a1cd614e9729177c894ce82bc9fc81d55d",
+      TxHash:
+        "0x3cbc1dab0b2e4bad13add1eac9ac49a1cd614e9729177c894ce82bc9fc81d55d",
     },
   ];
 
@@ -58,24 +64,22 @@ async function main() {
       // rows.push(row);
     })
     .on("end", async () => {
-      console.log("CSV file successfully processed. Starting transaction processing...");
-
       // Now process each row serially using a for loop
       let numProcessed = 0;
       for (const row of rows) {
         const { TxHash } = row;
 
         if (TxHash) {
-          console.log("Processing transaction:", TxHash);
-
           // Await each transaction processing sequentially
           try {
             const transaction = await publicClient.getTransaction({
               hash: TxHash,
             });
-            const transactionReceipt = await publicClient.getTransactionReceipt({
-              hash: TxHash,
-            });
+            const transactionReceipt = await publicClient.getTransactionReceipt(
+              {
+                hash: TxHash,
+              },
+            );
             // console.log("Transaction:", transaction);
             // console.log("Transaction Receipt:", transactionReceipt);
 
@@ -84,46 +88,32 @@ async function main() {
               data: transaction.input,
             });
 
-            const baseFee = transactionReceipt["effectiveGasPrice"] - transaction["maxPriorityFeePerGas"];
-            const l2Fee = transactionReceipt["gasUsed"] * baseFee;
-            const l1Fee = transactionReceipt["l1Fee"];
-            const totalFee = l2Fee + transactionReceipt["l1Fee"];
+            const baseFee =
+              transactionReceipt.effectiveGasPrice -
+              transaction.maxPriorityFeePerGas;
+            const l2Fee = transactionReceipt.gasUsed * baseFee;
+            const l1Fee = transactionReceipt.l1Fee;
+            const totalFee = l2Fee + transactionReceipt.l1Fee;
             totalL2Fee += l2Fee;
             totalL1Fee += l1Fee;
-            console.log("Total L2 Fee:", formatEther(l2Fee));
-            console.log("Total L1 Fee:", formatEther(l1Fee));
-            console.log("Total Fee:", formatEther(totalFee));
-            console.log("% L1 Fee:", (Number(l1Fee) / Number(totalFee)) * 100);
-            console.log("% L2 Fee:", (Number(l2Fee) / Number(totalFee)) * 100);
-
-            console.log("Function Name:", functionName);
             // console.log("Arguments:", args);
             // console.log("Gas Used:", calculateCalldataGasCost(transaction.input));
-            if (functionName == "batchCallFrom") {
+            if (functionName === "batchCallFrom") {
               for (const batchCallArgs of args[0]) {
-                const callFromCallData = decodeFunctionData({ abi: IWorldAbi, data: batchCallArgs["callData"] });
-                console.log("Call From Function Name:", callFromCallData.functionName);
-                console.log("Call From Arguments:", callFromCallData.args);
+                const callFromCallData = decodeFunctionData({
+                  abi: IWorldAbi,
+                  data: batchCallArgs.callData,
+                });
               }
             }
-          } catch (error) {
-            console.log(`Error processing transaction ${TxHash}:`, error);
-          }
+          } catch (error) {}
         }
         numProcessed++;
         if (numProcessed % 100 === 0) {
-          console.log("Processed", numProcessed, "transactions.");
         }
       }
 
       const totalFee = totalL2Fee + totalL1Fee;
-      console.log("Total L1 Fee:", formatEther(totalL1Fee));
-      console.log("Total L2 Fee:", formatEther(totalL2Fee));
-      console.log("Total Fee:", formatEther(totalFee));
-      console.log("Total % L1 Fee:", (Number(totalL1Fee) / Number(totalFee)) * 100);
-      console.log("Total % L2 Fee:", (Number(totalL2Fee) / Number(totalFee)) * 100);
-
-      console.log("All transactions processed.");
       process.exit(0); // Exit after processing all rows
     })
     .on("error", (error) => {

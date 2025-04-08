@@ -1,28 +1,42 @@
-import { WriteContractParameters, createPublicClient, createWalletClient, custom, parseGwei, size } from "viem";
-import dotenv from "dotenv";
 import { transportObserver } from "@latticexyz/common";
-import { Hex } from "viem";
+import dotenv from "dotenv";
+import {
+  type WriteContractParameters,
+  createPublicClient,
+  createWalletClient,
+  custom,
+  parseGwei,
+  size,
+} from "viem";
+import type { Hex } from "viem";
 import { fallback } from "viem";
 import { webSocket } from "viem";
 import { http } from "viem";
-import { Abi, Account, Chain, ContractFunctionName, ContractFunctionArgs } from "viem";
+import type {
+  Abi,
+  Account,
+  Chain,
+  ContractFunctionArgs,
+  ContractFunctionName,
+} from "viem";
 
 import { privateKeyToAccount } from "viem/accounts";
 
 import IWorldAbi from "@dust/world/IWorld.abi.json";
+import worldsJson from "@dust/world/worlds.json";
 import ERC20SystemAbi from "@latticexyz/world-modules/out/ERC20System.sol/ERC20System.abi.json";
 import ERC721SystemAbi from "@latticexyz/world-modules/out/ERC721System.sol/ERC721System.abi.json";
-import worldsJson from "@dust/world/worlds.json";
 
-import { supportedChains } from "./supportedChains";
 import { mudFoundry } from "@latticexyz/common/chains";
+import { supportedChains } from "./supportedChains";
 
 dotenv.config();
 
-const DEV_CHAIN_ID = supportedChains.find((chain) => chain.name === "Foundry")?.id ?? 31337;
+const DEV_CHAIN_ID =
+  supportedChains.find((chain) => chain.name === "Foundry")?.id ?? 31337;
 
 const chainId = process.env.CHAIN_ID
-  ? parseInt(process.env.CHAIN_ID)
+  ? Number.parseInt(process.env.CHAIN_ID)
   : DEV_CHAIN_ID;
 
 export type SetupNetwork = Awaited<ReturnType<typeof setupNetwork>>;
@@ -37,14 +51,11 @@ export async function setupNetwork() {
   if (!chain) {
     throw new Error(`Chain ${chainId} not found`);
   }
-  console.log("Using RPC:", chain.rpcUrls["default"].http);
-  console.log("Chain Id:", chain.id);
 
   const worldAddress = worldsJson[chain.id]?.address;
   if (!worldAddress) {
     throw new Error("Missing worldAddress in worlds.json file");
   }
-  console.log("Using WorldAddress:", worldAddress);
   const fromBlock = worldsJson[chain.id]?.blockNumber ?? 0;
 
   const account = privateKeyToAccount(privateKey as Hex);
@@ -77,7 +88,6 @@ export async function setupNetwork() {
   });
 
   const [publicKey] = await walletClient.getAddresses();
-  console.log("Using Account:", publicKey);
 
   const txOptions = {
     address: worldAddress as Hex,
@@ -93,10 +103,21 @@ export async function setupNetwork() {
     account extends Account | undefined,
     abi extends Abi | readonly unknown[],
     functionName extends ContractFunctionName<abi, "nonpayable" | "payable">,
-    args extends ContractFunctionArgs<abi, "nonpayable" | "payable", functionName>,
+    args extends ContractFunctionArgs<
+      abi,
+      "nonpayable" | "payable",
+      functionName
+    >,
     chainOverride extends Chain | undefined,
   >(
-    txData: WriteContractParameters<abi, functionName, args, chain, account, chainOverride>,
+    txData: WriteContractParameters<
+      abi,
+      functionName,
+      args,
+      chain,
+      account,
+      chainOverride
+    >,
     label: string | undefined = undefined,
   ) {
     let txHash: Hex;
@@ -106,7 +127,6 @@ export async function setupNetwork() {
       console.error(e);
       return [false, e];
     }
-    console.log(`${label ?? txData.functionName} txHash: ${txHash}`);
     const receipt = await publicClient.waitForTransactionReceipt({
       hash: txHash,
       pollingInterval: 1_000,
@@ -116,14 +136,12 @@ export async function setupNetwork() {
     });
     if (receipt.status !== "success") {
       try {
-        console.log(`Simulating transaction: ${txData.functionName}`);
         await publicClient.simulateContract(txData);
       } catch (e) {
         console.error(e);
         return [false, e];
       }
     }
-    console.log(`${label ?? txData.functionName} gasUsed: ${receipt.gasUsed.toLocaleString()}`);
     return [true, receipt];
   }
 
@@ -133,7 +151,10 @@ export async function setupNetwork() {
   let indexer = undefined;
   if (chainId === mudFoundry.id) {
     indexerUrl = "http://localhost:13690";
-    indexer = { type: "sqlite", url: new URL("/api/sqlite-indexer", indexerUrl).toString() };
+    indexer = {
+      type: "sqlite",
+      url: new URL("/api/sqlite-indexer", indexerUrl).toString(),
+    };
   } else {
     if (indexerUrl) {
       indexer = { type: "hosted", url: new URL("/q", indexerUrl).toString() };

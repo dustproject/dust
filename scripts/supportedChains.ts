@@ -1,6 +1,11 @@
-import { garnet, pyrope, mudFoundry, redstone } from "@latticexyz/common/chains";
+import {
+  garnet,
+  mudFoundry,
+  pyrope,
+  redstone,
+} from "@latticexyz/common/chains";
 
-import { Chain } from "viem";
+import type { Chain } from "viem";
 
 /*
  * See https://mud.dev/tutorials/minimal/deploy#run-the-user-interface

@@ -1,6 +1,6 @@
-const { parentPort, workerData } = require("worker_threads");
-const fs = require("fs");
-const path = require("path");
+const { parentPort, workerData } = require("node:worker_threads");
+const fs = require("node:fs");
+const path = require("node:path");
 const { decodeFunctionData } = require("viem");
 
 const { replacer, reviver } = require("./utils");
@@ -16,7 +16,13 @@ function tryDecodeFunctionData(abis, data) {
   throw new Error("No valid ABI found");
 }
 
-async function processFiles({ filesToProcess, abis, worldAddress, referenceStartBlock, referenceStartTimestamp }) {
+async function processFiles({
+  filesToProcess,
+  abis,
+  worldAddress,
+  referenceStartBlock,
+  referenceStartTimestamp,
+}) {
   const aggregatedFees = {
     baseFeeTotal: BigInt(0),
     priorityFeeTotal: BigInt(0),
@@ -31,13 +37,16 @@ async function processFiles({ filesToProcess, abis, worldAddress, referenceStart
   let contractCreationCount = 0;
   let nonWorldTxCount = 0;
   let unknownTxCount = 0;
-  let earliestFromBlock = Infinity;
+  let earliestFromBlock = Number.POSITIVE_INFINITY;
   let latestToBlock = 0;
   const perUserStats = new Map();
 
   for (const filePath of filesToProcess) {
     const fileContent = await fs.promises.readFile(filePath, "utf-8");
-    const { fromBlock, toBlock, transactions } = JSON.parse(fileContent, reviver);
+    const { fromBlock, toBlock, transactions } = JSON.parse(
+      fileContent,
+      reviver,
+    );
 
     try {
       earliestFromBlock = Math.min(earliestFromBlock, fromBlock);
@@ -87,25 +96,33 @@ async function processFiles({ filesToProcess, abis, worldAddress, referenceStart
 
       let numTxs = 0;
       try {
-        const { functionName, args } = tryDecodeFunctionData(abis, tx.transaction.input);
-        if (functionName == "batchCallFrom") {
+        const { functionName, args } = tryDecodeFunctionData(
+          abis,
+          tx.transaction.input,
+        );
+        if (functionName === "batchCallFrom") {
           for (const batchCallArgs of args[0]) {
             try {
-              const callFromCallData = tryDecodeFunctionData(abis, batchCallArgs["callData"]);
+              const callFromCallData = tryDecodeFunctionData(
+                abis,
+                batchCallArgs.callData,
+              );
               // console.log("Call From Function Name:", callFromCallData.functionName);
               // console.log("Call From Arguments:", callFromCallData.args);
               const newCount = txCounts.get(callFromCallData.functionName) || 0;
               txCounts.set(callFromCallData.functionName, newCount + 1);
               numTxs++;
 
-              const perUserCount = perUserStat.txCounts.get(callFromCallData.functionName) || 0;
-              perUserStat.txCounts.set(callFromCallData.functionName, perUserCount + 1);
+              const perUserCount =
+                perUserStat.txCounts.get(callFromCallData.functionName) || 0;
+              perUserStat.txCounts.set(
+                callFromCallData.functionName,
+                perUserCount + 1,
+              );
               perUserStat.numActions++;
-            } catch (e) {
-              continue;
-            }
+            } catch (e) {}
           }
-        } else if (functionName == "callFrom") {
+        } else if (functionName === "callFrom") {
           const callFromCallData = tryDecodeFunctionData(abis, args[2]);
           // console.log("Call From Function Name:", callFromCallData.functionName);
           // console.log("Call From Arguments:", callFromCallData.args);
@@ -113,25 +130,34 @@ async function processFiles({ filesToProcess, abis, worldAddress, referenceStart
           txCounts.set(callFromCallData.functionName, newCount + 1);
           numTxs++;
 
-          const perUserCount = perUserStat.txCounts.get(callFromCallData.functionName) || 0;
-          perUserStat.txCounts.set(callFromCallData.functionName, perUserCount + 1);
+          const perUserCount =
+            perUserStat.txCounts.get(callFromCallData.functionName) || 0;
+          perUserStat.txCounts.set(
+            callFromCallData.functionName,
+            perUserCount + 1,
+          );
           perUserStat.numActions++;
-        } else if (functionName == "batchCall") {
+        } else if (functionName === "batchCall") {
           for (const batchCallArgs of args[0]) {
             try {
-              const callFromCallData = tryDecodeFunctionData(abis, batchCallArgs["callData"]);
+              const callFromCallData = tryDecodeFunctionData(
+                abis,
+                batchCallArgs.callData,
+              );
               // console.log("Call From Function Name:", callFromCallData.functionName);
               // console.log("Call From Arguments:", callFromCallData.args);
               const newCount = txCounts.get(callFromCallData.functionName) || 0;
               txCounts.set(callFromCallData.functionName, newCount + 1);
               numTxs++;
 
-              const perUserCount = perUserStat.txCounts.get(callFromCallData.functionName) || 0;
-              perUserStat.txCounts.set(callFromCallData.functionName, perUserCount + 1);
+              const perUserCount =
+                perUserStat.txCounts.get(callFromCallData.functionName) || 0;
+              perUserStat.txCounts.set(
+                callFromCallData.functionName,
+                perUserCount + 1,
+              );
               perUserStat.numActions++;
-            } catch (e) {
-              continue;
-            }
+            } catch (e) {}
           }
         } else {
           const newCount = txCounts.get(functionName) || 0;
@@ -147,7 +173,7 @@ async function processFiles({ filesToProcess, abis, worldAddress, referenceStart
         // console.error("Error decoding function data", e);
       }
 
-      if (numTxs == 0) {
+      if (numTxs === 0) {
         unknownTxCount++;
         perUserStat.numUnknownTxs++;
         perUserStats.set(tx.receipt.from.toLowerCase(), perUserStat);
@@ -156,9 +182,12 @@ async function processFiles({ filesToProcess, abis, worldAddress, referenceStart
 
       let totalFee = 0n;
       try {
-        const priorityFee = tx.transaction.maxPriorityFeePerGas ? BigInt(tx.transaction.maxPriorityFeePerGas) : 0n;
+        const priorityFee = tx.transaction.maxPriorityFeePerGas
+          ? BigInt(tx.transaction.maxPriorityFeePerGas)
+          : 0n;
         const baseFee = BigInt(tx.receipt.effectiveGasPrice) - priorityFee;
-        const l2Fee = BigInt(tx.receipt.gasUsed) * BigInt(tx.receipt.effectiveGasPrice);
+        const l2Fee =
+          BigInt(tx.receipt.gasUsed) * BigInt(tx.receipt.effectiveGasPrice);
         const l1Fee = BigInt(tx.receipt.l1Fee);
         totalFee = l2Fee + l1Fee;
 
@@ -174,13 +203,17 @@ async function processFiles({ filesToProcess, abis, worldAddress, referenceStart
         perUserStat.totalFees += totalFee;
         perUserStat.totalPriorityFees += priorityFee;
       } catch (error) {
-        console.error(`Error calculating fees for transaction ${tx.hash}:`, error);
+        console.error(
+          `Error calculating fees for transaction ${tx.hash}:`,
+          error,
+        );
       }
 
       try {
         const blockNumber = BigInt(tx.receipt.blockNumber);
         const blocksSinceReference = blockNumber - referenceStartBlock;
-        const estimatedBlockTimestamp = referenceStartTimestamp + blocksSinceReference * 2n;
+        const estimatedBlockTimestamp =
+          referenceStartTimestamp + blocksSinceReference * 2n;
         const txDate = new Date(Number(estimatedBlockTimestamp * 1000n));
         const txDateStr = txDate.toISOString().slice(0, 10);
         let dailyStat = dailyStats.get(txDateStr);
@@ -192,10 +225,16 @@ async function processFiles({ filesToProcess, abis, worldAddress, referenceStart
         dailyStat.users.add(tx.receipt.from);
         dailyStats.set(txDateStr, dailyStat);
 
-        if (perUserStat.firstTxDate === null || txDate < perUserStat.firstTxDate) {
+        if (
+          perUserStat.firstTxDate === null ||
+          txDate < perUserStat.firstTxDate
+        ) {
           perUserStat.firstTxDate = txDate;
         }
-        if (perUserStat.lastTxDate === null || txDate > perUserStat.lastTxDate) {
+        if (
+          perUserStat.lastTxDate === null ||
+          txDate > perUserStat.lastTxDate
+        ) {
           perUserStat.lastTxDate = txDate;
         }
       } catch (e) {
