@@ -11,7 +11,7 @@ procs:
       done
       worldAddress=$(awk -v id="31337" -F'"' '$2 == id {getline; print $4}' ../world/worlds.json)
       echo "Using world address: $worldAddress"
-      pnpm mud deploy --worldAddress=$worldAddress --alwaysRunPostDeploy=true --rpcBatch=true
+      wait-on ../worlds/deploys/31337/latest.json && pnpm mud deploy --worldAddress=$(cat ../worlds/worlds.json | jq -r ".[\"31337\"].address // empty") --alwaysRunPostDeploy=true --rpcBatch=true
   explorer:
     cwd: packages/world
     shell: pnpm explorer --indexer-port 3008
