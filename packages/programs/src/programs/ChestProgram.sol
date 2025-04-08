@@ -11,14 +11,7 @@ import { ITransferHook } from "@dust/world/src/ProgramInterfaces.sol";
 
 import { DefaultProgram } from "./DefaultProgram.sol";
 
-/**
- * @title ChestProgram
- */
 contract ChestProgram is DefaultProgram, ITransferHook {
-  /**
-   * @notice Initializes the ChestProgram
-   * @param _world The world contract
-   */
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
 
   function onTransfer(
@@ -30,6 +23,6 @@ contract ChestProgram is DefaultProgram, ITransferHook {
     EntityId[] memory toolEntities,
     bytes memory extraData
   ) external onlyWorld {
-    require(_isApproved(target, caller), "Only approved callers can transfer to/from the chest");
+    require(_isAllowed(target, caller), "Only approved callers can transfer to/from the chest");
   }
 }

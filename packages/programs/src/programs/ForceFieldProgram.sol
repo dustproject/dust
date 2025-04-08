@@ -21,9 +21,6 @@ import { Owner } from "../codegen/tables/Owner.sol";
 
 import { DefaultProgram } from "./DefaultProgram.sol";
 
-/**
- * @title ForceFieldProgram
- */
 contract ForceFieldProgram is
   DefaultProgram,
   IProgramValidator,
@@ -32,10 +29,6 @@ contract ForceFieldProgram is
   IBuildHook,
   IMineHook
 {
-  /**
-   * @notice Initializes the ForceFieldProgram
-   * @param _world The world contract
-   */
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
 
   function validateProgram(
@@ -50,14 +43,14 @@ contract ForceFieldProgram is
   }
 
   function onAddFragment(EntityId caller, EntityId target, EntityId added, bytes memory extraData) external onlyWorld {
-    require(_isApproved(target, caller), "Only approved callers can add fragments to the force field");
+    require(_isAllowed(target, caller), "Only approved callers can add fragments to the force field");
   }
 
   function onRemoveFragment(EntityId caller, EntityId target, EntityId removed, bytes memory extraData)
     external
     onlyWorld
   {
-    require(_isApproved(target, caller), "Only approved callers can remove fragments from the force field");
+    require(_isAllowed(target, caller), "Only approved callers can remove fragments from the force field");
   }
 
   function onBuild(EntityId caller, EntityId target, ObjectTypeId objectTypeId, Vec3 coord, bytes memory extraData)
@@ -65,7 +58,7 @@ contract ForceFieldProgram is
     payable
     onlyWorld
   {
-    require(_isApproved(target, caller), "Only approved callers can build in the force field");
+    require(_isAllowed(target, caller), "Only approved callers can build in the force field");
   }
 
   function onMine(EntityId caller, EntityId target, ObjectTypeId objectTypeId, Vec3 coord, bytes memory extraData)
@@ -73,6 +66,6 @@ contract ForceFieldProgram is
     payable
     onlyWorld
   {
-    require(_isApproved(target, caller), "Only approved callers can mine in the force field");
+    require(_isAllowed(target, caller), "Only approved callers can mine in the force field");
   }
 }

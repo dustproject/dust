@@ -8,56 +8,46 @@ import { Player } from "@dust/world/src/codegen/tables/Player.sol";
 
 import { IAttachProgramHook, IDetachProgramHook } from "@dust/world/src/ProgramInterfaces.sol";
 
-import { AllowedCallers } from "../codegen/tables/AllowedCallers.sol";
+import { AllowedCaller } from "../codegen/tables/AllowedCaller.sol";
 import { Owner } from "../codegen/tables/Owner.sol";
 
-/**
- * @title DefaultProgram
- */
+import { SmartItem } from "../codegen/tables/SmartItem.sol";
+import { UniqueEntity } from "../codegen/tables/UniqueEntity.sol";
+
 contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, WorldConsumer {
-  /**
-   * @notice Initializes the DefaultProgram
-   * @param _world The world contract
-   */
   constructor(IBaseWorld _world) WorldConsumer(_world) { }
 
+  function _requireOwner(EntityId target) internal view returns (bytes32) {
+    bytes32 smartItemId = SmartItem.get(target);
+    require(Owner.get(smartItemId) == Player.get(_msgSender()), "Only the owner can call this function");
+    return smartItemId;
+  }
+
+  function _isAllowed(EntityId target, EntityId caller) internal view returns (bool) {
+    return AllowedCaller.get(SmartItem.get(target), caller);
+  }
+
   function onAttachProgram(EntityId caller, EntityId target, bytes memory extraData) external onlyWorld {
-    Owner.set(target, caller);
-    bytes32[] memory callers = new bytes32[](1);
-    callers[0] = caller.unwrap();
-    AllowedCallers.set(target, callers);
+    uint256 uniqueEntity = UniqueEntity.get() + 1;
+    UniqueEntity.set(uniqueEntity);
+    bytes32 smartItemId = bytes32(uniqueEntity);
+    SmartItem.set(target, smartItemId);
+
+    Owner.set(smartItemId, caller);
+    AllowedCaller.set(smartItemId, caller, true);
   }
 
   function onDetachProgram(EntityId caller, EntityId target, bytes memory extraData) external onlyWorld {
-    EntityId owner = Owner.get(target);
-    if (owner.exists()) {
-      require(owner == caller, "Only the owner can detach this program");
-      Owner.deleteRecord(target);
-    }
-    AllowedCallers.deleteRecord(target);
+    require(Owner.get(SmartItem.get(target)) == caller, "Only the owner can detach this program");
   }
 
-  function _isApproved(EntityId target, EntityId caller) internal view returns (bool) {
-    bytes32[] memory callers = AllowedCallers.get(target);
-    for (uint256 i = 0; i < callers.length; i++) {
-      if (callers[i] == caller.unwrap()) {
-        return true;
-      }
-    }
-    return false;
+  function setAllowed(EntityId target, EntityId caller, bool allowed) external {
+    bytes32 smartItemId = _requireOwner(target);
+    AllowedCaller.set(smartItemId, caller, allowed);
   }
 
-  function setApprovedCallers(EntityId target, EntityId[] memory callers) external {
-    require(Owner.get(target) == Player.get(_msgSender()), "Only the owner can set approved callers");
-    bytes32[] memory callersBytes = new bytes32[](callers.length);
-    for (uint256 i = 0; i < callers.length; i++) {
-      callersBytes[i] = callers[i].unwrap();
-    }
-    AllowedCallers.set(target, callersBytes);
-  }
-
-  function setOwner(EntityId target, EntityId owner) external {
-    require(Owner.get(target) == Player.get(_msgSender()), "Only the owner can set a new owner");
-    Owner.set(target, owner);
+  function setOwner(EntityId target, EntityId newOwner) external {
+    bytes32 smartItemId = _requireOwner(target);
+    Owner.set(smartItemId, newOwner);
   }
 }

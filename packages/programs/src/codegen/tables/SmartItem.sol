@@ -23,9 +23,9 @@ import { EncodeArray } from "@latticexyz/store/src/tightcoder/EncodeArray.sol";
 // Import user types
 import { EntityId } from "@dust/world/src/EntityId.sol";
 
-library Owner {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "default-1", name: "Owner", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x746264656661756c742d3100000000004f776e65720000000000000000000000);
+library SmartItem {
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "default-1", name: "SmartItem", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x746264656661756c742d310000000000536d6172744974656d00000000000000);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0020010020000000000000000000000000000000000000000000000000000000);
@@ -41,7 +41,7 @@ library Owner {
    */
   function getKeyNames() internal pure returns (string[] memory keyNames) {
     keyNames = new string[](1);
-    keyNames[0] = "itemId";
+    keyNames[0] = "entityId";
   }
 
   /**
@@ -50,7 +50,7 @@ library Owner {
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
     fieldNames = new string[](1);
-    fieldNames[0] = "owner";
+    fieldNames[0] = "itemId";
   }
 
   /**
@@ -68,95 +68,95 @@ library Owner {
   }
 
   /**
-   * @notice Get owner.
+   * @notice Get itemId.
    */
-  function getOwner(bytes32 itemId) internal view returns (EntityId owner) {
+  function getItemId(EntityId entityId) internal view returns (bytes32 itemId) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return EntityId.wrap(bytes32(_blob));
+    return (bytes32(_blob));
   }
 
   /**
-   * @notice Get owner.
+   * @notice Get itemId.
    */
-  function _getOwner(bytes32 itemId) internal view returns (EntityId owner) {
+  function _getItemId(EntityId entityId) internal view returns (bytes32 itemId) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return EntityId.wrap(bytes32(_blob));
+    return (bytes32(_blob));
   }
 
   /**
-   * @notice Get owner.
+   * @notice Get itemId.
    */
-  function get(bytes32 itemId) internal view returns (EntityId owner) {
+  function get(EntityId entityId) internal view returns (bytes32 itemId) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return EntityId.wrap(bytes32(_blob));
+    return (bytes32(_blob));
   }
 
   /**
-   * @notice Get owner.
+   * @notice Get itemId.
    */
-  function _get(bytes32 itemId) internal view returns (EntityId owner) {
+  function _get(EntityId entityId) internal view returns (bytes32 itemId) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return EntityId.wrap(bytes32(_blob));
+    return (bytes32(_blob));
   }
 
   /**
-   * @notice Set owner.
+   * @notice Set itemId.
    */
-  function setOwner(bytes32 itemId, EntityId owner) internal {
+  function setItemId(EntityId entityId, bytes32 itemId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(EntityId.unwrap(owner)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((itemId)), _fieldLayout);
   }
 
   /**
-   * @notice Set owner.
+   * @notice Set itemId.
    */
-  function _setOwner(bytes32 itemId, EntityId owner) internal {
+  function _setItemId(EntityId entityId, bytes32 itemId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(EntityId.unwrap(owner)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((itemId)), _fieldLayout);
   }
 
   /**
-   * @notice Set owner.
+   * @notice Set itemId.
    */
-  function set(bytes32 itemId, EntityId owner) internal {
+  function set(EntityId entityId, bytes32 itemId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(EntityId.unwrap(owner)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((itemId)), _fieldLayout);
   }
 
   /**
-   * @notice Set owner.
+   * @notice Set itemId.
    */
-  function _set(bytes32 itemId, EntityId owner) internal {
+  function _set(EntityId entityId, bytes32 itemId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(EntityId.unwrap(owner)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((itemId)), _fieldLayout);
   }
 
   /**
    * @notice Delete all data for given keys.
    */
-  function deleteRecord(bytes32 itemId) internal {
+  function deleteRecord(EntityId entityId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     StoreSwitch.deleteRecord(_tableId, _keyTuple);
   }
@@ -164,9 +164,9 @@ library Owner {
   /**
    * @notice Delete all data for given keys.
    */
-  function _deleteRecord(bytes32 itemId) internal {
+  function _deleteRecord(EntityId entityId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     StoreCore.deleteRecord(_tableId, _keyTuple, _fieldLayout);
   }
@@ -175,8 +175,8 @@ library Owner {
    * @notice Tightly pack static (fixed length) data using this table's schema.
    * @return The static data, encoded into a sequence of bytes.
    */
-  function encodeStatic(EntityId owner) internal pure returns (bytes memory) {
-    return abi.encodePacked(owner);
+  function encodeStatic(bytes32 itemId) internal pure returns (bytes memory) {
+    return abi.encodePacked(itemId);
   }
 
   /**
@@ -185,8 +185,8 @@ library Owner {
    * @return The lengths of the dynamic fields (packed into a single bytes32 value).
    * @return The dynamic (variable length) data, encoded into a sequence of bytes.
    */
-  function encode(EntityId owner) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
-    bytes memory _staticData = encodeStatic(owner);
+  function encode(bytes32 itemId) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
+    bytes memory _staticData = encodeStatic(itemId);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -197,9 +197,9 @@ library Owner {
   /**
    * @notice Encode keys as a bytes32 array using this table's field layout.
    */
-  function encodeKeyTuple(bytes32 itemId) internal pure returns (bytes32[] memory) {
+  function encodeKeyTuple(EntityId entityId) internal pure returns (bytes32[] memory) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     return _keyTuple;
   }

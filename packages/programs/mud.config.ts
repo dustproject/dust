@@ -6,19 +6,33 @@ export default defineWorld({
     EntityId: { filePath: "@dust/world/src/EntityId.sol", type: "bytes32" },
   },
   tables: {
-    Owner: {
+    SmartItem: {
       schema: {
         entityId: "EntityId",
-        owner: "EntityId",
+        itemId: "bytes32",
       },
       key: ["entityId"],
     },
-    AllowedCallers: {
+    Owner: {
       schema: {
-        target: "EntityId",
-        callers: "bytes32[]", // EntityId[]
+        itemId: "bytes32",
+        owner: "EntityId",
       },
-      key: ["target"],
+      key: ["itemId"],
+    },
+    AllowedCaller: {
+      schema: {
+        itemId: "bytes32",
+        caller: "EntityId",
+        allowed: "bool",
+      },
+      key: ["itemId", "caller"],
+    },
+    UniqueEntity: {
+      schema: {
+        value: "uint256",
+      },
+      key: [],
     },
   },
 });

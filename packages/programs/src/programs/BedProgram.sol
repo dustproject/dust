@@ -9,21 +9,14 @@ import { ISleepHook, IWakeupHook } from "@dust/world/src/ProgramInterfaces.sol";
 
 import { DefaultProgram } from "./DefaultProgram.sol";
 
-/**
- * @title BedProgram
- */
 contract BedProgram is DefaultProgram, ISleepHook, IWakeupHook {
-  /**
-   * @notice Initializes the BedProgram
-   * @param _world The world contract
-   */
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
 
   function onSleep(EntityId caller, EntityId target, bytes memory extraData) external onlyWorld {
-    require(_isApproved(target, caller), "Only approved callers can sleep in the bed");
+    require(_isAllowed(target, caller), "Only approved callers can sleep in the bed");
   }
 
   function onWakeup(EntityId caller, EntityId target, bytes memory extraData) external onlyWorld {
-    require(_isApproved(target, caller), "Only approved callers can wake up from the bed");
+    require(_isAllowed(target, caller), "Only approved callers can wake up from the bed");
   }
 }
