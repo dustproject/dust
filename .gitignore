@@ -8,6 +8,10 @@
 node_modules
 dist
 
+# foundry artifacts
+cache
+out
+
 # mud artifacts
 .mud
 
