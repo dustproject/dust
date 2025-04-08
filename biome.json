@@ -6,9 +6,6 @@
     "useIgnoreFile": true,
     "defaultBranch": "main"
   },
-  "files": {
-    "ignore": ["./packages/world"]
-  },
   "formatter": {
     "enabled": true,
     "formatWithErrors": false,
