@@ -1,8 +1,7 @@
 {
   "name": "@dust/scripts",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "private": true,
-  "description": "",
   "scripts": {
     "readWorld": "npx tsx readWorld.ts",
     "writeWorld": "npx tsx writeWorld.ts",

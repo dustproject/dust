@@ -8,5 +8,9 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   minify: true,
-  noExternal: ["@latticexyz/world", "@latticexyz/store/internal", "@latticexyz/schema-type/internal"],
+  noExternal: [
+    "@latticexyz/world",
+    "@latticexyz/store/internal",
+    "@latticexyz/schema-type/internal",
+  ],
 });

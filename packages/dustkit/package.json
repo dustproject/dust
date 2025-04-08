@@ -4,11 +4,13 @@
   "type": "module",
   "exports": {
     ".": "./dist/src/exports/index.js",
+    "./mud.config": "./dist/mud.config.js",
     "./out/*": "./out/*"
   },
   "typesVersions": {
     "*": {
-      "index": ["./dist/src/exports/index.d.ts"]
+      "index": ["./dist/src/exports/index.d.ts"],
+      "mud.config": ["./dist/mud.config.d.ts"]
     }
   },
   "files": ["dist", "json-schemas", "contracts", "out"],

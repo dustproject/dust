@@ -61,7 +61,10 @@ export default defineWorld({
     ObjectTypeId: { filePath: "./src/ObjectTypeId.sol", type: "uint16" },
     EntityId: { filePath: "./src/EntityId.sol", type: "bytes32" },
     ProgramId: { filePath: "./src/ProgramId.sol", type: "bytes32" },
-    ResourceId: { filePath: "@latticexyz/store/src/ResourceId.sol", type: "bytes32" },
+    ResourceId: {
+      filePath: "@latticexyz/store/src/ResourceId.sol",
+      type: "bytes32",
+    },
     Vec3: { filePath: "./src/Vec3.sol", type: "uint96" },
   },
   tables: {

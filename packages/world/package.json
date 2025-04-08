@@ -1,16 +1,21 @@
 {
   "name": "@dust/world",
-  "version": "0.1.4",
+  "version": "0.0.0",
   "exports": {
     "./mud.config": "./dist/mud.config.js",
     "./worlds.json": "./worlds.json",
-    "./IWorld.abi.json": "./IWorld.abi.json"
+    "./out/*": "./out/*"
   },
+  "typesVersions": {
+    "*": {
+      "mud.config": ["./dist/mud.config.d.ts"]
+    }
+  },
+  "files": ["src", "out", "dist", "worlds.json"],
   "scripts": {
-    "build": "mud build && pnpm run build:js && pnpm run cp-abi",
+    "build": "mud build && pnpm run build:js",
     "build:js": "tsup",
     "clean": "forge clean && shx rm -rf src/**/codegen",
-    "cp-abi": "cp out/IWorld.sol/IWorld.abi.json IWorld.abi.json",
     "deploy:local": "pnpm entrykit-deploy && pnpm run build && mud deploy",
     "dev": "pnpm entrykit-deploy && pnpm run build && pnpm mud dev-contracts --rpc http://127.0.0.1:8545",
     "fix": "pnpm run fix:format",
