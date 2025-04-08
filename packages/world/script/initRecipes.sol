@@ -132,36 +132,6 @@ function initRecipes() {
   {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
-    inputTypes[0] = ObjectTypes.SpruceLog;
-    uint16[] memory inputAmounts = new uint16[](1);
-    inputAmounts[0] = 1;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
-    outputTypes[0] = ObjectTypes.SprucePlanks;
-    uint16[] memory outputAmounts = new uint16[](1);
-    outputAmounts[0] = 4;
-
-    uint16[] memory _inputTypes;
-    assembly ("memory-safe") {
-      _inputTypes := inputTypes
-    }
-
-    uint16[] memory _outputTypes;
-    assembly ("memory-safe") {
-      _outputTypes := outputTypes
-    }
-
-    Recipes.set(
-      keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
-      stationObjectTypeId,
-      _inputTypes,
-      inputAmounts,
-      _outputTypes,
-      outputAmounts
-    );
-  }
-  {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
     inputTypes[0] = ObjectTypes.AcaciaLog;
     uint16[] memory inputAmounts = new uint16[](1);
     inputAmounts[0] = 1;
@@ -192,11 +162,71 @@ function initRecipes() {
   {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    inputTypes[0] = ObjectTypes.SpruceLog;
+    uint16[] memory inputAmounts = new uint16[](1);
+    inputAmounts[0] = 1;
+    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    outputTypes[0] = ObjectTypes.SprucePlanks;
+    uint16[] memory outputAmounts = new uint16[](1);
+    outputAmounts[0] = 4;
+
+    uint16[] memory _inputTypes;
+    assembly ("memory-safe") {
+      _inputTypes := inputTypes
+    }
+
+    uint16[] memory _outputTypes;
+    assembly ("memory-safe") {
+      _outputTypes := outputTypes
+    }
+
+    Recipes.set(
+      keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      stationObjectTypeId,
+      _inputTypes,
+      inputAmounts,
+      _outputTypes,
+      outputAmounts
+    );
+  }
+  {
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
+    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
     inputTypes[0] = ObjectTypes.DarkOakLog;
     uint16[] memory inputAmounts = new uint16[](1);
     inputAmounts[0] = 1;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
     outputTypes[0] = ObjectTypes.DarkOakPlanks;
+    uint16[] memory outputAmounts = new uint16[](1);
+    outputAmounts[0] = 4;
+
+    uint16[] memory _inputTypes;
+    assembly ("memory-safe") {
+      _inputTypes := inputTypes
+    }
+
+    uint16[] memory _outputTypes;
+    assembly ("memory-safe") {
+      _outputTypes := outputTypes
+    }
+
+    Recipes.set(
+      keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      stationObjectTypeId,
+      _inputTypes,
+      inputAmounts,
+      _outputTypes,
+      outputAmounts
+    );
+  }
+  {
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
+    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    inputTypes[0] = ObjectTypes.MangroveLog;
+    uint16[] memory inputAmounts = new uint16[](1);
+    inputAmounts[0] = 1;
+    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    outputTypes[0] = ObjectTypes.MangrovePlanks;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 4;
 

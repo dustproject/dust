@@ -1200,6 +1200,16 @@ function initObjects() {
     })
   );
   ObjectTypeMetadata.set(
+    ObjectTypes.MangrovePlanks,
+    ObjectTypeMetadataData({
+      stackable: 99,
+      maxInventorySlots: 0,
+      mass: 10000000000000000,
+      energy: 0,
+      canPassThrough: false
+    })
+  );
+  ObjectTypeMetadata.set(
     ObjectTypes.Furnace,
     ObjectTypeMetadataData({
       stackable: 1,
@@ -1589,7 +1599,13 @@ function initObjects() {
   );
   ObjectTypeMetadata.set(
     ObjectTypes.AnyPlanks,
-    ObjectTypeMetadataData({ stackable: 99, maxInventorySlots: 0, mass: 0, energy: 0, canPassThrough: false })
+    ObjectTypeMetadataData({
+      stackable: 99,
+      maxInventorySlots: 0,
+      mass: 12500000000000000,
+      energy: 0,
+      canPassThrough: false
+    })
   );
   ObjectTypeMetadata.set(
     ObjectTypes.AnyReinforcedPlanks,
