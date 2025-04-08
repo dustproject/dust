@@ -840,7 +840,7 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
     inputTypes[0] = ObjectTypes.AnyPlanks;
     uint16[] memory inputAmounts = new uint16[](1);

@@ -89,27 +89,30 @@ contract CraftTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
-    inputTypes[0] = ObjectTypes.Clay;
+    inputTypes[0] = ObjectTypes.Stone;
     inputTypes[1] = ObjectTypes.Sand;
     uint16[] memory inputAmounts = new uint16[](2);
-    inputAmounts[0] = 4;
-    inputAmounts[1] = 4;
+    inputAmounts[0] = 6;
+    inputAmounts[1] = 2;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
-    outputTypes[0] = ObjectTypes.Furnace;
+    outputTypes[0] = ObjectTypes.Powerstone;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
-    bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
+    bytes32 recipeId = hashRecipe(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
     for (uint256 i = 0; i < inputTypes.length; i++) {
       TestInventoryUtils.addObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
       assertInventoryHasObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
     }
 
+    Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
+    EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
+
     EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
 
     vm.prank(alice);
     startGasReport("handcraft multiple inputs");
-    world.craft(aliceEntityId, recipeId);
+    world.craftWithStation(aliceEntityId, recipeId, stationEntityId);
     endGasReport();
 
     for (uint256 i = 0; i < inputTypes.length; i++) {
@@ -127,16 +130,16 @@ contract CraftTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
-    inputTypes[0] = ObjectTypes.IronOre;
-    inputTypes[1] = ObjectTypes.CoalOre;
+    inputTypes[0] = ObjectTypes.Stone;
+    inputTypes[1] = ObjectTypes.IronBar;
     uint16[] memory inputAmounts = new uint16[](2);
-    inputAmounts[0] = 1;
-    inputAmounts[1] = 1;
+    inputAmounts[0] = 30;
+    inputAmounts[1] = 5;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
-    outputTypes[0] = ObjectTypes.IronBar;
+    outputTypes[0] = ObjectTypes.ForceField;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
-    bytes32 recipeId = hashRecipe(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts);
+    bytes32 recipeId = hashRecipe(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
     for (uint256 i = 0; i < inputTypes.length; i++) {
       TestInventoryUtils.addObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
@@ -144,7 +147,7 @@ contract CraftTest is DustTest {
     }
 
     Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
-    EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Furnace);
+    EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
 
     EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
 
@@ -211,18 +214,18 @@ contract CraftTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
-    inputTypes[0] = ObjectTypes.AnyLog;
+    inputTypes[0] = ObjectTypes.AnyPlanks;
     uint16[] memory inputAmounts = new uint16[](1);
-    inputAmounts[0] = 4;
+    inputAmounts[0] = 5;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
     outputTypes[0] = ObjectTypes.WoodenPick;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
     bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
-    ObjectTypeId inputObjectTypeId = ObjectTypes.SakuraLog;
-    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId, 4);
-    assertInventoryHasObject(aliceEntityId, inputObjectTypeId, 4);
+    ObjectTypeId inputObjectTypeId = ObjectTypes.OakPlanks;
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId, 5);
+    assertInventoryHasObject(aliceEntityId, inputObjectTypeId, 5);
 
     EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
 
@@ -250,25 +253,25 @@ contract CraftTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
-    inputTypes[0] = ObjectTypes.AnyLog;
+    inputTypes[0] = ObjectTypes.AnyPlanks;
     uint16[] memory inputAmounts = new uint16[](1);
-    inputAmounts[0] = 4;
+    inputAmounts[0] = 5;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
     outputTypes[0] = ObjectTypes.WoodenPick;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
     bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
-    ObjectTypeId inputObjectTypeId = ObjectTypes.SakuraLog;
-    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId, 8);
-    assertInventoryHasObject(aliceEntityId, inputObjectTypeId, 8);
+    ObjectTypeId inputObjectTypeId = ObjectTypes.OakPlanks;
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId, 10);
+    assertInventoryHasObject(aliceEntityId, inputObjectTypeId, 10);
 
     EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
 
     vm.prank(alice);
     world.craft(aliceEntityId, recipeId);
 
-    assertInventoryHasObject(aliceEntityId, inputObjectTypeId, 4);
+    assertInventoryHasObject(aliceEntityId, inputObjectTypeId, 5);
     uint16[] memory toolSlots = InventoryTypeSlots.get(aliceEntityId, outputTypes[0]);
     assertEq(toolSlots.length, 1, "should have 1 of the crafted tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
@@ -304,6 +307,10 @@ contract CraftTest is DustTest {
   }
 
   function testCraftMultipleOutputs() public {
+    vm.skip(true, "TODO");
+  }
+
+  function testCraftWithCoal() public {
     vm.skip(true, "TODO");
   }
 
@@ -373,16 +380,16 @@ contract CraftTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
-    inputTypes[0] = ObjectTypes.IronOre;
-    inputTypes[1] = ObjectTypes.CoalOre;
+    inputTypes[0] = ObjectTypes.Stone;
+    inputTypes[1] = ObjectTypes.IronBar;
     uint16[] memory inputAmounts = new uint16[](2);
-    inputAmounts[0] = 1;
-    inputAmounts[1] = 1;
+    inputAmounts[0] = 30;
+    inputAmounts[1] = 5;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
-    outputTypes[0] = ObjectTypes.IronBar;
+    outputTypes[0] = ObjectTypes.ForceField;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
-    bytes32 recipeId = hashRecipe(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts);
+    bytes32 recipeId = hashRecipe(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
     for (uint256 i = 0; i < inputTypes.length; i++) {
       TestInventoryUtils.addObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
@@ -390,7 +397,7 @@ contract CraftTest is DustTest {
     }
 
     Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
-    EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
+    EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Furnace);
 
     vm.prank(alice);
     vm.expectRevert("This recipe requires a station");
@@ -401,7 +408,7 @@ contract CraftTest is DustTest {
     world.craftWithStation(aliceEntityId, recipeId, stationEntityId);
 
     stationCoord = playerCoord + vec3(int32(MAX_ENTITY_INFLUENCE_HALF_WIDTH) + 1, 0, 0);
-    stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Furnace);
+    stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
 
     vm.prank(alice);
     vm.expectRevert("Entity is too far");
