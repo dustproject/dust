@@ -1,18 +1,27 @@
-import type { EntityId } from "../common";
+import type { EntityId, ProgramId } from "../common";
+import type { Config } from "./config";
+
+// TODO: split schema out into directional specific schemas (app->client, client->app)
 
 export type MessengerSchema = [
   {
-    topic: "close";
+    topic: "internal:ready";
     payload: undefined;
     response: undefined;
   },
   {
-    topic: "ready";
-    payload: undefined;
+    topic: "client:openApp";
+    payload: {
+      config: Config;
+      via?: {
+        entity: EntityId;
+        program: ProgramId;
+      };
+    };
     response: undefined;
   },
   {
-    topic: "requestWaypoint";
+    topic: "app:setWaypoint";
     payload: {
       target: EntityId;
       label: string;
