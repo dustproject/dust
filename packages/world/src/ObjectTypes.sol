@@ -175,15 +175,15 @@ library ObjectTypes {
   ObjectTypeId constant SprucePlanks = ObjectTypeId.wrap(Block | 260);
   ObjectTypeId constant AcaciaPlanks = ObjectTypeId.wrap(Block | 261);
   ObjectTypeId constant DarkOakPlanks = ObjectTypeId.wrap(Block | 262);
-  ObjectTypeId constant Thermoblaster = ObjectTypeId.wrap(Block | 263);
+  ObjectTypeId constant Furnace = ObjectTypeId.wrap(Block | 263);
   ObjectTypeId constant Workbench = ObjectTypeId.wrap(Block | 264);
-  ObjectTypeId constant Dyeomatic = ObjectTypeId.wrap(Block | 265);
-  ObjectTypeId constant Powerstone = ObjectTypeId.wrap(Block | 266);
-  ObjectTypeId constant CoalOre = ObjectTypeId.wrap(Block | 267);
+  ObjectTypeId constant Powerstone = ObjectTypeId.wrap(Block | 265);
+  ObjectTypeId constant CoalOre = ObjectTypeId.wrap(Block | 266);
+  ObjectTypeId constant CopperOre = ObjectTypeId.wrap(Block | 267);
   ObjectTypeId constant IronOre = ObjectTypeId.wrap(Block | 268);
   ObjectTypeId constant GoldOre = ObjectTypeId.wrap(Block | 269);
   ObjectTypeId constant DiamondOre = ObjectTypeId.wrap(Block | 270);
-  ObjectTypeId constant EmeraldOre = ObjectTypeId.wrap(Block | 271);
+  ObjectTypeId constant NeptuniumOre = ObjectTypeId.wrap(Block | 271);
   ObjectTypeId constant WetFarmland = ObjectTypeId.wrap(Block | 272);
   ObjectTypeId constant WheatSeed = ObjectTypeId.wrap(Block | 273);
   ObjectTypeId constant OakSeed = ObjectTypeId.wrap(Block | 274);
@@ -201,12 +201,12 @@ library ObjectTypes {
   ObjectTypeId constant WoodenAxe = ObjectTypeId.wrap(Tool | 1);
   ObjectTypeId constant WoodenWhacker = ObjectTypeId.wrap(Tool | 2);
   ObjectTypeId constant WoodenHoe = ObjectTypeId.wrap(Tool | 3);
-  ObjectTypeId constant StonePick = ObjectTypeId.wrap(Tool | 4);
-  ObjectTypeId constant StoneAxe = ObjectTypeId.wrap(Tool | 5);
-  ObjectTypeId constant StoneWhacker = ObjectTypeId.wrap(Tool | 6);
-  ObjectTypeId constant SilverPick = ObjectTypeId.wrap(Tool | 7);
-  ObjectTypeId constant SilverAxe = ObjectTypeId.wrap(Tool | 8);
-  ObjectTypeId constant SilverWhacker = ObjectTypeId.wrap(Tool | 9);
+  ObjectTypeId constant CopperPick = ObjectTypeId.wrap(Tool | 4);
+  ObjectTypeId constant CopperAxe = ObjectTypeId.wrap(Tool | 5);
+  ObjectTypeId constant CopperWhacker = ObjectTypeId.wrap(Tool | 6);
+  ObjectTypeId constant IronPick = ObjectTypeId.wrap(Tool | 7);
+  ObjectTypeId constant IronAxe = ObjectTypeId.wrap(Tool | 8);
+  ObjectTypeId constant IronWhacker = ObjectTypeId.wrap(Tool | 9);
   ObjectTypeId constant GoldPick = ObjectTypeId.wrap(Tool | 10);
   ObjectTypeId constant GoldAxe = ObjectTypeId.wrap(Tool | 11);
   ObjectTypeId constant DiamondPick = ObjectTypeId.wrap(Tool | 12);
@@ -218,7 +218,7 @@ library ObjectTypes {
   // Item
   // ------------------------------------------------------------
   ObjectTypeId constant GoldBar = ObjectTypeId.wrap(Item | 0);
-  ObjectTypeId constant SilverBar = ObjectTypeId.wrap(Item | 1);
+  ObjectTypeId constant IronBar = ObjectTypeId.wrap(Item | 1);
   ObjectTypeId constant Diamond = ObjectTypeId.wrap(Item | 2);
   ObjectTypeId constant NeptuniumBar = ObjectTypeId.wrap(Item | 3);
   ObjectTypeId constant Bucket = ObjectTypeId.wrap(Item | 4);

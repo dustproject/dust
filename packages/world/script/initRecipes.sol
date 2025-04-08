@@ -220,13 +220,15 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Thermoblaster;
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Furnace;
+    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
     inputTypes[0] = ObjectTypes.IronOre;
-    uint16[] memory inputAmounts = new uint16[](1);
+    inputTypes[1] = ObjectTypes.CoalOre;
+    uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 1;
+    inputAmounts[1] = 1;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
-    outputTypes[0] = ObjectTypes.SilverBar;
+    outputTypes[0] = ObjectTypes.IronBar;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
 
@@ -250,11 +252,13 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Thermoblaster;
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Furnace;
+    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
     inputTypes[0] = ObjectTypes.GoldOre;
-    uint16[] memory inputAmounts = new uint16[](1);
+    inputTypes[1] = ObjectTypes.CoalOre;
+    uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 1;
+    inputAmounts[1] = 1;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
     outputTypes[0] = ObjectTypes.GoldBar;
     uint16[] memory outputAmounts = new uint16[](1);
@@ -280,11 +284,13 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Thermoblaster;
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Furnace;
+    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
     inputTypes[0] = ObjectTypes.DiamondOre;
-    uint16[] memory inputAmounts = new uint16[](1);
+    inputTypes[1] = ObjectTypes.CoalOre;
+    uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 1;
+    inputAmounts[1] = 1;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
     outputTypes[0] = ObjectTypes.Diamond;
     uint16[] memory outputAmounts = new uint16[](1);
@@ -310,11 +316,13 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Thermoblaster;
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
-    inputTypes[0] = ObjectTypes.EmeraldOre;
-    uint16[] memory inputAmounts = new uint16[](1);
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Furnace;
+    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
+    inputTypes[0] = ObjectTypes.NeptuniumOre;
+    inputTypes[1] = ObjectTypes.CoalOre;
+    uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 1;
+    inputAmounts[1] = 1;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
     outputTypes[0] = ObjectTypes.NeptuniumBar;
     uint16[] memory outputAmounts = new uint16[](1);
@@ -346,7 +354,7 @@ function initRecipes() {
     uint16[] memory inputAmounts = new uint16[](1);
     inputAmounts[0] = 9;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
-    outputTypes[0] = ObjectTypes.Thermoblaster;
+    outputTypes[0] = ObjectTypes.Furnace;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
 
@@ -372,9 +380,9 @@ function initRecipes() {
   {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
-    inputTypes[0] = ObjectTypes.AnyLog;
+    inputTypes[0] = ObjectTypes.AnyPlanks;
     uint16[] memory inputAmounts = new uint16[](1);
-    inputAmounts[0] = 5;
+    inputAmounts[0] = 4;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
     outputTypes[0] = ObjectTypes.Workbench;
     uint16[] memory outputAmounts = new uint16[](1);
@@ -400,39 +408,7 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
-    inputTypes[0] = ObjectTypes.Clay;
-    inputTypes[1] = ObjectTypes.Sand;
-    uint16[] memory inputAmounts = new uint16[](2);
-    inputAmounts[0] = 4;
-    inputAmounts[1] = 4;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
-    outputTypes[0] = ObjectTypes.Dyeomatic;
-    uint16[] memory outputAmounts = new uint16[](1);
-    outputAmounts[0] = 1;
-
-    uint16[] memory _inputTypes;
-    assembly ("memory-safe") {
-      _inputTypes := inputTypes
-    }
-
-    uint16[] memory _outputTypes;
-    assembly ("memory-safe") {
-      _outputTypes := outputTypes
-    }
-
-    Recipes.set(
-      keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
-      stationObjectTypeId,
-      _inputTypes,
-      inputAmounts,
-      _outputTypes,
-      outputAmounts
-    );
-  }
-  {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
     inputTypes[0] = ObjectTypes.Stone;
     inputTypes[1] = ObjectTypes.Sand;
@@ -464,10 +440,10 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Thermoblaster;
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
     inputTypes[0] = ObjectTypes.Stone;
-    inputTypes[1] = ObjectTypes.SilverBar;
+    inputTypes[1] = ObjectTypes.IronBar;
     uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 30;
     inputAmounts[1] = 5;
@@ -556,10 +532,10 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Thermoblaster;
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
     inputTypes[0] = ObjectTypes.ForceField;
-    inputTypes[1] = ObjectTypes.SilverBar;
+    inputTypes[1] = ObjectTypes.IronBar;
     uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 1;
     inputAmounts[1] = 8;
@@ -589,12 +565,10 @@ function initRecipes() {
   }
   {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
+    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
     inputTypes[0] = ObjectTypes.AnyPlanks;
-    inputTypes[1] = ObjectTypes.SilverBar;
-    uint16[] memory inputAmounts = new uint16[](2);
-    inputAmounts[0] = 8;
-    inputAmounts[1] = 4;
+    uint16[] memory inputAmounts = new uint16[](1);
+    inputAmounts[0] = 3;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
     outputTypes[0] = ObjectTypes.Bed;
     uint16[] memory outputAmounts = new uint16[](1);
@@ -624,7 +598,7 @@ function initRecipes() {
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
     inputTypes[0] = ObjectTypes.AnyLog;
     uint16[] memory inputAmounts = new uint16[](1);
-    inputAmounts[0] = 4;
+    inputAmounts[0] = 5;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
     outputTypes[0] = ObjectTypes.WoodenPick;
     uint16[] memory outputAmounts = new uint16[](1);
@@ -654,7 +628,7 @@ function initRecipes() {
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
     inputTypes[0] = ObjectTypes.AnyLog;
     uint16[] memory inputAmounts = new uint16[](1);
-    inputAmounts[0] = 4;
+    inputAmounts[0] = 5;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
     outputTypes[0] = ObjectTypes.WoodenAxe;
     uint16[] memory outputAmounts = new uint16[](1);
@@ -742,77 +716,13 @@ function initRecipes() {
   {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
-    inputTypes[0] = ObjectTypes.AnyLog;
-    inputTypes[1] = ObjectTypes.Stone;
-    uint16[] memory inputAmounts = new uint16[](2);
-    inputAmounts[0] = 4;
-    inputAmounts[1] = 8;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
-    outputTypes[0] = ObjectTypes.StonePick;
-    uint16[] memory outputAmounts = new uint16[](1);
-    outputAmounts[0] = 1;
-
-    uint16[] memory _inputTypes;
-    assembly ("memory-safe") {
-      _inputTypes := inputTypes
-    }
-
-    uint16[] memory _outputTypes;
-    assembly ("memory-safe") {
-      _outputTypes := outputTypes
-    }
-
-    Recipes.set(
-      keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
-      stationObjectTypeId,
-      _inputTypes,
-      inputAmounts,
-      _outputTypes,
-      outputAmounts
-    );
-  }
-  {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
-    inputTypes[0] = ObjectTypes.AnyLog;
-    inputTypes[1] = ObjectTypes.Stone;
-    uint16[] memory inputAmounts = new uint16[](2);
-    inputAmounts[0] = 4;
-    inputAmounts[1] = 8;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
-    outputTypes[0] = ObjectTypes.StoneAxe;
-    uint16[] memory outputAmounts = new uint16[](1);
-    outputAmounts[0] = 1;
-
-    uint16[] memory _inputTypes;
-    assembly ("memory-safe") {
-      _inputTypes := inputTypes
-    }
-
-    uint16[] memory _outputTypes;
-    assembly ("memory-safe") {
-      _outputTypes := outputTypes
-    }
-
-    Recipes.set(
-      keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
-      stationObjectTypeId,
-      _inputTypes,
-      inputAmounts,
-      _outputTypes,
-      outputAmounts
-    );
-  }
-  {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
-    inputTypes[0] = ObjectTypes.AnyLog;
-    inputTypes[1] = ObjectTypes.Stone;
+    inputTypes[0] = ObjectTypes.AnyPlanks;
+    inputTypes[1] = ObjectTypes.CopperOre;
     uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 2;
-    inputAmounts[1] = 4;
+    inputAmounts[1] = 3;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
-    outputTypes[0] = ObjectTypes.StoneWhacker;
+    outputTypes[0] = ObjectTypes.CopperPick;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
 
@@ -838,13 +748,13 @@ function initRecipes() {
   {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
-    inputTypes[0] = ObjectTypes.AnyLog;
-    inputTypes[1] = ObjectTypes.SilverBar;
+    inputTypes[0] = ObjectTypes.AnyPlanks;
+    inputTypes[1] = ObjectTypes.CopperOre;
     uint16[] memory inputAmounts = new uint16[](2);
-    inputAmounts[0] = 4;
-    inputAmounts[1] = 4;
+    inputAmounts[0] = 2;
+    inputAmounts[1] = 3;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
-    outputTypes[0] = ObjectTypes.SilverPick;
+    outputTypes[0] = ObjectTypes.CopperAxe;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
 
@@ -870,43 +780,13 @@ function initRecipes() {
   {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
-    inputTypes[0] = ObjectTypes.AnyLog;
-    inputTypes[1] = ObjectTypes.SilverBar;
+    inputTypes[0] = ObjectTypes.AnyPlanks;
+    inputTypes[1] = ObjectTypes.CopperOre;
     uint16[] memory inputAmounts = new uint16[](2);
-    inputAmounts[0] = 4;
-    inputAmounts[1] = 4;
+    inputAmounts[0] = 2;
+    inputAmounts[1] = 6;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
-    outputTypes[0] = ObjectTypes.SilverAxe;
-    uint16[] memory outputAmounts = new uint16[](1);
-    outputAmounts[0] = 1;
-
-    uint16[] memory _inputTypes;
-    assembly ("memory-safe") {
-      _inputTypes := inputTypes
-    }
-
-    uint16[] memory _outputTypes;
-    assembly ("memory-safe") {
-      _outputTypes := outputTypes
-    }
-
-    Recipes.set(
-      keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
-      stationObjectTypeId,
-      _inputTypes,
-      inputAmounts,
-      _outputTypes,
-      outputAmounts
-    );
-  }
-  {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
-    inputTypes[0] = ObjectTypes.SilverBar;
-    uint16[] memory inputAmounts = new uint16[](1);
-    inputAmounts[0] = 6;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
-    outputTypes[0] = ObjectTypes.SilverWhacker;
+    outputTypes[0] = ObjectTypes.CopperWhacker;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
 
@@ -932,11 +812,107 @@ function initRecipes() {
   {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
-    inputTypes[0] = ObjectTypes.AnyLog;
-    inputTypes[1] = ObjectTypes.GoldBar;
+    inputTypes[0] = ObjectTypes.AnyPlanks;
+    inputTypes[1] = ObjectTypes.IronOre;
     uint16[] memory inputAmounts = new uint16[](2);
-    inputAmounts[0] = 4;
-    inputAmounts[1] = 4;
+    inputAmounts[0] = 2;
+    inputAmounts[1] = 3;
+    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    outputTypes[0] = ObjectTypes.IronPick;
+    uint16[] memory outputAmounts = new uint16[](1);
+    outputAmounts[0] = 1;
+
+    uint16[] memory _inputTypes;
+    assembly ("memory-safe") {
+      _inputTypes := inputTypes
+    }
+
+    uint16[] memory _outputTypes;
+    assembly ("memory-safe") {
+      _outputTypes := outputTypes
+    }
+
+    Recipes.set(
+      keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      stationObjectTypeId,
+      _inputTypes,
+      inputAmounts,
+      _outputTypes,
+      outputAmounts
+    );
+  }
+  {
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
+    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
+    inputTypes[0] = ObjectTypes.AnyPlanks;
+    inputTypes[1] = ObjectTypes.IronOre;
+    uint16[] memory inputAmounts = new uint16[](2);
+    inputAmounts[0] = 2;
+    inputAmounts[1] = 3;
+    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    outputTypes[0] = ObjectTypes.IronAxe;
+    uint16[] memory outputAmounts = new uint16[](1);
+    outputAmounts[0] = 1;
+
+    uint16[] memory _inputTypes;
+    assembly ("memory-safe") {
+      _inputTypes := inputTypes
+    }
+
+    uint16[] memory _outputTypes;
+    assembly ("memory-safe") {
+      _outputTypes := outputTypes
+    }
+
+    Recipes.set(
+      keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      stationObjectTypeId,
+      _inputTypes,
+      inputAmounts,
+      _outputTypes,
+      outputAmounts
+    );
+  }
+  {
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
+    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
+    inputTypes[0] = ObjectTypes.AnyPlanks;
+    inputTypes[1] = ObjectTypes.IronOre;
+    uint16[] memory inputAmounts = new uint16[](2);
+    inputAmounts[0] = 2;
+    inputAmounts[1] = 6;
+    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    outputTypes[0] = ObjectTypes.IronWhacker;
+    uint16[] memory outputAmounts = new uint16[](1);
+    outputAmounts[0] = 1;
+
+    uint16[] memory _inputTypes;
+    assembly ("memory-safe") {
+      _inputTypes := inputTypes
+    }
+
+    uint16[] memory _outputTypes;
+    assembly ("memory-safe") {
+      _outputTypes := outputTypes
+    }
+
+    Recipes.set(
+      keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      stationObjectTypeId,
+      _inputTypes,
+      inputAmounts,
+      _outputTypes,
+      outputAmounts
+    );
+  }
+  {
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
+    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
+    inputTypes[0] = ObjectTypes.AnyPlanks;
+    inputTypes[1] = ObjectTypes.GoldOre;
+    uint16[] memory inputAmounts = new uint16[](2);
+    inputAmounts[0] = 2;
+    inputAmounts[1] = 3;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
     outputTypes[0] = ObjectTypes.GoldPick;
     uint16[] memory outputAmounts = new uint16[](1);
@@ -964,11 +940,11 @@ function initRecipes() {
   {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
-    inputTypes[0] = ObjectTypes.AnyLog;
-    inputTypes[1] = ObjectTypes.GoldBar;
+    inputTypes[0] = ObjectTypes.AnyPlanks;
+    inputTypes[1] = ObjectTypes.GoldOre;
     uint16[] memory inputAmounts = new uint16[](2);
-    inputAmounts[0] = 4;
-    inputAmounts[1] = 4;
+    inputAmounts[0] = 2;
+    inputAmounts[1] = 3;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
     outputTypes[0] = ObjectTypes.GoldAxe;
     uint16[] memory outputAmounts = new uint16[](1);
@@ -996,10 +972,10 @@ function initRecipes() {
   {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
-    inputTypes[0] = ObjectTypes.AnyLog;
+    inputTypes[0] = ObjectTypes.AnyPlanks;
     inputTypes[1] = ObjectTypes.Diamond;
     uint16[] memory inputAmounts = new uint16[](2);
-    inputAmounts[0] = 4;
+    inputAmounts[0] = 2;
     inputAmounts[1] = 4;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
     outputTypes[0] = ObjectTypes.DiamondPick;
@@ -1028,10 +1004,10 @@ function initRecipes() {
   {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
-    inputTypes[0] = ObjectTypes.AnyLog;
+    inputTypes[0] = ObjectTypes.AnyPlanks;
     inputTypes[1] = ObjectTypes.Diamond;
     uint16[] memory inputAmounts = new uint16[](2);
-    inputAmounts[0] = 4;
+    inputAmounts[0] = 2;
     inputAmounts[1] = 4;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
     outputTypes[0] = ObjectTypes.DiamondAxe;
@@ -1060,11 +1036,11 @@ function initRecipes() {
   {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
-    inputTypes[0] = ObjectTypes.AnyLog;
+    inputTypes[0] = ObjectTypes.AnyPlanks;
     inputTypes[1] = ObjectTypes.NeptuniumBar;
     uint16[] memory inputAmounts = new uint16[](2);
-    inputAmounts[0] = 4;
-    inputAmounts[1] = 4;
+    inputAmounts[0] = 2;
+    inputAmounts[1] = 3;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
     outputTypes[0] = ObjectTypes.NeptuniumPick;
     uint16[] memory outputAmounts = new uint16[](1);
@@ -1092,11 +1068,11 @@ function initRecipes() {
   {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
-    inputTypes[0] = ObjectTypes.AnyLog;
+    inputTypes[0] = ObjectTypes.AnyPlanks;
     inputTypes[1] = ObjectTypes.NeptuniumBar;
     uint16[] memory inputAmounts = new uint16[](2);
-    inputAmounts[0] = 4;
-    inputAmounts[1] = 4;
+    inputAmounts[0] = 2;
+    inputAmounts[1] = 3;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
     outputTypes[0] = ObjectTypes.NeptuniumAxe;
     uint16[] memory outputAmounts = new uint16[](1);
@@ -1124,7 +1100,7 @@ function initRecipes() {
   {
     ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
-    inputTypes[0] = ObjectTypes.SilverBar;
+    inputTypes[0] = ObjectTypes.IronBar;
     uint16[] memory inputAmounts = new uint16[](1);
     inputAmounts[0] = 3;
     ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
