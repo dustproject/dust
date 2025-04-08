@@ -7,7 +7,7 @@
     "defaultBranch": "main"
   },
   "files": {
-    "ignore": ["packages/world", "scripts"]
+    "ignore": ["./packages/world", "./scripts"]
   },
   "formatter": {
     "enabled": true,
