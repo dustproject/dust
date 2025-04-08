@@ -1300,6 +1300,56 @@ function initObjects() {
     })
   );
   ObjectTypeMetadata.set(
+    ObjectTypes.CopperBlock,
+    ObjectTypeMetadataData({
+      stackable: 99,
+      maxInventorySlots: 0,
+      mass: 675000000000000000,
+      energy: 0,
+      canPassThrough: false
+    })
+  );
+  ObjectTypeMetadata.set(
+    ObjectTypes.IronBlock,
+    ObjectTypeMetadataData({
+      stackable: 99,
+      maxInventorySlots: 0,
+      mass: 675000000000000000,
+      energy: 0,
+      canPassThrough: false
+    })
+  );
+  ObjectTypeMetadata.set(
+    ObjectTypes.GoldBlock,
+    ObjectTypeMetadataData({
+      stackable: 99,
+      maxInventorySlots: 0,
+      mass: 1600000000000000000,
+      energy: 0,
+      canPassThrough: false
+    })
+  );
+  ObjectTypeMetadata.set(
+    ObjectTypes.DiamondBlock,
+    ObjectTypeMetadataData({
+      stackable: 99,
+      maxInventorySlots: 0,
+      mass: 5000000000000000000,
+      energy: 0,
+      canPassThrough: false
+    })
+  );
+  ObjectTypeMetadata.set(
+    ObjectTypes.NeptuniumBlock,
+    ObjectTypeMetadataData({
+      stackable: 99,
+      maxInventorySlots: 0,
+      mass: 5000000000000000000,
+      energy: 0,
+      canPassThrough: false
+    })
+  );
+  ObjectTypeMetadata.set(
     ObjectTypes.WetFarmland,
     ObjectTypeMetadataData({
       stackable: 99,
