@@ -153,7 +153,7 @@ contract FarmingTest is DustTest {
     world.till(aliceEntityId, dirtCoord, 0);
 
     // Equipped but not a hoe
-    TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.SilverPick);
+    TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.IronPick);
 
     vm.prank(alice);
     vm.expectRevert("Must equip a hoe");
