@@ -1365,7 +1365,7 @@ function initObjects() {
       stackable: 99,
       maxInventorySlots: type(uint16).max,
       mass: 0,
-      energy: 100,
+      energy: 10000000000000000,
       canPassThrough: true
     })
   );
@@ -1375,7 +1375,7 @@ function initObjects() {
       stackable: 99,
       maxInventorySlots: type(uint16).max,
       mass: 0,
-      energy: 1000,
+      energy: 100000000000000000,
       canPassThrough: true
     })
   );
@@ -1385,7 +1385,7 @@ function initObjects() {
       stackable: 99,
       maxInventorySlots: type(uint16).max,
       mass: 0,
-      energy: 1000,
+      energy: 100000000000000000,
       canPassThrough: true
     })
   );
@@ -1661,7 +1661,13 @@ function initObjects() {
   );
   ObjectTypeMetadata.set(
     ObjectTypes.Fuel,
-    ObjectTypeMetadataData({ stackable: 99, maxInventorySlots: 0, mass: 0, energy: 1, canPassThrough: false })
+    ObjectTypeMetadataData({
+      stackable: 99,
+      maxInventorySlots: 0,
+      mass: 0,
+      energy: 100000000000000,
+      canPassThrough: false
+    })
   );
   ObjectTypeMetadata.set(
     ObjectTypes.Player,
