@@ -331,7 +331,17 @@ contract CraftTest is DustTest {
 
     assertInventoryHasObject(aliceEntityId, ObjectTypes.OakLog, 0);
     assertInventoryHasObject(aliceEntityId, ObjectTypes.BirchLeaf, 0);
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.Fuel, 15);
+    assertInventoryHasObject(
+      aliceEntityId,
+      ObjectTypes.Fuel,
+      uint16(
+        (
+          10 * (ObjectTypeMetadata.getMass(ObjectTypes.OakLog) + ObjectTypeMetadata.getEnergy(ObjectTypes.OakLog))
+            + 5
+              * (ObjectTypeMetadata.getMass(ObjectTypes.BirchLeaf) + ObjectTypeMetadata.getEnergy(ObjectTypes.BirchLeaf))
+        ) / (ObjectTypeMetadata.getEnergy(ObjectTypes.Fuel))
+      )
+    );
 
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
