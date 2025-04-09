@@ -17,7 +17,7 @@ import { ObjectTypes } from "../ObjectTypes.sol";
 import { Vec3 } from "../Vec3.sol";
 import { transferEnergyToPool } from "../utils/EnergyUtils.sol";
 import { InventoryUtils, SlotAmount } from "../utils/InventoryUtils.sol";
-import { CraftNotification, notify } from "../utils/NotifUtils.sol";
+import { CraftFuelNotification, notify } from "../utils/NotifUtils.sol";
 
 contract CraftFuelSystem is System {
   using ObjectTypeLib for ObjectTypeId;
@@ -40,13 +40,13 @@ contract CraftFuelSystem is System {
         inputs[i].amount * (ObjectTypeMetadata._getEnergy(inputType) + ObjectTypeMetadata._getMass(inputType));
       InventoryUtils.removeObjectFromSlot(caller, inputType, inputs[i].amount, inputs[i].slot);
     }
-    uint128 fuelAmount = totalEnergy / ObjectTypeMetadata._getEnergy(ObjectTypes.Fuel);
-    require(fuelAmount > 0 && fuelAmount <= uint128(type(uint16).max), "Invalid fuel amount");
-    InventoryUtils.addObject(caller, ObjectTypes.Fuel, uint16(fuelAmount));
+    // Note: we use the value of fuel directly to save a read
+    // ObjectTypeMetadata._getEnergy(ObjectTypes.Fuel) == 100000000000000
+    uint128 fuelAmount = totalEnergy / 100000000000000;
+    InventoryUtils.addObject(caller, ObjectTypes.Fuel, fuelAmount);
 
     transferEnergyToPool(caller, CRAFT_ENERGY_COST);
 
-    // TODO: should we use a diff notification for fuel?
-    notify(caller, CraftNotification({ recipeId: bytes32(0), station: powerstone }));
+    notify(caller, CraftFuelNotification({ station: powerstone, fuelAmount: fuelAmount }));
   }
 }

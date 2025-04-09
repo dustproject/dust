@@ -9,6 +9,7 @@ enum Action {
   Mine,
   Move,
   Craft,
+  CraftFuel,
   Drop,
   Pickup,
   Transfer,
