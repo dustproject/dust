@@ -27,6 +27,11 @@ struct SlotTransfer {
   uint16 amount; // For entities, this should always be 1
 }
 
+struct SlotAmount {
+  uint16 slot;
+  uint16 amount;
+}
+
 library InventoryUtils {
   function useTool(EntityId owner, uint16 slot, uint128 useMassMax)
     public
