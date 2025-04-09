@@ -556,4 +556,57 @@ contract CraftTest is DustTest {
     vm.expectRevert("Player is sleeping");
     world.craft(aliceEntityId, recipeId);
   }
+
+  function testCraftFuelFailsIfInvalidInputs() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    SlotAmount[] memory inputs = new SlotAmount[](2);
+    inputs[0] = SlotAmount({ slot: 0, amount: 10 });
+    inputs[1] = SlotAmount({ slot: 1, amount: 5 });
+
+    TestInventoryUtils.addObjectToSlot(aliceEntityId, ObjectTypes.Dirt, inputs[0].amount, inputs[0].slot);
+    TestInventoryUtils.addObjectToSlot(aliceEntityId, ObjectTypes.BirchLeaf, inputs[1].amount, inputs[1].slot);
+    assertInventoryHasObjectInSlot(aliceEntityId, ObjectTypes.Dirt, inputs[0].amount, inputs[0].slot);
+    assertInventoryHasObjectInSlot(aliceEntityId, ObjectTypes.BirchLeaf, inputs[1].amount, inputs[1].slot);
+
+    Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
+    EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Powerstone);
+
+    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+
+    vm.prank(alice);
+    vm.expectRevert("Can only use logs or leaves to make fuel");
+    world.craftFuel(aliceEntityId, stationEntityId, inputs);
+
+    vm.prank(alice);
+    vm.expectRevert("Must provide at least one input");
+    world.craftFuel(aliceEntityId, stationEntityId, new SlotAmount[](0));
+  }
+
+  function testCraftFuelFailsIfInvalidStation() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    SlotAmount[] memory inputs = new SlotAmount[](2);
+    inputs[0] = SlotAmount({ slot: 0, amount: 10 });
+    inputs[1] = SlotAmount({ slot: 1, amount: 5 });
+
+    TestInventoryUtils.addObjectToSlot(aliceEntityId, ObjectTypes.OakLog, inputs[0].amount, inputs[0].slot);
+    TestInventoryUtils.addObjectToSlot(aliceEntityId, ObjectTypes.BirchLeaf, inputs[1].amount, inputs[1].slot);
+    assertInventoryHasObjectInSlot(aliceEntityId, ObjectTypes.OakLog, inputs[0].amount, inputs[0].slot);
+    assertInventoryHasObjectInSlot(aliceEntityId, ObjectTypes.BirchLeaf, inputs[1].amount, inputs[1].slot);
+
+    Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
+    EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
+
+    vm.prank(alice);
+    vm.expectRevert("You need a powerstone to craft fuel");
+    world.craftFuel(aliceEntityId, stationEntityId, inputs);
+
+    stationCoord = playerCoord + vec3(int32(MAX_ENTITY_INFLUENCE_HALF_WIDTH) + 1, 0, 0);
+    stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Powerstone);
+
+    vm.prank(alice);
+    vm.expectRevert("Entity is too far");
+    world.craftFuel(aliceEntityId, stationEntityId, inputs);
+  }
 }
