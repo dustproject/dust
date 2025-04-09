@@ -4,6 +4,7 @@ pragma solidity >=0.8.24;
 import { Direction } from "./codegen/common.sol";
 
 import { BurnedResourceCount } from "./codegen/tables/BurnedResourceCount.sol";
+import { ObjectTypeMetadata } from "./codegen/tables/ObjectTypeMetadata.sol";
 import { ResourceCount } from "./codegen/tables/ResourceCount.sol";
 
 import { IMachineSystem } from "./codegen/world/IMachineSystem.sol";

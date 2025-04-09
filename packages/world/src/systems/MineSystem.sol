@@ -93,92 +93,66 @@ contract MineSystem is System {
     caller.activate();
     caller.requireConnected(coord);
 
-    (EntityId mined, ObjectTypeId mineObjectTypeId) = getOrCreateEntityAt(coord);
-    require(mineObjectTypeId.isMineable(), "Object is not mineable");
+    (EntityId mined, ObjectTypeId minedType) = getOrCreateEntityAt(coord);
+    require(minedType.isMineable(), "Object is not mineable");
 
     mined = mined.baseEntityId();
     Vec3 baseCoord = Position._get(mined);
 
-    if (mineObjectTypeId.isMachine()) {
+    if (minedType.isMachine()) {
       (EnergyData memory machineData,) = updateMachineEnergy(mined);
       require(machineData.energy == 0, "Cannot mine a machine that has energy");
-    } else if (mineObjectTypeId.isSeed()) {
-      _requireSeedNotFullyGrown(mined);
-    } else if (mineObjectTypeId == ObjectTypes.AnyOre) {
-      mineObjectTypeId = RandomResourceLib._collapseRandomOre(mined, coord);
+    } else if (minedType == ObjectTypes.AnyOre) {
+      minedType = RandomResourceLib._collapseRandomOre(mined, coord);
     }
 
-    // First coord will be the base coord, the rest is relative schema coords
-    Vec3[] memory coords = mineObjectTypeId.getRelativeCoords(baseCoord, Orientation._get(mined));
+    MineLib._requireMinesAllowed(caller, minedType, coord, extraData);
 
     uint128 finalMass = MassReductionLib._processMassReduction(caller, mined, toolSlot);
 
-    if (finalMass == 0) {
-      if (mineObjectTypeId == ObjectTypes.Bed) {
-        // If mining a bed with a sleeping player, kill the player
-        MineLib._mineBed(mined, baseCoord);
-      }
-
-      if (bytes(DisplayURI._get(mined)).length > 0) {
-        DisplayURI._deleteRecord(mined);
-      }
-
-      Mass._deleteRecord(mined);
-
-      {
-        // Remove seeds placed on top of this block
-        Vec3 aboveCoord = baseCoord + vec3(0, 1, 0);
-        // If above is a seed, the entity must exist as there are not seeds in the base terrain
-        (EntityId above, ObjectTypeId aboveTypeId) = getEntityAt(aboveCoord);
-        if (aboveTypeId.isSeed()) {
-          _requireSeedNotFullyGrown(above);
-          _removeBlock(above, aboveCoord);
-          _handleDrop(caller, aboveTypeId, aboveCoord);
-        }
-      }
-
-      _removeBlock(mined, baseCoord);
-      _handleDrop(caller, mineObjectTypeId, baseCoord);
-
-      // If object being mined is a seed, return its energy to local pool
-      if (mineObjectTypeId.isSeed()) {
-        addEnergyToLocalPool(coord, ObjectTypeMetadata._getEnergy(mineObjectTypeId));
-      }
-
-      // Only iterate through relative schema coords
-      for (uint256 i = 1; i < coords.length; i++) {
-        Vec3 relativeCoord = coords[i];
-        (EntityId relative,) = getEntityAt(relativeCoord);
-        BaseEntity._deleteRecord(relative);
-
-        _removeBlock(relative, relativeCoord);
-      }
-    } else {
+    if (finalMass != 0) {
       Mass._setMass(mined, finalMass);
+      return mined;
     }
 
-    MineLib._requireMinesAllowed(caller, mineObjectTypeId, coord, extraData);
+    // The block was fully mined
+    Mass._deleteRecord(mined);
 
-    if (finalMass == 0) {
-      // Detach program if it exists
-      ProgramId program = mined.getProgram();
-      if (program.exists()) {
-        bytes memory onDetachProgram = abi.encodeCall(IDetachProgramHook.onDetachProgram, (caller, mined, extraData));
-        program.call({ gas: SAFE_PROGRAM_GAS, hook: onDetachProgram });
-      }
-
-      if (mineObjectTypeId == ObjectTypes.ForceField) {
-        destroyForceField(mined);
-      }
+    // Remove flora on top of this block
+    Vec3 aboveCoord = baseCoord + vec3(0, 1, 0);
+    // If above is a seed, the entity must exist as there are not seeds in the base terrain
+    (EntityId above, ObjectTypeId aboveTypeId) = getOrCreateEntityAt(aboveCoord);
+    if (aboveTypeId.isFlora()) {
+      _removeFlora(above, aboveTypeId, aboveCoord);
+      _handleDrop(caller, aboveTypeId, aboveCoord);
     }
 
-    notify(caller, MineNotification({ mineEntityId: mined, mineCoord: coord, mineObjectTypeId: mineObjectTypeId }));
+    _removeBlock(mined, minedType, baseCoord);
+    _removeRelativeBlocks(mined, minedType, baseCoord);
+    _handleDrop(caller, minedType, baseCoord);
+
+    _destroyEntity(caller, mined, minedType, baseCoord, extraData);
+
+    notify(caller, MineNotification({ mineEntityId: mined, mineCoord: coord, mineObjectTypeId: minedType }));
 
     return mined;
   }
 
-  function _removeBlock(EntityId entityId, Vec3 coord) internal {
+  function _removeFlora(EntityId entityId, ObjectTypeId objectType, Vec3 coord) internal {
+    if (objectType.isSeed()) {
+      _requireSeedNotFullyGrown(entityId);
+      addEnergyToLocalPool(coord, ObjectTypeMetadata._getEnergy(objectType));
+    }
+  }
+
+  function _removeBlock(EntityId entityId, ObjectTypeId objectType, Vec3 coord) internal {
     ObjectType._set(entityId, ObjectTypes.Air);
+
+    // If object being mined is flora, no need to check above entities
+    if (objectType.isFlora()) {
+      _removeFlora(entityId, objectType, coord);
+      return;
+    }
 
     Vec3 aboveCoord = coord + vec3(0, 1, 0);
     EntityId above = getMovableEntityAt(aboveCoord);
@@ -186,6 +160,45 @@ contract MineSystem is System {
     // but if we add other types of movable entities we should check that it is a base entity
     if (above.exists()) {
       MoveLib.runGravity(above, aboveCoord);
+    }
+  }
+
+  function _removeRelativeBlocks(EntityId mined, ObjectTypeId minedType, Vec3 baseCoord) internal {
+    // First coord will be the base coord, the rest is relative schema coords
+    Vec3[] memory coords = minedType.getRelativeCoords(baseCoord, Orientation._get(mined));
+
+    // Only iterate through relative schema coords
+    for (uint256 i = 1; i < coords.length; i++) {
+      Vec3 relativeCoord = coords[i];
+      (EntityId relative, ObjectTypeId relativeType) = getEntityAt(relativeCoord);
+      BaseEntity._deleteRecord(relative);
+
+      _removeBlock(relative, relativeType, relativeCoord);
+    }
+  }
+
+  function _destroyEntity(
+    EntityId caller,
+    EntityId mined,
+    ObjectTypeId minedType,
+    Vec3 baseCoord,
+    bytes calldata extraData
+  ) internal {
+    // Detach program if it exists
+    ProgramId program = mined.getProgram();
+    if (program.exists()) {
+      bytes memory onDetachProgram = abi.encodeCall(IDetachProgramHook.onDetachProgram, (caller, mined, extraData));
+      program.call({ gas: SAFE_PROGRAM_GAS, hook: onDetachProgram });
+    }
+
+    if (minedType == ObjectTypes.Bed) {
+      MineLib._mineBed(mined, baseCoord);
+    } else if (minedType == ObjectTypes.ForceField) {
+      destroyForceField(mined);
+    }
+
+    if (bytes(DisplayURI._get(mined)).length > 0) {
+      DisplayURI._deleteRecord(mined);
     }
   }
 
@@ -212,19 +225,22 @@ contract MineSystem is System {
 
 library MineLib {
   function _mineBed(EntityId bed, Vec3 bedCoord) public {
+    // If there is a player sleeping in the mined bed, kill them
     EntityId sleepingPlayerId = BedPlayer._getPlayerEntityId(bed);
-    if (sleepingPlayerId.exists()) {
-      (EntityId forceField,) = getForceField(bedCoord);
-      (, uint128 depletedTime) = updateMachineEnergy(forceField);
-      EnergyData memory playerData = updateSleepingPlayerEnergy(sleepingPlayerId, bed, depletedTime, bedCoord);
-      PlayerUtils.removePlayerFromBed(sleepingPlayerId, bed, forceField);
-
-      // Kill the player
-      // The player is not on the grid so no need to call killPlayer
-      Energy._setEnergy(sleepingPlayerId, 0);
-      addEnergyToLocalPool(bedCoord, playerData.energy);
-      notify(sleepingPlayerId, DeathNotification({ deathCoord: bedCoord }));
+    if (!sleepingPlayerId.exists()) {
+      return;
     }
+
+    (EntityId forceField,) = getForceField(bedCoord);
+    (, uint128 depletedTime) = updateMachineEnergy(forceField);
+    EnergyData memory playerData = updateSleepingPlayerEnergy(sleepingPlayerId, bed, depletedTime, bedCoord);
+    PlayerUtils.removePlayerFromBed(sleepingPlayerId, bed, forceField);
+
+    // Kill the player
+    // The player is not on the grid so no need to call killPlayer
+    Energy._setEnergy(sleepingPlayerId, 0);
+    addEnergyToLocalPool(bedCoord, playerData.energy);
+    notify(sleepingPlayerId, DeathNotification({ deathCoord: bedCoord }));
   }
 
   function _requireMinesAllowed(EntityId caller, ObjectTypeId objectTypeId, Vec3 coord, bytes calldata extraData)
