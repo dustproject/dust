@@ -1,5 +1,5 @@
 import type { EntityId, ProgramId } from "../common";
-import type { Config } from "./config";
+import type { AppConfig } from "./appConfig";
 
 // TODO: split schema out into directional specific schemas (app->client, client->app)
 
@@ -10,7 +10,7 @@ export type MessengerSchema = [
   {
     topic: "app:open";
     payload: {
-      config: Config;
+      appConfig: AppConfig;
       via?: {
         entity: EntityId;
         program: ProgramId;
