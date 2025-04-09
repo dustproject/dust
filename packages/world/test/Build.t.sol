@@ -80,7 +80,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectTypeId, 1);
 
     EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    Vec3 forceFieldFragmentCoord = buildCoord.toForceFieldFragmentCoord();
+    Vec3 forceFieldFragmentCoord = buildCoord.toFragmentCoord();
 
     vm.prank(alice);
     startGasReport("build non-terrain");
@@ -112,7 +112,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectTypeId, 1);
 
     EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    Vec3 forceFieldFragmentCoord = buildCoord.toForceFieldFragmentCoord();
+    Vec3 forceFieldFragmentCoord = buildCoord.toFragmentCoord();
 
     vm.prank(alice);
     startGasReport("build multi-size");
@@ -138,7 +138,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectTypeId, 1);
 
     EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    Vec3 forceFieldFragmentCoord = playerCoord.toForceFieldFragmentCoord();
+    Vec3 forceFieldFragmentCoord = playerCoord.toFragmentCoord();
 
     vm.prank(alice);
     startGasReport("jump build");

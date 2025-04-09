@@ -15,7 +15,7 @@ import { ReversePlayer } from "./codegen/tables/ReversePlayer.sol";
 
 import { updateMachineEnergy, updatePlayerEnergy } from "./utils/EnergyUtils.sol";
 import { getForceField } from "./utils/ForceFieldUtils.sol";
-import { MovablePosition, Position } from "./utils/Vec3Storage.sol";
+import { ForceFieldFragmentPosition, MovablePosition, Position } from "./utils/Vec3Storage.sol";
 
 import { MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "./Constants.sol";
 import { ObjectTypeId } from "./ObjectTypeId.sol";
@@ -66,6 +66,17 @@ library EntityIdLib {
     Vec3 selfCoord = self.getPosition();
     require(selfCoord.inSurroundingCube(otherCoord, MAX_ENTITY_INFLUENCE_HALF_WIDTH), "Entity is too far");
     return (selfCoord, otherCoord);
+  }
+
+  function requireAdjacentToFragment(EntityId self, EntityId fragment) internal view returns (Vec3, Vec3) {
+    Vec3 fragmentCoord = ForceFieldFragmentPosition.get(fragment);
+    return requireAdjacentToFragment(self, fragmentCoord);
+  }
+
+  function requireAdjacentToFragment(EntityId self, Vec3 fragmentCoord) internal view returns (Vec3, Vec3) {
+    Vec3 selfFragmentCoord = self.getPosition().toFragmentCoord();
+    require(selfFragmentCoord.inSurroundingCube(fragmentCoord, 1), "Fragment is too far");
+    return (selfFragmentCoord, fragmentCoord);
   }
 
   function getPosition(EntityId self) internal view returns (Vec3) {

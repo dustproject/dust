@@ -20,7 +20,7 @@ import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol
 import { DustTest, console } from "./DustTest.sol";
 
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
-import { MovablePosition, Position, ReversePosition } from "../src/utils/Vec3Storage.sol";
+import { ForceFieldFragmentPosition, MovablePosition, Position, ReversePosition } from "../src/utils/Vec3Storage.sol";
 
 import { FRAGMENT_SIZE, MACHINE_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
@@ -109,10 +109,18 @@ contract ForceFieldTest is DustTest {
     world.registerNamespace(namespaceId);
     world.registerSystem(programSystemId, programSystem, false);
 
-    Vec3 coord = Position.get(entityId);
+    Vec3 coord;
+    // Handle force field fragments differently than regular entities
+    if (ObjectType.get(entityId) == ObjectTypes.ForceFieldFragment) {
+      // For fragments, we need to use ForceFieldFragmentPosition instead of Position
+      coord = ForceFieldFragmentPosition.get(entityId).fromFragmentCoord();
+    } else {
+      coord = Position.get(entityId) - vec3(1, 0, 0);
+    }
+
     ProgramId program = ProgramId.wrap(programSystemId.unwrap());
     // Attach program with test player
-    (address bob, EntityId bobEntityId) = createTestPlayer(coord - vec3(1, 0, 0));
+    (address bob, EntityId bobEntityId) = createTestPlayer(coord);
     vm.prank(bob);
     world.attachProgram(bobEntityId, entityId, program, "");
     return program;
@@ -275,12 +283,10 @@ contract ForceFieldTest is DustTest {
     // Set up a flat chunk with a player
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
-    // Set up a force field with NO energy (depleted)
+    // Set up a force field with energy
     Vec3 forceFieldCoord = playerCoord + vec3(2, 0, 0);
     setupForceField(
-      forceFieldCoord,
-      EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 }),
-      100 // depletedTime
+      forceFieldCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 })
     );
 
     (, EntityId fragmentEntityId) = TestForceFieldUtils.getForceField(forceFieldCoord);
@@ -318,7 +324,7 @@ contract ForceFieldTest is DustTest {
     assertTrue(TestForceFieldUtils.isForceFieldActive(forceFieldEntityId), "Force field not active");
 
     // Verify that the fragment at the force field coordinate exists
-    Vec3 fragmentCoord = forceFieldCoord.toForceFieldFragmentCoord();
+    Vec3 fragmentCoord = forceFieldCoord.toFragmentCoord();
     assertTrue(
       TestForceFieldUtils.isForceFieldFragment(forceFieldEntityId, fragmentCoord), "Force field fragment not found"
     );
@@ -411,7 +417,7 @@ contract ForceFieldTest is DustTest {
     EntityId forceFieldEntityId = setupForceField(forceFieldCoord, initialEnergyData);
 
     // Define expansion area
-    Vec3 refFragmentCoord = forceFieldCoord.toForceFieldFragmentCoord();
+    Vec3 refFragmentCoord = forceFieldCoord.toFragmentCoord();
     Vec3 newFragmentCoord = refFragmentCoord + vec3(1, 0, 0);
 
     // Expand the force field
@@ -444,7 +450,7 @@ contract ForceFieldTest is DustTest {
       forceFieldCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 })
     );
 
-    Vec3 refFragmentCoord = forceFieldCoord.toForceFieldFragmentCoord();
+    Vec3 refFragmentCoord = forceFieldCoord.toFragmentCoord();
     Vec3 newFragmentCoord = refFragmentCoord + vec3(1, 0, 0);
 
     // Add a fragment
@@ -501,15 +507,38 @@ contract ForceFieldTest is DustTest {
     );
 
     // Reference fragment coordinate
-    Vec3 refFragmentCoord = forceFieldCoord.toForceFieldFragmentCoord();
+    Vec3 refFragmentCoord = forceFieldCoord.toFragmentCoord();
 
     // This coordinate is not adjacent to the reference fragment
-    Vec3 newFragmentCoord = refFragmentCoord + vec3(2, 0, 0);
+    Vec3 newFragmentCoord = refFragmentCoord + vec3(1, 1, 0);
 
-    // Add should fail because new fragment is not adjacent to reference fragment
+    // Add should fail because new fragment is not adjacent to reference fragment (not in Von Neumann neighborhood)
     vm.prank(alice);
     vm.expectRevert("Reference fragment is not adjacent to new fragment");
     world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, newFragmentCoord, "");
+  }
+
+  // Test that diagonal coordinates are not considered adjacent (Von Neumann neighborhood enforces orthogonal adjacency)
+  function testAddFragmentFailsIfRefFragmentNotInVonNeumannNeighborhood() public {
+    // Set up a flat chunk with a player
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Set up a force field with energy
+    Vec3 forceFieldCoord = playerCoord + vec3(2, 0, 0);
+    EntityId forceFieldEntityId = setupForceField(
+      forceFieldCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 })
+    );
+
+    // Reference fragment coordinate
+    Vec3 refFragmentCoord = forceFieldCoord.toFragmentCoord();
+
+    // This coordinate is diagonally adjacent to the reference fragment (1,1,0 offset)
+    Vec3 diagonalFragmentCoord = refFragmentCoord + vec3(1, 1, 0);
+
+    // Add should fail because diagonal adjacency is not allowed (Von Neumann neighborhood requires manhattan distance = 1)
+    vm.prank(alice);
+    vm.expectRevert("Reference fragment is not adjacent to new fragment");
+    world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, diagonalFragmentCoord, "");
   }
 
   function testAddFragmentFailsIfRefFragmentNotInForceField() public {
@@ -523,14 +552,14 @@ contract ForceFieldTest is DustTest {
     );
 
     // Invalid reference fragment coordinate (not part of the force field)
-    Vec3 invalidRefFragmentCoord = forceFieldCoord.toForceFieldFragmentCoord() + vec3(10, 0, 0);
+    Vec3 invalidRefFragmentCoord = forceFieldCoord.toFragmentCoord() + vec3(10, 0, 0);
 
-    // Expansion area
+    // Expansion area - directly adjacent to the invalid reference fragment
     Vec3 newFragmentCoord = invalidRefFragmentCoord + vec3(1, 0, 0);
 
     // Expand should fail because reference fragment is not part of the force field
     vm.prank(alice);
-    vm.expectRevert("Reference fragment is not part of forcefield");
+    vm.expectRevert("Fragment is too far");
     world.addFragment(aliceEntityId, forceFieldEntityId, invalidRefFragmentCoord, newFragmentCoord, "");
   }
 
@@ -545,7 +574,7 @@ contract ForceFieldTest is DustTest {
     );
 
     // Add a fragment to the force field
-    Vec3 refFragmentCoord = forceFieldCoord.toForceFieldFragmentCoord();
+    Vec3 refFragmentCoord = forceFieldCoord.toFragmentCoord();
     Vec3 newFragmentCoord = refFragmentCoord + vec3(1, 0, 0);
 
     vm.prank(alice);
@@ -573,7 +602,7 @@ contract ForceFieldTest is DustTest {
     );
 
     // Expand the force field
-    Vec3 refFragmentCoord = forceFieldCoord.toForceFieldFragmentCoord();
+    Vec3 refFragmentCoord = forceFieldCoord.toFragmentCoord();
     Vec3 fragment1 = refFragmentCoord + vec3(1, 0, 0);
     Vec3 fragment2 = refFragmentCoord + vec3(0, 1, 0);
     Vec3 fragment3 = refFragmentCoord + vec3(1, 1, 0);
@@ -629,8 +658,8 @@ contract ForceFieldTest is DustTest {
     );
 
     // Try to expand first force field into second force field's area (should fail)
-    Vec3 refFragmentCoord = forceField1Coord.toForceFieldFragmentCoord();
-    Vec3 newFragmentCoord = forceField2Coord.toForceFieldFragmentCoord();
+    Vec3 refFragmentCoord = forceField1Coord.toFragmentCoord();
+    Vec3 newFragmentCoord = forceField2Coord.toFragmentCoord();
     vm.prank(alice);
     vm.expectRevert("Fragment already belongs to a forcefield");
     world.addFragment(aliceEntityId, forceField1EntityId, refFragmentCoord, newFragmentCoord, "");
@@ -776,13 +805,13 @@ contract ForceFieldTest is DustTest {
     );
 
     // Add fragment to first force field
-    Vec3 refFragmentCoord1 = forceField1Coord.toForceFieldFragmentCoord();
+    Vec3 refFragmentCoord1 = forceField1Coord.toFragmentCoord();
     Vec3 newFragment1 = refFragmentCoord1 + vec3(1, 0, 0);
     vm.prank(alice);
     world.addFragment(aliceEntityId, forceField1EntityId, refFragmentCoord1, newFragment1, "");
 
     // Add fragment to second force field
-    Vec3 refFragmentCoord2 = forceField2Coord.toForceFieldFragmentCoord();
+    Vec3 refFragmentCoord2 = forceField2Coord.toFragmentCoord();
     Vec3 newFragment2 = refFragmentCoord2 - vec3(1, 0, 0);
     vm.prank(alice);
     world.addFragment(aliceEntityId, forceField2EntityId, refFragmentCoord2, newFragment2, "");
@@ -810,7 +839,7 @@ contract ForceFieldTest is DustTest {
       forceFieldCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 10000, drainRate: 1 })
     );
 
-    Vec3 refFragmentCoord = forceFieldCoord.toForceFieldFragmentCoord();
+    Vec3 refFragmentCoord = forceFieldCoord.toFragmentCoord();
     Vec3 newFragmentCoord = refFragmentCoord + vec3(1, 0, 0);
 
     // Test adding a fragment

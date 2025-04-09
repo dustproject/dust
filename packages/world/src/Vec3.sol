@@ -226,12 +226,16 @@ library Vec3Lib {
     return center.manhattanDistance(checkCoord) == 1;
   }
 
-  function toChunkCoord(Vec3 a) internal pure returns (Vec3) {
-    return a.floorDiv(CHUNK_SIZE);
+  function toChunkCoord(Vec3 self) internal pure returns (Vec3) {
+    return self.floorDiv(CHUNK_SIZE);
   }
 
-  function toForceFieldFragmentCoord(Vec3 coord) internal pure returns (Vec3) {
-    return coord.floorDiv(FRAGMENT_SIZE);
+  function toFragmentCoord(Vec3 self) internal pure returns (Vec3) {
+    return self.floorDiv(FRAGMENT_SIZE);
+  }
+
+  function fromFragmentCoord(Vec3 self) internal pure returns (Vec3) {
+    return self.mul(FRAGMENT_SIZE);
   }
 
   // Note: Local Energy Pool shards are 2D for now, but the table supports 3D
