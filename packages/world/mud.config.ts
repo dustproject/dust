@@ -318,13 +318,6 @@ export default defineWorld({
       },
       key: ["entityId"],
     },
-    DisplayURI: {
-      schema: {
-        entityId: "EntityId",
-        uri: "string",
-      },
-      key: ["entityId"],
-    },
     // ------------------------------------------------------------
     // Resources
     // ------------------------------------------------------------

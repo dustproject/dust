@@ -6,7 +6,6 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 
-import { DisplayURI } from "../codegen/tables/DisplayURI.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
@@ -117,10 +116,6 @@ contract MineSystem is System {
       if (mineObjectTypeId == ObjectTypes.Bed) {
         // If mining a bed with a sleeping player, kill the player
         MineLib._mineBed(mined, baseCoord);
-      }
-
-      if (bytes(DisplayURI._get(mined)).length > 0) {
-        DisplayURI._deleteRecord(mined);
       }
 
       Mass._deleteRecord(mined);

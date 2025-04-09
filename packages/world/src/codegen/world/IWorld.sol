@@ -9,7 +9,6 @@ import { IBedSystem } from "./IBedSystem.sol";
 import { IBucketSystem } from "./IBucketSystem.sol";
 import { IBuildSystem } from "./IBuildSystem.sol";
 import { ICraftSystem } from "./ICraftSystem.sol";
-import { IDisplaySystem } from "./IDisplaySystem.sol";
 import { IFarmingSystem } from "./IFarmingSystem.sol";
 import { IFoodSystem } from "./IFoodSystem.sol";
 import { IForceFieldSystem } from "./IForceFieldSystem.sol";
@@ -40,7 +39,6 @@ interface IWorld is
   IBucketSystem,
   IBuildSystem,
   ICraftSystem,
-  IDisplaySystem,
   IFarmingSystem,
   IFoodSystem,
   IForceFieldSystem,

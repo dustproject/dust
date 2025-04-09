@@ -41,6 +41,13 @@ import { Vec3, vec3 } from "../Vec3.sol";
 using ObjectTypeLib for ObjectTypeId;
 
 contract BuildSystem is System {
+  function build(EntityId caller, ObjectTypeId buildObjectTypeId, Vec3 baseCoord, bytes calldata extraData)
+    public
+    returns (EntityId)
+  {
+    return buildWithDirection(caller, buildObjectTypeId, baseCoord, Direction.PositiveZ, extraData);
+  }
+
   function buildWithDirection(
     EntityId caller,
     ObjectTypeId buildObjectTypeId,
@@ -70,13 +77,6 @@ contract BuildSystem is System {
     );
 
     return base;
-  }
-
-  function build(EntityId caller, ObjectTypeId buildObjectTypeId, Vec3 baseCoord, bytes calldata extraData)
-    public
-    returns (EntityId)
-  {
-    return buildWithDirection(caller, buildObjectTypeId, baseCoord, Direction.PositiveZ, extraData);
   }
 
   function jumpBuildWithDirection(
