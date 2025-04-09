@@ -33,6 +33,7 @@ import { ObjectTypes } from "../src/ObjectTypes.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
+import { SlotAmount } from "../src/utils/InventoryUtils.sol";
 
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
@@ -303,6 +304,36 @@ contract CraftTest is DustTest {
     assertEq(Mass.get(toolEntityId2), ObjectTypeMetadata.getMass(outputTypes[0]), "mass should be equal to tool mass");
 
     afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+  }
+
+  function testCraftFuel() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    SlotAmount[] memory inputs = new SlotAmount[](2);
+    inputs[0] = SlotAmount({ slot: 0, amount: 10 });
+    inputs[1] = SlotAmount({ slot: 1, amount: 5 });
+
+    TestInventoryUtils.addObjectToSlot(aliceEntityId, ObjectTypes.OakLog, inputs[0].amount, inputs[0].slot);
+    TestInventoryUtils.addObjectToSlot(aliceEntityId, ObjectTypes.BirchLeaf, inputs[1].amount, inputs[1].slot);
+    assertInventoryHasObjectInSlot(aliceEntityId, ObjectTypes.OakLog, inputs[0].amount, inputs[0].slot);
+    assertInventoryHasObjectInSlot(aliceEntityId, ObjectTypes.BirchLeaf, inputs[1].amount, inputs[1].slot);
+
+    Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
+    EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Powerstone);
+
+    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+
+    vm.prank(alice);
+    startGasReport("craft fuel");
+    world.craftFuel(aliceEntityId, stationEntityId, inputs);
+    endGasReport();
+
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.OakLog, 0);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.BirchLeaf, 0);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Fuel, 15);
+
+    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
   }
 
