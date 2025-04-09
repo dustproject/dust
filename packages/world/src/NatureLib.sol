@@ -7,10 +7,11 @@ import { ChunkCommitment } from "./utils/Vec3Storage.sol";
 import {
   CHUNK_COMMIT_EXPIRY_BLOCKS,
   MAX_COAL,
+  MAX_COPPER,
   MAX_DIAMOND,
-  MAX_EMERALD,
   MAX_GOLD,
   MAX_IRON,
+  MAX_NEPTUNIUM,
   MAX_WHEAT_SEED
 } from "./Constants.sol";
 import { ObjectTypeId } from "./ObjectTypeId.sol";
@@ -124,10 +125,11 @@ library NatureLib {
   // Get resource cap for a specific resource type
   function getResourceCap(ObjectTypeId objectTypeId) internal pure returns (uint256) {
     if (objectTypeId == ObjectTypes.CoalOre) return MAX_COAL;
+    if (objectTypeId == ObjectTypes.CopperOre) return MAX_COPPER;
     if (objectTypeId == ObjectTypes.IronOre) return MAX_IRON;
     if (objectTypeId == ObjectTypes.GoldOre) return MAX_GOLD;
     if (objectTypeId == ObjectTypes.DiamondOre) return MAX_DIAMOND;
-    if (objectTypeId == ObjectTypes.EmeraldOre) return MAX_EMERALD;
+    if (objectTypeId == ObjectTypes.NeptuniumOre) return MAX_NEPTUNIUM;
     if (objectTypeId == ObjectTypes.WheatSeed) return MAX_WHEAT_SEED;
 
     // If no specific cap, use a high value

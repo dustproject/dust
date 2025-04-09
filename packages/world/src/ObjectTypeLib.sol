@@ -118,10 +118,6 @@ library ObjectTypeLib {
     return self == ObjectTypes.AnyLog || self == ObjectTypes.AnyPlanks;
   }
 
-  function isWhacker(ObjectTypeId self) internal pure returns (bool) {
-    return self == ObjectTypes.WoodenWhacker || self == ObjectTypes.StoneWhacker || self == ObjectTypes.SilverWhacker;
-  }
-
   function isHoe(ObjectTypeId self) internal pure returns (bool) {
     return self == ObjectTypes.WoodenHoe;
   }
@@ -218,42 +214,53 @@ library ObjectTypeLib {
   /// @dev Get ore amounts that should be burned when this object is burned
   /// Currently it only supports tools, and assumes that only a single type of ore is used
   function getOreAmount(ObjectTypeId self) internal pure returns (ObjectAmount memory) {
-    // Silver tools
-    if (self == ObjectTypes.SilverPick || self == ObjectTypes.SilverAxe) {
-      return ObjectAmount(ObjectTypes.IronOre, 4); // 4 silver bars = 4 ores
+    // Copper tools
+    if (self == ObjectTypes.CopperPick || self == ObjectTypes.CopperAxe) {
+      return ObjectAmount(ObjectTypes.CopperOre, 3); // 3 copper bars = 3 ores
     }
-    if (self == ObjectTypes.SilverWhacker) {
-      return ObjectAmount(ObjectTypes.IronOre, 6); // 6 silver bars = 6 ores
+    if (self == ObjectTypes.CopperWhacker) {
+      return ObjectAmount(ObjectTypes.CopperOre, 6); // 6 copper bars = 6 ores
+    }
+
+    // Iron tools
+    if (self == ObjectTypes.IronPick || self == ObjectTypes.IronAxe) {
+      return ObjectAmount(ObjectTypes.IronOre, 3); // 3 iron bars = 3 ores
+    }
+    if (self == ObjectTypes.IronWhacker) {
+      return ObjectAmount(ObjectTypes.IronOre, 6); // 6 iron bars = 6 ores
     }
 
     // Gold tools
     if (self == ObjectTypes.GoldPick || self == ObjectTypes.GoldAxe) {
-      return ObjectAmount(ObjectTypes.GoldOre, 4); // 4 gold bars = 4 ores
+      return ObjectAmount(ObjectTypes.GoldOre, 3); // 3 gold bars = 3 ores
     }
 
     // Diamond tools
     if (self == ObjectTypes.DiamondPick || self == ObjectTypes.DiamondAxe) {
-      return ObjectAmount(ObjectTypes.DiamondOre, 4); // 4 diamonds
+      return ObjectAmount(ObjectTypes.DiamondOre, 3); // 3 diamonds = 3 ores
     }
 
     // Neptunium tools
     if (self == ObjectTypes.NeptuniumPick || self == ObjectTypes.NeptuniumAxe) {
-      return ObjectAmount(ObjectTypes.EmeraldOre, 4); // 4 neptunium bars = 4 ores
+      return ObjectAmount(ObjectTypes.NeptuniumOre, 3); // 3 neptunium bars = 3 ores
     }
 
     // Return zero amount for any other tool
     return ObjectAmount(ObjectTypes.Null, 0);
   }
 
+  function burnOre(ObjectTypeId self, uint256 amount) internal {
+    // This increases the availability of the ores being burned
+    ResourceCount._set(self, ResourceCount._get(self) - amount);
+    // This allows the same amount of ores to respawn
+    BurnedResourceCount._set(ObjectTypes.AnyOre, BurnedResourceCount._get(ObjectTypes.AnyOre) + amount);
+  }
+
   function burnOres(ObjectTypeId self) internal {
     ObjectAmount memory ores = self.getOreAmount();
     ObjectTypeId objectTypeId = ores.objectTypeId;
     if (!objectTypeId.isNull()) {
-      uint256 amount = ores.amount;
-      // This increases the availability of the ores being burned
-      ResourceCount._set(objectTypeId, ResourceCount._get(objectTypeId) - amount);
-      // This allows the same amount of ores to respawn
-      BurnedResourceCount._set(ObjectTypes.AnyOre, BurnedResourceCount._get(ObjectTypes.AnyOre) + amount);
+      objectTypeId.burnOre(ores.amount);
     }
   }
 
@@ -280,7 +287,7 @@ library ObjectTypeLib {
 }
 
 function getLogObjectTypes() pure returns (ObjectTypeId[] memory) {
-  ObjectTypeId[] memory result = new ObjectTypeId[](7);
+  ObjectTypeId[] memory result = new ObjectTypeId[](8);
   result[0] = ObjectTypes.OakLog;
   result[1] = ObjectTypes.BirchLog;
   result[2] = ObjectTypes.JungleLog;
@@ -288,11 +295,12 @@ function getLogObjectTypes() pure returns (ObjectTypeId[] memory) {
   result[4] = ObjectTypes.AcaciaLog;
   result[5] = ObjectTypes.SpruceLog;
   result[6] = ObjectTypes.DarkOakLog;
+  result[7] = ObjectTypes.MangroveLog;
   return result;
 }
 
 function getPlanksObjectTypes() pure returns (ObjectTypeId[] memory) {
-  ObjectTypeId[] memory result = new ObjectTypeId[](7);
+  ObjectTypeId[] memory result = new ObjectTypeId[](8);
   result[0] = ObjectTypes.OakPlanks;
   result[1] = ObjectTypes.BirchPlanks;
   result[2] = ObjectTypes.JunglePlanks;
@@ -300,16 +308,18 @@ function getPlanksObjectTypes() pure returns (ObjectTypeId[] memory) {
   result[4] = ObjectTypes.SprucePlanks;
   result[5] = ObjectTypes.AcaciaPlanks;
   result[6] = ObjectTypes.DarkOakPlanks;
+  result[7] = ObjectTypes.MangrovePlanks;
   return result;
 }
 
 function getOreObjectTypes() pure returns (ObjectTypeId[] memory) {
-  ObjectTypeId[] memory result = new ObjectTypeId[](5);
+  ObjectTypeId[] memory result = new ObjectTypeId[](6);
   result[0] = ObjectTypes.CoalOre;
-  result[1] = ObjectTypes.IronOre;
-  result[2] = ObjectTypes.GoldOre;
-  result[3] = ObjectTypes.DiamondOre;
-  result[4] = ObjectTypes.EmeraldOre;
+  result[1] = ObjectTypes.CopperOre;
+  result[2] = ObjectTypes.IronOre;
+  result[3] = ObjectTypes.GoldOre;
+  result[4] = ObjectTypes.DiamondOre;
+  result[5] = ObjectTypes.NeptuniumOre;
   return result;
 }
 
