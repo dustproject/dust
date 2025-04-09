@@ -8,6 +8,9 @@ import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 
 import { DisplayURI } from "../codegen/tables/DisplayURI.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
+
+import { Machine } from "../codegen/tables/Machine.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
@@ -38,7 +41,7 @@ import {
   getObjectTypeIdAt,
   getOrCreateEntityAt
 } from "../utils/EntityUtils.sol";
-import { destroyForceField, getForceField } from "../utils/ForceFieldUtils.sol";
+import { getForceField } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { DeathNotification, MineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
@@ -106,24 +109,23 @@ contract MineSystem is System {
       minedType = RandomResourceLib._collapseRandomOre(mined, coord);
     }
 
-    MineLib._requireMinesAllowed(caller, minedType, coord, extraData);
-
     uint128 finalMass = MassReductionLib._processMassReduction(caller, mined, toolSlot);
 
     if (finalMass != 0) {
       Mass._setMass(mined, finalMass);
+      MineLib._requireMinesAllowed(caller, minedType, coord, extraData);
       return mined;
     }
 
     // The block was fully mined
     Mass._deleteRecord(mined);
 
-    // Remove flora on top of this block
+    // Remove seed on top of this block
     Vec3 aboveCoord = baseCoord + vec3(0, 1, 0);
     // If above is a seed, the entity must exist as there are not seeds in the base terrain
     (EntityId above, ObjectTypeId aboveTypeId) = getOrCreateEntityAt(aboveCoord);
-    if (aboveTypeId.isFlora()) {
-      _removeFlora(above, aboveTypeId, aboveCoord);
+    if (aboveTypeId.isSeed()) {
+      _removeSeed(above, aboveTypeId, aboveCoord);
       _handleDrop(caller, aboveTypeId, aboveCoord);
     }
 
@@ -131,25 +133,25 @@ contract MineSystem is System {
     _removeRelativeBlocks(mined, minedType, baseCoord);
     _handleDrop(caller, minedType, baseCoord);
 
-    _destroyEntity(caller, mined, minedType, baseCoord, extraData);
+    _destroyEntity(caller, mined, minedType, baseCoord);
+
+    MineLib._requireMinesAllowed(caller, minedType, coord, extraData);
 
     notify(caller, MineNotification({ mineEntityId: mined, mineCoord: coord, mineObjectTypeId: minedType }));
 
     return mined;
   }
 
-  function _removeFlora(EntityId entityId, ObjectTypeId objectType, Vec3 coord) internal {
+  function _removeSeed(EntityId entityId, ObjectTypeId objectType, Vec3 coord) internal {
     ObjectType._set(entityId, ObjectTypes.Air);
-    if (objectType.isSeed()) {
-      require(SeedGrowth._getFullyGrownAt(entityId) > block.timestamp, "Cannot mine fully grown seed");
-      addEnergyToLocalPool(coord, ObjectTypeMetadata._getEnergy(objectType));
-    }
+    require(SeedGrowth._getFullyGrownAt(entityId) > block.timestamp, "Cannot mine fully grown seed");
+    addEnergyToLocalPool(coord, ObjectTypeMetadata._getEnergy(objectType));
   }
 
   function _removeBlock(EntityId entityId, ObjectTypeId objectType, Vec3 coord) internal {
-    // If object being mined is flora, no need to check above entities
-    if (objectType.isFlora()) {
-      _removeFlora(entityId, objectType, coord);
+    // If object being mined is seed, no need to check above entities
+    if (objectType.isSeed()) {
+      _removeSeed(entityId, objectType, coord);
       return;
     }
 
@@ -178,28 +180,24 @@ contract MineSystem is System {
     }
   }
 
-  function _destroyEntity(
-    EntityId caller,
-    EntityId mined,
-    ObjectTypeId minedType,
-    Vec3 baseCoord,
-    bytes calldata extraData
-  ) internal {
-    // Detach program if it exists
-    ProgramId program = mined.getProgram();
-    if (program.exists()) {
-      bytes memory onDetachProgram = abi.encodeCall(IDetachProgramHook.onDetachProgram, (caller, mined, extraData));
-      program.call({ gas: SAFE_PROGRAM_GAS, hook: onDetachProgram });
-    }
-
+  function _destroyEntity(EntityId caller, EntityId mined, ObjectTypeId minedType, Vec3 baseCoord) internal {
     if (minedType == ObjectTypes.Bed) {
       MineLib._mineBed(mined, baseCoord);
     } else if (minedType == ObjectTypes.ForceField) {
-      destroyForceField(mined);
+      Machine._deleteRecord(mined);
     }
 
     if (bytes(DisplayURI._get(mined)).length > 0) {
       DisplayURI._deleteRecord(mined);
+    }
+
+    // Detach program if it exists
+    ProgramId program = mined.getProgram();
+    if (program.exists()) {
+      bytes memory onDetachProgram = abi.encodeCall(IDetachProgramHook.onDetachProgram, (caller, mined, ""));
+      program.call({ gas: SAFE_PROGRAM_GAS, hook: onDetachProgram });
+
+      EntityProgram._deleteRecord(mined);
     }
   }
 
@@ -244,10 +242,10 @@ library MineLib {
     public
   {
     (EntityId forceField, EntityId fragment) = getForceField(coord);
-
     if (!forceField.exists()) {
       return;
     }
+
     (EnergyData memory machineData,) = updateMachineEnergy(forceField);
     if (machineData.energy == 0) {
       return;
