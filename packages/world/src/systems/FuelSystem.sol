@@ -5,6 +5,7 @@ import { System } from "@latticexyz/world/src/System.sol";
 
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
+import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { InventorySlot, InventorySlotData } from "../codegen/tables/InventorySlot.sol";
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 
@@ -14,12 +15,16 @@ import { ObjectTypeId } from "../ObjectTypeId.sol";
 import { ObjectTypeLib } from "../ObjectTypeLib.sol";
 import { ObjectTypes } from "../ObjectTypes.sol";
 
+import { MACHINE_ENERGY_DRAIN_RATE } from "../Constants.sol";
 import { Vec3 } from "../Vec3.sol";
-import { transferEnergyToPool } from "../utils/EnergyUtils.sol";
+import { transferEnergyToPool, updateMachineEnergy } from "../utils/EnergyUtils.sol";
 import { InventoryUtils, SlotAmount } from "../utils/InventoryUtils.sol";
-import { CraftNotification, notify } from "../utils/NotifUtils.sol";
+import { CraftNotification, FuelMachineNotification, notify } from "../utils/NotifUtils.sol";
 
-contract CraftFuelSystem is System {
+import { ProgramId } from "../ProgramId.sol";
+import { IFuelHook } from "../ProgramInterfaces.sol";
+
+contract FuelSystem is System {
   using ObjectTypeLib for ObjectTypeId;
 
   function craftFuel(EntityId caller, EntityId powerstone, SlotAmount[] memory inputs) public {
@@ -48,5 +53,28 @@ contract CraftFuelSystem is System {
 
     // TODO: should we use a diff notification for fuel?
     notify(caller, CraftNotification({ recipeId: bytes32(0), station: powerstone }));
+  }
+
+  function fuelMachine(EntityId caller, EntityId machine, uint16 fuelAmount, bytes calldata extraData) external {
+    caller.activate();
+    caller.requireConnected(machine);
+
+    machine = machine.baseEntityId();
+
+    ObjectTypeId objectTypeId = ObjectType._get(machine);
+    require(ObjectTypeLib.isMachine(objectTypeId), "Can only power machines");
+
+    InventoryUtils.removeObject(caller, ObjectTypes.Fuel, fuelAmount);
+
+    (EnergyData memory machineData,) = updateMachineEnergy(machine);
+
+    uint128 newEnergyLevel = machineData.energy + uint128(fuelAmount) * ObjectTypeMetadata._getEnergy(ObjectTypes.Fuel);
+
+    Energy._setEnergy(machine, newEnergyLevel);
+
+    ProgramId program = machine.getProgram();
+    program.callOrRevert(abi.encodeCall(IFuelHook.onFuel, (caller, machine, fuelAmount, extraData)));
+
+    notify(caller, FuelMachineNotification({ machine: machine, fuelAmount: fuelAmount }));
   }
 }

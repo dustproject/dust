@@ -6,7 +6,7 @@ import { Direction } from "./codegen/common.sol";
 import { BurnedResourceCount } from "./codegen/tables/BurnedResourceCount.sol";
 import { ResourceCount } from "./codegen/tables/ResourceCount.sol";
 
-import { IMachineSystem } from "./codegen/world/IMachineSystem.sol";
+import { IFuelSystem } from "./codegen/world/IFuelSystem.sol";
 import { ITransferSystem } from "./codegen/world/ITransferSystem.sol";
 
 import { ObjectTypeId } from "./ObjectTypeId.sol";
@@ -299,7 +299,7 @@ library ObjectTypeLib {
     }
 
     if (self == ObjectTypes.Chest) {
-      return sig == ITransferSystem.transfer.selector || sig == IMachineSystem.fuelMachine.selector;
+      return sig == ITransferSystem.transfer.selector || sig == IFuelSystem.fuelMachine.selector;
     }
 
     return false;
