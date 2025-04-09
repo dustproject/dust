@@ -38,7 +38,7 @@ contract CraftFuelSystem is System {
       // we convert the mass to energy
       totalEnergy +=
         inputs[i].amount * (ObjectTypeMetadata._getEnergy(inputType) + ObjectTypeMetadata._getMass(inputType));
-      InventoryUtils.removeObject(caller, inputType, inputs[i].amount);
+      InventoryUtils.removeObjectFromSlot(caller, inputType, inputs[i].amount, inputs[i].slot);
     }
     uint128 fuelAmount = totalEnergy / ObjectTypeMetadata._getEnergy(ObjectTypes.Fuel);
     require(fuelAmount > 0 && fuelAmount <= uint128(type(uint16).max), "Invalid fuel amount");
