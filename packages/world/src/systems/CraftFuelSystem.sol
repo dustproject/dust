@@ -24,14 +24,17 @@ contract CraftFuelSystem is System {
 
   function craftFuel(EntityId caller, EntityId powerstone, SlotAmount[] memory inputs) public {
     caller.activate();
-    require(inputs.length > 0, "No inputs provided");
-    require(powerstone.exists() && ObjectType._get(powerstone) == ObjectTypes.Powerstone, "Invalid powerstone");
+    require(inputs.length > 0, "Must provide at least one input");
+    require(
+      powerstone.exists() && ObjectType._get(powerstone) == ObjectTypes.Powerstone,
+      "You need a powerstone to craft fuel"
+    );
     caller.requireConnected(powerstone);
 
     uint128 totalEnergy = 0;
     for (uint256 i = 0; i < inputs.length; i++) {
       ObjectTypeId inputType = InventorySlot._getObjectType(caller, inputs[i].slot);
-      require(inputType.isLog() || inputType.isLeaf(), "Invalid input type");
+      require(inputType.isLog() || inputType.isLeaf(), "Can only use logs or leaves to make fuel");
       // we convert the mass to energy
       totalEnergy +=
         inputs[i].amount * (ObjectTypeMetadata._getEnergy(inputType) + ObjectTypeMetadata._getMass(inputType));
