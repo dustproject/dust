@@ -31,7 +31,7 @@ function _isFragmentActive(ForceFieldFragmentData memory fragmentData, EntityId 
  * @dev Get the forcefield and fragment entity IDs for a given coordinate
  */
 function getForceField(Vec3 coord) view returns (EntityId, EntityId) {
-  Vec3 fragmentCoord = coord.toForceFieldFragmentCoord();
+  Vec3 fragmentCoord = coord.toFragmentCoord();
   ForceFieldFragmentData memory fragmentData = ForceFieldFragment._get(fragmentCoord);
 
   if (!_isFragmentActive(fragmentData, fragmentData.forceFieldId)) {
@@ -80,7 +80,7 @@ function setupForceField(EntityId forceField, Vec3 coord) {
   // Set up the forcefield first
   Machine._setCreatedAt(forceField, uint128(block.timestamp));
 
-  Vec3 fragmentCoord = coord.toForceFieldFragmentCoord();
+  Vec3 fragmentCoord = coord.toFragmentCoord();
   setupForceFieldFragment(forceField, fragmentCoord);
 }
 

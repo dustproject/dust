@@ -107,11 +107,10 @@ contract ForceFieldSystem is System {
     bytes calldata extraData
   ) public {
     caller.activate();
-    // caller.requireConnected(forceField);
+    caller.requireAdjacentToFragment(fragmentCoord);
 
     ObjectTypeId objectTypeId = ObjectType._get(forceField);
     require(objectTypeId == ObjectTypes.ForceField, "Invalid object type");
-    (EnergyData memory machineData,) = updateMachineEnergy(forceField);
 
     require(
       refFragmentCoord.inVonNeumannNeighborhood(fragmentCoord), "Reference fragment is not adjacent to new fragment"
@@ -120,6 +119,8 @@ contract ForceFieldSystem is System {
     require(isForceFieldFragment(forceField, refFragmentCoord), "Reference fragment is not part of forcefield");
     require(!isForceFieldFragmentActive(fragmentCoord), "Fragment already belongs to a forcefield");
     EntityId fragment = setupForceFieldFragment(forceField, fragmentCoord);
+
+    (EnergyData memory machineData,) = updateMachineEnergy(forceField);
 
     // Increase drain rate per new fragment
     Energy._setDrainRate(forceField, machineData.drainRate + MACHINE_ENERGY_DRAIN_RATE);
@@ -146,12 +147,12 @@ contract ForceFieldSystem is System {
     bytes calldata extraData
   ) public {
     caller.activate();
-
-    Vec3 forceFieldFragmentCoord = Position._get(forceField).toForceFieldFragmentCoord();
+    caller.requireAdjacentToFragment(fragmentCoord);
 
     ObjectTypeId objectTypeId = ObjectType._get(forceField);
     require(objectTypeId == ObjectTypes.ForceField, "Invalid object type");
 
+    Vec3 forceFieldFragmentCoord = Position._get(forceField).toFragmentCoord();
     require(forceFieldFragmentCoord != fragmentCoord, "Can't remove forcefield's fragment");
     require(isForceFieldFragment(forceField, fragmentCoord), "Fragment is not part of forcefield");
 
@@ -167,12 +168,12 @@ contract ForceFieldSystem is System {
 
     (EnergyData memory machineData,) = updateMachineEnergy(forceField);
 
-    // Update drain rate
     Energy._setDrainRate(forceField, machineData.drainRate - MACHINE_ENERGY_DRAIN_RATE);
 
     {
       bytes memory onRemoveFragment =
         abi.encodeCall(IRemoveFragmentHook.onRemoveFragment, (caller, forceField, fragment, extraData));
+
       forceField.getProgram().callOrRevert(onRemoveFragment);
     }
 

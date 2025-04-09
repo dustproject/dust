@@ -29,7 +29,15 @@ import { Vec3 } from "../Vec3.sol";
 contract ProgramSystem is System {
   function attachProgram(EntityId caller, EntityId target, ProgramId program, bytes calldata extraData) public {
     caller.activate();
-    (, Vec3 targetCoord) = caller.requireConnected(target);
+
+    Vec3 validatorCoord;
+    if (ObjectType._get(target) == ObjectTypes.ForceFieldFragment) {
+      (, Vec3 fragmentCoord) = caller.requireAdjacentToFragment(target);
+      validatorCoord = fragmentCoord.fromFragmentCoord();
+    } else {
+      (, validatorCoord) = caller.requireConnected(target);
+    }
+
     target = target.baseEntityId();
 
     require(!target.getProgram().exists(), "Existing program must be detached");
@@ -37,7 +45,7 @@ contract ProgramSystem is System {
     (, bool publicAccess) = Systems._get(program.toResourceId());
     require(!publicAccess, "Program system must be private");
 
-    (EntityId validator, ProgramId validatorProgram) = _getValidatorProgram(targetCoord);
+    (EntityId validator, ProgramId validatorProgram) = _getValidatorProgram(validatorCoord);
 
     bytes memory validateProgram =
       abi.encodeCall(IProgramValidator.validateProgram, (caller, validator, target, program, extraData));
@@ -54,7 +62,15 @@ contract ProgramSystem is System {
 
   function detachProgram(EntityId caller, EntityId target, bytes calldata extraData) public {
     caller.activate();
-    (, Vec3 targetCoord) = caller.requireConnected(target);
+
+    Vec3 forceFieldCoord;
+    if (ObjectType._get(target) == ObjectTypes.ForceFieldFragment) {
+      (, Vec3 fragmentCoord) = caller.requireAdjacentToFragment(target);
+      forceFieldCoord = fragmentCoord.fromFragmentCoord();
+    } else {
+      (, forceFieldCoord) = caller.requireConnected(target);
+    }
+
     target = target.baseEntityId();
 
     ProgramId program = target.getProgram();
@@ -62,7 +78,7 @@ contract ProgramSystem is System {
 
     bytes memory onDetachProgram = abi.encodeCall(IDetachProgramHook.onDetachProgram, (caller, target, extraData));
 
-    (EntityId forceField,) = getForceField(targetCoord);
+    (EntityId forceField,) = getForceField(forceFieldCoord);
     // If forcefield doesn't have energy, allow the program
     (EnergyData memory machineData,) = updateMachineEnergy(forceField);
     if (machineData.energy > 0) {
