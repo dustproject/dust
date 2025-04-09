@@ -12,20 +12,6 @@ export default defineWorld({
     ProgramId: { type: "bytes32", filePath: "@dust/world/src/ProgramId.sol" },
   },
   tables: {
-    App: {
-      schema: {
-        app: "ResourceId",
-        configUrl: "string",
-      },
-      key: ["app"],
-    },
-    ProgramEntity: {
-      schema: {
-        program: "ProgramId",
-        entity: "EntityId", // optional, assumes all entities if empty
-        defaultApp: "ResourceId",
-      },
-      key: ["program", "entity"],
-    },
+    // TODO
   },
 });
