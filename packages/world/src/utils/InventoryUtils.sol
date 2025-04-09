@@ -303,7 +303,6 @@ library InventoryUtils {
       }
     }
 
-    // Clean up inventory structure
     Inventory._deleteRecord(from);
   }
 
@@ -312,7 +311,7 @@ library InventoryUtils {
     view
     returns (EntityId[] memory entities, ObjectAmount[] memory objects)
   {
-    // First pass: count entities and objects
+    // Count entities and objects
     uint256 entityCount = 0;
     uint256 objectCount = 0;
 
@@ -325,11 +324,10 @@ library InventoryUtils {
       }
     }
 
-    // Allocate arrays
     entities = new EntityId[](entityCount);
     objects = new ObjectAmount[](objectCount);
 
-    // Second pass: fill arrays
+    // Fill arrays
     uint256 entityIndex = 0;
     uint256 objectIndex = 0;
 
@@ -387,11 +385,6 @@ library InventoryUtils {
     InventorySlot._setOccupiedIndex(owner, occupiedIndex, occupiedIndex);
     return occupiedIndex;
   }
-
-  // function _addToInventory(EntityId owner, uint16 slot) private {
-  //   uint16 occupiedIndex = uint16(Inventory._length(owner));
-  //   InventorySlot._setOccupiedIndex(owner, slot, occupiedIndex);
-  // }
 
   // Marks a slot as empty - O(1)
   function _recycleSlot(EntityId owner, uint16 slot) private {

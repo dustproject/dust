@@ -16,10 +16,9 @@ import { getUniqueEntity } from "../Utils.sol";
 import { Vec3 } from "../Vec3.sol";
 import { getOrCreateEntityAt } from "../utils/EntityUtils.sol";
 import { InventoryUtils, SlotTransfer } from "../utils/InventoryUtils.sol";
-import { DropNotification, notify } from "../utils/NotifUtils.sol";
+import { DropNotification, PickupNotification, notify } from "../utils/NotifUtils.sol";
 import { TerrainLib } from "./libraries/TerrainLib.sol";
 
-// TODO: combine the tool and non-tool drop functions
 contract InventorySystem is System {
   function drop(EntityId caller, SlotTransfer[] memory slotTransfers, Vec3 coord) public {
     require(slotTransfers.length > 0, "Must drop at least one object");
@@ -30,11 +29,7 @@ contract InventorySystem is System {
     require(ObjectTypeMetadata._getCanPassThrough(objectTypeId), "Cannot drop on a non-passable block");
 
     InventoryUtils.transfer(caller, entityId, slotTransfers);
-    // TODO: confirm the structure of this notification
-    // notify(
-    //   caller,
-    //   DropNotification({ dropCoord: coord, dropObjectTypeId: toolObjectTypeId, dropAmount: uint16(tools.length) })
-    // );
+    notify(caller, DropNotification({ dropCoord: coord }));
   }
 
   function pickup(EntityId caller, SlotTransfer[] memory slotTransfers, Vec3 coord) public {
@@ -62,14 +57,6 @@ contract InventorySystem is System {
 
     InventoryUtils.transferAll(entityId, caller);
 
-    // TODO: Confirm notification
-    // notify(
-    //   caller,
-    //   PickupNotification({
-    //     pickupCoord: coord,
-    //     pickupObjectTypeId: ObjectTypes.Air,
-    //     pickupAmount: uint16(numTransferred)
-    //   })
-    // );
+    notify(caller, PickupNotification({ pickupCoord: coord }));
   }
 }

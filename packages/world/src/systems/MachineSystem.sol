@@ -25,7 +25,7 @@ import { IFuelHook } from "../ProgramInterfaces.sol";
 import { Vec3 } from "../Vec3.sol";
 
 contract MachineSystem is System {
-  function fuelMachine(EntityId caller, EntityId machine, uint16 fuelAmount) public {
+  function fuelMachine(EntityId caller, EntityId machine, uint16 fuelAmount, bytes calldata extraData) external {
     caller.activate();
     caller.requireConnected(machine);
 
@@ -42,10 +42,9 @@ contract MachineSystem is System {
 
     Energy._setEnergy(machine, newEnergyLevel);
 
-    // TODO: pass extradata as argument
     ProgramId program = machine.getProgram();
-    program.callOrRevert(abi.encodeCall(IFuelHook.onFuel, (caller, machine, fuelAmount, "")));
+    program.callOrRevert(abi.encodeCall(IFuelHook.onFuel, (caller, machine, fuelAmount, extraData)));
 
-    // TODO: notify
+    notify(caller, FuelMachineNotification({ machine: machine, fuelAmount: fuelAmount }));
   }
 }

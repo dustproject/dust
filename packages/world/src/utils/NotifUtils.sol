@@ -32,16 +32,14 @@ struct CraftNotification {
   EntityId station;
 }
 
+// TODO: update to use actual object types and amounts
 struct DropNotification {
   Vec3 dropCoord;
-  ObjectTypeId dropObjectTypeId;
-  uint16 dropAmount;
 }
 
+// TODO: update to use actual object types and amounts
 struct PickupNotification {
   Vec3 pickupCoord;
-  ObjectTypeId pickupObjectTypeId;
-  uint16 pickupAmount;
 }
 
 struct TransferNotification {
@@ -64,7 +62,6 @@ struct SpawnNotification {
 
 struct FuelMachineNotification {
   EntityId machine;
-  Vec3 machineCoord;
   uint16 fuelAmount;
 }
 
