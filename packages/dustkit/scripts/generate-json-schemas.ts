@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { config } from "../src/apps/config";
+import { appConfig } from "../src/apps/appConfig";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,5 +12,5 @@ fs.mkdirSync(outDir, { recursive: true });
 
 fs.writeFileSync(
   path.join(outDir, "app-config.json"),
-  JSON.stringify(config.toJsonSchema(), null, 2),
+  JSON.stringify(appConfig.toJsonSchema(), null, 2),
 );

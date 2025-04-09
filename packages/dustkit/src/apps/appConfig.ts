@@ -1,6 +1,6 @@
 import { type } from "arktype";
 
-export const config = type({
+export const appConfig = type({
   name: "string",
   startUrl: "string",
   "frame?": {
@@ -8,9 +8,9 @@ export const config = type({
     height: "number",
   },
 });
-export type Config = typeof config.infer;
+export type AppConfig = typeof appConfig.infer;
 
-export const configInput = type({
+export const appConfigInput = type({
   name: "string",
   "startUrl?": "string",
   "frame?": {
@@ -18,4 +18,4 @@ export const configInput = type({
     height: "number",
   },
 });
-export type ConfigInput = typeof configInput.infer;
+export type AppConfigInput = typeof appConfigInput.infer;

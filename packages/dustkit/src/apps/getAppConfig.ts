@@ -1,15 +1,17 @@
-import { type Config, configInput } from "./config";
+import { type AppConfig, appConfigInput } from "./appConfig";
 
-export async function getConfig({ url }: { url: string }): Promise<Config> {
+export async function getAppConfig({
+  url,
+}: { url: string }): Promise<AppConfig> {
   const config = await fetch(url)
     .then((res) => res.json())
-    .then(configInput.assert);
+    .then(appConfigInput.assert);
 
   const configUrl = new URL(url);
   const startUrl = new URL(config.startUrl ?? ".", url);
   if (startUrl.origin !== configUrl.origin) {
     throw new Error(
-      `Config \`startUrl\` origin ("${startUrl.origin}") did not match config origin ("${configUrl.origin}").`,
+      `App config \`startUrl\` origin ("${startUrl.origin}") did not match app config origin ("${configUrl.origin}").`,
     );
   }
 
