@@ -282,7 +282,7 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
     inputTypes[0] = ObjectTypes.IronBar;
     uint16[] memory inputAmounts = new uint16[](1);
@@ -344,7 +344,7 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
     inputTypes[0] = ObjectTypes.GoldBar;
     uint16[] memory inputAmounts = new uint16[](1);
@@ -406,7 +406,7 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
     inputTypes[0] = ObjectTypes.Diamond;
     uint16[] memory inputAmounts = new uint16[](1);
@@ -468,7 +468,7 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
     inputTypes[0] = ObjectTypes.NeptuniumBar;
     uint16[] memory inputAmounts = new uint16[](1);
@@ -528,7 +528,7 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
     inputTypes[0] = ObjectTypes.CopperBlock;
     uint16[] memory inputAmounts = new uint16[](1);
@@ -588,7 +588,7 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
     inputTypes[0] = ObjectTypes.IronBlock;
     uint16[] memory inputAmounts = new uint16[](1);
@@ -648,7 +648,7 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
     inputTypes[0] = ObjectTypes.GoldBlock;
     uint16[] memory inputAmounts = new uint16[](1);
@@ -708,7 +708,7 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
     inputTypes[0] = ObjectTypes.DiamondBlock;
     uint16[] memory inputAmounts = new uint16[](1);
@@ -768,7 +768,7 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
     inputTypes[0] = ObjectTypes.NeptuniumBlock;
     uint16[] memory inputAmounts = new uint16[](1);
@@ -920,7 +920,7 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
     inputTypes[0] = ObjectTypes.Powerstone;
     uint16[] memory inputAmounts = new uint16[](1);
@@ -984,7 +984,7 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
     inputTypes[0] = ObjectTypes.ForceField;
     uint16[] memory inputAmounts = new uint16[](1);
@@ -1108,7 +1108,7 @@ function initRecipes() {
     );
   }
   {
-    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Workbench;
     ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
     inputTypes[0] = ObjectTypes.SpawnTile;
     uint16[] memory inputAmounts = new uint16[](1);
