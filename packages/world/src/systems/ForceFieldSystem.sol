@@ -147,8 +147,7 @@ contract ForceFieldSystem is System {
   ) public {
     caller.activate();
 
-    Vec3 forceFieldFragmentCoord;
-    forceFieldFragmentCoord = Position._get(forceField).toForceFieldFragmentCoord();
+    Vec3 forceFieldFragmentCoord = Position._get(forceField).toForceFieldFragmentCoord();
 
     ObjectTypeId objectTypeId = ObjectType._get(forceField);
     require(objectTypeId == ObjectTypes.ForceField, "Invalid object type");

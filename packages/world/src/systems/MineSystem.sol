@@ -6,7 +6,6 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 
-import { DisplayURI } from "../codegen/tables/DisplayURI.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
 
@@ -185,10 +184,6 @@ contract MineSystem is System {
       MineLib._mineBed(mined, baseCoord);
     } else if (minedType == ObjectTypes.ForceField) {
       Machine._deleteRecord(mined);
-    }
-
-    if (bytes(DisplayURI._get(mined)).length > 0) {
-      DisplayURI._deleteRecord(mined);
     }
 
     // Detach program if it exists

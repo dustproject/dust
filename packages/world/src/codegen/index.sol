@@ -30,7 +30,6 @@ import { EntityProgram } from "./tables/EntityProgram.sol";
 import { ForceFieldFragment, ForceFieldFragmentData } from "./tables/ForceFieldFragment.sol";
 import { ForceFieldFragmentPosition, ForceFieldFragmentPositionData } from "./tables/ForceFieldFragmentPosition.sol";
 import { Machine, MachineData } from "./tables/Machine.sol";
-import { DisplayURI } from "./tables/DisplayURI.sol";
 import { ChunkCommitment } from "./tables/ChunkCommitment.sol";
 import { ResourcePosition, ResourcePositionData } from "./tables/ResourcePosition.sol";
 import { ResourceCount } from "./tables/ResourceCount.sol";

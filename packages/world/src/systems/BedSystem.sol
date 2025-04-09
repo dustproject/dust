@@ -35,48 +35,7 @@ import { ProgramId } from "../ProgramId.sol";
 import { ISleepHook, IWakeupHook } from "../ProgramInterfaces.sol";
 import { Vec3 } from "../Vec3.sol";
 
-// To avoid reaching bytecode size limit
-library BedLib {
-  function transferInventory(EntityId player, EntityId bed) public {
-    InventoryUtils.transferAll(player, bed);
-  }
-
-  function updateSleepingPlayer(EntityId forceField, EntityId player, EntityId bed, Vec3 bedCoord)
-    public
-    returns (EnergyData memory)
-  {
-    uint128 depletedTime;
-    (, depletedTime) = updateMachineEnergy(forceField);
-    return updateSleepingPlayerEnergy(player, bed, depletedTime, bedCoord);
-  }
-}
-
 contract BedSystem is System {
-  function removeDeadPlayerFromBed(EntityId player, Vec3 dropCoord) public {
-    checkWorldStatus();
-
-    EntityId bed = PlayerStatus._getBedEntityId(player);
-    require(bed.exists(), "Player is not in a bed");
-
-    Vec3 bedCoord = Position._get(bed);
-
-    // TODO: use a different constant?
-    require(bedCoord.inSurroundingCube(dropCoord, MAX_RESPAWN_HALF_WIDTH), "Drop location is too far from bed");
-
-    (EntityId drop, ObjectTypeId objectTypeId) = getOrCreateEntityAt(dropCoord);
-    require(ObjectTypeMetadata._getCanPassThrough(objectTypeId), "Cannot drop items on a non-passable block");
-
-    (EntityId forceField,) = getForceField(bedCoord);
-    EnergyData memory playerData = BedLib.updateSleepingPlayer(forceField, player, bed, bedCoord);
-
-    require(playerData.energy == 0, "Player is not dead");
-
-    PlayerUtils.removePlayerFromBed(player, bed, forceField);
-
-    BedLib.transferInventory(bed, drop);
-    // TODO: Should we safecall the program?
-  }
-
   function sleep(EntityId caller, EntityId bed, bytes calldata extraData) public {
     caller.activate();
 
@@ -135,5 +94,46 @@ contract BedSystem is System {
     bed.getProgram().callOrRevert(onWakeup);
 
     notify(caller, WakeupNotification({ bed: bed, bedCoord: bedCoord }));
+  }
+
+  function removeDeadPlayerFromBed(EntityId player, Vec3 dropCoord) public {
+    checkWorldStatus();
+
+    EntityId bed = PlayerStatus._getBedEntityId(player);
+    require(bed.exists(), "Player is not in a bed");
+
+    Vec3 bedCoord = Position._get(bed);
+
+    // TODO: use a different constant?
+    require(bedCoord.inSurroundingCube(dropCoord, MAX_RESPAWN_HALF_WIDTH), "Drop location is too far from bed");
+
+    (EntityId drop, ObjectTypeId objectTypeId) = getOrCreateEntityAt(dropCoord);
+    require(ObjectTypeMetadata._getCanPassThrough(objectTypeId), "Cannot drop items on a non-passable block");
+
+    (EntityId forceField,) = getForceField(bedCoord);
+    EnergyData memory playerData = BedLib.updateSleepingPlayer(forceField, player, bed, bedCoord);
+
+    require(playerData.energy == 0, "Player is not dead");
+
+    PlayerUtils.removePlayerFromBed(player, bed, forceField);
+
+    BedLib.transferInventory(bed, drop);
+    // TODO: Should we safecall the program?
+  }
+}
+
+// To avoid reaching bytecode size limit
+library BedLib {
+  function transferInventory(EntityId player, EntityId bed) public {
+    InventoryUtils.transferAll(player, bed);
+  }
+
+  function updateSleepingPlayer(EntityId forceField, EntityId player, EntityId bed, Vec3 bedCoord)
+    public
+    returns (EnergyData memory)
+  {
+    uint128 depletedTime;
+    (, depletedTime) = updateMachineEnergy(forceField);
+    return updateSleepingPlayerEnergy(player, bed, depletedTime, bedCoord);
   }
 }

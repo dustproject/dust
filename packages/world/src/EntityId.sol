@@ -102,7 +102,6 @@ library ActivateLib {
 
     self.requireCallerAllowed(caller, objectTypeId);
 
-    // TODO: do we want to support chips for players?
     EnergyData memory energyData;
     if (objectTypeId == ObjectTypes.Player) {
       require(!PlayerStatus._getBedEntityId(self).exists(), "Player is sleeping");

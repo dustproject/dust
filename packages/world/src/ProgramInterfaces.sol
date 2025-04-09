@@ -23,13 +23,6 @@ interface IProgramValidator {
   ) external view;
 }
 
-interface IDisplay {
-  function getDisplayURI(EntityId caller, EntityId target, bytes memory extraData)
-    external
-    view
-    returns (string memory);
-}
-
 interface IAttachProgramHook {
   function onAttachProgram(EntityId caller, EntityId target, bytes memory extraData) external;
 }

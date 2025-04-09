@@ -126,10 +126,6 @@ library ObjectTypeLib {
     return self == ObjectTypes.ForceField;
   }
 
-  function canHoldDisplay(ObjectTypeId self) internal pure returns (bool) {
-    return self == ObjectTypes.TextSign;
-  }
-
   function isOre(ObjectTypeId self) internal pure returns (bool) {
     ObjectTypeId[] memory oreTypes = getOreObjectTypes();
     for (uint256 i = 0; i < oreTypes.length; i++) {

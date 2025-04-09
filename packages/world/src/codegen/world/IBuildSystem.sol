@@ -14,18 +14,18 @@ import { Direction } from "../common.sol";
  * @dev This interface is automatically generated from the corresponding system contract. Do not edit manually.
  */
 interface IBuildSystem {
+  function build(
+    EntityId caller,
+    ObjectTypeId buildObjectTypeId,
+    Vec3 baseCoord,
+    bytes calldata extraData
+  ) external returns (EntityId);
+
   function buildWithDirection(
     EntityId caller,
     ObjectTypeId buildObjectTypeId,
     Vec3 baseCoord,
     Direction direction,
-    bytes calldata extraData
-  ) external returns (EntityId);
-
-  function build(
-    EntityId caller,
-    ObjectTypeId buildObjectTypeId,
-    Vec3 baseCoord,
     bytes calldata extraData
   ) external returns (EntityId);
 
