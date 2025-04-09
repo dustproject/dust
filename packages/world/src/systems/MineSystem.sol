@@ -139,20 +139,21 @@ contract MineSystem is System {
   }
 
   function _removeFlora(EntityId entityId, ObjectTypeId objectType, Vec3 coord) internal {
+    ObjectType._set(entityId, ObjectTypes.Air);
     if (objectType.isSeed()) {
-      _requireSeedNotFullyGrown(entityId);
+      require(SeedGrowth._getFullyGrownAt(entityId) > block.timestamp, "Cannot mine fully grown seed");
       addEnergyToLocalPool(coord, ObjectTypeMetadata._getEnergy(objectType));
     }
   }
 
   function _removeBlock(EntityId entityId, ObjectTypeId objectType, Vec3 coord) internal {
-    ObjectType._set(entityId, ObjectTypes.Air);
-
     // If object being mined is flora, no need to check above entities
     if (objectType.isFlora()) {
       _removeFlora(entityId, objectType, coord);
       return;
     }
+
+    ObjectType._set(entityId, ObjectTypes.Air);
 
     Vec3 aboveCoord = coord + vec3(0, 1, 0);
     EntityId above = getMovableEntityAt(aboveCoord);
@@ -216,10 +217,6 @@ contract MineSystem is System {
         ResourceCount._set(dropType, ResourceCount._get(dropType) + amount);
       }
     }
-  }
-
-  function _requireSeedNotFullyGrown(EntityId entityId) internal view {
-    require(SeedGrowth._getFullyGrownAt(entityId) > block.timestamp, "Cannot mine fully grown seed");
   }
 }
 
