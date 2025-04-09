@@ -235,7 +235,7 @@ library ObjectTypes {
   // Misc
   // ------------------------------------------------------------
   ObjectTypeId constant Player = ObjectTypeId.wrap(Misc | 0);
-  ObjectTypeId constant ForceFieldFragment = ObjectTypeId.wrap(Misc | 1);
+  ObjectTypeId constant Fragment = ObjectTypeId.wrap(Misc | 1);
   ObjectTypeId constant AnyLog = ObjectTypeId.wrap(Misc | 2047);
   ObjectTypeId constant AnyPlanks = ObjectTypeId.wrap(Misc | 2046);
 }

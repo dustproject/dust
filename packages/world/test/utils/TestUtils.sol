@@ -27,7 +27,7 @@ import {
   destroyForceField as _destroyForceField,
   getForceField as _getForceField,
   isForceFieldActive as _isForceFieldActive,
-  isForceFieldFragment as _isForceFieldFragment,
+  isFragment as _isFragment,
   setupForceField as _setupForceField
 } from "../../src/utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../../src/utils/InventoryUtils.sol";
@@ -151,8 +151,8 @@ library TestForceFieldUtils {
     return _isForceFieldActive(forceFieldEntityId);
   }
 
-  function isForceFieldFragment(EntityId forceFieldEntityId, Vec3 fragmentCoord) public asWorld returns (bool) {
-    return _isForceFieldFragment(forceFieldEntityId, fragmentCoord);
+  function isFragment(EntityId forceFieldEntityId, Vec3 fragmentCoord) public asWorld returns (bool) {
+    return _isFragment(forceFieldEntityId, fragmentCoord);
   }
 
   function getForceField(Vec3 coord) public asWorld returns (EntityId, EntityId) {

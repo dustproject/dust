@@ -14,7 +14,7 @@ import { Player } from "../codegen/tables/Player.sol";
 import { PlayerStatus } from "../codegen/tables/PlayerStatus.sol";
 import { ReversePlayer } from "../codegen/tables/ReversePlayer.sol";
 
-import { ForceFieldFragmentPosition, MovablePosition, Position, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
+import { FragmentPosition, MovablePosition, Position, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
 
 import { ObjectTypeId } from "../ObjectTypeId.sol";
 import { ObjectTypes } from "../ObjectTypes.sol";

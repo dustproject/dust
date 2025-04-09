@@ -13,7 +13,7 @@ import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
 import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
-import { getForceField, isForceFieldFragmentActive } from "../utils/ForceFieldUtils.sol";
+import { getForceField } from "../utils/ForceFieldUtils.sol";
 import { AttachProgramNotification, DetachProgramNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
@@ -31,7 +31,7 @@ contract ProgramSystem is System {
     caller.activate();
 
     Vec3 validatorCoord;
-    if (ObjectType._get(target) == ObjectTypes.ForceFieldFragment) {
+    if (ObjectType._get(target) == ObjectTypes.Fragment) {
       (, Vec3 fragmentCoord) = caller.requireAdjacentToFragment(target);
       validatorCoord = fragmentCoord.fromFragmentCoord();
     } else {
@@ -64,7 +64,7 @@ contract ProgramSystem is System {
     caller.activate();
 
     Vec3 forceFieldCoord;
-    if (ObjectType._get(target) == ObjectTypes.ForceFieldFragment) {
+    if (ObjectType._get(target) == ObjectTypes.Fragment) {
       (, Vec3 fragmentCoord) = caller.requireAdjacentToFragment(target);
       forceFieldCoord = fragmentCoord.fromFragmentCoord();
     } else {
