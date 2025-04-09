@@ -37,6 +37,7 @@ contract GiveScript is Script {
     world.adminAddToInventory(playerEntityId, ObjectTypes.TextSign, 1);
     world.adminAddToInventory(playerEntityId, ObjectTypes.Workbench, 1);
     world.adminAddToInventory(playerEntityId, ObjectTypes.Furnace, 1);
+    world.adminAddToInventory(playerEntityId, ObjectTypes.Powerstone, 1);
     world.adminAddToInventory(playerEntityId, ObjectTypes.SpawnTile, 1);
     world.adminAddToInventory(playerEntityId, ObjectTypes.Bed, 1);
     world.adminAddToInventory(playerEntityId, ObjectTypes.Bucket, 1);
