@@ -27,6 +27,11 @@ struct SlotTransfer {
   uint16 amount; // For entities, this should always be 1
 }
 
+struct SlotAmount {
+  uint16 slot;
+  uint16 amount;
+}
+
 library InventoryUtils {
   function useTool(EntityId owner, uint16 slot, uint128 useMassMax)
     public
@@ -81,12 +86,12 @@ library InventoryUtils {
     return slot;
   }
 
-  function addObject(EntityId owner, ObjectTypeId objectType, uint16 amount) public {
+  function addObject(EntityId owner, ObjectTypeId objectType, uint128 amount) public {
     require(amount > 0, "Amount must be greater than 0");
     uint16 stackable = ObjectTypeMetadata._getStackable(objectType);
     require(stackable > 0, "Object type cannot be added to inventory");
 
-    uint16 remaining = amount;
+    uint128 remaining = amount;
 
     // First, find and fill existing slots for this object type
     uint256 numTypeSlots = InventoryTypeSlots._length(owner, objectType);
@@ -100,7 +105,7 @@ library InventoryUtils {
       }
 
       uint16 canAdd = stackable - currentAmount;
-      uint16 toAdd = remaining < canAdd ? remaining : canAdd;
+      uint16 toAdd = remaining < canAdd ? uint16(remaining) : canAdd;
       InventorySlot._setAmount(owner, slot, currentAmount + toAdd);
       remaining -= toAdd;
     }
@@ -108,7 +113,7 @@ library InventoryUtils {
     // If we still have objects to add, use empty slots
     while (remaining > 0) {
       uint16 slot = _useEmptySlot(owner);
-      uint16 toAdd = remaining < stackable ? remaining : stackable;
+      uint16 toAdd = remaining < stackable ? uint16(remaining) : stackable;
 
       Inventory._push(owner, slot);
       InventorySlot._setObjectType(owner, slot, objectType);

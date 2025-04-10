@@ -11,6 +11,7 @@ export default defineWorld({
       "Mine",
       "Move",
       "Craft",
+      "CraftFuel",
       "Drop",
       "Pickup",
       "Transfer",

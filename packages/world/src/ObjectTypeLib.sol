@@ -157,6 +157,26 @@ library ObjectTypeLib {
     return self == ObjectTypes.Wheat;
   }
 
+  function isLog(ObjectTypeId self) internal pure returns (bool) {
+    ObjectTypeId[] memory logTypes = getLogObjectTypes();
+    for (uint256 i = 0; i < logTypes.length; i++) {
+      if (self == logTypes[i]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function isLeaf(ObjectTypeId self) internal pure returns (bool) {
+    ObjectTypeId[] memory leafTypes = getLeafObjectTypes();
+    for (uint256 i = 0; i < leafTypes.length; i++) {
+      if (self == leafTypes[i]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   // TODO: one possible way to optimize is to follow some kind of schema for crops and their seeds
   function getCrop(ObjectTypeId self) internal pure returns (ObjectTypeId) {
     if (self == ObjectTypes.WheatSeed) {
@@ -296,6 +316,19 @@ function getLogObjectTypes() pure returns (ObjectTypeId[] memory) {
   result[5] = ObjectTypes.SpruceLog;
   result[6] = ObjectTypes.DarkOakLog;
   result[7] = ObjectTypes.MangroveLog;
+  return result;
+}
+
+function getLeafObjectTypes() pure returns (ObjectTypeId[] memory) {
+  ObjectTypeId[] memory result = new ObjectTypeId[](8);
+  result[0] = ObjectTypes.OakLeaf;
+  result[1] = ObjectTypes.BirchLeaf;
+  result[2] = ObjectTypes.JungleLeaf;
+  result[3] = ObjectTypes.SakuraLeaf;
+  result[4] = ObjectTypes.AcaciaLeaf;
+  result[5] = ObjectTypes.SpruceLeaf;
+  result[6] = ObjectTypes.DarkOakLeaf;
+  result[7] = ObjectTypes.MangroveLeaf;
   return result;
 }
 

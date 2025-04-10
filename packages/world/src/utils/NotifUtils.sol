@@ -32,6 +32,11 @@ struct CraftNotification {
   EntityId station;
 }
 
+struct CraftFuelNotification {
+  EntityId station;
+  uint128 fuelAmount;
+}
+
 // TODO: update to use actual object types and amounts
 struct DropNotification {
   Vec3 dropCoord;
@@ -127,6 +132,17 @@ function notify(EntityId player, CraftNotification memory craftNotification) {
   Notification._set(
     player,
     NotificationData({ timestamp: uint128(block.timestamp), action: Action.Craft, data: abi.encode(craftNotification) })
+  );
+}
+
+function notify(EntityId player, CraftFuelNotification memory craftFuelNotification) {
+  Notification._set(
+    player,
+    NotificationData({
+      timestamp: uint128(block.timestamp),
+      action: Action.CraftFuel,
+      data: abi.encode(craftFuelNotification)
+    })
   );
 }
 

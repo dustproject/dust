@@ -81,6 +81,13 @@ library TestInventoryUtils {
     InventoryUtils.addObject(ownerEntityId, objectTypeId, numObjectsToAdd);
   }
 
+  function addObjectToSlot(EntityId ownerEntityId, ObjectTypeId objectTypeId, uint16 numObjectsToAdd, uint16 slot)
+    public
+    asWorld
+  {
+    InventoryUtils.addObjectToSlot(ownerEntityId, objectTypeId, numObjectsToAdd, slot);
+  }
+
   function addEntity(EntityId ownerEntityId, ObjectTypeId toolObjectTypeId) public asWorld returns (EntityId) {
     EntityId entityId = createEntity(toolObjectTypeId);
     InventoryUtils.addEntity(ownerEntityId, entityId);
