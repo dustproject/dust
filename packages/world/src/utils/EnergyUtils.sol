@@ -10,7 +10,7 @@ import { ReversePlayer } from "../codegen/tables/ReversePlayer.sol";
 
 import { getEntityAt } from "../utils/EntityUtils.sol";
 
-import { getForceField } from "../utils/ForceFieldUtils.sol";
+import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { LocalEnergyPool, MovablePosition, Position } from "../utils/Vec3Storage.sol";
@@ -134,7 +134,7 @@ function transferEnergyToPool(EntityId entityId, uint128 amount) {
     decreasePlayerEnergy(entityId, coord, amount);
   } else {
     if (!objectTypeId.isMachine()) {
-      (entityId,) = getForceField(coord);
+      (entityId,) = ForceFieldUtils.getForceField(coord);
     }
     decreaseMachineEnergy(entityId, amount);
   }

@@ -21,7 +21,7 @@ import { getUniqueEntity } from "../Utils.sol";
 
 import { removeEnergyFromLocalPool, transferEnergyToPool, updateMachineEnergy } from "../utils/EnergyUtils.sol";
 import { getMovableEntityAt, getObjectTypeIdAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
-import { getForceField, setupForceField } from "../utils/ForceFieldUtils.sol";
+import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { BuildNotification, MoveNotification, notify } from "../utils/NotifUtils.sol";
 
@@ -159,12 +159,12 @@ library BuildLib {
   ) public {
     for (uint256 i = 0; i < coords.length; i++) {
       Vec3 coord = coords[i];
-      (EntityId forceField, EntityId fragment) = getForceField(coord);
+      (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
 
       // If placing a forcefield, there should be no active forcefield at coord
       if (objectTypeId == ObjectTypes.ForceField) {
         require(!forceField.exists(), "Force field overlaps with another force field");
-        setupForceField(base, coord);
+        ForceFieldUtils.setupForceField(base, coord);
       }
 
       if (forceField.exists()) {

@@ -22,7 +22,6 @@ import { checkWorldStatus, getUniqueEntity } from "../Utils.sol";
 import { updatePlayerEnergy } from "./EnergyUtils.sol";
 
 import { getMovableEntityAt, getOrCreateEntityAt, safeGetObjectTypeIdAt, setMovableEntityAt } from "./EntityUtils.sol";
-import { getForceField } from "./ForceFieldUtils.sol";
 import { InventoryUtils } from "./InventoryUtils.sol";
 
 import { FRAGMENT_SIZE, PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
@@ -99,9 +98,6 @@ library PlayerUtils {
   function removePlayerFromBed(EntityId player, EntityId bed, EntityId forceField) internal {
     PlayerStatus._deleteRecord(player);
     BedPlayer._deleteRecord(bed);
-
-    // Decrease forcefield's drain rate
-    Energy._setDrainRate(forceField, Energy._getDrainRate(forceField) - PLAYER_ENERGY_DRAIN_RATE);
   }
 
   /// @dev Kills the player, it assumes the player is not sleeping

@@ -14,7 +14,7 @@ import { PlayerStatus } from "./codegen/tables/PlayerStatus.sol";
 import { ReversePlayer } from "./codegen/tables/ReversePlayer.sol";
 
 import { updateMachineEnergy, updatePlayerEnergy } from "./utils/EnergyUtils.sol";
-import { getForceField } from "./utils/ForceFieldUtils.sol";
+import { ForceFieldUtils } from "./utils/ForceFieldUtils.sol";
 import { FragmentPosition, MovablePosition, Position } from "./utils/Vec3Storage.sol";
 
 import { MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "./Constants.sol";
@@ -122,7 +122,7 @@ library ActivateLib {
       if (objectTypeId == ObjectTypes.ForceField) {
         forceField = self;
       } else {
-        (forceField,) = getForceField(self.getPosition());
+        (forceField,) = ForceFieldUtils.getForceField(self.getPosition());
       }
 
       (energyData,) = updateMachineEnergy(forceField);

@@ -13,7 +13,7 @@ import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
 import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
-import { getForceField } from "../utils/ForceFieldUtils.sol";
+import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { AttachProgramNotification, DetachProgramNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
@@ -78,7 +78,7 @@ contract ProgramSystem is System {
 
     bytes memory onDetachProgram = abi.encodeCall(IDetachProgramHook.onDetachProgram, (caller, target, extraData));
 
-    (EntityId forceField,) = getForceField(forceFieldCoord);
+    (EntityId forceField,) = ForceFieldUtils.getForceField(forceFieldCoord);
     // If forcefield doesn't have energy, allow the program
     (EnergyData memory machineData,) = updateMachineEnergy(forceField);
     if (machineData.energy > 0) {
@@ -94,7 +94,7 @@ contract ProgramSystem is System {
 
   function _getValidatorProgram(Vec3 coord) internal returns (EntityId, ProgramId) {
     // Check if the forcefield (or fragment) allow the new program
-    (EntityId forceField, EntityId fragment) = getForceField(coord);
+    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
     if (!forceField.exists()) {
       return (EntityId.wrap(0), ProgramId.wrap(0));
     }

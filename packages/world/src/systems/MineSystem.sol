@@ -40,7 +40,7 @@ import {
   getObjectTypeIdAt,
   getOrCreateEntityAt
 } from "../utils/EntityUtils.sol";
-import { getForceField } from "../utils/ForceFieldUtils.sol";
+import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { DeathNotification, MineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
@@ -221,10 +221,11 @@ library MineLib {
       return;
     }
 
-    (EntityId forceField,) = getForceField(bedCoord);
+    (EntityId forceField,) = ForceFieldUtils.getForceField(bedCoord);
     (, uint128 depletedTime) = updateMachineEnergy(forceField);
     EnergyData memory playerData = updateSleepingPlayerEnergy(sleepingPlayerId, bed, depletedTime, bedCoord);
     PlayerUtils.removePlayerFromBed(sleepingPlayerId, bed, forceField);
+    // TODO: decrease fragment drain rate
 
     // Kill the player
     // The player is not on the grid so no need to call killPlayer
@@ -236,7 +237,7 @@ library MineLib {
   function _requireMinesAllowed(EntityId caller, ObjectTypeId objectTypeId, Vec3 coord, bytes calldata extraData)
     public
   {
-    (EntityId forceField, EntityId fragment) = getForceField(coord);
+    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
     if (!forceField.exists()) {
       return;
     }

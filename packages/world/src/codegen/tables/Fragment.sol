@@ -74,7 +74,7 @@ library Fragment {
   /**
    * @notice Get forceField.
    */
-  function getForceFieldId(EntityId entityId) internal view returns (EntityId forceField) {
+  function getForceField(EntityId entityId) internal view returns (EntityId forceField) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -85,7 +85,7 @@ library Fragment {
   /**
    * @notice Get forceField.
    */
-  function _getForceFieldId(EntityId entityId) internal view returns (EntityId forceField) {
+  function _getForceField(EntityId entityId) internal view returns (EntityId forceField) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -96,7 +96,7 @@ library Fragment {
   /**
    * @notice Set forceField.
    */
-  function setForceFieldId(EntityId entityId, EntityId forceField) internal {
+  function setForceField(EntityId entityId, EntityId forceField) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -106,7 +106,7 @@ library Fragment {
   /**
    * @notice Set forceField.
    */
-  function _setForceFieldId(EntityId entityId, EntityId forceField) internal {
+  function _setForceField(EntityId entityId, EntityId forceField) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -245,12 +245,7 @@ library Fragment {
   /**
    * @notice Set the full data using individual values.
    */
-  function _set(
-    EntityId entityId,
-    EntityId forceField,
-    uint128 forceFieldCreatedAt,
-    uint128 extraDrainRate
-  ) internal {
+  function _set(EntityId entityId, EntityId forceField, uint128 forceFieldCreatedAt, uint128 extraDrainRate) internal {
     bytes memory _staticData = encodeStatic(forceField, forceFieldCreatedAt, extraDrainRate);
 
     EncodedLengths _encodedLengths;
