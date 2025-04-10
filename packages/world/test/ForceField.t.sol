@@ -459,7 +459,7 @@ contract ForceFieldTest is DustTest {
     EnergyData memory afterAddEnergyData = Energy.get(forceFieldEntityId);
 
     // Compute boundary fragments
-    (Vec3[26] memory boundary, uint256 len) = world.computeBoundaryFragments(forceFieldEntityId, newFragmentCoord);
+    (, uint256 len) = world.computeBoundaryFragments(forceFieldEntityId, newFragmentCoord);
 
     // Create a valid parent array for the boundary
     uint256[] memory parents = new uint256[](len);
@@ -664,12 +664,17 @@ contract ForceFieldTest is DustTest {
 
   function testForceFieldEnergyDrainsOverTime() public {
     // Set up a flat chunk with a player
-    (address alice,, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+    (,, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
     // Create a force field with energy
+    uint128 initialTimestamp = uint128(vm.getBlockTimestamp());
     Vec3 forceFieldCoord = playerCoord + vec3(2, 0, 0);
-    EntityId forceFieldEntityId = setupForceField(
-      forceFieldCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 100, drainRate: 1 })
+    EntityId forceFieldEntityId =
+      setupForceField(forceFieldCoord, EnergyData({ lastUpdatedTime: initialTimestamp, energy: 100, drainRate: 1 }));
+    assertEq(
+      Machine.getDepletedTime(forceFieldEntityId),
+      uint128(vm.getBlockTimestamp()),
+      "Accumulated depleted time is not initialized correctly"
     );
 
     // Fast forward time
@@ -681,6 +686,7 @@ contract ForceFieldTest is DustTest {
     // Check energy level (should be reduced)
     EnergyData memory currentEnergy = Energy.get(forceFieldEntityId);
     assertEq(currentEnergy.energy, 50, "Energy should be reduced after time passes");
+    assertEq(Machine.getDepletedTime(forceFieldEntityId), initialTimestamp, "Accumulated depleted time changed");
 
     // Fast forward enough time to deplete all energy
     vm.warp(vm.getBlockTimestamp() + 60);
@@ -690,7 +696,9 @@ contract ForceFieldTest is DustTest {
     // Check energy level (should be 0)
     currentEnergy = Energy.get(forceFieldEntityId);
     assertEq(currentEnergy.energy, 0, "Energy should be completely depleted");
-    assertEq(Machine.getDepletedTime(forceFieldEntityId), 10, "Accumulated depleted time should be tracked");
+    assertEq(
+      Machine.getDepletedTime(forceFieldEntityId), initialTimestamp + 10, "Accumulated depleted time should be tracked"
+    );
   }
 
   function testOnBuildAndOnMineHooksForForceField() public {

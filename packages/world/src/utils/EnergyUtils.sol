@@ -3,6 +3,7 @@ pragma solidity >=0.8.24;
 
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+import { console } from "forge-std/console.sol";
 
 import { Machine } from "../codegen/tables/Machine.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";

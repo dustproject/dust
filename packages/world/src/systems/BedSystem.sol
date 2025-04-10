@@ -93,7 +93,7 @@ contract BedSystem is System {
     Energy._setDrainRate(forceField, machineData.drainRate - PLAYER_ENERGY_DRAIN_RATE);
     Fragment._setExtraDrainRate(fragment, Fragment._getExtraDrainRate(fragment) - PLAYER_ENERGY_DRAIN_RATE);
 
-    PlayerUtils.removePlayerFromBed(caller, bed, forceField);
+    PlayerUtils.removePlayerFromBed(caller, bed);
     PlayerUtils.addPlayerToGrid(caller, spawnCoord);
 
     BedLib.transferInventory(bed, caller);
@@ -128,7 +128,7 @@ contract BedSystem is System {
     Energy._setDrainRate(forceField, machineData.drainRate - PLAYER_ENERGY_DRAIN_RATE);
     Fragment._setExtraDrainRate(fragment, Fragment._getExtraDrainRate(fragment) - PLAYER_ENERGY_DRAIN_RATE);
 
-    PlayerUtils.removePlayerFromBed(player, bed, forceField);
+    PlayerUtils.removePlayerFromBed(player, bed);
 
     BedLib.transferInventory(bed, drop);
     // TODO: Should we safecall the program?

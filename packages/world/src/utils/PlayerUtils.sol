@@ -95,7 +95,7 @@ library PlayerUtils {
     }
   }
 
-  function removePlayerFromBed(EntityId player, EntityId bed, EntityId forceField) internal {
+  function removePlayerFromBed(EntityId player, EntityId bed) internal {
     PlayerStatus._deleteRecord(player);
     BedPlayer._deleteRecord(bed);
   }

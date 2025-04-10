@@ -70,10 +70,10 @@ contract BedTest is DustTest {
 
     Vec3 bedCoord = coord - vec3(2, 0, 0);
 
+    uint128 initialTimestamp = uint128(vm.getBlockTimestamp());
     // Set forcefield
     setupForceField(
-      bedCoord,
-      EnergyData({ energy: 1000, lastUpdatedTime: uint128(vm.getBlockTimestamp()), drainRate: MACHINE_ENERGY_DRAIN_RATE })
+      bedCoord, EnergyData({ energy: 1000, lastUpdatedTime: initialTimestamp, drainRate: MACHINE_ENERGY_DRAIN_RATE })
     );
 
     EntityId bedEntityId = createBed(bedCoord);
@@ -86,7 +86,7 @@ contract BedTest is DustTest {
     // Checks
     BedPlayerData memory bedPlayerData = BedPlayer.get(bedEntityId);
     assertEq(bedPlayerData.playerEntityId.unwrap(), aliceEntityId.unwrap(), "Bed's player entity is not alice");
-    assertEq(bedPlayerData.lastDepletedTime, 0, "Wrong lastDepletedTime");
+    assertEq(bedPlayerData.lastDepletedTime, initialTimestamp, "Wrong lastDepletedTime");
     assertEq(
       PlayerStatus.getBedEntityId(aliceEntityId).unwrap(), bedEntityId.unwrap(), "Player's bed entity is not the bed"
     );
@@ -190,12 +190,14 @@ contract BedTest is DustTest {
     // Set the forcefield's energy to fully deplete after 1000 seconds (with 1 sleeping player)
     uint128 initialForcefieldEnergy = (MACHINE_ENERGY_DRAIN_RATE + PLAYER_ENERGY_DRAIN_RATE) * 1000;
 
+    uint128 initialTimestamp = uint128(vm.getBlockTimestamp());
+
     // Set forcefield
     EntityId forcefieldEntityId = setupForceField(
       bedCoord,
       EnergyData({
         energy: initialForcefieldEnergy,
-        lastUpdatedTime: uint128(vm.getBlockTimestamp()),
+        lastUpdatedTime: initialTimestamp,
         drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
@@ -221,7 +223,7 @@ contract BedTest is DustTest {
     assertEq(ffEnergyData.energy, 0, "Forcefield energy wasn't drained correctly");
     assertEq(ffEnergyData.drainRate, MACHINE_ENERGY_DRAIN_RATE, "Forcefield drain rate was not restored");
     // The forcefield had 0 energy for 500 seconds
-    assertEq(depletedTime, 500, "Forcefield depletedTime was not computed correctly");
+    assertEq(depletedTime, 500 + initialTimestamp, "Forcefield depletedTime was not computed correctly");
 
     // Check that the player energy was drained during the 1000 seconds that the forcefield was off
     assertEq(
@@ -241,12 +243,14 @@ contract BedTest is DustTest {
     // Set the forcefield's energy to fully deplete after 1000 seconds (with 1 sleeping player)
     uint128 initialForcefieldEnergy = (MACHINE_ENERGY_DRAIN_RATE + PLAYER_ENERGY_DRAIN_RATE) * 1000;
 
+    uint128 initialTimestamp = uint128(vm.getBlockTimestamp());
+
     // Set forcefield
     EntityId forcefieldEntityId = setupForceField(
       bedCoord,
       EnergyData({
         energy: initialForcefieldEnergy,
-        lastUpdatedTime: uint128(vm.getBlockTimestamp()),
+        lastUpdatedTime: initialTimestamp,
         drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
@@ -278,7 +282,7 @@ contract BedTest is DustTest {
     assertEq(ffEnergyData.energy, 0, "Forcefield energy wasn't drained correctly");
     assertEq(ffEnergyData.drainRate, MACHINE_ENERGY_DRAIN_RATE, "Forcefield drain rate was not restored");
     // The forcefield had 0 energy for 500 seconds
-    assertEq(depletedTime, 500, "Forcefield depletedTime was not computed correctly");
+    assertEq(depletedTime, 500 + initialTimestamp, "Forcefield depletedTime was not computed correctly");
 
     // Check that the player energy was drained during the 1000 seconds that the forcefield was off,
     // but not after recharging
@@ -299,12 +303,14 @@ contract BedTest is DustTest {
     // Set the forcefield's energy to fully deplete after 1000 seconds (with 1 sleeping player)
     uint128 initialForcefieldEnergy = (MACHINE_ENERGY_DRAIN_RATE + PLAYER_ENERGY_DRAIN_RATE) * 1000;
 
+    uint128 initialTimestamp = uint128(vm.getBlockTimestamp());
+
     // Set forcefield
     EntityId forcefieldEntityId = setupForceField(
       bedCoord,
       EnergyData({
         energy: initialForcefieldEnergy,
-        lastUpdatedTime: uint128(vm.getBlockTimestamp()),
+        lastUpdatedTime: initialTimestamp,
         drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
@@ -338,7 +344,7 @@ contract BedTest is DustTest {
       "Forcefield drain rate does not include player"
     );
     // The forcefield had 0 energy for 500 seconds
-    assertEq(depletedTime, playerDrainTime, "Forcefield depletedTime was not computed correctly");
+    assertEq(depletedTime, playerDrainTime + initialTimestamp, "Forcefield depletedTime was not computed correctly");
   }
 
   function testRemoveDeadPlayerFromBed() public {
@@ -351,12 +357,14 @@ contract BedTest is DustTest {
     // Set the forcefield's energy to fully deplete after 1000 seconds (with 1 sleeping player)
     uint128 initialForcefieldEnergy = (MACHINE_ENERGY_DRAIN_RATE + PLAYER_ENERGY_DRAIN_RATE) * 1000;
 
+    uint128 initialTimestamp = uint128(vm.getBlockTimestamp());
+
     // Set forcefield
     EntityId forcefieldEntityId = setupForceField(
       bedCoord,
       EnergyData({
         energy: initialForcefieldEnergy,
-        lastUpdatedTime: uint128(vm.getBlockTimestamp()),
+        lastUpdatedTime: initialTimestamp,
         drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
@@ -383,7 +391,7 @@ contract BedTest is DustTest {
     assertEq(ffEnergyData.energy, 0, "Forcefield energy wasn't drained correctly");
     assertEq(ffEnergyData.drainRate, MACHINE_ENERGY_DRAIN_RATE, "Forcefield drain rate was not restored");
     // The forcefield had 0 energy for playerDrainTime seconds
-    assertEq(depletedTime, playerDrainTime, "Forcefield depletedTime was not computed correctly");
+    assertEq(depletedTime, playerDrainTime + initialTimestamp, "Forcefield depletedTime was not computed correctly");
 
     // Check that the player energy was drained during the playerDrainTime seconds that the forcefield was off
     assertEq(Energy.getEnergy(aliceEntityId), 0, "Player energy was not drained");

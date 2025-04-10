@@ -127,8 +127,6 @@ library ForceFieldUtils {
       forceField, machineData.drainRate - MACHINE_ENERGY_DRAIN_RATE - Fragment._getExtraDrainRate(fragment)
     );
 
-    // EntityProgram._deleteRecord(fragment);
-
     // Disassociate the fragment from the forcefield
     Fragment._deleteRecord(fragment);
   }

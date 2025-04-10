@@ -224,7 +224,7 @@ library MineLib {
     (EntityId forceField,) = ForceFieldUtils.getForceField(bedCoord);
     (, uint128 depletedTime) = updateMachineEnergy(forceField);
     EnergyData memory playerData = updateSleepingPlayerEnergy(sleepingPlayerId, bed, depletedTime, bedCoord);
-    PlayerUtils.removePlayerFromBed(sleepingPlayerId, bed, forceField);
+    PlayerUtils.removePlayerFromBed(sleepingPlayerId, bed);
     // TODO: decrease fragment drain rate
 
     // Kill the player
