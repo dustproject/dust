@@ -42,8 +42,11 @@ function getLatestEnergyData(EntityId entityId) view returns (EnergyData memory,
   uint128 energyDrained = timeSinceLastUpdate * energyData.drainRate;
   uint128 depletedTime = 0;
 
+  // Update accumulated depleted time if it ran out of energy on this update
   if (energyDrained >= energyData.energy) {
+    // Calculate when it ran out by determining how much time it took to drain the energy
     uint128 timeToDeplete = energyData.energy / energyData.drainRate;
+    // Add the remaining time after depletion to the accumulated depleted time
     depletedTime = timeSinceLastUpdate - timeToDeplete;
     energyDrained = energyData.energy;
     energyData.energy = 0;
