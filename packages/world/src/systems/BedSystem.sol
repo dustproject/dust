@@ -21,7 +21,12 @@ import { ObjectTypeId } from "../ObjectTypeId.sol";
 import { ObjectTypes } from "../ObjectTypes.sol";
 import { checkWorldStatus, getUniqueEntity } from "../Utils.sol";
 
-import { updateMachineEnergy, updateSleepingPlayerEnergy } from "../utils/EnergyUtils.sol";
+import {
+  decreaseFragmentDrainRate,
+  increaseFragmentDrainRate,
+  updateMachineEnergy,
+  updateSleepingPlayerEnergy
+} from "../utils/EnergyUtils.sol";
 
 import { getOrCreateEntityAt } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
@@ -52,12 +57,8 @@ contract BedSystem is System {
 
     (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
     require(forceField.exists(), "Bed is not inside a forcefield");
-    (EnergyData memory machineData, uint128 depletedTime) = updateMachineEnergy(forceField);
 
-    // Increase forcefield's drain rate
-    Energy._setDrainRate(forceField, machineData.drainRate + PLAYER_ENERGY_DRAIN_RATE);
-    Fragment._setExtraDrainRate(fragment, Fragment._getExtraDrainRate(fragment) + PLAYER_ENERGY_DRAIN_RATE);
-
+    uint128 depletedTime = increaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
     PlayerStatus._setBedEntityId(caller, bed);
     BedPlayer._set(bed, caller, depletedTime);
 
@@ -86,12 +87,11 @@ contract BedSystem is System {
     require(!MoveLib._gravityApplies(spawnCoord), "Cannot spawn player here as gravity applies");
 
     (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
-    (EnergyData memory machineData, uint128 depletedTime) = updateMachineEnergy(forceField);
+
+    uint128 depletedTime = decreaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
+
     EnergyData memory playerData = BedLib.updateSleepingPlayer(caller, bed, depletedTime, bedCoord);
     require(playerData.energy > 0, "Player died while sleeping");
-
-    Energy._setDrainRate(forceField, machineData.drainRate - PLAYER_ENERGY_DRAIN_RATE);
-    Fragment._setExtraDrainRate(fragment, Fragment._getExtraDrainRate(fragment) - PLAYER_ENERGY_DRAIN_RATE);
 
     PlayerUtils.removePlayerFromBed(caller, bed);
     PlayerUtils.addPlayerToGrid(caller, spawnCoord);
@@ -120,13 +120,9 @@ contract BedSystem is System {
 
     (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
 
-    (EnergyData memory machineData, uint128 depletedTime) = updateMachineEnergy(forceField);
-
+    uint128 depletedTime = decreaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
     EnergyData memory playerData = BedLib.updateSleepingPlayer(player, bed, depletedTime, bedCoord);
     require(playerData.energy == 0, "Player is not dead");
-
-    Energy._setDrainRate(forceField, machineData.drainRate - PLAYER_ENERGY_DRAIN_RATE);
-    Fragment._setExtraDrainRate(fragment, Fragment._getExtraDrainRate(fragment) - PLAYER_ENERGY_DRAIN_RATE);
 
     PlayerUtils.removePlayerFromBed(player, bed);
 

@@ -5,6 +5,7 @@ import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { console } from "forge-std/console.sol";
 
+import { Fragment } from "../codegen/tables/Fragment.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 import { ReversePlayer } from "../codegen/tables/ReversePlayer.sol";
@@ -119,6 +120,20 @@ function decreasePlayerEnergy(EntityId player, Vec3 playerCoord, uint128 amount)
   if (newEnergy == 0) {
     PlayerUtils.killPlayer(player, playerCoord);
   }
+}
+
+function increaseFragmentDrainRate(EntityId forceField, EntityId fragment, uint128 amount) returns (uint128) {
+  (EnergyData memory machineData, uint128 depletedTime) = updateMachineEnergy(forceField);
+  Energy._setDrainRate(forceField, machineData.drainRate + amount);
+  Fragment._setExtraDrainRate(fragment, Fragment._getExtraDrainRate(fragment) + amount);
+  return depletedTime;
+}
+
+function decreaseFragmentDrainRate(EntityId forceField, EntityId fragment, uint128 amount) returns (uint128) {
+  (EnergyData memory machineData, uint128 depletedTime) = updateMachineEnergy(forceField);
+  Energy._setDrainRate(forceField, machineData.drainRate - amount);
+  Fragment._setExtraDrainRate(fragment, Fragment._getExtraDrainRate(fragment) - amount);
+  return depletedTime;
 }
 
 function addEnergyToLocalPool(Vec3 coord, uint128 numToAdd) returns (uint128) {
