@@ -26,12 +26,12 @@
   },
   "dependencies": {
     "@dust/world": "workspace:*",
-    "@latticexyz/abi-ts": "2.2.21-b18c0ef0edeab2378b08d9f4a328a5d0d817f6bf",
-    "@latticexyz/cli": "2.2.21-b18c0ef0edeab2378b08d9f4a328a5d0d817f6bf",
-    "@latticexyz/schema-type": "2.2.21-b18c0ef0edeab2378b08d9f4a328a5d0d817f6bf",
-    "@latticexyz/store": "2.2.21-b18c0ef0edeab2378b08d9f4a328a5d0d817f6bf",
-    "@latticexyz/world": "2.2.21-b18c0ef0edeab2378b08d9f4a328a5d0d817f6bf",
-    "@latticexyz/world-module-metadata": "2.2.21-b18c0ef0edeab2378b08d9f4a328a5d0d817f6bf",
+    "@latticexyz/abi-ts": "2.2.22-26d2e3acd8fc0a0852f530e8e1574a68d2baa3d2",
+    "@latticexyz/cli": "2.2.22-26d2e3acd8fc0a0852f530e8e1574a68d2baa3d2",
+    "@latticexyz/schema-type": "2.2.22-26d2e3acd8fc0a0852f530e8e1574a68d2baa3d2",
+    "@latticexyz/store": "2.2.22-26d2e3acd8fc0a0852f530e8e1574a68d2baa3d2",
+    "@latticexyz/world": "2.2.22-26d2e3acd8fc0a0852f530e8e1574a68d2baa3d2",
+    "@latticexyz/world-module-metadata": "2.2.22-26d2e3acd8fc0a0852f530e8e1574a68d2baa3d2",
     "arktype": "^2.1.15",
     "ox": "^0.6.10"
   },
