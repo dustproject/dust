@@ -128,7 +128,7 @@ export function bridge(parameters: bridge.Parameters): Bridge {
     destroy() {
       from_.destroy();
       to.destroy();
-      ready.reject();
+      ready.reject(new Error("Bridge destroyed before ready."));
     },
     on(topic, listener, id) {
       return from_.on(topic, listener, id);
