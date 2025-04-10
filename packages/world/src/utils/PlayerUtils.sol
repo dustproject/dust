@@ -14,7 +14,7 @@ import { Player } from "../codegen/tables/Player.sol";
 import { PlayerStatus } from "../codegen/tables/PlayerStatus.sol";
 import { ReversePlayer } from "../codegen/tables/ReversePlayer.sol";
 
-import { ForceFieldFragmentPosition, MovablePosition, Position, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
+import { FragmentPosition, MovablePosition, Position, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
 
 import { ObjectTypeId } from "../ObjectTypeId.sol";
 import { ObjectTypes } from "../ObjectTypes.sol";
@@ -22,7 +22,6 @@ import { checkWorldStatus, getUniqueEntity } from "../Utils.sol";
 import { updatePlayerEnergy } from "./EnergyUtils.sol";
 
 import { getMovableEntityAt, getOrCreateEntityAt, safeGetObjectTypeIdAt, setMovableEntityAt } from "./EntityUtils.sol";
-import { getForceField } from "./ForceFieldUtils.sol";
 import { InventoryUtils } from "./InventoryUtils.sol";
 
 import { FRAGMENT_SIZE, PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
@@ -96,12 +95,9 @@ library PlayerUtils {
     }
   }
 
-  function removePlayerFromBed(EntityId player, EntityId bed, EntityId forceField) internal {
+  function removePlayerFromBed(EntityId player, EntityId bed) internal {
     PlayerStatus._deleteRecord(player);
     BedPlayer._deleteRecord(bed);
-
-    // Decrease forcefield's drain rate
-    Energy._setDrainRate(forceField, Energy._getDrainRate(forceField) - PLAYER_ENERGY_DRAIN_RATE);
   }
 
   /// @dev Kills the player, it assumes the player is not sleeping

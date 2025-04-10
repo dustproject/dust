@@ -281,7 +281,7 @@ export default defineWorld({
       key: ["entityId"],
     },
     // ------------------------------------------------------------
-    // Smart Items
+    // Smart Entities
     // ------------------------------------------------------------
     EntityProgram: {
       schema: {
@@ -290,19 +290,18 @@ export default defineWorld({
       },
       key: ["entityId"],
     },
-    ForceFieldFragment: {
+    Fragment: {
       schema: {
-        x: "int32",
-        y: "int32",
-        z: "int32",
         entityId: "EntityId",
-        forceFieldId: "EntityId",
+        forceField: "EntityId",
         forceFieldCreatedAt: "uint128",
+        // Comes from beds with sleeping players or
+        // other entities that might continuously drain energy
+        extraDrainRate: "uint128",
       },
-      key: ["x", "y", "z"],
+      key: ["entityId"],
     },
-    ForceFieldFragmentPosition: {
-      name: "FragmentPosition",
+    FragmentPosition: {
       schema: {
         entityId: "EntityId",
         x: "int32",
@@ -310,6 +309,15 @@ export default defineWorld({
         z: "int32",
       },
       key: ["entityId"],
+    },
+    ReverseFragmentPosition: {
+      schema: {
+        x: "int32",
+        y: "int32",
+        z: "int32",
+        entityId: "EntityId",
+      },
+      key: ["x", "y", "z"],
     },
     Machine: {
       schema: {

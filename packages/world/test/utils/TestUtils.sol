@@ -23,13 +23,7 @@ import {
 } from "../../src/utils/EnergyUtils.sol";
 
 import { createEntity } from "../../src/utils/EntityUtils.sol";
-import {
-  destroyForceField as _destroyForceField,
-  getForceField as _getForceField,
-  isForceFieldActive as _isForceFieldActive,
-  isForceFieldFragment as _isForceFieldFragment,
-  setupForceField as _setupForceField
-} from "../../src/utils/ForceFieldUtils.sol";
+import { ForceFieldUtils } from "../../src/utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../../src/utils/InventoryUtils.sol";
 
 Vm constant vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
@@ -154,23 +148,23 @@ library TestForceFieldUtils {
     TestUtils.init(LIB_ADDRESS_SLOT, libAddress);
   }
 
-  function isForceFieldActive(EntityId forceFieldEntityId) public asWorld returns (bool) {
-    return _isForceFieldActive(forceFieldEntityId);
+  function isForceFieldActive(EntityId forceField) public asWorld returns (bool) {
+    return ForceFieldUtils.isForceFieldActive(forceField);
   }
 
-  function isForceFieldFragment(EntityId forceFieldEntityId, Vec3 fragmentCoord) public asWorld returns (bool) {
-    return _isForceFieldFragment(forceFieldEntityId, fragmentCoord);
+  function isFragment(EntityId forceField, Vec3 fragmentCoord) public asWorld returns (bool) {
+    return ForceFieldUtils.isFragment(forceField, fragmentCoord);
   }
 
   function getForceField(Vec3 coord) public asWorld returns (EntityId, EntityId) {
-    return _getForceField(coord);
+    return ForceFieldUtils.getForceField(coord);
   }
 
-  function setupForceField(EntityId forceFieldId, Vec3 coord) public asWorld {
-    _setupForceField(forceFieldId, coord);
+  function setupForceField(EntityId forceField, Vec3 coord) public asWorld {
+    ForceFieldUtils.setupForceField(forceField, coord);
   }
 
-  function destroyForceField(EntityId forceFieldId) public asWorld {
-    _destroyForceField(forceFieldId);
+  function destroyForceField(EntityId forceField) public asWorld {
+    ForceFieldUtils.destroyForceField(forceField);
   }
 }

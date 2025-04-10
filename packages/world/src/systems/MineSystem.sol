@@ -26,6 +26,7 @@ import { getUniqueEntity } from "../Utils.sol";
 
 import {
   addEnergyToLocalPool,
+  decreaseFragmentDrainRate,
   decreasePlayerEnergy,
   transferEnergyToPool,
   updateMachineEnergy,
@@ -40,12 +41,12 @@ import {
   getObjectTypeIdAt,
   getOrCreateEntityAt
 } from "../utils/EntityUtils.sol";
-import { getForceField } from "../utils/ForceFieldUtils.sol";
+import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { DeathNotification, MineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
-import { MINE_ENERGY_COST, SAFE_PROGRAM_GAS } from "../Constants.sol";
+import { MINE_ENERGY_COST, PLAYER_ENERGY_DRAIN_RATE, SAFE_PROGRAM_GAS } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectTypeId } from "../ObjectTypeId.sol";
 import { ObjectAmount, ObjectTypeLib } from "../ObjectTypeLib.sol";
@@ -221,10 +222,10 @@ library MineLib {
       return;
     }
 
-    (EntityId forceField,) = getForceField(bedCoord);
-    (, uint128 depletedTime) = updateMachineEnergy(forceField);
+    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
+    uint128 depletedTime = decreaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
     EnergyData memory playerData = updateSleepingPlayerEnergy(sleepingPlayerId, bed, depletedTime, bedCoord);
-    PlayerUtils.removePlayerFromBed(sleepingPlayerId, bed, forceField);
+    PlayerUtils.removePlayerFromBed(sleepingPlayerId, bed);
 
     // Kill the player
     // The player is not on the grid so no need to call killPlayer
@@ -236,7 +237,7 @@ library MineLib {
   function _requireMinesAllowed(EntityId caller, ObjectTypeId objectTypeId, Vec3 coord, bytes calldata extraData)
     public
   {
-    (EntityId forceField, EntityId fragment) = getForceField(coord);
+    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
     if (!forceField.exists()) {
       return;
     }

@@ -39,7 +39,7 @@ import { checkWorldStatus } from "../Utils.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
 import { removeEnergyFromLocalPool, updateMachineEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
 import { getMovableEntityAt, getObjectTypeIdAt } from "../utils/EntityUtils.sol";
-import { getForceField } from "../utils/ForceFieldUtils.sol";
+import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { SpawnNotification, notify } from "../utils/NotifUtils.sol";
 
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
@@ -149,7 +149,7 @@ contract SpawnSystem is System {
     // Use the y coordinate given by the player
     spawnCoord = vec3(spawnCoord.x(), y, spawnCoord.z());
 
-    (EntityId forceField,) = getForceField(spawnCoord);
+    (EntityId forceField,) = ForceFieldUtils.getForceField(spawnCoord);
     require(!forceField.exists(), "Cannot spawn in force field");
 
     // Extract energy from local pool
@@ -166,7 +166,7 @@ contract SpawnSystem is System {
     Vec3 spawnTileCoord = Position._get(spawnTile);
     require(spawnTileCoord.inSurroundingCube(spawnCoord, MAX_RESPAWN_HALF_WIDTH), "Spawn tile is too far away");
 
-    (EntityId forceField,) = getForceField(spawnTileCoord);
+    (EntityId forceField,) = ForceFieldUtils.getForceField(spawnTileCoord);
     require(forceField.exists(), "Spawn tile is not inside a forcefield");
     (EnergyData memory machineData,) = updateMachineEnergy(forceField);
     require(machineData.energy >= MAX_PLAYER_ENERGY, "Not enough energy in spawn tile forcefield");

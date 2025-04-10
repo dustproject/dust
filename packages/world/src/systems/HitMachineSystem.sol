@@ -19,7 +19,7 @@ import {
   decreasePlayerEnergy,
   updateMachineEnergy
 } from "../utils/EnergyUtils.sol";
-import { getForceField } from "../utils/ForceFieldUtils.sol";
+import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { HitMachineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
@@ -45,7 +45,7 @@ contract HitMachineSystem is System {
   function _hitForceField(EntityId caller, Vec3 coord, uint16 toolSlot) internal {
     caller.activate();
     (Vec3 callerCoord,) = caller.requireConnected(coord);
-    (EntityId forceField,) = getForceField(coord);
+    (EntityId forceField,) = ForceFieldUtils.getForceField(coord);
     require(forceField.exists(), "No force field at this location");
     Vec3 forceFieldCoord = Position._get(forceField);
 

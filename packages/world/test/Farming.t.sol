@@ -392,7 +392,6 @@ contract FarmingTest is DustTest {
       // Check if we got seeds
       uint256 seedCount = getObjectAmount(aliceEntityId, ObjectTypes.WheatSeed);
 
-      console.log(seedCount);
       if (seedCount > 0) break;
     }
 

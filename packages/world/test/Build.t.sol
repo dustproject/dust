@@ -19,7 +19,6 @@ import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 
 import {
-  ForceFieldFragment,
   LocalEnergyPool,
   MovablePosition,
   Position,

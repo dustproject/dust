@@ -14,8 +14,8 @@ import { PlayerStatus } from "./codegen/tables/PlayerStatus.sol";
 import { ReversePlayer } from "./codegen/tables/ReversePlayer.sol";
 
 import { updateMachineEnergy, updatePlayerEnergy } from "./utils/EnergyUtils.sol";
-import { getForceField } from "./utils/ForceFieldUtils.sol";
-import { ForceFieldFragmentPosition, MovablePosition, Position } from "./utils/Vec3Storage.sol";
+import { ForceFieldUtils } from "./utils/ForceFieldUtils.sol";
+import { FragmentPosition, MovablePosition, Position } from "./utils/Vec3Storage.sol";
 
 import { MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "./Constants.sol";
 import { ObjectTypeId } from "./ObjectTypeId.sol";
@@ -69,7 +69,7 @@ library EntityIdLib {
   }
 
   function requireAdjacentToFragment(EntityId self, EntityId fragment) internal view returns (Vec3, Vec3) {
-    Vec3 fragmentCoord = ForceFieldFragmentPosition.get(fragment);
+    Vec3 fragmentCoord = FragmentPosition.get(fragment);
     return requireAdjacentToFragment(self, fragmentCoord);
   }
 
@@ -122,7 +122,7 @@ library ActivateLib {
       if (objectTypeId == ObjectTypes.ForceField) {
         forceField = self;
       } else {
-        (forceField,) = getForceField(self.getPosition());
+        (forceField,) = ForceFieldUtils.getForceField(self.getPosition());
       }
 
       (energyData,) = updateMachineEnergy(forceField);

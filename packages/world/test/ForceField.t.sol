@@ -20,7 +20,7 @@ import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol
 import { DustTest, console } from "./DustTest.sol";
 
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
-import { ForceFieldFragmentPosition, MovablePosition, Position, ReversePosition } from "../src/utils/Vec3Storage.sol";
+import { FragmentPosition, MovablePosition, Position, ReversePosition } from "../src/utils/Vec3Storage.sol";
 
 import { FRAGMENT_SIZE, MACHINE_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
@@ -63,7 +63,7 @@ contract TestForceFieldProgram is System {
   fallback() external { }
 }
 
-contract TestForceFieldFragmentProgram is System {
+contract TestFragmentProgram is System {
   // Just for testing, real programs should use tables
   bool revertOnValidateProgram;
   bool revertOnBuild;
@@ -111,9 +111,9 @@ contract ForceFieldTest is DustTest {
 
     Vec3 coord;
     // Handle force field fragments differently than regular entities
-    if (ObjectType.get(entityId) == ObjectTypes.ForceFieldFragment) {
-      // For fragments, we need to use ForceFieldFragmentPosition instead of Position
-      coord = ForceFieldFragmentPosition.get(entityId).fromFragmentCoord();
+    if (ObjectType.get(entityId) == ObjectTypes.Fragment) {
+      // For fragments, we need to use FragmentPosition instead of Position
+      coord = FragmentPosition.get(entityId).fromFragmentCoord();
     } else {
       coord = Position.get(entityId) - vec3(1, 0, 0);
     }
@@ -183,7 +183,7 @@ contract ForceFieldTest is DustTest {
     world.mine(aliceEntityId, mineCoord, "");
   }
 
-  function testMineFailsIfNotAllowedByForceFieldFragment() public {
+  function testMineFailsIfNotAllowedByFragment() public {
     // Set up a flat chunk with a player
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
@@ -195,7 +195,7 @@ contract ForceFieldTest is DustTest {
 
     (, EntityId fragmentEntityId) = TestForceFieldUtils.getForceField(forceFieldCoord);
 
-    TestForceFieldFragmentProgram program = new TestForceFieldFragmentProgram();
+    TestFragmentProgram program = new TestFragmentProgram();
     attachTestProgram(fragmentEntityId, program);
     program.setRevertOnMine(true);
 
@@ -279,7 +279,7 @@ contract ForceFieldTest is DustTest {
     world.build(aliceEntityId, buildObjectTypeId, buildCoord, "");
   }
 
-  function testBuildFailsIfNotAllowedByForceFieldFragment() public {
+  function testBuildFailsIfNotAllowedByFragment() public {
     // Set up a flat chunk with a player
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
@@ -291,7 +291,7 @@ contract ForceFieldTest is DustTest {
 
     (, EntityId fragmentEntityId) = TestForceFieldUtils.getForceField(forceFieldCoord);
 
-    TestForceFieldFragmentProgram program = new TestForceFieldFragmentProgram();
+    TestFragmentProgram program = new TestFragmentProgram();
     attachTestProgram(fragmentEntityId, program);
     program.setRevertOnBuild(true);
 
@@ -325,9 +325,7 @@ contract ForceFieldTest is DustTest {
 
     // Verify that the fragment at the force field coordinate exists
     Vec3 fragmentCoord = forceFieldCoord.toFragmentCoord();
-    assertTrue(
-      TestForceFieldUtils.isForceFieldFragment(forceFieldEntityId, fragmentCoord), "Force field fragment not found"
-    );
+    assertTrue(TestForceFieldUtils.isFragment(forceFieldEntityId, fragmentCoord), "Force field fragment not found");
 
     // Verify that we can get the force field from the coordinate
     (EntityId retrievedForceFieldId,) = TestForceFieldUtils.getForceField(forceFieldCoord);
@@ -348,7 +346,7 @@ contract ForceFieldTest is DustTest {
     (, EntityId fragmentEntityId) = TestForceFieldUtils.getForceField(forceFieldCoord);
 
     // Attach a program to the fragment
-    TestForceFieldFragmentProgram program = new TestForceFieldFragmentProgram();
+    TestFragmentProgram program = new TestFragmentProgram();
     attachTestProgram(fragmentEntityId, program);
     program.setRevertOnMine(true);
 
@@ -382,7 +380,7 @@ contract ForceFieldTest is DustTest {
     (, EntityId fragmentEntityId) = TestForceFieldUtils.getForceField(forceFieldCoord);
 
     // Attach a program to the fragment
-    TestForceFieldFragmentProgram program = new TestForceFieldFragmentProgram();
+    TestFragmentProgram program = new TestFragmentProgram();
     attachTestProgram(fragmentEntityId, program);
     program.setRevertOnMine(true);
 
@@ -436,7 +434,7 @@ contract ForceFieldTest is DustTest {
 
     // Verify that each new fragment exists
     assertTrue(
-      TestForceFieldUtils.isForceFieldFragment(forceFieldEntityId, newFragmentCoord),
+      TestForceFieldUtils.isFragment(forceFieldEntityId, newFragmentCoord),
       "Force field fragment not found at coordinate"
     );
   }
@@ -461,7 +459,7 @@ contract ForceFieldTest is DustTest {
     EnergyData memory afterAddEnergyData = Energy.get(forceFieldEntityId);
 
     // Compute boundary fragments
-    (Vec3[26] memory boundary, uint256 len) = world.computeBoundaryFragments(forceFieldEntityId, newFragmentCoord);
+    (, uint256 len) = world.computeBoundaryFragments(forceFieldEntityId, newFragmentCoord);
 
     // Create a valid parent array for the boundary
     uint256[] memory parents = new uint256[](len);
@@ -485,14 +483,13 @@ contract ForceFieldTest is DustTest {
 
     // Verify fragment no longer exists
     assertFalse(
-      TestForceFieldUtils.isForceFieldFragment(forceFieldEntityId, newFragmentCoord),
+      TestForceFieldUtils.isFragment(forceFieldEntityId, newFragmentCoord),
       "Force field fragment still exists after removal"
     );
 
     // Verify original fragment still exists
     assertTrue(
-      TestForceFieldUtils.isForceFieldFragment(forceFieldEntityId, refFragmentCoord),
-      "Original force field fragment was removed"
+      TestForceFieldUtils.isFragment(forceFieldEntityId, refFragmentCoord), "Original force field fragment was removed"
     );
   }
 
@@ -622,7 +619,7 @@ contract ForceFieldTest is DustTest {
     // Verify that each boundary fragment is part of the force field
     for (uint256 i = 0; i < len; i++) {
       assertTrue(
-        TestForceFieldUtils.isForceFieldFragment(forceFieldEntityId, boundaryFragments[i]),
+        TestForceFieldUtils.isFragment(forceFieldEntityId, boundaryFragments[i]),
         "Boundary fragment is not part of the force field"
       );
     }
@@ -667,12 +664,17 @@ contract ForceFieldTest is DustTest {
 
   function testForceFieldEnergyDrainsOverTime() public {
     // Set up a flat chunk with a player
-    (address alice,, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+    (,, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
     // Create a force field with energy
+    uint128 initialTimestamp = uint128(vm.getBlockTimestamp());
     Vec3 forceFieldCoord = playerCoord + vec3(2, 0, 0);
-    EntityId forceFieldEntityId = setupForceField(
-      forceFieldCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 100, drainRate: 1 })
+    EntityId forceFieldEntityId =
+      setupForceField(forceFieldCoord, EnergyData({ lastUpdatedTime: initialTimestamp, energy: 100, drainRate: 1 }));
+    assertEq(
+      Machine.getDepletedTime(forceFieldEntityId),
+      uint128(vm.getBlockTimestamp()),
+      "Accumulated depleted time is not initialized correctly"
     );
 
     // Fast forward time
@@ -684,6 +686,7 @@ contract ForceFieldTest is DustTest {
     // Check energy level (should be reduced)
     EnergyData memory currentEnergy = Energy.get(forceFieldEntityId);
     assertEq(currentEnergy.energy, 50, "Energy should be reduced after time passes");
+    assertEq(Machine.getDepletedTime(forceFieldEntityId), initialTimestamp, "Accumulated depleted time changed");
 
     // Fast forward enough time to deplete all energy
     vm.warp(vm.getBlockTimestamp() + 60);
@@ -693,7 +696,9 @@ contract ForceFieldTest is DustTest {
     // Check energy level (should be 0)
     currentEnergy = Energy.get(forceFieldEntityId);
     assertEq(currentEnergy.energy, 0, "Energy should be completely depleted");
-    assertEq(Machine.getDepletedTime(forceFieldEntityId), 10, "Accumulated depleted time should be tracked");
+    assertEq(
+      Machine.getDepletedTime(forceFieldEntityId), initialTimestamp + 10, "Accumulated depleted time should be tracked"
+    );
   }
 
   function testOnBuildAndOnMineHooksForForceField() public {
@@ -829,7 +834,7 @@ contract ForceFieldTest is DustTest {
     world.addFragment(aliceEntityId, forceField2EntityId, newFragment2, newFragment1, "");
   }
 
-  function testForceFieldFragmentGasUsage() public {
+  function testFragmentGasUsage() public {
     // Set up a flat chunk with a player
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 

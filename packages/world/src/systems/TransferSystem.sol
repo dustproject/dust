@@ -7,7 +7,6 @@ import { EnergyData } from "../codegen/tables/Energy.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
 import { transferEnergyToPool, updateMachineEnergy } from "../utils/EnergyUtils.sol";
-import { getForceField } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils, SlotTransfer, SlotTransfer } from "../utils/InventoryUtils.sol";
 import { TransferNotification, notify } from "../utils/NotifUtils.sol";
 
