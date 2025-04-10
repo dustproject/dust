@@ -23,9 +23,10 @@ library ForceFieldUtils {
    */
   function getForceField(Vec3 coord) internal returns (EntityId, EntityId) {
     Vec3 fragmentCoord = coord.toFragmentCoord();
-    EntityId fragment = getOrCreateFragmentAt(fragmentCoord);
-    FragmentData memory fragmentData = Fragment._get(fragment);
+    EntityId fragment = getFragmentAt(fragmentCoord);
+    if (!fragment.exists()) return (EntityId.wrap(0), fragment);
 
+    FragmentData memory fragmentData = Fragment._get(fragment);
     return _isFragmentActive(fragmentData, fragmentData.forceField)
       ? (fragmentData.forceField, fragment)
       : (EntityId.wrap(0), fragment);
