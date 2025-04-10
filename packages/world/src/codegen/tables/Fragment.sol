@@ -20,7 +20,7 @@ import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 import { EntityId } from "../../EntityId.sol";
 
 struct FragmentData {
-  EntityId forceFieldId;
+  EntityId forceField;
   uint128 forceFieldCreatedAt;
   uint128 extraDrainRate;
 }
@@ -52,7 +52,7 @@ library Fragment {
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
     fieldNames = new string[](3);
-    fieldNames[0] = "forceFieldId";
+    fieldNames[0] = "forceField";
     fieldNames[1] = "forceFieldCreatedAt";
     fieldNames[2] = "extraDrainRate";
   }
@@ -72,9 +72,9 @@ library Fragment {
   }
 
   /**
-   * @notice Get forceFieldId.
+   * @notice Get forceField.
    */
-  function getForceFieldId(EntityId entityId) internal view returns (EntityId forceFieldId) {
+  function getForceFieldId(EntityId entityId) internal view returns (EntityId forceField) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -83,9 +83,9 @@ library Fragment {
   }
 
   /**
-   * @notice Get forceFieldId.
+   * @notice Get forceField.
    */
-  function _getForceFieldId(EntityId entityId) internal view returns (EntityId forceFieldId) {
+  function _getForceFieldId(EntityId entityId) internal view returns (EntityId forceField) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -94,23 +94,23 @@ library Fragment {
   }
 
   /**
-   * @notice Set forceFieldId.
+   * @notice Set forceField.
    */
-  function setForceFieldId(EntityId entityId, EntityId forceFieldId) internal {
+  function setForceFieldId(EntityId entityId, EntityId forceField) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(EntityId.unwrap(forceFieldId)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(EntityId.unwrap(forceField)), _fieldLayout);
   }
 
   /**
-   * @notice Set forceFieldId.
+   * @notice Set forceField.
    */
-  function _setForceFieldId(EntityId entityId, EntityId forceFieldId) internal {
+  function _setForceFieldId(EntityId entityId, EntityId forceField) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(EntityId.unwrap(forceFieldId)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(EntityId.unwrap(forceField)), _fieldLayout);
   }
 
   /**
@@ -230,8 +230,8 @@ library Fragment {
   /**
    * @notice Set the full data using individual values.
    */
-  function set(EntityId entityId, EntityId forceFieldId, uint128 forceFieldCreatedAt, uint128 extraDrainRate) internal {
-    bytes memory _staticData = encodeStatic(forceFieldId, forceFieldCreatedAt, extraDrainRate);
+  function set(EntityId entityId, EntityId forceField, uint128 forceFieldCreatedAt, uint128 extraDrainRate) internal {
+    bytes memory _staticData = encodeStatic(forceField, forceFieldCreatedAt, extraDrainRate);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -247,11 +247,11 @@ library Fragment {
    */
   function _set(
     EntityId entityId,
-    EntityId forceFieldId,
+    EntityId forceField,
     uint128 forceFieldCreatedAt,
     uint128 extraDrainRate
   ) internal {
-    bytes memory _staticData = encodeStatic(forceFieldId, forceFieldCreatedAt, extraDrainRate);
+    bytes memory _staticData = encodeStatic(forceField, forceFieldCreatedAt, extraDrainRate);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -266,7 +266,7 @@ library Fragment {
    * @notice Set the full data using the data struct.
    */
   function set(EntityId entityId, FragmentData memory _table) internal {
-    bytes memory _staticData = encodeStatic(_table.forceFieldId, _table.forceFieldCreatedAt, _table.extraDrainRate);
+    bytes memory _staticData = encodeStatic(_table.forceField, _table.forceFieldCreatedAt, _table.extraDrainRate);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -281,7 +281,7 @@ library Fragment {
    * @notice Set the full data using the data struct.
    */
   function _set(EntityId entityId, FragmentData memory _table) internal {
-    bytes memory _staticData = encodeStatic(_table.forceFieldId, _table.forceFieldCreatedAt, _table.extraDrainRate);
+    bytes memory _staticData = encodeStatic(_table.forceField, _table.forceFieldCreatedAt, _table.extraDrainRate);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -297,8 +297,8 @@ library Fragment {
    */
   function decodeStatic(
     bytes memory _blob
-  ) internal pure returns (EntityId forceFieldId, uint128 forceFieldCreatedAt, uint128 extraDrainRate) {
-    forceFieldId = EntityId.wrap(Bytes.getBytes32(_blob, 0));
+  ) internal pure returns (EntityId forceField, uint128 forceFieldCreatedAt, uint128 extraDrainRate) {
+    forceField = EntityId.wrap(Bytes.getBytes32(_blob, 0));
 
     forceFieldCreatedAt = (uint128(Bytes.getBytes16(_blob, 32)));
 
@@ -316,7 +316,7 @@ library Fragment {
     EncodedLengths,
     bytes memory
   ) internal pure returns (FragmentData memory _table) {
-    (_table.forceFieldId, _table.forceFieldCreatedAt, _table.extraDrainRate) = decodeStatic(_staticData);
+    (_table.forceField, _table.forceFieldCreatedAt, _table.extraDrainRate) = decodeStatic(_staticData);
   }
 
   /**
@@ -344,11 +344,11 @@ library Fragment {
    * @return The static data, encoded into a sequence of bytes.
    */
   function encodeStatic(
-    EntityId forceFieldId,
+    EntityId forceField,
     uint128 forceFieldCreatedAt,
     uint128 extraDrainRate
   ) internal pure returns (bytes memory) {
-    return abi.encodePacked(forceFieldId, forceFieldCreatedAt, extraDrainRate);
+    return abi.encodePacked(forceField, forceFieldCreatedAt, extraDrainRate);
   }
 
   /**
@@ -358,11 +358,11 @@ library Fragment {
    * @return The dynamic (variable length) data, encoded into a sequence of bytes.
    */
   function encode(
-    EntityId forceFieldId,
+    EntityId forceField,
     uint128 forceFieldCreatedAt,
     uint128 extraDrainRate
   ) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
-    bytes memory _staticData = encodeStatic(forceFieldId, forceFieldCreatedAt, extraDrainRate);
+    bytes memory _staticData = encodeStatic(forceField, forceFieldCreatedAt, extraDrainRate);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;

@@ -292,7 +292,7 @@ export default defineWorld({
     Fragment: {
       schema: {
         entityId: "EntityId",
-        forceFieldId: "EntityId",
+        forceField: "EntityId",
         forceFieldCreatedAt: "uint128",
         // Comes from beds with sleeping players or
         // other entities that might continuously drain energy

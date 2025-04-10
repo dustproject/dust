@@ -351,13 +351,13 @@ library SurfaceChunkByIndex {
 library Fragment {
   function get(Vec3 position) internal view returns (FragmentData memory value) {
     bytes memory staticData = Vec3Storage.getAsBytes(_Fragment._tableId, _Fragment._fieldLayout, position);
-    (value.entityId, value.forceFieldId, value.forceFieldCreatedAt, value.extraDrainRate) =
+    (value.entityId, value.forceField, value.forceFieldCreatedAt, value.extraDrainRate) =
       _Fragment.decodeStatic(staticData);
   }
 
   function _get(Vec3 position) internal view returns (FragmentData memory value) {
     bytes memory staticData = Vec3Storage._getAsBytes(_Fragment._tableId, _Fragment._fieldLayout, position);
-    (value.entityId, value.forceFieldId, value.forceFieldCreatedAt, value.extraDrainRate) =
+    (value.entityId, value.forceField, value.forceFieldCreatedAt, value.extraDrainRate) =
       _Fragment.decodeStatic(staticData);
   }
 
@@ -368,13 +368,13 @@ library Fragment {
 
   function set(Vec3 position, FragmentData memory value) internal {
     bytes memory staticData =
-      _Fragment.encodeStatic(value.entityId, value.forceFieldId, value.forceFieldCreatedAt, value.extraDrainRate);
+      _Fragment.encodeStatic(value.entityId, value.forceField, value.forceFieldCreatedAt, value.extraDrainRate);
     Vec3Storage.set(_Fragment._tableId, _Fragment._fieldLayout, position, staticData);
   }
 
   function _set(Vec3 position, FragmentData memory value) internal {
     bytes memory staticData =
-      _Fragment.encodeStatic(value.entityId, value.forceFieldId, value.forceFieldCreatedAt, value.extraDrainRate);
+      _Fragment.encodeStatic(value.entityId, value.forceField, value.forceFieldCreatedAt, value.extraDrainRate);
     Vec3Storage._set(_Fragment._tableId, _Fragment._fieldLayout, position, staticData);
   }
 

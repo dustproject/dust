@@ -11,9 +11,7 @@ import { ObjectType } from "../codegen/tables/ObjectType.sol";
 import { getUniqueEntity } from "../Utils.sol";
 import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
 
-import {
-  isFragment, isFragmentActive, removeFragment as _removeFragment, setupFragment
-} from "../utils/ForceFieldUtils.sol";
+import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { AddFragmentNotification, RemoveFragmentNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
@@ -87,7 +85,7 @@ contract ForceFieldSystem is System {
     Vec3[26] memory neighbors = fragmentCoord.neighbors26();
     for (uint8 i = 0; i < neighbors.length; i++) {
       // Add to resulting boundary if it's a forcefield fragment
-      if (isFragment(forceField, neighbors[i])) {
+      if (ForceFieldUtils.isFragment(forceField, neighbors[i])) {
         boundary[count++] = neighbors[i];
       }
     }
@@ -112,10 +110,11 @@ contract ForceFieldSystem is System {
       refFragmentCoord.inVonNeumannNeighborhood(fragmentCoord), "Reference fragment is not adjacent to new fragment"
     );
 
-    require(isFragment(forceField, refFragmentCoord), "Reference fragment is not part of forcefield");
-    require(!isFragmentActive(fragmentCoord), "Fragment already belongs to a forcefield");
+    require(ForceFieldUtils.isFragment(forceField, refFragmentCoord), "Reference fragment is not part of forcefield");
 
-    EntityId fragment = setupFragment(forceField, fragmentCoord);
+    EntityId fragment = ForceFieldUtils.getOrCreateFragmentAt(fragmentCoord);
+
+    ForceFieldUtils.addFragment(forceField, fragment);
 
     bytes memory onAddFragment =
       abi.encodeCall(IAddFragmentHook.onAddFragment, (caller, forceField, fragment, extraData));
@@ -146,7 +145,9 @@ contract ForceFieldSystem is System {
 
     Vec3 forceFieldFragmentCoord = Position._get(forceField).toFragmentCoord();
     require(forceFieldFragmentCoord != fragmentCoord, "Can't remove forcefield's fragment");
-    require(isFragment(forceField, fragmentCoord), "Fragment is not part of forcefield");
+
+    EntityId fragment = ForceFieldUtils.getFragmentAt(fragmentCoord);
+    require(ForceFieldUtils.isFragment(forceField, fragment), "Fragment is not part of forcefield");
 
     // First, identify all boundary fragments (fragments adjacent to the fragment to be removed)
     (Vec3[26] memory boundary, uint256 len) = computeBoundaryFragments(forceField, fragmentCoord);
@@ -156,7 +157,7 @@ contract ForceFieldSystem is System {
     // Validate that boundaryFragments are connected
     require(validateSpanningTree(boundary, len, parents), "Invalid spanning tree");
 
-    EntityId fragment = _removeFragment(forceField, fragmentCoord);
+    ForceFieldUtils.removeFragment(forceField, fragment);
 
     bytes memory onRemoveFragment =
       abi.encodeCall(IRemoveFragmentHook.onRemoveFragment, (caller, forceField, fragment, extraData));

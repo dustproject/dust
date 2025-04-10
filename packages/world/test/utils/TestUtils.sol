@@ -159,11 +159,11 @@ library TestForceFieldUtils {
     return _getForceField(coord);
   }
 
-  function setupForceField(EntityId forceFieldId, Vec3 coord) public asWorld {
-    _setupForceField(forceFieldId, coord);
+  function setupForceField(EntityId forceField, Vec3 coord) public asWorld {
+    _setupForceField(forceField, coord);
   }
 
-  function destroyForceField(EntityId forceFieldId) public asWorld {
-    _destroyForceField(forceFieldId);
+  function destroyForceField(EntityId forceField) public asWorld {
+    _destroyForceField(forceField);
   }
 }
