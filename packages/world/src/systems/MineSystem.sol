@@ -123,8 +123,11 @@ contract MineSystem is System {
     // Remove seed on top of this block
     Vec3 aboveCoord = baseCoord + vec3(0, 1, 0);
     // If above is a seed, the entity must exist as there are not seeds in the base terrain
-    (EntityId above, ObjectTypeId aboveTypeId) = getOrCreateEntityAt(aboveCoord);
+    (EntityId above, ObjectTypeId aboveTypeId) = getEntityAt(aboveCoord);
     if (aboveTypeId.isSeed()) {
+      if (!above.exists()) {
+        above = createEntityAt(aboveCoord, aboveTypeId);
+      }
       _removeSeed(above, aboveTypeId, aboveCoord);
       _handleDrop(caller, aboveTypeId, aboveCoord);
     }
