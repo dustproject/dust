@@ -48,6 +48,7 @@ library NatureLib {
     if (objectTypeId == ObjectTypes.DiamondOre) return MAX_DIAMOND;
     if (objectTypeId == ObjectTypes.NeptuniumOre) return MAX_NEPTUNIUM;
     if (objectTypeId == ObjectTypes.WheatSeed) return MAX_WHEAT_SEED;
+    // TODO: add caps
 
     // If no specific cap, use a high value
     return type(uint256).max;
@@ -62,18 +63,22 @@ library NatureLib {
     return mined >= cap ? 0 : cap - mined;
   }
 
-  function getMineDrops(ObjectTypeId objectTypeId, Vec3 coord) internal view returns (ObjectAmount[] memory result) {
+  function getMineDrops(ObjectTypeId objectType, Vec3 coord) internal view returns (ObjectAmount[] memory result) {
     // Wheat drops wheat + 0-3 wheat seeds
-    if (objectTypeId == ObjectTypes.Wheat) {
+    if (objectType == ObjectTypes.Wheat) {
       return getWheatDrops(getRandomSeed(coord));
     }
 
     // FescueGrass has a chance to drop wheat seeds
-    if (objectTypeId == ObjectTypes.FescueGrass) {
+    if (objectType == ObjectTypes.FescueGrass) {
       return getGrassDrops(getRandomSeed(coord));
     }
 
-    if (objectTypeId == ObjectTypes.Farmland || objectTypeId == ObjectTypes.WetFarmland) {
+    if (objectType.isLeaf()) {
+      return getLeafDrops(objectType, getRandomSeed(coord));
+    }
+
+    if (objectType == ObjectTypes.Farmland || objectType == ObjectTypes.WetFarmland) {
       result = new ObjectAmount[](1);
       result[0] = ObjectAmount(ObjectTypes.Dirt, 1);
       return result;
@@ -81,7 +86,7 @@ library NatureLib {
 
     // Default behavior for all other objects
     result = new ObjectAmount[](1);
-    result[0] = ObjectAmount(objectTypeId, 1);
+    result[0] = ObjectAmount(objectType, 1);
 
     return result;
   }
@@ -131,6 +136,30 @@ library NatureLib {
     return result;
   }
 
+  function getLeafDrops(ObjectTypeId objectType, uint256 randomSeed)
+    internal
+    view
+    returns (ObjectAmount[] memory result)
+  {
+    uint256[] memory distribution = new uint256[](2);
+    distribution[0] = 43; // No sapling: 43%
+    distribution[1] = 57; // 1 sapling: 57%
+
+    // Get sapling options and their weights using distribution
+    (ObjectAmount[] memory saplingOptions, uint256[] memory weights) =
+      getDropWeights(objectType.getSapling(), distribution);
+
+    // Select sapling drop based on calculated weights
+    ObjectAmount memory saplingDrop = selectObjectByWeight(saplingOptions, weights, randomSeed);
+
+    if (saplingDrop.objectTypeId != ObjectTypes.Null) {
+      result = new ObjectAmount[](1);
+      result[0] = saplingDrop;
+    }
+
+    return result;
+  }
+
   function getRandomOre(Vec3 coord) internal view returns (ObjectTypeId) {
     uint256 randomSeed = getRandomSeed(coord);
 
@@ -175,7 +204,7 @@ library NatureLib {
     uint32 leaves;
 
     // Initial seed for randomness
-    uint256 currentSeed = uint256(keccak256(abi.encodePacked(block.timestamp, baseCoord)));
+    uint256 randomSeed = uint256(keccak256(abi.encodePacked(block.timestamp, baseCoord)));
 
     ObjectTypeId leafType = treeData.leafType;
 
@@ -206,8 +235,8 @@ library NatureLib {
               continue;
             }
 
-            currentSeed = uint256(keccak256(abi.encodePacked(currentSeed)));
-            if (currentSeed % 100 < 40) {
+            randomSeed = uint256(keccak256(abi.encodePacked(randomSeed)));
+            if (randomSeed % 100 < 40) {
               continue;
             }
           }

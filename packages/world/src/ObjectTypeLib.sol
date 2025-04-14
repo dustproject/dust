@@ -147,11 +147,13 @@ library ObjectTypeLib {
   }
 
   function isSeed(ObjectTypeId self) internal pure returns (bool) {
-    return self == ObjectTypes.WheatSeed;
+    return self == ObjectTypes.WheatSeed || self == ObjectTypes.MelonSeed || self == ObjectTypes.PumpkinSeed;
   }
 
   function isSapling(ObjectTypeId self) internal pure returns (bool) {
-    return self == ObjectTypes.OakSapling || self == ObjectTypes.SpruceSapling;
+    return self == ObjectTypes.OakSapling || self == ObjectTypes.SpruceSapling || self == ObjectTypes.MangroveSapling
+      || self == ObjectTypes.SakuraSapling || self == ObjectTypes.DarkOakSapling || self == ObjectTypes.BirchSapling
+      || self == ObjectTypes.AcaciaSapling || self == ObjectTypes.JungleSapling;
   }
 
   function isCrop(ObjectTypeId self) internal pure returns (bool) {
@@ -176,6 +178,28 @@ library ObjectTypeLib {
       }
     }
     return false;
+  }
+
+  function getSapling(ObjectTypeId self) internal pure returns (ObjectTypeId) {
+    if (self == ObjectTypes.OakLeaf) {
+      return ObjectTypes.OakSapling;
+    } else if (self == ObjectTypes.SpruceLeaf) {
+      return ObjectTypes.SpruceSapling;
+    } else if (self == ObjectTypes.MangroveLeaf) {
+      return ObjectTypes.MangroveSapling;
+    } else if (self == ObjectTypes.SakuraLeaf) {
+      return ObjectTypes.SakuraSapling;
+    } else if (self == ObjectTypes.DarkOakLeaf) {
+      return ObjectTypes.DarkOakSapling;
+    } else if (self == ObjectTypes.BirchLeaf) {
+      return ObjectTypes.BirchSapling;
+    } else if (self == ObjectTypes.AcaciaLeaf) {
+      return ObjectTypes.AcaciaSapling;
+    } else if (self == ObjectTypes.JungleLeaf) {
+      return ObjectTypes.JungleSapling;
+    }
+
+    revert("Invalid log type");
   }
 
   // TODO: one possible way to optimize is to follow some kind of schema for crops and their seeds

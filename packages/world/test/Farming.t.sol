@@ -241,7 +241,7 @@ contract FarmingTest is DustTest {
     setTerrainAtCoord(dirtCoord, ObjectTypes.Dirt);
 
     vm.prank(alice);
-    vm.expectRevert("Crop seeds need wet farmland");
+    vm.expectRevert("Seeds need wet farmland");
     world.build(aliceEntityId, ObjectTypes.WheatSeed, dirtCoord + vec3(0, 1, 0), "");
 
     // Try to plant on farmland (not wet)
@@ -249,7 +249,7 @@ contract FarmingTest is DustTest {
     setTerrainAtCoord(farmlandCoord, ObjectTypes.Farmland);
 
     vm.prank(alice);
-    vm.expectRevert("Crop seeds need wet farmland");
+    vm.expectRevert("Seeds need wet farmland");
     world.build(aliceEntityId, ObjectTypes.WheatSeed, farmlandCoord + vec3(0, 1, 0), "");
   }
 
