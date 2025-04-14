@@ -10,7 +10,6 @@ import { transferEnergyToPool, updateMachineEnergy } from "../utils/EnergyUtils.
 import { InventoryUtils, SlotTransfer, SlotTransfer } from "../utils/InventoryUtils.sol";
 import { TransferNotification, notify } from "../utils/NotifUtils.sol";
 
-import { SMART_CHEST_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectTypeId } from "../ObjectTypeId.sol";
 import { ObjectAmount } from "../ObjectTypeLib.sol";
@@ -29,51 +28,35 @@ contract TransferSystem is System {
   ) public {
     caller.activate();
 
+    // TODO: this is incorrect, we might need 2 targets (eg. transferring from chest to chest), but we need to figure out how to prevent reentrancies
+    EntityId target;
+
+    // Can't withdraw from a player, unless it is the player itself
     if (caller != from) {
       caller.requireConnected(from);
+      require(ObjectType._get(from) != ObjectTypes.Player, "Cannot transfer from player");
+      target = from;
     }
-    from.requireConnected(to);
 
-    transferEnergyToPool(caller, SMART_CHEST_ENERGY_COST);
+    // Can't deposit to a player, unless it is the player itself
+    if (caller != to) {
+      caller.requireConnected(to);
+      require(ObjectType._get(to) != ObjectTypes.Player, "Cannot transfer to player");
+      target = to;
+    }
 
     (EntityId[] memory entities, ObjectAmount[] memory objectAmounts) =
       InventoryUtils.getObjectsAndEntities(from, slotTransfers);
 
-    InventoryUtils.transfer(from, to, slotTransfers);
+    if (target.exists()) {
+      InventoryUtils.transfer(from, to, slotTransfers);
 
-    // Note: we call this after the transfer state has been updated, to prevent re-entrancy attacks
-    TransferLib._onTransfer(caller, from, to, entities, objectAmounts, extraData);
-  }
-}
+      bytes memory onTransfer =
+        abi.encodeCall(ITransferHook.onTransfer, (caller, target, from, to, objectAmounts, entities, extraData));
 
-library TransferLib {
-  function _onTransfer(
-    EntityId caller,
-    EntityId from,
-    EntityId to,
-    EntityId[] memory entities,
-    ObjectAmount[] memory objectAmounts,
-    bytes calldata extraData
-  ) public {
-    EntityId target = _getTarget(caller, from, to);
-
-    require(ObjectType._get(target) != ObjectTypes.Player, "Cannot transfer to player");
-
-    bytes memory onTransfer =
-      abi.encodeCall(ITransferHook.onTransfer, (caller, target, from, to, objectAmounts, entities, extraData));
-
-    target.getProgram().callOrRevert(onTransfer);
+      target.getProgram().callOrRevert(onTransfer);
+    }
 
     notify(caller, TransferNotification({ transferEntityId: target, tools: entities, objectAmounts: objectAmounts }));
-  }
-
-  function _getTarget(EntityId caller, EntityId from, EntityId to) internal pure returns (EntityId) {
-    if (caller == from) {
-      return to;
-    } else if (caller == to) {
-      return from;
-    } else {
-      revert("Caller is not involved in transfer");
-    }
   }
 }
