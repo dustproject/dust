@@ -70,7 +70,7 @@ contract FoodTest is DustTest {
     );
 
     // Add food to player inventory
-    ObjectTypeId foodType = ObjectTypes.Wheat;
+    ObjectTypeId foodType = ObjectTypes.WheatSlop;
     uint16 foodAmount = 3;
     TestInventoryUtils.addObject(aliceEntityId, foodType, foodAmount);
 
