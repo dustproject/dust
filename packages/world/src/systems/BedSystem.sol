@@ -28,7 +28,7 @@ import {
   updateSleepingPlayerEnergy
 } from "../utils/EnergyUtils.sol";
 
-import { getOrCreateEntityAt, getUniqueEntity } from "../utils/EntityUtils.sol";
+import { getOrCreateEntityAt } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { SleepNotification, WakeupNotification, notify } from "../utils/NotifUtils.sol";

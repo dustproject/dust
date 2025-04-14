@@ -13,7 +13,7 @@ import { EntityId } from "../EntityId.sol";
 import { ObjectTypeId } from "../ObjectTypeId.sol";
 import { ObjectTypes } from "../ObjectTypes.sol";
 import { Vec3 } from "../Vec3.sol";
-import { getOrCreateEntityAt, getUniqueEntity } from "../utils/EntityUtils.sol";
+import { getOrCreateEntityAt } from "../utils/EntityUtils.sol";
 import { InventoryUtils, SlotTransfer } from "../utils/InventoryUtils.sol";
 import { DropNotification, PickupNotification, notify } from "../utils/NotifUtils.sol";
 import { TerrainLib } from "./libraries/TerrainLib.sol";

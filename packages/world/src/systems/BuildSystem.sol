@@ -18,7 +18,7 @@ import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 import { MovablePosition, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
 
 import { removeEnergyFromLocalPool, transferEnergyToPool, updateMachineEnergy } from "../utils/EnergyUtils.sol";
-import { getMovableEntityAt, getObjectTypeIdAt, getOrCreateEntityAt, getUniqueEntity } from "../utils/EntityUtils.sol";
+import { getMovableEntityAt, getObjectTypeIdAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { BuildNotification, MoveNotification, notify } from "../utils/NotifUtils.sol";

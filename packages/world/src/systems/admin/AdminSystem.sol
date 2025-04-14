@@ -17,11 +17,7 @@ import { ObjectTypeLib } from "../../ObjectTypeLib.sol";
 import { ObjectTypes } from "../../ObjectTypes.sol";
 
 import {
-  createEntity,
-  getMovableEntityAt,
-  getUniqueEntity,
-  safeGetObjectTypeIdAt,
-  setMovableEntityAt
+  createEntity, getMovableEntityAt, safeGetObjectTypeIdAt, setMovableEntityAt
 } from "../../utils/EntityUtils.sol";
 import { InventoryUtils } from "../../utils/InventoryUtils.sol";
 import { PlayerUtils } from "../../utils/PlayerUtils.sol";

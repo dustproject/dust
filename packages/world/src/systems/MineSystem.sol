@@ -36,8 +36,7 @@ import {
   getEntityAt,
   getMovableEntityAt,
   getObjectTypeIdAt,
-  getOrCreateEntityAt,
-  getUniqueEntity
+  getOrCreateEntityAt
 } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
