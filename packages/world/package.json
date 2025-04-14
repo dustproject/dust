@@ -41,6 +41,7 @@
     "forge-std": "https://github.com/foundry-rs/forge-std.git#3b20d60d14b343ee4f908cb8079495c07f5e8981",
     "solhint": "^3.4.1",
     "solhint-config-mud": "2.2.22-ab837ceb49fa77cc29487bb9df0c487975b37afe",
-    "solhint-plugin-mud": "2.2.22-ab837ceb49fa77cc29487bb9df0c487975b37afe"
+    "solhint-plugin-mud": "2.2.22-ab837ceb49fa77cc29487bb9df0c487975b37afe",
+    "typescript": "^5.8.3"
   }
 }

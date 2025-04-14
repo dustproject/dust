@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
+
+import { ObjectType } from "./codegen/tables/ObjectType.sol";
 import { ResourceCount } from "./codegen/tables/ResourceCount.sol";
+
+import { getObjectTypeIdAt, getOrCreateEntityAt } from "./utils/EntityUtils.sol";
 import { ChunkCommitment } from "./utils/Vec3Storage.sol";
 
 import {
@@ -14,13 +19,48 @@ import {
   MAX_NEPTUNIUM,
   MAX_WHEAT_SEED
 } from "./Constants.sol";
+
+import { EntityId } from "./EntityId.sol";
 import { ObjectTypeId } from "./ObjectTypeId.sol";
-import { ObjectAmount, ObjectTypeLib, getOreObjectTypes } from "./ObjectTypeLib.sol";
+import { ObjectAmount, ObjectTypeLib, TreeData, getOreObjectTypes } from "./ObjectTypeLib.sol";
 import { ObjectTypes } from "./ObjectTypes.sol";
-import { Vec3 } from "./Vec3.sol";
+import { Vec3, vec3 } from "./Vec3.sol";
 
 library NatureLib {
   using ObjectTypeLib for ObjectTypeId;
+
+  function getRandomSeed(Vec3 coord) internal view returns (uint256) {
+    // Get chunk commitment for the coord, but only validate it for random resources (done in NatureLib)
+    Vec3 chunkCoord = coord.toChunkCoord();
+    uint256 commitment = ChunkCommitment._get(chunkCoord);
+    // We can't get blockhash of current block
+    require(block.number > commitment, "Not within commitment blocks");
+    require(block.number <= commitment + CHUNK_COMMIT_EXPIRY_BLOCKS, "Chunk commitment expired");
+    return uint256(keccak256(abi.encodePacked(blockhash(commitment), coord)));
+  }
+
+  // Get resource cap for a specific resource type
+  function getResourceCap(ObjectTypeId objectTypeId) internal pure returns (uint256) {
+    if (objectTypeId == ObjectTypes.CoalOre) return MAX_COAL;
+    if (objectTypeId == ObjectTypes.CopperOre) return MAX_COPPER;
+    if (objectTypeId == ObjectTypes.IronOre) return MAX_IRON;
+    if (objectTypeId == ObjectTypes.GoldOre) return MAX_GOLD;
+    if (objectTypeId == ObjectTypes.DiamondOre) return MAX_DIAMOND;
+    if (objectTypeId == ObjectTypes.NeptuniumOre) return MAX_NEPTUNIUM;
+    if (objectTypeId == ObjectTypes.WheatSeed) return MAX_WHEAT_SEED;
+
+    // If no specific cap, use a high value
+    return type(uint256).max;
+  }
+
+  // Get remaining amount of a resource
+  function getRemainingAmount(ObjectTypeId objectTypeId) internal view returns (uint256) {
+    if (objectTypeId == ObjectTypes.Null) return type(uint256).max;
+
+    uint256 cap = getResourceCap(objectTypeId);
+    uint256 mined = ResourceCount._get(objectTypeId);
+    return mined >= cap ? 0 : cap - mined;
+  }
 
   function getMineDrops(ObjectTypeId objectTypeId, Vec3 coord) internal view returns (ObjectAmount[] memory result) {
     // Wheat drops wheat + 0-3 wheat seeds
@@ -112,42 +152,101 @@ library NatureLib {
     return selectedOre.objectTypeId;
   }
 
-  function getRandomSeed(Vec3 coord) internal view returns (uint256) {
-    // Get chunk commitment for the coord, but only validate it for random resources (done in NatureLib)
-    Vec3 chunkCoord = coord.toChunkCoord();
-    uint256 commitment = ChunkCommitment._get(chunkCoord);
-    // We can't get blockhash of current block
-    require(block.number > commitment, "Not within commitment blocks");
-    require(block.number <= commitment + CHUNK_COMMIT_EXPIRY_BLOCKS, "Chunk commitment expired");
-    return uint256(keccak256(abi.encodePacked(blockhash(commitment), coord)));
+  function growTree(EntityId seed, Vec3 baseCoord, TreeData memory treeData) public returns (uint32, uint32) {
+    uint32 trunkHeight = growTreeTrunk(seed, baseCoord, treeData);
+
+    if (trunkHeight <= 2) {
+      // Very small tree, no leaves
+      return (trunkHeight, 0);
+    }
+
+    // Define canopy parameters
+    uint32 size = treeData.canopyWidth;
+    uint32 start = treeData.canopyStart; // Bottom of the canopy
+    uint32 end = treeData.canopyEnd; // Top of the canopy
+    uint32 stretch = treeData.stretchFactor; // How many times to repeat each sphere layer
+    int32 center = int32(trunkHeight) + treeData.centerOffset; // Center of the sphere
+
+    // Adjust if the tree is blocked
+    if (trunkHeight < treeData.trunkHeight) {
+      end = trunkHeight + 1; // Still allow one layer above the trunk
+    }
+
+    uint32 leaves;
+
+    // Initial seed for randomness
+    uint256 currentSeed = uint256(keccak256(abi.encodePacked(block.timestamp, baseCoord)));
+
+    ObjectTypeId leafType = treeData.leafType;
+
+    // Avoid stack too deep issues
+    Vec3 coord = baseCoord;
+
+    for (int32 y = int32(start); y < int32(end); ++y) {
+      // Calculate distance from sphere center
+      uint32 dy = uint32(FixedPointMathLib.dist(y, center));
+      if (size < dy / stretch) {
+        continue;
+      }
+
+      // We know this is not negative, but we use int32 to simplify operations
+      int32 radius = int32(size - dy / stretch);
+
+      // Create the canopy
+      for (int32 x = -radius; x <= radius; ++x) {
+        for (int32 z = -radius; z <= radius; ++z) {
+          // Skip the trunk position
+          if (x == 0 && z == 0 && y < int32(trunkHeight)) {
+            continue;
+          }
+
+          // If it is a corner
+          if (radius != 0 && int256(FixedPointMathLib.abs(x)) == radius && int256(FixedPointMathLib.abs(z)) == radius) {
+            if ((dy + 1) % stretch == 0) {
+              continue;
+            }
+
+            currentSeed = uint256(keccak256(abi.encodePacked(currentSeed)));
+            if (currentSeed % 100 < 40) {
+              continue;
+            }
+          }
+
+          (EntityId leaf, ObjectTypeId existingType) = getOrCreateEntityAt(coord + vec3(x, y, z));
+
+          // Only place leaves in air blocks
+          if (existingType == ObjectTypes.Air) {
+            ObjectType._set(leaf, leafType);
+            leaves++;
+          }
+        }
+      }
+    }
+
+    return (trunkHeight, leaves);
   }
 
-  // Get resource cap for a specific resource type
-  function getResourceCap(ObjectTypeId objectTypeId) internal pure returns (uint256) {
-    if (objectTypeId == ObjectTypes.CoalOre) return MAX_COAL;
-    if (objectTypeId == ObjectTypes.CopperOre) return MAX_COPPER;
-    if (objectTypeId == ObjectTypes.IronOre) return MAX_IRON;
-    if (objectTypeId == ObjectTypes.GoldOre) return MAX_GOLD;
-    if (objectTypeId == ObjectTypes.DiamondOre) return MAX_DIAMOND;
-    if (objectTypeId == ObjectTypes.NeptuniumOre) return MAX_NEPTUNIUM;
-    if (objectTypeId == ObjectTypes.WheatSeed) return MAX_WHEAT_SEED;
+  function growTreeTrunk(EntityId seed, Vec3 baseCoord, TreeData memory treeData) internal returns (uint32) {
+    // Replace the seed with the trunk
+    ObjectType._set(seed, treeData.logType);
 
-    // If no specific cap, use a high value
-    return type(uint256).max;
-  }
+    // Create the trunk up to available space
+    for (uint32 i = 1; i < treeData.trunkHeight; i++) {
+      Vec3 trunkCoord = baseCoord + vec3(0, int32(i), 0);
+      (EntityId trunk, ObjectTypeId objectTypeId) = getOrCreateEntityAt(trunkCoord);
+      if (objectTypeId != ObjectTypes.Air) {
+        return i;
+      }
 
-  // Get remaining amount of a resource
-  function getRemainingAmount(ObjectTypeId objectTypeId) internal view returns (uint256) {
-    if (objectTypeId == ObjectTypes.Null) return type(uint256).max;
+      ObjectType._set(trunk, treeData.logType);
+    }
 
-    uint256 cap = getResourceCap(objectTypeId);
-    uint256 mined = ResourceCount._get(objectTypeId);
-    return mined >= cap ? 0 : cap - mined;
+    return treeData.trunkHeight;
   }
 
   // Simple random selection based on weights
   function selectObjectByWeight(ObjectAmount[] memory options, uint256[] memory weights, uint256 randomSeed)
-    internal
+    private
     pure
     returns (ObjectAmount memory)
   {
@@ -155,7 +254,7 @@ library NatureLib {
   }
 
   // Simple weighted selection from an array of weights
-  function selectByWeight(uint256[] memory weights, uint256 randomSeed) internal pure returns (uint256) {
+  function selectByWeight(uint256[] memory weights, uint256 randomSeed) private pure returns (uint256) {
     uint256 totalWeight = 0;
     for (uint256 i = 0; i < weights.length; i++) {
       totalWeight += weights[i];

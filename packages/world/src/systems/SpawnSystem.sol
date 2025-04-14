@@ -152,8 +152,8 @@ contract SpawnSystem is System {
     (EntityId forceField,) = ForceFieldUtils.getForceField(spawnCoord);
     require(!forceField.exists(), "Cannot spawn in force field");
 
-    // Extract energy from local pool
-    removeEnergyFromLocalPool(spawnCoord, MAX_PLAYER_ENERGY);
+    // Extract energy from local pool (half of max player energy)
+    removeEnergyFromLocalPool(spawnCoord, MAX_PLAYER_ENERGY / 2);
 
     return _spawnPlayer(spawnCoord);
   }

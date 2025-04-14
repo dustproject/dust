@@ -179,6 +179,9 @@ importers:
       solhint-plugin-mud:
         specifier: 2.2.22-ab837ceb49fa77cc29487bb9df0c487975b37afe
         version: 2.2.22-ab837ceb49fa77cc29487bb9df0c487975b37afe
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
 
   scripts:
     dependencies:

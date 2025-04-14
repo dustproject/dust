@@ -22,8 +22,6 @@ import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 import { Position } from "../utils/Vec3Storage.sol";
 import { ResourcePosition } from "../utils/Vec3Storage.sol";
 
-import { getUniqueEntity } from "../Utils.sol";
-
 import {
   addEnergyToLocalPool,
   decreaseFragmentDrainRate,
@@ -39,7 +37,8 @@ import {
   getEntityAt,
   getMovableEntityAt,
   getObjectTypeIdAt,
-  getOrCreateEntityAt
+  getOrCreateEntityAt,
+  getUniqueEntity
 } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";

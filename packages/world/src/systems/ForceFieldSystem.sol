@@ -8,8 +8,8 @@ import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
-import { getUniqueEntity } from "../Utils.sol";
 import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
+import { getUniqueEntity } from "../utils/EntityUtils.sol";
 
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { AddFragmentNotification, RemoveFragmentNotification, notify } from "../utils/NotifUtils.sol";

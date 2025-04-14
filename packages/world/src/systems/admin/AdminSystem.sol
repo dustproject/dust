@@ -15,10 +15,13 @@ import { EntityId } from "../../EntityId.sol";
 import { ObjectTypeId } from "../../ObjectTypeId.sol";
 import { ObjectTypeLib } from "../../ObjectTypeLib.sol";
 import { ObjectTypes } from "../../ObjectTypes.sol";
-import { getUniqueEntity } from "../../Utils.sol";
 
 import {
-  createEntity, getMovableEntityAt, safeGetObjectTypeIdAt, setMovableEntityAt
+  createEntity,
+  getMovableEntityAt,
+  getUniqueEntity,
+  safeGetObjectTypeIdAt,
+  setMovableEntityAt
 } from "../../utils/EntityUtils.sol";
 import { InventoryUtils } from "../../utils/InventoryUtils.sol";
 import { PlayerUtils } from "../../utils/PlayerUtils.sol";

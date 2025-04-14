@@ -18,10 +18,16 @@ import { FragmentPosition, MovablePosition, Position, ReverseMovablePosition } f
 
 import { ObjectTypeId } from "../ObjectTypeId.sol";
 import { ObjectTypes } from "../ObjectTypes.sol";
-import { checkWorldStatus, getUniqueEntity } from "../Utils.sol";
+import { checkWorldStatus } from "../Utils.sol";
 import { updatePlayerEnergy } from "./EnergyUtils.sol";
 
-import { getMovableEntityAt, getOrCreateEntityAt, safeGetObjectTypeIdAt, setMovableEntityAt } from "./EntityUtils.sol";
+import {
+  getMovableEntityAt,
+  getOrCreateEntityAt,
+  getUniqueEntity,
+  safeGetObjectTypeIdAt,
+  setMovableEntityAt
+} from "./EntityUtils.sol";
 import { InventoryUtils } from "./InventoryUtils.sol";
 
 import { FRAGMENT_SIZE, PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
