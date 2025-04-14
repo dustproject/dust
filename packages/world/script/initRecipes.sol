@@ -1733,4 +1733,34 @@ function initRecipes() {
       outputAmounts
     );
   }
+  {
+    ObjectTypeId stationObjectTypeId = ObjectTypes.Null;
+    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    inputTypes[0] = ObjectTypes.Wheat;
+    uint16[] memory inputAmounts = new uint16[](1);
+    inputAmounts[0] = 16;
+    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    outputTypes[0] = ObjectTypes.WheatSlop;
+    uint16[] memory outputAmounts = new uint16[](1);
+    outputAmounts[0] = 1;
+
+    uint16[] memory _inputTypes;
+    assembly ("memory-safe") {
+      _inputTypes := inputTypes
+    }
+
+    uint16[] memory _outputTypes;
+    assembly ("memory-safe") {
+      _outputTypes := outputTypes
+    }
+
+    Recipes.set(
+      keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      stationObjectTypeId,
+      _inputTypes,
+      inputAmounts,
+      _outputTypes,
+      outputAmounts
+    );
+  }
 }
