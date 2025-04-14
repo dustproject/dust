@@ -1370,7 +1370,7 @@ function initObjects() {
     })
   );
   ObjectTypeMetadata.set(
-    ObjectTypes.OakSeed,
+    ObjectTypes.OakSapling,
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: type(uint16).max,
@@ -1380,7 +1380,7 @@ function initObjects() {
     })
   );
   ObjectTypeMetadata.set(
-    ObjectTypes.SpruceSeed,
+    ObjectTypes.SpruceSapling,
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: type(uint16).max,

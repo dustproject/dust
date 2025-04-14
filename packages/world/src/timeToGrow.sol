@@ -11,11 +11,11 @@ function timeToGrow(ObjectTypeId objectTypeId) pure returns (uint128) {
     return 900 seconds;
   }
 
-  if (objectTypeId == ObjectTypes.OakSeed) {
+  if (objectTypeId == ObjectTypes.OakSapling) {
     return 345600 seconds;
   }
 
-  if (objectTypeId == ObjectTypes.SpruceSeed) {
+  if (objectTypeId == ObjectTypes.SpruceSapling) {
     return 345600 seconds;
   }
 

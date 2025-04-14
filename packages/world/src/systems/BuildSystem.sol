@@ -59,7 +59,7 @@ contract BuildSystem is System {
 
     (EntityId base, Vec3[] memory coords) = BuildLib._addBlocks(baseCoord, buildObjectTypeId, direction);
 
-    if (buildObjectTypeId.isSeed()) {
+    if (buildObjectTypeId.isGrowable()) {
       BuildLib._handleSeed(base, buildObjectTypeId, baseCoord);
     }
 
@@ -137,10 +137,10 @@ library BuildLib {
 
   function _handleSeed(EntityId base, ObjectTypeId buildObjectTypeId, Vec3 baseCoord) public {
     ObjectTypeId belowTypeId = getObjectTypeIdAt(baseCoord - vec3(0, 1, 0));
-    if (buildObjectTypeId.isCropSeed()) {
-      require(belowTypeId == ObjectTypes.WetFarmland, "Crop seeds need wet farmland");
-    } else if (buildObjectTypeId.isTreeSeed()) {
-      require(belowTypeId == ObjectTypes.Dirt || belowTypeId == ObjectTypes.Grass, "Tree seeds need dirt or grass");
+    if (buildObjectTypeId.isSeed()) {
+      require(belowTypeId == ObjectTypes.WetFarmland, "Seeds need wet farmland");
+    } else if (buildObjectTypeId.isSapling()) {
+      require(belowTypeId == ObjectTypes.Dirt || belowTypeId == ObjectTypes.Grass, "Tree saplings need dirt or grass");
     }
 
     removeEnergyFromLocalPool(baseCoord, ObjectTypeMetadata._getEnergy(buildObjectTypeId));

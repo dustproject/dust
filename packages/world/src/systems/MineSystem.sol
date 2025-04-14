@@ -16,7 +16,6 @@ import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { Orientation } from "../codegen/tables/Orientation.sol";
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 
-import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
 import { Position } from "../utils/Vec3Storage.sol";
@@ -123,7 +122,7 @@ contract MineSystem is System {
     Vec3 aboveCoord = baseCoord + vec3(0, 1, 0);
     // If above is a seed, the entity must exist as there are not seeds in the base terrain
     (EntityId above, ObjectTypeId aboveTypeId) = getEntityAt(aboveCoord);
-    if (aboveTypeId.isSeed()) {
+    if (aboveTypeId.isGrowable()) {
       if (!above.exists()) {
         above = createEntityAt(aboveCoord, aboveTypeId);
       }
@@ -152,7 +151,7 @@ contract MineSystem is System {
 
   function _removeBlock(EntityId entityId, ObjectTypeId objectType, Vec3 coord) internal {
     // If object being mined is seed, no need to check above entities
-    if (objectType.isSeed()) {
+    if (objectType.isGrowable()) {
       _removeSeed(entityId, objectType, coord);
       return;
     }
@@ -209,7 +208,7 @@ contract MineSystem is System {
 
       // Track mined resource count for seeds
       // TODO: could make it more general like .isCappedResource() or something
-      if (dropType.isSeed()) {
+      if (dropType.isGrowable()) {
         ResourceCount._set(dropType, ResourceCount._get(dropType) + amount);
       }
     }

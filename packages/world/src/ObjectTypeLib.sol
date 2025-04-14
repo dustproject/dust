@@ -138,19 +138,20 @@ library ObjectTypeLib {
   }
 
   function isFood(ObjectTypeId self) internal pure returns (bool) {
-    return self.isCrop();
+    // TODO: add foods
+    return self == ObjectTypes.Wheat;
+  }
+
+  function isGrowable(ObjectTypeId self) internal pure returns (bool) {
+    return isSeed(self) || isSapling(self);
   }
 
   function isSeed(ObjectTypeId self) internal pure returns (bool) {
-    return isCropSeed(self) || isTreeSeed(self);
-  }
-
-  function isCropSeed(ObjectTypeId self) internal pure returns (bool) {
     return self == ObjectTypes.WheatSeed;
   }
 
-  function isTreeSeed(ObjectTypeId self) internal pure returns (bool) {
-    return self == ObjectTypes.OakSeed || self == ObjectTypes.SpruceSeed;
+  function isSapling(ObjectTypeId self) internal pure returns (bool) {
+    return self == ObjectTypes.OakSapling || self == ObjectTypes.SpruceSapling;
   }
 
   function isCrop(ObjectTypeId self) internal pure returns (bool) {
@@ -186,8 +187,8 @@ library ObjectTypeLib {
     revert("Invalid crop seed type");
   }
 
-  function getTreeData(ObjectTypeId seedType) internal pure returns (TreeData memory) {
-    if (seedType == ObjectTypes.OakSeed) {
+  function getTreeData(ObjectTypeId saplingType) internal pure returns (TreeData memory) {
+    if (saplingType == ObjectTypes.OakSapling) {
       return TreeData({
         logType: ObjectTypes.OakLog,
         leafType: ObjectTypes.OakLeaf,
@@ -198,7 +199,7 @@ library ObjectTypeLib {
         stretchFactor: 2,
         centerOffset: -2
       });
-    } else if (seedType == ObjectTypes.SpruceSeed) {
+    } else if (saplingType == ObjectTypes.SpruceSapling) {
       return TreeData({
         logType: ObjectTypes.SpruceLog,
         leafType: ObjectTypes.SpruceLeaf,
@@ -209,9 +210,74 @@ library ObjectTypeLib {
         stretchFactor: 3,
         centerOffset: -5
       });
+    } else if (saplingType == ObjectTypes.MangroveSapling) {
+      return TreeData({
+        logType: ObjectTypes.MangroveLog,
+        leafType: ObjectTypes.MangroveLeaf,
+        trunkHeight: 7,
+        canopyStart: 2,
+        canopyEnd: 10,
+        canopyWidth: 2,
+        stretchFactor: 3,
+        centerOffset: -5
+      });
+    } else if (saplingType == ObjectTypes.SakuraSapling) {
+      return TreeData({
+        logType: ObjectTypes.SakuraLog,
+        leafType: ObjectTypes.SakuraLeaf,
+        trunkHeight: 7,
+        canopyStart: 2,
+        canopyEnd: 10,
+        canopyWidth: 2,
+        stretchFactor: 3,
+        centerOffset: -5
+      });
+    } else if (saplingType == ObjectTypes.DarkOakSapling) {
+      return TreeData({
+        logType: ObjectTypes.DarkOakLog,
+        leafType: ObjectTypes.DarkOakLeaf,
+        trunkHeight: 7,
+        canopyStart: 2,
+        canopyEnd: 10,
+        canopyWidth: 2,
+        stretchFactor: 3,
+        centerOffset: -5
+      });
+    } else if (saplingType == ObjectTypes.BirchSapling) {
+      return TreeData({
+        logType: ObjectTypes.BirchLog,
+        leafType: ObjectTypes.BirchLeaf,
+        trunkHeight: 7,
+        canopyStart: 2,
+        canopyEnd: 10,
+        canopyWidth: 2,
+        stretchFactor: 3,
+        centerOffset: -5
+      });
+    } else if (saplingType == ObjectTypes.AcaciaSapling) {
+      return TreeData({
+        logType: ObjectTypes.AcaciaLog,
+        leafType: ObjectTypes.AcaciaLeaf,
+        trunkHeight: 7,
+        canopyStart: 2,
+        canopyEnd: 10,
+        canopyWidth: 2,
+        stretchFactor: 3,
+        centerOffset: -5
+      });
+    } else if (saplingType == ObjectTypes.JungleSapling) {
+      return TreeData({
+        logType: ObjectTypes.JungleLog,
+        leafType: ObjectTypes.JungleLeaf,
+        trunkHeight: 7,
+        canopyStart: 2,
+        canopyEnd: 10,
+        canopyWidth: 2,
+        stretchFactor: 3,
+        centerOffset: -5
+      });
     }
-
-    revert("Invalid tree seed type");
+    revert("Invalid tree sapling type");
   }
 
   function timeToGrow(ObjectTypeId objectTypeId) internal pure returns (uint128) {
@@ -229,6 +295,15 @@ library ObjectTypeLib {
 
     // Return empty array for non-Any types
     return new ObjectTypeId[](0);
+  }
+
+  /// @dev Get seed amounts that should be burned when this object is consumed
+  function getSeedAmount(ObjectTypeId self) internal pure returns (ObjectAmount memory) {
+    // TODO: add all foods
+    if (self == ObjectTypes.Wheat) {
+      return ObjectAmount(ObjectTypes.WheatSeed, 1);
+    }
+    return ObjectAmount(ObjectTypes.Null, 0);
   }
 
   /// @dev Get ore amounts that should be burned when this object is burned

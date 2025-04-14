@@ -86,7 +86,7 @@ contract NatureSystem is System {
     // TODO: should we do proximity checks?
 
     (EntityId seed, ObjectTypeId objectType) = getOrCreateEntityAt(coord);
-    require(objectType.isSeed(), "Not a seed");
+    require(objectType.isGrowable(), "Not a seed");
 
     require(SeedGrowth._getFullyGrownAt(seed) <= block.timestamp, "Seed cannot be grown yet");
 
@@ -95,9 +95,8 @@ contract NatureSystem is System {
     uint256 seedCount = ResourceCount._get(objectType);
     // This should never happen if there are seeds in the world obtained from drops
     require(seedCount > 0, "Not enough seeds in circulation");
-    ResourceCount._set(objectType, seedCount - 1);
 
-    if (objectType.isCropSeed()) {
+    if (objectType.isSeed()) {
       // Turn wet farmland to regular farmland if mining a seed or crop
       (EntityId below, ObjectTypeId belowType) = getOrCreateEntityAt(coord - vec3(0, 1, 0));
       // Sanity check
@@ -106,7 +105,7 @@ contract NatureSystem is System {
       }
 
       ObjectType._set(seed, objectType.getCrop());
-    } else if (objectType.isTreeSeed()) {
+    } else if (objectType.isSapling()) {
       TreeData memory treeData = objectType.getTreeData();
 
       // Grow the tree (replace the seed with the trunk and add blocks)
