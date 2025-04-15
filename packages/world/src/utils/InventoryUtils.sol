@@ -350,6 +350,20 @@ library InventoryUtils {
     return (entities, objects);
   }
 
+  function swapSlots(EntityId owner, uint16 slotFrom, uint16 slotTo) public {
+    require(slotFrom != slotTo, "Cannot swap with the same slot");
+    InventorySlotData memory slotDataFrom = InventorySlot._get(owner, slotFrom);
+    InventorySlotData memory slotDataTo = InventorySlot._get(owner, slotTo);
+
+    // Update type slots
+    InventoryTypeSlots._update(owner, slotDataFrom.objectType, slotDataFrom.typeIndex, slotTo);
+    InventoryTypeSlots._update(owner, slotDataTo.objectType, slotDataTo.typeIndex, slotFrom);
+
+    // Swap the slots
+    InventorySlot._set(owner, uint16(slotFrom), slotDataTo);
+    InventorySlot._set(owner, uint16(slotTo), slotDataFrom);
+  }
+
   // Add a slot to type slots - O(1)
   function _addToTypeSlots(EntityId owner, ObjectTypeId objectType, uint16 slot) private {
     uint256 numTypeSlots = InventoryTypeSlots._length(owner, objectType);
