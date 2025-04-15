@@ -14,7 +14,7 @@ import { Block, CATEGORY_MASK, Item, Misc, ObjectTypes, Tool } from "./ObjectTyp
 
 import { Vec3, vec3 } from "./Vec3.sol";
 
-import { isFood as _isFood } from "./isFood.sol";
+import { isCropSeed as _isCropSeed, isFood as _isFood, isTreeSeed as _isTreeSeed } from "./ObjectTypeFlags.sol";
 import { timeToGrow as _timeToGrow } from "./timeToGrow.sol";
 
 struct ObjectAmount {
@@ -148,11 +148,11 @@ library ObjectTypeLib {
   }
 
   function isCropSeed(ObjectTypeId self) internal pure returns (bool) {
-    return self == ObjectTypes.WheatSeed;
+    return _isCropSeed(self);
   }
 
   function isTreeSeed(ObjectTypeId self) internal pure returns (bool) {
-    return self == ObjectTypes.OakSeed || self == ObjectTypes.SpruceSeed;
+    return _isTreeSeed(self);
   }
 
   function isCrop(ObjectTypeId self) internal pure returns (bool) {
