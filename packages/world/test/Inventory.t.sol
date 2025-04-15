@@ -577,4 +577,94 @@ contract InventoryTest is DustTest {
     vm.expectRevert("Player is sleeping");
     world.drop(aliceEntityId, drops, dropCoord);
   }
+
+  function testSwapPartiallyFilledSlots() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    ObjectTypeId fromType = ObjectTypes.Grass;
+    uint16 fromAmount = 10;
+    TestInventoryUtils.addObject(aliceEntityId, fromType, fromAmount);
+
+    ObjectTypeId toType = ObjectTypes.Dirt;
+    uint16 toAmount = 5;
+    TestInventoryUtils.addObject(aliceEntityId, toType, toAmount);
+
+    assertInventoryHasObjectInSlot(aliceEntityId, fromType, fromAmount, 0);
+    assertInventoryHasObjectInSlot(aliceEntityId, toType, toAmount, 1);
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+
+    vm.prank(alice);
+    startGasReport("swap partially filled slots");
+    world.swapSlots(aliceEntityId, 0, 1);
+    endGasReport();
+
+    assertInventoryHasObjectInSlot(aliceEntityId, fromType, fromAmount, 1);
+    assertInventoryHasObjectInSlot(aliceEntityId, toType, toAmount, 0);
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+  }
+
+  function testSwapEntityAndObjectSlots() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    ObjectTypeId fromType = ObjectTypes.Grass;
+    uint16 fromAmount = 10;
+    TestInventoryUtils.addObject(aliceEntityId, fromType, fromAmount);
+
+    ObjectTypeId toType = ObjectTypes.NeptuniumPick;
+    TestInventoryUtils.addEntity(aliceEntityId, toType);
+
+    assertInventoryHasObjectInSlot(aliceEntityId, fromType, fromAmount, 0);
+    assertInventoryHasObjectInSlot(aliceEntityId, toType, 1, 1);
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+
+    vm.prank(alice);
+    startGasReport("swap entity and object slots");
+    world.swapSlots(aliceEntityId, 0, 1);
+    endGasReport();
+
+    assertInventoryHasObjectInSlot(aliceEntityId, fromType, fromAmount, 1);
+    assertInventoryHasObjectInSlot(aliceEntityId, toType, 1, 0);
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+  }
+
+  function testSwapEntitySlots() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    ObjectTypeId fromType = ObjectTypes.GoldPick;
+    TestInventoryUtils.addEntity(aliceEntityId, fromType);
+
+    ObjectTypeId toType = ObjectTypes.NeptuniumPick;
+    TestInventoryUtils.addEntity(aliceEntityId, toType);
+
+    assertInventoryHasObjectInSlot(aliceEntityId, fromType, 1, 0);
+    assertInventoryHasObjectInSlot(aliceEntityId, toType, 1, 1);
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+
+    vm.prank(alice);
+    startGasReport("swap entity slots");
+    world.swapSlots(aliceEntityId, 0, 1);
+    endGasReport();
+
+    assertInventoryHasObjectInSlot(aliceEntityId, fromType, 1, 1);
+    assertInventoryHasObjectInSlot(aliceEntityId, toType, 1, 0);
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+  }
+
+  function testSwapEntityWithNullSlot() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    ObjectTypeId fromType = ObjectTypes.GoldPick;
+    TestInventoryUtils.addEntity(aliceEntityId, fromType);
+
+    assertInventoryHasObjectInSlot(aliceEntityId, fromType, 1, 0);
+    assertEq(Inventory.length(aliceEntityId), 1, "Wrong number of occupied inventory slots");
+
+    vm.prank(alice);
+    startGasReport("swap entity with null slot");
+    world.swapSlots(aliceEntityId, 0, 1);
+    endGasReport();
+
+    assertInventoryHasObjectInSlot(aliceEntityId, fromType, 1, 1);
+    assertEq(Inventory.length(aliceEntityId), 1, "Wrong number of occupied inventory slots");
+  }
 }

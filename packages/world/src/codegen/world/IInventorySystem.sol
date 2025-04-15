@@ -18,4 +18,6 @@ interface IInventorySystem {
   function pickup(EntityId caller, SlotTransfer[] memory slotTransfers, Vec3 coord) external;
 
   function pickupAll(EntityId caller, Vec3 coord) external;
+
+  function swapSlots(EntityId caller, uint16 fromSlot, uint16 toSlot) external;
 }

@@ -62,10 +62,4 @@ contract TransferSystem is System {
 
     notify(caller, TransferNotification({ transferEntityId: target, tools: entities, objectAmounts: objectAmounts }));
   }
-
-  // TODO: eventually we should support a more generic swap function
-  function swapSlots(EntityId caller, uint16 fromSlot, uint16 toSlot) external {
-    caller.activate();
-    InventoryUtils.swapSlots(caller, fromSlot, toSlot);
-  }
 }

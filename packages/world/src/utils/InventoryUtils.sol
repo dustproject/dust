@@ -133,16 +133,13 @@ library InventoryUtils {
     require(slot < maxSlots, "Invalid slot");
 
     InventorySlotData memory slotData = InventorySlot._get(owner, slot);
-    uint16 newAmount = slotData.amount + amount;
-    require(newAmount <= stackable, "Object does not fit in slot");
 
     if (slotData.objectType.isNull()) {
       InventorySlot._setObjectType(owner, slot, objectType);
       InventorySlot._setOccupiedIndex(owner, slot, uint16(Inventory._length(owner)));
       Inventory._push(owner, slot);
-      if (InventoryTypeSlots._length(owner, ObjectTypes.Null) > 0) {
-        uint16 typeIndex = InventorySlot._getTypeIndex(owner, slot);
-        uint16 nullSlot = InventoryTypeSlots._getItem(owner, ObjectTypes.Null, typeIndex);
+      if (slotData.typeIndex < InventoryTypeSlots._length(owner, ObjectTypes.Null)) {
+        uint16 nullSlot = InventoryTypeSlots._getItem(owner, ObjectTypes.Null, slotData.typeIndex);
         if (nullSlot == slot) {
           _removeFromTypeSlots(owner, ObjectTypes.Null, slot);
         }
@@ -151,6 +148,9 @@ library InventoryUtils {
     } else {
       require(slotData.objectType == objectType, "Cannot store different object types in the same slot");
     }
+
+    uint16 newAmount = slotData.amount + amount;
+    require(newAmount <= stackable, "Object does not fit in slot");
 
     InventorySlot._setAmount(owner, slot, newAmount);
   }
@@ -352,8 +352,19 @@ library InventoryUtils {
 
   function swapSlots(EntityId owner, uint16 slotFrom, uint16 slotTo) public {
     require(slotFrom != slotTo, "Cannot swap with the same slot");
+
     InventorySlotData memory slotDataFrom = InventorySlot._get(owner, slotFrom);
     InventorySlotData memory slotDataTo = InventorySlot._get(owner, slotTo);
+
+    // If one of the slots is empty, we need to check if it is tracked as part of the Null type
+    // If it is not being tracked, track it
+    if (!_slotExists(owner, slotFrom)) {
+      require(!slotDataTo.objectType.isNull(), "Both slots are empty");
+      slotDataFrom.typeIndex = _addToTypeSlots(owner, ObjectTypes.Null, slotFrom);
+    } else if (!_slotExists(owner, slotTo)) {
+      require(!slotDataFrom.objectType.isNull(), "Both slots are empty");
+      slotDataFrom.typeIndex = _addToTypeSlots(owner, ObjectTypes.Null, slotTo);
+    }
 
     // Update type slots
     InventoryTypeSlots._update(owner, slotDataFrom.objectType, slotDataFrom.typeIndex, slotTo);
@@ -364,11 +375,21 @@ library InventoryUtils {
     InventorySlot._set(owner, uint16(slotTo), slotDataFrom);
   }
 
+  function _slotExists(EntityId owner, uint16 slot) private view returns (bool) {
+    InventorySlotData memory slotData = InventorySlot._get(owner, slot);
+
+    // TODO: review this
+    return slotData.objectType != ObjectTypes.Null
+      && slotData.typeIndex < InventoryTypeSlots._length(owner, slotData.objectType)
+      && slot == InventoryTypeSlots._getItem(owner, slotData.objectType, slotData.typeIndex);
+  }
+
   // Add a slot to type slots - O(1)
-  function _addToTypeSlots(EntityId owner, ObjectTypeId objectType, uint16 slot) private {
-    uint256 numTypeSlots = InventoryTypeSlots._length(owner, objectType);
+  function _addToTypeSlots(EntityId owner, ObjectTypeId objectType, uint16 slot) private returns (uint16) {
+    uint16 numTypeSlots = uint16(InventoryTypeSlots._length(owner, objectType));
     InventoryTypeSlots._push(owner, objectType, slot);
-    InventorySlot._setTypeIndex(owner, slot, uint16(numTypeSlots));
+    InventorySlot._setTypeIndex(owner, slot, numTypeSlots);
+    return numTypeSlots;
   }
 
   // Remove a slot from type slots - O(1)
