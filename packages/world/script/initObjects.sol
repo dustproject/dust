@@ -1134,7 +1134,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 3125000000000000,
+      mass: 4450000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1144,7 +1144,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 3125000000000000,
+      mass: 4450000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1154,7 +1154,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 3125000000000000,
+      mass: 4450000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1164,7 +1164,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 3125000000000000,
+      mass: 4450000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1174,7 +1174,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 3125000000000000,
+      mass: 4450000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1184,7 +1184,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 3125000000000000,
+      mass: 4450000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1194,7 +1194,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 3125000000000000,
+      mass: 4450000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1204,7 +1204,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 3125000000000000,
+      mass: 4450000000000000,
       energy: 0,
       canPassThrough: false
     })
@@ -1424,7 +1424,7 @@ function initObjects() {
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
-      mass: 6087000000000000000,
+      mass: 9135000000000000000,
       energy: 0,
       canPassThrough: false
     })
