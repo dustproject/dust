@@ -13,6 +13,8 @@ import { ObjectTypeId } from "./ObjectTypeId.sol";
 import { Block, CATEGORY_MASK, Item, Misc, ObjectTypes, Tool } from "./ObjectTypes.sol";
 
 import { Vec3, vec3 } from "./Vec3.sol";
+
+import { isFood as _isFood } from "./isFood.sol";
 import { timeToGrow as _timeToGrow } from "./timeToGrow.sol";
 
 struct ObjectAmount {
@@ -138,7 +140,7 @@ library ObjectTypeLib {
   }
 
   function isFood(ObjectTypeId self) internal pure returns (bool) {
-    return self.isCrop();
+    return _isFood(self);
   }
 
   function isSeed(ObjectTypeId self) internal pure returns (bool) {
