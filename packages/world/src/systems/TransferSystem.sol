@@ -28,29 +28,32 @@ contract TransferSystem is System {
   ) public {
     caller.activate();
 
-    // TODO: this is incorrect, we might need 2 targets (eg. transferring from chest to chest), but we need to figure out how to prevent reentrancies
     EntityId target;
 
-    // Can't withdraw from a player, unless it is the player itself
-    if (caller != from) {
-      caller.requireConnected(from);
-      require(ObjectType._get(from) != ObjectTypes.Player, "Cannot transfer from player");
-      target = from;
-    }
-
-    // Can't deposit to a player, unless it is the player itself
-    if (caller != to) {
-      caller.requireConnected(to);
-      require(ObjectType._get(to) != ObjectTypes.Player, "Cannot transfer to player");
-      target = to;
+    if (from != to) {
+      // Can't withdraw from a player, unless it is the player itself
+      if (caller == to) {
+        caller.requireConnected(from);
+        require(ObjectType._get(from) != ObjectTypes.Player, "Cannot transfer from player");
+        target = from;
+      }
+      // Can't deposit to a player, unless it is the player itself
+      else if (caller == from) {
+        caller.requireConnected(to);
+        require(ObjectType._get(to) != ObjectTypes.Player, "Cannot transfer to player");
+        target = to;
+      } else {
+        // TODO: remove this restriction
+        revert("Caller is not involved in transfer");
+      }
     }
 
     (EntityId[] memory entities, ObjectAmount[] memory objectAmounts) =
       InventoryUtils.getObjectsAndEntities(from, slotTransfers);
 
-    if (target.exists()) {
-      InventoryUtils.transfer(from, to, slotTransfers);
+    InventoryUtils.transfer(from, to, slotTransfers);
 
+    if (target.exists()) {
       bytes memory onTransfer =
         abi.encodeCall(ITransferHook.onTransfer, (caller, target, from, to, objectAmounts, entities, extraData));
 
