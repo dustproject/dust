@@ -284,7 +284,8 @@ contract MineTest is DustTest {
 
     // Mine again but with a non-base coord
     vm.prank(alice);
-    world.build(aliceEntityId, ObjectTypes.TextSign, mineCoord, "");
+    uint16 signSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.TextSign);
+    world.build(aliceEntityId, mineCoord, signSlot, "");
 
     mineEntityId = ReversePosition.get(mineCoord);
     topEntityId = ReversePosition.get(topCoord);

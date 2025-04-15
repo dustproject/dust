@@ -239,7 +239,8 @@ contract ForceFieldTest is DustTest {
 
     // Build the block
     vm.prank(alice);
-    world.build(aliceEntityId, buildObjectTypeId, buildCoord, "");
+    uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectTypeId);
+    world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
     // Verify that the block was successfully built
     EntityId buildEntityId = ReversePosition.get(buildCoord);
@@ -276,7 +277,8 @@ contract ForceFieldTest is DustTest {
     // Try to build the block, should fail
     vm.prank(alice);
     vm.expectRevert("Not allowed by forcefield");
-    world.build(aliceEntityId, buildObjectTypeId, buildCoord, "");
+    uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectTypeId);
+    world.build(aliceEntityId, buildCoord, inventorySlot, "");
   }
 
   function testBuildFailsIfNotAllowedByFragment() public {
@@ -309,7 +311,8 @@ contract ForceFieldTest is DustTest {
     // Try to build the block, should fail
     vm.prank(alice);
     vm.expectRevert("Not allowed by forcefield fragment");
-    world.build(aliceEntityId, buildObjectTypeId, buildCoord, "");
+    uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectTypeId);
+    world.build(aliceEntityId, buildCoord, inventorySlot, "");
   }
 
   function testSetupForceField() public {
@@ -733,7 +736,8 @@ contract ForceFieldTest is DustTest {
 
       // Build should succeed
       vm.prank(alice);
-      world.build(aliceEntityId, buildObjectTypeId, buildCoord, "");
+      uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectTypeId);
+      world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
       // Verify build succeeded
       EntityId buildEntityId = ReversePosition.get(buildCoord);
@@ -755,7 +759,8 @@ contract ForceFieldTest is DustTest {
       // Build should fail
       vm.prank(alice);
       vm.expectRevert("Not allowed by forcefield");
-      world.build(aliceEntityId, buildObjectTypeId, buildCoord2, "");
+      inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectTypeId);
+      world.build(aliceEntityId, buildCoord2, inventorySlot, "");
     }
 
     // Test onMine hook

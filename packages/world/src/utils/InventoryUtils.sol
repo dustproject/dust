@@ -199,12 +199,11 @@ library InventoryUtils {
     require(remaining == 0, "Not enough objects of this type in inventory");
   }
 
-  function removeObjectFromSlot(EntityId owner, ObjectTypeId objectType, uint16 amount, uint16 slot) internal {
+  function removeObjectFromSlot(EntityId owner, uint16 slot, uint16 amount) internal returns (ObjectTypeId) {
     require(amount > 0, "Amount must be greater than 0");
-    require(!objectType.isNull(), "Empty slot");
 
     ObjectTypeId slotObjectType = InventorySlot._getObjectType(owner, slot);
-    require(slotObjectType == objectType, "Slot does not contain the specified object type");
+    require(!slotObjectType.isNull(), "Empty slot");
 
     uint16 currentAmount = InventorySlot._getAmount(owner, slot);
     require(currentAmount >= amount, "Not enough objects in slot");
@@ -216,6 +215,8 @@ library InventoryUtils {
       // Remove partial amount
       InventorySlot._setAmount(owner, slot, currentAmount - amount);
     }
+
+    return slotObjectType;
   }
 
   function removeAny(EntityId owner, ObjectTypeId anyType, uint16 amount) public {
@@ -273,7 +274,7 @@ library InventoryUtils {
       } else {
         // Regular objects can be transferred in partial amounts
         require(amount <= sourceSlot.amount, "Not enough objects in slot");
-        removeObjectFromSlot(from, sourceSlot.objectType, amount, slotFrom);
+        removeObjectFromSlot(from, slotFrom, amount);
         addObjectToSlot(to, sourceSlot.objectType, amount, slotTo);
       }
     }
