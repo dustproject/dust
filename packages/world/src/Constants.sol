@@ -39,9 +39,18 @@ uint128 constant MOVE_ENERGY_COST = 25543750000000;
 uint128 constant PLAYER_FALL_ENERGY_COST = MAX_PLAYER_ENERGY / 25; // This makes it so, with full energy, you die from a 25 block fall
 
 // Resource caps
-uint256 constant MAX_WHEAT_SEED = 5_000_000;
-uint256 constant MAX_OAK_SEED = 1_000_000;
-uint256 constant MAX_SPRUCE_SEED = 1_000_000;
+uint256 constant MAX_WHEAT_SEED = 444_971;
+uint256 constant MAX_MELON_SEED = 9_122;
+uint256 constant MAX_PUMPKIN_SEED = 1_717;
+
+uint256 constant MAX_OAK_SEED = 1_000;
+uint256 constant MAX_SPRUCE_SEED = 1_000;
+uint256 constant MAX_MANGROVE_SEED = 1_000;
+uint256 constant MAX_SAKURA_SEED = 1_000;
+uint256 constant MAX_DARK_OAK_SEED = 1_000;
+uint256 constant MAX_BIRCH_SEED = 1_000;
+uint256 constant MAX_ACACIA_SEED = 1_000;
+uint256 constant MAX_JUNGLE_SEED = 1_000;
 
 uint256 constant MAX_COAL = 13_116_437;
 uint256 constant MAX_COPPER = 7_661_934;

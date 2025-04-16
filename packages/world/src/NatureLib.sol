@@ -11,12 +11,22 @@ import { ChunkCommitment } from "./utils/Vec3Storage.sol";
 
 import {
   CHUNK_COMMIT_EXPIRY_BLOCKS,
+  MAX_ACACIA_SEED,
+  MAX_BIRCH_SEED,
   MAX_COAL,
   MAX_COPPER,
+  MAX_DARK_OAK_SEED,
   MAX_DIAMOND,
   MAX_GOLD,
   MAX_IRON,
+  MAX_JUNGLE_SEED,
+  MAX_MANGROVE_SEED,
+  MAX_MELON_SEED,
   MAX_NEPTUNIUM,
+  MAX_OAK_SEED,
+  MAX_PUMPKIN_SEED,
+  MAX_SAKURA_SEED,
+  MAX_SPRUCE_SEED,
   MAX_WHEAT_SEED
 } from "./Constants.sol";
 
@@ -48,19 +58,28 @@ library NatureLib {
     if (objectTypeId == ObjectTypes.DiamondOre) return MAX_DIAMOND;
     if (objectTypeId == ObjectTypes.NeptuniumOre) return MAX_NEPTUNIUM;
     if (objectTypeId == ObjectTypes.WheatSeed) return MAX_WHEAT_SEED;
-    // TODO: add caps
+    if (objectTypeId == ObjectTypes.MelonSeed) return MAX_MELON_SEED;
+    if (objectTypeId == ObjectTypes.PumpkinSeed) return MAX_PUMPKIN_SEED;
+    if (objectTypeId == ObjectTypes.OakSapling) return MAX_OAK_SEED;
+    if (objectTypeId == ObjectTypes.SpruceSapling) return MAX_SPRUCE_SEED;
+    if (objectTypeId == ObjectTypes.MangroveSapling) return MAX_MANGROVE_SEED;
+    if (objectTypeId == ObjectTypes.SakuraSapling) return MAX_SAKURA_SEED;
+    if (objectTypeId == ObjectTypes.DarkOakSapling) return MAX_DARK_OAK_SEED;
+    if (objectTypeId == ObjectTypes.BirchSapling) return MAX_BIRCH_SEED;
+    if (objectTypeId == ObjectTypes.AcaciaSapling) return MAX_ACACIA_SEED;
+    if (objectTypeId == ObjectTypes.JungleSapling) return MAX_JUNGLE_SEED;
 
     // If no specific cap, use a high value
     return type(uint256).max;
   }
 
   // Get remaining amount of a resource
-  function getRemainingAmount(ObjectTypeId objectTypeId) internal view returns (uint256) {
-    if (objectTypeId == ObjectTypes.Null) return type(uint256).max;
+  function getCapAndRemaining(ObjectTypeId objectTypeId) internal view returns (uint256, uint256) {
+    if (objectTypeId == ObjectTypes.Null) return (type(uint256).max, type(uint256).max);
 
     uint256 cap = getResourceCap(objectTypeId);
     uint256 mined = ResourceCount._get(objectTypeId);
-    return mined >= cap ? 0 : cap - mined;
+    return (cap, mined >= cap ? 0 : cap - mined);
   }
 
   function getMineDrops(ObjectTypeId objectType, Vec3 coord) internal view returns (ObjectAmount[] memory result) {
@@ -171,7 +190,7 @@ library NatureLib {
     // Use remaining amounts directly as weights
     for (uint256 i = 0; i < weights.length; i++) {
       oreOptions[i] = ObjectAmount(oreTypes[i], 1);
-      weights[i] = getRemainingAmount(oreTypes[i]);
+      (, weights[i]) = getCapAndRemaining(oreTypes[i]);
     }
 
     // Select ore based on availability
@@ -324,8 +343,7 @@ library NatureLib {
     weights[0] = distribution[0]; // Weight for 0 drops stays the same
 
     // Get resource availability info
-    uint256 remaining = getRemainingAmount(objectType);
-    uint256 cap = getResourceCap(objectType);
+    (uint256 cap, uint256 remaining) = getCapAndRemaining(objectType);
 
     // For each non-zero option, apply compound probability adjustment
     for (uint8 i = 1; i <= maxAmount; i++) {
