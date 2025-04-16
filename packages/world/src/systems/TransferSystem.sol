@@ -30,28 +30,25 @@ contract TransferSystem is System {
 
     EntityId target;
 
-    // Transferring within the same inventory
     if (from == to) {
+      // Transferring within the same inventory
       if (caller != from) {
-        caller.requireConnected(from);
         target = from;
       }
     } else {
-      // Can't withdraw from a player, unless it is the player itself
       if (caller == to) {
-        caller.requireConnected(from);
-        require(ObjectType._get(from) != ObjectTypes.Player, "Cannot transfer from player");
         target = from;
-      }
-      // Can't deposit to a player, unless it is the player itself
-      else if (caller == from) {
-        caller.requireConnected(to);
-        require(ObjectType._get(to) != ObjectTypes.Player, "Cannot transfer to player");
+      } else if (caller == from) {
         target = to;
       } else {
         // TODO: remove this restriction
         revert("Caller is not involved in transfer");
       }
+    }
+
+    if (target.exists()) {
+      caller.requireConnected(target);
+      require(ObjectType._get(target) != ObjectTypes.Player, "Cannot access another player's inventory");
     }
 
     (SlotData[] memory deposits, SlotData[] memory withdrawals) = InventoryUtils.transfer(from, to, transfers);
