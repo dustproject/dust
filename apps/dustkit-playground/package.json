@@ -1,0 +1,23 @@
+{
+  "private": true,
+  "name": "dustkit-playground",
+  "type": "module",
+  "scripts": {
+    "dev": "mprocs",
+    "test": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.4.0",
+    "vite": "^6.3.0"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.74.3",
+    "dustkit": "workspace:*",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "viem": "2.23.2",
+    "wagmi": "^2.14.16"
+  }
+}

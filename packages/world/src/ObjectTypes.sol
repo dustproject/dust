@@ -242,6 +242,7 @@ library ObjectTypes {
   ObjectTypeId constant Bucket = ObjectTypeId.wrap(Item | 4);
   ObjectTypeId constant WaterBucket = ObjectTypeId.wrap(Item | 5);
   ObjectTypeId constant Fuel = ObjectTypeId.wrap(Item | 6);
+  ObjectTypeId constant WheatSlop = ObjectTypeId.wrap(Item | 7);
 
   // ------------------------------------------------------------
   // Misc

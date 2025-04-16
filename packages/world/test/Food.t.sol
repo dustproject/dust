@@ -28,8 +28,8 @@ contract FoodTest is DustTest {
       aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: initialEnergy, drainRate: 1 })
     );
 
-    // Add some wheat to player inventory
-    ObjectTypeId foodType = ObjectTypes.Wheat;
+    // Add some wheat_slop to player inventory
+    ObjectTypeId foodType = ObjectTypes.WheatSlop;
     uint16 foodAmount = 3;
     TestInventoryUtils.addObject(aliceEntityId, foodType, foodAmount);
 
@@ -70,7 +70,7 @@ contract FoodTest is DustTest {
     );
 
     // Add food to player inventory
-    ObjectTypeId foodType = ObjectTypes.Wheat;
+    ObjectTypeId foodType = ObjectTypes.WheatSlop;
     uint16 foodAmount = 3;
     TestInventoryUtils.addObject(aliceEntityId, foodType, foodAmount);
 
@@ -99,7 +99,7 @@ contract FoodTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupFlatChunkWithPlayer();
 
     // Add food to player inventory
-    ObjectTypeId foodType = ObjectTypes.Wheat;
+    ObjectTypeId foodType = ObjectTypes.WheatSlop;
     uint16 foodAmount = 3;
     TestInventoryUtils.addObject(aliceEntityId, foodType, foodAmount);
 
@@ -114,7 +114,7 @@ contract FoodTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupFlatChunkWithPlayer();
 
     // Add food to player inventory
-    ObjectTypeId foodType = ObjectTypes.Wheat;
+    ObjectTypeId foodType = ObjectTypes.WheatSlop;
     uint16 initialFoodAmount = 5;
     TestInventoryUtils.addObject(aliceEntityId, foodType, initialFoodAmount);
 

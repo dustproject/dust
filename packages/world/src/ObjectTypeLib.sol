@@ -13,6 +13,8 @@ import { ObjectTypeId } from "./ObjectTypeId.sol";
 import { Block, CATEGORY_MASK, Item, Misc, ObjectTypes, Tool } from "./ObjectTypes.sol";
 
 import { Vec3, vec3 } from "./Vec3.sol";
+
+import { isCropSeed as _isCropSeed, isFood as _isFood, isTreeSeed as _isTreeSeed } from "./ObjectTypeFlags.sol";
 import { timeToGrow as _timeToGrow } from "./timeToGrow.sol";
 
 struct ObjectAmount {
@@ -138,8 +140,7 @@ library ObjectTypeLib {
   }
 
   function isFood(ObjectTypeId self) internal pure returns (bool) {
-    // TODO: add foods
-    return self == ObjectTypes.Wheat;
+    return _isFood(self);
   }
 
   function isGrowable(ObjectTypeId self) internal pure returns (bool) {
@@ -147,13 +148,11 @@ library ObjectTypeLib {
   }
 
   function isSeed(ObjectTypeId self) internal pure returns (bool) {
-    return self == ObjectTypes.WheatSeed || self == ObjectTypes.MelonSeed || self == ObjectTypes.PumpkinSeed;
+    return _isCropSeed(self);
   }
 
   function isSapling(ObjectTypeId self) internal pure returns (bool) {
-    return self == ObjectTypes.OakSapling || self == ObjectTypes.SpruceSapling || self == ObjectTypes.MangroveSapling
-      || self == ObjectTypes.SakuraSapling || self == ObjectTypes.DarkOakSapling || self == ObjectTypes.BirchSapling
-      || self == ObjectTypes.AcaciaSapling || self == ObjectTypes.JungleSapling;
+    return _isTreeSeed(self);
   }
 
   function isCrop(ObjectTypeId self) internal pure returns (bool) {
