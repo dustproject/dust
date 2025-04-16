@@ -118,6 +118,11 @@ library ObjectTypeLib {
     return self == ObjectTypes.AnyLog || self == ObjectTypes.AnyPlanks;
   }
 
+  function isSmartEntity(ObjectTypeId self) internal pure returns (bool) {
+    return self == ObjectTypes.Chest || self == ObjectTypes.ForceField || self == ObjectTypes.Fragment
+      || self == ObjectTypes.SpawnTile || self == ObjectTypes.Bed;
+  }
+
   function isHoe(ObjectTypeId self) internal pure returns (bool) {
     return self == ObjectTypes.WoodenHoe;
   }

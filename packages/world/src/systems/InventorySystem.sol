@@ -59,10 +59,4 @@ contract InventorySystem is System {
 
     notify(caller, PickupNotification({ pickupCoord: coord }));
   }
-
-  // TODO: eventually we should support a more generic swap function
-  function swapSlots(EntityId caller, uint16 fromSlot, uint16 toSlot) external {
-    caller.activate();
-    InventoryUtils.swapSlots(caller, fromSlot, toSlot);
-  }
 }

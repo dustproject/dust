@@ -32,6 +32,12 @@ struct SlotAmount {
   uint16 amount;
 }
 
+struct SlotData {
+  EntityId entityId;
+  ObjectTypeId objectType;
+  uint16 amount;
+}
+
 library InventoryUtils {
   function useTool(EntityId owner, uint16 slot, uint128 useMassMax)
     public
@@ -219,7 +225,14 @@ library InventoryUtils {
     return slotObjectType;
   }
 
-  function transfer(EntityId from, EntityId to, SlotTransfer[] memory slotTransfers) public {
+  function transfer(EntityId from, EntityId to, SlotTransfer[] memory slotTransfers)
+    public
+    returns (SlotData[] memory fromSlotData, SlotData[] memory toSlotData)
+  {
+    fromSlotData = new SlotData[](slotTransfers.length);
+    SlotData[] memory tempToSlotData = new SlotData[](slotTransfers.length);
+
+    uint256 tempIndex = 0;
     for (uint256 i = 0; i < slotTransfers.length; i++) {
       uint16 slotFrom = slotTransfers[i].slotFrom;
       uint16 slotTo = slotTransfers[i].slotTo;
@@ -229,8 +242,21 @@ library InventoryUtils {
 
       InventorySlotData memory sourceSlot = InventorySlot._get(from, slotFrom);
       require(!sourceSlot.objectType.isNull(), "Empty slot");
+      fromSlotData[i] = SlotData(sourceSlot.entityId, sourceSlot.objectType, sourceSlot.amount);
 
       InventorySlotData memory destSlot = InventorySlot._get(to, slotTo);
+
+      // Handle slot swaps (transferring all to an existing slot with a different type)
+      if (amount == sourceSlot.amount && sourceSlot.objectType != destSlot.objectType && !destSlot.objectType.isNull())
+      {
+        tempToSlotData[tempIndex++] = SlotData(destSlot.entityId, destSlot.objectType, destSlot.amount);
+
+        _replaceSlot(from, slotFrom, sourceSlot.objectType, destSlot.entityId, destSlot.objectType, destSlot.amount);
+        _replaceSlot(to, slotTo, destSlot.objectType, sourceSlot.entityId, sourceSlot.objectType, sourceSlot.amount);
+
+        continue;
+      }
+
       require(
         destSlot.objectType.isNull() || destSlot.objectType == sourceSlot.objectType,
         "Cannot store different object types in the same slot"
@@ -248,6 +274,11 @@ library InventoryUtils {
         removeObjectFromSlot(from, slotFrom, amount);
         addObjectToSlot(to, sourceSlot.objectType, amount, slotTo);
       }
+    }
+
+    toSlotData = new SlotData[](tempIndex);
+    for (uint256 i = 0; i < tempIndex; i++) {
+      toSlotData[i] = tempToSlotData[i];
     }
   }
 
@@ -283,7 +314,7 @@ library InventoryUtils {
     Inventory._deleteRecord(from);
   }
 
-  function getObjectsAndEntities(EntityId owner, SlotTransfer[] memory slotTransfers)
+  function getSlotData(EntityId owner, SlotTransfer[] memory slotTransfers)
     internal
     view
     returns (EntityId[] memory entities, ObjectAmount[] memory objects)
@@ -321,38 +352,19 @@ library InventoryUtils {
     return (entities, objects);
   }
 
-  function swapSlots(EntityId owner, uint16 slotFrom, uint16 slotTo) public {
-    require(slotFrom != slotTo, "Cannot swap with the same slot");
-
-    InventorySlotData memory slotDataFrom = InventorySlot._get(owner, slotFrom);
-    InventorySlotData memory slotDataTo = InventorySlot._get(owner, slotTo);
-
-    // If one of the slots is empty, we need to check if it is tracked as part of the Null type
-    // If it is not being tracked, track it
-    if (!_slotExists(owner, slotFrom)) {
-      require(!slotDataTo.objectType.isNull(), "Both slots are empty");
-      slotDataFrom.typeIndex = _addToTypeSlots(owner, ObjectTypes.Null, slotFrom);
-    } else if (!_slotExists(owner, slotTo)) {
-      require(!slotDataFrom.objectType.isNull(), "Both slots are empty");
-      slotDataFrom.typeIndex = _addToTypeSlots(owner, ObjectTypes.Null, slotTo);
-    }
-
-    // Update type slots
-    InventoryTypeSlots._update(owner, slotDataFrom.objectType, slotDataFrom.typeIndex, slotTo);
-    InventoryTypeSlots._update(owner, slotDataTo.objectType, slotDataTo.typeIndex, slotFrom);
-
-    // Swap the slots
-    InventorySlot._set(owner, uint16(slotFrom), slotDataTo);
-    InventorySlot._set(owner, uint16(slotTo), slotDataFrom);
-  }
-
-  function _slotExists(EntityId owner, uint16 slot) private view returns (bool) {
-    InventorySlotData memory slotData = InventorySlot._get(owner, slot);
-
-    // TODO: review this
-    return slotData.objectType != ObjectTypes.Null
-      && slotData.typeIndex < InventoryTypeSlots._length(owner, slotData.objectType)
-      && slot == InventoryTypeSlots._getItem(owner, slotData.objectType, slotData.typeIndex);
+  function _replaceSlot(
+    EntityId owner,
+    uint16 slot,
+    ObjectTypeId objectType,
+    EntityId entityId,
+    ObjectTypeId newObjectType,
+    uint16 amount
+  ) internal {
+    _removeFromTypeSlots(owner, objectType, slot);
+    _addToTypeSlots(owner, newObjectType, slot);
+    InventorySlot._setEntityId(owner, slot, entityId);
+    InventorySlot._setObjectType(owner, slot, newObjectType);
+    InventorySlot._setAmount(owner, slot, amount);
   }
 
   // Add a slot to type slots - O(1)

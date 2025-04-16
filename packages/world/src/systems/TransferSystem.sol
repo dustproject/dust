@@ -7,7 +7,7 @@ import { EnergyData } from "../codegen/tables/Energy.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
 import { transferEnergyToPool, updateMachineEnergy } from "../utils/EnergyUtils.sol";
-import { InventoryUtils, SlotTransfer, SlotTransfer } from "../utils/InventoryUtils.sol";
+import { InventoryUtils, SlotData, SlotTransfer } from "../utils/InventoryUtils.sol";
 import { TransferNotification, notify } from "../utils/NotifUtils.sol";
 
 import { EntityId } from "../EntityId.sol";
@@ -23,14 +23,20 @@ contract TransferSystem is System {
     EntityId caller,
     EntityId from,
     EntityId to,
-    SlotTransfer[] memory slotTransfers,
+    SlotTransfer[] memory transfers,
     bytes calldata extraData
   ) public {
     caller.activate();
 
     EntityId target;
 
-    if (from != to) {
+    // Transferring within the same inventory
+    if (from == to) {
+      if (caller != from) {
+        caller.requireConnected(from);
+        target = from;
+      }
+    } else {
       // Can't withdraw from a player, unless it is the player itself
       if (caller == to) {
         caller.requireConnected(from);
@@ -48,18 +54,15 @@ contract TransferSystem is System {
       }
     }
 
-    (EntityId[] memory entities, ObjectAmount[] memory objectAmounts) =
-      InventoryUtils.getObjectsAndEntities(from, slotTransfers);
-
-    InventoryUtils.transfer(from, to, slotTransfers);
+    (SlotData[] memory deposits, SlotData[] memory withdrawals) = InventoryUtils.transfer(from, to, transfers);
 
     if (target.exists()) {
       bytes memory onTransfer =
-        abi.encodeCall(ITransferHook.onTransfer, (caller, target, from, to, objectAmounts, entities, extraData));
+        abi.encodeCall(ITransferHook.onTransfer, (caller, target, deposits, withdrawals, extraData));
 
       target.getProgram().callOrRevert(onTransfer);
     }
 
-    notify(caller, TransferNotification({ transferEntityId: target, tools: entities, objectAmounts: objectAmounts }));
+    notify(caller, TransferNotification({ transferEntityId: target, deposits: deposits, withdrawals: withdrawals }));
   }
 }
