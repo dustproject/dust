@@ -79,11 +79,12 @@ contract CraftSystem is System {
 
       while (remainingAmount > 0) {
         require(currentInput < inputs.length, "Not enough inputs for recipe");
+        uint16 amount = inputs[currentInput].amount;
+        require(amount > 0, "Input amount must be greater than zero");
 
         ObjectTypeId inputType = InventorySlot._getObjectType(caller, inputs[currentInput].slot);
         _validateRecipeInput(recipeType, inputType);
 
-        uint16 amount = inputs[currentInput].amount;
         InventoryUtils.removeObjectFromSlot(caller, inputs[currentInput].slot, amount);
         remainingAmount -= amount;
         currentInput++;

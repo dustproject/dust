@@ -282,9 +282,10 @@ contract MineTest is DustTest {
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
 
+    uint16 signSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.TextSign);
+
     // Mine again but with a non-base coord
     vm.prank(alice);
-    uint16 signSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.TextSign);
     world.build(aliceEntityId, mineCoord, signSlot, "");
 
     mineEntityId = ReversePosition.get(mineCoord);

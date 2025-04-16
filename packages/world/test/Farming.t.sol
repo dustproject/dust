@@ -205,9 +205,10 @@ contract FarmingTest is DustTest {
     uint128 initialLocalEnergy = LocalEnergyPool.get(farmlandCoord.toLocalEnergyPoolShardCoord());
     uint128 seedEnergy = ObjectTypeMetadata.getEnergy(ObjectTypes.WheatSeed);
 
+    uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+
     // Plant wheat seeds
     vm.prank(alice);
-    uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
     world.build(aliceEntityId, farmlandCoord + vec3(0, 1, 0), seedSlot, "");
 
     // Verify seeds were planted
@@ -241,18 +242,20 @@ contract FarmingTest is DustTest {
     Vec3 dirtCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
     setTerrainAtCoord(dirtCoord, ObjectTypes.Dirt);
 
+    uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+
     vm.prank(alice);
     vm.expectRevert("Crop seeds need wet farmland");
-    uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
     world.build(aliceEntityId, dirtCoord + vec3(0, 1, 0), seedSlot, "");
 
     // Try to plant on farmland (not wet)
     Vec3 farmlandCoord = vec3(playerCoord.x() + 2, 0, playerCoord.z());
     setTerrainAtCoord(farmlandCoord, ObjectTypes.Farmland);
 
+    seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+
     vm.prank(alice);
     vm.expectRevert("Crop seeds need wet farmland");
-    seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
     world.build(aliceEntityId, farmlandCoord + vec3(0, 1, 0), seedSlot, "");
   }
 
@@ -268,9 +271,10 @@ contract FarmingTest is DustTest {
 
     Vec3 cropCoord = farmlandCoord + vec3(0, 1, 0);
 
+    uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+
     // Plant wheat seeds
     vm.prank(alice);
-    uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
     world.build(aliceEntityId, cropCoord, seedSlot, "");
 
     // Verify seeds were planted
@@ -326,9 +330,10 @@ contract FarmingTest is DustTest {
     // Get initial energy
     uint128 seedEnergy = ObjectTypeMetadata.getEnergy(ObjectTypes.WheatSeed);
 
+    uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+
     // Plant wheat seeds
     vm.prank(alice);
-    uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
     world.build(aliceEntityId, cropCoord, seedSlot, "");
 
     // Verify seeds were planted
@@ -414,8 +419,8 @@ contract FarmingTest is DustTest {
 
     Vec3 cropCoord = farmlandCoord + vec3(0, 1, 0);
     // Plant wheat seeds
-    vm.prank(alice);
     uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+    vm.prank(alice);
     world.build(aliceEntityId, cropCoord, seedSlot, "");
 
     // Verify seeds were planted
@@ -438,8 +443,8 @@ contract FarmingTest is DustTest {
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 0);
 
     // Reset test by planting again
-    vm.prank(alice);
     seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+    vm.prank(alice);
     world.build(aliceEntityId, cropCoord, seedSlot, "");
 
     cropEntityId = ReversePosition.get(cropCoord);

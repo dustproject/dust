@@ -420,7 +420,7 @@ contract CraftTest is DustTest {
     inputs[0] = SlotAmount({ slot: 0, amount: 0 });
 
     vm.prank(alice);
-    vm.expectRevert("Input type does not match any valid type for this recipe");
+    vm.expectRevert("Input amount must be greater than zero");
     world.craft(aliceEntityId, recipeId, inputs);
 
     inputTypes = new ObjectTypeId[](1);
@@ -451,7 +451,7 @@ contract CraftTest is DustTest {
     inputs[2] = SlotAmount({ slot: 2, amount: 1 });
 
     vm.prank(alice);
-    vm.expectRevert("Input type does not match any valid type for this recipe");
+    vm.expectRevert("Not enough inputs for recipe");
     world.craftWithStation(aliceEntityId, recipeId, stationEntityId, inputs);
   }
 

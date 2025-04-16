@@ -448,7 +448,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectTypeId, 0);
   }
 
-  function testBuildFailsIfDoesntHaveBlock() public {
+  function testBuildFailsIfEmptySlot() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     Vec3 buildCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
@@ -462,7 +462,7 @@ contract BuildTest is DustTest {
     uint8 inventorySlot = 0; // assuming slot 0 is empty or has another item
 
     vm.prank(alice);
-    vm.expectRevert("Not enough objects of this type in inventory");
+    vm.expectRevert("Cannot build non-block object");
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
   }
 
