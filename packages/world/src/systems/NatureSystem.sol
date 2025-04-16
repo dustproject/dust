@@ -86,8 +86,7 @@ contract NatureSystem is System {
     // TODO: should we do proximity checks?
 
     (EntityId seed, ObjectTypeId objectType) = getOrCreateEntityAt(coord);
-    require(objectType.isGrowable(), "Not a seed");
-
+    require(objectType.isGrowable(), "Not growable");
     require(SeedGrowth._getFullyGrownAt(seed) <= block.timestamp, "Seed cannot be grown yet");
 
     // When a seed grows, it's removed from circulation
