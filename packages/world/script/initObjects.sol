@@ -1709,4 +1709,14 @@ function initObjects() {
       canPassThrough: false
     })
   );
+  ObjectTypeMetadata.set(
+    ObjectTypes.AnyLeaf,
+    ObjectTypeMetadataData({
+      stackable: 99,
+      maxInventorySlots: 0,
+      mass: 200000000000000,
+      energy: 500000000000000,
+      canPassThrough: false
+    })
+  );
 }

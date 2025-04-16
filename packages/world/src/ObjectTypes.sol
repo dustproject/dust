@@ -239,4 +239,5 @@ library ObjectTypes {
   ObjectTypeId constant Fragment = ObjectTypeId.wrap(Misc | 1);
   ObjectTypeId constant AnyLog = ObjectTypeId.wrap(Misc | 2047);
   ObjectTypeId constant AnyPlanks = ObjectTypeId.wrap(Misc | 2046);
+  ObjectTypeId constant AnyLeaf = ObjectTypeId.wrap(Misc | 2045);
 }
