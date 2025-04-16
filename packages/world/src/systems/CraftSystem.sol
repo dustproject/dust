@@ -40,33 +40,67 @@ contract CraftSystem is System {
       caller.requireConnected(station);
     }
 
-    // Require that slots match the recipe inputs
-    // And delete the inputs from the inventory as they are used
+    _consumeRecipeInputs(caller, recipe, inputs);
+    _createRecipeOutputs(caller, recipe);
+
+    CraftLib.transferCraftEnergyToPool(caller);
+
+    notify(caller, CraftNotification({ recipeId: recipeId, station: station }));
+  }
+
+  function craft(EntityId caller, bytes32 recipeId, SlotAmount[] memory inputs) public {
+    craftWithStation(caller, recipeId, EntityId.wrap(bytes32(0)), inputs);
+  }
+
+  function _validateRecipeInput(ObjectTypeId recipeType, ObjectTypeId inputType) private pure {
+    if (recipeType.isAny()) {
+      ObjectTypeId[] memory validTypes = recipeType.getObjectTypes();
+      bool matchFound = false;
+
+      for (uint256 j = 0; j < validTypes.length; j++) {
+        if (validTypes[j] == inputType) {
+          matchFound = true;
+          break;
+        }
+      }
+
+      require(matchFound, "Input type does not match any valid type for this recipe");
+    } else {
+      require(recipeType == inputType, "Input type does not match required recipe type");
+    }
+  }
+
+  function _consumeRecipeInputs(EntityId caller, RecipesData memory recipe, SlotAmount[] memory inputs) private {
     uint256 currentInput = 0;
+
     for (uint256 i = 0; i < recipe.inputTypes.length; i++) {
       ObjectTypeId recipeType = ObjectTypeId.wrap(recipe.inputTypes[i]);
-
       uint16 remainingAmount = recipe.inputAmounts[i];
+
       while (remainingAmount > 0) {
+        require(currentInput < inputs.length, "Not enough inputs for recipe");
+
         ObjectTypeId inputType = InventorySlot._getObjectType(caller, inputs[currentInput].slot);
-        // TODO: support Any
-        require(recipeType == inputType, "Input does not match recipe");
+        _validateRecipeInput(recipeType, inputType);
+
         uint16 amount = inputs[currentInput].amount;
         InventoryUtils.removeObjectFromSlot(caller, inputs[currentInput].slot, amount);
         remainingAmount -= amount;
         currentInput++;
       }
 
-      // TODO: add a time cost to burning the coal
+      // Handle special case for coal ore
       if (recipeType == ObjectTypes.CoalOre) {
         recipeType.burnOre(recipe.inputAmounts[i]);
       }
     }
+  }
 
-    // Create the crafted objects
+  function _createRecipeOutputs(EntityId caller, RecipesData memory recipe) private {
     for (uint256 i = 0; i < recipe.outputTypes.length; i++) {
       ObjectTypeId outputType = ObjectTypeId.wrap(recipe.outputTypes[i]);
       uint16 outputAmount = recipe.outputAmounts[i];
+
       if (outputType.isTool()) {
         for (uint256 j = 0; j < outputAmount; j++) {
           EntityId tool = createEntity(outputType);
@@ -76,14 +110,6 @@ contract CraftSystem is System {
         InventoryUtils.addObject(caller, outputType, outputAmount);
       }
     }
-
-    CraftLib.transferCraftEnergyToPool(caller);
-
-    notify(caller, CraftNotification({ recipeId: recipeId, station: station }));
-  }
-
-  function craft(EntityId caller, bytes32 recipeId, SlotAmount[] memory inputs) public {
-    craftWithStation(caller, recipeId, EntityId.wrap(bytes32(0)), inputs);
   }
 }
 
