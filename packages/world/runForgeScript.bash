@@ -81,6 +81,14 @@ if [ -z "$customSig" ]; then
     signature="run(address,address,int32,int32,int32)"
     # Quote each argument individually
     scriptArgs="'${worldAddress}' '${args[0]}' '${args[1]}' '${args[2]}' '${args[3]}'"
+  elif [[ $scriptFile == *"AttachProgramScript"* ]]; then
+    if [ ${#args[@]} -ne 4 ]; then
+      echo "AttachProgramScript requires 4 arguments: <playerAddress> <target> <program> <extraData>"
+      exit 1
+    fi
+    signature="run(address,address,bytes32,bytes32,bytes)"
+    # Quote each argument individually
+    scriptArgs="'${worldAddress}' '${args[0]}' '${args[1]}' '${args[2]}' '${args[3]}'"
   else
     signature="run(address)"
     scriptArgs="'${worldAddress}'"

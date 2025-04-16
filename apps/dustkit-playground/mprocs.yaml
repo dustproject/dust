@@ -1,0 +1,10 @@
+scrollback: 10000
+procs:
+  client:
+    shell: pnpm vite client --port 5500
+    env:
+      VITE_DUSTKIT_APP_URL: http://localhost:5501/
+  app:
+    shell: pnpm vite app --port 5501
+  anvil:
+    shell: anvil

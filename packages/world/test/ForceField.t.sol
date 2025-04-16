@@ -163,7 +163,7 @@ contract ForceFieldTest is DustTest {
     // Set up a force field with energy
     Vec3 forceFieldCoord = playerCoord + vec3(2, 0, 0);
     EntityId forceFieldEntityId = setupForceField(
-      forceFieldCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 })
+      forceFieldCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 0 })
     );
 
     TestForceFieldProgram program = new TestForceFieldProgram();
@@ -237,9 +237,11 @@ contract ForceFieldTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, buildObjectTypeId, 1);
     assertInventoryHasObject(aliceEntityId, buildObjectTypeId, 1);
 
+    uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectTypeId);
+
     // Build the block
     vm.prank(alice);
-    world.build(aliceEntityId, buildObjectTypeId, buildCoord, "");
+    world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
     // Verify that the block was successfully built
     EntityId buildEntityId = ReversePosition.get(buildCoord);
@@ -253,9 +255,7 @@ contract ForceFieldTest is DustTest {
     // Set up a force field with NO energy (depleted)
     Vec3 forceFieldCoord = playerCoord + vec3(2, 0, 0);
     EntityId forceFieldEntityId = setupForceField(
-      forceFieldCoord,
-      EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 }),
-      100 // Depleted time
+      forceFieldCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 0 })
     );
 
     TestForceFieldProgram program = new TestForceFieldProgram();
@@ -274,9 +274,10 @@ contract ForceFieldTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectTypeId, 1);
 
     // Try to build the block, should fail
+    uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectTypeId);
     vm.prank(alice);
     vm.expectRevert("Not allowed by forcefield");
-    world.build(aliceEntityId, buildObjectTypeId, buildCoord, "");
+    world.build(aliceEntityId, buildCoord, inventorySlot, "");
   }
 
   function testBuildFailsIfNotAllowedByFragment() public {
@@ -286,7 +287,7 @@ contract ForceFieldTest is DustTest {
     // Set up a force field with energy
     Vec3 forceFieldCoord = playerCoord + vec3(2, 0, 0);
     setupForceField(
-      forceFieldCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 })
+      forceFieldCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 0 })
     );
 
     (, EntityId fragmentEntityId) = TestForceFieldUtils.getForceField(forceFieldCoord);
@@ -306,10 +307,12 @@ contract ForceFieldTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, buildObjectTypeId, 1);
     assertInventoryHasObject(aliceEntityId, buildObjectTypeId, 1);
 
+    uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectTypeId);
+
     // Try to build the block, should fail
     vm.prank(alice);
     vm.expectRevert("Not allowed by forcefield fragment");
-    world.build(aliceEntityId, buildObjectTypeId, buildCoord, "");
+    world.build(aliceEntityId, buildCoord, inventorySlot, "");
   }
 
   function testSetupForceField() public {
@@ -731,9 +734,11 @@ contract ForceFieldTest is DustTest {
       TestInventoryUtils.addObject(aliceEntityId, buildObjectTypeId, 1);
       assertInventoryHasObject(aliceEntityId, buildObjectTypeId, 1);
 
+      uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectTypeId);
+
       // Build should succeed
       vm.prank(alice);
-      world.build(aliceEntityId, buildObjectTypeId, buildCoord, "");
+      world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
       // Verify build succeeded
       EntityId buildEntityId = ReversePosition.get(buildCoord);
@@ -752,10 +757,12 @@ contract ForceFieldTest is DustTest {
       TestInventoryUtils.addObject(aliceEntityId, buildObjectTypeId, 1);
       assertInventoryHasObject(aliceEntityId, buildObjectTypeId, 1);
 
+      inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectTypeId);
+
       // Build should fail
       vm.prank(alice);
       vm.expectRevert("Not allowed by forcefield");
-      world.build(aliceEntityId, buildObjectTypeId, buildCoord2, "");
+      world.build(aliceEntityId, buildCoord2, inventorySlot, "");
     }
 
     // Test onMine hook

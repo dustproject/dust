@@ -20,6 +20,8 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { SAFE_PROGRAM_GAS } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectTypeId } from "../ObjectTypeId.sol";
+
+import { ObjectTypeLib } from "../ObjectTypeLib.sol";
 import { ObjectTypes } from "../ObjectTypes.sol";
 
 import { ProgramId } from "../ProgramId.sol";
@@ -27,11 +29,16 @@ import { IAttachProgramHook, IDetachProgramHook, IProgramValidator } from "../Pr
 import { Vec3 } from "../Vec3.sol";
 
 contract ProgramSystem is System {
+  using ObjectTypeLib for ObjectTypeId;
+
   function attachProgram(EntityId caller, EntityId target, ProgramId program, bytes calldata extraData) public {
     caller.activate();
 
+    ObjectTypeId targetType = ObjectType._get(target);
+    require(targetType.isSmartEntity(), "Can only attach programs to smart entities");
+
     Vec3 validatorCoord;
-    if (ObjectType._get(target) == ObjectTypes.Fragment) {
+    if (targetType == ObjectTypes.Fragment) {
       (, Vec3 fragmentCoord) = caller.requireAdjacentToFragment(target);
       validatorCoord = fragmentCoord.fromFragmentCoord();
     } else {
