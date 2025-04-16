@@ -1,3 +1,4 @@
+import type { RpcRequest, RpcResponse } from "ox";
 import type { EntityId, ProgramId } from "../common";
 import type { AppConfig } from "./appConfig";
 
@@ -19,8 +20,13 @@ export type MessengerSchema = [
     response: undefined;
   },
   /**
-   * Client -> App messages
+   * App -> Client messages
    */
+  {
+    topic: "client:rpcRequests";
+    payload: readonly RpcRequest.RpcRequest[];
+    response: readonly RpcResponse.RpcResponse[];
+  },
   {
     topic: "client:setWaypoint";
     payload: {
