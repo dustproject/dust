@@ -595,4 +595,52 @@ contract TransferTest is DustTest {
     assertInventoryHasObjectInSlot(aliceEntityId, fromType, 1, 1);
     assertEq(Inventory.length(aliceEntityId), 1, "Wrong number of occupied inventory slots");
   }
+
+  function testTransferWithinChestInventory() public {
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+    Vec3 chestCoord = vec3(0, 0, 0);
+    EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
+
+    ObjectTypeId transferObjectTypeId = ObjectTypes.Grass;
+    uint16 numToTransfer = 10;
+    TestInventoryUtils.addObject(chestEntityId, transferObjectTypeId, numToTransfer);
+    assertInventoryHasObject(chestEntityId, transferObjectTypeId, numToTransfer);
+
+    SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 1, amount: numToTransfer });
+
+    vm.prank(alice);
+    startGasReport("transfer within chest inventory");
+    world.transfer(aliceEntityId, chestEntityId, chestEntityId, slotsToTransfer, "");
+    endGasReport();
+
+    assertInventoryHasObject(chestEntityId, transferObjectTypeId, numToTransfer);
+  }
+
+  function testTransferWithinChestInventoryFailsIfProgramReverts() public {
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+    Vec3 chestCoord = vec3(0, 0, 0);
+    EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
+
+    ObjectTypeId transferObjectTypeId = ObjectTypes.Grass;
+    uint16 numToTransfer = 10;
+    TestInventoryUtils.addObject(chestEntityId, transferObjectTypeId, numToTransfer);
+    assertInventoryHasObject(chestEntityId, transferObjectTypeId, numToTransfer);
+
+    setupForceField(
+      chestCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000 * 10 ** 14, drainRate: 1 })
+    );
+
+    TestChestProgram program = new TestChestProgram();
+    attachTestProgram(chestEntityId, program, "namespace");
+
+    program.setRevertOnTransfer(true);
+
+    SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 1, amount: numToTransfer });
+
+    vm.prank(alice);
+    vm.expectRevert("Transfer not allowed by chest");
+    world.transfer(aliceEntityId, chestEntityId, chestEntityId, slotsToTransfer, "");
+  }
 }
