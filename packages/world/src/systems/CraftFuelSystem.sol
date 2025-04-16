@@ -38,7 +38,7 @@ contract CraftFuelSystem is System {
       // we convert the mass to energy
       totalEnergy +=
         inputs[i].amount * (ObjectTypeMetadata._getEnergy(inputType) + ObjectTypeMetadata._getMass(inputType));
-      InventoryUtils.removeObjectFromSlot(caller, inputType, inputs[i].amount, inputs[i].slot);
+      InventoryUtils.removeObjectFromSlot(caller, inputs[i].slot, inputs[i].amount);
     }
     // Note: we use the value of fuel directly to save a read
     // ObjectTypeMetadata._getEnergy(ObjectTypes.Fuel) == 100000000000000
