@@ -3,9 +3,7 @@
   "name": "dustkit-playground",
   "type": "module",
   "scripts": {
-    "build": "vite build",
-    "dev": "vite",
-    "preview": "vite preview",
+    "dev": "mprocs",
     "test": "tsc --noEmit"
   },
   "devDependencies": {
@@ -16,6 +14,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.74.3",
+    "dustkit": "workspace:*",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "viem": "2.23.2",
