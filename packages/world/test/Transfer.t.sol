@@ -643,4 +643,52 @@ contract TransferTest is DustTest {
     vm.expectRevert("Transfer not allowed by chest");
     world.transfer(aliceEntityId, chestEntityId, chestEntityId, slotsToTransfer, "");
   }
+
+  function testTransferFailsToOtherPlayers() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupAirChunkWithPlayer();
+    (, EntityId bobEntityId) = createTestPlayer(coord + vec3(1, 0, 0));
+
+    ObjectTypeId transferObjectTypeId = ObjectTypes.Grass;
+    uint16 numToTransfer = 10;
+    TestInventoryUtils.addObject(aliceEntityId, transferObjectTypeId, numToTransfer);
+
+    SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: numToTransfer });
+
+    vm.prank(alice);
+    vm.expectRevert("Cannot access another player's inventory");
+    world.transfer(aliceEntityId, aliceEntityId, bobEntityId, slotsToTransfer, "");
+  }
+
+  function testTransferFailsFromOtherPlayers() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupAirChunkWithPlayer();
+    (, EntityId bobEntityId) = createTestPlayer(coord + vec3(1, 0, 0));
+
+    ObjectTypeId transferObjectTypeId = ObjectTypes.Grass;
+    uint16 numToTransfer = 10;
+    TestInventoryUtils.addObject(bobEntityId, transferObjectTypeId, numToTransfer);
+
+    SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: numToTransfer });
+
+    vm.prank(alice);
+    vm.expectRevert("Cannot access another player's inventory");
+    world.transfer(aliceEntityId, bobEntityId, aliceEntityId, slotsToTransfer, "");
+  }
+
+  function testTransferFailsWithinOtherPlayers() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupAirChunkWithPlayer();
+    (, EntityId bobEntityId) = createTestPlayer(coord + vec3(1, 0, 0));
+
+    ObjectTypeId transferObjectTypeId = ObjectTypes.Grass;
+    uint16 numToTransfer = 10;
+    TestInventoryUtils.addObject(bobEntityId, transferObjectTypeId, numToTransfer);
+
+    SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 1, amount: numToTransfer });
+
+    vm.prank(alice);
+    vm.expectRevert("Cannot access another player's inventory");
+    world.transfer(aliceEntityId, bobEntityId, bobEntityId, slotsToTransfer, "");
+  }
 }
