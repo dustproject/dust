@@ -1,5 +1,5 @@
 import { encodeSystemCall } from "@latticexyz/world/internal";
-import type { Address, Client } from "viem";
+import { type Address, type Client, zeroHash } from "viem";
 import { readContract } from "viem/actions";
 import appAbi from "../../out/IAppConfigURI.sol/IAppConfigURI.abi";
 import worldCallAbi from "../../out/IWorldKernel.sol/IWorldCall.abi";
@@ -26,7 +26,7 @@ export async function getProgramAppConfigUrl({
       systemId: program,
       abi: appAbi,
       functionName: "appConfigURI",
-      args: [entity ?? "0x"],
+      args: [entity ?? zeroHash],
     }),
   });
   if (url !== "") {
