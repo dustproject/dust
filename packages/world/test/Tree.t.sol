@@ -72,7 +72,7 @@ contract TreeTest is DustTest {
     Vec3 seedCoord = dirtCoord + vec3(0, 1, 0);
     vm.prank(alice);
     startGasReport("plant tree seed");
-    world.build(aliceEntityId, ObjectTypes.OakSapling, seedCoord, "");
+    world.build(aliceEntityId, seedCoord, 0, "");
     endGasReport();
 
     // Verify seeds were planted
@@ -107,7 +107,7 @@ contract TreeTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Tree saplings need dirt or grass");
-    world.build(aliceEntityId, ObjectTypes.OakSapling, stoneCoord + vec3(0, 1, 0), "");
+    world.build(aliceEntityId, stoneCoord + vec3(0, 1, 0), 0, "");
 
     // Try to plant on farmland
     Vec3 farmlandCoord = vec3(playerCoord.x() + 2, 0, playerCoord.z());
@@ -115,7 +115,7 @@ contract TreeTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Tree saplings need dirt or grass");
-    world.build(aliceEntityId, ObjectTypes.OakSapling, farmlandCoord + vec3(0, 1, 0), "");
+    world.build(aliceEntityId, farmlandCoord + vec3(0, 1, 0), 0, "");
   }
 
   function testTreeGrowthWithSpace() public {
@@ -132,7 +132,7 @@ contract TreeTest is DustTest {
 
     // Plant oak seed
     vm.prank(alice);
-    world.build(aliceEntityId, ObjectTypes.OakSapling, seedCoord, "");
+    world.build(aliceEntityId, seedCoord, 0, "");
 
     // Verify seed was planted
     EntityId seedEntityId = ReversePosition.get(seedCoord);
@@ -201,7 +201,7 @@ contract TreeTest is DustTest {
 
     // Plant oak seed
     vm.prank(alice);
-    world.build(aliceEntityId, ObjectTypes.OakSapling, seedCoord, "");
+    world.build(aliceEntityId, seedCoord, 0, "");
 
     // Verify seed was planted
     EntityId seedEntityId = ReversePosition.get(seedCoord);
@@ -243,7 +243,7 @@ contract TreeTest is DustTest {
     // Plant oak seed
     Vec3 seedCoord = dirtCoord + vec3(0, 1, 0);
     vm.prank(alice);
-    world.build(aliceEntityId, ObjectTypes.OakSapling, seedCoord, "");
+    world.build(aliceEntityId, seedCoord, 0, "");
 
     // Verify seed was planted
     EntityId seedEntityId = ReversePosition.get(seedCoord);
@@ -286,7 +286,7 @@ contract TreeTest is DustTest {
     // Plant oak seed
     Vec3 seedCoord = dirtCoord + vec3(0, 1, 0);
     vm.prank(alice);
-    world.build(aliceEntityId, ObjectTypes.OakSapling, seedCoord, "");
+    world.build(aliceEntityId, seedCoord, 0, "");
 
     // Verify seed was planted
     EntityId seedEntityId = ReversePosition.get(seedCoord);
@@ -388,7 +388,7 @@ contract TreeTest is DustTest {
       // Plant seed
       Vec3 seedCoord = i == 0 ? seedCoord1 : seedCoord2;
       vm.prank(alice);
-      world.build(aliceEntityId, seedTypes[i], seedCoord, "");
+      world.build(aliceEntityId, seedCoord, 0, "");
 
       // Verify seed was planted
       EntityId seedEntityId = ReversePosition.get(seedCoord);
@@ -431,7 +431,7 @@ contract TreeTest is DustTest {
     // Plant oak seed
     Vec3 seedCoord = dirtCoord + vec3(0, 1, 0);
     vm.prank(alice);
-    world.build(aliceEntityId, ObjectTypes.OakSapling, seedCoord, "");
+    world.build(aliceEntityId, seedCoord, 0, "");
 
     // Verify seed was planted
     EntityId seedEntityId = ReversePosition.get(seedCoord);

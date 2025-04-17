@@ -17,7 +17,7 @@ import { UniqueEntity } from "../codegen/tables/UniqueEntity.sol";
 contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, WorldConsumer {
   constructor(IBaseWorld _world) WorldConsumer(_world) { }
 
-  function onAttachProgram(EntityId caller, EntityId target, bytes memory extraData) external onlyWorld {
+  function onAttachProgram(EntityId caller, EntityId target, bytes memory) external onlyWorld {
     uint256 uniqueEntity = UniqueEntity.get() + 1;
     UniqueEntity.set(uniqueEntity);
     bytes32 smartItemId = bytes32(uniqueEntity);
@@ -27,7 +27,7 @@ contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, WorldConsumer
     AllowedCaller.set(smartItemId, caller, true);
   }
 
-  function onDetachProgram(EntityId caller, EntityId target, bytes memory extraData) external onlyWorld {
+  function onDetachProgram(EntityId caller, EntityId target, bytes memory) external onlyWorld {
     // TODO: dont call require if force field has no energy, so we can still perform the cleanup
     require(Owner.get(SmartItem.get(target)) == caller, "Only the owner can detach this program");
     SmartItem.deleteRecord(target);

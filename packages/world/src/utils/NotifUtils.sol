@@ -10,6 +10,7 @@ import { EntityId } from "../EntityId.sol";
 import { ObjectTypeId } from "../ObjectTypeId.sol";
 import { ObjectAmount } from "../ObjectTypeLib.sol";
 import { Vec3 } from "../Vec3.sol";
+import { SlotData } from "../utils/InventoryUtils.sol";
 
 struct BuildNotification {
   EntityId buildEntityId;
@@ -49,8 +50,8 @@ struct PickupNotification {
 
 struct TransferNotification {
   EntityId transferEntityId;
-  EntityId[] tools;
-  ObjectAmount[] objectAmounts;
+  SlotData[] deposits;
+  SlotData[] withdrawals;
 }
 
 struct EquipNotification {

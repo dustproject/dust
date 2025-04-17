@@ -7,6 +7,7 @@ import { Action, Direction } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { Inventory } from "../codegen/tables/Inventory.sol";
+import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
@@ -39,51 +40,44 @@ import { Vec3, vec3 } from "../Vec3.sol";
 using ObjectTypeLib for ObjectTypeId;
 
 contract BuildSystem is System {
-  function build(EntityId caller, ObjectTypeId buildObjectTypeId, Vec3 baseCoord, bytes calldata extraData)
+  function build(EntityId caller, Vec3 coord, uint16 slot, bytes calldata extraData) public returns (EntityId) {
+    return buildWithDirection(caller, coord, slot, Direction.PositiveZ, extraData);
+  }
+
+  function buildWithDirection(EntityId caller, Vec3 coord, uint16 slot, Direction direction, bytes calldata extraData)
     public
     returns (EntityId)
   {
-    return buildWithDirection(caller, buildObjectTypeId, baseCoord, Direction.PositiveZ, extraData);
-  }
-
-  function buildWithDirection(
-    EntityId caller,
-    ObjectTypeId buildObjectTypeId,
-    Vec3 baseCoord,
-    Direction direction,
-    bytes calldata extraData
-  ) public returns (EntityId) {
     caller.activate();
-    caller.requireConnected(baseCoord);
-    require(buildObjectTypeId.isBlock(), "Cannot build non-block object");
+    caller.requireConnected(coord);
+    ObjectTypeId buildObjectType = InventorySlot._getObjectType(caller, slot);
+    require(buildObjectType.isBlock(), "Cannot build non-block object");
 
-    (EntityId base, Vec3[] memory coords) = BuildLib._addBlocks(baseCoord, buildObjectTypeId, direction);
+    (EntityId base, Vec3[] memory coords) = BuildLib._addBlocks(coord, buildObjectType, direction);
 
-    if (buildObjectTypeId.isGrowable()) {
-      BuildLib._handleSeed(base, buildObjectTypeId, baseCoord);
+    if (buildObjectType.isGrowable()) {
+      BuildLib._handleSeed(base, buildObjectType, coord);
     }
 
-    InventoryUtils.removeObject(caller, buildObjectTypeId, 1);
+    InventoryUtils.removeObjectFromSlot(caller, slot, 1);
 
     transferEnergyToPool(caller, BUILD_ENERGY_COST);
 
     // Note: we call this after the build state has been updated, to prevent re-entrancy attacks
-    BuildLib._requireBuildsAllowed(caller, base, buildObjectTypeId, coords, extraData);
+    BuildLib._requireBuildsAllowed(caller, base, buildObjectType, coords, extraData);
 
     notify(
-      caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectTypeId: buildObjectTypeId })
+      caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectTypeId: buildObjectType })
     );
 
     return base;
   }
 
-  function jumpBuildWithDirection(
-    EntityId caller,
-    ObjectTypeId buildObjectTypeId,
-    Direction direction,
-    bytes calldata extraData
-  ) public {
+  function jumpBuildWithDirection(EntityId caller, uint16 slot, Direction direction, bytes calldata extraData) public {
     caller.activate();
+
+    ObjectTypeId buildObjectType = InventorySlot._getObjectType(caller, slot);
+    require(!ObjectTypeMetadata._getCanPassThrough(buildObjectType), "Cannot jump build on a pass-through block");
 
     Vec3 coord = MovablePosition._get(caller);
 
@@ -93,43 +87,41 @@ contract BuildSystem is System {
 
     notify(caller, MoveNotification({ moveCoords: moveCoords }));
 
-    require(!ObjectTypeMetadata._getCanPassThrough(buildObjectTypeId), "Cannot jump build on a pass-through block");
-
-    buildWithDirection(caller, buildObjectTypeId, coord, direction, extraData);
+    buildWithDirection(caller, coord, slot, direction, extraData);
   }
 
-  function jumpBuild(EntityId caller, ObjectTypeId buildObjectTypeId, bytes calldata extraData) public {
-    jumpBuildWithDirection(caller, buildObjectTypeId, Direction.PositiveZ, extraData);
+  function jumpBuild(EntityId caller, uint16 slot, bytes calldata extraData) public {
+    jumpBuildWithDirection(caller, slot, Direction.PositiveZ, extraData);
   }
 }
 
 library BuildLib {
-  function _addBlock(ObjectTypeId buildObjectTypeId, Vec3 coord) internal returns (EntityId) {
+  function _addBlock(ObjectTypeId buildObjectType, Vec3 coord) internal returns (EntityId) {
     (EntityId terrain, ObjectTypeId terrainObjectTypeId) = getOrCreateEntityAt(coord);
     require(terrainObjectTypeId == ObjectTypes.Air, "Cannot build on a non-air block");
     require(Inventory._length(terrain) == 0, "Cannot build where there are dropped objects");
-    if (!ObjectTypeMetadata._getCanPassThrough(buildObjectTypeId)) {
+    if (!ObjectTypeMetadata._getCanPassThrough(buildObjectType)) {
       require(!getMovableEntityAt(coord).exists(), "Cannot build on a movable entity");
     }
 
-    ObjectType._set(terrain, buildObjectTypeId);
+    ObjectType._set(terrain, buildObjectType);
 
     return terrain;
   }
 
-  function _addBlocks(Vec3 baseCoord, ObjectTypeId buildObjectTypeId, Direction direction)
+  function _addBlocks(Vec3 baseCoord, ObjectTypeId buildObjectType, Direction direction)
     public
     returns (EntityId, Vec3[] memory)
   {
-    Vec3[] memory coords = buildObjectTypeId.getRelativeCoords(baseCoord, direction);
-    EntityId base = _addBlock(buildObjectTypeId, baseCoord);
+    Vec3[] memory coords = buildObjectType.getRelativeCoords(baseCoord, direction);
+    EntityId base = _addBlock(buildObjectType, baseCoord);
     Orientation._set(base, direction);
-    uint128 mass = ObjectTypeMetadata._getMass(buildObjectTypeId);
+    uint128 mass = ObjectTypeMetadata._getMass(buildObjectType);
     Mass._setMass(base, mass);
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];
-      EntityId relative = _addBlock(buildObjectTypeId, relativeCoord);
+      EntityId relative = _addBlock(buildObjectType, relativeCoord);
       BaseEntity._set(relative, base);
     }
     return (base, coords);

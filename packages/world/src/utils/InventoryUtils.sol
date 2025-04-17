@@ -26,6 +26,12 @@ struct SlotAmount {
   uint16 amount;
 }
 
+struct SlotData {
+  EntityId entityId;
+  ObjectTypeId objectType;
+  uint16 amount;
+}
+
 library InventoryUtils {
   function useTool(EntityId owner, uint16 slot, uint128 useMassMax)
     public
@@ -127,16 +133,13 @@ library InventoryUtils {
     require(slot < maxSlots, "Invalid slot");
 
     InventorySlotData memory slotData = InventorySlot._get(owner, slot);
-    uint16 newAmount = slotData.amount + amount;
-    require(newAmount <= stackable, "Object does not fit in slot");
 
     if (slotData.objectType.isNull()) {
       InventorySlot._setObjectType(owner, slot, objectType);
       InventorySlot._setOccupiedIndex(owner, slot, uint16(Inventory._length(owner)));
       Inventory._push(owner, slot);
-      if (InventoryTypeSlots._length(owner, ObjectTypes.Null) > 0) {
-        uint16 typeIndex = InventorySlot._getTypeIndex(owner, slot);
-        uint16 nullSlot = InventoryTypeSlots._getItem(owner, ObjectTypes.Null, typeIndex);
+      if (slotData.typeIndex < InventoryTypeSlots._length(owner, ObjectTypes.Null)) {
+        uint16 nullSlot = InventoryTypeSlots._getItem(owner, ObjectTypes.Null, slotData.typeIndex);
         if (nullSlot == slot) {
           _removeFromTypeSlots(owner, ObjectTypes.Null, slot);
         }
@@ -145,6 +148,9 @@ library InventoryUtils {
     } else {
       require(slotData.objectType == objectType, "Cannot store different object types in the same slot");
     }
+
+    uint16 newAmount = slotData.amount + amount;
+    require(newAmount <= stackable, "Object does not fit in slot");
 
     InventorySlot._setAmount(owner, slot, newAmount);
   }
@@ -193,12 +199,11 @@ library InventoryUtils {
     require(remaining == 0, "Not enough objects of this type in inventory");
   }
 
-  function removeObjectFromSlot(EntityId owner, ObjectTypeId objectType, uint16 amount, uint16 slot) internal {
+  function removeObjectFromSlot(EntityId owner, uint16 slot, uint16 amount) internal returns (ObjectTypeId) {
     require(amount > 0, "Amount must be greater than 0");
-    require(!objectType.isNull(), "Empty slot");
 
     ObjectTypeId slotObjectType = InventorySlot._getObjectType(owner, slot);
-    require(slotObjectType == objectType, "Slot does not contain the specified object type");
+    require(!slotObjectType.isNull(), "Empty slot");
 
     uint16 currentAmount = InventorySlot._getAmount(owner, slot);
     require(currentAmount >= amount, "Not enough objects in slot");
@@ -210,38 +215,18 @@ library InventoryUtils {
       // Remove partial amount
       InventorySlot._setAmount(owner, slot, currentAmount - amount);
     }
+
+    return slotObjectType;
   }
 
-  function removeAny(EntityId owner, ObjectTypeId anyType, uint16 amount) public {
-    require(amount > 0, "Amount must be greater than 0");
+  function transfer(EntityId from, EntityId to, SlotTransfer[] memory slotTransfers)
+    public
+    returns (SlotData[] memory fromSlotData, SlotData[] memory toSlotData)
+  {
+    fromSlotData = new SlotData[](slotTransfers.length);
+    SlotData[] memory tempToSlotData = new SlotData[](slotTransfers.length);
 
-    uint16 remaining = amount;
-    ObjectTypeId[] memory objectTypes = anyType.getObjectTypes();
-
-    for (uint256 i = 0; i < objectTypes.length && remaining > 0; i++) {
-      ObjectTypeId currentType = objectTypes[i];
-      uint256 numSlots = InventoryTypeSlots._length(owner, currentType);
-
-      if (numSlots == 0) continue;
-
-      uint16 available = 0;
-      for (uint16 j = 0; j < numSlots; j++) {
-        uint16 slot = InventoryTypeSlots._getItem(owner, currentType, j);
-        available += InventorySlot._getAmount(owner, slot);
-        if (available >= remaining) break;
-      }
-
-      if (available > 0) {
-        uint16 toRemove = available >= remaining ? remaining : available;
-        removeObject(owner, currentType, toRemove);
-        remaining -= toRemove;
-      }
-    }
-
-    require(remaining == 0, "Not enough objects of this type in inventory");
-  }
-
-  function transfer(EntityId from, EntityId to, SlotTransfer[] memory slotTransfers) public {
+    uint256 tempIndex = 0;
     for (uint256 i = 0; i < slotTransfers.length; i++) {
       uint16 slotFrom = slotTransfers[i].slotFrom;
       uint16 slotTo = slotTransfers[i].slotTo;
@@ -251,8 +236,21 @@ library InventoryUtils {
 
       InventorySlotData memory sourceSlot = InventorySlot._get(from, slotFrom);
       require(!sourceSlot.objectType.isNull(), "Empty slot");
+      fromSlotData[i] = SlotData(sourceSlot.entityId, sourceSlot.objectType, sourceSlot.amount);
 
       InventorySlotData memory destSlot = InventorySlot._get(to, slotTo);
+
+      // Handle slot swaps (transferring all to an existing slot with a different type)
+      if (amount == sourceSlot.amount && sourceSlot.objectType != destSlot.objectType && !destSlot.objectType.isNull())
+      {
+        tempToSlotData[tempIndex++] = SlotData(destSlot.entityId, destSlot.objectType, destSlot.amount);
+
+        _replaceSlot(from, slotFrom, sourceSlot.objectType, destSlot.entityId, destSlot.objectType, destSlot.amount);
+        _replaceSlot(to, slotTo, destSlot.objectType, sourceSlot.entityId, sourceSlot.objectType, sourceSlot.amount);
+
+        continue;
+      }
+
       require(
         destSlot.objectType.isNull() || destSlot.objectType == sourceSlot.objectType,
         "Cannot store different object types in the same slot"
@@ -267,9 +265,14 @@ library InventoryUtils {
       } else {
         // Regular objects can be transferred in partial amounts
         require(amount <= sourceSlot.amount, "Not enough objects in slot");
-        removeObjectFromSlot(from, sourceSlot.objectType, amount, slotFrom);
+        removeObjectFromSlot(from, slotFrom, amount);
         addObjectToSlot(to, sourceSlot.objectType, amount, slotTo);
       }
+    }
+
+    toSlotData = new SlotData[](tempIndex);
+    for (uint256 i = 0; i < tempIndex; i++) {
+      toSlotData[i] = tempToSlotData[i];
     }
   }
 
@@ -305,7 +308,7 @@ library InventoryUtils {
     Inventory._deleteRecord(from);
   }
 
-  function getObjectsAndEntities(EntityId owner, SlotTransfer[] memory slotTransfers)
+  function getSlotData(EntityId owner, SlotTransfer[] memory slotTransfers)
     internal
     view
     returns (EntityId[] memory entities, ObjectAmount[] memory objects)
@@ -343,11 +346,27 @@ library InventoryUtils {
     return (entities, objects);
   }
 
+  function _replaceSlot(
+    EntityId owner,
+    uint16 slot,
+    ObjectTypeId objectType,
+    EntityId entityId,
+    ObjectTypeId newObjectType,
+    uint16 amount
+  ) internal {
+    _removeFromTypeSlots(owner, objectType, slot);
+    _addToTypeSlots(owner, newObjectType, slot);
+    InventorySlot._setEntityId(owner, slot, entityId);
+    InventorySlot._setObjectType(owner, slot, newObjectType);
+    InventorySlot._setAmount(owner, slot, amount);
+  }
+
   // Add a slot to type slots - O(1)
-  function _addToTypeSlots(EntityId owner, ObjectTypeId objectType, uint16 slot) private {
-    uint256 numTypeSlots = InventoryTypeSlots._length(owner, objectType);
+  function _addToTypeSlots(EntityId owner, ObjectTypeId objectType, uint16 slot) private returns (uint16) {
+    uint16 numTypeSlots = uint16(InventoryTypeSlots._length(owner, objectType));
     InventoryTypeSlots._push(owner, objectType, slot);
-    InventorySlot._setTypeIndex(owner, slot, uint16(numTypeSlots));
+    InventorySlot._setTypeIndex(owner, slot, numTypeSlots);
+    return numTypeSlots;
   }
 
   // Remove a slot from type slots - O(1)

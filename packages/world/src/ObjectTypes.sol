@@ -249,6 +249,7 @@ library ObjectTypes {
   // ------------------------------------------------------------
   ObjectTypeId constant Player = ObjectTypeId.wrap(Misc | 0);
   ObjectTypeId constant Fragment = ObjectTypeId.wrap(Misc | 1);
-  ObjectTypeId constant AnyLog = ObjectTypeId.wrap(Misc | 2047);
-  ObjectTypeId constant AnyPlanks = ObjectTypeId.wrap(Misc | 2046);
+  ObjectTypeId constant AnyLog = ObjectTypeId.wrap(Misc | 2);
+  ObjectTypeId constant AnyPlanks = ObjectTypeId.wrap(Misc | 3);
+  ObjectTypeId constant AnyLeaf = ObjectTypeId.wrap(Misc | 4);
 }
