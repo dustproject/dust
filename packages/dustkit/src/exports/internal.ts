@@ -4,5 +4,6 @@ export * from "../apps/getProgramDefaultAppConfigUrl";
 
 export * from "../wagmi/connector";
 
-export * from "../transports/messagePort";
-export * from "../transports/createMessagePortRpcServer";
+export * from "../rpc/getMessagePortRpcClient";
+export * from "../rpc/createMessagePortRpcServer";
+export * from "../rpc/schemas";

@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createMessagePortRpcServer } from "dustkit/internal";
+import { type AppSchema, createMessagePortRpcServer } from "dustkit/internal";
+import { MethodNotSupportedError } from "ox/RpcResponse";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { WagmiProvider } from "wagmi";
@@ -19,13 +20,15 @@ root.render(
   </StrictMode>,
 );
 
-createMessagePortRpcServer({
-  async onRequest(req) {
-    console.info("got rpc request", req);
-    return {
-      jsonrpc: req.jsonrpc,
-      id: req.id,
-      result: "hello",
-    };
+createMessagePortRpcServer<AppSchema>({
+  async onRequest({ method, params }) {
+    if (method === "dustApp_init") {
+      console.info("client asked this app to initialize with", params);
+      return;
+    }
+
+    throw new MethodNotSupportedError({
+      message: `"${method}" not supported.`,
+    });
   },
 });
