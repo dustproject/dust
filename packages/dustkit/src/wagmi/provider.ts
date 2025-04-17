@@ -50,16 +50,17 @@ export function createProvider(config: ProviderConfig) {
       const request = store.prepare(args);
 
       console.info("sending request", request);
-      const [response] = await config.bridge.sendAsync("client:rpcRequests", [
+      const response = await config.bridge.sendAsync(
+        "client:rpcRequest",
         request,
-      ]);
+      );
       console.info("got response", response);
 
-      if (response!.error) {
-        throw toProviderRpcError(response!.error);
+      if (response.error) {
+        throw toProviderRpcError(response.error);
       }
 
-      return response!.result;
+      return response.result;
     },
   });
 }

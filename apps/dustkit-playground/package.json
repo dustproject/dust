@@ -15,6 +15,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.74.3",
     "dustkit": "workspace:*",
+    "ox": "^0.6.10",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "viem": "2.23.2",

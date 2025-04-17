@@ -13,7 +13,7 @@ export type Messenger = {
     topic: topic | Topic,
     listener: (
       payload: Payload<topic>,
-      reply: (payload: Response<topic>) => void,
+      reply?: (payload: Response<topic>) => void,
     ) => void,
     id?: string | undefined,
   ) => () => void;
@@ -79,12 +79,7 @@ export function fromWindow(
         if (event.data.topic !== topic) return;
         if (id && event.data.id !== id) return;
         if (targetOrigin && event.origin !== targetOrigin) return;
-        listener(event.data.payload, (response) => {
-          w.postMessage(
-            { id: event.data.id, topic: event.data.topic, payload: response },
-            event.origin,
-          );
-        });
+        listener(event.data.payload);
       }
       w.addEventListener("message", handler);
       handlers.push(handler);

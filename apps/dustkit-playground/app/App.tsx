@@ -10,6 +10,7 @@ export function App() {
     });
   }, []);
 
+  // TODO: pass in chain ID?
   const connectorClient = useConnectorClient();
 
   return (

@@ -1,56 +1,99 @@
 import { Messenger } from "dustkit";
+import { RpcResponse } from "ox";
 import { useEffect, useState } from "react";
-import { useConfig } from "wagmi";
-import { getConnectorClient } from "wagmi/actions";
+import { useConfig, useConnect, useConnectorClient } from "wagmi";
 
 export function App() {
-  const [iframe, setIframe] = useState<HTMLIFrameElement>();
-  const wagmiConfig = useConfig();
+  const [bridge, setBridge] = useState<Messenger.Bridge>();
+  // destroy bridge when it changes or we unmount
+  useEffect(() => {
+    if (!bridge) return;
+    return () => bridge.destroy();
+  }, [bridge]);
+
+  // TODO: pass in chain ID?
+  const connectorClient = useConnectorClient();
+  const { connect, connectors } = useConnect();
 
   useEffect(() => {
-    if (!iframe) return;
-    if (!iframe.contentWindow) {
-      console.warn("no content window for iframe, skipping bridge", iframe);
-      return;
-    }
+    if (!bridge) return;
+    return bridge.on("client:rpcRequest", async (request, reply) => {
+      console.info("got request", request);
 
-    const bridge = Messenger.bridge({
-      from: Messenger.fromWindow(window),
-      to: Messenger.fromWindow(iframe.contentWindow),
-      waitForReady: true,
+      switch (request.method) {
+        case "eth_accounts": {
+          return reply(
+            RpcResponse.from({
+              jsonrpc: request.jsonrpc,
+              id: request.id,
+              result: connectorClient.data
+                ? [connectorClient.data.account.address]
+                : [],
+            }),
+          );
+        }
+      }
+
+      // try {
+      //   const result = await connectorClient.transport.request(request);
+      //   console.info("replying with result", result);
+      //   reply(
+      //     RpcResponse.from({
+      //       id: request.id,
+      //       jsonrpc: request.jsonrpc,
+      //       result,
+      //     }),
+      //   );
+      // } catch (error) {
+      //   console.info("replying with error", error);
+      //   reply(
+      //     RpcResponse.from({
+      //       id: request.id,
+      //       jsonrpc: request.jsonrpc,
+      //       error: {
+      //         code: error.code,
+      //         message: error.message,
+      //       },
+      //     }),
+      //   );
+      // }
     });
-
-    bridge.send("app:open", {
-      appConfig: {
-        name: "DustKit app",
-        startUrl: "/",
-      },
-    });
-
-    bridge.on("client:rpcRequests", async (requests, reply) => {
-      console.info("got requests", requests);
-      const connectorClient = await getConnectorClient(wagmiConfig);
-      const responses = await Promise.all(
-        requests.map(async (request) =>
-          connectorClient.transport.request(request),
-        ),
-      );
-      console.info("replying with", responses);
-      reply(responses);
-    });
-
-    return () => {
-      bridge.destroy();
-    };
-  }, [iframe, wagmiConfig]);
+  }, [bridge, connectorClient]);
 
   return (
     <div>
       <h1>Client</h1>
+      <p>
+        Connector client {connectorClient.status} for chain{" "}
+        {connectorClient.data?.chain.id} (uid: {connectorClient.data?.uid})
+      </p>
+      <p>
+        <button
+          type="button"
+          onClick={() => connect({ connector: connectors[0]! })}
+        >
+          Connect
+        </button>
+      </p>
       <iframe
         title="DustKit app"
         src={import.meta.env.VITE_DUSTKIT_APP_URL}
-        onLoad={(event) => setIframe(event.currentTarget)}
+        onLoad={(event) => {
+          const bridge = Messenger.bridge({
+            from: Messenger.fromWindow(window),
+            to: Messenger.fromWindow(event.currentTarget.contentWindow!),
+            waitForReady: true,
+          });
+
+          bridge.send("app:open", {
+            appConfig: {
+              name: "DustKit app",
+              startUrl: "/",
+            },
+          });
+
+          setBridge(bridge);
+        }}
       />
     </div>
   );

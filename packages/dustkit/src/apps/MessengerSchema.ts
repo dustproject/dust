@@ -23,9 +23,9 @@ export type MessengerSchema = [
    * App -> Client messages
    */
   {
-    topic: "client:rpcRequests";
-    payload: readonly RpcRequest.RpcRequest[];
-    response: readonly RpcResponse.RpcResponse[];
+    topic: "client:rpcRequest";
+    payload: RpcRequest.RpcRequest;
+    response: RpcResponse.RpcResponse;
   },
   {
     topic: "client:setWaypoint";
