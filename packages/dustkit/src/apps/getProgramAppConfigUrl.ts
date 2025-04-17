@@ -26,7 +26,10 @@ export async function getProgramAppConfigUrl({
       systemId: program,
       abi: appAbi,
       functionName: "appConfigURI",
-      args: [entity ?? "0x"],
+      args: [
+        entity ??
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+      ],
     }),
   });
   if (url !== "") {
