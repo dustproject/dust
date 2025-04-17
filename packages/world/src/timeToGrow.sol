@@ -11,11 +11,43 @@ function timeToGrow(ObjectTypeId objectTypeId) pure returns (uint128) {
     return 900 seconds;
   }
 
+  if (objectTypeId == ObjectTypes.MelonSeed) {
+    return 3600 seconds;
+  }
+
+  if (objectTypeId == ObjectTypes.PumpkinSeed) {
+    return 3600 seconds;
+  }
+
   if (objectTypeId == ObjectTypes.OakSapling) {
     return 345600 seconds;
   }
 
+  if (objectTypeId == ObjectTypes.BirchSapling) {
+    return 345600 seconds;
+  }
+
+  if (objectTypeId == ObjectTypes.JungleSapling) {
+    return 345600 seconds;
+  }
+
+  if (objectTypeId == ObjectTypes.SakuraSapling) {
+    return 345600 seconds;
+  }
+
+  if (objectTypeId == ObjectTypes.AcaciaSapling) {
+    return 345600 seconds;
+  }
+
   if (objectTypeId == ObjectTypes.SpruceSapling) {
+    return 345600 seconds;
+  }
+
+  if (objectTypeId == ObjectTypes.DarkOakSapling) {
+    return 345600 seconds;
+  }
+
+  if (objectTypeId == ObjectTypes.MangroveSapling) {
     return 345600 seconds;
   }
 
