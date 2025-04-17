@@ -10,6 +10,11 @@ export function createMessagePortRpcServer<schema extends RpcSchema.Generic>({
       params: RpcSchema.ExtractParams<schema, method>;
     }) => Promise<RpcSchema.ExtractReturnType<schema, method>>;
   }[RpcSchema.ExtractMethodName<schema>];
+
+  // onRequest: <method extends RpcSchema.ExtractMethodName<schema>>(request: {
+  //   method: method;
+  //   params: RpcSchema.ExtractParams<schema, method>;
+  // }) => Promise<RpcSchema.ExtractReturnType<schema, method>>;
 }) {
   window.addEventListener("message", (event) => {
     if (event.data !== initMessage) return;

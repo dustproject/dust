@@ -1,24 +1,15 @@
 import { WebSocketRequestError } from "viem";
 import {
-  type GetSocketRpcClientParameters,
   type Socket,
   type SocketRpcClient,
   getSocketRpcClient,
 } from "viem/utils";
 
-export type GetMessagePortRpcClientOptions = Pick<
-  GetSocketRpcClientParameters,
-  "reconnect"
->;
-
 export const initMessage = "MessagePortRpcClient";
 
 export async function getMessagePortRpcClient(
   target: Window,
-  options: GetMessagePortRpcClientOptions | undefined = {},
 ): Promise<SocketRpcClient<MessagePort>> {
-  const { reconnect } = options;
-
   return getSocketRpcClient({
     async getSocket({ onClose, onError, onOpen, onResponse }) {
       let closed = false;
@@ -69,7 +60,6 @@ export async function getMessagePortRpcClient(
         },
       } as Socket<WebSocket>);
     },
-    reconnect,
     url: "*",
   });
 }

@@ -1,5 +1,9 @@
 import { Messenger } from "dustkit";
-import { getMessagePortRpcClient } from "dustkit/internal";
+import {
+  type AppSchema,
+  getMessagePortRpcClient,
+  messagePort,
+} from "dustkit/internal";
 import { RpcResponse } from "ox";
 import { useEffect, useState } from "react";
 import { useConfig, useConnect, useConnectorClient } from "wagmi";
@@ -95,15 +99,17 @@ export function App() {
 
           setBridge(bridge);
 
-          console.info("creating message port rpc client for app iframe");
-          const rpcClient = await getMessagePortRpcClient(
+          console.info("setting up app transport");
+          const appTransport = messagePort<AppSchema>(
             event.currentTarget.contentWindow!,
           );
           console.info("rpc client ready, sending hello");
-          const res = await rpcClient.requestAsync({
-            body: {
-              method: "dustkit_hello",
-            },
+          const res = await appTransport({}).request({
+            method: "dustApp_init",
+            params: {},
+          });
+          await appTransport({}).request({
+            method: "example",
           });
           console.info("got hello reply", res);
         }}

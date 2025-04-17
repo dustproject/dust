@@ -12,15 +12,22 @@ export type ClientSchema = RpcSchema.From<{
   };
 }>;
 
-export type AppSchema = RpcSchema.From<{
-  Request: {
-    method: "dustApp_init";
-    params: {
-      appConfig: AppConfig;
-      via?: {
-        entity: EntityId;
-        program: ProgramId;
+export type AppSchema = RpcSchema.From<
+  | {
+      Request: {
+        method: "dustApp_init";
+        params: {
+          appConfig: AppConfig;
+          via?: {
+            entity: EntityId;
+            program: ProgramId;
+          };
+        };
       };
-    };
-  };
-}>;
+    }
+  | {
+      Request: {
+        method: "example";
+      };
+    }
+>;
