@@ -5,7 +5,7 @@
     "./mud.config": "./dist/mud.config.js",
     "./worlds.json": "./worlds.json",
     "./out/*": "./out/*",
-    "./gen-tree-lib": "./gen-tree-lib.ts"
+    "./tree-lib": "./tree-lib.ts"
   },
   "typesVersions": {
     "*": {
