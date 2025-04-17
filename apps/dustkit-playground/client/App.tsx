@@ -1,4 +1,5 @@
 import { Messenger } from "dustkit";
+import { getMessagePortRpcClient } from "dustkit/internal";
 import { RpcResponse } from "ox";
 import { useEffect, useState } from "react";
 import { useConfig, useConnect, useConnectorClient } from "wagmi";
@@ -78,7 +79,7 @@ export function App() {
       <iframe
         title="DustKit app"
         src={import.meta.env.VITE_DUSTKIT_APP_URL}
-        onLoad={(event) => {
+        onLoad={async (event) => {
           const bridge = Messenger.bridge({
             from: Messenger.fromWindow(window),
             to: Messenger.fromWindow(event.currentTarget.contentWindow!),
@@ -93,6 +94,18 @@ export function App() {
           });
 
           setBridge(bridge);
+
+          console.info("creating message port rpc client for app iframe");
+          const rpcClient = await getMessagePortRpcClient(
+            event.currentTarget.contentWindow!,
+          );
+          console.info("rpc client ready, sending hello");
+          const res = await rpcClient.requestAsync({
+            body: {
+              method: "dustkit_hello",
+            },
+          });
+          console.info("got hello reply", res);
         }}
       />
     </div>
