@@ -246,8 +246,10 @@ library TreeLib {
     internal
     pure
     returns (Vec3[] memory fixedLeaves, Vec3[] memory randomLeaves)
-  {${treePieces.join("")}
-    revert("Tree type not supported");
+  {${treePieces.join(" else ")}
+    else {
+      revert("Tree type not supported");
+    }
   }
 }
 `);

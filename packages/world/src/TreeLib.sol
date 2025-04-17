@@ -74,28 +74,28 @@ library TreeLib {
 
   function getTreeData(ObjectTypeId objectType) internal pure returns (TreeData memory) {
     if (objectType == ObjectTypes.OakSapling) {
-      return TreeData({ logType: ObjectTypes.OakSapling, leafType: ObjectTypes.OakLeaf, trunkHeight: 5 });
+      return TreeData({ logType: ObjectTypes.OakLog, leafType: ObjectTypes.OakLeaf, trunkHeight: 5 });
     }
     if (objectType == ObjectTypes.BirchSapling) {
-      return TreeData({ logType: ObjectTypes.BirchSapling, leafType: ObjectTypes.BirchLeaf, trunkHeight: 7 });
+      return TreeData({ logType: ObjectTypes.BirchLog, leafType: ObjectTypes.BirchLeaf, trunkHeight: 7 });
     }
     if (objectType == ObjectTypes.JungleSapling) {
-      return TreeData({ logType: ObjectTypes.JungleSapling, leafType: ObjectTypes.JungleLeaf, trunkHeight: 12 });
+      return TreeData({ logType: ObjectTypes.JungleLog, leafType: ObjectTypes.JungleLeaf, trunkHeight: 12 });
     }
     if (objectType == ObjectTypes.SakuraSapling) {
-      return TreeData({ logType: ObjectTypes.SakuraSapling, leafType: ObjectTypes.SakuraLeaf, trunkHeight: 6 });
+      return TreeData({ logType: ObjectTypes.SakuraLog, leafType: ObjectTypes.SakuraLeaf, trunkHeight: 6 });
     }
     if (objectType == ObjectTypes.AcaciaSapling) {
-      return TreeData({ logType: ObjectTypes.AcaciaSapling, leafType: ObjectTypes.AcaciaLeaf, trunkHeight: 6 });
+      return TreeData({ logType: ObjectTypes.AcaciaLog, leafType: ObjectTypes.AcaciaLeaf, trunkHeight: 6 });
     }
     if (objectType == ObjectTypes.SpruceSapling) {
-      return TreeData({ logType: ObjectTypes.SpruceSapling, leafType: ObjectTypes.SpruceLeaf, trunkHeight: 9 });
+      return TreeData({ logType: ObjectTypes.SpruceLog, leafType: ObjectTypes.SpruceLeaf, trunkHeight: 9 });
     }
     if (objectType == ObjectTypes.DarkOakSapling) {
-      return TreeData({ logType: ObjectTypes.DarkOakSapling, leafType: ObjectTypes.DarkOakLeaf, trunkHeight: 6 });
+      return TreeData({ logType: ObjectTypes.DarkOakLog, leafType: ObjectTypes.DarkOakLeaf, trunkHeight: 6 });
     }
     if (objectType == ObjectTypes.MangroveSapling) {
-      return TreeData({ logType: ObjectTypes.MangroveSapling, leafType: ObjectTypes.MangroveLeaf, trunkHeight: 8 });
+      return TreeData({ logType: ObjectTypes.MangroveLog, leafType: ObjectTypes.MangroveLeaf, trunkHeight: 8 });
     }
     revert("Tree type not supported");
   }
@@ -108,35 +108,29 @@ library TreeLib {
     if (objectType == ObjectTypes.OakSapling) {
       fixedLeaves = _loadLeaves(TreeBlobs.OAK_FIXED);
       randomLeaves = _loadLeaves(TreeBlobs.OAK_RANDOM);
-    }
-    if (objectType == ObjectTypes.BirchSapling) {
+    } else if (objectType == ObjectTypes.BirchSapling) {
       fixedLeaves = _loadLeaves(TreeBlobs.BIRCH_FIXED);
       randomLeaves = _loadLeaves(TreeBlobs.BIRCH_RANDOM);
-    }
-    if (objectType == ObjectTypes.JungleSapling) {
+    } else if (objectType == ObjectTypes.JungleSapling) {
       fixedLeaves = _loadLeaves(TreeBlobs.JUNGLE_FIXED);
       randomLeaves = _loadLeaves(TreeBlobs.JUNGLE_RANDOM);
-    }
-    if (objectType == ObjectTypes.SakuraSapling) {
+    } else if (objectType == ObjectTypes.SakuraSapling) {
       fixedLeaves = _loadLeaves(TreeBlobs.SAKURA_FIXED);
       randomLeaves = _loadLeaves(TreeBlobs.SAKURA_RANDOM);
-    }
-    if (objectType == ObjectTypes.AcaciaSapling) {
+    } else if (objectType == ObjectTypes.AcaciaSapling) {
       fixedLeaves = _loadLeaves(TreeBlobs.ACACIA_FIXED);
       randomLeaves = _loadLeaves(TreeBlobs.ACACIA_RANDOM);
-    }
-    if (objectType == ObjectTypes.SpruceSapling) {
+    } else if (objectType == ObjectTypes.SpruceSapling) {
       fixedLeaves = _loadLeaves(TreeBlobs.SPRUCE_FIXED);
       randomLeaves = _loadLeaves(TreeBlobs.SPRUCE_RANDOM);
-    }
-    if (objectType == ObjectTypes.DarkOakSapling) {
+    } else if (objectType == ObjectTypes.DarkOakSapling) {
       fixedLeaves = _loadLeaves(TreeBlobs.DARKOAK_FIXED);
       randomLeaves = _loadLeaves(TreeBlobs.DARKOAK_RANDOM);
-    }
-    if (objectType == ObjectTypes.MangroveSapling) {
+    } else if (objectType == ObjectTypes.MangroveSapling) {
       fixedLeaves = _loadLeaves(TreeBlobs.MANGROVE_FIXED);
       randomLeaves = _loadLeaves(TreeBlobs.MANGROVE_RANDOM);
+    } else {
+      revert("Tree type not supported");
     }
-    revert("Tree type not supported");
   }
 }
