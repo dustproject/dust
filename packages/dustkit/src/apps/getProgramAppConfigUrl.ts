@@ -18,17 +18,25 @@ export async function getProgramAppConfigUrl({
   program: ProgramId;
   entity?: EntityId;
 }): Promise<string | undefined> {
-  const url = await readContract(client, {
-    address: worldAddress,
-    abi: worldCallAbi,
-    functionName: "call",
-    args: encodeSystemCall({
-      systemId: program,
-      abi: appAbi,
-      functionName: "appConfigURI",
-      args: [entity ?? zeroHash],
-    }),
-  });
+  let url: string | undefined;
+  try {
+    url = await readContract(client, {
+      address: worldAddress,
+      abi: worldCallAbi,
+      functionName: "call",
+      args: encodeSystemCall({
+        systemId: program,
+        abi: appAbi,
+        functionName: "appConfigURI",
+        args: [entity ?? zeroHash],
+      }),
+    });
+  } catch (error: any) {
+    if (error?.name === "ContractFunctionRevertedError") {
+      return undefined;
+    }
+    throw error;
+  }
   if (url !== "") {
     return url;
   }
