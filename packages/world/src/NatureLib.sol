@@ -149,8 +149,12 @@ library NatureLib {
     ObjectAmount memory seedDrop = selectObjectByWeight(grassOptions, weights, randomSeed);
 
     if (seedDrop.objectTypeId != ObjectTypes.Null) {
+      result = new ObjectAmount[](2);
+      result[0] = ObjectAmount(ObjectTypes.FescueGrass, 1);
+      result[1] = seedDrop;
+    } else {
       result = new ObjectAmount[](1);
-      result[0] = seedDrop;
+      result[0] = ObjectAmount(ObjectTypes.FescueGrass, 1);
     }
 
     return result;
@@ -174,8 +178,12 @@ library NatureLib {
     ObjectAmount memory saplingDrop = selectObjectByWeight(saplingOptions, weights, randomSeed);
 
     if (saplingDrop.objectTypeId != ObjectTypes.Null) {
+      result = new ObjectAmount[](2);
+      result[0] = ObjectAmount(objectType, 1);
+      result[1] = saplingDrop;
+    } else {
       result = new ObjectAmount[](1);
-      result[0] = saplingDrop;
+      result[0] = ObjectAmount(objectType, 1);
     }
 
     return result;
