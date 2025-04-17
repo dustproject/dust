@@ -73,7 +73,10 @@ contract BuildSystem is System {
     return base;
   }
 
-  function jumpBuildWithDirection(EntityId caller, uint16 slot, Direction direction, bytes calldata extraData) public {
+  function jumpBuildWithDirection(EntityId caller, uint16 slot, Direction direction, bytes calldata extraData)
+    public
+    returns (EntityId)
+  {
     caller.activate();
 
     ObjectTypeId buildObjectType = InventorySlot._getObjectType(caller, slot);
@@ -87,11 +90,11 @@ contract BuildSystem is System {
 
     notify(caller, MoveNotification({ moveCoords: moveCoords }));
 
-    buildWithDirection(caller, coord, slot, direction, extraData);
+    return buildWithDirection(caller, coord, slot, direction, extraData);
   }
 
-  function jumpBuild(EntityId caller, uint16 slot, bytes calldata extraData) public {
-    jumpBuildWithDirection(caller, slot, Direction.PositiveZ, extraData);
+  function jumpBuild(EntityId caller, uint16 slot, bytes calldata extraData) public returns (EntityId) {
+    return jumpBuildWithDirection(caller, slot, Direction.PositiveZ, extraData);
   }
 }
 
