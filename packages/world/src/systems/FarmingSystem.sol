@@ -17,7 +17,7 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { TILL_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectTypeId } from "../ObjectTypeId.sol";
-import { ObjectTypeLib, TreeData } from "../ObjectTypeLib.sol";
+import { ObjectTypeLib } from "../ObjectTypeLib.sol";
 import { ObjectTypes } from "../ObjectTypes.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
 

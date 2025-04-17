@@ -22,17 +22,6 @@ struct ObjectAmount {
   uint16 amount;
 }
 
-struct TreeData {
-  ObjectTypeId logType;
-  ObjectTypeId leafType;
-  uint32 trunkHeight;
-  uint32 canopyStart;
-  uint32 canopyEnd;
-  uint32 canopyWidth;
-  uint32 stretchFactor;
-  int32 centerOffset;
-}
-
 library ObjectTypeLib {
   function unwrap(ObjectTypeId self) internal pure returns (uint16) {
     return ObjectTypeId.unwrap(self);
@@ -208,99 +197,6 @@ library ObjectTypeLib {
     }
 
     revert("Invalid crop seed type");
-  }
-
-  function getTreeData(ObjectTypeId saplingType) internal pure returns (TreeData memory) {
-    if (saplingType == ObjectTypes.OakSapling) {
-      return TreeData({
-        logType: ObjectTypes.OakLog,
-        leafType: ObjectTypes.OakLeaf,
-        trunkHeight: 5,
-        canopyStart: 3,
-        canopyEnd: 7,
-        canopyWidth: 2,
-        stretchFactor: 2,
-        centerOffset: -2
-      });
-    } else if (saplingType == ObjectTypes.SpruceSapling) {
-      return TreeData({
-        logType: ObjectTypes.SpruceLog,
-        leafType: ObjectTypes.SpruceLeaf,
-        trunkHeight: 7,
-        canopyStart: 2,
-        canopyEnd: 10,
-        canopyWidth: 2,
-        stretchFactor: 3,
-        centerOffset: -5
-      });
-    } else if (saplingType == ObjectTypes.MangroveSapling) {
-      return TreeData({
-        logType: ObjectTypes.MangroveLog,
-        leafType: ObjectTypes.MangroveLeaf,
-        trunkHeight: 7,
-        canopyStart: 2,
-        canopyEnd: 10,
-        canopyWidth: 2,
-        stretchFactor: 3,
-        centerOffset: -5
-      });
-    } else if (saplingType == ObjectTypes.SakuraSapling) {
-      return TreeData({
-        logType: ObjectTypes.SakuraLog,
-        leafType: ObjectTypes.SakuraLeaf,
-        trunkHeight: 7,
-        canopyStart: 2,
-        canopyEnd: 10,
-        canopyWidth: 2,
-        stretchFactor: 3,
-        centerOffset: -5
-      });
-    } else if (saplingType == ObjectTypes.DarkOakSapling) {
-      return TreeData({
-        logType: ObjectTypes.DarkOakLog,
-        leafType: ObjectTypes.DarkOakLeaf,
-        trunkHeight: 7,
-        canopyStart: 2,
-        canopyEnd: 10,
-        canopyWidth: 2,
-        stretchFactor: 3,
-        centerOffset: -5
-      });
-    } else if (saplingType == ObjectTypes.BirchSapling) {
-      return TreeData({
-        logType: ObjectTypes.BirchLog,
-        leafType: ObjectTypes.BirchLeaf,
-        trunkHeight: 7,
-        canopyStart: 2,
-        canopyEnd: 10,
-        canopyWidth: 2,
-        stretchFactor: 3,
-        centerOffset: -5
-      });
-    } else if (saplingType == ObjectTypes.AcaciaSapling) {
-      return TreeData({
-        logType: ObjectTypes.AcaciaLog,
-        leafType: ObjectTypes.AcaciaLeaf,
-        trunkHeight: 7,
-        canopyStart: 2,
-        canopyEnd: 10,
-        canopyWidth: 2,
-        stretchFactor: 3,
-        centerOffset: -5
-      });
-    } else if (saplingType == ObjectTypes.JungleSapling) {
-      return TreeData({
-        logType: ObjectTypes.JungleLog,
-        leafType: ObjectTypes.JungleLeaf,
-        trunkHeight: 7,
-        canopyStart: 2,
-        canopyEnd: 10,
-        canopyWidth: 2,
-        stretchFactor: 3,
-        centerOffset: -5
-      });
-    }
-    revert("Invalid tree sapling type");
   }
 
   function timeToGrow(ObjectTypeId objectTypeId) internal pure returns (uint128) {

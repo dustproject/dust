@@ -22,8 +22,9 @@ import { EntityId } from "../EntityId.sol";
 
 import { NatureLib } from "../NatureLib.sol";
 import { ObjectTypeId } from "../ObjectTypeId.sol";
-import { ObjectTypeLib, TreeData } from "../ObjectTypeLib.sol";
+import { ObjectTypeLib } from "../ObjectTypeLib.sol";
 import { ObjectTypes } from "../ObjectTypes.sol";
+import { TreeData, TreeLib } from "../TreeLib.sol";
 
 import { Vec3, vec3 } from "../Vec3.sol";
 
@@ -105,21 +106,101 @@ contract NatureSystem is System {
 
       ObjectType._set(seed, objectType.getCrop());
     } else if (objectType.isSapling()) {
-      TreeData memory treeData = objectType.getTreeData();
-
       // Grow the tree (replace the seed with the trunk and add blocks)
-      (uint32 trunkHeight, uint32 leaves) = NatureLib.growTree(seed, coord, treeData);
+      TreeData memory treeData = TreeLib.getTreeData(objectType);
 
-      // Seed energy is the sum of the energy of all the blocks of the tree
+      (uint32 trunkHeight, uint32 leaves) = _growTree(seed, coord, treeData, objectType);
+
       uint128 seedEnergy = ObjectTypeMetadata._getEnergy(objectType);
-
       uint128 trunkEnergy = trunkHeight * ObjectTypeMetadata._getEnergy(treeData.logType);
       uint128 leafEnergy = leaves * ObjectTypeMetadata._getEnergy(treeData.leafType);
 
       uint128 energyToReturn = seedEnergy - trunkEnergy - leafEnergy;
+
       if (energyToReturn > 0) {
         addEnergyToLocalPool(coord, energyToReturn);
       }
     }
+  }
+
+  function _growTree(EntityId seed, Vec3 baseCoord, TreeData memory treeData, ObjectTypeId saplingType)
+    private
+    returns (uint32, uint32)
+  {
+    uint32 trunkHeight = _growTreeTrunk(seed, baseCoord, treeData);
+
+    if (trunkHeight <= 2) {
+      // Very small tree, no leaves
+      return (trunkHeight, 0);
+    }
+
+    // Adjust if the tree is blocked
+    if (trunkHeight < treeData.trunkHeight) {
+      trunkHeight = trunkHeight + 1; // Still allow one layer above the trunk
+    }
+
+    (Vec3[] memory fixedLeaves, Vec3[] memory randomLeaves) = TreeLib.getLeafCoords(saplingType);
+
+    // Initial seed for randomness
+    uint256 rand = uint256(keccak256(abi.encodePacked(block.timestamp, baseCoord)));
+
+    uint32 leafCount;
+    ObjectTypeId leafType = treeData.leafType;
+
+    for (uint256 i = 0; i < fixedLeaves.length; ++i) {
+      Vec3 rel = fixedLeaves[i];
+      if (rel.y() > int32(trunkHeight)) {
+        break;
+      }
+
+      if (_tryCreateLeaf(leafType, baseCoord + rel)) {
+        ++leafCount;
+      }
+    }
+
+    for (uint256 j = 0; j < randomLeaves.length; ++j) {
+      Vec3 rel = randomLeaves[j];
+      if (rel.y() > int32(trunkHeight)) {
+        break;
+      }
+
+      rand = uint256(keccak256(abi.encodePacked(rand, j))); // evolve RNG
+
+      if (rand % 100 < 40) continue; // 40 % trimmed
+
+      if (_tryCreateLeaf(leafType, baseCoord + rel)) {
+        ++leafCount;
+      }
+    }
+
+    return (trunkHeight, leafCount);
+  }
+
+  function _tryCreateLeaf(ObjectTypeId leafType, Vec3 coord) private returns (bool) {
+    (EntityId leaf, ObjectTypeId existing) = getOrCreateEntityAt(coord);
+    if (existing != ObjectTypes.Air) {
+      return false;
+    }
+
+    ObjectType._set(leaf, leafType);
+    return true;
+  }
+
+  function _growTreeTrunk(EntityId seed, Vec3 baseCoord, TreeData memory treeData) private returns (uint32) {
+    // Replace the seed with the trunk
+    ObjectType._set(seed, treeData.logType);
+
+    // Create the trunk up to available space
+    for (uint32 i = 1; i < treeData.trunkHeight; i++) {
+      Vec3 trunkCoord = baseCoord + vec3(0, int32(i), 0);
+      (EntityId trunk, ObjectTypeId objectTypeId) = getOrCreateEntityAt(trunkCoord);
+      if (objectTypeId != ObjectTypes.Air) {
+        return i;
+      }
+
+      ObjectType._set(trunk, treeData.logType);
+    }
+
+    return treeData.trunkHeight;
   }
 }

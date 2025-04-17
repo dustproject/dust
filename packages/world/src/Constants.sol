@@ -43,14 +43,14 @@ uint256 constant MAX_WHEAT_SEED = 444_971;
 uint256 constant MAX_MELON_SEED = 9_122;
 uint256 constant MAX_PUMPKIN_SEED = 1_717;
 
-uint256 constant MAX_OAK_SEED = 39321;
-uint256 constant MAX_BIRCH_SEED = 27267;
-uint256 constant MAX_JUNGLE_SEED = 25265;
-uint256 constant MAX_SAKURA_SEED = 2983;
-uint256 constant MAX_ACACIA_SEED = 20701;
-uint256 constant MAX_SPRUCE_SEED = 16156;
-uint256 constant MAX_DARK_OAK_SEED = 11322;
-uint256 constant MAX_MANGROVE_SEED = 19017;
+uint256 constant MAX_OAK_SEED = 44_745;
+uint256 constant MAX_BIRCH_SEED = 35_656;
+uint256 constant MAX_JUNGLE_SEED = 27_671;
+uint256 constant MAX_SAKURA_SEED = 3_437;
+uint256 constant MAX_ACACIA_SEED = 20_701;
+uint256 constant MAX_SPRUCE_SEED = 19_594;
+uint256 constant MAX_DARK_OAK_SEED = 13_732;
+uint256 constant MAX_MANGROVE_SEED = 21_610;
 
 uint256 constant MAX_COAL = 13_116_437;
 uint256 constant MAX_COPPER = 7_661_934;
