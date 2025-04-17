@@ -28,6 +28,8 @@ export async function getProgramAppConfigUrl({
   });
 
   try {
+    // We are calling the program system directly here, as programs are required to be private
+    // systems so that their hook functions can only be called by the world
     url = await readContract(client, {
       address: system,
       abi: appAbi,
@@ -35,7 +37,7 @@ export async function getProgramAppConfigUrl({
       args: [entity ?? zeroHash],
     });
   } catch (error: any) {
-    if (error?.name === "ContractFunctionRevertedError") {
+    if (error?.name === "ContractFunctionExecutionError") {
       return undefined;
     }
     throw error;
