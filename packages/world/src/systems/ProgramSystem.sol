@@ -49,7 +49,8 @@ contract ProgramSystem is System {
 
     require(!target.getProgram().exists(), "Existing program must be detached");
 
-    (, bool publicAccess) = Systems._get(program.toResourceId());
+    (address programAddress, bool publicAccess) = Systems._get(program.toResourceId());
+    require(programAddress != address(0), "Program does not exist");
     require(!publicAccess, "Program system must be private");
 
     (EntityId validator, ProgramId validatorProgram) = _getValidatorProgram(validatorCoord);

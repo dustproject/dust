@@ -4,6 +4,9 @@ export default defineWorld({
   deploy: {
     upgradeableWorldImplementation: true,
   },
+  codegen: {
+    generateSystemLibraries: true,
+  },
   enums: {
     Action: [
       "None",
