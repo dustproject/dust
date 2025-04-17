@@ -11,22 +11,22 @@ import { ChunkCommitment } from "./utils/Vec3Storage.sol";
 
 import {
   CHUNK_COMMIT_EXPIRY_BLOCKS,
-  MAX_ACACIA_SEED,
-  MAX_BIRCH_SEED,
+  MAX_ACACIA_SAPLING,
+  MAX_BIRCH_SAPLING,
   MAX_COAL,
   MAX_COPPER,
-  MAX_DARK_OAK_SEED,
+  MAX_DARK_OAK_SAPLING,
   MAX_DIAMOND,
   MAX_GOLD,
   MAX_IRON,
-  MAX_JUNGLE_SEED,
-  MAX_MANGROVE_SEED,
+  MAX_JUNGLE_SAPLING,
+  MAX_MANGROVE_SAPLING,
   MAX_MELON_SEED,
   MAX_NEPTUNIUM,
-  MAX_OAK_SEED,
+  MAX_OAK_SAPLING,
   MAX_PUMPKIN_SEED,
-  MAX_SAKURA_SEED,
-  MAX_SPRUCE_SEED,
+  MAX_SAKURA_SAPLING,
+  MAX_SPRUCE_SAPLING,
   MAX_WHEAT_SEED
 } from "./Constants.sol";
 
@@ -60,14 +60,14 @@ library NatureLib {
     if (objectTypeId == ObjectTypes.WheatSeed) return MAX_WHEAT_SEED;
     if (objectTypeId == ObjectTypes.MelonSeed) return MAX_MELON_SEED;
     if (objectTypeId == ObjectTypes.PumpkinSeed) return MAX_PUMPKIN_SEED;
-    if (objectTypeId == ObjectTypes.OakSapling) return MAX_OAK_SEED;
-    if (objectTypeId == ObjectTypes.SpruceSapling) return MAX_SPRUCE_SEED;
-    if (objectTypeId == ObjectTypes.MangroveSapling) return MAX_MANGROVE_SEED;
-    if (objectTypeId == ObjectTypes.SakuraSapling) return MAX_SAKURA_SEED;
-    if (objectTypeId == ObjectTypes.DarkOakSapling) return MAX_DARK_OAK_SEED;
-    if (objectTypeId == ObjectTypes.BirchSapling) return MAX_BIRCH_SEED;
-    if (objectTypeId == ObjectTypes.AcaciaSapling) return MAX_ACACIA_SEED;
-    if (objectTypeId == ObjectTypes.JungleSapling) return MAX_JUNGLE_SEED;
+    if (objectTypeId == ObjectTypes.OakSapling) return MAX_OAK_SAPLING;
+    if (objectTypeId == ObjectTypes.SpruceSapling) return MAX_SPRUCE_SAPLING;
+    if (objectTypeId == ObjectTypes.MangroveSapling) return MAX_MANGROVE_SAPLING;
+    if (objectTypeId == ObjectTypes.SakuraSapling) return MAX_SAKURA_SAPLING;
+    if (objectTypeId == ObjectTypes.DarkOakSapling) return MAX_DARK_OAK_SAPLING;
+    if (objectTypeId == ObjectTypes.BirchSapling) return MAX_BIRCH_SAPLING;
+    if (objectTypeId == ObjectTypes.AcaciaSapling) return MAX_ACACIA_SAPLING;
+    if (objectTypeId == ObjectTypes.JungleSapling) return MAX_JUNGLE_SAPLING;
 
     // If no specific cap, use a high value
     return type(uint256).max;

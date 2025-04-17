@@ -125,7 +125,7 @@ contract MineSystem is System {
       if (!above.exists()) {
         above = createEntityAt(aboveCoord, aboveTypeId);
       }
-      _removeSeed(above, aboveTypeId, aboveCoord);
+      _removeGrowable(above, aboveTypeId, aboveCoord);
       _handleDrop(caller, aboveTypeId, aboveCoord);
     }
 
@@ -142,7 +142,7 @@ contract MineSystem is System {
     return mined;
   }
 
-  function _removeSeed(EntityId entityId, ObjectTypeId objectType, Vec3 coord) internal {
+  function _removeGrowable(EntityId entityId, ObjectTypeId objectType, Vec3 coord) internal {
     ObjectType._set(entityId, ObjectTypes.Air);
     require(SeedGrowth._getFullyGrownAt(entityId) > block.timestamp, "Cannot mine fully grown seed");
     addEnergyToLocalPool(coord, ObjectTypeMetadata._getEnergy(objectType));
@@ -151,7 +151,7 @@ contract MineSystem is System {
   function _removeBlock(EntityId entityId, ObjectTypeId objectType, Vec3 coord) internal {
     // If object being mined is seed, no need to check above entities
     if (objectType.isGrowable()) {
-      _removeSeed(entityId, objectType, coord);
+      _removeGrowable(entityId, objectType, coord);
       return;
     }
 

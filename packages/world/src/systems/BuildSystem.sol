@@ -56,7 +56,7 @@ contract BuildSystem is System {
     (EntityId base, Vec3[] memory coords) = BuildLib._addBlocks(coord, buildObjectType, direction);
 
     if (buildObjectType.isGrowable()) {
-      BuildLib._handleSeed(base, buildObjectType, coord);
+      BuildLib._handleGrowable(base, buildObjectType, coord);
     }
 
     InventoryUtils.removeObjectFromSlot(caller, slot, 1);
@@ -127,7 +127,7 @@ library BuildLib {
     return (base, coords);
   }
 
-  function _handleSeed(EntityId base, ObjectTypeId buildObjectTypeId, Vec3 baseCoord) public {
+  function _handleGrowable(EntityId base, ObjectTypeId buildObjectTypeId, Vec3 baseCoord) public {
     ObjectTypeId belowTypeId = getObjectTypeIdAt(baseCoord - vec3(0, 1, 0));
     if (buildObjectTypeId.isSeed()) {
       require(belowTypeId == ObjectTypes.WetFarmland, "Seeds need wet farmland");
