@@ -3,8 +3,8 @@ pragma solidity >=0.8.24;
 
 import { EntityId } from "../EntityId.sol";
 
-import { IBuildSystem } from "../codegen/world/IBuildSystem.sol";
-import { IProgramSystem } from "../codegen/world/IProgramSystem.sol";
+import { buildSystem } from "../codegen/systems/BuildSystemLib.sol";
+import { programSystem } from "../codegen/systems/ProgramSystemLib.sol";
 
 import { ProgramId } from "../ProgramId.sol";
 import { Vec3 } from "../Vec3.sol";
@@ -21,8 +21,8 @@ contract BatchSystem is System {
     bytes calldata buildExtraData,
     bytes calldata attachExtraData
   ) public returns (EntityId) {
-    EntityId buildEntity = IBuildSystem(_world()).build(caller, coord, slot, buildExtraData);
-    IProgramSystem(_world()).attachProgram(caller, buildEntity, program, attachExtraData);
+    EntityId buildEntity = buildSystem.callAsRoot().build(caller, coord, slot, buildExtraData);
+    programSystem.callAsRoot().attachProgram(caller, buildEntity, program, attachExtraData);
     return buildEntity;
   }
 
@@ -35,8 +35,8 @@ contract BatchSystem is System {
     bytes calldata buildExtraData,
     bytes calldata attachExtraData
   ) public returns (EntityId) {
-    EntityId buildEntity = IBuildSystem(_world()).buildWithDirection(caller, coord, slot, direction, buildExtraData);
-    IProgramSystem(_world()).attachProgram(caller, buildEntity, program, attachExtraData);
+    EntityId buildEntity = buildSystem.callAsRoot().buildWithDirection(caller, coord, slot, direction, buildExtraData);
+    programSystem.callAsRoot().attachProgram(caller, buildEntity, program, attachExtraData);
     return buildEntity;
   }
 
@@ -47,8 +47,8 @@ contract BatchSystem is System {
     bytes calldata buildExtraData,
     bytes calldata attachExtraData
   ) public returns (EntityId) {
-    EntityId buildEntity = IBuildSystem(_world()).jumpBuild(caller, slot, buildExtraData);
-    IProgramSystem(_world()).attachProgram(caller, buildEntity, program, attachExtraData);
+    EntityId buildEntity = buildSystem.callAsRoot().jumpBuild(caller, slot, buildExtraData);
+    programSystem.callAsRoot().attachProgram(caller, buildEntity, program, attachExtraData);
     return buildEntity;
   }
 
@@ -60,8 +60,8 @@ contract BatchSystem is System {
     bytes calldata buildExtraData,
     bytes calldata attachExtraData
   ) public returns (EntityId) {
-    EntityId buildEntity = IBuildSystem(_world()).jumpBuildWithDirection(caller, slot, direction, buildExtraData);
-    IProgramSystem(_world()).attachProgram(caller, buildEntity, program, attachExtraData);
+    EntityId buildEntity = buildSystem.callAsRoot().jumpBuildWithDirection(caller, slot, direction, buildExtraData);
+    programSystem.callAsRoot().attachProgram(caller, buildEntity, program, attachExtraData);
     return buildEntity;
   }
 }
