@@ -4,7 +4,8 @@
   "exports": {
     "./mud.config": "./dist/mud.config.js",
     "./worlds.json": "./worlds.json",
-    "./out/*": "./out/*"
+    "./out/*": "./out/*",
+    "./gen-tree-lib": "./gen-tree-lib.ts"
   },
   "typesVersions": {
     "*": {

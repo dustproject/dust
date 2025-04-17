@@ -17,7 +17,7 @@ interface TreeDef {
   centerOffset: number;
 }
 
-const TREES: TreeDef[] = [
+export const TREES: TreeDef[] = [
   {
     name: "Oak",
     objectTypeId: "ObjectTypes.OakSapling",
@@ -138,7 +138,10 @@ const blobHex = (vs: Vec3[]) =>
 /* convert "Dark Oak" -> "DARK_OAK" */
 const constName = (label: string) => label.replace(/\s+/g, "_").toUpperCase();
 
-function classifyLeaves(tree: TreeDef): { fixed: Vec3[]; random: Vec3[] } {
+export function classifyLeaves(tree: TreeDef): {
+  fixed: Vec3[];
+  random: Vec3[];
+} {
   const fixed: Vec3[] = [];
   const random: Vec3[] = [];
 
@@ -172,29 +175,30 @@ function classifyLeaves(tree: TreeDef): { fixed: Vec3[]; random: Vec3[] } {
   return { fixed, random };
 }
 
-const blobs: string[] = [];
-const treePieces: string[] = [];
-const dataPieces: string[] = [];
-const chancePieces: string[] = [];
+export function genTreeLib() {
+  const blobs: string[] = [];
+  const treePieces: string[] = [];
+  const dataPieces: string[] = [];
+  const chancePieces: string[] = [];
 
-for (const t of TREES) {
-  const { fixed, random } = classifyLeaves(t);
-  const FIX = blobHex(fixed);
-  const RND = blobHex(random);
-  const N = constName(t.name);
+  for (const t of TREES) {
+    const { fixed, random } = classifyLeaves(t);
+    const FIX = blobHex(fixed);
+    const RND = blobHex(random);
+    const N = constName(t.name);
 
-  blobs.push(`
+    blobs.push(`
   /* ${t.name} – ${fixed.length} fixed, ${random.length} random */
   bytes constant ${N}_FIXED  = hex"${FIX}";
   bytes constant ${N}_RANDOM = hex"${RND}";`);
 
-  treePieces.push(`
+    treePieces.push(`
     if (objectType == ${t.objectTypeId}) {
       fixedLeaves  = _loadLeaves(TreeBlobs.${N}_FIXED );
       randomLeaves = _loadLeaves(TreeBlobs.${N}_RANDOM);
     }`);
 
-  dataPieces.push(`
+    dataPieces.push(`
     if (objectType == ${t.objectTypeId}) {
       return TreeData({
         logType:  ${t.logType},
@@ -203,13 +207,13 @@ for (const t of TREES) {
       });
     }`);
 
-  chancePieces.push(`
+    chancePieces.push(`
     if (objectType == ${t.leafType}) {
       return uint256(3) * 100 / ${fixed.length + random.length};
     }`);
-}
+  }
 
-console.info(`// SPDX-License-Identifier: MIT
+  console.info(`// SPDX-License-Identifier: MIT
 /* Auto‑generated. DO NOT EDIT. */
 pragma solidity >=0.8.24;
 
@@ -277,3 +281,4 @@ library TreeLib {
 
 }
 `);
+}
