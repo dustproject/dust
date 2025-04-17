@@ -7,6 +7,7 @@ interface Vec3 {
 interface TreeDef {
   name: string;
   objectTypeId: string;
+  logType: string;
   leafType: string;
   trunkHeight: number;
   canopyStart: number;
@@ -20,6 +21,7 @@ const TREES: TreeDef[] = [
   {
     name: "Oak",
     objectTypeId: "ObjectTypes.OakSapling",
+    logType: "ObjectTypes.OakLog",
     leafType: "ObjectTypes.OakLeaf",
     trunkHeight: 5,
     canopyStart: 3,
@@ -31,6 +33,7 @@ const TREES: TreeDef[] = [
   {
     name: "Birch",
     objectTypeId: "ObjectTypes.BirchSapling",
+    logType: "ObjectTypes.BirchLog",
     leafType: "ObjectTypes.BirchLeaf",
     trunkHeight: 7,
     canopyStart: 6,
@@ -42,6 +45,7 @@ const TREES: TreeDef[] = [
   {
     name: "Jungle",
     objectTypeId: "ObjectTypes.JungleSapling",
+    logType: "ObjectTypes.JungleLog",
     leafType: "ObjectTypes.JungleLeaf",
     trunkHeight: 12,
     canopyStart: 11,
@@ -53,6 +57,7 @@ const TREES: TreeDef[] = [
   {
     name: "Sakura",
     objectTypeId: "ObjectTypes.SakuraSapling",
+    logType: "ObjectTypes.SakuraLog",
     leafType: "ObjectTypes.SakuraLeaf",
     trunkHeight: 6,
     canopyStart: 4,
@@ -64,6 +69,7 @@ const TREES: TreeDef[] = [
   {
     name: "Acacia",
     objectTypeId: "ObjectTypes.AcaciaSapling",
+    logType: "ObjectTypes.AcaciaLog",
     leafType: "ObjectTypes.AcaciaLeaf",
     trunkHeight: 6,
     canopyStart: 6,
@@ -75,6 +81,7 @@ const TREES: TreeDef[] = [
   {
     name: "Spruce",
     objectTypeId: "ObjectTypes.SpruceSapling",
+    logType: "ObjectTypes.SpruceLog",
     leafType: "ObjectTypes.SpruceLeaf",
     trunkHeight: 9,
     canopyStart: 3,
@@ -86,6 +93,7 @@ const TREES: TreeDef[] = [
   {
     name: "DarkOak",
     objectTypeId: "ObjectTypes.DarkOakSapling",
+    logType: "ObjectTypes.DarkOakLog",
     leafType: "ObjectTypes.DarkOakLeaf",
     trunkHeight: 6,
     canopyStart: 2,
@@ -97,6 +105,7 @@ const TREES: TreeDef[] = [
   {
     name: "Mangrove",
     objectTypeId: "ObjectTypes.MangroveSapling",
+    logType: "ObjectTypes.MangroveLog",
     leafType: "ObjectTypes.MangroveLeaf",
     trunkHeight: 8,
     canopyStart: 6,
@@ -166,6 +175,7 @@ function classifyLeaves(tree: TreeDef): { fixed: Vec3[]; random: Vec3[] } {
 const blobs: string[] = [];
 const treePieces: string[] = [];
 const dataPieces: string[] = [];
+const chancePieces: string[] = [];
 
 for (const t of TREES) {
   const { fixed, random } = classifyLeaves(t);
@@ -187,10 +197,15 @@ for (const t of TREES) {
   dataPieces.push(`
     if (objectType == ${t.objectTypeId}) {
       return TreeData({
-        logType:  ${t.objectTypeId},
+        logType:  ${t.logType},
         leafType: ${t.leafType},
         trunkHeight: ${t.trunkHeight}
       });
+    }`);
+
+  chancePieces.push(`
+    if (objectType == ${t.leafType}) {
+      return uint256(3) * 100 / ${fixed.length + random.length};
     }`);
 }
 
@@ -212,6 +227,32 @@ struct TreeData {
 }
 
 library TreeLib {
+  function getTreeData(ObjectTypeId objectType)
+    internal
+    pure
+    returns (TreeData memory)
+  {${dataPieces.join("")}
+    revert("Tree type not supported");
+  }
+
+  function getLeafCoords(ObjectTypeId objectType)
+    internal
+    pure
+    returns (Vec3[] memory fixedLeaves, Vec3[] memory randomLeaves)
+  {${treePieces.join(" else ")}
+    else {
+      revert("Tree type not supported");
+    }
+  }
+
+  function getLeafDropChance(ObjectTypeId objectType)
+    internal
+    pure
+    returns (uint256)
+  {${chancePieces.join("")}
+    revert("Leaf type not supported");
+  }
+
   /* decode blob → Vec3[] */
   function _loadLeaves(bytes memory blob)
     private
@@ -234,22 +275,5 @@ library TreeLib {
     }
   }
 
-  function getTreeData(ObjectTypeId objectType)
-    internal
-    pure
-    returns (TreeData memory)
-  {${dataPieces.join("")}
-    revert("Tree type not supported");
-  }
-
-  function getLeafCoords(ObjectTypeId objectType)
-    internal
-    pure
-    returns (Vec3[] memory fixedLeaves, Vec3[] memory randomLeaves)
-  {${treePieces.join(" else ")}
-    else {
-      revert("Tree type not supported");
-    }
-  }
 }
 `);

@@ -54,24 +54,6 @@ struct TreeData {
 }
 
 library TreeLib {
-  /* decode blob → Vec3[] */
-  function _loadLeaves(bytes memory blob) private pure returns (Vec3[] memory out) {
-    uint256 words = blob.length / 12;
-    out = new Vec3[](words);
-
-    assembly {
-      let src := add(blob, 32) // skip length
-      let dst := add(out, 32)
-
-      for { let i := 0 } lt(i, words) { i := add(i, 1) } {
-        let w := mload(add(src, mul(i, 12))) // 12‑byte chunk in low bytes
-        w := shr(160, w) // shift to low 96 bits
-        mstore(dst, w) // Vec3.wrap(uint96)
-        dst := add(dst, 32)
-      }
-    }
-  }
-
   function getTreeData(ObjectTypeId objectType) internal pure returns (TreeData memory) {
     if (objectType == ObjectTypes.OakSapling) {
       return TreeData({ logType: ObjectTypes.OakLog, leafType: ObjectTypes.OakLeaf, trunkHeight: 5 });
@@ -131,6 +113,52 @@ library TreeLib {
       randomLeaves = _loadLeaves(TreeBlobs.MANGROVE_RANDOM);
     } else {
       revert("Tree type not supported");
+    }
+  }
+
+  function getLeafDropChance(ObjectTypeId objectType) internal pure returns (uint256) {
+    if (objectType == ObjectTypes.OakLeaf) {
+      return uint256(3) * 100 / 58;
+    }
+    if (objectType == ObjectTypes.BirchLeaf) {
+      return uint256(3) * 100 / 13;
+    }
+    if (objectType == ObjectTypes.JungleLeaf) {
+      return uint256(3) * 100 / 84;
+    }
+    if (objectType == ObjectTypes.SakuraLeaf) {
+      return uint256(3) * 100 / 79;
+    }
+    if (objectType == ObjectTypes.AcaciaLeaf) {
+      return uint256(3) * 100 / 50;
+    }
+    if (objectType == ObjectTypes.SpruceLeaf) {
+      return uint256(3) * 100 / 94;
+    }
+    if (objectType == ObjectTypes.DarkOakLeaf) {
+      return uint256(3) * 100 / 94;
+    }
+    if (objectType == ObjectTypes.MangroveLeaf) {
+      return uint256(3) * 100 / 88;
+    }
+    revert("Leaf type not supported");
+  }
+
+  /* decode blob → Vec3[] */
+  function _loadLeaves(bytes memory blob) private pure returns (Vec3[] memory out) {
+    uint256 words = blob.length / 12;
+    out = new Vec3[](words);
+
+    assembly {
+      let src := add(blob, 32) // skip length
+      let dst := add(out, 32)
+
+      for { let i := 0 } lt(i, words) { i := add(i, 1) } {
+        let w := mload(add(src, mul(i, 12))) // 12‑byte chunk in low bytes
+        w := shr(160, w) // shift to low 96 bits
+        mstore(dst, w) // Vec3.wrap(uint96)
+        dst := add(dst, 32)
+      }
     }
   }
 }

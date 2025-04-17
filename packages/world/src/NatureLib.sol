@@ -34,6 +34,7 @@ import { EntityId } from "./EntityId.sol";
 import { ObjectTypeId } from "./ObjectTypeId.sol";
 import { ObjectAmount, ObjectTypeLib, getOreObjectTypes } from "./ObjectTypeLib.sol";
 import { ObjectTypes } from "./ObjectTypes.sol";
+import { TreeLib } from "./TreeLib.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
 
 library NatureLib {
@@ -160,9 +161,10 @@ library NatureLib {
     view
     returns (ObjectAmount[] memory result)
   {
+    uint256 chance = TreeLib.getLeafDropChance(objectType);
     uint256[] memory distribution = new uint256[](2);
-    distribution[0] = 43; // No sapling: 43%
-    distribution[1] = 57; // 1 sapling: 57%
+    distribution[0] = 100 - chance; // No sapling
+    distribution[1] = chance; // 1 sapling
 
     // Get sapling options and their weights using distribution
     (ObjectAmount[] memory saplingOptions, uint256[] memory weights) =

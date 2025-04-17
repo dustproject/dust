@@ -345,7 +345,7 @@ contract TreeTest is DustTest {
     assertTrue(leafEntityId.exists(), "Leaf entity doesn't exist");
 
     // Set up chunk commitment for randomness when mining
-    newCommit(alice, aliceEntityId, leafCoord, bytes32(uint256(1)));
+    newCommit(alice, aliceEntityId, leafCoord, bytes32(uint256(19)));
 
     // Harvest the leaf
     vm.prank(alice);
