@@ -32,10 +32,16 @@ contract FarmingSystem is System {
 
     (EntityId farmland, ObjectTypeId objectTypeId) = getOrCreateEntityAt(coord);
     require(objectTypeId == ObjectTypes.Dirt || objectTypeId == ObjectTypes.Grass, "Not dirt or grass");
+
+    // If player died, return early
+    uint128 callerEnergy = FarmingLib._processEnergyReduction(caller);
+    if (callerEnergy == 0) {
+      // TODO: review this
+      return;
+    }
+
     (, ObjectTypeId toolType) = InventoryUtils.useTool(caller, callerCoord, toolSlot, type(uint128).max);
     require(toolType.isHoe(), "Must equip a hoe");
-
-    FarmingLib._processEnergyReduction(caller);
 
     ObjectType._set(farmland, ObjectTypes.Farmland);
   }
@@ -86,8 +92,9 @@ contract FarmingSystem is System {
 }
 
 library FarmingLib {
-  function _processEnergyReduction(EntityId caller) public {
-    transferEnergyToPool(caller, TILL_ENERGY_COST);
+  function _processEnergyReduction(EntityId caller) public returns (uint128) {
+    (uint128 callerEnergy,) = transferEnergyToPool(caller, TILL_ENERGY_COST);
+    return callerEnergy;
   }
 
   function _growTree(EntityId seed, Vec3 baseCoord, TreeData memory treeData) public returns (uint32, uint32) {
