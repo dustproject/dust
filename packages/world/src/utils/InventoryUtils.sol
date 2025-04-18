@@ -81,6 +81,10 @@ library InventoryUtils {
   }
 
   function applyUsage(ToolData memory toolData, Vec3 ownerCoord, uint128 massToUse) public returns (uint128) {
+    if (!toolData.tool.exists()) {
+      return 0;
+    }
+
     require(toolData.massLeft > 0, "Tool is broken");
 
     if (toolData.massLeft <= massToUse) {

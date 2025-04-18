@@ -109,19 +109,10 @@ contract MineSystem is System {
       minedType = RandomResourceLib._collapseRandomOre(mined, coord);
     }
 
-    ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
-    (uint128 finalMass, uint128 toolMassReduction, uint128 energyReduction) = _getMassReduction(toolData, mined);
-
-    if (energyReduction > 0) {
-      // If player died, return early
-      (uint128 callerEnergy,) = transferEnergyToPool(caller, energyReduction);
-      if (callerEnergy == 0) {
-        return mined;
-      }
+    (uint128 finalMass, bool canMine) = _processMassReduction(caller, callerCoord, toolSlot, mined);
+    if (!canMine) {
+      return mined;
     }
-
-    // Apply tool usage after decreasing player energy so we make sure the player is alive
-    toolData.applyUsage(callerCoord, toolMassReduction);
 
     if (finalMass != 0) {
       Mass._setMass(mined, finalMass);
@@ -229,6 +220,27 @@ contract MineSystem is System {
         ResourceCount._set(dropType, ResourceCount._get(dropType) + amount);
       }
     }
+  }
+
+  // TODO: this is ugly, but doing this to avoid stack too deep errors. We should refactor later.
+  function _processMassReduction(EntityId caller, Vec3 callerCoord, uint16 toolSlot, EntityId mined)
+    internal
+    returns (uint128, bool)
+  {
+    ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
+    (uint128 finalMass, uint128 toolMassReduction, uint128 energyReduction) = _getMassReduction(toolData, mined);
+
+    if (energyReduction > 0) {
+      // If player died, return early
+      (uint128 callerEnergy,) = transferEnergyToPool(caller, energyReduction);
+      if (callerEnergy == 0) {
+        return (finalMass, false);
+      }
+    }
+
+    // Apply tool usage after decreasing player energy so we make sure the player is alive
+    toolData.applyUsage(callerCoord, toolMassReduction);
+    return (finalMass, true);
   }
 
   function _getMassReduction(ToolData memory toolData, EntityId mined)
