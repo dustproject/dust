@@ -11,6 +11,8 @@ import { EntityId } from "../../src/EntityId.sol";
 
 import { ObjectTypes } from "../../src/ObjectTypes.sol";
 import { ProgramId } from "../../src/ProgramId.sol";
+
+import { EntityProgram } from "../../src/codegen/tables/EntityProgram.sol";
 import { Player } from "../../src/codegen/tables/Player.sol";
 
 contract AttachProgramScript is Script {
@@ -31,7 +33,7 @@ contract AttachProgramScript is Script {
     EntityId playerEntityId = Player.get(playerAddress);
     require(playerEntityId.exists(), "Player entity not found");
 
-    if (target.getProgram().exists()) {
+    if (EntityProgram.get(target).exists()) {
       world.detachProgram(playerEntityId, target, "");
     }
 
