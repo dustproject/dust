@@ -39,7 +39,7 @@ contract FarmingSystem is System {
       return;
     }
 
-    (, ObjectTypeId toolType) = InventoryUtils.useTool(caller, callerCoord, toolSlot, type(uint128).max);
+    ObjectTypeId toolType = InventoryUtils.useTool(caller, callerCoord, toolSlot, type(uint128).max);
     require(toolType.isHoe(), "Must equip a hoe");
 
     ObjectType._set(farmland, ObjectTypes.Farmland);

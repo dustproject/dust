@@ -239,7 +239,7 @@ contract MineSystem is System {
     }
 
     // Apply tool usage after decreasing player energy so we make sure the player is alive
-    toolData.applyUsage(callerCoord, toolMassReduction);
+    toolData.applyMassReduction(callerCoord, toolMassReduction);
     return (finalMass, true);
   }
 
