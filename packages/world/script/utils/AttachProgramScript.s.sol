@@ -31,6 +31,10 @@ contract AttachProgramScript is Script {
     EntityId playerEntityId = Player.get(playerAddress);
     require(playerEntityId.exists(), "Player entity not found");
 
+    if (target.getProgram().exists()) {
+      world.detachProgram(playerEntityId, target, "");
+    }
+
     world.attachProgram(playerEntityId, target, program, extraData);
 
     vm.stopBroadcast();
