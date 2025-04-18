@@ -1700,7 +1700,7 @@ function initObjects() {
     })
   );
   ObjectTypeMetadata.set(
-    ObjectTypes.AnyPlanks,
+    ObjectTypes.AnyPlank,
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: 0,
