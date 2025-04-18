@@ -109,7 +109,15 @@ contract MineSystem is System {
       minedType = RandomResourceLib._collapseRandomOre(mined, coord);
     }
 
-    uint128 finalMass = MassReductionLib._processMassReduction(caller, callerCoord, mined, toolSlot);
+    (uint128 finalMass, uint128 energyReduction) = _processEnergyReduction(caller, callerCoord, mined, toolSlot);
+
+    {
+      // If player died, return early
+      (uint128 callerEnergy,) = transferEnergyToPool(caller, energyReduction);
+      if (callerEnergy == 0) {
+        return mined;
+      }
+    }
 
     if (finalMass != 0) {
       Mass._setMass(mined, finalMass);
@@ -217,6 +225,28 @@ contract MineSystem is System {
       }
     }
   }
+
+  function _processEnergyReduction(EntityId caller, Vec3 callerCoord, EntityId mined, uint16 toolSlot)
+    public
+    returns (uint128, uint128)
+  {
+    uint128 massLeft = Mass._getMass(mined);
+    if (massLeft == 0) {
+      return (0, 0);
+    }
+
+    (uint128 toolMassReduction,) = InventoryUtils.useTool(caller, callerCoord, toolSlot, massLeft);
+
+    // if tool mass reduction is not enough, consume energy from player up to mine energy cost
+    uint128 energyReduction = 0;
+    if (toolMassReduction < massLeft) {
+      uint128 remaining = massLeft - toolMassReduction;
+      energyReduction = MINE_ENERGY_COST <= remaining ? MINE_ENERGY_COST : remaining;
+      massLeft -= energyReduction;
+    }
+
+    return (massLeft - toolMassReduction, energyReduction);
+  }
 }
 
 library MineLib {
@@ -264,30 +294,6 @@ library MineLib {
     bytes memory onMine = abi.encodeCall(IMineHook.onMine, (caller, forceField, objectTypeId, coord, extraData));
 
     program.callOrRevert(onMine);
-  }
-}
-
-library MassReductionLib {
-  function _processMassReduction(EntityId caller, Vec3 callerCoord, EntityId mined, uint16 toolSlot)
-    public
-    returns (uint128)
-  {
-    uint128 massLeft = Mass._getMass(mined);
-    if (massLeft == 0) {
-      return 0;
-    }
-
-    (uint128 toolMassReduction,) = InventoryUtils.useTool(caller, callerCoord, toolSlot, massLeft);
-
-    // if tool mass reduction is not enough, consume energy from player up to mine energy cost
-    if (toolMassReduction < massLeft) {
-      uint128 remaining = massLeft - toolMassReduction;
-      uint128 energyReduction = MINE_ENERGY_COST <= remaining ? MINE_ENERGY_COST : remaining;
-      transferEnergyToPool(caller, energyReduction);
-      massLeft -= energyReduction;
-    }
-
-    return massLeft - toolMassReduction;
   }
 }
 

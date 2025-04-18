@@ -22,4 +22,11 @@ interface IMineSystem {
   function mineUntilDestroyed(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) external;
 
   function mineUntilDestroyed(EntityId caller, Vec3 coord, bytes calldata extraData) external;
+
+  function _processEnergyReduction(
+    EntityId caller,
+    Vec3 callerCoord,
+    EntityId mined,
+    uint16 toolSlot
+  ) external returns (uint128, uint128);
 }

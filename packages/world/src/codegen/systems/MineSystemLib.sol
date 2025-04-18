@@ -72,6 +72,16 @@ library MineSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).mineUntilDestroyed(caller, coord, extraData);
   }
 
+  function _processEnergyReduction(
+    MineSystemType self,
+    EntityId caller,
+    Vec3 callerCoord,
+    EntityId mined,
+    uint16 toolSlot
+  ) internal returns (uint128, uint128) {
+    return CallWrapper(self.toResourceId(), address(0))._processEnergyReduction(caller, callerCoord, mined, toolSlot);
+  }
+
   function getRandomOreType(CallWrapper memory self, Vec3 coord) internal view returns (ObjectTypeId) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert MineSystemLib_CallingFromRootSystem();
@@ -157,6 +167,27 @@ library MineSystemLib {
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
+  function _processEnergyReduction(
+    CallWrapper memory self,
+    EntityId caller,
+    Vec3 callerCoord,
+    EntityId mined,
+    uint16 toolSlot
+  ) internal returns (uint128, uint128) {
+    // if the contract calling this function is a root system, it should use `callAsRoot`
+    if (address(_world()) == address(this)) revert MineSystemLib_CallingFromRootSystem();
+
+    bytes memory systemCall = abi.encodeCall(
+      __processEnergyReduction_EntityId_Vec3_EntityId_uint16._processEnergyReduction,
+      (caller, callerCoord, mined, toolSlot)
+    );
+
+    bytes memory result = self.from == address(0)
+      ? _world().call(self.systemId, systemCall)
+      : _world().callFrom(self.from, self.systemId, systemCall);
+    return abi.decode(result, (uint128, uint128));
+  }
+
   function mine(
     RootCallWrapper memory self,
     EntityId caller,
@@ -210,6 +241,22 @@ library MineSystemLib {
       (caller, coord, extraData)
     );
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
+  }
+
+  function _processEnergyReduction(
+    RootCallWrapper memory self,
+    EntityId caller,
+    Vec3 callerCoord,
+    EntityId mined,
+    uint16 toolSlot
+  ) internal returns (uint128, uint128) {
+    bytes memory systemCall = abi.encodeCall(
+      __processEnergyReduction_EntityId_Vec3_EntityId_uint16._processEnergyReduction,
+      (caller, callerCoord, mined, toolSlot)
+    );
+
+    bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
+    return abi.decode(result, (uint128, uint128));
   }
 
   function callFrom(MineSystemType self, address from) internal pure returns (CallWrapper memory) {
@@ -268,6 +315,10 @@ interface _mineUntilDestroyed_EntityId_Vec3_uint16_bytes {
 
 interface _mineUntilDestroyed_EntityId_Vec3_bytes {
   function mineUntilDestroyed(EntityId caller, Vec3 coord, bytes memory extraData) external;
+}
+
+interface __processEnergyReduction_EntityId_Vec3_EntityId_uint16 {
+  function _processEnergyReduction(EntityId caller, Vec3 callerCoord, EntityId mined, uint16 toolSlot) external;
 }
 
 using MineSystemLib for MineSystemType global;
