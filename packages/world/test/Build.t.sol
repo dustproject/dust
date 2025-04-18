@@ -386,7 +386,7 @@ contract BuildTest is DustTest {
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
   }
 
-  function testBuildFailsIfNotEnoughEnergy() public {
+  function testBuildKillsIfNotEnoughEnergy() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     Vec3 buildCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
@@ -403,8 +403,12 @@ contract BuildTest is DustTest {
     Energy.set(aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1, drainRate: 0 }));
 
     vm.prank(alice);
-    vm.expectRevert("Not enough energy");
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
+
+    assertPlayerIsDead(aliceEntityId, playerCoord);
+
+    // Verify the block was not built
+    assertEq(ObjectType.get(buildEntityId), ObjectTypes.Air, "Build entity is not air");
   }
 
   function testBuildFatal() public {
@@ -430,21 +434,11 @@ contract BuildTest is DustTest {
     vm.prank(alice);
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
-    // Check energy is zero
-    assertEq(Energy.getEnergy(aliceEntityId), 0, "Player energy is not 0");
+    assertPlayerIsDead(aliceEntityId, playerCoord);
 
-    // Verify the player entity is still registered to the address, but removed from the grid
-    assertEq(Player.get(alice), aliceEntityId, "Player entity was deleted");
-    assertEq(MovablePosition.get(aliceEntityId), vec3(0, 0, 0), "Player position was not deleted");
-    assertEq(ReverseMovablePosition.get(playerCoord), EntityId.wrap(0), "Player reverse position was not deleted");
-    assertEq(
-      ReverseMovablePosition.get(playerCoord + vec3(0, 1, 0)),
-      EntityId.wrap(0),
-      "Player reverse position at head was not deleted"
-    );
-
-    // Verify the block was built successfully
-    assertEq(ObjectType.get(buildEntityId), buildObjectTypeId, "Build entity is not build object type");
+    // TODO: we might want to build the block in this case
+    // Verify the block was not built
+    assertEq(ObjectType.get(buildEntityId), ObjectTypes.Air, "Build entity is not build object type");
     assertInventoryHasObject(aliceEntityId, buildObjectTypeId, 0);
   }
 

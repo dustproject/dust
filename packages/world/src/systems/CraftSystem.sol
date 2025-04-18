@@ -40,11 +40,7 @@ contract CraftSystem is System {
       caller.requireConnected(station);
     }
 
-    // If player died, return early
-    uint128 callerEnergy = CraftLib._processEnergyReduction(caller);
-    if (callerEnergy == 0) {
-      return;
-    }
+    CraftLib._processEnergyReduction(caller);
 
     _consumeRecipeInputs(caller, recipe, inputs);
     _createRecipeOutputs(caller, recipe);
@@ -119,8 +115,8 @@ contract CraftSystem is System {
 }
 
 library CraftLib {
-  function _processEnergyReduction(EntityId caller) public returns (uint128) {
+  function _processEnergyReduction(EntityId caller) public {
     (uint128 callerEnergy,) = transferEnergyToPool(caller, CRAFT_ENERGY_COST);
-    return callerEnergy;
+    require(callerEnergy > 0, "Not enough energy");
   }
 }

@@ -106,7 +106,6 @@ function decreaseMachineEnergy(EntityId machine, uint128 amount) returns (uint12
 function decreasePlayerEnergy(EntityId player, Vec3 playerCoord, uint128 amount) returns (uint128) {
   require(amount > 0, "Cannot decrease 0 energy");
   uint128 current = Energy._getEnergy(player);
-  require(current >= amount, "Not enough energy");
 
   uint128 newEnergy = current >= amount ? current - amount : 0;
   Energy._setEnergy(player, newEnergy);

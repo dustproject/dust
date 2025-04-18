@@ -112,10 +112,12 @@ contract MineSystem is System {
     (uint128 finalMass, uint128 energyReduction) = _processEnergyReduction(caller, callerCoord, mined, toolSlot);
 
     {
-      // If player died, return early
-      (uint128 callerEnergy,) = transferEnergyToPool(caller, energyReduction);
-      if (callerEnergy == 0) {
-        return mined;
+      if (energyReduction > 0) {
+        // If player died, return early
+        (uint128 callerEnergy,) = transferEnergyToPool(caller, energyReduction);
+        if (callerEnergy == 0) {
+          return mined;
+        }
       }
     }
 

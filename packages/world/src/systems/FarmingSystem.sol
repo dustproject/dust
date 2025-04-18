@@ -36,7 +36,6 @@ contract FarmingSystem is System {
     // If player died, return early
     uint128 callerEnergy = FarmingLib._processEnergyReduction(caller);
     if (callerEnergy == 0) {
-      // TODO: review this
       return;
     }
 
