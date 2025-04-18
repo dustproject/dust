@@ -1395,7 +1395,7 @@ function initObjects() {
       stackable: 99,
       maxInventorySlots: type(uint16).max,
       mass: 0,
-      energy: 129600000000000000,
+      energy: 148000000000000000,
       canPassThrough: true
     })
   );
@@ -1405,7 +1405,7 @@ function initObjects() {
       stackable: 99,
       maxInventorySlots: type(uint16).max,
       mass: 0,
-      energy: 133700000000000000,
+      energy: 139000000000000000,
       canPassThrough: true
     })
   );
@@ -1415,7 +1415,7 @@ function initObjects() {
       stackable: 99,
       maxInventorySlots: type(uint16).max,
       mass: 0,
-      energy: 272400000000000000,
+      energy: 300000000000000000,
       canPassThrough: true
     })
   );
@@ -1425,7 +1425,7 @@ function initObjects() {
       stackable: 99,
       maxInventorySlots: type(uint16).max,
       mass: 0,
-      energy: 162100000000000000,
+      energy: 187000000000000000,
       canPassThrough: true
     })
   );
@@ -1435,7 +1435,7 @@ function initObjects() {
       stackable: 99,
       maxInventorySlots: type(uint16).max,
       mass: 0,
-      energy: 141800000000000000,
+      energy: 158000000000000000,
       canPassThrough: true
     })
   );
@@ -1445,7 +1445,7 @@ function initObjects() {
       stackable: 99,
       maxInventorySlots: type(uint16).max,
       mass: 0,
-      energy: 226000000000000000,
+      energy: 256000000000000000,
       canPassThrough: true
     })
   );
@@ -1455,7 +1455,7 @@ function initObjects() {
       stackable: 99,
       maxInventorySlots: type(uint16).max,
       mass: 0,
-      energy: 172600000000000000,
+      energy: 202000000000000000,
       canPassThrough: true
     })
   );
@@ -1465,7 +1465,7 @@ function initObjects() {
       stackable: 99,
       maxInventorySlots: type(uint16).max,
       mass: 0,
-      energy: 204000000000000000,
+      energy: 232000000000000000,
       canPassThrough: true
     })
   );
