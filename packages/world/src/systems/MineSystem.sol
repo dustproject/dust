@@ -42,7 +42,7 @@ import {
   getOrCreateEntityAt
 } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
-import { InventoryUtils } from "../utils/InventoryUtils.sol";
+import { InventoryUtils, ToolData } from "../utils/InventoryUtils.sol";
 import { DeathNotification, MineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
@@ -109,17 +109,19 @@ contract MineSystem is System {
       minedType = RandomResourceLib._collapseRandomOre(mined, coord);
     }
 
-    (uint128 finalMass, uint128 energyReduction) = _processEnergyReduction(caller, callerCoord, mined, toolSlot);
+    ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
+    (uint128 finalMass, uint128 toolMassReduction, uint128 energyReduction) = _getMassReduction(toolData, mined);
 
-    {
-      if (energyReduction > 0) {
-        // If player died, return early
-        (uint128 callerEnergy,) = transferEnergyToPool(caller, energyReduction);
-        if (callerEnergy == 0) {
-          return mined;
-        }
+    if (energyReduction > 0) {
+      // If player died, return early
+      (uint128 callerEnergy,) = transferEnergyToPool(caller, energyReduction);
+      if (callerEnergy == 0) {
+        return mined;
       }
     }
+
+    // Apply tool usage after decreasing player energy so we make sure the player is alive
+    toolData.applyUsage(callerCoord, toolMassReduction);
 
     if (finalMass != 0) {
       Mass._setMass(mined, finalMass);
@@ -130,10 +132,11 @@ contract MineSystem is System {
     // The block was fully mined
     Mass._deleteRecord(mined);
 
-    // Remove seed on top of this block
-    Vec3 aboveCoord = baseCoord + vec3(0, 1, 0);
-    // If above is a seed, the entity must exist as there are not seeds in the base terrain
     {
+      // Remove seed on top of this block
+      Vec3 aboveCoord = baseCoord + vec3(0, 1, 0);
+
+      // If above is a seed, the entity must exist as there are not seeds in the base terrain
       (EntityId above, ObjectTypeId aboveTypeId) = getEntityAt(aboveCoord);
       if (aboveTypeId.isSeed()) {
         if (!above.exists()) {
@@ -228,16 +231,17 @@ contract MineSystem is System {
     }
   }
 
-  function _processEnergyReduction(EntityId caller, Vec3 callerCoord, EntityId mined, uint16 toolSlot)
-    public
-    returns (uint128, uint128)
+  function _getMassReduction(ToolData memory toolData, EntityId mined)
+    internal
+    view
+    returns (uint128, uint128, uint128)
   {
     uint128 massLeft = Mass._getMass(mined);
     if (massLeft == 0) {
-      return (0, 0);
+      return (0, 0, 0);
     }
 
-    (uint128 toolMassReduction,) = InventoryUtils.useTool(caller, callerCoord, toolSlot, massLeft);
+    uint128 toolMassReduction = toolData.getMassReduction(massLeft);
 
     // if tool mass reduction is not enough, consume energy from player up to mine energy cost
     uint128 energyReduction = 0;
@@ -247,7 +251,9 @@ contract MineSystem is System {
       massLeft -= energyReduction;
     }
 
-    return (massLeft - toolMassReduction, energyReduction);
+    uint128 finalMass = massLeft - toolMassReduction;
+
+    return (finalMass, toolMassReduction, energyReduction);
   }
 }
 

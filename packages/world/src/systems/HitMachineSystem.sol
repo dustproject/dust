@@ -20,7 +20,7 @@ import {
   updateMachineEnergy
 } from "../utils/EnergyUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
-import { InventoryUtils } from "../utils/InventoryUtils.sol";
+import { InventoryUtils, ToolData } from "../utils/InventoryUtils.sol";
 import { HitMachineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
@@ -71,19 +71,29 @@ library HitMachineLib {
   ) public returns (uint128) {
     (EnergyData memory machineData,) = updateMachineEnergy(forceField);
     require(machineData.energy > 0, "Cannot hit depleted forcefield");
-    (uint128 toolMassReduction,) = InventoryUtils.useTool(caller, callerCoord, toolSlot, machineData.energy);
+
+    ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
+    uint128 toolMassReduction = toolData.getMassReduction(machineData.energy);
 
     uint128 playerEnergyReduction = 0;
 
     // if tool mass reduction is not enough, consume energy from player up to hit energy cost
+    uint128 energyLeft;
     if (toolMassReduction < machineData.energy) {
       uint128 remaining = machineData.energy - toolMassReduction;
       playerEnergyReduction = HIT_ENERGY_COST <= remaining ? HIT_ENERGY_COST : remaining;
-      decreasePlayerEnergy(caller, callerCoord, playerEnergyReduction);
+      energyLeft = decreasePlayerEnergy(caller, callerCoord, playerEnergyReduction);
     }
 
-    uint128 machineEnergyReduction = playerEnergyReduction + toolMassReduction;
-    decreaseMachineEnergy(forceField, machineEnergyReduction);
+    uint128 machineEnergyReduction = 0;
+
+    // If player is alive, apply tool usage and decrease machine's energy
+    if (energyLeft != 0) {
+      toolData.applyUsage(callerCoord, toolMassReduction);
+      machineEnergyReduction = playerEnergyReduction + toolMassReduction;
+      decreaseMachineEnergy(forceField, machineEnergyReduction);
+    }
+
     addEnergyToLocalPool(forceFieldCoord, machineEnergyReduction + playerEnergyReduction);
     return machineEnergyReduction;
   }

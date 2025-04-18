@@ -40,36 +40,59 @@ struct SlotData {
   uint16 amount;
 }
 
+struct ToolData {
+  EntityId owner;
+  EntityId tool;
+  ObjectTypeId toolType;
+  uint16 slot;
+  uint128 massLeft;
+  uint128 maxUseMass;
+}
+
 library InventoryUtils {
+  function getToolData(EntityId owner, uint16 slot) public view returns (ToolData memory) {
+    EntityId tool = InventorySlot._getEntityId(owner, slot);
+    if (!tool.exists()) {
+      return ToolData(owner, tool, ObjectTypes.Null, slot, 0, 0);
+    }
+
+    ObjectTypeId toolType = ObjectType._get(tool);
+    require(toolType.isTool(), "Inventory item is not a tool");
+
+    uint128 maxMass = ObjectTypeMetadata._getMass(toolType);
+    uint128 maxUsePerCall = maxMass / 10; // Limit to 10% of max mass per use
+
+    return ToolData(owner, tool, toolType, slot, Mass._getMass(tool), maxUsePerCall);
+  }
+
   function useTool(EntityId owner, Vec3 ownerCoord, uint16 slot, uint128 useMassMax)
     public
     returns (uint128 massUsed, ObjectTypeId toolType)
   {
-    EntityId tool = InventorySlot._getEntityId(owner, slot);
-    if (!tool.exists()) {
-      return (0, ObjectTypes.Null);
-    }
+    ToolData memory toolData = getToolData(owner, slot);
 
-    toolType = ObjectType._get(tool);
-    require(toolType.isTool(), "Inventory item is not a tool");
-    uint128 toolMassLeft = Mass._getMass(tool);
-    require(toolMassLeft > 0, "Tool is already broken");
+    uint128 massToUse = toolData.getMassReduction(useMassMax);
 
-    uint128 maxMass = ObjectTypeMetadata._getMass(toolType);
-    uint128 maxUsePerCall = maxMass / 10; // Limit to 10% of max mass per use
-    massUsed = useMassMax > maxUsePerCall ? maxUsePerCall : useMassMax;
+    return (applyUsage(toolData, ownerCoord, massToUse), toolData.toolType);
+  }
 
-    if (toolMassLeft <= massUsed) {
-      massUsed = toolMassLeft;
+  function getMassReduction(ToolData memory toolData, uint128 useMassMax) internal pure returns (uint128) {
+    return useMassMax > toolData.maxUseMass ? toolData.maxUseMass : useMassMax;
+  }
+
+  function applyUsage(ToolData memory toolData, Vec3 ownerCoord, uint128 massToUse) public returns (uint128) {
+    require(toolData.massLeft > 0, "Tool is broken");
+
+    if (toolData.massLeft <= massToUse) {
       // Destroy equipped item
-      _recycleSlot(owner, slot);
-      Mass._deleteRecord(tool);
-      toolType.burnOres();
-      burnToolEnergy(toolType, ownerCoord);
-
-      // TODO: return energy to local pool
+      _recycleSlot(toolData.owner, toolData.slot);
+      Mass._deleteRecord(toolData.tool);
+      toolData.toolType.burnOres();
+      burnToolEnergy(toolData.toolType, ownerCoord);
+      return toolData.massLeft;
     } else {
-      Mass._setMass(tool, toolMassLeft - massUsed);
+      Mass._setMass(toolData.tool, toolData.massLeft - massToUse);
+      return massToUse;
     }
   }
 
@@ -436,3 +459,5 @@ library InventoryUtils {
     Inventory._pop(owner);
   }
 }
+
+using InventoryUtils for ToolData global;
