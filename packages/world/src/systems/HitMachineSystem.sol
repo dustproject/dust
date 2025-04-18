@@ -71,7 +71,7 @@ library HitMachineLib {
   ) public returns (uint128) {
     (EnergyData memory machineData,) = updateMachineEnergy(forceField);
     require(machineData.energy > 0, "Cannot hit depleted forcefield");
-    (uint128 toolMassReduction,) = InventoryUtils.useTool(caller, toolSlot, machineData.energy);
+    (uint128 toolMassReduction,) = InventoryUtils.useTool(caller, callerCoord, toolSlot, machineData.energy);
 
     uint128 playerEnergyReduction = 0;
 
