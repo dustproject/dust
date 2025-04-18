@@ -117,7 +117,7 @@ library ObjectTypeLib {
   }
 
   function isAny(ObjectTypeId self) internal pure returns (bool) {
-    return self == ObjectTypes.AnyLog || self == ObjectTypes.AnyPlanks;
+    return self == ObjectTypes.AnyLog || self == ObjectTypes.AnyPlank || self == ObjectTypes.AnyLeaf;
   }
 
   function isSmartEntity(ObjectTypeId self) internal pure returns (bool) {
@@ -230,8 +230,12 @@ library ObjectTypeLib {
       return getLogObjectTypes();
     }
 
-    if (self == ObjectTypes.AnyPlanks) {
+    if (self == ObjectTypes.AnyPlank) {
       return getPlanksObjectTypes();
+    }
+
+    if (self == ObjectTypes.AnyLeaf) {
+      return getLeafObjectTypes();
     }
 
     // Return empty array for non-Any types
