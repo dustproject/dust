@@ -150,7 +150,7 @@ library ObjectTypeLib {
   }
 
   function isCrop(ObjectTypeId self) internal pure returns (bool) {
-    return self == ObjectTypes.Wheat;
+    return self == ObjectTypes.Wheat || self == ObjectTypes.Melon || self == ObjectTypes.Pumpkin;
   }
 
   function isLog(ObjectTypeId self) internal pure returns (bool) {
@@ -171,6 +171,10 @@ library ObjectTypeLib {
       }
     }
     return false;
+  }
+
+  function hasExtraDrops(ObjectTypeId self) internal pure returns (bool) {
+    return self == ObjectTypes.FescueGrass || self.isCrop() || self.isLeaf();
   }
 
   function getSapling(ObjectTypeId self) internal pure returns (ObjectTypeId) {

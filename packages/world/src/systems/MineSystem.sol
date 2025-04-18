@@ -120,18 +120,18 @@ contract MineSystem is System {
     // Remove seed on top of this block
     Vec3 aboveCoord = baseCoord + vec3(0, 1, 0);
     // If above is a seed, the entity must exist as there are not seeds in the base terrain
-    (EntityId above, ObjectTypeId aboveTypeId) = getEntityAt(aboveCoord);
-    if (aboveTypeId.isGrowable()) {
+    (EntityId above, ObjectTypeId aboveType) = getEntityAt(aboveCoord);
+    if (aboveType.isGrowable()) {
       if (!above.exists()) {
-        above = createEntityAt(aboveCoord, aboveTypeId);
+        above = createEntityAt(aboveCoord, aboveType);
       }
-      _removeGrowable(above, aboveTypeId, aboveCoord);
-      _handleDrop(caller, aboveTypeId, aboveCoord);
+      _removeGrowable(above, aboveType, aboveCoord);
+      _handleDrop(caller, above, aboveType, aboveCoord);
     }
 
     _removeBlock(mined, minedType, baseCoord);
     _removeRelativeBlocks(mined, minedType, baseCoord);
-    _handleDrop(caller, minedType, baseCoord);
+    _handleDrop(caller, mined, minedType, baseCoord);
 
     _destroyEntity(caller, mined, minedType, baseCoord);
 
@@ -197,9 +197,9 @@ contract MineSystem is System {
     }
   }
 
-  function _handleDrop(EntityId caller, ObjectTypeId mineObjectTypeId, Vec3 coord) internal {
+  function _handleDrop(EntityId caller, EntityId mined, ObjectTypeId minedType, Vec3 coord) internal {
     // Get drops with all metadata for resource tracking
-    ObjectAmount[] memory result = RandomResourceLib._getMineDrops(mineObjectTypeId, coord);
+    ObjectAmount[] memory result = RandomResourceLib._getMineDrops(mined, minedType, coord);
 
     for (uint256 i = 0; i < result.length; i++) {
       (ObjectTypeId dropType, uint16 amount) = (result[i].objectTypeId, uint16(result[i].amount));
@@ -284,8 +284,12 @@ library MassReductionLib {
 }
 
 library RandomResourceLib {
-  function _getMineDrops(ObjectTypeId objectTypeId, Vec3 coord) public view returns (ObjectAmount[] memory) {
-    return NatureLib.getMineDrops(objectTypeId, coord);
+  function _getMineDrops(EntityId mined, ObjectTypeId objectTypeId, Vec3 coord)
+    public
+    view
+    returns (ObjectAmount[] memory)
+  {
+    return NatureLib.getMineDrops(mined, objectTypeId, coord);
   }
 
   function _getRandomOre(Vec3 coord) public view returns (ObjectTypeId) {

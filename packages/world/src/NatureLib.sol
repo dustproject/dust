@@ -3,6 +3,7 @@ pragma solidity >=0.8.24;
 
 import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
+import { DisabledExtraDrops } from "./codegen/tables/DisabledExtraDrops.sol";
 import { ObjectType } from "./codegen/tables/ObjectType.sol";
 import { ResourceCount } from "./codegen/tables/ResourceCount.sol";
 
@@ -83,19 +84,25 @@ library NatureLib {
     return (cap, mined >= cap ? 0 : cap - mined);
   }
 
-  function getMineDrops(ObjectTypeId objectType, Vec3 coord) internal view returns (ObjectAmount[] memory result) {
-    // Wheat drops wheat + 0-3 wheat seeds
-    if (objectType == ObjectTypes.Wheat) {
-      return getWheatDrops(getRandomSeed(coord));
-    }
+  function getMineDrops(EntityId mined, ObjectTypeId objectType, Vec3 coord)
+    internal
+    view
+    returns (ObjectAmount[] memory result)
+  {
+    if (objectType.hasExtraDrops() && !DisabledExtraDrops._get(mined)) {
+      // Wheat drops wheat + 0-3 wheat seeds
+      if (objectType == ObjectTypes.Wheat) {
+        return getWheatDrops(getRandomSeed(coord));
+      }
 
-    // FescueGrass has a chance to drop wheat seeds
-    if (objectType == ObjectTypes.FescueGrass) {
-      return getGrassDrops(getRandomSeed(coord));
-    }
+      // FescueGrass has a chance to drop wheat seeds
+      if (objectType == ObjectTypes.FescueGrass) {
+        return getGrassDrops(getRandomSeed(coord));
+      }
 
-    if (objectType.isLeaf()) {
-      return getLeafDrops(objectType, getRandomSeed(coord));
+      if (objectType.isLeaf()) {
+        return getLeafDrops(objectType, getRandomSeed(coord));
+      }
     }
 
     if (objectType == ObjectTypes.Farmland || objectType == ObjectTypes.WetFarmland) {
