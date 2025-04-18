@@ -91,7 +91,7 @@ contract MineSystem is System {
 
   function _mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) internal returns (EntityId) {
     caller.activate();
-    caller.requireConnected(coord);
+    (Vec3 callerCoord,) = caller.requireConnected(coord);
 
     (EntityId mined, ObjectTypeId minedType) = getOrCreateEntityAt(coord);
     require(minedType.isMineable(), "Object is not mineable");
@@ -106,7 +106,7 @@ contract MineSystem is System {
       minedType = RandomResourceLib._collapseRandomOre(mined, coord);
     }
 
-    uint128 finalMass = MassReductionLib._processMassReduction(caller, mined, toolSlot);
+    uint128 finalMass = MassReductionLib._processMassReduction(caller, callerCoord, mined, toolSlot);
 
     if (finalMass != 0) {
       Mass._setMass(mined, finalMass);
@@ -117,17 +117,7 @@ contract MineSystem is System {
     // The block was fully mined
     Mass._deleteRecord(mined);
 
-    // Remove seed on top of this block
-    Vec3 aboveCoord = baseCoord + vec3(0, 1, 0);
-    // If above is a seed, the entity must exist as there are not seeds in the base terrain
-    (EntityId above, ObjectTypeId aboveType) = getEntityAt(aboveCoord);
-    if (aboveType.isGrowable()) {
-      if (!above.exists()) {
-        above = createEntityAt(aboveCoord, aboveType);
-      }
-      _removeGrowable(above, aboveType, aboveCoord);
-      _handleDrop(caller, above, aboveType, aboveCoord);
-    }
+    _handleGrowable(caller, baseCoord);
 
     _removeBlock(mined, minedType, baseCoord);
     _removeRelativeBlocks(mined, minedType, baseCoord);
@@ -140,6 +130,20 @@ contract MineSystem is System {
     notify(caller, MineNotification({ mineEntityId: mined, mineCoord: coord, mineObjectTypeId: minedType }));
 
     return mined;
+  }
+
+  function _handleGrowable(EntityId caller, Vec3 coord) internal {
+    // Remove growables on top of this block
+    Vec3 aboveCoord = coord + vec3(0, 1, 0);
+    // If above is growable, the entity must exist as there are not growables in the base terrain
+    (EntityId above, ObjectTypeId aboveType) = getEntityAt(aboveCoord);
+    if (aboveType.isGrowable()) {
+      if (!above.exists()) {
+        above = createEntityAt(aboveCoord, aboveType);
+      }
+      _removeGrowable(above, aboveType, aboveCoord);
+      _handleDrop(caller, above, aboveType, aboveCoord);
+    }
   }
 
   function _removeGrowable(EntityId entityId, ObjectTypeId objectType, Vec3 coord) internal {
@@ -263,13 +267,16 @@ library MineLib {
 }
 
 library MassReductionLib {
-  function _processMassReduction(EntityId caller, EntityId mined, uint16 toolSlot) public returns (uint128) {
+  function _processMassReduction(EntityId caller, Vec3 callerCoord, EntityId mined, uint16 toolSlot)
+    public
+    returns (uint128)
+  {
     uint128 massLeft = Mass._getMass(mined);
     if (massLeft == 0) {
       return 0;
     }
 
-    (uint128 toolMassReduction,) = InventoryUtils.useTool(caller, toolSlot, massLeft);
+    (uint128 toolMassReduction,) = InventoryUtils.useTool(caller, callerCoord, toolSlot, massLeft);
 
     // if tool mass reduction is not enough, consume energy from player up to mine energy cost
     if (toolMassReduction < massLeft) {

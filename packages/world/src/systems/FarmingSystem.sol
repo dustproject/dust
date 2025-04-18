@@ -26,11 +26,11 @@ contract FarmingSystem is System {
 
   function till(EntityId caller, Vec3 coord, uint16 toolSlot) external {
     caller.activate();
-    caller.requireConnected(coord);
+    (Vec3 callerCoord,) = caller.requireConnected(coord);
 
     (EntityId farmland, ObjectTypeId objectTypeId) = getOrCreateEntityAt(coord);
     require(objectTypeId == ObjectTypes.Dirt || objectTypeId == ObjectTypes.Grass, "Not dirt or grass");
-    (, ObjectTypeId toolType) = InventoryUtils.useTool(caller, toolSlot, type(uint128).max);
+    (, ObjectTypeId toolType) = InventoryUtils.useTool(caller, callerCoord, toolSlot, type(uint128).max);
     require(toolType.isHoe(), "Must equip a hoe");
 
     transferEnergyToPool(caller, TILL_ENERGY_COST);

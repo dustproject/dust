@@ -272,8 +272,27 @@ library ObjectTypeLib {
       return ObjectAmount(ObjectTypes.NeptuniumOre, 3); // 3 neptunium bars = 3 ores
     }
 
-    // Return zero amount for any other tool
+    // Return zero amount for any other type
     return ObjectAmount(ObjectTypes.Null, 0);
+  }
+
+  function getToolPlankAmount(ObjectTypeId self) internal pure returns (uint16) {
+    require(self.isTool(), "Not a tool");
+
+    if (self == ObjectTypes.WoodenPick || self == ObjectTypes.WoodenAxe) {
+      return 5;
+    }
+
+    if (self == ObjectTypes.WoodenHoe) {
+      return 4;
+    }
+
+    if (self == ObjectTypes.WoodenWhacker) {
+      return 8;
+    }
+
+    // All other tools use 2 planks
+    return 2;
   }
 
   function burnOre(ObjectTypeId self, uint256 amount) internal {

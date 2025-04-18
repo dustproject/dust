@@ -12,6 +12,10 @@ import { EntityId } from "../EntityId.sol";
 import { ObjectTypeId } from "../ObjectTypeId.sol";
 import { ObjectAmount, ObjectTypeLib } from "../ObjectTypeLib.sol";
 import { ObjectTypes } from "../ObjectTypes.sol";
+import { burnToolEnergy } from "../utils/EnergyUtils.sol";
+
+import { EntityId } from "../EntityId.sol";
+import { Vec3 } from "../Vec3.sol";
 
 using ObjectTypeLib for ObjectTypeId;
 
@@ -33,7 +37,7 @@ struct SlotData {
 }
 
 library InventoryUtils {
-  function useTool(EntityId owner, uint16 slot, uint128 useMassMax)
+  function useTool(EntityId owner, Vec3 ownerCoord, uint16 slot, uint128 useMassMax)
     public
     returns (uint128 massUsed, ObjectTypeId toolType)
   {
@@ -57,6 +61,7 @@ library InventoryUtils {
       _recycleSlot(owner, slot);
       Mass._deleteRecord(tool);
       toolType.burnOres();
+      burnToolEnergy(toolType, ownerCoord);
 
       // TODO: return energy to local pool
     } else {
