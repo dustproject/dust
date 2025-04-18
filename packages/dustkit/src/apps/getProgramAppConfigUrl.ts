@@ -1,7 +1,6 @@
 import { findCause } from "@latticexyz/common";
 import { getRecord } from "@latticexyz/store/internal";
 import baseWorldConfig from "@latticexyz/world/mud.config";
-import { unknown } from "arktype/internal/keywords/ts.ts";
 import { type Address, type Client, zeroHash } from "viem";
 import { readContract } from "viem/actions";
 import appAbi from "../../out/IAppConfigURI.sol/IAppConfigURI.abi";
