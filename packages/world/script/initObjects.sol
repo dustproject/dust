@@ -1365,27 +1365,107 @@ function initObjects() {
       stackable: 99,
       maxInventorySlots: type(uint16).max,
       mass: 0,
-      energy: 10000000000000000,
+      energy: 800000000000000,
       canPassThrough: true
     })
   );
   ObjectTypeMetadata.set(
-    ObjectTypes.OakSeed,
+    ObjectTypes.MelonSeed,
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: type(uint16).max,
       mass: 0,
-      energy: 100000000000000000,
+      energy: 17800000000000000,
       canPassThrough: true
     })
   );
   ObjectTypeMetadata.set(
-    ObjectTypes.SpruceSeed,
+    ObjectTypes.PumpkinSeed,
     ObjectTypeMetadataData({
       stackable: 99,
       maxInventorySlots: type(uint16).max,
       mass: 0,
-      energy: 100000000000000000,
+      energy: 17800000000000000,
+      canPassThrough: true
+    })
+  );
+  ObjectTypeMetadata.set(
+    ObjectTypes.OakSapling,
+    ObjectTypeMetadataData({
+      stackable: 99,
+      maxInventorySlots: type(uint16).max,
+      mass: 0,
+      energy: 148000000000000000,
+      canPassThrough: true
+    })
+  );
+  ObjectTypeMetadata.set(
+    ObjectTypes.BirchSapling,
+    ObjectTypeMetadataData({
+      stackable: 99,
+      maxInventorySlots: type(uint16).max,
+      mass: 0,
+      energy: 139000000000000000,
+      canPassThrough: true
+    })
+  );
+  ObjectTypeMetadata.set(
+    ObjectTypes.JungleSapling,
+    ObjectTypeMetadataData({
+      stackable: 99,
+      maxInventorySlots: type(uint16).max,
+      mass: 0,
+      energy: 300000000000000000,
+      canPassThrough: true
+    })
+  );
+  ObjectTypeMetadata.set(
+    ObjectTypes.SakuraSapling,
+    ObjectTypeMetadataData({
+      stackable: 99,
+      maxInventorySlots: type(uint16).max,
+      mass: 0,
+      energy: 187000000000000000,
+      canPassThrough: true
+    })
+  );
+  ObjectTypeMetadata.set(
+    ObjectTypes.AcaciaSapling,
+    ObjectTypeMetadataData({
+      stackable: 99,
+      maxInventorySlots: type(uint16).max,
+      mass: 0,
+      energy: 158000000000000000,
+      canPassThrough: true
+    })
+  );
+  ObjectTypeMetadata.set(
+    ObjectTypes.SpruceSapling,
+    ObjectTypeMetadataData({
+      stackable: 99,
+      maxInventorySlots: type(uint16).max,
+      mass: 0,
+      energy: 256000000000000000,
+      canPassThrough: true
+    })
+  );
+  ObjectTypeMetadata.set(
+    ObjectTypes.DarkOakSapling,
+    ObjectTypeMetadataData({
+      stackable: 99,
+      maxInventorySlots: type(uint16).max,
+      mass: 0,
+      energy: 202000000000000000,
+      canPassThrough: true
+    })
+  );
+  ObjectTypeMetadata.set(
+    ObjectTypes.MangroveSapling,
+    ObjectTypeMetadataData({
+      stackable: 99,
+      maxInventorySlots: type(uint16).max,
+      mass: 0,
+      energy: 232000000000000000,
       canPassThrough: true
     })
   );

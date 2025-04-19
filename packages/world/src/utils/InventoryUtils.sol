@@ -2,20 +2,16 @@
 pragma solidity >=0.8.24;
 
 import { Inventory } from "../codegen/tables/Inventory.sol";
-
-import { InventoryTypeSlots } from "../codegen/tables/InventoryTypeSlots.sol";
-
 import { InventorySlot, InventorySlotData } from "../codegen/tables/InventorySlot.sol";
-
+import { InventoryTypeSlots } from "../codegen/tables/InventoryTypeSlots.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 
+import { EntityId } from "../EntityId.sol";
 import { ObjectTypeId } from "../ObjectTypeId.sol";
-
 import { ObjectAmount, ObjectTypeLib } from "../ObjectTypeLib.sol";
 import { ObjectTypes } from "../ObjectTypes.sol";
-import { getUniqueEntity } from "../Utils.sol";
 import { burnToolEnergy } from "../utils/EnergyUtils.sol";
 
 import { EntityId } from "../EntityId.sol";

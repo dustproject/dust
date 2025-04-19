@@ -70,9 +70,10 @@ library SpawnSystemLib {
     SpawnSystemType self,
     EntityId spawnTile,
     Vec3 spawnCoord,
+    uint128 spawnEnergy,
     bytes memory extraData
   ) internal returns (EntityId) {
-    return CallWrapper(self.toResourceId(), address(0)).spawn(spawnTile, spawnCoord, extraData);
+    return CallWrapper(self.toResourceId(), address(0)).spawn(spawnTile, spawnCoord, spawnEnergy, extraData);
   }
 
   function getAllRandomSpawnCoords(
@@ -161,12 +162,16 @@ library SpawnSystemLib {
     CallWrapper memory self,
     EntityId spawnTile,
     Vec3 spawnCoord,
+    uint128 spawnEnergy,
     bytes memory extraData
   ) internal returns (EntityId) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert SpawnSystemLib_CallingFromRootSystem();
 
-    bytes memory systemCall = abi.encodeCall(_spawn_EntityId_Vec3_bytes.spawn, (spawnTile, spawnCoord, extraData));
+    bytes memory systemCall = abi.encodeCall(
+      _spawn_EntityId_Vec3_uint128_bytes.spawn,
+      (spawnTile, spawnCoord, spawnEnergy, extraData)
+    );
 
     bytes memory result = self.from == address(0)
       ? _world().call(self.systemId, systemCall)
@@ -185,9 +190,13 @@ library SpawnSystemLib {
     RootCallWrapper memory self,
     EntityId spawnTile,
     Vec3 spawnCoord,
+    uint128 spawnEnergy,
     bytes memory extraData
   ) internal returns (EntityId) {
-    bytes memory systemCall = abi.encodeCall(_spawn_EntityId_Vec3_bytes.spawn, (spawnTile, spawnCoord, extraData));
+    bytes memory systemCall = abi.encodeCall(
+      _spawn_EntityId_Vec3_uint128_bytes.spawn,
+      (spawnTile, spawnCoord, spawnEnergy, extraData)
+    );
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
     return abi.decode(result, (EntityId));
@@ -251,8 +260,8 @@ interface _randomSpawn_uint256_int32 {
   function randomSpawn(uint256 blockNumber, int32 y) external;
 }
 
-interface _spawn_EntityId_Vec3_bytes {
-  function spawn(EntityId spawnTile, Vec3 spawnCoord, bytes memory extraData) external;
+interface _spawn_EntityId_Vec3_uint128_bytes {
+  function spawn(EntityId spawnTile, Vec3 spawnCoord, uint128 spawnEnergy, bytes memory extraData) external;
 }
 
 using SpawnSystemLib for SpawnSystemType global;

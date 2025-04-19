@@ -13,6 +13,4 @@ import { Vec3 } from "../../Vec3.sol";
  */
 interface IFarmingSystem {
   function till(EntityId caller, Vec3 coord, uint16 toolSlot) external;
-
-  function growSeed(EntityId caller, Vec3 coord) external;
 }

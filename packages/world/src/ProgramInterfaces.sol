@@ -69,7 +69,7 @@ interface IMineHook {
 }
 
 interface ISpawnHook {
-  function onSpawn(EntityId caller, EntityId target, bytes memory extraData) external;
+  function onSpawn(EntityId caller, EntityId target, uint128 spawnEnergy, bytes memory extraData) external;
 }
 
 interface ISleepHook {

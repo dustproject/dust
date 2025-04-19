@@ -246,7 +246,7 @@ contract FarmingTest is DustTest {
     uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
 
     vm.prank(alice);
-    vm.expectRevert("Crop seeds need wet farmland");
+    vm.expectRevert("Seeds need wet farmland");
     world.build(aliceEntityId, dirtCoord + vec3(0, 1, 0), seedSlot, "");
 
     // Try to plant on farmland (not wet)
@@ -256,7 +256,7 @@ contract FarmingTest is DustTest {
     seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
 
     vm.prank(alice);
-    vm.expectRevert("Crop seeds need wet farmland");
+    vm.expectRevert("Seeds need wet farmland");
     world.build(aliceEntityId, farmlandCoord + vec3(0, 1, 0), seedSlot, "");
   }
 
@@ -303,7 +303,7 @@ contract FarmingTest is DustTest {
     // Verify wheat and seeds were obtained
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
     // TODO: test randomness
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 0);
 
     // Verify crop no longer exists
     assertEq(ObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
@@ -467,6 +467,6 @@ contract FarmingTest is DustTest {
     // Now we get wheat and seeds
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
     // TODO: test randomness
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 0);
   }
 }

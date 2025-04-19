@@ -16,13 +16,10 @@ import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { Orientation } from "../codegen/tables/Orientation.sol";
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 
-import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
 import { Position } from "../utils/Vec3Storage.sol";
 import { ResourcePosition } from "../utils/Vec3Storage.sol";
-
-import { getUniqueEntity } from "../Utils.sol";
 
 import {
   addEnergyToLocalPool,
@@ -123,24 +120,11 @@ contract MineSystem is System {
     // The block was fully mined
     Mass._deleteRecord(mined);
 
-    {
-      // Remove seed on top of this block
-      Vec3 aboveCoord = baseCoord + vec3(0, 1, 0);
-
-      // If above is a seed, the entity must exist as there are not seeds in the base terrain
-      (EntityId above, ObjectTypeId aboveTypeId) = getEntityAt(aboveCoord);
-      if (aboveTypeId.isSeed()) {
-        if (!above.exists()) {
-          above = createEntityAt(aboveCoord, aboveTypeId);
-        }
-        _removeSeed(above, aboveTypeId, aboveCoord);
-        _handleDrop(caller, aboveTypeId, aboveCoord);
-      }
-    }
+    _handleGrowable(caller, baseCoord);
 
     _removeBlock(mined, minedType, baseCoord);
     _removeRelativeBlocks(mined, minedType, baseCoord);
-    _handleDrop(caller, minedType, baseCoord);
+    _handleDrop(caller, mined, minedType, baseCoord);
 
     _destroyEntity(caller, mined, minedType, baseCoord);
 
@@ -151,7 +135,21 @@ contract MineSystem is System {
     return mined;
   }
 
-  function _removeSeed(EntityId entityId, ObjectTypeId objectType, Vec3 coord) internal {
+  function _handleGrowable(EntityId caller, Vec3 coord) internal {
+    // Remove growables on top of this block
+    Vec3 aboveCoord = coord + vec3(0, 1, 0);
+    // If above is growable, the entity must exist as there are not growables in the base terrain
+    (EntityId above, ObjectTypeId aboveType) = getEntityAt(aboveCoord);
+    if (aboveType.isGrowable()) {
+      if (!above.exists()) {
+        above = createEntityAt(aboveCoord, aboveType);
+      }
+      _removeGrowable(above, aboveType, aboveCoord);
+      _handleDrop(caller, above, aboveType, aboveCoord);
+    }
+  }
+
+  function _removeGrowable(EntityId entityId, ObjectTypeId objectType, Vec3 coord) internal {
     ObjectType._set(entityId, ObjectTypes.Air);
     require(SeedGrowth._getFullyGrownAt(entityId) > block.timestamp, "Cannot mine fully grown seed");
     addEnergyToLocalPool(coord, ObjectTypeMetadata._getEnergy(objectType));
@@ -159,8 +157,8 @@ contract MineSystem is System {
 
   function _removeBlock(EntityId entityId, ObjectTypeId objectType, Vec3 coord) internal {
     // If object being mined is seed, no need to check above entities
-    if (objectType.isSeed()) {
-      _removeSeed(entityId, objectType, coord);
+    if (objectType.isGrowable()) {
+      _removeGrowable(entityId, objectType, coord);
       return;
     }
 
@@ -206,9 +204,9 @@ contract MineSystem is System {
     }
   }
 
-  function _handleDrop(EntityId caller, ObjectTypeId mineObjectTypeId, Vec3 coord) internal {
+  function _handleDrop(EntityId caller, EntityId mined, ObjectTypeId minedType, Vec3 coord) internal {
     // Get drops with all metadata for resource tracking
-    ObjectAmount[] memory result = RandomResourceLib._getMineDrops(mineObjectTypeId, coord);
+    ObjectAmount[] memory result = RandomResourceLib._getMineDrops(mined, minedType, coord);
 
     for (uint256 i = 0; i < result.length; i++) {
       (ObjectTypeId dropType, uint16 amount) = (result[i].objectTypeId, uint16(result[i].amount));
@@ -216,7 +214,7 @@ contract MineSystem is System {
 
       // Track mined resource count for seeds
       // TODO: could make it more general like .isCappedResource() or something
-      if (dropType.isSeed()) {
+      if (dropType.isGrowable()) {
         ResourceCount._set(dropType, ResourceCount._get(dropType) + amount);
       }
     }
@@ -318,8 +316,12 @@ library MineLib {
 }
 
 library RandomResourceLib {
-  function _getMineDrops(ObjectTypeId objectTypeId, Vec3 coord) public view returns (ObjectAmount[] memory) {
-    return NatureLib.getMineDrops(objectTypeId, coord);
+  function _getMineDrops(EntityId mined, ObjectTypeId objectTypeId, Vec3 coord)
+    public
+    view
+    returns (ObjectAmount[] memory)
+  {
+    return NatureLib.getMineDrops(mined, objectTypeId, coord);
   }
 
   function _getRandomOre(Vec3 coord) public view returns (ObjectTypeId) {

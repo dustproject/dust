@@ -15,7 +15,6 @@ import { EntityId } from "../../EntityId.sol";
 import { ObjectTypeId } from "../../ObjectTypeId.sol";
 import { ObjectTypeLib } from "../../ObjectTypeLib.sol";
 import { ObjectTypes } from "../../ObjectTypes.sol";
-import { getUniqueEntity } from "../../Utils.sol";
 
 import {
   createEntity, getMovableEntityAt, safeGetObjectTypeIdAt, setMovableEntityAt

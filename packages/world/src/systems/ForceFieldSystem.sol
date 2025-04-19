@@ -8,7 +8,6 @@ import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
-import { getUniqueEntity } from "../Utils.sol";
 import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
 
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";

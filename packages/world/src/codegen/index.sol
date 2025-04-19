@@ -35,6 +35,7 @@ import { ChunkCommitment } from "./tables/ChunkCommitment.sol";
 import { ResourcePosition, ResourcePositionData } from "./tables/ResourcePosition.sol";
 import { ResourceCount } from "./tables/ResourceCount.sol";
 import { BurnedResourceCount } from "./tables/BurnedResourceCount.sol";
+import { DisabledExtraDrops } from "./tables/DisabledExtraDrops.sol";
 import { SeedGrowth } from "./tables/SeedGrowth.sol";
 import { Notification, NotificationData } from "./tables/Notification.sol";
 import { WorldStatus } from "./tables/WorldStatus.sol";
