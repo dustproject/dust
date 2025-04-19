@@ -22,7 +22,9 @@ contract BatchSystem is System {
     bytes calldata attachExtraData
   ) public returns (EntityId) {
     EntityId buildEntity = buildSystem.callAsRoot().build(caller, coord, slot, buildExtraData);
-    programSystem.callAsRoot().attachProgram(caller, buildEntity, program, attachExtraData);
+    if (buildEntity.exists()) {
+      programSystem.callAsRoot().attachProgram(caller, buildEntity, program, attachExtraData);
+    }
     return buildEntity;
   }
 
@@ -36,7 +38,9 @@ contract BatchSystem is System {
     bytes calldata attachExtraData
   ) public returns (EntityId) {
     EntityId buildEntity = buildSystem.callAsRoot().buildWithDirection(caller, coord, slot, direction, buildExtraData);
-    programSystem.callAsRoot().attachProgram(caller, buildEntity, program, attachExtraData);
+    if (buildEntity.exists()) {
+      programSystem.callAsRoot().attachProgram(caller, buildEntity, program, attachExtraData);
+    }
     return buildEntity;
   }
 
@@ -48,7 +52,9 @@ contract BatchSystem is System {
     bytes calldata attachExtraData
   ) public returns (EntityId) {
     EntityId buildEntity = buildSystem.callAsRoot().jumpBuild(caller, slot, buildExtraData);
-    programSystem.callAsRoot().attachProgram(caller, buildEntity, program, attachExtraData);
+    if (buildEntity.exists()) {
+      programSystem.callAsRoot().attachProgram(caller, buildEntity, program, attachExtraData);
+    }
     return buildEntity;
   }
 
@@ -61,7 +67,9 @@ contract BatchSystem is System {
     bytes calldata attachExtraData
   ) public returns (EntityId) {
     EntityId buildEntity = buildSystem.callAsRoot().jumpBuildWithDirection(caller, slot, direction, buildExtraData);
-    programSystem.callAsRoot().attachProgram(caller, buildEntity, program, attachExtraData);
+    if (buildEntity.exists()) {
+      programSystem.callAsRoot().attachProgram(caller, buildEntity, program, attachExtraData);
+    }
     return buildEntity;
   }
 }

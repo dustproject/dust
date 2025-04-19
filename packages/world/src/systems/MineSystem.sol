@@ -39,7 +39,7 @@ import {
   getOrCreateEntityAt
 } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
-import { InventoryUtils } from "../utils/InventoryUtils.sol";
+import { InventoryUtils, ToolData } from "../utils/InventoryUtils.sol";
 import { DeathNotification, MineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
@@ -106,7 +106,10 @@ contract MineSystem is System {
       minedType = RandomResourceLib._collapseRandomOre(mined, coord);
     }
 
-    uint128 finalMass = MassReductionLib._processMassReduction(caller, callerCoord, mined, toolSlot);
+    (uint128 finalMass, bool canMine) = _processMassReduction(caller, callerCoord, toolSlot, mined);
+    if (!canMine) {
+      return mined;
+    }
 
     if (finalMass != 0) {
       Mass._setMass(mined, finalMass);
@@ -216,6 +219,52 @@ contract MineSystem is System {
       }
     }
   }
+
+  // TODO: this is ugly, but doing this to avoid stack too deep errors. We should refactor later.
+  function _processMassReduction(EntityId caller, Vec3 callerCoord, uint16 toolSlot, EntityId mined)
+    internal
+    returns (uint128, bool)
+  {
+    ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
+    (uint128 finalMass, uint128 toolMassReduction, uint128 energyReduction) = _getMassReduction(toolData, mined);
+
+    if (energyReduction > 0) {
+      // If player died, return early
+      (uint128 callerEnergy,) = transferEnergyToPool(caller, energyReduction);
+      if (callerEnergy == 0) {
+        return (finalMass, false);
+      }
+    }
+
+    // Apply tool usage after decreasing player energy so we make sure the player is alive
+    toolData.applyMassReduction(callerCoord, toolMassReduction);
+    return (finalMass, true);
+  }
+
+  function _getMassReduction(ToolData memory toolData, EntityId mined)
+    internal
+    view
+    returns (uint128, uint128, uint128)
+  {
+    uint128 massLeft = Mass._getMass(mined);
+    if (massLeft == 0) {
+      return (0, 0, 0);
+    }
+
+    uint128 toolMassReduction = toolData.getMassReduction(massLeft);
+
+    // if tool mass reduction is not enough, consume energy from player up to mine energy cost
+    uint128 energyReduction = 0;
+    if (toolMassReduction < massLeft) {
+      uint128 remaining = massLeft - toolMassReduction;
+      energyReduction = MINE_ENERGY_COST <= remaining ? MINE_ENERGY_COST : remaining;
+      massLeft -= energyReduction;
+    }
+
+    uint128 finalMass = massLeft - toolMassReduction;
+
+    return (finalMass, toolMassReduction, energyReduction);
+  }
 }
 
 library MineLib {
@@ -263,30 +312,6 @@ library MineLib {
     bytes memory onMine = abi.encodeCall(IMineHook.onMine, (caller, forceField, objectTypeId, coord, extraData));
 
     program.callOrRevert(onMine);
-  }
-}
-
-library MassReductionLib {
-  function _processMassReduction(EntityId caller, Vec3 callerCoord, EntityId mined, uint16 toolSlot)
-    public
-    returns (uint128)
-  {
-    uint128 massLeft = Mass._getMass(mined);
-    if (massLeft == 0) {
-      return 0;
-    }
-
-    (uint128 toolMassReduction,) = InventoryUtils.useTool(caller, callerCoord, toolSlot, massLeft);
-
-    // if tool mass reduction is not enough, consume energy from player up to mine energy cost
-    if (toolMassReduction < massLeft) {
-      uint128 remaining = massLeft - toolMassReduction;
-      uint128 energyReduction = MINE_ENERGY_COST <= remaining ? MINE_ENERGY_COST : remaining;
-      transferEnergyToPool(caller, energyReduction);
-      massLeft -= energyReduction;
-    }
-
-    return massLeft - toolMassReduction;
   }
 }
 
