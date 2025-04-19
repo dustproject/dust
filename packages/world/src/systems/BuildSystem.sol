@@ -55,6 +55,12 @@ contract BuildSystem is System {
     ObjectTypeId buildObjectType = InventorySlot._getObjectType(caller, slot);
     require(buildObjectType.isBlock(), "Cannot build non-block object");
 
+    // If player died, return early
+    (uint128 callerEnergy,) = transferEnergyToPool(caller, BUILD_ENERGY_COST);
+    if (callerEnergy == 0) {
+      return EntityId.wrap(0);
+    }
+
     (EntityId base, Vec3[] memory coords) = BuildLib._addBlocks(coord, buildObjectType, direction);
 
     if (buildObjectType.isSeed()) {
@@ -62,8 +68,6 @@ contract BuildSystem is System {
     }
 
     InventoryUtils.removeObjectFromSlot(caller, slot, 1);
-
-    transferEnergyToPool(caller, BUILD_ENERGY_COST);
 
     // Note: we call this after the build state has been updated, to prevent re-entrancy attacks
     BuildLib._requireBuildsAllowed(caller, base, buildObjectType, coords, extraData);

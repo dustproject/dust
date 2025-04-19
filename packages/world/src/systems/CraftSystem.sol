@@ -40,10 +40,10 @@ contract CraftSystem is System {
       caller.requireConnected(station);
     }
 
+    CraftLib._processEnergyReduction(caller);
+
     _consumeRecipeInputs(caller, recipe, inputs);
     _createRecipeOutputs(caller, recipe);
-
-    CraftLib.transferCraftEnergyToPool(caller);
 
     notify(caller, CraftNotification({ recipeId: recipeId, station: station }));
   }
@@ -115,7 +115,8 @@ contract CraftSystem is System {
 }
 
 library CraftLib {
-  function transferCraftEnergyToPool(EntityId caller) public {
-    transferEnergyToPool(caller, CRAFT_ENERGY_COST);
+  function _processEnergyReduction(EntityId caller) public {
+    (uint128 callerEnergy,) = transferEnergyToPool(caller, CRAFT_ENERGY_COST);
+    require(callerEnergy > 0, "Not enough energy");
   }
 }

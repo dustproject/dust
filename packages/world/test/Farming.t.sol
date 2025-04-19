@@ -173,7 +173,7 @@ contract FarmingTest is DustTest {
     world.till(aliceEntityId, dirtCoord, 0);
   }
 
-  function testTillFailsIfNotEnoughEnergy() public {
+  function testTillKillsIfNotEnoughEnergy() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     Vec3 dirtCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
@@ -189,8 +189,9 @@ contract FarmingTest is DustTest {
     );
 
     vm.prank(alice);
-    vm.expectRevert("Not enough energy");
     world.till(aliceEntityId, dirtCoord, 0);
+
+    assertPlayerIsDead(aliceEntityId, playerCoord);
   }
 
   function testPlantWheatSeeds() public {
