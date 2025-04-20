@@ -172,8 +172,7 @@ contract BuildTest is DustTest {
 
     (,, Vec3 bobCoord) = spawnPlayerOnAirChunk(aliceCoord + vec3(0, 0, 3));
 
-    ObjectTypeId buildObjectTypeId = ObjectTypes.Grass;
-    ObjectTypeMetadata.setCanPassThrough(buildObjectTypeId, true);
+    ObjectTypeId buildObjectTypeId = ObjectTypes.SakuraLeaf;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectTypeId, 4);
     assertInventoryHasObject(aliceEntityId, buildObjectTypeId, 4);
 

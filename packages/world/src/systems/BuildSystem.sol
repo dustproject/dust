@@ -86,7 +86,7 @@ contract BuildSystem is System {
     caller.activate();
 
     ObjectTypeId buildObjectType = InventorySlot._getObjectType(caller, slot);
-    require(!ObjectTypeMetadata._getCanPassThrough(buildObjectType), "Cannot jump build on a pass-through block");
+    require(!buildObjectType.isPassThrough(), "Cannot jump build on a pass-through block");
 
     Vec3 coord = MovablePosition._get(caller);
 
@@ -105,54 +105,54 @@ contract BuildSystem is System {
 }
 
 library BuildLib {
-  function _addBlock(ObjectTypeId buildObjectType, Vec3 coord) internal returns (EntityId) {
+  function _addBlock(ObjectTypeId buildType, Vec3 coord) internal returns (EntityId) {
     (EntityId terrain, ObjectTypeId terrainObjectTypeId) = getOrCreateEntityAt(coord);
     require(terrainObjectTypeId == ObjectTypes.Air, "Cannot build on a non-air block");
     require(Inventory._length(terrain) == 0, "Cannot build where there are dropped objects");
-    if (!ObjectTypeMetadata._getCanPassThrough(buildObjectType)) {
+    if (!buildType.isPassThrough()) {
       require(!getMovableEntityAt(coord).exists(), "Cannot build on a movable entity");
     }
 
-    ObjectType._set(terrain, buildObjectType);
+    ObjectType._set(terrain, buildType);
 
     return terrain;
   }
 
-  function _addBlocks(Vec3 baseCoord, ObjectTypeId buildObjectType, Direction direction)
+  function _addBlocks(Vec3 baseCoord, ObjectTypeId buildType, Direction direction)
     public
     returns (EntityId, Vec3[] memory)
   {
-    Vec3[] memory coords = buildObjectType.getRelativeCoords(baseCoord, direction);
-    EntityId base = _addBlock(buildObjectType, baseCoord);
+    Vec3[] memory coords = buildType.getRelativeCoords(baseCoord, direction);
+    EntityId base = _addBlock(buildType, baseCoord);
     Orientation._set(base, direction);
-    uint128 mass = ObjectTypeMetadata._getMass(buildObjectType);
+    uint128 mass = ObjectTypeMetadata._getMass(buildType);
     Mass._setMass(base, mass);
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];
-      EntityId relative = _addBlock(buildObjectType, relativeCoord);
+      EntityId relative = _addBlock(buildType, relativeCoord);
       BaseEntity._set(relative, base);
     }
     return (base, coords);
   }
 
-  function _handleSeed(EntityId base, ObjectTypeId buildObjectTypeId, Vec3 baseCoord) public {
+  function _handleSeed(EntityId base, ObjectTypeId buildType, Vec3 baseCoord) public {
     ObjectTypeId belowTypeId = getObjectTypeIdAt(baseCoord - vec3(0, 1, 0));
-    if (buildObjectTypeId.isCropSeed()) {
+    if (buildType.isCropSeed()) {
       require(belowTypeId == ObjectTypes.WetFarmland, "Crop seeds need wet farmland");
-    } else if (buildObjectTypeId.isTreeSeed()) {
+    } else if (buildType.isTreeSeed()) {
       require(belowTypeId == ObjectTypes.Dirt || belowTypeId == ObjectTypes.Grass, "Tree seeds need dirt or grass");
     }
 
-    removeEnergyFromLocalPool(baseCoord, ObjectTypeMetadata._getEnergy(buildObjectTypeId));
+    removeEnergyFromLocalPool(baseCoord, ObjectTypeMetadata._getEnergy(buildType));
 
-    SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildObjectTypeId.timeToGrow());
+    SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildType.timeToGrow());
   }
 
   function _requireBuildsAllowed(
     EntityId caller,
     EntityId base,
-    ObjectTypeId objectTypeId,
+    ObjectTypeId buildType,
     Vec3[] memory coords,
     bytes calldata extraData
   ) public {
@@ -161,7 +161,7 @@ library BuildLib {
       (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
 
       // If placing a forcefield, there should be no active forcefield at coord
-      if (objectTypeId == ObjectTypes.ForceField) {
+      if (buildType == ObjectTypes.ForceField) {
         require(!forceField.exists(), "Force field overlaps with another force field");
         ForceFieldUtils.setupForceField(base, coord);
       }
@@ -175,8 +175,7 @@ library BuildLib {
             program = forceField.getProgram();
           }
 
-          bytes memory onBuild =
-            abi.encodeCall(IBuildHook.onBuild, (caller, forceField, objectTypeId, coord, extraData));
+          bytes memory onBuild = abi.encodeCall(IBuildHook.onBuild, (caller, forceField, buildType, coord, extraData));
 
           program.callOrRevert(onBuild);
         }

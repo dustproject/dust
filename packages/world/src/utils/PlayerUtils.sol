@@ -54,7 +54,7 @@ library PlayerUtils {
     // Check if the spawn location is valid
     ObjectTypeId terrainObjectTypeId = safeGetObjectTypeIdAt(playerCoord);
     require(
-      ObjectTypeMetadata._getCanPassThrough(terrainObjectTypeId) && !getMovableEntityAt(playerCoord).exists(),
+      terrainObjectTypeId.isPassThrough() && !getMovableEntityAt(playerCoord).exists(),
       "Cannot spawn on a non-passable block"
     );
 
@@ -68,8 +68,7 @@ library PlayerUtils {
       Vec3 relativeCoord = coords[i];
       ObjectTypeId relativeTerrainObjectTypeId = safeGetObjectTypeIdAt(relativeCoord);
       require(
-        ObjectTypeMetadata._getCanPassThrough(relativeTerrainObjectTypeId)
-          && !getMovableEntityAt(relativeCoord).exists(),
+        relativeTerrainObjectTypeId.isPassThrough() && !getMovableEntityAt(relativeCoord).exists(),
         "Cannot spawn on a non-passable block"
       );
       EntityId relativePlayer = getUniqueEntity();

@@ -78,9 +78,6 @@ export default defineWorld({
     ObjectTypeMetadata: {
       schema: {
         objectTypeId: "ObjectTypeId",
-        canPassThrough: "bool",
-        stackable: "uint16",
-        maxInventorySlots: "uint16",
         mass: "uint128",
         energy: "uint128",
       },

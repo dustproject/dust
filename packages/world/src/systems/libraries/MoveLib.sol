@@ -34,7 +34,7 @@ library MoveLib {
       Vec3 newCoord = newPlayerCoords[i];
 
       ObjectTypeId newObjectTypeId = safeGetObjectTypeIdAt(newCoord);
-      require(ObjectTypeMetadata._getCanPassThrough(newObjectTypeId), "Cannot move through a non-passable block");
+      require(newObjectTypeId.isPassThrough(), "Cannot move through a non-passable block");
 
       require(!getMovableEntityAt(newCoord).exists(), "Cannot move through a player");
     }
@@ -55,7 +55,7 @@ library MoveLib {
 
     ObjectTypeId belowObjectTypeId = safeGetObjectTypeIdAt(belowCoord);
     // Players can swim in water so we don't want to apply gravity to them
-    if (belowObjectTypeId == ObjectTypes.Water || !ObjectTypeMetadata._getCanPassThrough(belowObjectTypeId)) {
+    if (belowObjectTypeId == ObjectTypes.Water || !belowObjectTypeId.isPassThrough()) {
       return false;
     }
 

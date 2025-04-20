@@ -71,7 +71,7 @@ contract AdminSystem is System {
       Vec3 newCoord = newPlayerCoords[i];
 
       ObjectTypeId newObjectTypeId = safeGetObjectTypeIdAt(newCoord);
-      require(ObjectTypeMetadata._getCanPassThrough(newObjectTypeId), "Cannot teleport to a non-passable block");
+      require(newObjectTypeId.isPassThrough(), "Cannot teleport to a non-passable block");
       require(!getMovableEntityAt(newCoord).exists(), "Cannot teleport where a player already exists");
 
       setMovableEntityAt(newCoord, players[i]);

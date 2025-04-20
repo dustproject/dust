@@ -93,31 +93,22 @@ contract SpawnSystem is System {
 
   function isValidSpawn(Vec3 spawnCoord) public view returns (bool) {
     Vec3 belowCoord = spawnCoord - vec3(0, 1, 0);
-    Vec3 topCoord = spawnCoord + vec3(0, 1, 0);
+    Vec3 aboveCoord = spawnCoord + vec3(0, 1, 0);
 
-    ObjectTypeId spawnObjectTypeId = getObjectTypeIdAt(spawnCoord);
-    if (
-      spawnObjectTypeId.isNull() || !ObjectTypeMetadata._getCanPassThrough(spawnObjectTypeId)
-        || getMovableEntityAt(spawnCoord).exists()
-    ) {
+    ObjectTypeId spawnType = getObjectTypeIdAt(spawnCoord);
+    if (spawnType.isNull() || !spawnType.isPassThrough() || getMovableEntityAt(spawnCoord).exists()) {
       return false;
     }
 
-    ObjectTypeId topObjectTypeId = getObjectTypeIdAt(topCoord);
-    if (
-      topObjectTypeId.isNull() || !ObjectTypeMetadata._getCanPassThrough(topObjectTypeId)
-        || getMovableEntityAt(topCoord).exists()
-    ) {
+    ObjectTypeId aboveType = getObjectTypeIdAt(aboveCoord);
+    if (aboveType.isNull() || !aboveType.isPassThrough() || getMovableEntityAt(aboveCoord).exists()) {
       return false;
     }
 
-    ObjectTypeId belowObjectTypeId = getObjectTypeIdAt(belowCoord);
+    ObjectTypeId belowType = getObjectTypeIdAt(belowCoord);
     if (
-      belowObjectTypeId.isNull()
-        || (
-          belowObjectTypeId != ObjectTypes.Water && ObjectTypeMetadata._getCanPassThrough(belowObjectTypeId)
-            && !getMovableEntityAt(belowCoord).exists()
-        )
+      belowType.isNull()
+        || (belowType != ObjectTypes.Water && belowType.isPassThrough() && !getMovableEntityAt(belowCoord).exists())
     ) {
       return false;
     }

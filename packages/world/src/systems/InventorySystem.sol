@@ -25,8 +25,8 @@ contract InventorySystem is System {
     caller.activate();
     caller.requireConnected(coord);
 
-    (EntityId entityId, ObjectTypeId objectTypeId) = getOrCreateEntityAt(coord);
-    require(ObjectTypeMetadata._getCanPassThrough(objectTypeId), "Cannot drop on a non-passable block");
+    (EntityId entityId, ObjectTypeId objectType) = getOrCreateEntityAt(coord);
+    require(objectType.isPassThrough(), "Cannot drop on a non-passable block");
 
     InventoryUtils.transfer(caller, entityId, slotTransfers);
     notify(caller, DropNotification({ dropCoord: coord }));
@@ -39,8 +39,8 @@ contract InventorySystem is System {
     EntityId entityId = ReversePosition._get(coord);
     require(entityId.exists(), "No entity at pickup location");
 
-    ObjectTypeId objectTypeId = ObjectType._get(entityId);
-    require(ObjectTypeMetadata._getCanPassThrough(objectTypeId), "Cannot pickup from a non-passable block");
+    ObjectTypeId objectType = ObjectType._get(entityId);
+    require(objectType.isPassThrough(), "Cannot pickup from a non-passable block");
 
     InventoryUtils.transfer(entityId, caller, slotTransfers);
   }
@@ -53,7 +53,7 @@ contract InventorySystem is System {
     require(entityId.exists(), "No entity at pickup location");
 
     ObjectTypeId objectTypeId = ObjectType._get(entityId);
-    require(ObjectTypeMetadata._getCanPassThrough(objectTypeId), "Cannot pickup from a non-passable block");
+    require(objectTypeId.isPassThrough(), "Cannot pickup from a non-passable block");
 
     InventoryUtils.transferAll(entityId, caller);
 
