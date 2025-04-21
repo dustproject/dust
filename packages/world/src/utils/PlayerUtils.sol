@@ -6,8 +6,9 @@ import { WorldContextConsumerLib } from "@latticexyz/world/src/WorldContext.sol"
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
-import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { Player } from "../codegen/tables/Player.sol";
@@ -16,12 +17,12 @@ import { ReversePlayer } from "../codegen/tables/ReversePlayer.sol";
 
 import { FragmentPosition, MovablePosition, Position, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
 
-import { ObjectTypeId } from "../ObjectTypeId.sol";
-import { ObjectTypes } from "../ObjectTypes.sol";
+import { ObjectType } from "../ObjectType.sol";
+import { ObjectTypes } from "../ObjectType.sol";
 import { checkWorldStatus, getUniqueEntity } from "../Utils.sol";
 import { updatePlayerEnergy } from "./EnergyUtils.sol";
 
-import { getMovableEntityAt, getOrCreateEntityAt, safeGetObjectTypeIdAt, setMovableEntityAt } from "./EntityUtils.sol";
+import { getMovableEntityAt, getOrCreateEntityAt, safeGetObjectTypeAt, setMovableEntityAt } from "./EntityUtils.sol";
 import { InventoryUtils } from "./InventoryUtils.sol";
 
 import { FRAGMENT_SIZE, PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
@@ -31,7 +32,7 @@ import { Vec3, vec3 } from "../Vec3.sol";
 
 import { DeathNotification, notify } from "./NotifUtils.sol";
 
-using ObjectTypeLib for ObjectTypeId;
+using ObjectTypeLib for ObjectType;
 
 library PlayerUtils {
   function getOrCreatePlayer() internal returns (EntityId) {
@@ -44,7 +45,7 @@ library PlayerUtils {
       ReversePlayer._set(player, playerAddress);
 
       // Set the player object type first
-      ObjectType._set(player, ObjectTypes.Player);
+      EntityObjectType._set(player, ObjectTypes.Player);
     }
 
     return player;
@@ -52,9 +53,9 @@ library PlayerUtils {
 
   function addPlayerToGrid(EntityId player, Vec3 playerCoord) internal {
     // Check if the spawn location is valid
-    ObjectTypeId terrainObjectTypeId = safeGetObjectTypeIdAt(playerCoord);
+    ObjectType terrainObjectType = safeGetObjectTypeAt(playerCoord);
     require(
-      terrainObjectTypeId.isPassThrough() && !getMovableEntityAt(playerCoord).exists(),
+      terrainObjectType.isPassThrough() && !getMovableEntityAt(playerCoord).exists(),
       "Cannot spawn on a non-passable block"
     );
 
@@ -66,13 +67,13 @@ library PlayerUtils {
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];
-      ObjectTypeId relativeTerrainObjectTypeId = safeGetObjectTypeIdAt(relativeCoord);
+      ObjectType relativeTerrainObjectType = safeGetObjectTypeAt(relativeCoord);
       require(
-        relativeTerrainObjectTypeId.isPassThrough() && !getMovableEntityAt(relativeCoord).exists(),
+        relativeTerrainObjectType.isPassThrough() && !getMovableEntityAt(relativeCoord).exists(),
         "Cannot spawn on a non-passable block"
       );
       EntityId relativePlayer = getUniqueEntity();
-      ObjectType._set(relativePlayer, ObjectTypes.Player);
+      EntityObjectType._set(relativePlayer, ObjectTypes.Player);
       setMovableEntityAt(relativeCoord, relativePlayer);
       BaseEntity._set(relativePlayer, player);
     }
@@ -89,7 +90,7 @@ library PlayerUtils {
       EntityId relativePlayer = getMovableEntityAt(relativeCoord);
       MovablePosition._deleteRecord(relativePlayer);
       ReverseMovablePosition._deleteRecord(relativeCoord);
-      ObjectType._deleteRecord(relativePlayer);
+      EntityObjectType._deleteRecord(relativePlayer);
       BaseEntity._deleteRecord(relativePlayer);
     }
   }

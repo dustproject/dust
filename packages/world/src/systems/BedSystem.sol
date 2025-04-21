@@ -7,9 +7,9 @@ import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Fragment } from "../codegen/tables/Fragment.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
-import { ObjectType } from "../codegen/tables/ObjectType.sol";
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { Player } from "../codegen/tables/Player.sol";
 import { PlayerStatus } from "../codegen/tables/PlayerStatus.sol";
@@ -17,8 +17,8 @@ import { PlayerStatus } from "../codegen/tables/PlayerStatus.sol";
 import { Position } from "../utils/Vec3Storage.sol";
 
 import { MAX_RESPAWN_HALF_WIDTH, PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
-import { ObjectTypeId } from "../ObjectTypeId.sol";
-import { ObjectTypes } from "../ObjectTypes.sol";
+import { ObjectType } from "../ObjectType.sol";
+import { ObjectTypes } from "../ObjectType.sol";
 import { checkWorldStatus, getUniqueEntity } from "../Utils.sol";
 
 import {
@@ -115,8 +115,8 @@ contract BedSystem is System {
     // TODO: use a different constant?
     require(bedCoord.inSurroundingCube(dropCoord, MAX_RESPAWN_HALF_WIDTH), "Drop location is too far from bed");
 
-    (EntityId drop, ObjectTypeId objectTypeId) = getOrCreateEntityAt(dropCoord);
-    require(objectTypeId.isPassThrough(), "Cannot drop items on a non-passable block");
+    (EntityId drop, ObjectType objectType) = getOrCreateEntityAt(dropCoord);
+    require(objectType.isPassThrough(), "Cannot drop items on a non-passable block");
 
     (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
 

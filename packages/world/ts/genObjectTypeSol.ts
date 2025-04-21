@@ -1,8 +1,10 @@
 import {
   type Category,
+  allCategories,
   allCategoryMetadata,
   blockCategories,
   blockCategoryMetadata,
+  hasAnyCategories,
   nonBlockCategoryMetadata,
   objects,
   passThroughCategories,
@@ -15,7 +17,7 @@ function formatCategoryName(name: string): string {
 
 function renderMetaCategoryMask(categories: Category[]): string {
   return categories
-    .map((cat) => `(uint128(1) << ${blockCategories.indexOf(cat) + 1})`)
+    .map((cat) => `(uint128(1) << (${cat} >> CATEGORY_SHIFT))`)
     .join(" | ");
 }
 
@@ -39,17 +41,26 @@ library Category {
   // Block Categories
 ${blockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(${cat.id}) << CATEGORY_SHIFT;`).join("\n")}
   // Non-Block Categories
-${nonBlockCategoryMetadata
-  .map(
-    (cat) =>
-      `  uint16 constant ${cat.name} = uint16(${cat.id}) << CATEGORY_SHIFT;`,
-  )
-  .join("\n")}
+${nonBlockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(${cat.id}) << CATEGORY_SHIFT;`).join("\n")}
   // ------------------------------------------------------------
   // Meta Category Masks (fits within uint128; mask bit k set if raw category ID k belongs)
   uint128 constant BLOCK_MASK = uint128(type(uint64).max);
+  uint128 constant HAS_ANY_MASK = ${renderMetaCategoryMask(hasAnyCategories)};
   uint128 constant PASS_THROUGH_MASK = ${renderMetaCategoryMask(passThroughCategories)};
-  uint128 constant IS_MINEABLE_MASK = BLOCK_MASK & ~(uint128(1) << ${blockCategories.indexOf("NON_SOLID") + 1});
+  uint128 constant MINEABLE_MASK = BLOCK_MASK & ~${renderMetaCategoryMask(["NON_SOLID"])};
+}
+
+
+// ------------------------------------------------------------
+// Object Types
+// ------------------------------------------------------------
+library ObjectTypes {
+${objects
+  .map((obj) => {
+    const categoryRef = `Category.${obj.category}`;
+    return `  ObjectType constant ${obj.name} = ObjectType.wrap(${categoryRef} | ${obj.id});`;
+  })
+  .join("\n")}
 }
 
 // ------------------------------------------------------------
@@ -79,35 +90,50 @@ ${allCategoryMetadata
   .map(
     (cat) => `
   function is${formatCategoryName(cat.name)}(ObjectType self) internal pure returns (bool) {
-    return category(self) == ${cat.id};
+    return category(self) == Category.${cat.name};
   }`,
   )
   .join("")}
 
+
   // Meta Category Checks
+  function isAny(ObjectType self) internal pure returns (bool) {
+    // Check if:
+    // 1. ID bits are all 0
+    // 2. Category is one that supports "Any" types
+    uint16 c = self.category();
+    uint16 idx = self.unwrap() & ~CATEGORY_MASK;
+
+    return idx == 0 && ((uint128(1) << (c >> CATEGORY_SHIFT)) & Category.HAS_ANY_MASK) != 0;
+  }
+
   function isPassThrough(ObjectType self) internal pure returns (bool) {
     uint16 c = category(self);
-    return ((uint128(1) << c) & Category.PASS_THROUGH_MASK) != 0;
+    return ((uint128(1) << (c >> CATEGORY_SHIFT)) & Category.PASS_THROUGH_MASK) != 0;
   }
 
   function isMineable(ObjectType self) internal pure returns (bool) {
     uint16 c = category(self);
-    return ((uint128(1) << c) & Category.IS_MINEABLE_MASK) != 0;
+    return ((uint128(1) << (c >> CATEGORY_SHIFT)) & Category.MINEABLE_MASK) != 0;
+  }
+
+  function matches(ObjectType self, ObjectType other) internal pure returns (bool) {
+    if (self.isAny()) {
+      return self.category() == other.category();
+    }
+    return self == other;
   }
 }
 
-// ------------------------------------------------------------
-// Object Types
-// ------------------------------------------------------------
-library ObjectTypes {
-${objects
-  .filter((obj) => obj.mass !== 0n || obj.energy !== 0n)
-  .map((obj) => {
-    const categoryRef = `Category.${obj.category}`;
-    return `  ObjectType constant ${obj.name} = ObjectType.wrap(${categoryRef} | ${obj.id});`;
-  })
-  .join("\n")}
+function eq(ObjectType self, ObjectType other) pure returns (bool) {
+  return ObjectType.unwrap(self) == ObjectType.unwrap(other);
 }
+
+function neq(ObjectType self, ObjectType other) pure returns (bool) {
+  return ObjectType.unwrap(self) != ObjectType.unwrap(other);
+}
+
+using { eq as ==, neq as != } for ObjectType global;
 
 using ObjectTypeLib for ObjectType global;
 `;

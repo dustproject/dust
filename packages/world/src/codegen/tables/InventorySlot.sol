@@ -18,11 +18,11 @@ import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
 // Import user types
 import { EntityId } from "../../EntityId.sol";
-import { ObjectTypeId } from "../../ObjectTypeId.sol";
+import { ObjectType } from "../../ObjectType.sol";
 
 struct InventorySlotData {
   EntityId entityId;
-  ObjectTypeId objectType;
+  ObjectType objectType;
   uint16 amount;
   uint16 occupiedIndex;
   uint16 typeIndex;
@@ -126,47 +126,47 @@ library InventorySlot {
   /**
    * @notice Get objectType.
    */
-  function getObjectType(EntityId owner, uint16 slot) internal view returns (ObjectTypeId objectType) {
+  function getObjectType(EntityId owner, uint16 slot) internal view returns (ObjectType objectType) {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(owner);
     _keyTuple[1] = bytes32(uint256(slot));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 1, _fieldLayout);
-    return ObjectTypeId.wrap(uint16(bytes2(_blob)));
+    return ObjectType.wrap(uint16(bytes2(_blob)));
   }
 
   /**
    * @notice Get objectType.
    */
-  function _getObjectType(EntityId owner, uint16 slot) internal view returns (ObjectTypeId objectType) {
+  function _getObjectType(EntityId owner, uint16 slot) internal view returns (ObjectType objectType) {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(owner);
     _keyTuple[1] = bytes32(uint256(slot));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 1, _fieldLayout);
-    return ObjectTypeId.wrap(uint16(bytes2(_blob)));
+    return ObjectType.wrap(uint16(bytes2(_blob)));
   }
 
   /**
    * @notice Set objectType.
    */
-  function setObjectType(EntityId owner, uint16 slot, ObjectTypeId objectType) internal {
+  function setObjectType(EntityId owner, uint16 slot, ObjectType objectType) internal {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(owner);
     _keyTuple[1] = bytes32(uint256(slot));
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked(ObjectTypeId.unwrap(objectType)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked(ObjectType.unwrap(objectType)), _fieldLayout);
   }
 
   /**
    * @notice Set objectType.
    */
-  function _setObjectType(EntityId owner, uint16 slot, ObjectTypeId objectType) internal {
+  function _setObjectType(EntityId owner, uint16 slot, ObjectType objectType) internal {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(owner);
     _keyTuple[1] = bytes32(uint256(slot));
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked(ObjectTypeId.unwrap(objectType)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked(ObjectType.unwrap(objectType)), _fieldLayout);
   }
 
   /**
@@ -346,7 +346,7 @@ library InventorySlot {
     EntityId owner,
     uint16 slot,
     EntityId entityId,
-    ObjectTypeId objectType,
+    ObjectType objectType,
     uint16 amount,
     uint16 occupiedIndex,
     uint16 typeIndex
@@ -370,7 +370,7 @@ library InventorySlot {
     EntityId owner,
     uint16 slot,
     EntityId entityId,
-    ObjectTypeId objectType,
+    ObjectType objectType,
     uint16 amount,
     uint16 occupiedIndex,
     uint16 typeIndex
@@ -439,11 +439,11 @@ library InventorySlot {
   )
     internal
     pure
-    returns (EntityId entityId, ObjectTypeId objectType, uint16 amount, uint16 occupiedIndex, uint16 typeIndex)
+    returns (EntityId entityId, ObjectType objectType, uint16 amount, uint16 occupiedIndex, uint16 typeIndex)
   {
     entityId = EntityId.wrap(Bytes.getBytes32(_blob, 0));
 
-    objectType = ObjectTypeId.wrap(uint16(Bytes.getBytes2(_blob, 32)));
+    objectType = ObjectType.wrap(uint16(Bytes.getBytes2(_blob, 32)));
 
     amount = (uint16(Bytes.getBytes2(_blob, 34)));
 
@@ -496,7 +496,7 @@ library InventorySlot {
    */
   function encodeStatic(
     EntityId entityId,
-    ObjectTypeId objectType,
+    ObjectType objectType,
     uint16 amount,
     uint16 occupiedIndex,
     uint16 typeIndex
@@ -512,7 +512,7 @@ library InventorySlot {
    */
   function encode(
     EntityId entityId,
-    ObjectTypeId objectType,
+    ObjectType objectType,
     uint16 amount,
     uint16 occupiedIndex,
     uint16 typeIndex

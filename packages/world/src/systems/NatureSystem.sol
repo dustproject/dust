@@ -3,8 +3,8 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Inventory } from "../codegen/tables/Inventory.sol";
-import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
 import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
@@ -13,8 +13,8 @@ import { ChunkCommitment, Position, ResourcePosition, ReversePosition } from "..
 
 import { CHUNK_COMMIT_EXPIRY_BLOCKS, CHUNK_COMMIT_HALF_WIDTH, RESPAWN_ORE_BLOCK_RANGE } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
-import { ObjectTypeId } from "../ObjectTypeId.sol";
-import { ObjectTypes } from "../ObjectTypes.sol";
+import { ObjectType } from "../ObjectType.sol";
+import { ObjectTypes } from "../ObjectType.sol";
 
 import { Vec3 } from "../Vec3.sol";
 
@@ -33,7 +33,7 @@ contract NatureSystem is System {
     ChunkCommitment._set(chunkCoord, block.number + 1);
   }
 
-  function respawnResource(uint256 blockNumber, ObjectTypeId objectType) public {
+  function respawnResource(uint256 blockNumber, ObjectType objectType) public {
     require(
       blockNumber < block.number && blockNumber >= block.number - RESPAWN_ORE_BLOCK_RANGE,
       "Can only choose past 10 blocks"
@@ -49,8 +49,8 @@ contract NatureSystem is System {
 
     // Check existing entity
     EntityId entityId = ReversePosition._get(resourceCoord);
-    ObjectTypeId objectTypeId = ObjectType._get(entityId);
-    require(objectTypeId == ObjectTypes.Air, "Resource coordinate is not air");
+    ObjectType objectType = EntityObjectType._get(entityId);
+    require(objectType == ObjectTypes.Air, "Resource coordinate is not air");
     require(Inventory._length(entityId) == 0, "Cannot respawn where there are dropped objects");
 
     // Remove from collected resource array
@@ -65,7 +65,7 @@ contract NatureSystem is System {
     ResourceCount._set(objectType, collected - 1);
 
     // This is enough to respawn the resource block, as it will be read from the original terrain next time
-    ObjectType._deleteRecord(entityId);
+    EntityObjectType._deleteRecord(entityId);
     Position._deleteRecord(entityId);
     ReversePosition._deleteRecord(resourceCoord);
   }

@@ -62,7 +62,7 @@ export default defineWorld({
     ],
   },
   userTypes: {
-    ObjectTypeId: { filePath: "./src/ObjectTypeId.sol", type: "uint16" },
+    ObjectType: { filePath: "./src/ObjectType.sol", type: "uint16" },
     EntityId: { filePath: "./src/EntityId.sol", type: "bytes32" },
     ProgramId: { filePath: "./src/ProgramId.sol", type: "bytes32" },
     ResourceId: {
@@ -77,16 +77,16 @@ export default defineWorld({
     // ------------------------------------------------------------
     ObjectTypeMetadata: {
       schema: {
-        objectTypeId: "ObjectTypeId",
+        objectType: "ObjectType",
         mass: "uint128",
         energy: "uint128",
       },
-      key: ["objectTypeId"],
+      key: ["objectType"],
     },
     Recipes: {
       schema: {
         recipeId: "bytes32",
-        stationTypeId: "ObjectTypeId",
+        stationTypeId: "ObjectType",
         inputTypes: "uint16[]",
         inputAmounts: "uint16[]",
         outputTypes: "uint16[]",
@@ -106,10 +106,10 @@ export default defineWorld({
     // ------------------------------------------------------------
     // Grid
     // ------------------------------------------------------------
-    ObjectType: {
+    EntityObjectType: {
       schema: {
         entityId: "EntityId",
-        objectTypeId: "ObjectTypeId",
+        objectType: "ObjectType",
       },
       key: ["entityId"],
     },
@@ -210,7 +210,7 @@ export default defineWorld({
         owner: "EntityId",
         slot: "uint16",
         entityId: "EntityId",
-        objectType: "ObjectTypeId",
+        objectType: "ObjectType",
         amount: "uint16",
         // TODO: we could make them bigger but not sure if neeed
         occupiedIndex: "uint16",
@@ -221,7 +221,7 @@ export default defineWorld({
     InventoryTypeSlots: {
       schema: {
         owner: "EntityId",
-        objectType: "ObjectTypeId",
+        objectType: "ObjectType",
         slots: "uint16[]", // All slots containing this object type
       },
       key: ["owner", "objectType"],
@@ -341,27 +341,27 @@ export default defineWorld({
     },
     ResourcePosition: {
       schema: {
-        objectTypeId: "ObjectTypeId",
+        objectType: "ObjectType",
         index: "uint256",
         x: "int32",
         y: "int32",
         z: "int32",
       },
-      key: ["objectTypeId", "index"],
+      key: ["objectType", "index"],
     },
     ResourceCount: {
       schema: {
-        objectTypeId: "ObjectTypeId",
+        objectType: "ObjectType",
         count: "uint256",
       },
-      key: ["objectTypeId"],
+      key: ["objectType"],
     },
     BurnedResourceCount: {
       schema: {
-        objectTypeId: "ObjectTypeId",
+        objectType: "ObjectType",
         count: "uint256",
       },
-      key: ["objectTypeId"],
+      key: ["objectType"],
     },
     // ------------------------------------------------------------
     // Farming

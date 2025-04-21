@@ -13,7 +13,7 @@ import { TestUtils } from "./utils/TestUtils.sol";
 import { EntityId } from "../src/EntityId.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
-import { ObjectType } from "../src/codegen/tables/ObjectType.sol";
+import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest, console } from "./DustTest.sol";
@@ -24,9 +24,10 @@ import {
   CHUNK_SIZE, MACHINE_ENERGY_DRAIN_RATE, MAX_PLAYER_ENERGY, PLAYER_ENERGY_DRAIN_RATE
 } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
-import { ObjectTypeId } from "../src/ObjectTypeId.sol";
+import { ObjectType } from "../src/ObjectType.sol";
+
+import { ObjectTypes } from "../src/ObjectType.sol";
 import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
-import { ObjectTypes } from "../src/ObjectTypes.sol";
 import { ProgramId } from "../src/ProgramId.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
@@ -36,7 +37,7 @@ contract TestSpawnProgram is System {
 }
 
 contract SpawnTest is DustTest {
-  using ObjectTypeLib for ObjectTypeId;
+  using ObjectTypeLib for ObjectType;
 
   function testRandomSpawn() public {
     uint256 blockNumber = block.number - 5;

@@ -6,10 +6,11 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { Action, Direction } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Inventory } from "../codegen/tables/Inventory.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
-import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { Orientation } from "../codegen/tables/Orientation.sol";
@@ -21,7 +22,7 @@ import { MovablePosition, ReverseMovablePosition } from "../utils/Vec3Storage.so
 import { getUniqueEntity } from "../Utils.sol";
 
 import { removeEnergyFromLocalPool, transferEnergyToPool, updateMachineEnergy } from "../utils/EnergyUtils.sol";
-import { getMovableEntityAt, getObjectTypeIdAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
+import { getMovableEntityAt, getObjectTypeAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { BuildNotification, MoveNotification, notify } from "../utils/NotifUtils.sol";
@@ -31,15 +32,16 @@ import { TerrainLib } from "./libraries/TerrainLib.sol";
 
 import { BUILD_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
-import { ObjectTypeId } from "../ObjectTypeId.sol";
+import { ObjectType } from "../ObjectType.sol";
+
+import { ObjectTypes } from "../ObjectType.sol";
 import { ObjectTypeLib } from "../ObjectTypeLib.sol";
-import { ObjectTypes } from "../ObjectTypes.sol";
 
 import { ProgramId } from "../ProgramId.sol";
 import { IBuildHook } from "../ProgramInterfaces.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
 
-using ObjectTypeLib for ObjectTypeId;
+using ObjectTypeLib for ObjectType;
 
 contract BuildSystem is System {
   function build(EntityId caller, Vec3 coord, uint16 slot, bytes calldata extraData) public returns (EntityId) {
@@ -52,7 +54,7 @@ contract BuildSystem is System {
   {
     caller.activate();
     caller.requireConnected(coord);
-    ObjectTypeId buildObjectType = InventorySlot._getObjectType(caller, slot);
+    ObjectType buildObjectType = InventorySlot._getObjectType(caller, slot);
     require(buildObjectType.isBlock(), "Cannot build non-block object");
 
     // If player died, return early
@@ -72,9 +74,7 @@ contract BuildSystem is System {
     // Note: we call this after the build state has been updated, to prevent re-entrancy attacks
     BuildLib._requireBuildsAllowed(caller, base, buildObjectType, coords, extraData);
 
-    notify(
-      caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectTypeId: buildObjectType })
-    );
+    notify(caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectType: buildObjectType }));
 
     return base;
   }
@@ -85,7 +85,7 @@ contract BuildSystem is System {
   {
     caller.activate();
 
-    ObjectTypeId buildObjectType = InventorySlot._getObjectType(caller, slot);
+    ObjectType buildObjectType = InventorySlot._getObjectType(caller, slot);
     require(!buildObjectType.isPassThrough(), "Cannot jump build on a pass-through block");
 
     Vec3 coord = MovablePosition._get(caller);
@@ -105,20 +105,20 @@ contract BuildSystem is System {
 }
 
 library BuildLib {
-  function _addBlock(ObjectTypeId buildType, Vec3 coord) internal returns (EntityId) {
-    (EntityId terrain, ObjectTypeId terrainObjectTypeId) = getOrCreateEntityAt(coord);
-    require(terrainObjectTypeId == ObjectTypes.Air, "Cannot build on a non-air block");
+  function _addBlock(ObjectType buildType, Vec3 coord) internal returns (EntityId) {
+    (EntityId terrain, ObjectType terrainObjectType) = getOrCreateEntityAt(coord);
+    require(terrainObjectType == ObjectTypes.Air, "Cannot build on a non-air block");
     require(Inventory._length(terrain) == 0, "Cannot build where there are dropped objects");
     if (!buildType.isPassThrough()) {
       require(!getMovableEntityAt(coord).exists(), "Cannot build on a movable entity");
     }
 
-    ObjectType._set(terrain, buildType);
+    EntityObjectType._set(terrain, buildType);
 
     return terrain;
   }
 
-  function _addBlocks(Vec3 baseCoord, ObjectTypeId buildType, Direction direction)
+  function _addBlocks(Vec3 baseCoord, ObjectType buildType, Direction direction)
     public
     returns (EntityId, Vec3[] memory)
   {
@@ -136,8 +136,8 @@ library BuildLib {
     return (base, coords);
   }
 
-  function _handleSeed(EntityId base, ObjectTypeId buildType, Vec3 baseCoord) public {
-    ObjectTypeId belowTypeId = getObjectTypeIdAt(baseCoord - vec3(0, 1, 0));
+  function _handleSeed(EntityId base, ObjectType buildType, Vec3 baseCoord) public {
+    ObjectType belowTypeId = getObjectTypeAt(baseCoord - vec3(0, 1, 0));
     if (buildType.isCropSeed()) {
       require(belowTypeId == ObjectTypes.WetFarmland, "Crop seeds need wet farmland");
     } else if (buildType.isTreeSeed()) {
@@ -152,7 +152,7 @@ library BuildLib {
   function _requireBuildsAllowed(
     EntityId caller,
     EntityId base,
-    ObjectTypeId buildType,
+    ObjectType buildType,
     Vec3[] memory coords,
     bytes calldata extraData
   ) public {

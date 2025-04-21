@@ -42,146 +42,22 @@ library Category {
   // ------------------------------------------------------------
   // Meta Category Masks (fits within uint128; mask bit k set if raw category ID k belongs)
   uint128 constant BLOCK_MASK = uint128(type(uint64).max);
-  uint128 constant PASS_THROUGH_MASK = (uint128(1) << 1) | (uint128(1) << 9) | (uint128(1) << 10) | (uint128(1) << 16)
-    | (uint128(1) << 11) | (uint128(1) << 12) | (uint128(1) << 13);
-  uint128 constant IS_MINEABLE_MASK = BLOCK_MASK & ~(uint128(1) << 1);
-}
-
-// ------------------------------------------------------------
-library ObjectTypeLib {
-  function unwrap(ObjectType self) internal pure returns (uint16) {
-    return ObjectType.unwrap(self);
-  }
-
-  /// @dev Extract raw category ID from the top bits
-  function category(ObjectType self) internal pure returns (uint16) {
-    return self.unwrap() & CATEGORY_MASK;
-  }
-
-  /// @dev True if this is the null object
-  function isNull(ObjectType self) internal pure returns (bool) {
-    return self.unwrap() == 0;
-  }
-
-  /// @dev True if this is any block category
-  function isBlock(ObjectType self) internal pure returns (bool) {
-    return category(self) < BLOCK_CATEGORY_COUNT && !self.isNull();
-  }
-
-  // Direct Category Checks
-
-  function isNon_solid(ObjectType self) internal pure returns (bool) {
-    return category(self) == 1;
-  }
-
-  function isStone(ObjectType self) internal pure returns (bool) {
-    return category(self) == 2;
-  }
-
-  function isGemstone(ObjectType self) internal pure returns (bool) {
-    return category(self) == 3;
-  }
-
-  function isSoil(ObjectType self) internal pure returns (bool) {
-    return category(self) == 4;
-  }
-
-  function isOre(ObjectType self) internal pure returns (bool) {
-    return category(self) == 5;
-  }
-
-  function isSand(ObjectType self) internal pure returns (bool) {
-    return category(self) == 6;
-  }
-
-  function isClay(ObjectType self) internal pure returns (bool) {
-    return category(self) == 7;
-  }
-
-  function isLog(ObjectType self) internal pure returns (bool) {
-    return category(self) == 8;
-  }
-
-  function isLeaf(ObjectType self) internal pure returns (bool) {
-    return category(self) == 9;
-  }
-
-  function isFlower(ObjectType self) internal pure returns (bool) {
-    return category(self) == 10;
-  }
-
-  function isGreenery(ObjectType self) internal pure returns (bool) {
-    return category(self) == 11;
-  }
-
-  function isCrop(ObjectType self) internal pure returns (bool) {
-    return category(self) == 12;
-  }
-
-  function isUnderwater_plant(ObjectType self) internal pure returns (bool) {
-    return category(self) == 13;
-  }
-
-  function isPlank(ObjectType self) internal pure returns (bool) {
-    return category(self) == 14;
-  }
-
-  function isOre_block(ObjectType self) internal pure returns (bool) {
-    return category(self) == 15;
-  }
-
-  function isGrowable(ObjectType self) internal pure returns (bool) {
-    return category(self) == 16;
-  }
-
-  function isStation(ObjectType self) internal pure returns (bool) {
-    return category(self) == 17;
-  }
-
-  function isSmart(ObjectType self) internal pure returns (bool) {
-    return category(self) == 18;
-  }
-
-  function isTool(ObjectType self) internal pure returns (bool) {
-    return category(self) == 65;
-  }
-
-  function isOrebar(ObjectType self) internal pure returns (bool) {
-    return category(self) == 66;
-  }
-
-  function isBucket(ObjectType self) internal pure returns (bool) {
-    return category(self) == 67;
-  }
-
-  function isFood(ObjectType self) internal pure returns (bool) {
-    return category(self) == 68;
-  }
-
-  function isMovable(ObjectType self) internal pure returns (bool) {
-    return category(self) == 69;
-  }
-
-  function isMisc(ObjectType self) internal pure returns (bool) {
-    return category(self) == 70;
-  }
-
-  // Meta Category Checks
-  function isPassThrough(ObjectType self) internal pure returns (bool) {
-    uint16 c = category(self);
-    return ((uint128(1) << c) & Category.PASS_THROUGH_MASK) != 0;
-  }
-
-  function isMineable(ObjectType self) internal pure returns (bool) {
-    uint16 c = category(self);
-    return ((uint128(1) << c) & Category.IS_MINEABLE_MASK) != 0;
-  }
+  uint128 constant HAS_ANY_MASK = (uint128(1) << (LOG >> CATEGORY_SHIFT)) | (uint128(1) << (LEAF >> CATEGORY_SHIFT))
+    | (uint128(1) << (PLANK >> CATEGORY_SHIFT)) | (uint128(1) << (ORE >> CATEGORY_SHIFT));
+  uint128 constant PASS_THROUGH_MASK = (uint128(1) << (NON_SOLID >> CATEGORY_SHIFT))
+    | (uint128(1) << (LEAF >> CATEGORY_SHIFT)) | (uint128(1) << (FLOWER >> CATEGORY_SHIFT))
+    | (uint128(1) << (GROWABLE >> CATEGORY_SHIFT)) | (uint128(1) << (GREENERY >> CATEGORY_SHIFT))
+    | (uint128(1) << (CROP >> CATEGORY_SHIFT)) | (uint128(1) << (UNDERWATER_PLANT >> CATEGORY_SHIFT));
+  uint128 constant MINEABLE_MASK = BLOCK_MASK & ~(uint128(1) << (NON_SOLID >> CATEGORY_SHIFT));
 }
 
 // ------------------------------------------------------------
 // Object Types
 // ------------------------------------------------------------
 library ObjectTypes {
+  ObjectType constant Null = ObjectType.wrap(Category.NONE | 0);
+  ObjectType constant Air = ObjectType.wrap(Category.NON_SOLID | 0);
+  ObjectType constant Water = ObjectType.wrap(Category.NON_SOLID | 1);
   ObjectType constant Lava = ObjectType.wrap(Category.NON_SOLID | 2);
   ObjectType constant Stone = ObjectType.wrap(Category.STONE | 0);
   ObjectType constant Bedrock = ObjectType.wrap(Category.STONE | 1);
@@ -210,6 +86,13 @@ library ObjectTypes {
   ObjectType constant PackedMud = ObjectType.wrap(Category.SOIL | 6);
   ObjectType constant Farmland = ObjectType.wrap(Category.SOIL | 7);
   ObjectType constant WetFarmland = ObjectType.wrap(Category.SOIL | 8);
+  ObjectType constant AnyOre = ObjectType.wrap(Category.ORE | 0);
+  ObjectType constant CoalOre = ObjectType.wrap(Category.ORE | 1);
+  ObjectType constant CopperOre = ObjectType.wrap(Category.ORE | 2);
+  ObjectType constant IronOre = ObjectType.wrap(Category.ORE | 3);
+  ObjectType constant GoldOre = ObjectType.wrap(Category.ORE | 4);
+  ObjectType constant DiamondOre = ObjectType.wrap(Category.ORE | 5);
+  ObjectType constant NeptuniumOre = ObjectType.wrap(Category.ORE | 6);
   ObjectType constant Gravel = ObjectType.wrap(Category.SAND | 0);
   ObjectType constant Sand = ObjectType.wrap(Category.SAND | 1);
   ObjectType constant RedSand = ObjectType.wrap(Category.SAND | 2);
@@ -299,18 +182,11 @@ library ObjectTypes {
   ObjectType constant AcaciaPlanks = ObjectType.wrap(Category.PLANK | 6);
   ObjectType constant DarkOakPlanks = ObjectType.wrap(Category.PLANK | 7);
   ObjectType constant MangrovePlanks = ObjectType.wrap(Category.PLANK | 8);
-  ObjectType constant AnyOre = ObjectType.wrap(Category.ORE_BLOCK | 0);
-  ObjectType constant CoalOre = ObjectType.wrap(Category.ORE_BLOCK | 1);
-  ObjectType constant CopperOre = ObjectType.wrap(Category.ORE_BLOCK | 2);
-  ObjectType constant IronOre = ObjectType.wrap(Category.ORE_BLOCK | 3);
-  ObjectType constant GoldOre = ObjectType.wrap(Category.ORE_BLOCK | 4);
-  ObjectType constant DiamondOre = ObjectType.wrap(Category.ORE_BLOCK | 5);
-  ObjectType constant NeptuniumOre = ObjectType.wrap(Category.ORE_BLOCK | 6);
-  ObjectType constant CopperBlock = ObjectType.wrap(Category.ORE_BLOCK | 7);
-  ObjectType constant IronBlock = ObjectType.wrap(Category.ORE_BLOCK | 8);
-  ObjectType constant GoldBlock = ObjectType.wrap(Category.ORE_BLOCK | 9);
-  ObjectType constant DiamondBlock = ObjectType.wrap(Category.ORE_BLOCK | 10);
-  ObjectType constant NeptuniumBlock = ObjectType.wrap(Category.ORE_BLOCK | 11);
+  ObjectType constant CopperBlock = ObjectType.wrap(Category.ORE_BLOCK | 0);
+  ObjectType constant IronBlock = ObjectType.wrap(Category.ORE_BLOCK | 1);
+  ObjectType constant GoldBlock = ObjectType.wrap(Category.ORE_BLOCK | 2);
+  ObjectType constant DiamondBlock = ObjectType.wrap(Category.ORE_BLOCK | 3);
+  ObjectType constant NeptuniumBlock = ObjectType.wrap(Category.ORE_BLOCK | 4);
   ObjectType constant WheatSeed = ObjectType.wrap(Category.GROWABLE | 0);
   ObjectType constant OakSapling = ObjectType.wrap(Category.GROWABLE | 1);
   ObjectType constant SpruceSapling = ObjectType.wrap(Category.GROWABLE | 2);
@@ -345,11 +221,171 @@ library ObjectTypes {
   ObjectType constant WaterBucket = ObjectType.wrap(Category.BUCKET | 1);
   ObjectType constant Fuel = ObjectType.wrap(Category.FOOD | 0);
   ObjectType constant WheatSlop = ObjectType.wrap(Category.FOOD | 1);
+  ObjectType constant Player = ObjectType.wrap(Category.MOVABLE | 0);
+  ObjectType constant Fragment = ObjectType.wrap(Category.MISC | 0);
   ObjectType constant Snow = ObjectType.wrap(Category.MISC | 1);
   ObjectType constant Ice = ObjectType.wrap(Category.MISC | 2);
   ObjectType constant SpiderWeb = ObjectType.wrap(Category.MISC | 3);
   ObjectType constant Bone = ObjectType.wrap(Category.MISC | 4);
   ObjectType constant TextSign = ObjectType.wrap(Category.MISC | 5);
 }
+
+// ------------------------------------------------------------
+library ObjectTypeLib {
+  function unwrap(ObjectType self) internal pure returns (uint16) {
+    return ObjectType.unwrap(self);
+  }
+
+  /// @dev Extract raw category ID from the top bits
+  function category(ObjectType self) internal pure returns (uint16) {
+    return self.unwrap() & CATEGORY_MASK;
+  }
+
+  /// @dev True if this is the null object
+  function isNull(ObjectType self) internal pure returns (bool) {
+    return self.unwrap() == 0;
+  }
+
+  /// @dev True if this is any block category
+  function isBlock(ObjectType self) internal pure returns (bool) {
+    return category(self) < BLOCK_CATEGORY_COUNT && !self.isNull();
+  }
+
+  // Direct Category Checks
+
+  function isNon_solid(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.NON_SOLID;
+  }
+
+  function isStone(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.STONE;
+  }
+
+  function isGemstone(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.GEMSTONE;
+  }
+
+  function isSoil(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.SOIL;
+  }
+
+  function isOre(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.ORE;
+  }
+
+  function isSand(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.SAND;
+  }
+
+  function isClay(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.CLAY;
+  }
+
+  function isLog(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.LOG;
+  }
+
+  function isLeaf(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.LEAF;
+  }
+
+  function isFlower(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.FLOWER;
+  }
+
+  function isGreenery(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.GREENERY;
+  }
+
+  function isCrop(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.CROP;
+  }
+
+  function isUnderwater_plant(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.UNDERWATER_PLANT;
+  }
+
+  function isPlank(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.PLANK;
+  }
+
+  function isOre_block(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.ORE_BLOCK;
+  }
+
+  function isGrowable(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.GROWABLE;
+  }
+
+  function isStation(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.STATION;
+  }
+
+  function isSmart(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.SMART;
+  }
+
+  function isTool(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.TOOL;
+  }
+
+  function isOrebar(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.OREBAR;
+  }
+
+  function isBucket(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.BUCKET;
+  }
+
+  function isFood(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.FOOD;
+  }
+
+  function isMovable(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.MOVABLE;
+  }
+
+  function isMisc(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.MISC;
+  }
+
+  // Meta Category Checks
+  function isAny(ObjectType self) internal pure returns (bool) {
+    // Check if:
+    // 1. ID bits are all 0
+    // 2. Category is one that supports "Any" types
+    uint16 c = self.category();
+    uint16 idx = self.unwrap() & ~CATEGORY_MASK;
+
+    return idx == 0 && ((uint128(1) << (c >> CATEGORY_SHIFT)) & Category.HAS_ANY_MASK) != 0;
+  }
+
+  function isPassThrough(ObjectType self) internal pure returns (bool) {
+    uint16 c = category(self);
+    return ((uint128(1) << (c >> CATEGORY_SHIFT)) & Category.PASS_THROUGH_MASK) != 0;
+  }
+
+  function isMineable(ObjectType self) internal pure returns (bool) {
+    uint16 c = category(self);
+    return ((uint128(1) << (c >> CATEGORY_SHIFT)) & Category.MINEABLE_MASK) != 0;
+  }
+
+  function matches(ObjectType self, ObjectType other) internal pure returns (bool) {
+    if (self.isAny()) {
+      return self.category() == other.category();
+    }
+    return self == other;
+  }
+}
+
+function eq(ObjectType self, ObjectType other) pure returns (bool) {
+  return ObjectType.unwrap(self) == ObjectType.unwrap(other);
+}
+
+function neq(ObjectType self, ObjectType other) pure returns (bool) {
+  return ObjectType.unwrap(self) != ObjectType.unwrap(other);
+}
+
+using { eq as ==, neq as != } for ObjectType global;
 
 using ObjectTypeLib for ObjectType global;

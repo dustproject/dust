@@ -25,7 +25,7 @@ import { ReversePosition as _ReversePosition } from "../codegen/tables/ReversePo
 import { SurfaceChunkByIndex as _SurfaceChunkByIndex } from "../codegen/tables/SurfaceChunkByIndex.sol";
 
 import { EntityId } from "../EntityId.sol";
-import { ObjectTypeId } from "../ObjectTypeId.sol";
+import { ObjectType } from "../ObjectType.sol";
 import { Vec3 } from "../Vec3.sol";
 
 /// @dev Library to get and set Vec3s in tables. It only support schemas of <single key> -> Vec3 and Vec3 -> <single value>
@@ -435,9 +435,9 @@ library ChunkCommitment {
 }
 
 library ResourcePosition {
-  function get(ObjectTypeId objectType, uint256 key) internal view returns (Vec3 position) {
+  function get(ObjectType objectType, uint256 key) internal view returns (Vec3 position) {
     bytes32[] memory keyTuple = new bytes32[](2);
-    keyTuple[0] = bytes32(uint256(ObjectTypeId.unwrap(objectType)));
+    keyTuple[0] = bytes32(uint256(ObjectType.unwrap(objectType)));
     keyTuple[1] = bytes32(key);
     (bytes memory _staticData,,) =
       StoreSwitch.getRecord(_ResourcePosition._tableId, keyTuple, _ResourcePosition._fieldLayout);
@@ -447,9 +447,9 @@ library ResourcePosition {
     }
   }
 
-  function _get(ObjectTypeId objectType, uint256 key) internal view returns (Vec3 position) {
+  function _get(ObjectType objectType, uint256 key) internal view returns (Vec3 position) {
     bytes32[] memory keyTuple = new bytes32[](2);
-    keyTuple[0] = bytes32(uint256(ObjectTypeId.unwrap(objectType)));
+    keyTuple[0] = bytes32(uint256(ObjectType.unwrap(objectType)));
     keyTuple[1] = bytes32(key);
     (bytes memory _staticData,,) =
       StoreCore.getRecord(_ResourcePosition._tableId, keyTuple, _ResourcePosition._fieldLayout);
@@ -459,9 +459,9 @@ library ResourcePosition {
     }
   }
 
-  function set(ObjectTypeId objectType, uint256 key, Vec3 position) internal {
+  function set(ObjectType objectType, uint256 key, Vec3 position) internal {
     bytes32[] memory keyTuple = new bytes32[](2);
-    keyTuple[0] = bytes32(uint256(ObjectTypeId.unwrap(objectType)));
+    keyTuple[0] = bytes32(uint256(ObjectType.unwrap(objectType)));
     keyTuple[1] = bytes32(key);
 
     EncodedLengths _encodedLengths;
@@ -471,9 +471,9 @@ library ResourcePosition {
     );
   }
 
-  function _set(ObjectTypeId objectType, uint256 key, Vec3 position) internal {
+  function _set(ObjectType objectType, uint256 key, Vec3 position) internal {
     bytes32[] memory keyTuple = new bytes32[](2);
-    keyTuple[0] = bytes32(uint256(ObjectTypeId.unwrap(objectType)));
+    keyTuple[0] = bytes32(uint256(ObjectType.unwrap(objectType)));
     keyTuple[1] = bytes32(key);
 
     EncodedLengths _encodedLengths;
@@ -481,17 +481,17 @@ library ResourcePosition {
     StoreCore.setRecord(_ResourcePosition._tableId, keyTuple, abi.encodePacked(position), _encodedLengths, _dynamicData);
   }
 
-  function deleteRecord(ObjectTypeId objectType, uint256 key) internal {
+  function deleteRecord(ObjectType objectType, uint256 key) internal {
     bytes32[] memory keyTuple = new bytes32[](2);
-    keyTuple[0] = bytes32(uint256(ObjectTypeId.unwrap(objectType)));
+    keyTuple[0] = bytes32(uint256(ObjectType.unwrap(objectType)));
     keyTuple[1] = bytes32(key);
 
     StoreSwitch.deleteRecord(_ResourcePosition._tableId, keyTuple);
   }
 
-  function _deleteRecord(ObjectTypeId objectType, uint256 key) internal {
+  function _deleteRecord(ObjectType objectType, uint256 key) internal {
     bytes32[] memory keyTuple = new bytes32[](2);
-    keyTuple[0] = bytes32(uint256(ObjectTypeId.unwrap(objectType)));
+    keyTuple[0] = bytes32(uint256(ObjectType.unwrap(objectType)));
     keyTuple[1] = bytes32(key);
 
     StoreCore.deleteRecord(_ResourcePosition._tableId, keyTuple, _ResourcePosition._fieldLayout);

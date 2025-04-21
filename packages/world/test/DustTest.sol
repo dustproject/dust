@@ -12,9 +12,10 @@ import {
   CHUNK_SIZE, MAX_PLAYER_ENERGY, MINE_ENERGY_COST, PLAYER_ENERGY_DRAIN_RATE, REGION_SIZE
 } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
-import { ObjectTypeId } from "../src/ObjectTypeId.sol";
+import { ObjectType } from "../src/ObjectType.sol";
+
+import { ObjectTypes } from "../src/ObjectType.sol";
 import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
-import { ObjectTypes } from "../src/ObjectTypes.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 
@@ -26,7 +27,7 @@ import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol
 import { Machine } from "../src/codegen/tables/Machine.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
-import { ObjectType } from "../src/codegen/tables/ObjectType.sol";
+import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
 
 import { Player } from "../src/codegen/tables/Player.sol";
@@ -52,7 +53,7 @@ import { TestEnergyUtils, TestForceFieldUtils, TestInventoryUtils } from "./util
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 
 abstract contract DustTest is MudTest, GasReporter, DustAssertions {
-  using ObjectTypeLib for ObjectTypeId;
+  using ObjectTypeLib for ObjectType;
 
   IWorld internal world;
   int32 constant FLAT_CHUNK_GRASS_LEVEL = 4;
@@ -118,11 +119,11 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
         chunk[x][y] = new uint8[](uint256(int256(CHUNK_SIZE)));
         for (uint256 z = 0; z < uint256(int256(CHUNK_SIZE)); z++) {
           if (y < uint256(int256(FLAT_CHUNK_GRASS_LEVEL))) {
-            chunk[x][y][z] = uint8(ObjectTypeId.unwrap(ObjectTypes.Dirt));
+            chunk[x][y][z] = uint8(ObjectType.unwrap(ObjectTypes.Dirt));
           } else if (y == uint256(int256(FLAT_CHUNK_GRASS_LEVEL))) {
-            chunk[x][y][z] = uint8(ObjectTypeId.unwrap(ObjectTypes.Grass));
+            chunk[x][y][z] = uint8(ObjectType.unwrap(ObjectTypes.Grass));
           } else {
-            chunk[x][y][z] = uint8(ObjectTypeId.unwrap(ObjectTypes.Air));
+            chunk[x][y][z] = uint8(ObjectType.unwrap(ObjectTypes.Air));
           }
         }
       }
@@ -164,14 +165,14 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     return (alice, aliceEntityId, playerCoord);
   }
 
-  function _getChunk(ObjectTypeId objectTypeId) internal pure returns (uint8[][][] memory chunk) {
+  function _getChunk(ObjectType objectType) internal pure returns (uint8[][][] memory chunk) {
     chunk = new uint8[][][](uint256(int256(CHUNK_SIZE)));
     for (uint256 x = 0; x < uint256(int256(CHUNK_SIZE)); x++) {
       chunk[x] = new uint8[][](uint256(int256(CHUNK_SIZE)));
       for (uint256 y = 0; y < uint256(int256(CHUNK_SIZE)); y++) {
         chunk[x][y] = new uint8[](uint256(int256(CHUNK_SIZE)));
         for (uint256 z = 0; z < uint256(int256(CHUNK_SIZE)); z++) {
-          chunk[x][y][z] = uint8(ObjectTypeId.unwrap(objectTypeId));
+          chunk[x][y][z] = uint8(ObjectType.unwrap(objectType));
         }
       }
     }
@@ -217,7 +218,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     LocalEnergyPool.set(shardCoord, 1e18);
   }
 
-  function setTerrainAtCoord(Vec3 coord, ObjectTypeId objectTypeId) internal {
+  function setTerrainAtCoord(Vec3 coord, ObjectType objectType) internal {
     Vec3 chunkCoord = coord.toChunkCoord();
     if (!TerrainLib._isChunkExplored(chunkCoord, worldAddress)) {
       setupAirChunk(coord);
@@ -227,29 +228,29 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
 
     bytes memory chunk = chunkPointer.code;
     // Add SSTORE2 offset
-    chunk[blockIndex + 1] = bytes1(uint8(objectTypeId.unwrap()));
+    chunk[blockIndex + 1] = bytes1(uint8(objectType.unwrap()));
 
     vm.etch(chunkPointer, chunk);
   }
 
-  function setObjectAtCoord(Vec3 coord, ObjectTypeId objectTypeId) internal returns (EntityId) {
+  function setObjectAtCoord(Vec3 coord, ObjectType objectType) internal returns (EntityId) {
     Vec3 chunkCoord = coord.toChunkCoord();
     if (!TerrainLib._isChunkExplored(chunkCoord, worldAddress)) {
       setupAirChunk(coord);
     }
 
     EntityId entityId = randomEntityId();
-    ObjectType.set(entityId, objectTypeId);
+    ObjectType.set(entityId, objectType);
     Position.set(entityId, coord);
     ReversePosition.set(coord, entityId);
-    Mass.set(entityId, ObjectTypeMetadata.getMass(objectTypeId));
+    Mass.set(entityId, ObjectTypeMetadata.getMass(objectType));
 
-    Vec3[] memory coords = objectTypeId.getRelativeCoords(coord);
+    Vec3[] memory coords = objectType.getRelativeCoords(coord);
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];
       EntityId relativeEntityId = randomEntityId();
-      ObjectType.set(relativeEntityId, objectTypeId);
+      ObjectType.set(relativeEntityId, objectType);
       Position.set(relativeEntityId, relativeCoord);
       ReversePosition.set(relativeCoord, relativeEntityId);
       BaseEntity.set(relativeEntityId, entityId);
@@ -299,12 +300,12 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
   }
 
   // Helper function to find the inventory slot with a specific object type
-  function findInventorySlotWithObjectType(EntityId entityId, ObjectTypeId objectTypeId) internal view returns (uint8) {
+  function findInventorySlotWithObjectType(EntityId entityId, ObjectType objectType) internal view returns (uint8) {
     uint256 numSlots = Inventory.length(entityId);
     for (uint8 i = 0; i < numSlots; i++) {
       // Assuming 36 inventory slots
-      ObjectTypeId slotObjectTypeId = InventorySlot.getObjectType(entityId, Inventory.getItem(entityId, i));
-      if (slotObjectTypeId == objectTypeId) {
+      ObjectType slotObjectType = InventorySlot.getObjectType(entityId, Inventory.getItem(entityId, i));
+      if (slotObjectType == objectType) {
         return i;
       }
     }

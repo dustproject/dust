@@ -8,8 +8,9 @@ import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
 
 import { BaseEntity } from "./codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "./codegen/tables/Energy.sol";
+
+import { EntityObjectType } from "./codegen/tables/EntityObjectType.sol";
 import { EntityProgram } from "./codegen/tables/EntityProgram.sol";
-import { ObjectType } from "./codegen/tables/ObjectType.sol";
 import { PlayerStatus } from "./codegen/tables/PlayerStatus.sol";
 import { ReversePlayer } from "./codegen/tables/ReversePlayer.sol";
 
@@ -18,14 +19,13 @@ import { ForceFieldUtils } from "./utils/ForceFieldUtils.sol";
 import { FragmentPosition, MovablePosition, Position } from "./utils/Vec3Storage.sol";
 
 import { MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "./Constants.sol";
-import { ObjectTypeId } from "./ObjectTypeId.sol";
+import { ObjectType } from "./ObjectType.sol";
+
+import { ObjectTypes } from "./ObjectType.sol";
 import { ObjectTypeLib } from "./ObjectTypeLib.sol";
-import { ObjectTypes } from "./ObjectTypes.sol";
 import { ProgramId } from "./ProgramId.sol";
 import { checkWorldStatus } from "./Utils.sol";
 import { Vec3 } from "./Vec3.sol";
-
-using ObjectTypeLib for ObjectTypeId;
 
 type EntityId is bytes32;
 
@@ -36,8 +36,8 @@ library EntityIdLib {
     return ActivateLib._activate(self, caller, msg.sig);
   }
 
-  function requireCallerAllowed(EntityId self, address caller, ObjectTypeId objectTypeId) internal view {
-    if (objectTypeId == ObjectTypes.Player) {
+  function requireCallerAllowed(EntityId self, address caller, ObjectType objectType) internal view {
+    if (objectType == ObjectTypes.Player) {
       require(caller == ReversePlayer._get(self), "Caller not allowed");
     } else {
       address programAddress = self.getProgram().getAddress();
@@ -46,8 +46,8 @@ library EntityIdLib {
   }
 
   function requireCallerAllowed(EntityId self, address sender) internal view {
-    ObjectTypeId objectTypeId = ObjectType.get(self);
-    requireCallerAllowed(self, sender, objectTypeId);
+    ObjectType objectType = ObjectType.get(self);
+    requireCallerAllowed(self, sender, objectType);
   }
 
   function baseEntityId(EntityId self) internal view returns (EntityId) {
@@ -80,7 +80,7 @@ library EntityIdLib {
   }
 
   function getPosition(EntityId self) internal view returns (Vec3) {
-    return ObjectType._get(self).isMovable() ? MovablePosition._get(self) : Position._get(self);
+    return EntityObjectType._get(self).isMovable() ? MovablePosition._get(self) : Position._get(self);
   }
 
   function getProgram(EntityId self) internal view returns (ProgramId) {
@@ -108,18 +108,18 @@ library ActivateLib {
   function _activate(EntityId self, address caller, bytes4 sig) public returns (EnergyData memory) {
     checkWorldStatus();
 
-    ObjectTypeId objectTypeId = ObjectType._get(self);
-    require(objectTypeId.isActionAllowed(sig), "Action not allowed");
+    ObjectType objectType = EntityObjectType._get(self);
+    require(objectType.isActionAllowed(sig), "Action not allowed");
 
-    self.requireCallerAllowed(caller, objectTypeId);
+    self.requireCallerAllowed(caller, objectType);
 
     EnergyData memory energyData;
-    if (objectTypeId == ObjectTypes.Player) {
+    if (objectType == ObjectTypes.Player) {
       require(!PlayerStatus._getBedEntityId(self).exists(), "Player is sleeping");
       energyData = updatePlayerEnergy(self);
     } else {
       EntityId forceField;
-      if (objectTypeId == ObjectTypes.ForceField) {
+      if (objectType == ObjectTypes.ForceField) {
         forceField = self;
       } else {
         (forceField,) = ForceFieldUtils.getForceField(self.getPosition());

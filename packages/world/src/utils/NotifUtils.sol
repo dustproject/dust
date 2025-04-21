@@ -7,7 +7,7 @@ import { Action } from "../codegen/common.sol";
 import { Notification, NotificationData } from "../codegen/tables/Notification.sol";
 
 import { EntityId } from "../EntityId.sol";
-import { ObjectTypeId } from "../ObjectTypeId.sol";
+import { ObjectType } from "../ObjectType.sol";
 import { ObjectAmount } from "../ObjectTypeLib.sol";
 import { Vec3 } from "../Vec3.sol";
 import { SlotData } from "../utils/InventoryUtils.sol";
@@ -15,13 +15,13 @@ import { SlotData } from "../utils/InventoryUtils.sol";
 struct BuildNotification {
   EntityId buildEntityId;
   Vec3 buildCoord;
-  ObjectTypeId buildObjectTypeId;
+  ObjectType buildObjectType;
 }
 
 struct MineNotification {
   EntityId mineEntityId;
   Vec3 mineCoord;
-  ObjectTypeId mineObjectTypeId;
+  ObjectType mineObjectType;
 }
 
 struct MoveNotification {

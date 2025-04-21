@@ -3,8 +3,8 @@ pragma solidity >=0.8.24;
 
 import { CHUNK_SIZE } from "../../Constants.sol";
 
-import { ObjectTypeId } from "../../ObjectTypeId.sol";
-import { ObjectTypes } from "../../ObjectTypes.sol";
+import { ObjectType } from "../../ObjectType.sol";
+import { ObjectTypes } from "../../ObjectType.sol";
 import { Vec3, vec3 } from "../../Vec3.sol";
 import { SSTORE2 } from "../../utils/SSTORE2.sol";
 import { WorldContextConsumerLib } from "@latticexyz/world/src/WorldContext.sol";
@@ -22,20 +22,20 @@ library TerrainLib {
   /// @notice Get the terrain block type of a voxel coordinate.
   /// @dev Returns ObjectTypes.Null if the chunk is not explored yet.
   /// @dev Assumes to be called from a root system.
-  function _getBlockType(Vec3 coord) public view returns (ObjectTypeId) {
+  function _getBlockType(Vec3 coord) public view returns (ObjectType) {
     return getBlockType(coord, address(this));
   }
 
   /// @notice Get the terrain block type of a voxel coordinate.
   /// @dev Returns ObjectTypes.Null if the chunk is not explored yet.
   /// @dev Can be called from either a root or non-root system, but consumes slightly more gas.
-  function getBlockType(Vec3 coord) internal view returns (ObjectTypeId) {
+  function getBlockType(Vec3 coord) internal view returns (ObjectType) {
     return getBlockType(coord, WorldContextConsumerLib._world());
   }
 
   /// @notice Get the terrain block type of a voxel coordinate.
   /// @dev Returns ObjectTypes.Null if the chunk is not explored yet.
-  function getBlockType(Vec3 coord, address world) internal view returns (ObjectTypeId) {
+  function getBlockType(Vec3 coord, address world) internal view returns (ObjectType) {
     Vec3 chunkCoord = coord.toChunkCoord();
     if (!_isChunkExplored(chunkCoord, world)) {
       return ObjectTypes.Null;
@@ -50,7 +50,7 @@ library TerrainLib {
 
     // Uncompress the block type (first 4 bits are the category, last 4 bits are the index)
     uint16 blockValue = uint16(uint8(blockType));
-    return ObjectTypeId.wrap(((blockValue & 0xF0) << 5) | (blockValue & 0x0F));
+    return ObjectType.wrap(((blockValue & 0xF0) << 5) | (blockValue & 0x0F));
   }
 
   /// @notice Get the biome of a voxel coordinate.

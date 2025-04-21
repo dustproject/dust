@@ -16,7 +16,7 @@ import { BedPlayer, BedPlayerData } from "../src/codegen/tables/BedPlayer.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Machine } from "../src/codegen/tables/Machine.sol";
 
-import { ObjectType } from "../src/codegen/tables/ObjectType.sol";
+import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
 import { PlayerStatus } from "../src/codegen/tables/PlayerStatus.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
@@ -26,9 +26,10 @@ import { LocalEnergyPool, Position, ReversePosition } from "../src/utils/Vec3Sto
 
 import { CHUNK_SIZE, MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
-import { ObjectTypeId } from "../src/ObjectTypeId.sol";
+import { ObjectType } from "../src/ObjectType.sol";
+
+import { ObjectTypes } from "../src/ObjectType.sol";
 import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
-import { ObjectTypes } from "../src/ObjectTypes.sol";
 
 import { ProgramId } from "../src/ProgramId.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
@@ -38,7 +39,7 @@ contract TestBedProgram is System {
 }
 
 contract BedTest is DustTest {
-  using ObjectTypeLib for ObjectTypeId;
+  using ObjectTypeLib for ObjectType;
 
   function createBed(Vec3 bedCoord) internal returns (EntityId) {
     // Set entity to bed

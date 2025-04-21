@@ -3,6 +3,8 @@
 
 export const numBlockCategories = 128 / 2;
 
+export const noneCategory: string = "NONE";
+
 export const blockCategories: string[] = [
   "NON_SOLID",
   "STONE",
@@ -33,10 +35,17 @@ export const nonBlockCategories: string[] = [
   "MISC",
 ];
 
+export type NoneCategory = typeof noneCategory;
 export type BlockCategory = (typeof blockCategories)[number];
 export type NonBlockCategory = (typeof nonBlockCategories)[number];
 
-export type Category = BlockCategory | NonBlockCategory;
+export type Category = NoneCategory | BlockCategory | NonBlockCategory;
+
+export const allCategories: Category[] = [
+  noneCategory,
+  ...blockCategories,
+  ...nonBlockCategories,
+];
 
 // Define categories that pass metadata for the template
 export interface CategoryMetadata {
@@ -61,7 +70,7 @@ export const nonBlockCategoryMetadata: CategoryMetadata[] =
 
 // All categories metadata for template generation
 export const allCategoryMetadata: CategoryMetadata[] = [
-  { name: "NONE", id: 0 },
+  { name: noneCategory, id: 0 },
   ...blockCategoryMetadata,
   ...nonBlockCategoryMetadata,
 ];
@@ -129,6 +138,7 @@ export const objects: ObjectType[] = [
     { name: "Amethyst", mass: 100000000000000000n },
     { name: "Glowstone", mass: 37500000000000000n },
   ]),
+
   // Soil category
   ...defineCategoryObjects("SOIL", [
     { name: "Grass", mass: 3000000000000000n },
@@ -140,6 +150,17 @@ export const objects: ObjectType[] = [
     { name: "PackedMud", mass: 5000000000000000n },
     { name: "Farmland", mass: 3000000000000000n },
     { name: "WetFarmland", mass: 3000000000000000n },
+  ]),
+
+  // Ore category
+  ...defineCategoryObjects("ORE", [
+    { name: "AnyOre", mass: 10000000000000000n },
+    { name: "CoalOre", mass: 540000000000000000n },
+    { name: "CopperOre", mass: 675000000000000000n },
+    { name: "IronOre", mass: 675000000000000000n },
+    { name: "GoldOre", mass: 1600000000000000000n },
+    { name: "DiamondOre", mass: 5000000000000000000n },
+    { name: "NeptuniumOre", mass: 5000000000000000000n },
   ]),
 
   // Sand category
@@ -274,13 +295,6 @@ export const objects: ObjectType[] = [
   ]),
   // Ore Block category
   ...defineCategoryObjects("ORE_BLOCK", [
-    { name: "AnyOre", mass: 10000000000000000n },
-    { name: "CoalOre", mass: 540000000000000000n },
-    { name: "CopperOre", mass: 675000000000000000n },
-    { name: "IronOre", mass: 675000000000000000n },
-    { name: "GoldOre", mass: 1600000000000000000n },
-    { name: "DiamondOre", mass: 5000000000000000000n },
-    { name: "NeptuniumOre", mass: 5000000000000000000n },
     { name: "CopperBlock", mass: 675000000000000000n },
     { name: "IronBlock", mass: 675000000000000000n },
     { name: "GoldBlock", mass: 1600000000000000000n },
@@ -371,3 +385,5 @@ export const passThroughCategories: Category[] = [
   "CROP",
   "UNDERWATER_PLANT",
 ];
+
+export const hasAnyCategories: Category[] = ["LOG", "LEAF", "PLANK", "ORE"];

@@ -6,7 +6,7 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
-import { ObjectType } from "../codegen/tables/ObjectType.sol";
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 
 import { getUniqueEntity } from "../Utils.sol";
 import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
@@ -18,8 +18,8 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { Position } from "../utils/Vec3Storage.sol";
 
 import { EntityId } from "../EntityId.sol";
-import { ObjectTypeId } from "../ObjectTypeId.sol";
-import { ObjectTypes } from "../ObjectTypes.sol";
+import { ObjectType } from "../ObjectType.sol";
+import { ObjectTypes } from "../ObjectType.sol";
 import { IAddFragmentHook, IRemoveFragmentHook } from "../ProgramInterfaces.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
 
@@ -103,8 +103,8 @@ contract ForceFieldSystem is System {
     caller.activate();
     caller.requireAdjacentToFragment(fragmentCoord);
 
-    ObjectTypeId objectTypeId = ObjectType._get(forceField);
-    require(objectTypeId == ObjectTypes.ForceField, "Invalid object type");
+    ObjectType objectType = EntityObjectType._get(forceField);
+    require(objectType == ObjectTypes.ForceField, "Invalid object type");
 
     require(
       refFragmentCoord.inVonNeumannNeighborhood(fragmentCoord), "Reference fragment is not adjacent to new fragment"
@@ -140,8 +140,8 @@ contract ForceFieldSystem is System {
     caller.activate();
     caller.requireAdjacentToFragment(fragmentCoord);
 
-    ObjectTypeId objectTypeId = ObjectType._get(forceField);
-    require(objectTypeId == ObjectTypes.ForceField, "Invalid object type");
+    ObjectType objectType = EntityObjectType._get(forceField);
+    require(objectType == ObjectTypes.ForceField, "Invalid object type");
 
     Vec3 forceFieldFragmentCoord = Position._get(forceField).toFragmentCoord();
     require(forceFieldFragmentCoord != fragmentCoord, "Can't remove forcefield's fragment");

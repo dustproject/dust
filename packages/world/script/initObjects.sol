@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { ObjectTypes } from "../src/ObjectTypes.sol";
+import { ObjectTypes } from "../src/ObjectType.sol";
 import { ObjectTypeMetadata, ObjectTypeMetadataData } from "../src/codegen/tables/ObjectTypeMetadata.sol";
 
 function initObjects() {
@@ -36,6 +36,13 @@ function initObjects() {
   ObjectTypeMetadata.set(ObjectTypes.PackedMud, ObjectTypeMetadataData({ mass: 5000000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Farmland, ObjectTypeMetadataData({ mass: 3000000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.WetFarmland, ObjectTypeMetadataData({ mass: 3000000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.AnyOre, ObjectTypeMetadataData({ mass: 10000000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.CoalOre, ObjectTypeMetadataData({ mass: 540000000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.CopperOre, ObjectTypeMetadataData({ mass: 675000000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.IronOre, ObjectTypeMetadataData({ mass: 675000000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.GoldOre, ObjectTypeMetadataData({ mass: 1600000000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.DiamondOre, ObjectTypeMetadataData({ mass: 5000000000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.NeptuniumOre, ObjectTypeMetadataData({ mass: 5000000000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Gravel, ObjectTypeMetadataData({ mass: 2400000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Sand, ObjectTypeMetadataData({ mass: 4000000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.RedSand, ObjectTypeMetadataData({ mass: 5000000000000000, energy: 0 }));
@@ -173,13 +180,6 @@ function initObjects() {
   ObjectTypeMetadata.set(ObjectTypes.AcaciaPlanks, ObjectTypeMetadataData({ mass: 4500000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.DarkOakPlanks, ObjectTypeMetadataData({ mass: 4500000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.MangrovePlanks, ObjectTypeMetadataData({ mass: 4500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.AnyOre, ObjectTypeMetadataData({ mass: 10000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.CoalOre, ObjectTypeMetadataData({ mass: 540000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.CopperOre, ObjectTypeMetadataData({ mass: 675000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.IronOre, ObjectTypeMetadataData({ mass: 675000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.GoldOre, ObjectTypeMetadataData({ mass: 1600000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.DiamondOre, ObjectTypeMetadataData({ mass: 5000000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.NeptuniumOre, ObjectTypeMetadataData({ mass: 5000000000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.CopperBlock, ObjectTypeMetadataData({ mass: 675000000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.IronBlock, ObjectTypeMetadataData({ mass: 675000000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.GoldBlock, ObjectTypeMetadataData({ mass: 1600000000000000000, energy: 0 }));

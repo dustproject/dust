@@ -16,10 +16,10 @@ import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
 
+import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
-import { ObjectType } from "../src/codegen/tables/ObjectType.sol";
 import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
 
 import { Player } from "../src/codegen/tables/Player.sol";
@@ -37,8 +37,8 @@ import {
 
 import { EntityId } from "../src/EntityId.sol";
 
-import { ObjectTypeId } from "../src/ObjectTypeId.sol";
-import { ObjectTypes } from "../src/ObjectTypes.sol";
+import { ObjectType } from "../src/ObjectType.sol";
+import { ObjectTypes } from "../src/ObjectType.sol";
 import { ProgramId } from "../src/ProgramId.sol";
 import { TestForceFieldUtils } from "./utils/TestUtils.sol";
 import { encodeChunk } from "./utils/encodeChunk.sol";
@@ -52,7 +52,7 @@ abstract contract DustAssertions is MudTest, GasReporter {
     uint128 forceFieldEnergy;
   }
 
-  function getObjectAmount(EntityId owner, ObjectTypeId objectType) internal view returns (uint16) {
+  function getObjectAmount(EntityId owner, ObjectType objectType) internal view returns (uint16) {
     uint16[] memory slots = InventoryTypeSlots.get(owner, objectType);
     if (slots.length == 0) {
       return 0;
@@ -66,12 +66,12 @@ abstract contract DustAssertions is MudTest, GasReporter {
     return total;
   }
 
-  function inventoryHasObjectType(EntityId ownerEntityId, ObjectTypeId objectTypeId) internal view returns (bool) {
-    return InventoryTypeSlots.length(ownerEntityId, objectTypeId) > 0;
+  function inventoryHasObjectType(EntityId ownerEntityId, ObjectType objectType) internal view returns (bool) {
+    return InventoryTypeSlots.length(ownerEntityId, objectType) > 0;
   }
 
   function inventoryGetOreAmounts(EntityId owner) internal view returns (ObjectAmount[] memory) {
-    ObjectTypeId[] memory ores = getOreObjectTypes();
+    ObjectType[] memory ores = getOreObjectTypes();
 
     uint256 numOres = 0;
     for (uint256 i = 0; i < ores.length; i++) {
@@ -90,16 +90,16 @@ abstract contract DustAssertions is MudTest, GasReporter {
     return oreAmounts;
   }
 
-  function assertInventoryHasObject(EntityId owner, ObjectTypeId objectTypeId, uint16 amount) internal view {
-    uint256 actualAmount = getObjectAmount(owner, objectTypeId);
+  function assertInventoryHasObject(EntityId owner, ObjectType objectType, uint16 amount) internal view {
+    uint256 actualAmount = getObjectAmount(owner, objectType);
     assertEq(actualAmount, amount, "Inventory object amount is not correct");
   }
 
-  function assertInventoryHasObjectInSlot(EntityId owner, ObjectTypeId objectTypeId, uint16 amount, uint16 slot)
+  function assertInventoryHasObjectInSlot(EntityId owner, ObjectType objectType, uint16 amount, uint16 slot)
     internal
     view
   {
-    assertEq(InventorySlot.getObjectType(owner, slot), objectTypeId, "Inventory object type is not correct");
+    assertEq(InventorySlot.getObjectType(owner, slot), objectType, "Inventory object type is not correct");
     uint16 actualAmount = InventorySlot.getAmount(owner, slot);
     assertEq(actualAmount, amount, "Inventory object amount is not correct");
   }
@@ -190,19 +190,19 @@ abstract contract DustAssertions is MudTest, GasReporter {
     assertTrue(a == b);
   }
 
-  function assertEq(ObjectTypeId a, ObjectTypeId b, string memory err) internal pure {
+  function assertEq(ObjectType a, ObjectType b, string memory err) internal pure {
     assertTrue(a == b, err);
   }
 
-  function assertEq(ObjectTypeId a, ObjectTypeId b) internal pure {
+  function assertEq(ObjectType a, ObjectType b) internal pure {
     assertTrue(a == b);
   }
 
-  function assertNotEq(ObjectTypeId a, ObjectTypeId b, string memory err) internal pure {
+  function assertNotEq(ObjectType a, ObjectType b, string memory err) internal pure {
     assertTrue(a != b, err);
   }
 
-  function assertNotEq(ObjectTypeId a, ObjectTypeId b) internal pure {
+  function assertNotEq(ObjectType a, ObjectType b) internal pure {
     assertTrue(a != b);
   }
 }

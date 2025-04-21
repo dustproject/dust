@@ -7,8 +7,9 @@ import { LibPRNG } from "solady/utils/LibPRNG.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
-import { ObjectType } from "../codegen/tables/ObjectType.sol";
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { Player } from "../codegen/tables/Player.sol";
 import { ReversePlayer } from "../codegen/tables/ReversePlayer.sol";
@@ -31,14 +32,15 @@ import {
   PLAYER_ENERGY_DRAIN_RATE,
   SPAWN_BLOCK_RANGE
 } from "../Constants.sol";
-import { ObjectTypeId } from "../ObjectTypeId.sol";
+import { ObjectType } from "../ObjectType.sol";
+
+import { ObjectTypes } from "../ObjectType.sol";
 import { ObjectTypeLib } from "../ObjectTypeLib.sol";
-import { ObjectTypes } from "../ObjectTypes.sol";
 import { checkWorldStatus } from "../Utils.sol";
 
 import { Vec3, vec3 } from "../Vec3.sol";
 import { removeEnergyFromLocalPool, updateMachineEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
-import { getMovableEntityAt, getObjectTypeIdAt } from "../utils/EntityUtils.sol";
+import { getMovableEntityAt, getObjectTypeAt } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { SpawnNotification, notify } from "../utils/NotifUtils.sol";
 
@@ -50,7 +52,7 @@ import { EntityId } from "../EntityId.sol";
 import { ISpawnHook } from "../ProgramInterfaces.sol";
 
 contract SpawnSystem is System {
-  using ObjectTypeLib for ObjectTypeId;
+  using ObjectTypeLib for ObjectType;
   using LibPRNG for LibPRNG.PRNG;
 
   function getAllRandomSpawnCoords(address sender)
@@ -95,17 +97,17 @@ contract SpawnSystem is System {
     Vec3 belowCoord = spawnCoord - vec3(0, 1, 0);
     Vec3 aboveCoord = spawnCoord + vec3(0, 1, 0);
 
-    ObjectTypeId spawnType = getObjectTypeIdAt(spawnCoord);
+    ObjectType spawnType = getObjectTypeAt(spawnCoord);
     if (spawnType.isNull() || !spawnType.isPassThrough() || getMovableEntityAt(spawnCoord).exists()) {
       return false;
     }
 
-    ObjectTypeId aboveType = getObjectTypeIdAt(aboveCoord);
+    ObjectType aboveType = getObjectTypeAt(aboveCoord);
     if (aboveType.isNull() || !aboveType.isPassThrough() || getMovableEntityAt(aboveCoord).exists()) {
       return false;
     }
 
-    ObjectTypeId belowType = getObjectTypeIdAt(belowCoord);
+    ObjectType belowType = getObjectTypeAt(belowCoord);
     if (
       belowType.isNull()
         || (belowType != ObjectTypes.Water && belowType.isPassThrough() && !getMovableEntityAt(belowCoord).exists())
@@ -151,8 +153,8 @@ contract SpawnSystem is System {
 
   function spawn(EntityId spawnTile, Vec3 spawnCoord, bytes memory extraData) public returns (EntityId) {
     checkWorldStatus();
-    ObjectTypeId objectTypeId = ObjectType._get(spawnTile);
-    require(objectTypeId == ObjectTypes.SpawnTile, "Not a spawn tile");
+    ObjectType objectType = EntityObjectType._get(spawnTile);
+    require(objectType == ObjectTypes.SpawnTile, "Not a spawn tile");
 
     Vec3 spawnTileCoord = Position._get(spawnTile);
     require(spawnTileCoord.inSurroundingCube(spawnCoord, MAX_RESPAWN_HALF_WIDTH), "Spawn tile is too far away");

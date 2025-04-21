@@ -7,21 +7,21 @@ import { InventoryTypeSlots } from "../codegen/tables/InventoryTypeSlots.sol";
 
 import { InventorySlot, InventorySlotData } from "../codegen/tables/InventorySlot.sol";
 
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
-import { ObjectType } from "../codegen/tables/ObjectType.sol";
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 
-import { ObjectTypeId } from "../ObjectTypeId.sol";
+import { ObjectType } from "../ObjectType.sol";
 
+import { ObjectTypes } from "../ObjectType.sol";
 import { ObjectAmount, ObjectTypeLib } from "../ObjectTypeLib.sol";
-import { ObjectTypes } from "../ObjectTypes.sol";
 import { getUniqueEntity } from "../Utils.sol";
 import { burnToolEnergy } from "../utils/EnergyUtils.sol";
 
 import { EntityId } from "../EntityId.sol";
 import { Vec3 } from "../Vec3.sol";
 
-using ObjectTypeLib for ObjectTypeId;
+using ObjectTypeLib for ObjectType;
 
 struct SlotTransfer {
   uint16 slotFrom;
@@ -36,14 +36,14 @@ struct SlotAmount {
 
 struct SlotData {
   EntityId entityId;
-  ObjectTypeId objectType;
+  ObjectType objectType;
   uint16 amount;
 }
 
 struct ToolData {
   EntityId owner;
   EntityId tool;
-  ObjectTypeId toolType;
+  ObjectType toolType;
   uint16 slot;
   uint128 massLeft;
   uint128 maxUseMass;
@@ -56,7 +56,7 @@ library InventoryUtils {
       return ToolData(owner, tool, ObjectTypes.Null, slot, 0, 0);
     }
 
-    ObjectTypeId toolType = ObjectType._get(tool);
+    ObjectType toolType = EntityObjectType._get(tool);
     require(toolType.isTool(), "Inventory item is not a tool");
 
     uint128 maxMass = ObjectTypeMetadata._getMass(toolType);
@@ -67,7 +67,7 @@ library InventoryUtils {
 
   function useTool(EntityId owner, Vec3 ownerCoord, uint16 slot, uint128 useMassMax)
     public
-    returns (ObjectTypeId toolType)
+    returns (ObjectType toolType)
   {
     ToolData memory toolData = getToolData(owner, slot);
 
@@ -108,7 +108,7 @@ library InventoryUtils {
     require(slot < maxSlots, "Invalid slot");
     require(entityId.exists(), "Entity must exist");
 
-    ObjectTypeId objectType = ObjectType._get(entityId);
+    ObjectType objectType = EntityObjectType._get(entityId);
 
     Inventory._push(owner, slot);
     InventorySlot._setEntityId(owner, slot, entityId);
@@ -125,7 +125,7 @@ library InventoryUtils {
     return slot;
   }
 
-  function addObject(EntityId owner, ObjectTypeId objectType, uint128 amount) public {
+  function addObject(EntityId owner, ObjectType objectType, uint128 amount) public {
     require(amount > 0, "Amount must be greater than 0");
     uint16 stackable = ObjectTypeMetadata._getStackable(objectType);
     require(stackable > 0, "Object type cannot be added to inventory");
@@ -164,7 +164,7 @@ library InventoryUtils {
     }
   }
 
-  function addObjectToSlot(EntityId owner, ObjectTypeId objectType, uint16 amount, uint16 slot) internal {
+  function addObjectToSlot(EntityId owner, ObjectType objectType, uint16 amount, uint16 slot) internal {
     require(amount > 0, "Amount must be greater than 0");
     uint16 stackable = ObjectTypeMetadata._getStackable(objectType);
     require(stackable > 0, "Object type cannot be added to inventory");
@@ -208,7 +208,7 @@ library InventoryUtils {
     revert("Entity not found");
   }
 
-  function removeObject(EntityId owner, ObjectTypeId objectType, uint16 amount) public {
+  function removeObject(EntityId owner, ObjectType objectType, uint16 amount) public {
     require(amount > 0, "Amount must be greater than 0");
     require(!objectType.isNull(), "Empty slot");
 
@@ -238,10 +238,10 @@ library InventoryUtils {
     require(remaining == 0, "Not enough objects of this type in inventory");
   }
 
-  function removeObjectFromSlot(EntityId owner, uint16 slot, uint16 amount) internal returns (ObjectTypeId) {
+  function removeObjectFromSlot(EntityId owner, uint16 slot, uint16 amount) internal returns (ObjectType) {
     require(amount > 0, "Amount must be greater than 0");
 
-    ObjectTypeId slotObjectType = InventorySlot._getObjectType(owner, slot);
+    ObjectType slotObjectType = InventorySlot._getObjectType(owner, slot);
     require(!slotObjectType.isNull(), "Empty slot");
 
     uint16 currentAmount = InventorySlot._getAmount(owner, slot);
@@ -388,9 +388,9 @@ library InventoryUtils {
   function _replaceSlot(
     EntityId owner,
     uint16 slot,
-    ObjectTypeId objectType,
+    ObjectType objectType,
     EntityId entityId,
-    ObjectTypeId newObjectType,
+    ObjectType newObjectType,
     uint16 amount
   ) internal {
     _removeFromTypeSlots(owner, objectType, slot);
@@ -401,7 +401,7 @@ library InventoryUtils {
   }
 
   // Add a slot to type slots - O(1)
-  function _addToTypeSlots(EntityId owner, ObjectTypeId objectType, uint16 slot) private returns (uint16) {
+  function _addToTypeSlots(EntityId owner, ObjectType objectType, uint16 slot) private returns (uint16) {
     uint16 numTypeSlots = uint16(InventoryTypeSlots._length(owner, objectType));
     InventoryTypeSlots._push(owner, objectType, slot);
     InventorySlot._setTypeIndex(owner, slot, numTypeSlots);
@@ -409,7 +409,7 @@ library InventoryUtils {
   }
 
   // Remove a slot from type slots - O(1)
-  function _removeFromTypeSlots(EntityId owner, ObjectTypeId objectType, uint16 slot) private {
+  function _removeFromTypeSlots(EntityId owner, ObjectType objectType, uint16 slot) private {
     uint16 typeIndex = InventorySlot._getTypeIndex(owner, slot);
     uint256 numTypeSlots = InventoryTypeSlots._length(owner, objectType);
 
@@ -445,7 +445,7 @@ library InventoryUtils {
 
   // Marks a slot as empty - O(1)
   function _recycleSlot(EntityId owner, uint16 slot) private {
-    ObjectTypeId objectType = InventorySlot._getObjectType(owner, slot);
+    ObjectType objectType = InventorySlot._getObjectType(owner, slot);
 
     // Move to null slots
     _removeFromTypeSlots(owner, objectType, slot);

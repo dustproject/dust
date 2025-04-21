@@ -4,16 +4,16 @@ pragma solidity >=0.8.24;
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
 
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Fragment, FragmentData } from "../codegen/tables/Fragment.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
-import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
 import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
 import { FragmentPosition, Position, ReverseFragmentPosition } from "../utils/Vec3Storage.sol";
 
 import { MACHINE_ENERGY_DRAIN_RATE } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
-import { ObjectTypes } from "../ObjectTypes.sol";
+import { ObjectTypes } from "../ObjectType.sol";
 import { getUniqueEntity } from "../Utils.sol";
 import { Vec3 } from "../Vec3.sol";
 
@@ -44,7 +44,7 @@ library ForceFieldUtils {
       fragment = getUniqueEntity();
       FragmentPosition._set(fragment, fragmentCoord);
       ReverseFragmentPosition._set(fragmentCoord, fragment);
-      ObjectType._set(fragment, ObjectTypes.Fragment);
+      EntityObjectType._set(fragment, ObjectTypes.Fragment);
     }
 
     return fragment;

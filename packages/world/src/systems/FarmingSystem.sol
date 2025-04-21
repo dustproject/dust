@@ -4,34 +4,35 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
-import { ObjectType } from "../codegen/tables/ObjectType.sol";
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
 import { addEnergyToLocalPool, transferEnergyToPool } from "../utils/EnergyUtils.sol";
-import { getObjectTypeIdAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
+import { getObjectTypeAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { TILL_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
-import { ObjectTypeId } from "../ObjectTypeId.sol";
+import { ObjectType } from "../ObjectType.sol";
+
+import { ObjectTypes } from "../ObjectType.sol";
 import { ObjectTypeLib, TreeData } from "../ObjectTypeLib.sol";
-import { ObjectTypes } from "../ObjectTypes.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
 
 contract FarmingSystem is System {
-  using ObjectTypeLib for ObjectTypeId;
+  using ObjectTypeLib for ObjectType;
 
   function till(EntityId caller, Vec3 coord, uint16 toolSlot) external {
     caller.activate();
     (Vec3 callerCoord,) = caller.requireConnected(coord);
 
-    (EntityId farmland, ObjectTypeId objectTypeId) = getOrCreateEntityAt(coord);
-    require(objectTypeId == ObjectTypes.Dirt || objectTypeId == ObjectTypes.Grass, "Not dirt or grass");
+    (EntityId farmland, ObjectType objectType) = getOrCreateEntityAt(coord);
+    require(objectType == ObjectTypes.Dirt || objectType == ObjectTypes.Grass, "Not dirt or grass");
 
     // If player died, return early
     uint128 callerEnergy = FarmingLib._processEnergyReduction(caller);
@@ -39,45 +40,45 @@ contract FarmingSystem is System {
       return;
     }
 
-    ObjectTypeId toolType = InventoryUtils.useTool(caller, callerCoord, toolSlot, type(uint128).max);
+    ObjectType toolType = InventoryUtils.useTool(caller, callerCoord, toolSlot, type(uint128).max);
     require(toolType.isHoe(), "Must equip a hoe");
 
-    ObjectType._set(farmland, ObjectTypes.Farmland);
+    EntityObjectType._set(farmland, ObjectTypes.Farmland);
   }
 
   function growSeed(EntityId caller, Vec3 coord) external {
     caller.activate();
     // TODO: should we do proximity checks?
 
-    (EntityId seed, ObjectTypeId objectTypeId) = getOrCreateEntityAt(coord);
-    require(objectTypeId.isSeed(), "Not a seed");
+    (EntityId seed, ObjectType objectType) = getOrCreateEntityAt(coord);
+    require(objectType.isSeed(), "Not a seed");
 
     require(SeedGrowth._getFullyGrownAt(seed) <= block.timestamp, "Seed cannot be grown yet");
 
     // When a seed grows, it's removed from circulation
     // We only update ResourceCount since seeds don't participate in respawning (no need to track positions
-    uint256 seedCount = ResourceCount._get(objectTypeId);
+    uint256 seedCount = ResourceCount._get(objectType);
     // This should never happen if there are seeds in the world obtained from drops
     require(seedCount > 0, "Not enough seeds in circulation");
-    ResourceCount._set(objectTypeId, seedCount - 1);
+    ResourceCount._set(objectType, seedCount - 1);
 
-    if (objectTypeId.isCropSeed()) {
+    if (objectType.isCropSeed()) {
       // Turn wet farmland to regular farmland if mining a seed or crop
-      (EntityId below, ObjectTypeId belowTypeId) = getOrCreateEntityAt(coord - vec3(0, 1, 0));
+      (EntityId below, ObjectType belowTypeId) = getOrCreateEntityAt(coord - vec3(0, 1, 0));
       // Sanity check
       if (belowTypeId == ObjectTypes.WetFarmland) {
-        ObjectType._set(below, ObjectTypes.Farmland);
+        EntityObjectType._set(below, ObjectTypes.Farmland);
       }
 
-      ObjectType._set(seed, objectTypeId.getCrop());
-    } else if (objectTypeId.isTreeSeed()) {
-      TreeData memory treeData = objectTypeId.getTreeData();
+      EntityObjectType._set(seed, objectType.getCrop());
+    } else if (objectType.isTreeSeed()) {
+      TreeData memory treeData = objectType.getTreeData();
 
       // Grow the tree (replace the seed with the trunk and add blocks)
       (uint32 trunkHeight, uint32 leaves) = FarmingLib._growTree(seed, coord, treeData);
 
       // Seed energy is the sum of the energy of all the blocks of the tree
-      uint128 seedEnergy = ObjectTypeMetadata._getEnergy(objectTypeId);
+      uint128 seedEnergy = ObjectTypeMetadata._getEnergy(objectType);
 
       uint128 trunkEnergy = trunkHeight * ObjectTypeMetadata._getEnergy(treeData.logType);
       uint128 leafEnergy = leaves * ObjectTypeMetadata._getEnergy(treeData.leafType);
@@ -121,7 +122,7 @@ library FarmingLib {
     // Initial seed for randomness
     uint256 currentSeed = uint256(keccak256(abi.encodePacked(block.timestamp, baseCoord)));
 
-    ObjectTypeId leafType = treeData.leafType;
+    ObjectType leafType = treeData.leafType;
 
     // Avoid stack too deep issues
     Vec3 coord = baseCoord;
@@ -156,11 +157,11 @@ library FarmingLib {
             }
           }
 
-          (EntityId leaf, ObjectTypeId existingType) = getOrCreateEntityAt(coord + vec3(x, y, z));
+          (EntityId leaf, ObjectType existingType) = getOrCreateEntityAt(coord + vec3(x, y, z));
 
           // Only place leaves in air blocks
           if (existingType == ObjectTypes.Air) {
-            ObjectType._set(leaf, leafType);
+            EntityObjectType._set(leaf, leafType);
             leaves++;
           }
         }
@@ -172,17 +173,17 @@ library FarmingLib {
 
   function _growTreeTrunk(EntityId seed, Vec3 baseCoord, TreeData memory treeData) internal returns (uint32) {
     // Replace the seed with the trunk
-    ObjectType._set(seed, treeData.logType);
+    EntityObjectType._set(seed, treeData.logType);
 
     // Create the trunk up to available space
     for (uint32 i = 1; i < treeData.trunkHeight; i++) {
       Vec3 trunkCoord = baseCoord + vec3(0, int32(i), 0);
-      (EntityId trunk, ObjectTypeId objectTypeId) = getOrCreateEntityAt(trunkCoord);
-      if (objectTypeId != ObjectTypes.Air) {
+      (EntityId trunk, ObjectType objectType) = getOrCreateEntityAt(trunkCoord);
+      if (objectType != ObjectTypes.Air) {
         return i;
       }
 
-      ObjectType._set(trunk, treeData.logType);
+      EntityObjectType._set(trunk, treeData.logType);
     }
 
     return treeData.trunkHeight;

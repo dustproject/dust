@@ -13,7 +13,7 @@ import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 
-import { ObjectType } from "../src/codegen/tables/ObjectType.sol";
+import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
 import { Player } from "../src/codegen/tables/Player.sol";
 
@@ -29,26 +29,27 @@ import {
 } from "../src/utils/Vec3Storage.sol";
 
 import { CHUNK_SIZE, MINE_ENERGY_COST, MOVE_ENERGY_COST, PLAYER_FALL_ENERGY_COST } from "../src/Constants.sol";
-import { ObjectTypeId } from "../src/ObjectTypeId.sol";
+import { ObjectType } from "../src/ObjectType.sol";
+
+import { ObjectTypes } from "../src/ObjectType.sol";
 import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
-import { ObjectTypes } from "../src/ObjectTypes.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { TestUtils } from "./utils/TestUtils.sol";
 
 contract GravityTest is DustTest {
-  using ObjectTypeLib for ObjectTypeId;
+  using ObjectTypeLib for ObjectType;
 
   function testMineFallSingleBlock() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
     Vec3 mineCoord = playerCoord - vec3(0, 1, 0);
-    ObjectTypeId mineObjectTypeId = TerrainLib.getBlockType(mineCoord);
-    ObjectTypeMetadata.setMass(mineObjectTypeId, playerHandMassReduction);
+    ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
+    ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction);
     EntityId mineEntityId = ReversePosition.get(mineCoord);
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
-    assertInventoryHasObject(aliceEntityId, mineObjectTypeId, 0);
+    assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
     EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
 
@@ -66,7 +67,7 @@ contract GravityTest is DustTest {
 
     mineEntityId = ReversePosition.get(mineCoord);
     assertEq(ObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
-    assertInventoryHasObject(aliceEntityId, mineObjectTypeId, 1);
+    assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     uint128 playerEnergyLost =
       assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
@@ -79,11 +80,11 @@ contract GravityTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
     Vec3 mineCoord = playerCoord - vec3(0, 1, 0);
-    ObjectTypeId mineObjectTypeId = TerrainLib.getBlockType(mineCoord);
-    ObjectTypeMetadata.setMass(mineObjectTypeId, playerHandMassReduction);
+    ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
+    ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction);
     EntityId mineEntityId = ReversePosition.get(mineCoord);
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
-    assertInventoryHasObject(aliceEntityId, mineObjectTypeId, 0);
+    assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
     setTerrainAtCoord(mineCoord - vec3(0, 1, 0), ObjectTypes.Air);
     setTerrainAtCoord(mineCoord - vec3(0, 2, 0), ObjectTypes.Air);
@@ -104,7 +105,7 @@ contract GravityTest is DustTest {
 
     mineEntityId = ReversePosition.get(mineCoord);
     assertEq(ObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
-    assertInventoryHasObject(aliceEntityId, mineObjectTypeId, 1);
+    assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     uint128 playerEnergyLost =
       assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
@@ -131,11 +132,11 @@ contract GravityTest is DustTest {
     }
 
     Vec3 mineCoord = aliceCoord - vec3(0, 1, 0);
-    ObjectTypeId mineObjectTypeId = TerrainLib.getBlockType(mineCoord);
-    ObjectTypeMetadata.setMass(mineObjectTypeId, playerHandMassReduction);
+    ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
+    ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction);
     EntityId mineEntityId = ReversePosition.get(mineCoord);
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
-    assertInventoryHasObject(aliceEntityId, mineObjectTypeId, 0);
+    assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
     setTerrainAtCoord(mineCoord - vec3(0, 1, 0), ObjectTypes.Air);
     setTerrainAtCoord(mineCoord - vec3(0, 2, 0), ObjectTypes.Air);
@@ -169,7 +170,7 @@ contract GravityTest is DustTest {
 
     mineEntityId = ReversePosition.get(mineCoord);
     assertEq(ObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
-    assertInventoryHasObject(aliceEntityId, mineObjectTypeId, 1);
+    assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
     uint128 energyGainedInPool = LocalEnergyPool.get(shardCoord) - localEnergyPoolBefore;
     assertGt(energyGainedInPool, 0, "Local energy pool did not gain energy");
     uint128 aliceEnergyAfter = Energy.getEnergy(aliceEntityId);

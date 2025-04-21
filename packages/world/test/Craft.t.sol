@@ -14,9 +14,9 @@ import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 import { LocalEnergyPool } from "../src/codegen/tables/LocalEnergyPool.sol";
 
+import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 import { MovablePosition } from "../src/codegen/tables/MovablePosition.sol";
-import { ObjectType } from "../src/codegen/tables/ObjectType.sol";
 import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
 import { Player } from "../src/codegen/tables/Player.sol";
 
@@ -27,9 +27,10 @@ import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 
 import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "../src/Constants.sol";
-import { ObjectTypeId } from "../src/ObjectTypeId.sol";
+import { ObjectType } from "../src/ObjectType.sol";
+
+import { ObjectTypes } from "../src/ObjectType.sol";
 import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
-import { ObjectTypes } from "../src/ObjectTypes.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
@@ -38,26 +39,26 @@ import { SlotAmount } from "../src/utils/InventoryUtils.sol";
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract CraftTest is DustTest {
-  using ObjectTypeLib for ObjectTypeId;
+  using ObjectTypeLib for ObjectType;
 
   function hashRecipe(
-    ObjectTypeId stationObjectTypeId,
-    ObjectTypeId[] memory inputTypes,
+    ObjectType stationObjectType,
+    ObjectType[] memory inputTypes,
     uint16[] memory inputAmounts,
-    ObjectTypeId[] memory outputTypes,
+    ObjectType[] memory outputTypes,
     uint16[] memory outputAmounts
   ) internal pure returns (bytes32) {
-    return keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts));
+    return keccak256(abi.encode(stationObjectType, inputTypes, inputAmounts, outputTypes, outputAmounts));
   }
 
   function testCraftSingleInputSingleOutput() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory inputTypes = new ObjectType[](1);
     inputTypes[0] = ObjectTypes.OakLog;
     uint16[] memory inputAmounts = new uint16[](1);
     inputAmounts[0] = 1;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory outputTypes = new ObjectType[](1);
     outputTypes[0] = ObjectTypes.OakPlanks;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 4;
@@ -92,13 +93,13 @@ contract CraftTest is DustTest {
   function testCraftMultipleInputsSingleOutput() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
+    ObjectType[] memory inputTypes = new ObjectType[](2);
     inputTypes[0] = ObjectTypes.Stone;
     inputTypes[1] = ObjectTypes.Sand;
     uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 6;
     inputAmounts[1] = 2;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory outputTypes = new ObjectType[](1);
     outputTypes[0] = ObjectTypes.Powerstone;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
@@ -137,13 +138,13 @@ contract CraftTest is DustTest {
   function testCraftWithStation() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
+    ObjectType[] memory inputTypes = new ObjectType[](2);
     inputTypes[0] = ObjectTypes.Stone;
     inputTypes[1] = ObjectTypes.IronBar;
     uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 30;
     inputAmounts[1] = 5;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory outputTypes = new ObjectType[](1);
     outputTypes[0] = ObjectTypes.ForceField;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
@@ -180,30 +181,30 @@ contract CraftTest is DustTest {
   }
 
   function testCraftAnyInput() public {
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory inputTypes = new ObjectType[](1);
     inputTypes[0] = ObjectTypes.AnyPlank;
     uint16[] memory inputAmounts = new uint16[](1);
     inputAmounts[0] = 8;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory outputTypes = new ObjectType[](1);
     outputTypes[0] = ObjectTypes.Chest;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
 
     bytes32 recipeId = hashRecipe(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
-    ObjectTypeId inputObjectTypeId1 = ObjectTypes.OakPlanks;
-    ObjectTypeId inputObjectTypeId2 = ObjectTypes.BirchPlanks;
-    ObjectTypeId inputObjectTypeId3 = ObjectTypes.JunglePlanks;
+    ObjectType inputObjectType1 = ObjectTypes.OakPlanks;
+    ObjectType inputObjectType2 = ObjectTypes.BirchPlanks;
+    ObjectType inputObjectType3 = ObjectTypes.JunglePlanks;
 
     // Doing it here to avoid stack too deep
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId1, 2);
-    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId2, 3);
-    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId3, 3);
-    assertInventoryHasObject(aliceEntityId, inputObjectTypeId1, 2);
-    assertInventoryHasObject(aliceEntityId, inputObjectTypeId2, 3);
-    assertInventoryHasObject(aliceEntityId, inputObjectTypeId3, 3);
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectType1, 2);
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectType2, 3);
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectType3, 3);
+    assertInventoryHasObject(aliceEntityId, inputObjectType1, 2);
+    assertInventoryHasObject(aliceEntityId, inputObjectType2, 3);
+    assertInventoryHasObject(aliceEntityId, inputObjectType3, 3);
 
     {
       Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
@@ -225,9 +226,9 @@ contract CraftTest is DustTest {
       assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
     }
 
-    assertInventoryHasObject(aliceEntityId, inputObjectTypeId1, 0);
-    assertInventoryHasObject(aliceEntityId, inputObjectTypeId2, 0);
-    assertInventoryHasObject(aliceEntityId, inputObjectTypeId3, 0);
+    assertInventoryHasObject(aliceEntityId, inputObjectType1, 0);
+    assertInventoryHasObject(aliceEntityId, inputObjectType2, 0);
+    assertInventoryHasObject(aliceEntityId, inputObjectType3, 0);
     {
       for (uint256 i = 0; i < outputTypes.length; i++) {
         assertInventoryHasObject(aliceEntityId, outputTypes[i], outputAmounts[i]);
@@ -238,19 +239,19 @@ contract CraftTest is DustTest {
   function testCraftTool() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory inputTypes = new ObjectType[](1);
     inputTypes[0] = ObjectTypes.AnyPlank;
     uint16[] memory inputAmounts = new uint16[](1);
     inputAmounts[0] = 5;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory outputTypes = new ObjectType[](1);
     outputTypes[0] = ObjectTypes.WoodenPick;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
     bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
-    ObjectTypeId inputObjectTypeId = ObjectTypes.OakPlanks;
-    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId, 5);
-    assertInventoryHasObject(aliceEntityId, inputObjectTypeId, 5);
+    ObjectType inputObjectType = ObjectTypes.OakPlanks;
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectType, 5);
+    assertInventoryHasObject(aliceEntityId, inputObjectType, 5);
 
     EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
 
@@ -262,14 +263,14 @@ contract CraftTest is DustTest {
     world.craft(aliceEntityId, recipeId, inputs);
     endGasReport();
 
-    assertInventoryHasObject(aliceEntityId, inputObjectTypeId, 0);
+    assertInventoryHasObject(aliceEntityId, inputObjectType, 0);
     assertInventoryHasObject(aliceEntityId, outputTypes[0], 1);
     uint16[] memory toolSlots = InventoryTypeSlots.get(aliceEntityId, outputTypes[0]);
     assertEq(toolSlots.length, 1, "should have 1 tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
     assertTrue(toolEntityId.exists(), "tool entity id should exist");
-    ObjectTypeId toolObjectTypeId = ObjectType.get(toolEntityId);
-    assertEq(toolObjectTypeId, outputTypes[0], "tool object type should be equal to expected output object type");
+    ObjectType toolObjectType = ObjectType.get(toolEntityId);
+    assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
     assertEq(Mass.get(toolEntityId), ObjectTypeMetadata.getMass(outputTypes[0]), "mass should be equal to tool mass");
 
@@ -278,11 +279,11 @@ contract CraftTest is DustTest {
   }
 
   function testCraftWoodenPick() public {
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory inputTypes = new ObjectType[](1);
     inputTypes[0] = ObjectTypes.AnyPlank;
     uint16[] memory inputAmounts = new uint16[](1);
     inputAmounts[0] = 5;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory outputTypes = new ObjectType[](1);
     outputTypes[0] = ObjectTypes.WoodenPick;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
@@ -290,9 +291,9 @@ contract CraftTest is DustTest {
 
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    ObjectTypeId inputObjectTypeId = ObjectTypes.OakPlanks;
-    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId, 10);
-    assertInventoryHasObject(aliceEntityId, inputObjectTypeId, 10);
+    ObjectType inputObjectType = ObjectTypes.OakPlanks;
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectType, 10);
+    assertInventoryHasObject(aliceEntityId, inputObjectType, 10);
 
     EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
 
@@ -302,13 +303,13 @@ contract CraftTest is DustTest {
     vm.prank(alice);
     world.craft(aliceEntityId, recipeId, inputs);
 
-    assertInventoryHasObject(aliceEntityId, inputObjectTypeId, 5);
+    assertInventoryHasObject(aliceEntityId, inputObjectType, 5);
     uint16[] memory toolSlots = InventoryTypeSlots.get(aliceEntityId, outputTypes[0]);
     assertEq(toolSlots.length, 1, "should have 1 of the crafted tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
     assertTrue(toolEntityId.exists(), "tool entity id should exist");
-    ObjectTypeId toolObjectTypeId = ObjectType.get(toolEntityId);
-    assertEq(toolObjectTypeId, outputTypes[0], "tool object type should be equal to expected output object type");
+    ObjectType toolObjectType = ObjectType.get(toolEntityId);
+    assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
     assertEq(Mass.get(toolEntityId), ObjectTypeMetadata.getMass(outputTypes[0]), "mass should be equal to tool mass");
 
@@ -317,11 +318,11 @@ contract CraftTest is DustTest {
   }
 
   function testCraftWoodenAxe() public {
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory inputTypes = new ObjectType[](1);
     inputTypes[0] = ObjectTypes.AnyPlank;
     uint16[] memory inputAmounts = new uint16[](1);
     inputAmounts[0] = 5;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory outputTypes = new ObjectType[](1);
     outputTypes[0] = ObjectTypes.WoodenAxe;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
@@ -329,9 +330,9 @@ contract CraftTest is DustTest {
 
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    ObjectTypeId inputObjectTypeId = ObjectTypes.OakPlanks;
-    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId, 10);
-    assertInventoryHasObject(aliceEntityId, inputObjectTypeId, 10);
+    ObjectType inputObjectType = ObjectTypes.OakPlanks;
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectType, 10);
+    assertInventoryHasObject(aliceEntityId, inputObjectType, 10);
 
     EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
 
@@ -341,13 +342,13 @@ contract CraftTest is DustTest {
     vm.prank(alice);
     world.craft(aliceEntityId, recipeId, inputs);
 
-    assertInventoryHasObject(aliceEntityId, inputObjectTypeId, 5);
+    assertInventoryHasObject(aliceEntityId, inputObjectType, 5);
     uint16[] memory toolSlots = InventoryTypeSlots.get(aliceEntityId, outputTypes[0]);
     assertEq(toolSlots.length, 1, "should have 1 of the crafted tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
     assertTrue(toolEntityId.exists(), "tool entity id should exist");
-    ObjectTypeId toolObjectTypeId = ObjectType.get(toolEntityId);
-    assertEq(toolObjectTypeId, outputTypes[0], "tool object type should be equal to expected output object type");
+    ObjectType toolObjectType = ObjectType.get(toolEntityId);
+    assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
     assertEq(Mass.get(toolEntityId), ObjectTypeMetadata.getMass(outputTypes[0]), "mass should be equal to tool mass");
 
@@ -366,11 +367,11 @@ contract CraftTest is DustTest {
   function testCraftFailsIfNotEnoughInputs() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory inputTypes = new ObjectType[](1);
     inputTypes[0] = ObjectTypes.OakLog;
     uint16[] memory inputAmounts = new uint16[](1);
     inputAmounts[0] = 1;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory outputTypes = new ObjectType[](1);
     outputTypes[0] = ObjectTypes.OakPlanks;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 4;
@@ -383,25 +384,25 @@ contract CraftTest is DustTest {
     vm.expectRevert("Input amount must be greater than zero");
     world.craft(aliceEntityId, recipeId, inputs);
 
-    inputTypes = new ObjectTypeId[](1);
+    inputTypes = new ObjectType[](1);
     inputTypes[0] = ObjectTypes.AnyPlank;
     inputAmounts = new uint16[](1);
     inputAmounts[0] = 8;
-    outputTypes = new ObjectTypeId[](1);
+    outputTypes = new ObjectType[](1);
     outputTypes[0] = ObjectTypes.Chest;
     outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
     recipeId = hashRecipe(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
-    ObjectTypeId inputObjectTypeId1 = ObjectTypes.OakPlanks;
-    ObjectTypeId inputObjectTypeId2 = ObjectTypes.BirchPlanks;
-    ObjectTypeId inputObjectTypeId3 = ObjectTypes.JunglePlanks;
-    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId1, 1);
-    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId2, 1);
-    TestInventoryUtils.addObject(aliceEntityId, inputObjectTypeId3, 1);
-    assertInventoryHasObject(aliceEntityId, inputObjectTypeId1, 1);
-    assertInventoryHasObject(aliceEntityId, inputObjectTypeId2, 1);
-    assertInventoryHasObject(aliceEntityId, inputObjectTypeId3, 1);
+    ObjectType inputObjectType1 = ObjectTypes.OakPlanks;
+    ObjectType inputObjectType2 = ObjectTypes.BirchPlanks;
+    ObjectType inputObjectType3 = ObjectTypes.JunglePlanks;
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectType1, 1);
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectType2, 1);
+    TestInventoryUtils.addObject(aliceEntityId, inputObjectType3, 1);
+    assertInventoryHasObject(aliceEntityId, inputObjectType1, 1);
+    assertInventoryHasObject(aliceEntityId, inputObjectType2, 1);
+    assertInventoryHasObject(aliceEntityId, inputObjectType3, 1);
     Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
     EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
 
@@ -418,11 +419,11 @@ contract CraftTest is DustTest {
   function testCraftFailsIfInvalidRecipe() public {
     (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory inputTypes = new ObjectType[](1);
     inputTypes[0] = ObjectTypes.OakLog;
     uint16[] memory inputAmounts = new uint16[](1);
     inputAmounts[0] = 1;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory outputTypes = new ObjectType[](1);
     outputTypes[0] = ObjectTypes.Diamond;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 4;
@@ -439,13 +440,13 @@ contract CraftTest is DustTest {
   function testCraftFailsIfInvalidStation() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](2);
+    ObjectType[] memory inputTypes = new ObjectType[](2);
     inputTypes[0] = ObjectTypes.Stone;
     inputTypes[1] = ObjectTypes.IronBar;
     uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 30;
     inputAmounts[1] = 5;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory outputTypes = new ObjectType[](1);
     outputTypes[0] = ObjectTypes.ForceField;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
@@ -482,11 +483,11 @@ contract CraftTest is DustTest {
   function testCraftFailsIfFullInventory() public {
     (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory inputTypes = new ObjectType[](1);
     inputTypes[0] = ObjectTypes.OakLog;
     uint16[] memory inputAmounts = new uint16[](1);
     inputAmounts[0] = 1;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory outputTypes = new ObjectType[](1);
     outputTypes[0] = ObjectTypes.OakPlanks;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 4;
@@ -514,11 +515,11 @@ contract CraftTest is DustTest {
   function testCraftFailsIfNotEnoughEnergy() public {
     (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory inputTypes = new ObjectType[](1);
     inputTypes[0] = ObjectTypes.OakLog;
     uint16[] memory inputAmounts = new uint16[](1);
     inputAmounts[0] = 1;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory outputTypes = new ObjectType[](1);
     outputTypes[0] = ObjectTypes.OakPlanks;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 4;
@@ -542,11 +543,11 @@ contract CraftTest is DustTest {
   function testCraftFailsIfNoPlayer() public {
     (, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory inputTypes = new ObjectType[](1);
     inputTypes[0] = ObjectTypes.OakLog;
     uint16[] memory inputAmounts = new uint16[](1);
     inputAmounts[0] = 1;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory outputTypes = new ObjectType[](1);
     outputTypes[0] = ObjectTypes.OakPlanks;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 4;
@@ -567,11 +568,11 @@ contract CraftTest is DustTest {
   function testCraftFailsIfSleeping() public {
     (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
-    ObjectTypeId[] memory inputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory inputTypes = new ObjectType[](1);
     inputTypes[0] = ObjectTypes.OakLog;
     uint16[] memory inputAmounts = new uint16[](1);
     inputAmounts[0] = 1;
-    ObjectTypeId[] memory outputTypes = new ObjectTypeId[](1);
+    ObjectType[] memory outputTypes = new ObjectType[](1);
     outputTypes[0] = ObjectTypes.OakPlanks;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 4;

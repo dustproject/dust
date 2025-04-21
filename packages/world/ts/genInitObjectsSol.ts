@@ -6,7 +6,7 @@ function generateInitObjectsSol(): string {
 pragma solidity >=0.8.24;
 
 import { ObjectTypeMetadata, ObjectTypeMetadataData } from "../src/codegen/tables/ObjectTypeMetadata.sol";
-import { ObjectTypes } from "../src/ObjectTypes.sol";
+import { ObjectTypes } from "../src/ObjectType.sol";
 
 function initObjects() {
 ${objects
