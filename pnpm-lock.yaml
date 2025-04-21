@@ -216,6 +216,9 @@ importers:
       solhint-plugin-mud:
         specifier: 2.2.22-f6d87edb8513fd0f255ac4389a2e613a508ffab4
         version: 2.2.22-f6d87edb8513fd0f255ac4389a2e613a508ffab4
+      tsx:
+        specifier: ^4.19.3
+        version: 4.19.3
 
   scripts:
     dependencies:

@@ -11,11 +11,14 @@
       "mud.config": ["./dist/mud.config.d.ts"]
     }
   },
-  "files": ["src", "out", "dist", "worlds.json"],
+  "files": ["src", "out", "dist", "ts", "worlds.json"],
   "scripts": {
     "build": "mud build && pnpm run build:js",
     "build:js": "tsc",
     "clean": "forge clean && shx rm -rf src/**/codegen",
+    "codegen": "pnpm run codegen:object-type && pnpm run codegen:init-objects",
+    "codegen:init-objects": "tsx ./ts/genInitObjectsSol.ts> ./script/initObjects.sol",
+    "codegen:object-type": "tsx ./ts/genObjectTypeSol.ts > ./src/ObjectType.sol",
     "deploy:local": "pnpm entrykit-deploy && pnpm run build && mud deploy",
     "dev": "pnpm entrykit-deploy && pnpm run build && pnpm mud dev-contracts --rpc http://127.0.0.1:8545",
     "fix": "pnpm run fix:format",
@@ -42,6 +45,7 @@
     "forge-std": "https://github.com/foundry-rs/forge-std.git#3b20d60d14b343ee4f908cb8079495c07f5e8981",
     "solhint": "^3.4.1",
     "solhint-config-mud": "2.2.22-f6d87edb8513fd0f255ac4389a2e613a508ffab4",
-    "solhint-plugin-mud": "2.2.22-f6d87edb8513fd0f255ac4389a2e613a508ffab4"
+    "solhint-plugin-mud": "2.2.22-f6d87edb8513fd0f255ac4389a2e613a508ffab4",
+    "tsx": "^4.19.3"
   }
 }
