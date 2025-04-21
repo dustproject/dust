@@ -5,6 +5,8 @@ import { System } from "@latticexyz/world/src/System.sol";
 
 import { Action, Direction } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
+
+import { DisabledExtraDrops } from "../codegen/tables/DisabledExtraDrops.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { Inventory } from "../codegen/tables/Inventory.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
@@ -17,8 +19,6 @@ import { Orientation } from "../codegen/tables/Orientation.sol";
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
 import { MovablePosition, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
-
-import { getUniqueEntity } from "../Utils.sol";
 
 import { removeEnergyFromLocalPool, transferEnergyToPool, updateMachineEnergy } from "../utils/EnergyUtils.sol";
 import { getMovableEntityAt, getObjectTypeIdAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
@@ -52,8 +52,8 @@ contract BuildSystem is System {
   {
     caller.activate();
     caller.requireConnected(coord);
-    ObjectTypeId buildObjectType = InventorySlot._getObjectType(caller, slot);
-    require(buildObjectType.isBlock(), "Cannot build non-block object");
+    ObjectTypeId buildType = InventorySlot._getObjectType(caller, slot);
+    require(buildType.isBlock(), "Cannot build non-block object");
 
     // If player died, return early
     (uint128 callerEnergy,) = transferEnergyToPool(caller, BUILD_ENERGY_COST);
@@ -61,20 +61,16 @@ contract BuildSystem is System {
       return EntityId.wrap(0);
     }
 
-    (EntityId base, Vec3[] memory coords) = BuildLib._addBlocks(coord, buildObjectType, direction);
+    (EntityId base, Vec3[] memory coords) = BuildLib._addBlocks(coord, buildType, direction);
 
-    if (buildObjectType.isSeed()) {
-      BuildLib._handleSeed(base, buildObjectType, coord);
-    }
+    BuildLib._handleBuildType(base, buildType, coord);
 
     InventoryUtils.removeObjectFromSlot(caller, slot, 1);
 
     // Note: we call this after the build state has been updated, to prevent re-entrancy attacks
-    BuildLib._requireBuildsAllowed(caller, base, buildObjectType, coords, extraData);
+    BuildLib._requireBuildsAllowed(caller, base, buildType, coords, extraData);
 
-    notify(
-      caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectTypeId: buildObjectType })
-    );
+    notify(caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectTypeId: buildType }));
 
     return base;
   }
@@ -105,6 +101,14 @@ contract BuildSystem is System {
 }
 
 library BuildLib {
+  function _handleBuildType(EntityId base, ObjectTypeId buildType, Vec3 coord) public {
+    if (buildType.isGrowable()) {
+      _handleGrowable(base, buildType, coord);
+    } else if (buildType.hasExtraDrops()) {
+      DisabledExtraDrops._set(base, true);
+    }
+  }
+
   function _addBlock(ObjectTypeId buildObjectType, Vec3 coord) internal returns (EntityId) {
     (EntityId terrain, ObjectTypeId terrainObjectTypeId) = getOrCreateEntityAt(coord);
     require(terrainObjectTypeId == ObjectTypes.Air, "Cannot build on a non-air block");
@@ -118,41 +122,41 @@ library BuildLib {
     return terrain;
   }
 
-  function _addBlocks(Vec3 baseCoord, ObjectTypeId buildObjectType, Direction direction)
+  function _addBlocks(Vec3 baseCoord, ObjectTypeId buildType, Direction direction)
     public
     returns (EntityId, Vec3[] memory)
   {
-    Vec3[] memory coords = buildObjectType.getRelativeCoords(baseCoord, direction);
-    EntityId base = _addBlock(buildObjectType, baseCoord);
+    Vec3[] memory coords = buildType.getRelativeCoords(baseCoord, direction);
+    EntityId base = _addBlock(buildType, baseCoord);
     Orientation._set(base, direction);
-    uint128 mass = ObjectTypeMetadata._getMass(buildObjectType);
+    uint128 mass = ObjectTypeMetadata._getMass(buildType);
     Mass._setMass(base, mass);
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];
-      EntityId relative = _addBlock(buildObjectType, relativeCoord);
+      EntityId relative = _addBlock(buildType, relativeCoord);
       BaseEntity._set(relative, base);
     }
     return (base, coords);
   }
 
-  function _handleSeed(EntityId base, ObjectTypeId buildObjectTypeId, Vec3 baseCoord) public {
+  function _handleGrowable(EntityId base, ObjectTypeId buildType, Vec3 baseCoord) public {
     ObjectTypeId belowTypeId = getObjectTypeIdAt(baseCoord - vec3(0, 1, 0));
-    if (buildObjectTypeId.isCropSeed()) {
-      require(belowTypeId == ObjectTypes.WetFarmland, "Crop seeds need wet farmland");
-    } else if (buildObjectTypeId.isTreeSeed()) {
-      require(belowTypeId == ObjectTypes.Dirt || belowTypeId == ObjectTypes.Grass, "Tree seeds need dirt or grass");
+    if (buildType.isSeed()) {
+      require(belowTypeId == ObjectTypes.WetFarmland, "Seeds need wet farmland");
+    } else if (buildType.isSapling()) {
+      require(belowTypeId == ObjectTypes.Dirt || belowTypeId == ObjectTypes.Grass, "Tree saplings need dirt or grass");
     }
 
-    removeEnergyFromLocalPool(baseCoord, ObjectTypeMetadata._getEnergy(buildObjectTypeId));
+    removeEnergyFromLocalPool(baseCoord, ObjectTypeMetadata._getEnergy(buildType));
 
-    SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildObjectTypeId.timeToGrow());
+    SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildType.timeToGrow());
   }
 
   function _requireBuildsAllowed(
     EntityId caller,
     EntityId base,
-    ObjectTypeId objectTypeId,
+    ObjectTypeId buildType,
     Vec3[] memory coords,
     bytes calldata extraData
   ) public {
@@ -161,7 +165,7 @@ library BuildLib {
       (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
 
       // If placing a forcefield, there should be no active forcefield at coord
-      if (objectTypeId == ObjectTypes.ForceField) {
+      if (buildType == ObjectTypes.ForceField) {
         require(!forceField.exists(), "Force field overlaps with another force field");
         ForceFieldUtils.setupForceField(base, coord);
       }
@@ -175,8 +179,7 @@ library BuildLib {
             program = forceField.getProgram();
           }
 
-          bytes memory onBuild =
-            abi.encodeCall(IBuildHook.onBuild, (caller, forceField, objectTypeId, coord, extraData));
+          bytes memory onBuild = abi.encodeCall(IBuildHook.onBuild, (caller, forceField, buildType, coord, extraData));
 
           program.callOrRevert(onBuild);
         }

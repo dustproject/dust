@@ -4,11 +4,13 @@
   "exports": {
     "./mud.config": "./dist/mud.config.js",
     "./worlds.json": "./worlds.json",
-    "./out/*": "./out/*"
+    "./out/*": "./out/*",
+    "./tree-lib": "./dist/tree-lib.js"
   },
   "typesVersions": {
     "*": {
-      "mud.config": ["./dist/mud.config.d.ts"]
+      "mud.config": ["./dist/mud.config.d.ts"],
+      "tree-lib": ["./dist/tree-lib.d.ts"]
     }
   },
   "files": ["src", "out", "dist", "worlds.json"],
@@ -42,6 +44,7 @@
     "forge-std": "https://github.com/foundry-rs/forge-std.git#3b20d60d14b343ee4f908cb8079495c07f5e8981",
     "solhint": "^3.4.1",
     "solhint-config-mud": "2.2.22-f0c0b982573f9953e1c726c0bef91671efaaa545",
-    "solhint-plugin-mud": "2.2.22-f0c0b982573f9953e1c726c0bef91671efaaa545"
+    "solhint-plugin-mud": "2.2.22-f0c0b982573f9953e1c726c0bef91671efaaa545",
+    "typescript": "^5.8.3"
   }
 }

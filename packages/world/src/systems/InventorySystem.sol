@@ -12,7 +12,6 @@ import { ReversePosition } from "../utils/Vec3Storage.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectTypeId } from "../ObjectTypeId.sol";
 import { ObjectTypes } from "../ObjectTypes.sol";
-import { getUniqueEntity } from "../Utils.sol";
 import { Vec3 } from "../Vec3.sol";
 import { getOrCreateEntityAt } from "../utils/EntityUtils.sol";
 import { InventoryUtils, SlotTransfer } from "../utils/InventoryUtils.sol";
