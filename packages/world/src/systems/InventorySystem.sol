@@ -15,7 +15,7 @@ import { ObjectTypes } from "../ObjectTypes.sol";
 import { getUniqueEntity } from "../Utils.sol";
 import { Vec3 } from "../Vec3.sol";
 import { getOrCreateEntityAt } from "../utils/EntityUtils.sol";
-import { InventoryUtils, SlotTransfer } from "../utils/InventoryUtils.sol";
+import { InventoryUtils, SlotAmount, SlotTransfer } from "../utils/InventoryUtils.sol";
 import { DropNotification, PickupNotification, notify } from "../utils/NotifUtils.sol";
 import { TerrainLib } from "./libraries/TerrainLib.sol";
 
@@ -29,6 +29,22 @@ contract InventorySystem is System {
     require(ObjectTypeMetadata._getCanPassThrough(objectTypeId), "Cannot drop on a non-passable block");
 
     InventoryUtils.transfer(caller, entityId, slotTransfers);
+    notify(caller, DropNotification({ dropCoord: coord }));
+  }
+
+  function drop(EntityId caller, SlotAmount[] memory slots, Vec3 coord) public {
+    require(slots.length > 0, "Must drop at least one object");
+    caller.activate();
+    caller.requireConnected(coord);
+
+    (EntityId entityId, ObjectTypeId objectTypeId) = getOrCreateEntityAt(coord);
+    require(ObjectTypeMetadata._getCanPassThrough(objectTypeId), "Cannot drop on a non-passable block");
+
+    for (uint256 i = 0; i < slots.length; i++) {
+      ObjectTypeId objectTypeId = InventoryUtils.removeObjectFromSlot(caller, slots[i].slot, slots[i].amount);
+      InventoryUtils.addObject(entityId, objectTypeId, slots[i].amount);
+    }
+
     notify(caller, DropNotification({ dropCoord: coord }));
   }
 
