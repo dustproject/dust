@@ -5,6 +5,8 @@ import { System } from "@latticexyz/world/src/System.sol";
 
 import { Action, Direction } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
+
+import { DisabledExtraDrops } from "../codegen/tables/DisabledExtraDrops.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
@@ -19,8 +21,6 @@ import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
 import { MovablePosition, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
 
-import { getUniqueEntity } from "../Utils.sol";
-
 import { removeEnergyFromLocalPool, transferEnergyToPool, updateMachineEnergy } from "../utils/EnergyUtils.sol";
 import { getMovableEntityAt, getObjectTypeAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
@@ -32,16 +32,11 @@ import { TerrainLib } from "./libraries/TerrainLib.sol";
 
 import { BUILD_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
-import { ObjectType } from "../ObjectType.sol";
-
-import { ObjectTypes } from "../ObjectType.sol";
-import { ObjectTypeLib } from "../ObjectTypeLib.sol";
+import { ObjectType, ObjectTypes } from "../ObjectType.sol";
 
 import { ProgramId } from "../ProgramId.sol";
 import { IBuildHook } from "../ProgramInterfaces.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
-
-using ObjectTypeLib for ObjectType;
 
 contract BuildSystem is System {
   function build(EntityId caller, Vec3 coord, uint16 slot, bytes calldata extraData) public returns (EntityId) {
@@ -54,8 +49,8 @@ contract BuildSystem is System {
   {
     caller.activate();
     caller.requireConnected(coord);
-    ObjectType buildObjectType = InventorySlot._getObjectType(caller, slot);
-    require(buildObjectType.isBlock(), "Cannot build non-block object");
+    ObjectType buildType = InventorySlot._getObjectType(caller, slot);
+    require(buildType.isBlock(), "Cannot build non-block object");
 
     // If player died, return early
     (uint128 callerEnergy,) = transferEnergyToPool(caller, BUILD_ENERGY_COST);
@@ -63,18 +58,16 @@ contract BuildSystem is System {
       return EntityId.wrap(0);
     }
 
-    (EntityId base, Vec3[] memory coords) = BuildLib._addBlocks(coord, buildObjectType, direction);
+    (EntityId base, Vec3[] memory coords) = BuildLib._addBlocks(coord, buildType, direction);
 
-    if (buildObjectType.isSeed()) {
-      BuildLib._handleSeed(base, buildObjectType, coord);
-    }
+    BuildLib._handleBuildType(base, buildType, coord);
 
     InventoryUtils.removeObjectFromSlot(caller, slot, 1);
 
     // Note: we call this after the build state has been updated, to prevent re-entrancy attacks
-    BuildLib._requireBuildsAllowed(caller, base, buildObjectType, coords, extraData);
+    BuildLib._requireBuildsAllowed(caller, base, buildType, coords, extraData);
 
-    notify(caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectType: buildObjectType }));
+    notify(caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectType: buildType }));
 
     return base;
   }
@@ -105,6 +98,14 @@ contract BuildSystem is System {
 }
 
 library BuildLib {
+  function _handleBuildType(EntityId base, ObjectType buildType, Vec3 coord) public {
+    if (buildType.isGrowable()) {
+      _handleGrowable(base, buildType, coord);
+    } else if (buildType.hasExtraDrops()) {
+      DisabledExtraDrops._set(base, true);
+    }
+  }
+
   function _addBlock(ObjectType buildType, Vec3 coord) internal returns (EntityId) {
     (EntityId terrain, ObjectType terrainObjectType) = getOrCreateEntityAt(coord);
     require(terrainObjectType == ObjectTypes.Air, "Cannot build on a non-air block");
@@ -136,12 +137,12 @@ library BuildLib {
     return (base, coords);
   }
 
-  function _handleSeed(EntityId base, ObjectType buildType, Vec3 baseCoord) public {
-    ObjectType belowTypeId = getObjectTypeAt(baseCoord - vec3(0, 1, 0));
-    if (buildType.isCropSeed()) {
-      require(belowTypeId == ObjectTypes.WetFarmland, "Crop seeds need wet farmland");
-    } else if (buildType.isTreeSeed()) {
-      require(belowTypeId == ObjectTypes.Dirt || belowTypeId == ObjectTypes.Grass, "Tree seeds need dirt or grass");
+  function _handleGrowable(EntityId base, ObjectType buildType, Vec3 baseCoord) public {
+    ObjectType belowType = getObjectTypeAt(baseCoord - vec3(0, 1, 0));
+    if (buildType.isSeed()) {
+      require(belowType == ObjectTypes.WetFarmland, "Seeds need wet farmland");
+    } else if (buildType.isSapling()) {
+      require(belowType == ObjectTypes.Dirt || belowType == ObjectTypes.Grass, "Tree saplings need dirt or grass");
     }
 
     removeEnergyFromLocalPool(baseCoord, ObjectTypeMetadata._getEnergy(buildType));

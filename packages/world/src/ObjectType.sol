@@ -3,6 +3,12 @@ pragma solidity >=0.8.24;
 
 type ObjectType is uint16;
 
+// Structs
+struct ObjectAmount {
+  ObjectType objectType;
+  uint16 amount;
+}
+
 // Category bits (bits 15..11), id bits (bits 10..0)
 uint16 constant CATEGORY_MASK = 0xF800;
 uint16 constant CATEGORY_SHIFT = 11;
@@ -188,8 +194,16 @@ library ObjectTypes {
   ObjectType constant DiamondBlock = ObjectType.wrap(Category.ORE_BLOCK | 3);
   ObjectType constant NeptuniumBlock = ObjectType.wrap(Category.ORE_BLOCK | 4);
   ObjectType constant WheatSeed = ObjectType.wrap(Category.GROWABLE | 0);
-  ObjectType constant OakSapling = ObjectType.wrap(Category.GROWABLE | 1);
-  ObjectType constant SpruceSapling = ObjectType.wrap(Category.GROWABLE | 2);
+  ObjectType constant PumpkinSeed = ObjectType.wrap(Category.GROWABLE | 1);
+  ObjectType constant MelonSeed = ObjectType.wrap(Category.GROWABLE | 2);
+  ObjectType constant OakSapling = ObjectType.wrap(Category.GROWABLE | 3);
+  ObjectType constant BirchSapling = ObjectType.wrap(Category.GROWABLE | 4);
+  ObjectType constant JungleSapling = ObjectType.wrap(Category.GROWABLE | 5);
+  ObjectType constant SakuraSapling = ObjectType.wrap(Category.GROWABLE | 6);
+  ObjectType constant AcaciaSapling = ObjectType.wrap(Category.GROWABLE | 7);
+  ObjectType constant SpruceSapling = ObjectType.wrap(Category.GROWABLE | 8);
+  ObjectType constant DarkOakSapling = ObjectType.wrap(Category.GROWABLE | 9);
+  ObjectType constant MangroveSapling = ObjectType.wrap(Category.GROWABLE | 10);
   ObjectType constant Furnace = ObjectType.wrap(Category.STATION | 0);
   ObjectType constant Workbench = ObjectType.wrap(Category.STATION | 1);
   ObjectType constant Powerstone = ObjectType.wrap(Category.STATION | 2);
@@ -347,6 +361,272 @@ library ObjectTypeLib {
 
   function isMisc(ObjectType self) internal pure returns (bool) {
     return category(self) == Category.MISC;
+  }
+
+  // Category getters
+  function getNon_solidTypes() internal pure returns (ObjectType[3] memory) {
+    return [ObjectTypes.Air, ObjectTypes.Water, ObjectTypes.Lava];
+  }
+
+  function getStoneTypes() internal pure returns (ObjectType[16] memory) {
+    return [
+      ObjectTypes.Stone,
+      ObjectTypes.Bedrock,
+      ObjectTypes.Deepslate,
+      ObjectTypes.Granite,
+      ObjectTypes.Tuff,
+      ObjectTypes.Calcite,
+      ObjectTypes.Basalt,
+      ObjectTypes.SmoothBasalt,
+      ObjectTypes.Andesite,
+      ObjectTypes.Diorite,
+      ObjectTypes.Cobblestone,
+      ObjectTypes.MossyCobblestone,
+      ObjectTypes.Obsidian,
+      ObjectTypes.Dripstone,
+      ObjectTypes.Blackstone,
+      ObjectTypes.CobbledDeepslate
+    ];
+  }
+
+  function getGemstoneTypes() internal pure returns (ObjectType[2] memory) {
+    return [ObjectTypes.Amethyst, ObjectTypes.Glowstone];
+  }
+
+  function getSoilTypes() internal pure returns (ObjectType[9] memory) {
+    return [
+      ObjectTypes.Grass,
+      ObjectTypes.Dirt,
+      ObjectTypes.Moss,
+      ObjectTypes.Podzol,
+      ObjectTypes.DirtPath,
+      ObjectTypes.Mud,
+      ObjectTypes.PackedMud,
+      ObjectTypes.Farmland,
+      ObjectTypes.WetFarmland
+    ];
+  }
+
+  function getOreTypes() internal pure returns (ObjectType[7] memory) {
+    return [
+      ObjectTypes.AnyOre,
+      ObjectTypes.CoalOre,
+      ObjectTypes.CopperOre,
+      ObjectTypes.IronOre,
+      ObjectTypes.GoldOre,
+      ObjectTypes.DiamondOre,
+      ObjectTypes.NeptuniumOre
+    ];
+  }
+
+  function getSandTypes() internal pure returns (ObjectType[5] memory) {
+    return [ObjectTypes.Gravel, ObjectTypes.Sand, ObjectTypes.RedSand, ObjectTypes.Sandstone, ObjectTypes.RedSandstone];
+  }
+
+  function getClayTypes() internal pure returns (ObjectType[14] memory) {
+    return [
+      ObjectTypes.Clay,
+      ObjectTypes.Terracotta,
+      ObjectTypes.BrownTerracotta,
+      ObjectTypes.OrangeTerracotta,
+      ObjectTypes.WhiteTerracotta,
+      ObjectTypes.LightGrayTerracotta,
+      ObjectTypes.YellowTerracotta,
+      ObjectTypes.RedTerracotta,
+      ObjectTypes.LightBlueTerracotta,
+      ObjectTypes.CyanTerracotta,
+      ObjectTypes.BlackTerracotta,
+      ObjectTypes.PurpleTerracotta,
+      ObjectTypes.BlueTerracotta,
+      ObjectTypes.MagentaTerracotta
+    ];
+  }
+
+  function getLogTypes() internal pure returns (ObjectType[9] memory) {
+    return [
+      ObjectTypes.AnyLog,
+      ObjectTypes.OakLog,
+      ObjectTypes.BirchLog,
+      ObjectTypes.JungleLog,
+      ObjectTypes.SakuraLog,
+      ObjectTypes.AcaciaLog,
+      ObjectTypes.SpruceLog,
+      ObjectTypes.DarkOakLog,
+      ObjectTypes.MangroveLog
+    ];
+  }
+
+  function getLeafTypes() internal pure returns (ObjectType[13] memory) {
+    return [
+      ObjectTypes.AnyLeaf,
+      ObjectTypes.OakLeaf,
+      ObjectTypes.BirchLeaf,
+      ObjectTypes.JungleLeaf,
+      ObjectTypes.SakuraLeaf,
+      ObjectTypes.SpruceLeaf,
+      ObjectTypes.AcaciaLeaf,
+      ObjectTypes.DarkOakLeaf,
+      ObjectTypes.AzaleaLeaf,
+      ObjectTypes.FloweringAzaleaLeaf,
+      ObjectTypes.MangroveLeaf,
+      ObjectTypes.MangroveRoots,
+      ObjectTypes.MuddyMangroveRoots
+    ];
+  }
+
+  function getFlowerTypes() internal pure returns (ObjectType[12] memory) {
+    return [
+      ObjectTypes.AzaleaFlower,
+      ObjectTypes.BellFlower,
+      ObjectTypes.DandelionFlower,
+      ObjectTypes.DaylilyFlower,
+      ObjectTypes.LilacFlower,
+      ObjectTypes.RoseFlower,
+      ObjectTypes.FireFlower,
+      ObjectTypes.MorninggloryFlower,
+      ObjectTypes.PeonyFlower,
+      ObjectTypes.Ultraviolet,
+      ObjectTypes.SunFlower,
+      ObjectTypes.FlyTrap
+    ];
+  }
+
+  function getGreeneryTypes() internal pure returns (ObjectType[7] memory) {
+    return [
+      ObjectTypes.FescueGrass,
+      ObjectTypes.SwitchGrass,
+      ObjectTypes.CottonBush,
+      ObjectTypes.BambooBush,
+      ObjectTypes.VinesBush,
+      ObjectTypes.IvyVine,
+      ObjectTypes.HempBush
+    ];
+  }
+
+  function getCropTypes() internal pure returns (ObjectType[12] memory) {
+    return [
+      ObjectTypes.GoldenMushroom,
+      ObjectTypes.RedMushroom,
+      ObjectTypes.CoffeeBush,
+      ObjectTypes.StrawberryBush,
+      ObjectTypes.RaspberryBush,
+      ObjectTypes.Cactus,
+      ObjectTypes.Pumpkin,
+      ObjectTypes.Melon,
+      ObjectTypes.RedMushroomBlock,
+      ObjectTypes.BrownMushroomBlock,
+      ObjectTypes.MushroomStem,
+      ObjectTypes.Wheat
+    ];
+  }
+
+  function getUnderwater_plantTypes() internal pure returns (ObjectType[8] memory) {
+    return [
+      ObjectTypes.Coral,
+      ObjectTypes.SeaAnemone,
+      ObjectTypes.Algae,
+      ObjectTypes.HornCoralBlock,
+      ObjectTypes.FireCoralBlock,
+      ObjectTypes.TubeCoralBlock,
+      ObjectTypes.BubbleCoralBlock,
+      ObjectTypes.BrainCoralBlock
+    ];
+  }
+
+  function getPlankTypes() internal pure returns (ObjectType[9] memory) {
+    return [
+      ObjectTypes.AnyPlank,
+      ObjectTypes.OakPlanks,
+      ObjectTypes.BirchPlanks,
+      ObjectTypes.JunglePlanks,
+      ObjectTypes.SakuraPlanks,
+      ObjectTypes.SprucePlanks,
+      ObjectTypes.AcaciaPlanks,
+      ObjectTypes.DarkOakPlanks,
+      ObjectTypes.MangrovePlanks
+    ];
+  }
+
+  function getOre_blockTypes() internal pure returns (ObjectType[5] memory) {
+    return [
+      ObjectTypes.CopperBlock,
+      ObjectTypes.IronBlock,
+      ObjectTypes.GoldBlock,
+      ObjectTypes.DiamondBlock,
+      ObjectTypes.NeptuniumBlock
+    ];
+  }
+
+  function getGrowableTypes() internal pure returns (ObjectType[11] memory) {
+    return [
+      ObjectTypes.WheatSeed,
+      ObjectTypes.PumpkinSeed,
+      ObjectTypes.MelonSeed,
+      ObjectTypes.OakSapling,
+      ObjectTypes.BirchSapling,
+      ObjectTypes.JungleSapling,
+      ObjectTypes.SakuraSapling,
+      ObjectTypes.AcaciaSapling,
+      ObjectTypes.SpruceSapling,
+      ObjectTypes.DarkOakSapling,
+      ObjectTypes.MangroveSapling
+    ];
+  }
+
+  function getStationTypes() internal pure returns (ObjectType[3] memory) {
+    return [ObjectTypes.Furnace, ObjectTypes.Workbench, ObjectTypes.Powerstone];
+  }
+
+  function getSmartTypes() internal pure returns (ObjectType[4] memory) {
+    return [ObjectTypes.ForceField, ObjectTypes.Chest, ObjectTypes.SpawnTile, ObjectTypes.Bed];
+  }
+
+  function getToolTypes() internal pure returns (ObjectType[16] memory) {
+    return [
+      ObjectTypes.WoodenPick,
+      ObjectTypes.WoodenAxe,
+      ObjectTypes.WoodenWhacker,
+      ObjectTypes.WoodenHoe,
+      ObjectTypes.CopperPick,
+      ObjectTypes.CopperAxe,
+      ObjectTypes.CopperWhacker,
+      ObjectTypes.IronPick,
+      ObjectTypes.IronAxe,
+      ObjectTypes.IronWhacker,
+      ObjectTypes.GoldPick,
+      ObjectTypes.GoldAxe,
+      ObjectTypes.DiamondPick,
+      ObjectTypes.DiamondAxe,
+      ObjectTypes.NeptuniumPick,
+      ObjectTypes.NeptuniumAxe
+    ];
+  }
+
+  function getOrebarTypes() internal pure returns (ObjectType[4] memory) {
+    return [ObjectTypes.GoldBar, ObjectTypes.IronBar, ObjectTypes.Diamond, ObjectTypes.NeptuniumBar];
+  }
+
+  function getBucketTypes() internal pure returns (ObjectType[2] memory) {
+    return [ObjectTypes.Bucket, ObjectTypes.WaterBucket];
+  }
+
+  function getFoodTypes() internal pure returns (ObjectType[2] memory) {
+    return [ObjectTypes.Fuel, ObjectTypes.WheatSlop];
+  }
+
+  function getMovableTypes() internal pure returns (ObjectType[1] memory) {
+    return [ObjectTypes.Player];
+  }
+
+  function getMiscTypes() internal pure returns (ObjectType[6] memory) {
+    return [
+      ObjectTypes.Fragment,
+      ObjectTypes.Snow,
+      ObjectTypes.Ice,
+      ObjectTypes.SpiderWeb,
+      ObjectTypes.Bone,
+      ObjectTypes.TextSign
+    ];
   }
 
   // Meta Category Checks

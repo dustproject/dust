@@ -17,15 +17,12 @@ import { EntityId } from "../../EntityId.sol";
 import { ObjectType } from "../../ObjectType.sol";
 
 import { ObjectTypes } from "../../ObjectType.sol";
-import { ObjectTypeLib } from "../../ObjectTypeLib.sol";
 
 import { Vec3, vec3 } from "../../Vec3.sol";
 import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../../utils/EnergyUtils.sol";
 import { getMovableEntityAt, safeGetObjectTypeAt, setMovableEntityAt } from "../../utils/EntityUtils.sol";
 
 library MoveLib {
-  using ObjectTypeLib for ObjectType;
-
   function _requireValidMove(Vec3 baseOldCoord, Vec3 baseNewCoord) internal view {
     require(baseOldCoord.inSurroundingCube(baseNewCoord, 1), "New coord is too far from old coord");
 

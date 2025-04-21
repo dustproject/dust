@@ -32,19 +32,13 @@ import {
 } from "../src/utils/Vec3Storage.sol";
 
 import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_HALF_WIDTH, MINE_ENERGY_COST } from "../src/Constants.sol";
-import { ObjectType } from "../src/ObjectType.sol";
-
-import { ObjectTypes } from "../src/ObjectType.sol";
-import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
-import { ObjectAmount } from "../src/ObjectTypeLib.sol";
+import { ObjectAmount, ObjectType, ObjectTypes } from "../src/ObjectType.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract MineTest is DustTest {
-  using ObjectTypeLib for ObjectType;
-
   function testMineTerrain() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 

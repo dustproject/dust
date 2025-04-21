@@ -30,7 +30,6 @@ import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "../src/Constants.so
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
-import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
@@ -39,8 +38,6 @@ import { SlotAmount } from "../src/utils/InventoryUtils.sol";
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract CraftTest is DustTest {
-  using ObjectTypeLib for ObjectType;
-
   function hashRecipe(
     ObjectType stationObjectType,
     ObjectType[] memory inputTypes,

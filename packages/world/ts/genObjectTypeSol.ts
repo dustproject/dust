@@ -28,6 +28,12 @@ pragma solidity >=0.8.24;
 
 type ObjectType is uint16;
 
+// Structs
+struct ObjectAmount {
+  ObjectType objectType;
+  uint16 amount;
+}
+
 // Category bits (bits 15..11), id bits (bits 10..0)
 uint16 constant CATEGORY_MASK = 0xF800;
 uint16 constant CATEGORY_SHIFT = 11;
@@ -93,6 +99,17 @@ ${allCategoryMetadata
     return category(self) == Category.${cat.name};
   }`,
   )
+  .join("")}
+
+// Category getters
+${allCategoryMetadata
+  .filter((cat) => cat.name !== "NONE")
+  .map((cat) => {
+    const categoryObjects = objects.filter((obj) => obj.category === cat.name);
+    return `function get${formatCategoryName(cat.name)}Types() internal pure returns (ObjectType[${categoryObjects.length}] memory) {
+    return [${categoryObjects.map((obj) => `ObjectTypes.${obj.name}`).join(", ")}];
+  }`;
+  })
   .join("")}
 
 

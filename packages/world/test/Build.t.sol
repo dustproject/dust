@@ -31,15 +31,12 @@ import { BUILD_ENERGY_COST, CHUNK_SIZE, MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
-import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract BuildTest is DustTest {
-  using ObjectTypeLib for ObjectType;
-
   function testBuildTerrain() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 

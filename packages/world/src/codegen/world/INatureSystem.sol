@@ -15,5 +15,7 @@ import { ObjectType } from "../../ObjectType.sol";
 interface INatureSystem {
   function chunkCommit(EntityId caller, Vec3 chunkCoord) external;
 
-  function respawnResource(uint256 blockNumber, ObjectType objectType) external;
+  function respawnResource(uint256 blockNumber, ObjectType resourceType) external;
+
+  function growSeed(EntityId caller, Vec3 coord) external;
 }

@@ -22,10 +22,8 @@ import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
 
 import { ObjectTypes } from "../ObjectType.sol";
-import { ObjectTypeLib } from "../ObjectTypeLib.sol";
-import { Vec3 } from "../Vec3.sol";
 
-using ObjectTypeLib for ObjectType;
+import { Vec3 } from "../Vec3.sol";
 
 function getLatestEnergyData(EntityId entityId) view returns (EnergyData memory, uint128, uint128) {
   EnergyData memory energyData = Energy._get(entityId);

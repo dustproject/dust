@@ -10,7 +10,6 @@ import { Player } from "../codegen/tables/Player.sol";
 import { ObjectType } from "../ObjectType.sol";
 
 import { ObjectTypes } from "../ObjectType.sol";
-import { ObjectTypeLib } from "../ObjectTypeLib.sol";
 
 import { checkWorldStatus } from "../Utils.sol";
 import { updateMachineEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
@@ -18,8 +17,6 @@ import { updateMachineEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.so
 import { EntityId } from "../EntityId.sol";
 
 contract ActivateSystem is System {
-  using ObjectTypeLib for ObjectType;
-
   function activate(EntityId entityId) public {
     checkWorldStatus();
 

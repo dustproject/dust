@@ -31,7 +31,6 @@ import { EntityId } from "../src/EntityId.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
-import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
@@ -40,8 +39,6 @@ import { DustTest } from "./DustTest.sol";
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract FarmingTest is DustTest {
-  using ObjectTypeLib for ObjectType;
-
   function newCommit(address commiterAddress, EntityId commiter, Vec3 coord, bytes32 blockHash) internal {
     // Set up chunk commitment for randomness when mining grass
     Vec3 chunkCoord = coord.toChunkCoord();
@@ -248,7 +245,7 @@ contract FarmingTest is DustTest {
     uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
 
     vm.prank(alice);
-    vm.expectRevert("Crop seeds need wet farmland");
+    vm.expectRevert("Seeds need wet farmland");
     world.build(aliceEntityId, dirtCoord + vec3(0, 1, 0), seedSlot, "");
 
     // Try to plant on farmland (not wet)
@@ -258,7 +255,7 @@ contract FarmingTest is DustTest {
     seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
 
     vm.prank(alice);
-    vm.expectRevert("Crop seeds need wet farmland");
+    vm.expectRevert("Seeds need wet farmland");
     world.build(aliceEntityId, farmlandCoord + vec3(0, 1, 0), seedSlot, "");
   }
 
@@ -305,7 +302,7 @@ contract FarmingTest is DustTest {
     // Verify wheat and seeds were obtained
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
     // TODO: test randomness
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 0);
 
     // Verify crop no longer exists
     assertEq(ObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
@@ -469,6 +466,6 @@ contract FarmingTest is DustTest {
     // Now we get wheat and seeds
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
     // TODO: test randomness
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 0);
   }
 }

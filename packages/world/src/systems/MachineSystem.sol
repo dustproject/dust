@@ -21,7 +21,6 @@ import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
 
 import { ObjectTypes } from "../ObjectType.sol";
-import { ObjectTypeLib } from "../ObjectTypeLib.sol";
 
 import { ProgramId } from "../ProgramId.sol";
 import { IFuelHook } from "../ProgramInterfaces.sol";
@@ -36,7 +35,7 @@ contract MachineSystem is System {
     machine = machine.baseEntityId();
 
     ObjectType objectType = EntityObjectType._get(machine);
-    require(ObjectTypeLib.isMachine(objectType), "Can only fuel machines");
+    require(objectType.isMachine(), "Can only fuel machines");
 
     uint16 fuelAmount = 0;
     for (uint256 i = 0; i < slots.length; i++) {

@@ -22,15 +22,13 @@ import { CHUNK_SIZE, MACHINE_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
-import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
+
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 
 import { TestUtils } from "./utils/TestUtils.sol";
 
 contract EnergyTest is DustTest {
-  using ObjectTypeLib for ObjectType;
-
   function testPlayerLosesEnergyWhenIdle() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 

@@ -15,7 +15,7 @@ import { EntityId } from "../src/EntityId.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
-import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
+
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 
@@ -53,8 +53,6 @@ import { TestEnergyUtils, TestForceFieldUtils, TestInventoryUtils } from "./util
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 
 abstract contract DustTest is MudTest, GasReporter, DustAssertions {
-  using ObjectTypeLib for ObjectType;
-
   IWorld internal world;
   int32 constant FLAT_CHUNK_GRASS_LEVEL = 4;
   uint128 playerHandMassReduction = MINE_ENERGY_COST;

@@ -24,15 +24,12 @@ import { CHUNK_SIZE } from "../src/Constants.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
-import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
 
 import { Vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { TestUtils } from "./utils/TestUtils.sol";
 
 contract ProgramTest is DustTest {
-  using ObjectTypeLib for ObjectType;
-
   function testMineFailsIfProgramAttached() public {
     vm.skip(true, "TODO");
   }

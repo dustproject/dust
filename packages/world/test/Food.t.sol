@@ -11,7 +11,6 @@ import { EntityId } from "../src/EntityId.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
-import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
@@ -19,8 +18,6 @@ import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol
 import { LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 contract FoodTest is DustTest {
-  using ObjectTypeLib for ObjectType;
-
   function testEatFood() public {
     // Setup player with initial energy at 50% of max
     (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupFlatChunkWithPlayer();

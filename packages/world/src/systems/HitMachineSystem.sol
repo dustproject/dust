@@ -27,14 +27,12 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
-import { ObjectTypeLib } from "../ObjectTypeLib.sol";
+
 import { ProgramId } from "../ProgramId.sol";
 import { IHitHook } from "../ProgramInterfaces.sol";
 import { Vec3 } from "../Vec3.sol";
 
 contract HitMachineSystem is System {
-  using ObjectTypeLib for ObjectType;
-
   function hitForceField(EntityId caller, Vec3 coord, uint16 toolSlot) public {
     _hitForceField(caller, coord, toolSlot);
   }

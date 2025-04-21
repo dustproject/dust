@@ -16,7 +16,6 @@ import { InventoryTypeSlots } from "../../src/codegen/tables/InventoryTypeSlots.
 
 import { ObjectType } from "../../src/ObjectType.sol";
 
-import { ObjectAmount, ObjectTypeLib, getOreObjectTypes } from "../../src/ObjectTypeLib.sol";
 import {
   updateMachineEnergy as _updateMachineEnergy,
   updatePlayerEnergy as _updatePlayerEnergy
@@ -27,8 +26,6 @@ import { ForceFieldUtils } from "../../src/utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../../src/utils/InventoryUtils.sol";
 
 Vm constant vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
-
-using ObjectTypeLib for ObjectType;
 
 library TestUtils {
   /// @dev Allows calling test utils in the context of world

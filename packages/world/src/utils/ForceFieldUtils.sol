@@ -9,19 +9,19 @@ import { Fragment, FragmentData } from "../codegen/tables/Fragment.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
 
 import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
+import { getUniqueEntity } from "../utils/EntityUtils.sol";
 import { FragmentPosition, Position, ReverseFragmentPosition } from "../utils/Vec3Storage.sol";
 
 import { MACHINE_ENERGY_DRAIN_RATE } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectTypes } from "../ObjectType.sol";
-import { getUniqueEntity } from "../Utils.sol";
 import { Vec3 } from "../Vec3.sol";
 
 library ForceFieldUtils {
   /**
    * @dev Get the forcefield and fragment entity IDs for a given coordinate
    */
-  function getForceField(Vec3 coord) internal returns (EntityId, EntityId) {
+  function getForceField(Vec3 coord) internal view returns (EntityId, EntityId) {
     Vec3 fragmentCoord = coord.toFragmentCoord();
     EntityId fragment = getFragmentAt(fragmentCoord);
     if (!fragment.exists()) return (EntityId.wrap(0), fragment);

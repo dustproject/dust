@@ -255,6 +255,7 @@ export const objects: ObjectType[] = [
   ]),
 
   // Crop category
+  // TODO: extract non-passthrough blocks from crops
   ...defineCategoryObjects("CROP", [
     { name: "GoldenMushroom", mass: 300000000000000n },
     { name: "RedMushroom", mass: 300000000000000n },
@@ -297,15 +298,31 @@ export const objects: ObjectType[] = [
   ...defineCategoryObjects("ORE_BLOCK", [
     { name: "CopperBlock", mass: 675000000000000000n },
     { name: "IronBlock", mass: 675000000000000000n },
-    { name: "GoldBlock", mass: 1600000000000000000n },
-    { name: "DiamondBlock", mass: 5000000000000000000n },
-    { name: "NeptuniumBlock", mass: 5000000000000000000n },
+    { name: "GoldBlock", mass: 14400000000000000000n },
+    { name: "DiamondBlock", mass: 45000000000000000000n },
+    { name: "NeptuniumBlock", mass: 45000000000000000000n },
   ]),
   // Growable category
   ...defineCategoryObjects("GROWABLE", [
-    { name: "WheatSeed", energy: 10000000000000000n },
-    { name: "OakSapling", energy: 100000000000000000n },
-    { name: "SpruceSapling", energy: 100000000000000000n },
+    { name: "WheatSeed", energy: 10000000000000000n, timeToGrow: 900n },
+    { name: "PumpkinSeed", energy: 10000000000000000n, timeToGrow: 3600n },
+    { name: "MelonSeed", energy: 10000000000000000n, timeToGrow: 3600n },
+    { name: "OakSapling", energy: 148000000000000000n, timeToGrow: 345600n },
+    { name: "BirchSapling", energy: 139000000000000000n, timeToGrow: 345600n },
+    { name: "JungleSapling", energy: 300000000000000000n, timeToGrow: 345600n },
+    { name: "SakuraSapling", energy: 187000000000000000n, timeToGrow: 345600n },
+    { name: "AcaciaSapling", energy: 158000000000000000n, timeToGrow: 345600n },
+    { name: "SpruceSapling", energy: 256000000000000000n, timeToGrow: 345600n },
+    {
+      name: "DarkOakSapling",
+      energy: 202000000000000000n,
+      timeToGrow: 345600n,
+    },
+    {
+      name: "MangroveSapling",
+      energy: 232000000000000000n,
+      timeToGrow: 345600n,
+    },
   ]),
   // Station category
   ...defineCategoryObjects("STATION", [

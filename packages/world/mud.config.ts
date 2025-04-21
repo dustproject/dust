@@ -363,6 +363,13 @@ export default defineWorld({
       },
       key: ["objectType"],
     },
+    DisabledExtraDrops: {
+      schema: {
+        entityId: "EntityId",
+        disabled: "bool",
+      },
+      key: ["entityId"],
+    },
     // ------------------------------------------------------------
     // Farming
     // ------------------------------------------------------------

@@ -29,7 +29,6 @@ import { EntityId } from "../src/EntityId.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
-import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
 
 import { ProgramId } from "../src/ProgramId.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
@@ -39,8 +38,6 @@ contract TestBedProgram is System {
 }
 
 contract BedTest is DustTest {
-  using ObjectTypeLib for ObjectType;
-
   function createBed(Vec3 bedCoord) internal returns (EntityId) {
     // Set entity to bed
     EntityId bedEntityId = randomEntityId();

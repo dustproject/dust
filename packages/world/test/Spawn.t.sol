@@ -27,7 +27,7 @@ import { EntityId } from "../src/EntityId.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
-import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
+
 import { ProgramId } from "../src/ProgramId.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
@@ -37,8 +37,6 @@ contract TestSpawnProgram is System {
 }
 
 contract SpawnTest is DustTest {
-  using ObjectTypeLib for ObjectType;
-
   function testRandomSpawn() public {
     uint256 blockNumber = block.number - 5;
     address alice = vm.randomAddress();
@@ -115,7 +113,7 @@ contract SpawnTest is DustTest {
 
     // Spawn alice
     vm.prank(alice);
-    EntityId playerEntityId = world.spawn(spawnTileEntityId, spawnCoord, "");
+    EntityId playerEntityId = world.spawn(spawnTileEntityId, spawnCoord, 1, "");
     assertTrue(playerEntityId.exists());
   }
 
@@ -128,7 +126,7 @@ contract SpawnTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Not a spawn tile");
-    world.spawn(spawnTileEntityId, spawnCoord, "");
+    world.spawn(spawnTileEntityId, spawnCoord, 1, "");
   }
 
   function testSpawnFailsIfNotInSpawnArea() public {
@@ -149,7 +147,7 @@ contract SpawnTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Spawn tile is too far away");
-    world.spawn(spawnTileEntityId, spawnCoord, "");
+    world.spawn(spawnTileEntityId, spawnCoord, 1, "");
   }
 
   function testSpawnFailsIfNoForceField() public {
@@ -167,7 +165,7 @@ contract SpawnTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Spawn tile is not inside a forcefield");
-    world.spawn(spawnTileEntityId, spawnCoord, "");
+    world.spawn(spawnTileEntityId, spawnCoord, 1, "");
   }
 
   function testSpawnFailsIfNotEnoughForceFieldEnergy() public {
@@ -188,7 +186,7 @@ contract SpawnTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Not enough energy in spawn tile forcefield");
-    world.spawn(spawnTileEntityId, spawnCoord, "");
+    world.spawn(spawnTileEntityId, spawnCoord, 1, "");
   }
 
   function testSpawnAfterDeath() public {
@@ -220,7 +218,7 @@ contract SpawnTest is DustTest {
 
     // Spawn player
     vm.prank(alice);
-    EntityId playerEntityId = world.spawn(spawnTileEntityId, spawnCoord, "");
+    EntityId playerEntityId = world.spawn(spawnTileEntityId, spawnCoord, 1, "");
 
     assertEq(playerEntityId, aliceEntityId, "Player entity doesn't match");
   }
@@ -252,7 +250,7 @@ contract SpawnTest is DustTest {
     // Spawn player should fail as the player has energy
     vm.prank(alice);
     vm.expectRevert("Player already spawned");
-    world.spawn(spawnTileEntityId, spawnCoord, "");
+    world.spawn(spawnTileEntityId, spawnCoord, 1, "");
   }
 
   function testRandomSpawnAfterDeath() public {

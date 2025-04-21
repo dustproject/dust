@@ -19,7 +19,6 @@ import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
 
 import { ObjectTypes } from "../ObjectType.sol";
-import { ObjectTypeLib } from "../ObjectTypeLib.sol";
 
 import { Vec3 } from "../Vec3.sol";
 import { transferEnergyToPool } from "../utils/EnergyUtils.sol";
@@ -28,8 +27,6 @@ import { InventoryUtils, SlotAmount } from "../utils/InventoryUtils.sol";
 import { CraftNotification, notify } from "../utils/NotifUtils.sol";
 
 contract CraftSystem is System {
-  using ObjectTypeLib for ObjectType;
-
   function craftWithStation(EntityId caller, bytes32 recipeId, EntityId station, SlotAmount[] memory inputs) public {
     caller.activate();
     RecipesData memory recipe = Recipes._get(recipeId);
@@ -53,24 +50,6 @@ contract CraftSystem is System {
     craftWithStation(caller, recipeId, EntityId.wrap(bytes32(0)), inputs);
   }
 
-  function _validateRecipeInput(ObjectType recipeType, ObjectType inputType) private pure {
-    if (recipeType.isAny()) {
-      ObjectType[] memory validTypes = recipeType.getObjectTypes();
-      bool matchFound = false;
-
-      for (uint256 j = 0; j < validTypes.length; j++) {
-        if (validTypes[j] == inputType) {
-          matchFound = true;
-          break;
-        }
-      }
-
-      require(matchFound, "Input type does not match any valid type for this recipe");
-    } else {
-      require(recipeType == inputType, "Input type does not match required recipe type");
-    }
-  }
-
   function _consumeRecipeInputs(EntityId caller, RecipesData memory recipe, SlotAmount[] memory inputs) private {
     uint256 currentInput = 0;
 
@@ -84,7 +63,7 @@ contract CraftSystem is System {
         require(amount > 0, "Input amount must be greater than zero");
 
         ObjectType inputType = InventorySlot._getObjectType(caller, inputs[currentInput].slot);
-        _validateRecipeInput(recipeType, inputType);
+        require(recipeType.matches(inputType), "Input type does not match required recipe type");
 
         InventoryUtils.removeObjectFromSlot(caller, inputs[currentInput].slot, amount);
         remainingAmount -= amount;

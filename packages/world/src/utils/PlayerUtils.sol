@@ -19,20 +19,23 @@ import { FragmentPosition, MovablePosition, Position, ReverseMovablePosition } f
 
 import { ObjectType } from "../ObjectType.sol";
 import { ObjectTypes } from "../ObjectType.sol";
-import { checkWorldStatus, getUniqueEntity } from "../Utils.sol";
+import { checkWorldStatus } from "../Utils.sol";
 import { updatePlayerEnergy } from "./EnergyUtils.sol";
 
-import { getMovableEntityAt, getOrCreateEntityAt, safeGetObjectTypeAt, setMovableEntityAt } from "./EntityUtils.sol";
+import {
+  getMovableEntityAt,
+  getOrCreateEntityAt,
+  getUniqueEntity,
+  safeGetObjectTypeAt,
+  setMovableEntityAt
+} from "./EntityUtils.sol";
 import { InventoryUtils } from "./InventoryUtils.sol";
 
 import { FRAGMENT_SIZE, PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
-import { ObjectTypeLib } from "../ObjectTypeLib.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
 
 import { DeathNotification, notify } from "./NotifUtils.sol";
-
-using ObjectTypeLib for ObjectType;
 
 library PlayerUtils {
   function getOrCreatePlayer() internal returns (EntityId) {

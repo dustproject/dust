@@ -15,8 +15,6 @@ import { EntityId } from "../../EntityId.sol";
 import { ObjectType } from "../../ObjectType.sol";
 
 import { ObjectTypes } from "../../ObjectType.sol";
-import { ObjectTypeLib } from "../../ObjectTypeLib.sol";
-import { getUniqueEntity } from "../../Utils.sol";
 
 import { createEntity, getMovableEntityAt, safeGetObjectTypeAt, setMovableEntityAt } from "../../utils/EntityUtils.sol";
 import { InventoryUtils } from "../../utils/InventoryUtils.sol";
@@ -24,8 +22,6 @@ import { PlayerUtils } from "../../utils/PlayerUtils.sol";
 import { MoveLib } from "../libraries/MoveLib.sol";
 
 contract AdminSystem is System {
-  using ObjectTypeLib for ObjectType;
-
   modifier onlyAdmin() {
     AccessControl.requireOwner(ROOT_NAMESPACE_ID, _msgSender());
     _;

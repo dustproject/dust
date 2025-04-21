@@ -35,7 +35,6 @@ import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "../src/Constants.so
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
-import { ObjectAmount, ObjectTypeLib } from "../src/ObjectTypeLib.sol";
 
 import { ProgramId } from "../src/ProgramId.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
@@ -70,8 +69,6 @@ contract TestChestProgram is System {
 }
 
 contract TransferTest is DustTest {
-  using ObjectTypeLib for ObjectType;
-
   function attachTestProgram(EntityId entityId, System program, bytes14 namespace) internal {
     ResourceId namespaceId = WorldResourceIdLib.encodeNamespace(namespace);
     ResourceId programSystemId = WorldResourceIdLib.encode(RESOURCE_SYSTEM, namespace, "programName");

@@ -8,7 +8,7 @@ import { Notification, NotificationData } from "../codegen/tables/Notification.s
 
 import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
-import { ObjectAmount } from "../ObjectTypeLib.sol";
+
 import { Vec3 } from "../Vec3.sol";
 import { SlotData } from "../utils/InventoryUtils.sol";
 

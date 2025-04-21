@@ -17,9 +17,8 @@ import { PlayerStatus } from "../codegen/tables/PlayerStatus.sol";
 import { Position } from "../utils/Vec3Storage.sol";
 
 import { MAX_RESPAWN_HALF_WIDTH, PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
-import { ObjectType } from "../ObjectType.sol";
-import { ObjectTypes } from "../ObjectType.sol";
-import { checkWorldStatus, getUniqueEntity } from "../Utils.sol";
+import { ObjectType, ObjectTypes } from "../ObjectType.sol";
+import { checkWorldStatus } from "../Utils.sol";
 
 import {
   decreaseFragmentDrainRate,

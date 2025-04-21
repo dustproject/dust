@@ -32,15 +32,12 @@ import { CHUNK_SIZE, MINE_ENERGY_COST, MOVE_ENERGY_COST, PLAYER_FALL_ENERGY_COST
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
-import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { TestUtils } from "./utils/TestUtils.sol";
 
 contract GravityTest is DustTest {
-  using ObjectTypeLib for ObjectType;
-
   function testMineFallSingleBlock() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 

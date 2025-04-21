@@ -8,8 +8,6 @@ import { console } from "forge-std/console.sol";
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { NamespaceOwner } from "@latticexyz/world/src/codegen/tables/NamespaceOwner.sol";
 
-import { ObjectAmount, getOreObjectTypes } from "../src/ObjectTypeLib.sol";
-
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
@@ -37,8 +35,7 @@ import {
 
 import { EntityId } from "../src/EntityId.sol";
 
-import { ObjectType } from "../src/ObjectType.sol";
-import { ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectAmount, ObjectType, ObjectTypeLib, ObjectTypes } from "../src/ObjectType.sol";
 import { ProgramId } from "../src/ProgramId.sol";
 import { TestForceFieldUtils } from "./utils/TestUtils.sol";
 import { encodeChunk } from "./utils/encodeChunk.sol";
@@ -71,7 +68,7 @@ abstract contract DustAssertions is MudTest, GasReporter {
   }
 
   function inventoryGetOreAmounts(EntityId owner) internal view returns (ObjectAmount[] memory) {
-    ObjectType[] memory ores = getOreObjectTypes();
+    ObjectType[7] memory ores = ObjectTypeLib.getOreTypes();
 
     uint256 numOres = 0;
     for (uint256 i = 0; i < ores.length; i++) {

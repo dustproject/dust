@@ -40,15 +40,12 @@ import {
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
-import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract MoveTest is DustTest {
-  using ObjectTypeLib for ObjectType;
-
   function _testMoveMultipleBlocks(address player, uint8 numBlocksToMove, bool overTerrain) internal {
     EntityId playerEntityId = Player.get(player);
     Vec3 startingCoord = MovablePosition.get(playerEntityId);

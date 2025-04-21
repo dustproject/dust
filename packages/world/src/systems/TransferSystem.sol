@@ -13,7 +13,6 @@ import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
 
 import { ObjectTypes } from "../ObjectType.sol";
-import { ObjectAmount } from "../ObjectTypeLib.sol";
 
 import { ITransferHook } from "../ProgramInterfaces.sol";
 import { Vec3 } from "../Vec3.sol";

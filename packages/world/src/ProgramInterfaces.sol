@@ -4,7 +4,7 @@ pragma solidity >=0.8.24;
 import { EntityId } from "./EntityId.sol";
 
 import { ObjectType } from "./ObjectType.sol";
-import { ObjectAmount } from "./ObjectTypeLib.sol";
+
 import { ProgramId } from "./ProgramId.sol";
 import { Vec3 } from "./Vec3.sol";
 import { SlotData } from "./utils/InventoryUtils.sol";
@@ -68,7 +68,7 @@ interface IMineHook {
 }
 
 interface ISpawnHook {
-  function onSpawn(EntityId caller, EntityId target, bytes memory extraData) external;
+  function onSpawn(EntityId caller, EntityId target, uint128 spawnEnergy, bytes memory extraData) external;
 }
 
 interface ISleepHook {

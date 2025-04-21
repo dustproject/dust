@@ -43,10 +43,6 @@ library FarmingSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).till(caller, coord, toolSlot);
   }
 
-  function growSeed(FarmingSystemType self, EntityId caller, Vec3 coord) internal {
-    return CallWrapper(self.toResourceId(), address(0)).growSeed(caller, coord);
-  }
-
   function till(CallWrapper memory self, EntityId caller, Vec3 coord, uint16 toolSlot) internal {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert FarmingSystemLib_CallingFromRootSystem();
@@ -57,23 +53,8 @@ library FarmingSystemLib {
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
-  function growSeed(CallWrapper memory self, EntityId caller, Vec3 coord) internal {
-    // if the contract calling this function is a root system, it should use `callAsRoot`
-    if (address(_world()) == address(this)) revert FarmingSystemLib_CallingFromRootSystem();
-
-    bytes memory systemCall = abi.encodeCall(_growSeed_EntityId_Vec3.growSeed, (caller, coord));
-    self.from == address(0)
-      ? _world().call(self.systemId, systemCall)
-      : _world().callFrom(self.from, self.systemId, systemCall);
-  }
-
   function till(RootCallWrapper memory self, EntityId caller, Vec3 coord, uint16 toolSlot) internal {
     bytes memory systemCall = abi.encodeCall(_till_EntityId_Vec3_uint16.till, (caller, coord, toolSlot));
-    SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
-  }
-
-  function growSeed(RootCallWrapper memory self, EntityId caller, Vec3 coord) internal {
-    bytes memory systemCall = abi.encodeCall(_growSeed_EntityId_Vec3.growSeed, (caller, coord));
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
@@ -117,10 +98,6 @@ library FarmingSystemLib {
 
 interface _till_EntityId_Vec3_uint16 {
   function till(EntityId caller, Vec3 coord, uint16 toolSlot) external;
-}
-
-interface _growSeed_EntityId_Vec3 {
-  function growSeed(EntityId caller, Vec3 coord) external;
 }
 
 using FarmingSystemLib for FarmingSystemType global;

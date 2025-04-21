@@ -14,12 +14,10 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { MAX_PLAYER_ENERGY } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
-import { ObjectTypeLib } from "../ObjectTypeLib.sol";
+
 import { Vec3 } from "../Vec3.sol";
 
 contract FoodSystem is System {
-  using ObjectTypeLib for ObjectType;
-
   function eat(EntityId caller, ObjectType objectType, uint16 numToEat) public {
     EnergyData memory energyData = caller.activate();
 

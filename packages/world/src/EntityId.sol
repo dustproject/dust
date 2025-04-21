@@ -22,7 +22,6 @@ import { MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "./Constants.sol";
 import { ObjectType } from "./ObjectType.sol";
 
 import { ObjectTypes } from "./ObjectType.sol";
-import { ObjectTypeLib } from "./ObjectTypeLib.sol";
 import { ProgramId } from "./ProgramId.sol";
 import { checkWorldStatus } from "./Utils.sol";
 import { Vec3 } from "./Vec3.sol";

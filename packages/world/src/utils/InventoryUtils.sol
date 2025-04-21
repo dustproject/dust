@@ -2,26 +2,20 @@
 pragma solidity >=0.8.24;
 
 import { Inventory } from "../codegen/tables/Inventory.sol";
-
-import { InventoryTypeSlots } from "../codegen/tables/InventoryTypeSlots.sol";
-
 import { InventorySlot, InventorySlotData } from "../codegen/tables/InventorySlot.sol";
 
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
+import { InventoryTypeSlots } from "../codegen/tables/InventoryTypeSlots.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 
-import { ObjectType } from "../ObjectType.sol";
+import { ObjectAmount, ObjectType, ObjectTypes } from "../ObjectType.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
-import { ObjectAmount, ObjectTypeLib } from "../ObjectTypeLib.sol";
-import { getUniqueEntity } from "../Utils.sol";
+import { EntityId } from "../EntityId.sol";
 import { burnToolEnergy } from "../utils/EnergyUtils.sol";
 
 import { EntityId } from "../EntityId.sol";
 import { Vec3 } from "../Vec3.sol";
-
-using ObjectTypeLib for ObjectType;
 
 struct SlotTransfer {
   uint16 slotFrom;
