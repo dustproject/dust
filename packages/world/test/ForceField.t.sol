@@ -111,7 +111,7 @@ contract ForceFieldTest is DustTest {
 
     Vec3 coord;
     // Handle force field fragments differently than regular entities
-    if (ObjectType.get(entityId) == ObjectTypes.Fragment) {
+    if (EntityObjectType.get(entityId) == ObjectTypes.Fragment) {
       // For fragments, we need to use FragmentPosition instead of Position
       coord = FragmentPosition.get(entityId).fromFragmentCoord();
     } else {
@@ -153,7 +153,7 @@ contract ForceFieldTest is DustTest {
 
     // Verify that the block was successfully mined (should be replaced with Air)
     EntityId mineEntityId = ReversePosition.get(mineCoord);
-    assertTrue(ObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
+    assertTrue(EntityObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
   }
 
   function testMineFailsIfNotAllowedByForceField() public {
@@ -245,7 +245,7 @@ contract ForceFieldTest is DustTest {
 
     // Verify that the block was successfully built
     EntityId buildEntityId = ReversePosition.get(buildCoord);
-    assertTrue(ObjectType.get(buildEntityId) == buildObjectType, "Block was not built correctly");
+    assertTrue(EntityObjectType.get(buildEntityId) == buildObjectType, "Block was not built correctly");
   }
 
   function testBuildFailsIfNotAllowedByForceField() public {
@@ -366,7 +366,7 @@ contract ForceFieldTest is DustTest {
 
     // Verify that the block was successfully mined (should be replaced with Air)
     EntityId mineEntityId = ReversePosition.get(mineCoord);
-    assertTrue(ObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
+    assertTrue(EntityObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
   }
 
   function testFragmentProgramIsNotUsedIfNotActive() public {
@@ -403,7 +403,7 @@ contract ForceFieldTest is DustTest {
 
     // Verify that the block was successfully mined (should be replaced with Air)
     EntityId mineEntityId = ReversePosition.get(mineCoord);
-    assertTrue(ObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
+    assertTrue(EntityObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
   }
 
   function testAddFragment() public {
@@ -742,7 +742,7 @@ contract ForceFieldTest is DustTest {
 
       // Verify build succeeded
       EntityId buildEntityId = ReversePosition.get(buildCoord);
-      assertTrue(ObjectType.get(buildEntityId) == buildObjectType, "Block was not built correctly");
+      assertTrue(EntityObjectType.get(buildEntityId) == buildObjectType, "Block was not built correctly");
 
       // Now set the program to disallow building
       program.setRevertOnBuild(true);
@@ -783,7 +783,7 @@ contract ForceFieldTest is DustTest {
 
       // Verify mining succeeded
       EntityId mineEntityId = ReversePosition.get(mineCoord);
-      assertTrue(ObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
+      assertTrue(EntityObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
 
       // Now set the program to disallow mining
       program.setRevertOnMine(true);

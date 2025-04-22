@@ -5,12 +5,12 @@
     "./mud.config": "./dist/mud.config.js",
     "./worlds.json": "./worlds.json",
     "./out/*": "./out/*",
-    "./tree-lib": "./dist/tree-lib.js"
+    "./ts": "./dist/*"
   },
   "typesVersions": {
     "*": {
       "mud.config": ["./dist/mud.config.d.ts"],
-      "tree-lib": ["./dist/tree-lib.d.ts"]
+      "./ts": ["./dist/*"]
     }
   },
   "files": ["src", "out", "dist", "ts", "worlds.json"],

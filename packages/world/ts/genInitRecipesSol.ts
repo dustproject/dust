@@ -1,5 +1,5 @@
-import type { ObjectTypeName } from "./objects.ts";
-import { type Recipe, recipes } from "./recipes.ts";
+import type { ObjectTypeName } from "./objects";
+import { type Recipe, recipes } from "./recipes";
 
 function renderRecipe(recipe: Recipe): string {
   const station: ObjectTypeName = recipe.station ?? "Null";

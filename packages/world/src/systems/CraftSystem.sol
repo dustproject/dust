@@ -35,7 +35,7 @@ contract CraftSystem is System {
 
     if (!recipe.stationTypeId.isNull()) {
       require(station.exists(), "This recipe requires a station");
-      require(ObjectType._get(station) == recipe.stationTypeId, "Invalid station");
+      require(EntityObjectType._get(station) == recipe.stationTypeId, "Invalid station");
       caller.requireConnected(station);
     }
 

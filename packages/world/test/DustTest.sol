@@ -80,7 +80,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
   function createTestPlayer(Vec3 coord) internal returns (address, EntityId) {
     address playerAddress = vm.randomAddress();
     EntityId playerEntityId = randomEntityId();
-    ObjectType.set(playerEntityId, ObjectTypes.Player);
+    EntityObjectType.set(playerEntityId, ObjectTypes.Player);
     MovablePosition.set(playerEntityId, coord);
     ReverseMovablePosition.set(coord, playerEntityId);
 
@@ -88,7 +88,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     for (uint256 i = 0; i < relativePositions.length; i++) {
       Vec3 relativeCoord = coord + relativePositions[i];
       EntityId relativePlayerEntityId = randomEntityId();
-      ObjectType.set(relativePlayerEntityId, ObjectTypes.Player);
+      EntityObjectType.set(relativePlayerEntityId, ObjectTypes.Player);
       MovablePosition.set(relativePlayerEntityId, relativeCoord);
       ReverseMovablePosition.set(relativeCoord, relativePlayerEntityId);
       BaseEntity.set(relativePlayerEntityId, playerEntityId);
@@ -238,7 +238,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     }
 
     EntityId entityId = randomEntityId();
-    ObjectType.set(entityId, objectType);
+    EntityObjectType.set(entityId, objectType);
     Position.set(entityId, coord);
     ReversePosition.set(coord, entityId);
     Mass.set(entityId, ObjectTypeMetadata.getMass(objectType));
@@ -248,7 +248,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];
       EntityId relativeEntityId = randomEntityId();
-      ObjectType.set(relativeEntityId, objectType);
+      EntityObjectType.set(relativeEntityId, objectType);
       Position.set(relativeEntityId, relativeCoord);
       ReversePosition.set(relativeCoord, relativeEntityId);
       BaseEntity.set(relativeEntityId, entityId);

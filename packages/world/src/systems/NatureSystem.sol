@@ -98,10 +98,10 @@ contract NatureSystem is System {
       (EntityId below, ObjectType belowType) = getOrCreateEntityAt(coord - vec3(0, 1, 0));
       // Sanity check
       if (belowType == ObjectTypes.WetFarmland) {
-        ObjectType._set(below, ObjectTypes.Farmland);
+        EntityObjectType._set(below, ObjectTypes.Farmland);
       }
 
-      ObjectType._set(seed, objectType.getCrop());
+      EntityObjectType._set(seed, objectType.getCrop());
     } else if (objectType.isSapling()) {
       // Grow the tree (replace the seed with the trunk and add blocks)
       TreeData memory treeData = TreeLib.getTreeData(objectType);
@@ -179,13 +179,13 @@ contract NatureSystem is System {
       return false;
     }
 
-    ObjectType._set(leaf, leafType);
+    EntityObjectType._set(leaf, leafType);
     return true;
   }
 
   function _growTreeTrunk(EntityId seed, Vec3 baseCoord, TreeData memory treeData) private returns (uint32) {
     // Replace the seed with the trunk
-    ObjectType._set(seed, treeData.logType);
+    EntityObjectType._set(seed, treeData.logType);
 
     // Create the trunk up to available space
     for (uint32 i = 1; i < treeData.trunkHeight; i++) {
@@ -195,7 +195,7 @@ contract NatureSystem is System {
         return i;
       }
 
-      ObjectType._set(trunk, treeData.logType);
+      EntityObjectType._set(trunk, treeData.logType);
     }
 
     return treeData.trunkHeight;

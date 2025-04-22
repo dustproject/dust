@@ -63,7 +63,9 @@ contract BucketTest is DustTest {
     world.wetFarmland(aliceEntityId, farmlandCoord, 0);
     endGasReport();
 
-    assertEq(ObjectType.get(farmlandEntityId), ObjectTypes.WetFarmland, "Farmland was not converted to wet farmland");
+    assertEq(
+      EntityObjectType.get(farmlandEntityId), ObjectTypes.WetFarmland, "Farmland was not converted to wet farmland"
+    );
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Bucket, 1);
     assertInventoryHasObject(aliceEntityId, ObjectTypes.WaterBucket, 0);
   }

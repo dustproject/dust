@@ -50,7 +50,7 @@ contract SpawnTest is DustTest {
     EntityId belowEntityId = randomEntityId();
     Vec3 belowCoord = spawnCoord - vec3(0, 1, 0);
     ReversePosition.set(belowCoord, belowEntityId);
-    ObjectType.set(belowEntityId, ObjectTypes.Dirt);
+    EntityObjectType.set(belowEntityId, ObjectTypes.Dirt);
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
@@ -96,7 +96,7 @@ contract SpawnTest is DustTest {
     EntityId spawnTileEntityId = randomEntityId();
     Position.set(spawnTileEntityId, spawnTileCoord);
     ReversePosition.set(spawnTileCoord, spawnTileEntityId);
-    ObjectType.set(spawnTileEntityId, ObjectTypes.SpawnTile);
+    EntityObjectType.set(spawnTileEntityId, ObjectTypes.SpawnTile);
 
     TestSpawnProgram program = new TestSpawnProgram();
     bytes14 namespace = "programNS";
@@ -143,7 +143,7 @@ contract SpawnTest is DustTest {
     EntityId spawnTileEntityId = randomEntityId();
     Position.set(spawnTileEntityId, spawnTileCoord);
     ReversePosition.set(spawnTileCoord, spawnTileEntityId);
-    ObjectType.set(spawnTileEntityId, ObjectTypes.SpawnTile);
+    EntityObjectType.set(spawnTileEntityId, ObjectTypes.SpawnTile);
 
     vm.prank(alice);
     vm.expectRevert("Spawn tile is too far away");
@@ -161,7 +161,7 @@ contract SpawnTest is DustTest {
     EntityId spawnTileEntityId = randomEntityId();
     Position.set(spawnTileEntityId, spawnTileCoord);
     ReversePosition.set(spawnTileCoord, spawnTileEntityId);
-    ObjectType.set(spawnTileEntityId, ObjectTypes.SpawnTile);
+    EntityObjectType.set(spawnTileEntityId, ObjectTypes.SpawnTile);
 
     vm.prank(alice);
     vm.expectRevert("Spawn tile is not inside a forcefield");
@@ -182,7 +182,7 @@ contract SpawnTest is DustTest {
     EntityId spawnTileEntityId = randomEntityId();
     Position.set(spawnTileEntityId, spawnTileCoord);
     ReversePosition.set(spawnTileCoord, spawnTileEntityId);
-    ObjectType.set(spawnTileEntityId, ObjectTypes.SpawnTile);
+    EntityObjectType.set(spawnTileEntityId, ObjectTypes.SpawnTile);
 
     vm.prank(alice);
     vm.expectRevert("Not enough energy in spawn tile forcefield");
@@ -214,7 +214,7 @@ contract SpawnTest is DustTest {
     EntityId spawnTileEntityId = randomEntityId();
     Position.set(spawnTileEntityId, spawnTileCoord);
     ReversePosition.set(spawnTileCoord, spawnTileEntityId);
-    ObjectType.set(spawnTileEntityId, ObjectTypes.SpawnTile);
+    EntityObjectType.set(spawnTileEntityId, ObjectTypes.SpawnTile);
 
     // Spawn player
     vm.prank(alice);
@@ -245,7 +245,7 @@ contract SpawnTest is DustTest {
     EntityId spawnTileEntityId = randomEntityId();
     Position.set(spawnTileEntityId, spawnTileCoord);
     ReversePosition.set(spawnTileCoord, spawnTileEntityId);
-    ObjectType.set(spawnTileEntityId, ObjectTypes.SpawnTile);
+    EntityObjectType.set(spawnTileEntityId, ObjectTypes.SpawnTile);
 
     // Spawn player should fail as the player has energy
     vm.prank(alice);
@@ -268,7 +268,7 @@ contract SpawnTest is DustTest {
     EntityId belowEntityId = randomEntityId();
     Vec3 belowCoord = spawnCoord - vec3(0, 1, 0);
     ReversePosition.set(belowCoord, belowEntityId);
-    ObjectType.set(belowEntityId, ObjectTypes.Dirt);
+    EntityObjectType.set(belowEntityId, ObjectTypes.Dirt);
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
@@ -291,7 +291,7 @@ contract SpawnTest is DustTest {
     EntityId belowEntityId = randomEntityId();
     Vec3 belowCoord = spawnCoord - vec3(0, 1, 0);
     ReversePosition.set(belowCoord, belowEntityId);
-    ObjectType.set(belowEntityId, ObjectTypes.Dirt);
+    EntityObjectType.set(belowEntityId, ObjectTypes.Dirt);
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();

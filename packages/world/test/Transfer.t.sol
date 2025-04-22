@@ -195,7 +195,7 @@ contract TransferTest is DustTest {
     uint16 maxChestInventorySlots = ObjectTypes.Chest.getMaxInventorySlots();
     ObjectType transferObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(
-      chestEntityId, transferObjectType, ObjectTypeMetadata.getStackable(transferObjectType) * maxChestInventorySlots
+      chestEntityId, transferObjectType, transferObjectType.getStackable() * maxChestInventorySlots
     );
     assertEq(Inventory.length(chestEntityId), maxChestInventorySlots, "Inventory slots is not max");
 
@@ -218,7 +218,7 @@ contract TransferTest is DustTest {
     uint16 maxPlayerInventorySlots = ObjectTypes.Player.getMaxInventorySlots();
     ObjectType transferObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(
-      aliceEntityId, transferObjectType, ObjectTypeMetadata.getStackable(transferObjectType) * maxPlayerInventorySlots
+      aliceEntityId, transferObjectType, transferObjectType.getStackable() * maxPlayerInventorySlots
     );
     assertEq(Inventory.length(aliceEntityId), maxPlayerInventorySlots, "Inventory slots is not max");
 

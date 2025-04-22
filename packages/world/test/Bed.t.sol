@@ -43,7 +43,7 @@ contract BedTest is DustTest {
     EntityId bedEntityId = randomEntityId();
     Position.set(bedEntityId, bedCoord);
     ReversePosition.set(bedCoord, bedEntityId);
-    ObjectType.set(bedEntityId, ObjectTypes.Bed);
+    EntityObjectType.set(bedEntityId, ObjectTypes.Bed);
     return bedEntityId;
   }
 

@@ -47,7 +47,7 @@ contract TransferSystem is System {
 
     if (target.exists()) {
       caller.requireConnected(target);
-      require(ObjectType._get(target) != ObjectTypes.Player, "Cannot access another player's inventory");
+      require(EntityObjectType._get(target) != ObjectTypes.Player, "Cannot access another player's inventory");
     }
 
     (SlotData[] memory deposits, SlotData[] memory withdrawals) = InventoryUtils.transfer(from, to, transfers);

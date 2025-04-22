@@ -47,7 +47,7 @@ contract BedSystem is System {
 
     (Vec3 callerCoord,) = caller.requireConnected(bed);
 
-    require(ObjectType._get(bed) == ObjectTypes.Bed, "Not a bed");
+    require(EntityObjectType._get(bed) == ObjectTypes.Bed, "Not a bed");
 
     bed = bed.baseEntityId();
     Vec3 bedCoord = Position._get(bed);

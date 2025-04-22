@@ -7,31 +7,42 @@ import {
   nonBlockCategoryMetadata,
   objects,
   passThroughCategories,
+  smartEntityCategories,
+  toolCategories,
   uniqueObjectCategories,
-} from "./objects.ts";
+} from "./objects";
 
 // Helper to format category names correctly for function generation
 function formatCategoryName(name: string): string {
-  return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+  return name
+    .toLowerCase()
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("");
 }
 
 function renderMetaCategoryMask(categories: Category[]): string {
   return categories
-    .map((cat) => `(uint128(1) << (${cat} >> CATEGORY_SHIFT))`)
+    .map((cat) => `(uint128(1) << (${cat} >> OFFSET_BITS))`)
     .join(" | ");
 }
 
 function renderObjectAmount(objectAmount: {
   objectType: string;
-  amount: bigint;
+  amount: number | bigint;
 }): string {
-  return `ObjectAmount(${objectAmount.objectType}, ${objectAmount.amount.toString()})`;
+  return `ObjectAmount(ObjectTypes.${objectAmount.objectType}, ${objectAmount.amount.toString()})`;
 }
 
 // Template for the Solidity file
 function generateObjectTypeSol(): string {
   return `// SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
+
+import { IMachineSystem } from "./codegen/world/IMachineSystem.sol";
+import { ITransferSystem } from "./codegen/world/ITransferSystem.sol";
+import { Direction } from "./codegen/common.sol";
+import { Vec3, vec3 } from "./Vec3.sol";
 
 type ObjectType is uint16;
 
@@ -42,19 +53,18 @@ struct ObjectAmount {
 }
 
 // 7 category bits (bits 15..9), 9 index bits (bits 8..0)
-uint16 constant CATEGORY_MASK = 0xF800;
-uint16 constant CATEGORY_SHIFT = 9;
+uint16 constant OFFSET_BITS = 9;
+uint16 constant CATEGORY_MASK = (uint16(2)**OFFSET_BITS - 1) << OFFSET_BITS;
 uint16 constant BLOCK_CATEGORY_COUNT = 128 / 2; // 31
 
 // ------------------------------------------------------------
 // Object Categories
 // ------------------------------------------------------------
 library Category {
-  uint16 constant NONE = 0;
   // Block Categories
-${blockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(${cat.id}) << CATEGORY_SHIFT;`).join("\n")}
+${blockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(${cat.id}) << OFFSET_BITS;`).join("\n")}
   // Non-Block Categories
-${nonBlockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(${cat.id}) << CATEGORY_SHIFT;`).join("\n")}
+${nonBlockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(${cat.id}) << OFFSET_BITS;`).join("\n")}
   // ------------------------------------------------------------
   // Meta Category Masks (fits within uint128; mask bit k set if raw category ID k belongs)
   uint128 constant BLOCK_MASK = uint128(type(uint64).max);
@@ -62,6 +72,8 @@ ${nonBlockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(
   uint128 constant PASS_THROUGH_MASK = ${renderMetaCategoryMask(passThroughCategories)};
   uint128 constant GROWABLE_MASK = ${renderMetaCategoryMask(growableCategories)};
   uint128 constant UNIQUE_OBJECT_MASK = ${renderMetaCategoryMask(uniqueObjectCategories)};
+  uint128 constant SMART_ENTITY_MASK = ${renderMetaCategoryMask(smartEntityCategories)};
+  uint128 constant TOOL_MASK = ${renderMetaCategoryMask(toolCategories)};
   uint128 constant MINEABLE_MASK = BLOCK_MASK & ~${renderMetaCategoryMask(["NON_SOLID"])};
 }
 
@@ -70,11 +82,13 @@ ${nonBlockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(
 // Object Types
 // ------------------------------------------------------------
 library ObjectTypes {
+  ObjectType constant Null = ObjectType.wrap(0);
 ${objects
   .map((obj) => {
     const categoryRef = `Category.${obj.category}`;
     return `  ObjectType constant ${obj.name} = ObjectType.wrap(${categoryRef} | ${obj.id});`;
   })
+
   .join("\n")}
 }
 
@@ -101,7 +115,6 @@ library ObjectTypeLib {
 
   // Direct Category Checks
 ${allCategoryMetadata
-  .filter((cat) => cat.name !== "NONE")
   .map(
     (cat) => `
   function is${formatCategoryName(cat.name)}(ObjectType self) internal pure returns (bool) {
@@ -112,16 +125,82 @@ ${allCategoryMetadata
 
 // Category getters
 ${allCategoryMetadata
-  .filter((cat) => cat.name !== "NONE")
   .map((cat) => {
     const categoryObjects = objects.filter((obj) => obj.category === cat.name);
     return `function get${formatCategoryName(cat.name)}Types() internal pure returns (ObjectType[${categoryObjects.length}] memory) {
     return [${categoryObjects.map((obj) => `ObjectTypes.${obj.name}`).join(", ")}];
   }`;
   })
-  .join("")}
+  .join("\n")}
 
   // Specialized getters
+  // TODO: these are currently part of the codegen, but we should define them in Solidity and import them here
+  function getObjectTypeSchema(ObjectType self) internal pure returns (Vec3[] memory) {
+    if (self == ObjectTypes.Player) {
+      Vec3[] memory playerRelativePositions = new Vec3[](1);
+      playerRelativePositions[0] = vec3(0, 1, 0);
+      return playerRelativePositions;
+    }
+
+    if (self == ObjectTypes.Bed) {
+      Vec3[] memory bedRelativePositions = new Vec3[](1);
+      bedRelativePositions[0] = vec3(0, 0, 1);
+      return bedRelativePositions;
+    }
+
+    if (self == ObjectTypes.TextSign) {
+      Vec3[] memory textSignRelativePositions = new Vec3[](1);
+      textSignRelativePositions[0] = vec3(0, 1, 0);
+      return textSignRelativePositions;
+    }
+
+    return new Vec3[](0);
+  }
+
+  /// @dev Get relative schema coords, including base coord
+  function getRelativeCoords(ObjectType self, Vec3 baseCoord, Direction direction)
+    internal
+    pure
+    returns (Vec3[] memory)
+  {
+    Vec3[] memory schemaCoords = getObjectTypeSchema(self);
+    Vec3[] memory coords = new Vec3[](schemaCoords.length + 1);
+
+    coords[0] = baseCoord;
+
+    for (uint256 i = 0; i < schemaCoords.length; i++) {
+      require(isDirectionSupported(self, direction), "Direction not supported");
+      coords[i + 1] = baseCoord + schemaCoords[i].rotate(direction);
+    }
+
+    return coords;
+  }
+
+  function isDirectionSupported(ObjectType self, Direction direction) internal pure returns (bool) {
+    if (self == ObjectTypes.Bed) {
+      // Note: before supporting more directions, we need to ensure clients can render it
+      return direction == Direction.NegativeX || direction == Direction.NegativeZ;
+    }
+
+    return true;
+  }
+
+  function getRelativeCoords(ObjectType self, Vec3 baseCoord) internal pure returns (Vec3[] memory) {
+    return getRelativeCoords(self, baseCoord, Direction.PositiveZ);
+  }
+
+  function isActionAllowed(ObjectType self, bytes4 sig) internal pure returns (bool) {
+    if (self == ObjectTypes.Player) {
+      return true;
+    }
+
+    if (self == ObjectTypes.Chest) {
+      return sig == ITransferSystem.transfer.selector || sig == IMachineSystem.fuelMachine.selector;
+    }
+
+    return false;
+  }
+
 
   function getMaxInventorySlots(ObjectType self) internal pure returns (uint16) {
     if (self == ObjectTypes.Player) return 36;
@@ -135,15 +214,37 @@ ${allCategoryMetadata
     return 99;
   }
 
-  // TODO: implement
   function getOreAmount(ObjectType self) internal pure returns(ObjectAmount memory) {
     ${objects
-      .filter((obj) => obj.oreAmount !== undefined)
+      .filter((result) => result.oreAmount !== undefined)
       .map(
         (obj) =>
           `if (self == ObjectTypes.${obj.name}) return ${renderObjectAmount(obj.oreAmount!)};`,
       )
       .join("\n    ")}
+    return ObjectAmount(ObjectTypes.Null, 0);
+  }
+
+  function getPlankAmount(ObjectType self) internal pure returns(uint16) {
+    ${objects
+      .filter((obj) => obj.plankAmount !== undefined)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ${obj.plankAmount!.toString()};`,
+      )
+      .join("\n    ")}
+    return 0;
+  }
+
+  function getCrop(ObjectType self) internal pure returns(ObjectType) {
+    ${objects
+      .filter((obj) => obj.crop)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.crop};`,
+      )
+      .join("\n    ")}
+    return ObjectTypes.Null;
   }
 
   function getSapling(ObjectType self) internal pure returns(ObjectType) {
@@ -156,7 +257,6 @@ ${allCategoryMetadata
       .join("\n    ")}
     return ObjectTypes.Null;
   }
-
 
   function getTimeToGrow(ObjectType self) internal pure returns(uint128) {
     ${objects
@@ -174,12 +274,22 @@ ${allCategoryMetadata
     return self == ObjectTypes.FescueGrass || self.isCrop() || self.isLeaf();
   }
 
+  function isMachine(ObjectType self) internal pure returns (bool) {
+    ${objects
+      .filter((obj) => obj.isMachine)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ${obj.isMachine};`,
+      )
+      .join("\n    ")}
+    return false;
+  }
+
   // Meta Category Checks
   function isAny(ObjectType self) internal pure returns (bool) {
     // Check if:
     // 1. ID bits are all 0
     // 2. Category is one that supports "Any" types
-    uint16 c = self.category();
     uint16 idx = self.unwrap() & ~CATEGORY_MASK;
 
     return idx == 0 && hasMetaCategory(self, Category.HAS_ANY_MASK);
@@ -193,8 +303,16 @@ ${allCategoryMetadata
     return hasMetaCategory(self, Category.MINEABLE_MASK);
   }
 
+  function isTool(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.TOOL_MASK);
+  }
+
   function isUniqueObject(ObjectType self) internal pure returns (bool) {
     return hasMetaCategory(self, Category.UNIQUE_OBJECT_MASK);
+  }
+
+  function isSmartEntity(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.SMART_ENTITY_MASK);
   }
 
   function isGrowable(ObjectType self) internal pure returns (bool) {
@@ -203,7 +321,7 @@ ${allCategoryMetadata
 
   function hasMetaCategory(ObjectType self, uint128 mask) internal pure returns (bool) {
     uint16 c = category(self);
-    return ((uint128(1) << (c >> CATEGORY_SHIFT)) & mask) != 0;
+    return ((uint128(1) << (c >> OFFSET_BITS)) & mask) != 0;
   }
 
 

@@ -359,14 +359,14 @@ export const recipes: Recipe[] = [
 
 // Get recipes where an object is used as input
 export function getRecipesByInput(objectType: ObjectTypeName): Recipe[] {
-  return Object.values(recipes).filter((recipe) =>
+  return recipes.filter((recipe) =>
     recipe.inputs.some((input) => input[0] === objectType),
   );
 }
 
 // Get recipes where an object is produced as output
 export function getRecipesByOutput(objectType: ObjectTypeName): Recipe[] {
-  return Object.values(recipes).filter((recipe) =>
+  return recipes.filter((recipe) =>
     recipe.outputs.some((output) => output[0] === objectType),
   );
 }
@@ -391,7 +391,7 @@ function getTotalMassEnergy(objectAmounts: ObjectAmount[]): bigint {
     const [objectType, amount] = objectAmount;
     const obj = objectsByName[objectType];
     if (!obj) throw new Error(`Object type ${objectType} not found`);
-    totalMassEnergy += (obj.mass + obj.energy) * BigInt(amount);
+    totalMassEnergy += ((obj.mass ?? 0n) + (obj.energy ?? 0n)) * BigInt(amount);
   }
 
   return totalMassEnergy;

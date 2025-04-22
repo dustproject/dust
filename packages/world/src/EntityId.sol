@@ -45,7 +45,7 @@ library EntityIdLib {
   }
 
   function requireCallerAllowed(EntityId self, address sender) internal view {
-    ObjectType objectType = ObjectType.get(self);
+    ObjectType objectType = EntityObjectType._get(self);
     requireCallerAllowed(self, sender, objectType);
   }
 

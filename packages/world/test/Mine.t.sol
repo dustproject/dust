@@ -57,7 +57,7 @@ contract MineTest is DustTest {
     endGasReport();
 
     mineEntityId = ReversePosition.get(mineCoord);
-    assertEq(ObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
+    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
@@ -82,7 +82,7 @@ contract MineTest is DustTest {
     endGasReport();
 
     mineEntityId = ReversePosition.get(mineCoord);
-    assertEq(ObjectType.get(mineEntityId), mineObjectType, "Mine entity is not mined object");
+    assertEq(EntityObjectType.get(mineEntityId), mineObjectType, "Mine entity is not mined object");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
@@ -92,7 +92,7 @@ contract MineTest is DustTest {
     vm.prank(alice);
     world.mine(aliceEntityId, mineCoord, "");
 
-    assertEq(ObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
+    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
     afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
@@ -117,7 +117,7 @@ contract MineTest is DustTest {
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
 
     mineEntityId = ReversePosition.get(mineCoord);
-    assertEq(ObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
+    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
     afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
@@ -152,7 +152,7 @@ contract MineTest is DustTest {
     endGasReport();
 
     mineEntityId = ReversePosition.get(mineCoord);
-    assertEq(ObjectType.get(mineEntityId), ObjectTypes.Air, "Entity should be air");
+    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Entity should be air");
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
     assertInventoryHasObject(aliceEntityId, ObjectTypes.AnyOre, 0);
     assertEq(Inventory.length(aliceEntityId), 1, "Wrong number of occupied inventory slots");
@@ -190,7 +190,7 @@ contract MineTest is DustTest {
 
     // Check that the type has been set to specific resource
     mineEntityId = ReversePosition.get(mineCoord);
-    ObjectType resourceType = ObjectType.get(mineEntityId);
+    ObjectType resourceType = EntityObjectType.get(mineEntityId);
     assertNotEq(resourceType, ObjectTypes.AnyOre, "Resource type should have been set to a specific resource");
 
     // Verify mass has been set to the resource's
@@ -207,7 +207,7 @@ contract MineTest is DustTest {
 
     // Verify the resource type hasn't changed even though commitment expired
     mineEntityId = ReversePosition.get(mineCoord);
-    resourceType = ObjectType.get(mineEntityId);
+    resourceType = EntityObjectType.get(mineEntityId);
     assertNotEq(resourceType, ObjectTypes.AnyOre, "Resource type should remain consistent after commitment expired");
 
     // Verify mass has been set to the resource's
@@ -234,7 +234,7 @@ contract MineTest is DustTest {
     world.mine(aliceEntityId, mineCoord, "");
     endGasReport();
 
-    assertEq(ObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
+    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
@@ -253,8 +253,8 @@ contract MineTest is DustTest {
     EntityId topEntityId = ReversePosition.get(topCoord);
     assertTrue(mineEntityId.exists(), "Mine entity does not exist");
     assertTrue(topEntityId.exists(), "Top entity does not exist");
-    assertEq(ObjectType.get(mineEntityId), mineObjectType, "Mine entity is not mine object type");
-    assertEq(ObjectType.get(topEntityId), mineObjectType, "Top entity is not air");
+    assertEq(EntityObjectType.get(mineEntityId), mineObjectType, "Mine entity is not mine object type");
+    assertEq(EntityObjectType.get(topEntityId), mineObjectType, "Top entity is not air");
     assertEq(Mass.getMass(mineEntityId), ObjectTypeMetadata.getMass(mineObjectType), "Mine entity mass is not correct");
     assertEq(Mass.getMass(topEntityId), 0, "Top entity mass is not correct");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
@@ -266,9 +266,9 @@ contract MineTest is DustTest {
     world.mine(aliceEntityId, mineCoord, "");
     endGasReport();
 
-    assertEq(ObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
+    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
-    assertEq(ObjectType.get(topEntityId), ObjectTypes.Air, "Top entity is not air");
+    assertEq(EntityObjectType.get(topEntityId), ObjectTypes.Air, "Top entity is not air");
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not correct");
     assertEq(Mass.getMass(topEntityId), 0, "Top entity mass is not correct");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
@@ -290,9 +290,9 @@ contract MineTest is DustTest {
     vm.prank(alice);
     world.mine(aliceEntityId, topCoord, "");
 
-    assertEq(ObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
+    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
-    assertEq(ObjectType.get(topEntityId), ObjectTypes.Air, "Top entity is not air");
+    assertEq(EntityObjectType.get(topEntityId), ObjectTypes.Air, "Top entity is not air");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
   }
 

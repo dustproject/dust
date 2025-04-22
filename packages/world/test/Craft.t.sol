@@ -266,7 +266,7 @@ contract CraftTest is DustTest {
     assertEq(toolSlots.length, 1, "should have 1 tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
     assertTrue(toolEntityId.exists(), "tool entity id should exist");
-    ObjectType toolObjectType = ObjectType.get(toolEntityId);
+    ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
     assertEq(Mass.get(toolEntityId), ObjectTypeMetadata.getMass(outputTypes[0]), "mass should be equal to tool mass");
@@ -305,7 +305,7 @@ contract CraftTest is DustTest {
     assertEq(toolSlots.length, 1, "should have 1 of the crafted tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
     assertTrue(toolEntityId.exists(), "tool entity id should exist");
-    ObjectType toolObjectType = ObjectType.get(toolEntityId);
+    ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
     assertEq(Mass.get(toolEntityId), ObjectTypeMetadata.getMass(outputTypes[0]), "mass should be equal to tool mass");
@@ -344,7 +344,7 @@ contract CraftTest is DustTest {
     assertEq(toolSlots.length, 1, "should have 1 of the crafted tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
     assertTrue(toolEntityId.exists(), "tool entity id should exist");
-    ObjectType toolObjectType = ObjectType.get(toolEntityId);
+    ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
     assertEq(Mass.get(toolEntityId), ObjectTypeMetadata.getMass(outputTypes[0]), "mass should be equal to tool mass");

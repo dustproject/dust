@@ -1,11 +1,6 @@
-// Object Type Generator
-// Generate ObjectType.sol from structured type definitions
-
 export const numBlockCategories = 128 / 2;
 
-export const noneCategory: string = "NONE";
-
-export const blockCategories: string[] = [
+export const blockCategories = [
   "NON_SOLID",
   "STONE",
   "GEMSTONE",
@@ -24,29 +19,28 @@ export const blockCategories: string[] = [
   "SEED",
   "SAPLING",
   "STATION",
-  "SMART",
-];
+  "SMART_ENTITY_BLOCK",
+  "MISC_BLOCK",
+] as const;
 
-export const nonBlockCategories: string[] = [
-  "TOOL",
-  "OREBAR",
+export const nonBlockCategories = [
+  "PICK",
+  "AXE",
+  "HOE",
+  "WHACKER",
+  "ORE_BAR",
   "BUCKET",
   "FOOD",
   "MOVABLE",
-  "MISC",
-];
+  "SMART_ENTITY_NON_BLOCK",
+] as const;
 
-export type NoneCategory = typeof noneCategory;
-export type BlockCategory = (typeof blockCategories)[number];
-export type NonBlockCategory = (typeof nonBlockCategories)[number];
-
-export type Category = NoneCategory | BlockCategory | NonBlockCategory;
-
-export const allCategories: Category[] = [
-  noneCategory,
+export const allCategories = [
   ...blockCategories,
   ...nonBlockCategories,
-];
+] as const;
+
+export type Category = (typeof allCategories)[number];
 
 // Define categories that pass metadata for the template
 export interface CategoryMetadata {
@@ -71,7 +65,6 @@ export const nonBlockCategoryMetadata: CategoryMetadata[] =
 
 // All categories metadata for template generation
 export const allCategoryMetadata: CategoryMetadata[] = [
-  { name: noneCategory, id: 0 },
   ...blockCategoryMetadata,
   ...nonBlockCategoryMetadata,
 ];
@@ -81,27 +74,23 @@ export interface ObjectType {
   id: number;
   name: string;
   category: Category;
-  mass: bigint;
-  energy: bigint;
+  mass?: bigint;
+  energy?: bigint;
   timeToGrow?: bigint;
   isTillable?: boolean;
   stackable?: number;
   sapling?: ObjectTypeName;
+  crop?: ObjectTypeName;
+  isMachine?: boolean;
+  // Used for tools
+  plankAmount?: number;
+  oreAmount?: { objectType: ObjectTypeName; amount: number };
 }
 
 // Helper function to define objects for a category
 function defineCategoryObjects(
   category: Category,
-  objects: (
-    | string
-    | {
-        name: string;
-        mass?: bigint;
-        energy?: bigint;
-        timeToGrow?: bigint;
-        sapling?: ObjectTypeName;
-      }
-  )[],
+  objects: (string | Omit<ObjectType, "id" | "category">)[],
 ): ObjectType[] {
   return objects
     .map((obj) =>
@@ -117,7 +106,6 @@ function defineCategoryObjects(
 
 // Object type definitions using defineCategoryObjects
 export const objects: ObjectType[] = [
-  ...defineCategoryObjects("NONE", ["Null"]),
   // NonSolid category
   ...defineCategoryObjects("NON_SOLID", [
     "Air",
@@ -348,9 +336,24 @@ export const objects: ObjectType[] = [
     { name: "NeptuniumBlock", mass: 45000000000000000000n },
   ]),
   ...defineCategoryObjects("SEED", [
-    { name: "WheatSeed", energy: 10000000000000000n, timeToGrow: 900n },
-    { name: "PumpkinSeed", energy: 10000000000000000n, timeToGrow: 3600n },
-    { name: "MelonSeed", energy: 10000000000000000n, timeToGrow: 3600n },
+    {
+      name: "WheatSeed",
+      energy: 10000000000000000n,
+      timeToGrow: 900n,
+      crop: "Wheat",
+    },
+    {
+      name: "PumpkinSeed",
+      energy: 10000000000000000n,
+      timeToGrow: 3600n,
+      crop: "Pumpkin",
+    },
+    {
+      name: "MelonSeed",
+      energy: 10000000000000000n,
+      timeToGrow: 3600n,
+      crop: "Melon",
+    },
   ]),
   ...defineCategoryObjects("SAPLING", [
     { name: "OakSapling", energy: 148000000000000000n, timeToGrow: 345600n },
@@ -377,34 +380,113 @@ export const objects: ObjectType[] = [
     { name: "Powerstone", mass: 3735000000000000000n },
   ]),
   // Smart category
-  ...defineCategoryObjects("SMART", [
+  ...defineCategoryObjects("SMART_ENTITY_BLOCK", [
     { name: "ForceField", mass: 3735000000000000000n },
     { name: "Chest", mass: 35600000000000000n },
     { name: "SpawnTile", mass: 9135000000000000000n },
     { name: "Bed", mass: 13350000000000000n },
   ]),
-
-  // Tool category
-  ...defineCategoryObjects("TOOL", [
-    { name: "WoodenPick", mass: 22250000000000000n },
-    { name: "WoodenAxe", mass: 22250000000000000n },
-    { name: "WoodenWhacker", mass: 35600000000000000n },
-    { name: "WoodenHoe", mass: 17800000000000000n },
-    { name: "CopperPick", mass: 2033900000000000000n },
-    { name: "CopperAxe", mass: 2033900000000000002n },
-    { name: "CopperWhacker", mass: 4058900000000000000n },
-    { name: "IronPick", mass: 2033900000000000000n },
-    { name: "IronAxe", mass: 2033900000000000000n },
-    { name: "IronWhacker", mass: 4058900000000000000n },
-    { name: "GoldPick", mass: 4808900000000000000n },
-    { name: "GoldAxe", mass: 4808900000000000000n },
-    { name: "DiamondPick", mass: 15008900000000000000n },
-    { name: "DiamondAxe", mass: 15008900000000000000n },
-    { name: "NeptuniumPick", mass: 15008900000000000000n },
-    { name: "NeptuniumAxe", mass: 15008900000000000000n },
+  ...defineCategoryObjects("MISC_BLOCK", [
+    { name: "Snow", mass: 4000000000000000n },
+    { name: "Ice", mass: 4000000000000000n },
+    { name: "SpiderWeb", mass: 100000000000000n },
+    { name: "Bone", mass: 1000000000000000n },
+    { name: "TextSign", mass: 17800000000000000n },
   ]),
+
+  // NON BLOCKS
+
+  // Tool categories
+  ...defineCategoryObjects("PICK", [
+    { name: "WoodenPick", mass: 22250000000000000n, plankAmount: 5 },
+    {
+      name: "CopperPick",
+      mass: 2033900000000000000n,
+      plankAmount: 2,
+      oreAmount: { objectType: "CopperOre", amount: 3 },
+    },
+    {
+      name: "IronPick",
+      mass: 2033900000000000000n,
+      plankAmount: 2,
+      oreAmount: { objectType: "IronOre", amount: 3 },
+    },
+    {
+      name: "GoldPick",
+      mass: 4808900000000000000n,
+      plankAmount: 2,
+      oreAmount: { objectType: "GoldOre", amount: 3 },
+    },
+    {
+      name: "DiamondPick",
+      mass: 15008900000000000000n,
+      plankAmount: 2,
+      oreAmount: { objectType: "DiamondOre", amount: 3 },
+    },
+    {
+      name: "NeptuniumPick",
+      mass: 15008900000000000000n,
+      plankAmount: 2,
+      oreAmount: { objectType: "NeptuniumOre", amount: 3 },
+    },
+  ]),
+
+  ...defineCategoryObjects("AXE", [
+    { name: "WoodenAxe", mass: 22250000000000000n, plankAmount: 5 },
+    {
+      name: "CopperAxe",
+      mass: 2033900000000000002n,
+      plankAmount: 2,
+      oreAmount: { objectType: "CopperOre", amount: 3 },
+    },
+    {
+      name: "IronAxe",
+      mass: 2033900000000000000n,
+      plankAmount: 2,
+      oreAmount: { objectType: "IronOre", amount: 3 },
+    },
+    {
+      name: "GoldAxe",
+      mass: 4808900000000000000n,
+      plankAmount: 2,
+      oreAmount: { objectType: "GoldOre", amount: 3 },
+    },
+    {
+      name: "DiamondAxe",
+      mass: 15008900000000000000n,
+      plankAmount: 2,
+      oreAmount: { objectType: "DiamondOre", amount: 3 },
+    },
+    {
+      name: "NeptuniumAxe",
+      mass: 15008900000000000000n,
+      plankAmount: 2,
+      oreAmount: { objectType: "NeptuniumOre", amount: 3 },
+    },
+  ]),
+
+  ...defineCategoryObjects("WHACKER", [
+    { name: "WoodenWhacker", mass: 35600000000000000n, plankAmount: 8 },
+    {
+      name: "CopperWhacker",
+      mass: 4058900000000000000n,
+      plankAmount: 2,
+      oreAmount: { objectType: "CopperOre", amount: 6 },
+    },
+    {
+      name: "IronWhacker",
+      mass: 4058900000000000000n,
+      plankAmount: 2,
+      oreAmount: { objectType: "IronOre", amount: 6 },
+    },
+  ]),
+
+  ...defineCategoryObjects("HOE", [
+    { name: "WoodenHoe", mass: 17800000000000000n, plankAmount: 4 },
+  ]),
+
   // Orebar category
-  ...defineCategoryObjects("OREBAR", [
+  ...defineCategoryObjects("ORE_BAR", [
     { name: "GoldBar", mass: 1600000000000000000n },
     { name: "IronBar", mass: 675000000000000000n },
     { name: "Diamond", mass: 5000000000000000000n },
@@ -426,26 +508,21 @@ export const objects: ObjectType[] = [
   ]),
   // Movable category
   ...defineCategoryObjects("MOVABLE", [{ name: "Player" }]),
-  // Misc category
-  // TODO: move some of these to other categories!
-  ...defineCategoryObjects("MISC", [
-    { name: "Fragment" },
-    { name: "Snow", mass: 4000000000000000n },
-    { name: "Ice", mass: 4000000000000000n },
-    { name: "SpiderWeb", mass: 100000000000000n },
-    { name: "Bone", mass: 1000000000000000n },
-    { name: "TextSign", mass: 17800000000000000n },
-  ]),
+  // Smart entities that are not blocks
+  ...defineCategoryObjects("SMART_ENTITY_NON_BLOCK", [{ name: "Fragment" }]),
 ];
 
 export type ObjectTypeName = (typeof objects)[number]["name"];
 
 export type ObjectAmount = [ObjectTypeName, number];
 
-export const objectsByName = objects.reduce((acc, obj) => {
-  acc[obj.id] = obj;
-  return acc;
-}, {});
+export const objectsByName = objects.reduce(
+  (acc, obj) => {
+    acc[obj.name] = obj;
+    return acc;
+  },
+  {} as Record<ObjectTypeName, ObjectType>,
+);
 
 // Meta-categories (categories that should be included in pass-through check)
 export const passThroughCategories: Category[] = [
@@ -463,10 +540,19 @@ export const growableCategories: Category[] = ["SEED", "SAPLING"];
 
 // TODO: adjust categories
 export const uniqueObjectCategories: Category[] = [
-  "TOOL",
-  "SMART",
+  "PICK",
+  "AXE",
+  "WHACKER",
+  "HOE",
+  "SMART_ENTITY_BLOCK",
   "BUCKET",
-  "MISC",
+];
+
+export const toolCategories: Category[] = ["PICK", "AXE", "WHACKER", "HOE"];
+
+export const smartEntityCategories: Category[] = [
+  "SMART_ENTITY_BLOCK",
+  "SMART_ENTITY_NON_BLOCK",
 ];
 
 export const hasAnyCategories: Category[] = ["LOG", "LEAF", "PLANK", "ORE"];

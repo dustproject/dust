@@ -102,7 +102,7 @@ abstract contract DustAssertions is MudTest, GasReporter {
   }
 
   function assertInventoryHasTool(EntityId owner, EntityId toolEntityId, uint16 amount) internal view {
-    uint16[] memory slots = InventoryTypeSlots.get(owner, ObjectType.get(toolEntityId));
+    uint16[] memory slots = InventoryTypeSlots.get(owner, EntityObjectType.get(toolEntityId));
     bool found;
     if (slots.length > 0) {
       for (uint256 i; i < slots.length; i++) {

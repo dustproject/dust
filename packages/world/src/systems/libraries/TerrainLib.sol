@@ -50,7 +50,7 @@ library TerrainLib {
 
     // Uncompress the block type (first 4 bits are the category, last 4 bits are the index)
     uint16 blockValue = uint16(uint8(blockType));
-    return ObjectType.wrap(((blockValue & 0xF0) << 5) | (blockValue & 0x0F));
+    return ObjectType.wrap(((blockValue & 0xF0) << 9) | (blockValue & 0x0F));
   }
 
   /// @notice Get the biome of a voxel coordinate.

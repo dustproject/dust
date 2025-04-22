@@ -293,7 +293,7 @@ contract InventoryTest is DustTest {
 
     EntityId airEntityId = ReversePosition.get(chestCoord);
     assertEq(airEntityId.exists(), true, "Drop entity does not exist");
-    assertEq(ObjectType.get(airEntityId), ObjectTypes.Air, "Drop entity is not air");
+    assertEq(EntityObjectType.get(airEntityId), ObjectTypes.Air, "Drop entity is not air");
     assertInventoryHasObject(airEntityId, transferObjectType, numToPickup);
 
     vm.prank(alice);

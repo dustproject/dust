@@ -59,7 +59,7 @@ contract BuildTest is DustTest {
     endGasReport();
 
     buildEntityId = ReversePosition.get(buildCoord);
-    assertEq(ObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
 
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
@@ -90,7 +90,7 @@ contract BuildTest is DustTest {
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
     endGasReport();
 
-    assertEq(ObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
@@ -124,8 +124,8 @@ contract BuildTest is DustTest {
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
     endGasReport();
 
-    assertEq(ObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
-    assertEq(ObjectType.get(topEntityId), buildObjectType, "Top entity is not build object type");
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
+    assertEq(EntityObjectType.get(topEntityId), buildObjectType, "Top entity is not build object type");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
@@ -156,7 +156,7 @@ contract BuildTest is DustTest {
     assertEq(playerCoordAfter, playerCoord + vec3(0, 1, 0), "Player coord is not correct");
 
     EntityId buildEntityId = ReversePosition.get(playerCoord);
-    assertEq(ObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
@@ -181,7 +181,7 @@ contract BuildTest is DustTest {
     world.build(aliceEntityId, bobCoord, inventorySlot, "");
 
     EntityId buildEntityId = ReversePosition.get(bobCoord);
-    assertEq(ObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
     assertEq(
       Mass.getMass(buildEntityId), ObjectTypeMetadata.getMass(buildObjectType), "Build entity mass is not correct"
     );
@@ -190,28 +190,27 @@ contract BuildTest is DustTest {
     vm.prank(alice);
     world.build(aliceEntityId, aboveBobCoord, inventorySlot, "");
     buildEntityId = ReversePosition.get(aboveBobCoord);
-    assertEq(ObjectType.get(buildEntityId), buildObjectType, "Top entity is not build object type");
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Top entity is not build object type");
     assertEq(Mass.getMass(buildEntityId), ObjectTypeMetadata.getMass(buildObjectType), "Top entity mass is not correct");
 
     vm.prank(alice);
     world.build(aliceEntityId, aliceCoord, inventorySlot, "");
     buildEntityId = ReversePosition.get(aliceCoord);
-    assertEq(ObjectType.get(buildEntityId), buildObjectType, "Top entity is not build object type");
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Top entity is not build object type");
     assertEq(Mass.getMass(buildEntityId), ObjectTypeMetadata.getMass(buildObjectType), "Top entity mass is not correct");
 
     Vec3 aboveAliceCoord = aliceCoord + vec3(0, 1, 0);
     vm.prank(alice);
     world.build(aliceEntityId, aboveAliceCoord, inventorySlot, "");
     buildEntityId = ReversePosition.get(aboveAliceCoord);
-    assertEq(ObjectType.get(buildEntityId), buildObjectType, "Top entity is not build object type");
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Top entity is not build object type");
     assertEq(Mass.getMass(buildEntityId), ObjectTypeMetadata.getMass(buildObjectType), "Top entity mass is not correct");
   }
 
   function testJumpBuildFailsIfPassThrough() public {
     (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
-    ObjectType buildObjectType = ObjectTypes.Grass;
-    ObjectTypeMetadata.setCanPassThrough(buildObjectType, true);
+    ObjectType buildObjectType = ObjectTypes.SakuraLeaf;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
@@ -399,7 +398,7 @@ contract BuildTest is DustTest {
     assertPlayerIsDead(aliceEntityId, playerCoord);
 
     // Verify the block was not built
-    assertEq(ObjectType.get(buildEntityId), ObjectTypes.Air, "Build entity is not air");
+    assertEq(EntityObjectType.get(buildEntityId), ObjectTypes.Air, "Build entity is not air");
   }
 
   function testBuildFatal() public {
@@ -429,7 +428,7 @@ contract BuildTest is DustTest {
 
     // TODO: we might want to build the block in this case
     // Verify the block was not built
-    assertEq(ObjectType.get(buildEntityId), ObjectTypes.Air, "Build entity is not build object type");
+    assertEq(EntityObjectType.get(buildEntityId), ObjectTypes.Air, "Build entity is not build object type");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
   }
 

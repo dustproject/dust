@@ -1,4 +1,4 @@
-import { objects } from "./objects.ts";
+import { objects } from "./objects";
 
 // Template for the Solidity file
 function generateInitObjectsSol(): string {
@@ -10,8 +10,9 @@ import { ObjectTypes } from "../src/ObjectType.sol";
 
 function initObjects() {
 ${objects
+  .filter((obj) => obj.mass || obj.energy)
   .map((obj) => {
-    return `  ObjectTypeMetadata.set(ObjectTypes.${obj.name}, ObjectTypeMetadataData({ mass: ${obj.mass.toString()}, energy: ${obj.energy.toString()} }));`;
+    return `  ObjectTypeMetadata.set(ObjectTypes.${obj.name}, ObjectTypeMetadataData({ mass: ${obj.mass ?? 0}, energy: ${obj.energy ?? 0} }));`;
   })
   .join("\n")}
 }

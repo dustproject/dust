@@ -63,7 +63,7 @@ contract GravityTest is DustTest {
     );
 
     mineEntityId = ReversePosition.get(mineCoord);
-    assertEq(ObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
+    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     uint128 playerEnergyLost =
@@ -101,7 +101,7 @@ contract GravityTest is DustTest {
     );
 
     mineEntityId = ReversePosition.get(mineCoord);
-    assertEq(ObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
+    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     uint128 playerEnergyLost =
@@ -166,7 +166,7 @@ contract GravityTest is DustTest {
     }
 
     mineEntityId = ReversePosition.get(mineCoord);
-    assertEq(ObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
+    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
     uint128 energyGainedInPool = LocalEnergyPool.get(shardCoord) - localEnergyPoolBefore;
     assertGt(energyGainedInPool, 0, "Local energy pool did not gain energy");

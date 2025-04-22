@@ -70,7 +70,7 @@ contract ProgramSystem is System {
     caller.activate();
 
     Vec3 forceFieldCoord;
-    if (ObjectType._get(target) == ObjectTypes.Fragment) {
+    if (EntityObjectType._get(target) == ObjectTypes.Fragment) {
       (, Vec3 fragmentCoord) = caller.requireAdjacentToFragment(target);
       forceFieldCoord = fragmentCoord.fromFragmentCoord();
     } else {

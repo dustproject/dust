@@ -5,7 +5,6 @@ import { ObjectTypes } from "../src/ObjectType.sol";
 import { ObjectTypeMetadata, ObjectTypeMetadataData } from "../src/codegen/tables/ObjectTypeMetadata.sol";
 
 function initObjects() {
-  ObjectTypeMetadata.set(ObjectTypes.Null, ObjectTypeMetadataData({ mass: 0, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Air, ObjectTypeMetadataData({ mass: 0, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Water, ObjectTypeMetadataData({ mass: 0, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Lava, ObjectTypeMetadataData({ mass: 500000000000000, energy: 0 }));
@@ -203,22 +202,27 @@ function initObjects() {
   ObjectTypeMetadata.set(ObjectTypes.Chest, ObjectTypeMetadataData({ mass: 35600000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.SpawnTile, ObjectTypeMetadataData({ mass: 9135000000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Bed, ObjectTypeMetadataData({ mass: 13350000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.Snow, ObjectTypeMetadataData({ mass: 4000000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.Ice, ObjectTypeMetadataData({ mass: 4000000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.SpiderWeb, ObjectTypeMetadataData({ mass: 100000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.Bone, ObjectTypeMetadataData({ mass: 1000000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.TextSign, ObjectTypeMetadataData({ mass: 17800000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.WoodenPick, ObjectTypeMetadataData({ mass: 22250000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.WoodenAxe, ObjectTypeMetadataData({ mass: 22250000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.WoodenWhacker, ObjectTypeMetadataData({ mass: 35600000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.WoodenHoe, ObjectTypeMetadataData({ mass: 17800000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.CopperPick, ObjectTypeMetadataData({ mass: 2033900000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.CopperAxe, ObjectTypeMetadataData({ mass: 2033900000000000002, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.CopperWhacker, ObjectTypeMetadataData({ mass: 4058900000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.IronPick, ObjectTypeMetadataData({ mass: 2033900000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.IronAxe, ObjectTypeMetadataData({ mass: 2033900000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.IronWhacker, ObjectTypeMetadataData({ mass: 4058900000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.GoldPick, ObjectTypeMetadataData({ mass: 4808900000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.GoldAxe, ObjectTypeMetadataData({ mass: 4808900000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.DiamondPick, ObjectTypeMetadataData({ mass: 15008900000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.DiamondAxe, ObjectTypeMetadataData({ mass: 15008900000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.NeptuniumPick, ObjectTypeMetadataData({ mass: 15008900000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.WoodenAxe, ObjectTypeMetadataData({ mass: 22250000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.CopperAxe, ObjectTypeMetadataData({ mass: 2033900000000000002, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.IronAxe, ObjectTypeMetadataData({ mass: 2033900000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.GoldAxe, ObjectTypeMetadataData({ mass: 4808900000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.DiamondAxe, ObjectTypeMetadataData({ mass: 15008900000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.NeptuniumAxe, ObjectTypeMetadataData({ mass: 15008900000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.WoodenWhacker, ObjectTypeMetadataData({ mass: 35600000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.CopperWhacker, ObjectTypeMetadataData({ mass: 4058900000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.IronWhacker, ObjectTypeMetadataData({ mass: 4058900000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.WoodenHoe, ObjectTypeMetadataData({ mass: 17800000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.GoldBar, ObjectTypeMetadataData({ mass: 1600000000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.IronBar, ObjectTypeMetadataData({ mass: 675000000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Diamond, ObjectTypeMetadataData({ mass: 5000000000000000000, energy: 0 }));
@@ -233,9 +237,4 @@ function initObjects() {
   );
   ObjectTypeMetadata.set(ObjectTypes.Player, ObjectTypeMetadataData({ mass: 0, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Fragment, ObjectTypeMetadataData({ mass: 0, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Snow, ObjectTypeMetadataData({ mass: 4000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Ice, ObjectTypeMetadataData({ mass: 4000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.SpiderWeb, ObjectTypeMetadataData({ mass: 100000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Bone, ObjectTypeMetadataData({ mass: 1000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.TextSign, ObjectTypeMetadataData({ mass: 17800000000000000, energy: 0 }));
 }

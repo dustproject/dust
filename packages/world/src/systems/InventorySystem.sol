@@ -37,7 +37,7 @@ contract InventorySystem is System {
     caller.requireConnected(coord);
 
     (EntityId entityId, ObjectType objectType) = getOrCreateEntityAt(coord);
-    require(ObjectTypeMetadata._getCanPassThrough(objectType), "Cannot drop on a non-passable block");
+    require(objectType.isPassThrough(), "Cannot drop on a non-passable block");
 
     for (uint256 i = 0; i < slots.length; i++) {
       ObjectType dropType = InventoryUtils.removeObjectFromSlot(caller, slots[i].slot, slots[i].amount);

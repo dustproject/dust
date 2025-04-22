@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { Vec3, vec3 } from "./Vec3.sol";
+import { Direction } from "./codegen/common.sol";
+import { IMachineSystem } from "./codegen/world/IMachineSystem.sol";
+import { ITransferSystem } from "./codegen/world/ITransferSystem.sol";
+
 type ObjectType is uint16;
 
 // Structs
@@ -10,65 +15,71 @@ struct ObjectAmount {
 }
 
 // 7 category bits (bits 15..9), 9 index bits (bits 8..0)
-uint16 constant CATEGORY_MASK = 0xF800;
-uint16 constant CATEGORY_SHIFT = 9;
+uint16 constant OFFSET_BITS = 9;
+uint16 constant CATEGORY_MASK = (uint16(2) ** OFFSET_BITS - 1) << OFFSET_BITS;
 uint16 constant BLOCK_CATEGORY_COUNT = 128 / 2; // 31
 
 // ------------------------------------------------------------
 // Object Categories
 // ------------------------------------------------------------
 library Category {
-  uint16 constant NONE = 0;
   // Block Categories
-  uint16 constant NON_SOLID = uint16(1) << CATEGORY_SHIFT;
-  uint16 constant STONE = uint16(2) << CATEGORY_SHIFT;
-  uint16 constant GEMSTONE = uint16(3) << CATEGORY_SHIFT;
-  uint16 constant SOIL = uint16(4) << CATEGORY_SHIFT;
-  uint16 constant ORE = uint16(5) << CATEGORY_SHIFT;
-  uint16 constant SAND = uint16(6) << CATEGORY_SHIFT;
-  uint16 constant CLAY = uint16(7) << CATEGORY_SHIFT;
-  uint16 constant LOG = uint16(8) << CATEGORY_SHIFT;
-  uint16 constant LEAF = uint16(9) << CATEGORY_SHIFT;
-  uint16 constant FLOWER = uint16(10) << CATEGORY_SHIFT;
-  uint16 constant GREENERY = uint16(11) << CATEGORY_SHIFT;
-  uint16 constant CROP = uint16(12) << CATEGORY_SHIFT;
-  uint16 constant UNDERWATER_PLANT = uint16(13) << CATEGORY_SHIFT;
-  uint16 constant PLANK = uint16(14) << CATEGORY_SHIFT;
-  uint16 constant ORE_BLOCK = uint16(15) << CATEGORY_SHIFT;
-  uint16 constant SEED = uint16(16) << CATEGORY_SHIFT;
-  uint16 constant SAPLING = uint16(17) << CATEGORY_SHIFT;
-  uint16 constant STATION = uint16(18) << CATEGORY_SHIFT;
-  uint16 constant SMART = uint16(19) << CATEGORY_SHIFT;
+  uint16 constant NON_SOLID = uint16(1) << OFFSET_BITS;
+  uint16 constant STONE = uint16(2) << OFFSET_BITS;
+  uint16 constant GEMSTONE = uint16(3) << OFFSET_BITS;
+  uint16 constant SOIL = uint16(4) << OFFSET_BITS;
+  uint16 constant ORE = uint16(5) << OFFSET_BITS;
+  uint16 constant SAND = uint16(6) << OFFSET_BITS;
+  uint16 constant CLAY = uint16(7) << OFFSET_BITS;
+  uint16 constant LOG = uint16(8) << OFFSET_BITS;
+  uint16 constant LEAF = uint16(9) << OFFSET_BITS;
+  uint16 constant FLOWER = uint16(10) << OFFSET_BITS;
+  uint16 constant GREENERY = uint16(11) << OFFSET_BITS;
+  uint16 constant CROP = uint16(12) << OFFSET_BITS;
+  uint16 constant UNDERWATER_PLANT = uint16(13) << OFFSET_BITS;
+  uint16 constant PLANK = uint16(14) << OFFSET_BITS;
+  uint16 constant ORE_BLOCK = uint16(15) << OFFSET_BITS;
+  uint16 constant SEED = uint16(16) << OFFSET_BITS;
+  uint16 constant SAPLING = uint16(17) << OFFSET_BITS;
+  uint16 constant STATION = uint16(18) << OFFSET_BITS;
+  uint16 constant SMART_ENTITY_BLOCK = uint16(19) << OFFSET_BITS;
+  uint16 constant MISC_BLOCK = uint16(20) << OFFSET_BITS;
   // Non-Block Categories
-  uint16 constant TOOL = uint16(65) << CATEGORY_SHIFT;
-  uint16 constant OREBAR = uint16(66) << CATEGORY_SHIFT;
-  uint16 constant BUCKET = uint16(67) << CATEGORY_SHIFT;
-  uint16 constant FOOD = uint16(68) << CATEGORY_SHIFT;
-  uint16 constant MOVABLE = uint16(69) << CATEGORY_SHIFT;
-  uint16 constant MISC = uint16(70) << CATEGORY_SHIFT;
+  uint16 constant PICK = uint16(65) << OFFSET_BITS;
+  uint16 constant AXE = uint16(66) << OFFSET_BITS;
+  uint16 constant HOE = uint16(67) << OFFSET_BITS;
+  uint16 constant WHACKER = uint16(68) << OFFSET_BITS;
+  uint16 constant ORE_BAR = uint16(69) << OFFSET_BITS;
+  uint16 constant BUCKET = uint16(70) << OFFSET_BITS;
+  uint16 constant FOOD = uint16(71) << OFFSET_BITS;
+  uint16 constant MOVABLE = uint16(72) << OFFSET_BITS;
+  uint16 constant SMART_ENTITY_NON_BLOCK = uint16(73) << OFFSET_BITS;
   // ------------------------------------------------------------
   // Meta Category Masks (fits within uint128; mask bit k set if raw category ID k belongs)
   uint128 constant BLOCK_MASK = uint128(type(uint64).max);
-  uint128 constant HAS_ANY_MASK = (uint128(1) << (LOG >> CATEGORY_SHIFT)) | (uint128(1) << (LEAF >> CATEGORY_SHIFT))
-    | (uint128(1) << (PLANK >> CATEGORY_SHIFT)) | (uint128(1) << (ORE >> CATEGORY_SHIFT));
-  uint128 constant PASS_THROUGH_MASK = (uint128(1) << (NON_SOLID >> CATEGORY_SHIFT))
-    | (uint128(1) << (LEAF >> CATEGORY_SHIFT)) | (uint128(1) << (FLOWER >> CATEGORY_SHIFT))
-    | (uint128(1) << (SEED >> CATEGORY_SHIFT)) | (uint128(1) << (SAPLING >> CATEGORY_SHIFT))
-    | (uint128(1) << (GREENERY >> CATEGORY_SHIFT)) | (uint128(1) << (CROP >> CATEGORY_SHIFT))
-    | (uint128(1) << (UNDERWATER_PLANT >> CATEGORY_SHIFT));
-  uint128 constant GROWABLE_MASK =
-    (uint128(1) << (SEED >> CATEGORY_SHIFT)) | (uint128(1) << (SAPLING >> CATEGORY_SHIFT));
-  uint128 constant UNIQUE_OBJECT_MASK = (uint128(1) << (TOOL >> CATEGORY_SHIFT))
-    | (uint128(1) << (SMART >> CATEGORY_SHIFT)) | (uint128(1) << (BUCKET >> CATEGORY_SHIFT))
-    | (uint128(1) << (MISC >> CATEGORY_SHIFT));
-  uint128 constant MINEABLE_MASK = BLOCK_MASK & ~(uint128(1) << (NON_SOLID >> CATEGORY_SHIFT));
+  uint128 constant HAS_ANY_MASK = (uint128(1) << (LOG >> OFFSET_BITS)) | (uint128(1) << (LEAF >> OFFSET_BITS))
+    | (uint128(1) << (PLANK >> OFFSET_BITS)) | (uint128(1) << (ORE >> OFFSET_BITS));
+  uint128 constant PASS_THROUGH_MASK = (uint128(1) << (NON_SOLID >> OFFSET_BITS))
+    | (uint128(1) << (LEAF >> OFFSET_BITS)) | (uint128(1) << (FLOWER >> OFFSET_BITS))
+    | (uint128(1) << (SEED >> OFFSET_BITS)) | (uint128(1) << (SAPLING >> OFFSET_BITS))
+    | (uint128(1) << (GREENERY >> OFFSET_BITS)) | (uint128(1) << (CROP >> OFFSET_BITS))
+    | (uint128(1) << (UNDERWATER_PLANT >> OFFSET_BITS));
+  uint128 constant GROWABLE_MASK = (uint128(1) << (SEED >> OFFSET_BITS)) | (uint128(1) << (SAPLING >> OFFSET_BITS));
+  uint128 constant UNIQUE_OBJECT_MASK = (uint128(1) << (PICK >> OFFSET_BITS)) | (uint128(1) << (AXE >> OFFSET_BITS))
+    | (uint128(1) << (WHACKER >> OFFSET_BITS)) | (uint128(1) << (HOE >> OFFSET_BITS))
+    | (uint128(1) << (SMART_ENTITY_BLOCK >> OFFSET_BITS)) | (uint128(1) << (BUCKET >> OFFSET_BITS));
+  uint128 constant SMART_ENTITY_MASK =
+    (uint128(1) << (SMART_ENTITY_BLOCK >> OFFSET_BITS)) | (uint128(1) << (SMART_ENTITY_NON_BLOCK >> OFFSET_BITS));
+  uint128 constant TOOL_MASK = (uint128(1) << (PICK >> OFFSET_BITS)) | (uint128(1) << (AXE >> OFFSET_BITS))
+    | (uint128(1) << (WHACKER >> OFFSET_BITS)) | (uint128(1) << (HOE >> OFFSET_BITS));
+  uint128 constant MINEABLE_MASK = BLOCK_MASK & ~(uint128(1) << (NON_SOLID >> OFFSET_BITS));
 }
 
 // ------------------------------------------------------------
 // Object Types
 // ------------------------------------------------------------
 library ObjectTypes {
-  ObjectType constant Null = ObjectType.wrap(Category.NONE | 0);
+  ObjectType constant Null = ObjectType.wrap(0);
   ObjectType constant Air = ObjectType.wrap(Category.NON_SOLID | 0);
   ObjectType constant Water = ObjectType.wrap(Category.NON_SOLID | 1);
   ObjectType constant Lava = ObjectType.wrap(Category.NON_SOLID | 2);
@@ -214,41 +225,41 @@ library ObjectTypes {
   ObjectType constant Furnace = ObjectType.wrap(Category.STATION | 0);
   ObjectType constant Workbench = ObjectType.wrap(Category.STATION | 1);
   ObjectType constant Powerstone = ObjectType.wrap(Category.STATION | 2);
-  ObjectType constant ForceField = ObjectType.wrap(Category.SMART | 0);
-  ObjectType constant Chest = ObjectType.wrap(Category.SMART | 1);
-  ObjectType constant SpawnTile = ObjectType.wrap(Category.SMART | 2);
-  ObjectType constant Bed = ObjectType.wrap(Category.SMART | 3);
-  ObjectType constant WoodenPick = ObjectType.wrap(Category.TOOL | 0);
-  ObjectType constant WoodenAxe = ObjectType.wrap(Category.TOOL | 1);
-  ObjectType constant WoodenWhacker = ObjectType.wrap(Category.TOOL | 2);
-  ObjectType constant WoodenHoe = ObjectType.wrap(Category.TOOL | 3);
-  ObjectType constant CopperPick = ObjectType.wrap(Category.TOOL | 4);
-  ObjectType constant CopperAxe = ObjectType.wrap(Category.TOOL | 5);
-  ObjectType constant CopperWhacker = ObjectType.wrap(Category.TOOL | 6);
-  ObjectType constant IronPick = ObjectType.wrap(Category.TOOL | 7);
-  ObjectType constant IronAxe = ObjectType.wrap(Category.TOOL | 8);
-  ObjectType constant IronWhacker = ObjectType.wrap(Category.TOOL | 9);
-  ObjectType constant GoldPick = ObjectType.wrap(Category.TOOL | 10);
-  ObjectType constant GoldAxe = ObjectType.wrap(Category.TOOL | 11);
-  ObjectType constant DiamondPick = ObjectType.wrap(Category.TOOL | 12);
-  ObjectType constant DiamondAxe = ObjectType.wrap(Category.TOOL | 13);
-  ObjectType constant NeptuniumPick = ObjectType.wrap(Category.TOOL | 14);
-  ObjectType constant NeptuniumAxe = ObjectType.wrap(Category.TOOL | 15);
-  ObjectType constant GoldBar = ObjectType.wrap(Category.OREBAR | 0);
-  ObjectType constant IronBar = ObjectType.wrap(Category.OREBAR | 1);
-  ObjectType constant Diamond = ObjectType.wrap(Category.OREBAR | 2);
-  ObjectType constant NeptuniumBar = ObjectType.wrap(Category.OREBAR | 3);
+  ObjectType constant ForceField = ObjectType.wrap(Category.SMART_ENTITY_BLOCK | 0);
+  ObjectType constant Chest = ObjectType.wrap(Category.SMART_ENTITY_BLOCK | 1);
+  ObjectType constant SpawnTile = ObjectType.wrap(Category.SMART_ENTITY_BLOCK | 2);
+  ObjectType constant Bed = ObjectType.wrap(Category.SMART_ENTITY_BLOCK | 3);
+  ObjectType constant Snow = ObjectType.wrap(Category.MISC_BLOCK | 0);
+  ObjectType constant Ice = ObjectType.wrap(Category.MISC_BLOCK | 1);
+  ObjectType constant SpiderWeb = ObjectType.wrap(Category.MISC_BLOCK | 2);
+  ObjectType constant Bone = ObjectType.wrap(Category.MISC_BLOCK | 3);
+  ObjectType constant TextSign = ObjectType.wrap(Category.MISC_BLOCK | 4);
+  ObjectType constant WoodenPick = ObjectType.wrap(Category.PICK | 0);
+  ObjectType constant CopperPick = ObjectType.wrap(Category.PICK | 1);
+  ObjectType constant IronPick = ObjectType.wrap(Category.PICK | 2);
+  ObjectType constant GoldPick = ObjectType.wrap(Category.PICK | 3);
+  ObjectType constant DiamondPick = ObjectType.wrap(Category.PICK | 4);
+  ObjectType constant NeptuniumPick = ObjectType.wrap(Category.PICK | 5);
+  ObjectType constant WoodenAxe = ObjectType.wrap(Category.AXE | 0);
+  ObjectType constant CopperAxe = ObjectType.wrap(Category.AXE | 1);
+  ObjectType constant IronAxe = ObjectType.wrap(Category.AXE | 2);
+  ObjectType constant GoldAxe = ObjectType.wrap(Category.AXE | 3);
+  ObjectType constant DiamondAxe = ObjectType.wrap(Category.AXE | 4);
+  ObjectType constant NeptuniumAxe = ObjectType.wrap(Category.AXE | 5);
+  ObjectType constant WoodenWhacker = ObjectType.wrap(Category.WHACKER | 0);
+  ObjectType constant CopperWhacker = ObjectType.wrap(Category.WHACKER | 1);
+  ObjectType constant IronWhacker = ObjectType.wrap(Category.WHACKER | 2);
+  ObjectType constant WoodenHoe = ObjectType.wrap(Category.HOE | 0);
+  ObjectType constant GoldBar = ObjectType.wrap(Category.ORE_BAR | 0);
+  ObjectType constant IronBar = ObjectType.wrap(Category.ORE_BAR | 1);
+  ObjectType constant Diamond = ObjectType.wrap(Category.ORE_BAR | 2);
+  ObjectType constant NeptuniumBar = ObjectType.wrap(Category.ORE_BAR | 3);
   ObjectType constant Bucket = ObjectType.wrap(Category.BUCKET | 0);
   ObjectType constant WaterBucket = ObjectType.wrap(Category.BUCKET | 1);
   ObjectType constant Fuel = ObjectType.wrap(Category.FOOD | 0);
   ObjectType constant WheatSlop = ObjectType.wrap(Category.FOOD | 1);
   ObjectType constant Player = ObjectType.wrap(Category.MOVABLE | 0);
-  ObjectType constant Fragment = ObjectType.wrap(Category.MISC | 0);
-  ObjectType constant Snow = ObjectType.wrap(Category.MISC | 1);
-  ObjectType constant Ice = ObjectType.wrap(Category.MISC | 2);
-  ObjectType constant SpiderWeb = ObjectType.wrap(Category.MISC | 3);
-  ObjectType constant Bone = ObjectType.wrap(Category.MISC | 4);
-  ObjectType constant TextSign = ObjectType.wrap(Category.MISC | 5);
+  ObjectType constant Fragment = ObjectType.wrap(Category.SMART_ENTITY_NON_BLOCK | 0);
 }
 
 // ------------------------------------------------------------
@@ -274,7 +285,7 @@ library ObjectTypeLib {
 
   // Direct Category Checks
 
-  function isNon_solid(ObjectType self) internal pure returns (bool) {
+  function isNonSolid(ObjectType self) internal pure returns (bool) {
     return category(self) == Category.NON_SOLID;
   }
 
@@ -322,7 +333,7 @@ library ObjectTypeLib {
     return category(self) == Category.CROP;
   }
 
-  function isUnderwater_plant(ObjectType self) internal pure returns (bool) {
+  function isUnderwaterPlant(ObjectType self) internal pure returns (bool) {
     return category(self) == Category.UNDERWATER_PLANT;
   }
 
@@ -330,7 +341,7 @@ library ObjectTypeLib {
     return category(self) == Category.PLANK;
   }
 
-  function isOre_block(ObjectType self) internal pure returns (bool) {
+  function isOreBlock(ObjectType self) internal pure returns (bool) {
     return category(self) == Category.ORE_BLOCK;
   }
 
@@ -346,16 +357,32 @@ library ObjectTypeLib {
     return category(self) == Category.STATION;
   }
 
-  function isSmart(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.SMART;
+  function isSmartEntityBlock(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.SMART_ENTITY_BLOCK;
   }
 
-  function isTool(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.TOOL;
+  function isMiscBlock(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.MISC_BLOCK;
   }
 
-  function isOrebar(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.OREBAR;
+  function isPick(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.PICK;
+  }
+
+  function isAxe(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.AXE;
+  }
+
+  function isHoe(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.HOE;
+  }
+
+  function isWhacker(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.WHACKER;
+  }
+
+  function isOreBar(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.ORE_BAR;
   }
 
   function isBucket(ObjectType self) internal pure returns (bool) {
@@ -370,12 +397,12 @@ library ObjectTypeLib {
     return category(self) == Category.MOVABLE;
   }
 
-  function isMisc(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.MISC;
+  function isSmartEntityNonBlock(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.SMART_ENTITY_NON_BLOCK;
   }
 
   // Category getters
-  function getNon_solidTypes() internal pure returns (ObjectType[3] memory) {
+  function getNonSolidTypes() internal pure returns (ObjectType[3] memory) {
     return [ObjectTypes.Air, ObjectTypes.Water, ObjectTypes.Lava];
   }
 
@@ -531,7 +558,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function getUnderwater_plantTypes() internal pure returns (ObjectType[8] memory) {
+  function getUnderwaterPlantTypes() internal pure returns (ObjectType[8] memory) {
     return [
       ObjectTypes.Coral,
       ObjectTypes.SeaAnemone,
@@ -558,7 +585,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function getOre_blockTypes() internal pure returns (ObjectType[5] memory) {
+  function getOreBlockTypes() internal pure returns (ObjectType[5] memory) {
     return [
       ObjectTypes.CopperBlock,
       ObjectTypes.IronBlock,
@@ -589,32 +616,45 @@ library ObjectTypeLib {
     return [ObjectTypes.Furnace, ObjectTypes.Workbench, ObjectTypes.Powerstone];
   }
 
-  function getSmartTypes() internal pure returns (ObjectType[4] memory) {
+  function getSmartEntityBlockTypes() internal pure returns (ObjectType[4] memory) {
     return [ObjectTypes.ForceField, ObjectTypes.Chest, ObjectTypes.SpawnTile, ObjectTypes.Bed];
   }
 
-  function getToolTypes() internal pure returns (ObjectType[16] memory) {
+  function getMiscBlockTypes() internal pure returns (ObjectType[5] memory) {
+    return [ObjectTypes.Snow, ObjectTypes.Ice, ObjectTypes.SpiderWeb, ObjectTypes.Bone, ObjectTypes.TextSign];
+  }
+
+  function getPickTypes() internal pure returns (ObjectType[6] memory) {
     return [
       ObjectTypes.WoodenPick,
-      ObjectTypes.WoodenAxe,
-      ObjectTypes.WoodenWhacker,
-      ObjectTypes.WoodenHoe,
       ObjectTypes.CopperPick,
-      ObjectTypes.CopperAxe,
-      ObjectTypes.CopperWhacker,
       ObjectTypes.IronPick,
-      ObjectTypes.IronAxe,
-      ObjectTypes.IronWhacker,
       ObjectTypes.GoldPick,
-      ObjectTypes.GoldAxe,
       ObjectTypes.DiamondPick,
+      ObjectTypes.NeptuniumPick
+    ];
+  }
+
+  function getAxeTypes() internal pure returns (ObjectType[6] memory) {
+    return [
+      ObjectTypes.WoodenAxe,
+      ObjectTypes.CopperAxe,
+      ObjectTypes.IronAxe,
+      ObjectTypes.GoldAxe,
       ObjectTypes.DiamondAxe,
-      ObjectTypes.NeptuniumPick,
       ObjectTypes.NeptuniumAxe
     ];
   }
 
-  function getOrebarTypes() internal pure returns (ObjectType[4] memory) {
+  function getHoeTypes() internal pure returns (ObjectType[1] memory) {
+    return [ObjectTypes.WoodenHoe];
+  }
+
+  function getWhackerTypes() internal pure returns (ObjectType[3] memory) {
+    return [ObjectTypes.WoodenWhacker, ObjectTypes.CopperWhacker, ObjectTypes.IronWhacker];
+  }
+
+  function getOreBarTypes() internal pure returns (ObjectType[4] memory) {
     return [ObjectTypes.GoldBar, ObjectTypes.IronBar, ObjectTypes.Diamond, ObjectTypes.NeptuniumBar];
   }
 
@@ -630,18 +670,77 @@ library ObjectTypeLib {
     return [ObjectTypes.Player];
   }
 
-  function getMiscTypes() internal pure returns (ObjectType[6] memory) {
-    return [
-      ObjectTypes.Fragment,
-      ObjectTypes.Snow,
-      ObjectTypes.Ice,
-      ObjectTypes.SpiderWeb,
-      ObjectTypes.Bone,
-      ObjectTypes.TextSign
-    ];
+  function getSmartEntityNonBlockTypes() internal pure returns (ObjectType[1] memory) {
+    return [ObjectTypes.Fragment];
   }
 
   // Specialized getters
+  // TODO: these are currently part of the codegen, but we should define them in Solidity and import them here
+  function getObjectTypeSchema(ObjectType self) internal pure returns (Vec3[] memory) {
+    if (self == ObjectTypes.Player) {
+      Vec3[] memory playerRelativePositions = new Vec3[](1);
+      playerRelativePositions[0] = vec3(0, 1, 0);
+      return playerRelativePositions;
+    }
+
+    if (self == ObjectTypes.Bed) {
+      Vec3[] memory bedRelativePositions = new Vec3[](1);
+      bedRelativePositions[0] = vec3(0, 0, 1);
+      return bedRelativePositions;
+    }
+
+    if (self == ObjectTypes.TextSign) {
+      Vec3[] memory textSignRelativePositions = new Vec3[](1);
+      textSignRelativePositions[0] = vec3(0, 1, 0);
+      return textSignRelativePositions;
+    }
+
+    return new Vec3[](0);
+  }
+
+  /// @dev Get relative schema coords, including base coord
+  function getRelativeCoords(ObjectType self, Vec3 baseCoord, Direction direction)
+    internal
+    pure
+    returns (Vec3[] memory)
+  {
+    Vec3[] memory schemaCoords = getObjectTypeSchema(self);
+    Vec3[] memory coords = new Vec3[](schemaCoords.length + 1);
+
+    coords[0] = baseCoord;
+
+    for (uint256 i = 0; i < schemaCoords.length; i++) {
+      require(isDirectionSupported(self, direction), "Direction not supported");
+      coords[i + 1] = baseCoord + schemaCoords[i].rotate(direction);
+    }
+
+    return coords;
+  }
+
+  function isDirectionSupported(ObjectType self, Direction direction) internal pure returns (bool) {
+    if (self == ObjectTypes.Bed) {
+      // Note: before supporting more directions, we need to ensure clients can render it
+      return direction == Direction.NegativeX || direction == Direction.NegativeZ;
+    }
+
+    return true;
+  }
+
+  function getRelativeCoords(ObjectType self, Vec3 baseCoord) internal pure returns (Vec3[] memory) {
+    return getRelativeCoords(self, baseCoord, Direction.PositiveZ);
+  }
+
+  function isActionAllowed(ObjectType self, bytes4 sig) internal pure returns (bool) {
+    if (self == ObjectTypes.Player) {
+      return true;
+    }
+
+    if (self == ObjectTypes.Chest) {
+      return sig == ITransferSystem.transfer.selector || sig == IMachineSystem.fuelMachine.selector;
+    }
+
+    return false;
+  }
 
   function getMaxInventorySlots(ObjectType self) internal pure returns (uint16) {
     if (self == ObjectTypes.Player) return 36;
@@ -655,8 +754,48 @@ library ObjectTypeLib {
     return 99;
   }
 
-  // TODO: implement
-  function getOreAmount(ObjectType self) internal pure returns (ObjectAmount memory) { }
+  function getOreAmount(ObjectType self) internal pure returns (ObjectAmount memory) {
+    if (self == ObjectTypes.CopperPick) return ObjectAmount(ObjectTypes.CopperOre, 3);
+    if (self == ObjectTypes.IronPick) return ObjectAmount(ObjectTypes.IronOre, 3);
+    if (self == ObjectTypes.GoldPick) return ObjectAmount(ObjectTypes.GoldOre, 3);
+    if (self == ObjectTypes.DiamondPick) return ObjectAmount(ObjectTypes.DiamondOre, 3);
+    if (self == ObjectTypes.NeptuniumPick) return ObjectAmount(ObjectTypes.NeptuniumOre, 3);
+    if (self == ObjectTypes.CopperAxe) return ObjectAmount(ObjectTypes.CopperOre, 3);
+    if (self == ObjectTypes.IronAxe) return ObjectAmount(ObjectTypes.IronOre, 3);
+    if (self == ObjectTypes.GoldAxe) return ObjectAmount(ObjectTypes.GoldOre, 3);
+    if (self == ObjectTypes.DiamondAxe) return ObjectAmount(ObjectTypes.DiamondOre, 3);
+    if (self == ObjectTypes.NeptuniumAxe) return ObjectAmount(ObjectTypes.NeptuniumOre, 3);
+    if (self == ObjectTypes.CopperWhacker) return ObjectAmount(ObjectTypes.CopperOre, 6);
+    if (self == ObjectTypes.IronWhacker) return ObjectAmount(ObjectTypes.IronOre, 6);
+    return ObjectAmount(ObjectTypes.Null, 0);
+  }
+
+  function getPlankAmount(ObjectType self) internal pure returns (uint16) {
+    if (self == ObjectTypes.WoodenPick) return 5;
+    if (self == ObjectTypes.CopperPick) return 2;
+    if (self == ObjectTypes.IronPick) return 2;
+    if (self == ObjectTypes.GoldPick) return 2;
+    if (self == ObjectTypes.DiamondPick) return 2;
+    if (self == ObjectTypes.NeptuniumPick) return 2;
+    if (self == ObjectTypes.WoodenAxe) return 5;
+    if (self == ObjectTypes.CopperAxe) return 2;
+    if (self == ObjectTypes.IronAxe) return 2;
+    if (self == ObjectTypes.GoldAxe) return 2;
+    if (self == ObjectTypes.DiamondAxe) return 2;
+    if (self == ObjectTypes.NeptuniumAxe) return 2;
+    if (self == ObjectTypes.WoodenWhacker) return 8;
+    if (self == ObjectTypes.CopperWhacker) return 2;
+    if (self == ObjectTypes.IronWhacker) return 2;
+    if (self == ObjectTypes.WoodenHoe) return 4;
+    return 0;
+  }
+
+  function getCrop(ObjectType self) internal pure returns (ObjectType) {
+    if (self == ObjectTypes.WheatSeed) return ObjectTypes.Wheat;
+    if (self == ObjectTypes.PumpkinSeed) return ObjectTypes.Pumpkin;
+    if (self == ObjectTypes.MelonSeed) return ObjectTypes.Melon;
+    return ObjectTypes.Null;
+  }
 
   function getSapling(ObjectType self) internal pure returns (ObjectType) {
     if (self == ObjectTypes.OakLeaf) return ObjectTypes.OakSapling;
@@ -689,12 +828,15 @@ library ObjectTypeLib {
     return self == ObjectTypes.FescueGrass || self.isCrop() || self.isLeaf();
   }
 
+  function isMachine(ObjectType self) internal pure returns (bool) {
+    return false;
+  }
+
   // Meta Category Checks
   function isAny(ObjectType self) internal pure returns (bool) {
     // Check if:
     // 1. ID bits are all 0
     // 2. Category is one that supports "Any" types
-    uint16 c = self.category();
     uint16 idx = self.unwrap() & ~CATEGORY_MASK;
 
     return idx == 0 && hasMetaCategory(self, Category.HAS_ANY_MASK);
@@ -708,8 +850,16 @@ library ObjectTypeLib {
     return hasMetaCategory(self, Category.MINEABLE_MASK);
   }
 
+  function isTool(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.TOOL_MASK);
+  }
+
   function isUniqueObject(ObjectType self) internal pure returns (bool) {
     return hasMetaCategory(self, Category.UNIQUE_OBJECT_MASK);
+  }
+
+  function isSmartEntity(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.SMART_ENTITY_MASK);
   }
 
   function isGrowable(ObjectType self) internal pure returns (bool) {
@@ -718,7 +868,7 @@ library ObjectTypeLib {
 
   function hasMetaCategory(ObjectType self, uint128 mask) internal pure returns (bool) {
     uint16 c = category(self);
-    return ((uint128(1) << (c >> CATEGORY_SHIFT)) & mask) != 0;
+    return ((uint128(1) << (c >> OFFSET_BITS)) & mask) != 0;
   }
 
   function matches(ObjectType self, ObjectType other) internal pure returns (bool) {
