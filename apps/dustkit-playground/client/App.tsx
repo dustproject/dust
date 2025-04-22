@@ -5,21 +5,25 @@ import {
   messagePort,
 } from "dustkit/internal";
 import { useEffect } from "react";
-import { useConnect, useConnectorClient } from "wagmi";
+import { useConnect, useConnectorClient, useDisconnect } from "wagmi";
 
 export function App() {
   // TODO: pass in chain ID?
   const connectorClient = useConnectorClient();
   const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
 
   useEffect(
     () =>
       createMessagePortRpcServer<ClientRpcSchema>({
         async dustClient_setWaypoint(params) {
+          if (!connectorClient.data) {
+            throw new Error("Not connected.");
+          }
           console.info("app asked for waypoint", params);
         },
       }),
-    [],
+    [connectorClient],
   );
 
   return (
@@ -30,12 +34,18 @@ export function App() {
         {connectorClient.data?.chain.id} (uid: {connectorClient.data?.uid})
       </p>
       <p>
-        <button
-          type="button"
-          onClick={() => connect({ connector: connectors[0]! })}
-        >
-          Connect
-        </button>
+        {connectorClient.data ? (
+          <button type="button" onClick={() => disconnect()}>
+            Disconnect
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => connect({ connector: connectors[0]! })}
+          >
+            Connect
+          </button>
+        )}
       </p>
       <iframe
         title="DustKit app"
