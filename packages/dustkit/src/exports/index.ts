@@ -5,4 +5,3 @@ export {
   appConfigInput,
 } from "../apps/appConfig";
 export { getAppConfig } from "../apps/getAppConfig";
-export * as Messenger from "../apps/Messenger";

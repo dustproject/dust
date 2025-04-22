@@ -1,22 +1,25 @@
 {
   "name": "@dust/world",
   "version": "0.0.0",
+  "type": "module",
   "exports": {
-    "./mud.config": "./dist/mud.config.js",
     "./worlds.json": "./worlds.json",
-    "./out/*": "./out/*",
-    "./ts/*.ts": "./dist/*"
+    "./mud.config": "./dist/mud.config.js",
+    "./out/*": "./dist/out/*.js",
+    "./ts/*": "./dist/ts/*.js"
   },
   "typesVersions": {
     "*": {
       "mud.config": ["./dist/mud.config.d.ts"],
-      "./ts": ["./dist/*"]
+      "ts/*": ["./dist/ts/*.d.ts"],
+      "out/*": ["./dist/out/*.d.ts"]
     }
   },
   "files": ["src", "out", "dist", "ts", "worlds.json"],
   "scripts": {
-    "build": "mud build && pnpm run build:js",
+    "build": "pnpm run codegen && pnpm run build:mud && pnpm run build:js",
     "build:js": "tsc",
+    "build:mud": "mud build && abi-ts --extension .ts",
     "clean": "forge clean && shx rm -rf src/**/codegen",
     "codegen": "pnpm run codegen:object-type && pnpm run codegen:init-objects && pnpm run codegen:init-recipes && pnpm run codegen:tree-lib && forge fmt",
     "codegen:init-objects": "tsx ./ts/internal/genInitObjectsSol.ts> ./script/initObjects.sol",
@@ -34,6 +37,7 @@
     "test": "./runTests.bash"
   },
   "dependencies": {
+    "@latticexyz/abi-ts": "2.2.22-f0c0b982573f9953e1c726c0bef91671efaaa545",
     "@latticexyz/cli": "2.2.22-f0c0b982573f9953e1c726c0bef91671efaaa545",
     "@latticexyz/config": "2.2.22-f0c0b982573f9953e1c726c0bef91671efaaa545",
     "@latticexyz/gas-report": "2.2.22-f0c0b982573f9953e1c726c0bef91671efaaa545",
