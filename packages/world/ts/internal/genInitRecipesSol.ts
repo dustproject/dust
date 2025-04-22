@@ -49,7 +49,4 @@ function initRecipes() {
 `;
 }
 
-// Execute the generator when this module is run directly
-if (require.main === module) {
-  console.info(generateInitRecipesSol());
-}
+console.info(generateInitRecipesSol());

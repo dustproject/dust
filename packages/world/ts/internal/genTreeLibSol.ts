@@ -26,7 +26,7 @@ const blobHex = (vs: Vec3[]) =>
 /* convert "Dark Oak" -> "DARK_OAK" */
 const constName = (label: string) => label.replace(/\s+/g, "_").toUpperCase();
 
-export function genTreeLib() {
+export function genTreeLib(): string {
   const blobs: string[] = [];
   const treePieces: string[] = [];
   const dataPieces: string[] = [];
@@ -64,7 +64,7 @@ export function genTreeLib() {
     }`);
   }
 
-  console.info(`// SPDX-License-Identifier: MIT
+  return `// SPDX-License-Identifier: MIT
 /* Auto‑generated. DO NOT EDIT. */
 pragma solidity >=0.8.24;
 
@@ -131,7 +131,7 @@ library TreeLib {
   }
 
 }
-`);
+`;
 }
 
-genTreeLib();
+console.info(genTreeLib());

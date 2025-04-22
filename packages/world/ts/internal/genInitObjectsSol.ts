@@ -19,7 +19,4 @@ ${objects
 `;
 }
 
-// Execute the generator when this module is run directly
-if (require.main === module) {
-  console.info(generateInitObjectsSol());
-}
+console.info(generateInitObjectsSol());

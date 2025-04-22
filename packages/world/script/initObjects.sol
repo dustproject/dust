@@ -144,22 +144,6 @@ function initObjects() {
   ObjectTypeMetadata.set(ObjectTypes.VinesBush, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.IvyVine, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.HempBush, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.GoldenMushroom, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.RedMushroom, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.CoffeeBush, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.StrawberryBush, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.RaspberryBush, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Cactus, ObjectTypeMetadataData({ mass: 1300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(
-    ObjectTypes.Pumpkin, ObjectTypeMetadataData({ mass: 1300000000000000, energy: 16500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.Melon, ObjectTypeMetadataData({ mass: 1300000000000000, energy: 16500000000000000 })
-  );
-  ObjectTypeMetadata.set(ObjectTypes.RedMushroomBlock, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.BrownMushroomBlock, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.MushroomStem, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Wheat, ObjectTypeMetadataData({ mass: 300000000000000, energy: 500000000000000 }));
   ObjectTypeMetadata.set(ObjectTypes.Coral, ObjectTypeMetadataData({ mass: 400000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.SeaAnemone, ObjectTypeMetadataData({ mass: 400000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Algae, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
@@ -168,6 +152,18 @@ function initObjects() {
   ObjectTypeMetadata.set(ObjectTypes.TubeCoralBlock, ObjectTypeMetadataData({ mass: 37500000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.BubbleCoralBlock, ObjectTypeMetadataData({ mass: 37500000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.BrainCoralBlock, ObjectTypeMetadataData({ mass: 37500000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.GoldenMushroom, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.RedMushroom, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.CoffeeBush, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.StrawberryBush, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.RaspberryBush, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.Wheat, ObjectTypeMetadataData({ mass: 300000000000000, energy: 500000000000000 }));
+  ObjectTypeMetadata.set(
+    ObjectTypes.Pumpkin, ObjectTypeMetadataData({ mass: 1300000000000000, energy: 16500000000000000 })
+  );
+  ObjectTypeMetadata.set(
+    ObjectTypes.Melon, ObjectTypeMetadataData({ mass: 1300000000000000, energy: 16500000000000000 })
+  );
   ObjectTypeMetadata.set(ObjectTypes.AnyPlank, ObjectTypeMetadataData({ mass: 4500000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.OakPlanks, ObjectTypeMetadataData({ mass: 4500000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.BirchPlanks, ObjectTypeMetadataData({ mass: 4500000000000000, energy: 0 }));
@@ -200,6 +196,10 @@ function initObjects() {
   ObjectTypeMetadata.set(ObjectTypes.Chest, ObjectTypeMetadataData({ mass: 35600000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.SpawnTile, ObjectTypeMetadataData({ mass: 9135000000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Bed, ObjectTypeMetadataData({ mass: 13350000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.RedMushroomBlock, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.BrownMushroomBlock, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.MushroomStem, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.Cactus, ObjectTypeMetadataData({ mass: 1300000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Snow, ObjectTypeMetadataData({ mass: 4000000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Ice, ObjectTypeMetadataData({ mass: 4000000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.SpiderWeb, ObjectTypeMetadataData({ mass: 100000000000000, energy: 0 }));
@@ -212,7 +212,7 @@ function initObjects() {
   ObjectTypeMetadata.set(ObjectTypes.DiamondPick, ObjectTypeMetadataData({ mass: 15008900000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.NeptuniumPick, ObjectTypeMetadataData({ mass: 15008900000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.WoodenAxe, ObjectTypeMetadataData({ mass: 22250000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.CopperAxe, ObjectTypeMetadataData({ mass: 2033900000000000002, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.CopperAxe, ObjectTypeMetadataData({ mass: 2033900000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.IronAxe, ObjectTypeMetadataData({ mass: 2033900000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.GoldAxe, ObjectTypeMetadataData({ mass: 4808900000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.DiamondAxe, ObjectTypeMetadataData({ mass: 15008900000000000000, energy: 0 }));
@@ -229,8 +229,6 @@ function initObjects() {
   ObjectTypeMetadata.set(
     ObjectTypes.WaterBucket, ObjectTypeMetadataData({ mass: 675000000000000000, energy: 4000000000000000 })
   );
-  ObjectTypeMetadata.set(ObjectTypes.Fuel, ObjectTypeMetadataData({ mass: 1000000000000000, energy: 5000000000000000 }));
-  ObjectTypeMetadata.set(
-    ObjectTypes.WheatSlop, ObjectTypeMetadataData({ mass: 1000000000000000, energy: 5000000000000000 })
-  );
+  ObjectTypeMetadata.set(ObjectTypes.WheatSlop, ObjectTypeMetadataData({ mass: 0, energy: 12800000000000000 }));
+  ObjectTypeMetadata.set(ObjectTypes.Fuel, ObjectTypeMetadataData({ mass: 0, energy: 90000000000000000 }));
 }

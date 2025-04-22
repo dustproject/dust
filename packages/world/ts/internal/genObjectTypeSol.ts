@@ -1,9 +1,11 @@
 import {
   type Category,
+  type ObjectAmount,
   allCategoryMetadata,
   blockCategoryMetadata,
   growableCategories,
   hasAnyCategories,
+  hasExtraDropsCategories,
   nonBlockCategoryMetadata,
   objects,
   passThroughCategories,
@@ -12,26 +14,14 @@ import {
   uniqueObjectCategories,
 } from "../objects";
 
-// Helper to format category names correctly for function generation
-function formatCategoryName(name: string): string {
-  return name
-    .toLowerCase()
-    .split("_")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join("");
-}
-
 function renderMetaCategoryMask(categories: Category[]): string {
   return categories
     .map((cat) => `(uint128(1) << (${cat} >> OFFSET_BITS))`)
     .join(" | ");
 }
 
-function renderObjectAmount(objectAmount: {
-  objectType: string;
-  amount: number | bigint;
-}): string {
-  return `ObjectAmount(ObjectTypes.${objectAmount.objectType}, ${objectAmount.amount.toString()})`;
+function renderObjectAmount([objectType, amount]: ObjectAmount): string {
+  return `ObjectAmount(ObjectTypes.${objectType}, ${amount})`;
 }
 
 // Template for the Solidity file
@@ -62,19 +52,20 @@ uint16 constant BLOCK_CATEGORY_COUNT = 128 / 2; // 31
 // ------------------------------------------------------------
 library Category {
   // Block Categories
-${blockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(${cat.id}) << OFFSET_BITS;`).join("\n")}
+${blockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(${cat.index}) << OFFSET_BITS;`).join("\n")}
   // Non-Block Categories
-${nonBlockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(${cat.id}) << OFFSET_BITS;`).join("\n")}
+${nonBlockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(${cat.index}) << OFFSET_BITS;`).join("\n")}
   // ------------------------------------------------------------
   // Meta Category Masks (fits within uint128; mask bit k set if raw category ID k belongs)
   uint128 constant BLOCK_MASK = uint128(type(uint64).max);
   uint128 constant HAS_ANY_MASK = ${renderMetaCategoryMask(hasAnyCategories)};
+  uint128 constant HAS_EXTRA_DROPS_MASK = ${renderMetaCategoryMask(hasExtraDropsCategories)};
   uint128 constant PASS_THROUGH_MASK = ${renderMetaCategoryMask(passThroughCategories)};
   uint128 constant GROWABLE_MASK = ${renderMetaCategoryMask(growableCategories)};
   uint128 constant UNIQUE_OBJECT_MASK = ${renderMetaCategoryMask(uniqueObjectCategories)};
   uint128 constant SMART_ENTITY_MASK = ${renderMetaCategoryMask(smartEntityCategories)};
   uint128 constant TOOL_MASK = ${renderMetaCategoryMask(toolCategories)};
-  uint128 constant MINEABLE_MASK = BLOCK_MASK & ~${renderMetaCategoryMask(["NON_SOLID"])};
+  uint128 constant MINEABLE_MASK = BLOCK_MASK & ~${renderMetaCategoryMask(["NonSolid"])};
 }
 
 
@@ -85,7 +76,7 @@ library ObjectTypes {
 ${objects
   .map((obj) => {
     const categoryRef = `Category.${obj.category}`;
-    return `  ObjectType constant ${obj.name} = ObjectType.wrap(${categoryRef} | ${obj.id});`;
+    return `  ObjectType constant ${obj.name} = ObjectType.wrap(${categoryRef} | ${obj.index});`;
   })
 
   .join("\n")}
@@ -120,7 +111,7 @@ library ObjectTypeLib {
 ${allCategoryMetadata
   .map(
     (cat) => `
-  function is${formatCategoryName(cat.name)}(ObjectType self) internal pure returns (bool) {
+  function is${cat.name}(ObjectType self) internal pure returns (bool) {
     return category(self) == Category.${cat.name};
   }`,
   )
@@ -130,7 +121,7 @@ ${allCategoryMetadata
 ${allCategoryMetadata
   .map((cat) => {
     const categoryObjects = objects.filter((obj) => obj.category === cat.name);
-    return `function get${formatCategoryName(cat.name)}Types() internal pure returns (ObjectType[${categoryObjects.length}] memory) {
+    return `function get${cat.name}Types() internal pure returns (ObjectType[${categoryObjects.length}] memory) {
     return [${categoryObjects.map((obj) => `ObjectTypes.${obj.name}`).join(", ")}];
   }`;
   })
@@ -272,10 +263,6 @@ ${allCategoryMetadata
     return 0;
   }
 
-  // TODO: use meta categories?
-  function hasExtraDrops(ObjectType self) internal pure returns (bool) {
-    return self == ObjectTypes.FescueGrass || self.isCrop() || self.isLeaf();
-  }
 
   function isMachine(ObjectType self) internal pure returns (bool) {
     ${objects
@@ -296,6 +283,10 @@ ${allCategoryMetadata
     uint16 idx = self.unwrap() & ~CATEGORY_MASK;
 
     return idx == 0 && hasMetaCategory(self, Category.HAS_ANY_MASK);
+  }
+
+  function hasExtraDrops(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.HAS_EXTRA_DROPS_MASK);
   }
 
   function isPassThrough(ObjectType self) internal pure returns (bool) {
@@ -350,7 +341,4 @@ using ObjectTypeLib for ObjectType global;
 `;
 }
 
-// Execute the generator when this module is run directly
-if (require.main === module) {
-  console.info(generateObjectTypeSol());
-}
+console.info(generateObjectTypeSol());
