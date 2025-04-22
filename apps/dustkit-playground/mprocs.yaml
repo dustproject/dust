@@ -8,3 +8,5 @@ procs:
     shell: pnpm vite app --port 5501
   anvil:
     shell: anvil
+  dustkit:
+    shell: pnpm --filter dustkit dev

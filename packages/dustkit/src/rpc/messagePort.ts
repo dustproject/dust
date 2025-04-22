@@ -25,34 +25,11 @@ export type MessagePortTransportConfig = {
   timeout?: TransportConfig["timeout"] | undefined;
 };
 
-type OxRpcSchemaToViemRpcSchema<schema extends RpcSchema.Generic> = readonly {
-  [method in RpcSchema.ExtractMethodName<schema>]: unknown extends RpcSchema.ExtractParams<
-    schema,
-    method
-  >
-    ? {
-        Method: method;
-        Parameters?: RpcSchema.ExtractParams<schema, method>;
-        ReturnType: RpcSchema.ExtractReturnType<schema, method>;
-      }
-    : RpcSchema.ExtractParams<schema, method> extends undefined
-      ? {
-          Method: method;
-          Parameters?: RpcSchema.ExtractParams<schema, method>;
-          ReturnType: RpcSchema.ExtractReturnType<schema, method>;
-        }
-      : {
-          Method: method;
-          Parameters: RpcSchema.ExtractParams<schema, method>;
-          ReturnType: RpcSchema.ExtractReturnType<schema, method>;
-        };
-}[RpcSchema.ExtractMethodName<schema>][];
-
 export type MessagePortTransport<schema extends RpcSchema.Generic> = Transport<
   "messagePort",
   // biome-ignore lint/complexity/noBannedTypes: not needed yet
-  {}
-  // TODO: typed `request` function (improve EIP1193RequestFn)
+  {},
+  EIP1193RequestFn<OxRpcSchemaToViemRpcSchema<schema>>
 >;
 
 export type MessagePortTransportErrorType =
@@ -104,3 +81,27 @@ export function messagePort<schema extends RpcSchema.Generic>(
     );
   };
 }
+
+/** @internal */
+type OxRpcSchemaToViemRpcSchema<schema extends RpcSchema.Generic> = readonly {
+  [method in RpcSchema.ExtractMethodName<schema>]: unknown extends RpcSchema.ExtractParams<
+    schema,
+    method
+  >
+    ? {
+        Method: method;
+        Parameters?: RpcSchema.ExtractParams<schema, method>;
+        ReturnType: RpcSchema.ExtractReturnType<schema, method>;
+      }
+    : RpcSchema.ExtractParams<schema, method> extends undefined
+      ? {
+          Method: method;
+          Parameters?: RpcSchema.ExtractParams<schema, method>;
+          ReturnType: RpcSchema.ExtractReturnType<schema, method>;
+        }
+      : {
+          Method: method;
+          Parameters: RpcSchema.ExtractParams<schema, method>;
+          ReturnType: RpcSchema.ExtractReturnType<schema, method>;
+        };
+}[RpcSchema.ExtractMethodName<schema>][];

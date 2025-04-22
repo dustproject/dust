@@ -15,8 +15,8 @@ export function createMessagePortRpcServer<schema extends RpcSchema.Generic>(
       params: RpcSchema.ExtractParams<schema, method>,
     ) => Promise<RpcSchema.ExtractReturnType<schema, method>>;
   },
-) {
-  window.addEventListener("message", (event) => {
+): () => void {
+  function onMessage(event: MessageEvent) {
     if (event.data !== initMessage) return;
 
     const [port] = event.ports;
@@ -32,6 +32,7 @@ export function createMessagePortRpcServer<schema extends RpcSchema.Generic>(
         try {
           const handler =
             handlers[method as RpcSchema.ExtractMethodName<schema>];
+          // TODO: is there another error we can throw that won't cause viem transport to retry?
           if (!handler) throw new MethodNotSupportedError();
 
           const result = await handler(params);
@@ -52,5 +53,11 @@ export function createMessagePortRpcServer<schema extends RpcSchema.Generic>(
 
     port.start();
     port.postMessage("ready");
-  });
+  }
+
+  window.addEventListener("message", onMessage);
+  return () => {
+    window.removeEventListener("message", onMessage);
+    // TODO: close port?
+  };
 }

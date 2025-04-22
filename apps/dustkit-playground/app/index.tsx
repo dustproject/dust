@@ -19,11 +19,3 @@ root.render(
     </WagmiProvider>
   </StrictMode>,
 );
-
-createMessagePortRpcServer<AppSchema>({
-  async dustApp_init(params) {
-    console.info("client asked this app to initialize with", params);
-    return { success: true };
-  },
-  async example() {},
-});

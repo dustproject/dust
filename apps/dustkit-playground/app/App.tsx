@@ -1,14 +1,16 @@
+import { type AppSchema, createMessagePortRpcServer } from "dustkit/internal";
 import { useEffect } from "react";
 import { useConnectorClient } from "wagmi";
-import { dustBridge } from "./dust";
 
 export function App() {
-  useEffect(() => {
-    dustBridge.ready();
-    dustBridge.on("app:open", ({ appConfig, via }) => {
-      console.info("client opened app", appConfig, "via", via);
-    });
-  }, []);
+  useEffect(() =>
+    createMessagePortRpcServer<AppSchema>({
+      async dustApp_init(params) {
+        console.info("client asked this app to initialize with", params);
+        return { success: true };
+      },
+    }),
+  );
 
   // TODO: pass in chain ID?
   const connectorClient = useConnectorClient();
