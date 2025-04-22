@@ -2,10 +2,12 @@ import {
   type Category,
   allCategoryMetadata,
   blockCategoryMetadata,
+  growableCategories,
   hasAnyCategories,
   nonBlockCategoryMetadata,
   objects,
   passThroughCategories,
+  uniqueObjectCategories,
 } from "./objects.ts";
 
 // Helper to format category names correctly for function generation
@@ -58,6 +60,8 @@ ${nonBlockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(
   uint128 constant BLOCK_MASK = uint128(type(uint64).max);
   uint128 constant HAS_ANY_MASK = ${renderMetaCategoryMask(hasAnyCategories)};
   uint128 constant PASS_THROUGH_MASK = ${renderMetaCategoryMask(passThroughCategories)};
+  uint128 constant GROWABLE_MASK = ${renderMetaCategoryMask(growableCategories)};
+  uint128 constant UNIQUE_OBJECT_MASK = ${renderMetaCategoryMask(uniqueObjectCategories)};
   uint128 constant MINEABLE_MASK = BLOCK_MASK & ~${renderMetaCategoryMask(["NON_SOLID"])};
 }
 
@@ -118,7 +122,21 @@ ${allCategoryMetadata
   .join("")}
 
   // Specialized getters
-  function getOreAmount(ObjectType self) internal pure returns(bool) {
+
+  function getMaxInventorySlots(ObjectType self) internal pure returns (uint16) {
+    if (self == ObjectTypes.Player) return 36;
+    if (self == ObjectTypes.Chest) return 27;
+    if (self.isPassThrough()) return type(uint16).max;
+    return 0;
+  }
+
+  function getStackable(ObjectType self) internal pure returns (uint16) {
+    if (self.isUniqueObject()) return 1;
+    return 99;
+  }
+
+  // TODO: implement
+  function getOreAmount(ObjectType self) internal pure returns(ObjectAmount memory) {
     ${objects
       .filter((obj) => obj.oreAmount !== undefined)
       .map(
@@ -128,7 +146,19 @@ ${allCategoryMetadata
       .join("\n    ")}
   }
 
-  function getTimeToGrow(ObjectType self) internal pure returns(bool) {
+  function getSapling(ObjectType self) internal pure returns(ObjectType) {
+    ${objects
+      .filter((obj) => obj.sapling)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.sapling};`,
+      )
+      .join("\n    ")}
+    return ObjectTypes.Null;
+  }
+
+
+  function getTimeToGrow(ObjectType self) internal pure returns(uint128) {
     ${objects
       .filter((obj) => obj.timeToGrow)
       .map(
@@ -139,6 +169,11 @@ ${allCategoryMetadata
     return 0;
   }
 
+  // TODO: use meta categories?
+  function hasExtraDrops(ObjectType self) internal pure returns (bool) {
+    return self == ObjectTypes.FescueGrass || self.isCrop() || self.isLeaf();
+  }
+
   // Meta Category Checks
   function isAny(ObjectType self) internal pure returns (bool) {
     // Check if:
@@ -147,18 +182,30 @@ ${allCategoryMetadata
     uint16 c = self.category();
     uint16 idx = self.unwrap() & ~CATEGORY_MASK;
 
-    return idx == 0 && ((uint128(1) << (c >> CATEGORY_SHIFT)) & Category.HAS_ANY_MASK) != 0;
+    return idx == 0 && hasMetaCategory(self, Category.HAS_ANY_MASK);
   }
 
   function isPassThrough(ObjectType self) internal pure returns (bool) {
-    uint16 c = category(self);
-    return ((uint128(1) << (c >> CATEGORY_SHIFT)) & Category.PASS_THROUGH_MASK) != 0;
+    return hasMetaCategory(self, Category.PASS_THROUGH_MASK);
   }
 
   function isMineable(ObjectType self) internal pure returns (bool) {
-    uint16 c = category(self);
-    return ((uint128(1) << (c >> CATEGORY_SHIFT)) & Category.MINEABLE_MASK) != 0;
+    return hasMetaCategory(self, Category.MINEABLE_MASK);
   }
+
+  function isUniqueObject(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.UNIQUE_OBJECT_MASK);
+  }
+
+  function isGrowable(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.GROWABLE_MASK);
+  }
+
+  function hasMetaCategory(ObjectType self, uint128 mask) internal pure returns (bool) {
+    uint16 c = category(self);
+    return ((uint128(1) << (c >> CATEGORY_SHIFT)) & mask) != 0;
+  }
+
 
   function matches(ObjectType self, ObjectType other) internal pure returns (bool) {
     if (self.isAny()) {

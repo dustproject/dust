@@ -491,13 +491,11 @@ contract CraftTest is DustTest {
     bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
     TestInventoryUtils.addObject(
-      aliceEntityId,
-      ObjectTypes.OakLog,
-      ObjectTypeMetadata.getMaxInventorySlots(ObjectTypes.Player) * ObjectTypeMetadata.getStackable(ObjectTypes.OakLog)
+      aliceEntityId, ObjectTypes.OakLog, ObjectTypes.Player.getMaxInventorySlots() * ObjectTypes.OakLog.getStackable()
     );
     assertEq(
       Inventory.length(aliceEntityId),
-      ObjectTypeMetadata.getMaxInventorySlots(ObjectTypes.Player),
+      ObjectTypes.Player.getMaxInventorySlots(),
       "Wrong number of occupied inventory slots"
     );
 

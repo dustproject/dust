@@ -35,9 +35,10 @@ library Category {
   uint16 constant UNDERWATER_PLANT = uint16(13) << CATEGORY_SHIFT;
   uint16 constant PLANK = uint16(14) << CATEGORY_SHIFT;
   uint16 constant ORE_BLOCK = uint16(15) << CATEGORY_SHIFT;
-  uint16 constant GROWABLE = uint16(16) << CATEGORY_SHIFT;
-  uint16 constant STATION = uint16(17) << CATEGORY_SHIFT;
-  uint16 constant SMART = uint16(18) << CATEGORY_SHIFT;
+  uint16 constant SEED = uint16(16) << CATEGORY_SHIFT;
+  uint16 constant SAPLING = uint16(17) << CATEGORY_SHIFT;
+  uint16 constant STATION = uint16(18) << CATEGORY_SHIFT;
+  uint16 constant SMART = uint16(19) << CATEGORY_SHIFT;
   // Non-Block Categories
   uint16 constant TOOL = uint16(65) << CATEGORY_SHIFT;
   uint16 constant OREBAR = uint16(66) << CATEGORY_SHIFT;
@@ -52,8 +53,14 @@ library Category {
     | (uint128(1) << (PLANK >> CATEGORY_SHIFT)) | (uint128(1) << (ORE >> CATEGORY_SHIFT));
   uint128 constant PASS_THROUGH_MASK = (uint128(1) << (NON_SOLID >> CATEGORY_SHIFT))
     | (uint128(1) << (LEAF >> CATEGORY_SHIFT)) | (uint128(1) << (FLOWER >> CATEGORY_SHIFT))
-    | (uint128(1) << (GROWABLE >> CATEGORY_SHIFT)) | (uint128(1) << (GREENERY >> CATEGORY_SHIFT))
-    | (uint128(1) << (CROP >> CATEGORY_SHIFT)) | (uint128(1) << (UNDERWATER_PLANT >> CATEGORY_SHIFT));
+    | (uint128(1) << (SEED >> CATEGORY_SHIFT)) | (uint128(1) << (SAPLING >> CATEGORY_SHIFT))
+    | (uint128(1) << (GREENERY >> CATEGORY_SHIFT)) | (uint128(1) << (CROP >> CATEGORY_SHIFT))
+    | (uint128(1) << (UNDERWATER_PLANT >> CATEGORY_SHIFT));
+  uint128 constant GROWABLE_MASK =
+    (uint128(1) << (SEED >> CATEGORY_SHIFT)) | (uint128(1) << (SAPLING >> CATEGORY_SHIFT));
+  uint128 constant UNIQUE_OBJECT_MASK = (uint128(1) << (TOOL >> CATEGORY_SHIFT))
+    | (uint128(1) << (SMART >> CATEGORY_SHIFT)) | (uint128(1) << (BUCKET >> CATEGORY_SHIFT))
+    | (uint128(1) << (MISC >> CATEGORY_SHIFT));
   uint128 constant MINEABLE_MASK = BLOCK_MASK & ~(uint128(1) << (NON_SOLID >> CATEGORY_SHIFT));
 }
 
@@ -193,17 +200,17 @@ library ObjectTypes {
   ObjectType constant GoldBlock = ObjectType.wrap(Category.ORE_BLOCK | 2);
   ObjectType constant DiamondBlock = ObjectType.wrap(Category.ORE_BLOCK | 3);
   ObjectType constant NeptuniumBlock = ObjectType.wrap(Category.ORE_BLOCK | 4);
-  ObjectType constant WheatSeed = ObjectType.wrap(Category.GROWABLE | 0);
-  ObjectType constant PumpkinSeed = ObjectType.wrap(Category.GROWABLE | 1);
-  ObjectType constant MelonSeed = ObjectType.wrap(Category.GROWABLE | 2);
-  ObjectType constant OakSapling = ObjectType.wrap(Category.GROWABLE | 3);
-  ObjectType constant BirchSapling = ObjectType.wrap(Category.GROWABLE | 4);
-  ObjectType constant JungleSapling = ObjectType.wrap(Category.GROWABLE | 5);
-  ObjectType constant SakuraSapling = ObjectType.wrap(Category.GROWABLE | 6);
-  ObjectType constant AcaciaSapling = ObjectType.wrap(Category.GROWABLE | 7);
-  ObjectType constant SpruceSapling = ObjectType.wrap(Category.GROWABLE | 8);
-  ObjectType constant DarkOakSapling = ObjectType.wrap(Category.GROWABLE | 9);
-  ObjectType constant MangroveSapling = ObjectType.wrap(Category.GROWABLE | 10);
+  ObjectType constant WheatSeed = ObjectType.wrap(Category.SEED | 0);
+  ObjectType constant PumpkinSeed = ObjectType.wrap(Category.SEED | 1);
+  ObjectType constant MelonSeed = ObjectType.wrap(Category.SEED | 2);
+  ObjectType constant OakSapling = ObjectType.wrap(Category.SAPLING | 0);
+  ObjectType constant BirchSapling = ObjectType.wrap(Category.SAPLING | 1);
+  ObjectType constant JungleSapling = ObjectType.wrap(Category.SAPLING | 2);
+  ObjectType constant SakuraSapling = ObjectType.wrap(Category.SAPLING | 3);
+  ObjectType constant AcaciaSapling = ObjectType.wrap(Category.SAPLING | 4);
+  ObjectType constant SpruceSapling = ObjectType.wrap(Category.SAPLING | 5);
+  ObjectType constant DarkOakSapling = ObjectType.wrap(Category.SAPLING | 6);
+  ObjectType constant MangroveSapling = ObjectType.wrap(Category.SAPLING | 7);
   ObjectType constant Furnace = ObjectType.wrap(Category.STATION | 0);
   ObjectType constant Workbench = ObjectType.wrap(Category.STATION | 1);
   ObjectType constant Powerstone = ObjectType.wrap(Category.STATION | 2);
@@ -327,8 +334,12 @@ library ObjectTypeLib {
     return category(self) == Category.ORE_BLOCK;
   }
 
-  function isGrowable(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.GROWABLE;
+  function isSeed(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.SEED;
+  }
+
+  function isSapling(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.SAPLING;
   }
 
   function isStation(ObjectType self) internal pure returns (bool) {
@@ -557,11 +568,12 @@ library ObjectTypeLib {
     ];
   }
 
-  function getGrowableTypes() internal pure returns (ObjectType[11] memory) {
+  function getSeedTypes() internal pure returns (ObjectType[3] memory) {
+    return [ObjectTypes.WheatSeed, ObjectTypes.PumpkinSeed, ObjectTypes.MelonSeed];
+  }
+
+  function getSaplingTypes() internal pure returns (ObjectType[8] memory) {
     return [
-      ObjectTypes.WheatSeed,
-      ObjectTypes.PumpkinSeed,
-      ObjectTypes.MelonSeed,
       ObjectTypes.OakSapling,
       ObjectTypes.BirchSapling,
       ObjectTypes.JungleSapling,
@@ -630,9 +642,34 @@ library ObjectTypeLib {
   }
 
   // Specialized getters
-  function getOreAmount(ObjectType self) internal pure returns (bool) { }
 
-  function getTimeToGrow(ObjectType self) internal pure returns (bool) {
+  function getMaxInventorySlots(ObjectType self) internal pure returns (uint16) {
+    if (self == ObjectTypes.Player) return 36;
+    if (self == ObjectTypes.Chest) return 27;
+    if (self.isPassThrough()) return type(uint16).max;
+    return 0;
+  }
+
+  function getStackable(ObjectType self) internal pure returns (uint16) {
+    if (self.isUniqueObject()) return 1;
+    return 99;
+  }
+
+  // TODO: implement
+  function getOreAmount(ObjectType self) internal pure returns (ObjectAmount memory) { }
+
+  function getSapling(ObjectType self) internal pure returns (ObjectType) {
+    if (self == ObjectTypes.OakLeaf) return ObjectTypes.OakSapling;
+    if (self == ObjectTypes.BirchLeaf) return ObjectTypes.BirchSapling;
+    if (self == ObjectTypes.JungleLeaf) return ObjectTypes.JungleSapling;
+    if (self == ObjectTypes.SakuraLeaf) return ObjectTypes.SakuraSapling;
+    if (self == ObjectTypes.SpruceLeaf) return ObjectTypes.SpruceSapling;
+    if (self == ObjectTypes.AcaciaLeaf) return ObjectTypes.AcaciaSapling;
+    if (self == ObjectTypes.DarkOakLeaf) return ObjectTypes.DarkOakSapling;
+    return ObjectTypes.Null;
+  }
+
+  function getTimeToGrow(ObjectType self) internal pure returns (uint128) {
     if (self == ObjectTypes.WheatSeed) return 900;
     if (self == ObjectTypes.PumpkinSeed) return 3600;
     if (self == ObjectTypes.MelonSeed) return 3600;
@@ -647,6 +684,11 @@ library ObjectTypeLib {
     return 0;
   }
 
+  // TODO: use meta categories?
+  function hasExtraDrops(ObjectType self) internal pure returns (bool) {
+    return self == ObjectTypes.FescueGrass || self.isCrop() || self.isLeaf();
+  }
+
   // Meta Category Checks
   function isAny(ObjectType self) internal pure returns (bool) {
     // Check if:
@@ -655,17 +697,28 @@ library ObjectTypeLib {
     uint16 c = self.category();
     uint16 idx = self.unwrap() & ~CATEGORY_MASK;
 
-    return idx == 0 && ((uint128(1) << (c >> CATEGORY_SHIFT)) & Category.HAS_ANY_MASK) != 0;
+    return idx == 0 && hasMetaCategory(self, Category.HAS_ANY_MASK);
   }
 
   function isPassThrough(ObjectType self) internal pure returns (bool) {
-    uint16 c = category(self);
-    return ((uint128(1) << (c >> CATEGORY_SHIFT)) & Category.PASS_THROUGH_MASK) != 0;
+    return hasMetaCategory(self, Category.PASS_THROUGH_MASK);
   }
 
   function isMineable(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.MINEABLE_MASK);
+  }
+
+  function isUniqueObject(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.UNIQUE_OBJECT_MASK);
+  }
+
+  function isGrowable(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.GROWABLE_MASK);
+  }
+
+  function hasMetaCategory(ObjectType self, uint128 mask) internal pure returns (bool) {
     uint16 c = category(self);
-    return ((uint128(1) << (c >> CATEGORY_SHIFT)) & Category.MINEABLE_MASK) != 0;
+    return ((uint128(1) << (c >> CATEGORY_SHIFT)) & mask) != 0;
   }
 
   function matches(ObjectType self, ObjectType other) internal pure returns (bool) {

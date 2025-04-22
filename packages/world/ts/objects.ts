@@ -21,7 +21,8 @@ export const blockCategories: string[] = [
   "UNDERWATER_PLANT",
   "PLANK",
   "ORE_BLOCK",
-  "GROWABLE",
+  "SEED",
+  "SAPLING",
   "STATION",
   "SMART",
 ];
@@ -85,6 +86,7 @@ export interface ObjectType {
   timeToGrow?: bigint;
   isTillable?: boolean;
   stackable?: number;
+  sapling?: ObjectTypeName;
 }
 
 // Helper function to define objects for a category
@@ -92,7 +94,13 @@ function defineCategoryObjects(
   category: Category,
   objects: (
     | string
-    | { name: string; mass?: bigint; energy?: bigint; timeToGrow?: bigint }
+    | {
+        name: string;
+        mass?: bigint;
+        energy?: bigint;
+        timeToGrow?: bigint;
+        sapling?: ObjectTypeName;
+      }
   )[],
 ): ObjectType[] {
   return objects
@@ -211,13 +219,48 @@ export const objects: ObjectType[] = [
   // Leaf category
   ...defineCategoryObjects("LEAF", [
     { name: "AnyLeaf", mass: 500000000000000n, energy: 500000000000000n },
-    { name: "OakLeaf", mass: 500000000000000n, energy: 500000000000000n },
-    { name: "BirchLeaf", mass: 500000000000000n, energy: 500000000000000n },
-    { name: "JungleLeaf", mass: 500000000000000n, energy: 500000000000000n },
-    { name: "SakuraLeaf", mass: 500000000000000n, energy: 500000000000000n },
-    { name: "SpruceLeaf", mass: 500000000000000n, energy: 500000000000000n },
-    { name: "AcaciaLeaf", mass: 500000000000000n, energy: 500000000000000n },
-    { name: "DarkOakLeaf", mass: 500000000000000n, energy: 500000000000000n },
+    {
+      name: "OakLeaf",
+      sapling: "OakSapling",
+      mass: 500000000000000n,
+      energy: 500000000000000n,
+    },
+    {
+      name: "BirchLeaf",
+      sapling: "BirchSapling",
+      mass: 500000000000000n,
+      energy: 500000000000000n,
+    },
+    {
+      name: "JungleLeaf",
+      sapling: "JungleSapling",
+      mass: 500000000000000n,
+      energy: 500000000000000n,
+    },
+    {
+      name: "SakuraLeaf",
+      sapling: "SakuraSapling",
+      mass: 500000000000000n,
+      energy: 500000000000000n,
+    },
+    {
+      name: "SpruceLeaf",
+      sapling: "SpruceSapling",
+      mass: 500000000000000n,
+      energy: 500000000000000n,
+    },
+    {
+      name: "AcaciaLeaf",
+      sapling: "AcaciaSapling",
+      mass: 500000000000000n,
+      energy: 500000000000000n,
+    },
+    {
+      name: "DarkOakLeaf",
+      sapling: "DarkOakSapling",
+      mass: 500000000000000n,
+      energy: 500000000000000n,
+    },
     { name: "AzaleaLeaf", mass: 500000000000000n, energy: 500000000000000n },
     {
       name: "FloweringAzaleaLeaf",
@@ -304,11 +347,12 @@ export const objects: ObjectType[] = [
     { name: "DiamondBlock", mass: 45000000000000000000n },
     { name: "NeptuniumBlock", mass: 45000000000000000000n },
   ]),
-  // Growable category
-  ...defineCategoryObjects("GROWABLE", [
+  ...defineCategoryObjects("SEED", [
     { name: "WheatSeed", energy: 10000000000000000n, timeToGrow: 900n },
     { name: "PumpkinSeed", energy: 10000000000000000n, timeToGrow: 3600n },
     { name: "MelonSeed", energy: 10000000000000000n, timeToGrow: 3600n },
+  ]),
+  ...defineCategoryObjects("SAPLING", [
     { name: "OakSapling", energy: 148000000000000000n, timeToGrow: 345600n },
     { name: "BirchSapling", energy: 139000000000000000n, timeToGrow: 345600n },
     { name: "JungleSapling", energy: 300000000000000000n, timeToGrow: 345600n },
@@ -408,10 +452,21 @@ export const passThroughCategories: Category[] = [
   "NON_SOLID",
   "LEAF",
   "FLOWER",
-  "GROWABLE",
+  "SEED",
+  "SAPLING",
   "GREENERY",
   "CROP",
   "UNDERWATER_PLANT",
+];
+
+export const growableCategories: Category[] = ["SEED", "SAPLING"];
+
+// TODO: adjust categories
+export const uniqueObjectCategories: Category[] = [
+  "TOOL",
+  "SMART",
+  "BUCKET",
+  "MISC",
 ];
 
 export const hasAnyCategories: Category[] = ["LOG", "LEAF", "PLANK", "ORE"];

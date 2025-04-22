@@ -12,9 +12,9 @@ import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { ObjectAmount, ObjectType, ObjectTypes } from "../ObjectType.sol";
 
 import { EntityId } from "../EntityId.sol";
+import { NatureLib } from "../NatureLib.sol";
 import { burnToolEnergy } from "../utils/EnergyUtils.sol";
 
-import { EntityId } from "../EntityId.sol";
 import { Vec3 } from "../Vec3.sol";
 
 struct SlotTransfer {
@@ -90,7 +90,7 @@ library InventoryUtils {
       // Destroy tool
       _recycleSlot(toolData.owner, toolData.slot);
       Mass._deleteRecord(toolData.tool);
-      toolData.toolType.burnOres();
+      NatureLib.burnOres(toolData.toolType);
       burnToolEnergy(toolData.toolType, ownerCoord);
     } else {
       Mass._setMass(toolData.tool, toolData.massLeft - massReduction);
@@ -98,7 +98,7 @@ library InventoryUtils {
   }
 
   function addEntityToSlot(EntityId owner, EntityId entityId, uint16 slot) internal {
-    uint16 maxSlots = ObjectTypeMetadata._getMaxInventorySlots(ObjectType._get(owner));
+    uint16 maxSlots = EntityObjectType._get(owner).getMaxInventorySlots();
     require(slot < maxSlots, "Invalid slot");
     require(entityId.exists(), "Entity must exist");
 
@@ -121,7 +121,7 @@ library InventoryUtils {
 
   function addObject(EntityId owner, ObjectType objectType, uint128 amount) public {
     require(amount > 0, "Amount must be greater than 0");
-    uint16 stackable = ObjectTypeMetadata._getStackable(objectType);
+    uint16 stackable = objectType.getStackable();
     require(stackable > 0, "Object type cannot be added to inventory");
 
     uint128 remaining = amount;
@@ -160,9 +160,9 @@ library InventoryUtils {
 
   function addObjectToSlot(EntityId owner, ObjectType objectType, uint16 amount, uint16 slot) internal {
     require(amount > 0, "Amount must be greater than 0");
-    uint16 stackable = ObjectTypeMetadata._getStackable(objectType);
+    uint16 stackable = objectType.getStackable();
     require(stackable > 0, "Object type cannot be added to inventory");
-    uint16 maxSlots = ObjectTypeMetadata._getMaxInventorySlots(ObjectType._get(owner));
+    uint16 maxSlots = EntityObjectType._get(owner).getMaxInventorySlots();
     require(slot < maxSlots, "Invalid slot");
 
     InventorySlotData memory slotData = InventorySlot._get(owner, slot);
@@ -431,7 +431,7 @@ library InventoryUtils {
       return slot;
     }
 
-    uint16 maxSlots = ObjectTypeMetadata._getMaxInventorySlots(ObjectType._get(owner));
+    uint16 maxSlots = EntityObjectType._get(owner).getMaxInventorySlots();
     require(occupiedIndex < maxSlots, "All slots used");
     InventorySlot._setOccupiedIndex(owner, occupiedIndex, occupiedIndex);
     return occupiedIndex;

@@ -339,13 +339,11 @@ contract InventoryTest is DustTest {
     assertInventoryHasObject(aliceEntityId, transferObjectType, 0);
 
     TestInventoryUtils.addObject(
-      aliceEntityId,
-      transferObjectType,
-      ObjectTypeMetadata.getMaxInventorySlots(ObjectTypes.Player) * ObjectTypeMetadata.getStackable(transferObjectType)
+      aliceEntityId, transferObjectType, ObjectTypes.Player.getMaxInventorySlots() * transferObjectType.getStackable()
     );
     assertEq(
       Inventory.length(aliceEntityId),
-      ObjectTypeMetadata.getMaxInventorySlots(ObjectTypes.Player),
+      ObjectTypes.Player.getMaxInventorySlots(),
       "Wrong number of occupied inventory slots"
     );
 

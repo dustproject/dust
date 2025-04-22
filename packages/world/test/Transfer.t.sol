@@ -192,7 +192,7 @@ contract TransferTest is DustTest {
 
     Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
     EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
-    uint16 maxChestInventorySlots = ObjectTypeMetadata.getMaxInventorySlots(ObjectTypes.Chest);
+    uint16 maxChestInventorySlots = ObjectTypes.Chest.getMaxInventorySlots();
     ObjectType transferObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(
       chestEntityId, transferObjectType, ObjectTypeMetadata.getStackable(transferObjectType) * maxChestInventorySlots
@@ -215,7 +215,7 @@ contract TransferTest is DustTest {
 
     Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
     EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
-    uint16 maxPlayerInventorySlots = ObjectTypeMetadata.getMaxInventorySlots(ObjectTypes.Player);
+    uint16 maxPlayerInventorySlots = ObjectTypes.Player.getMaxInventorySlots();
     ObjectType transferObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(
       aliceEntityId, transferObjectType, ObjectTypeMetadata.getStackable(transferObjectType) * maxPlayerInventorySlots
@@ -243,7 +243,7 @@ contract TransferTest is DustTest {
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
     assertInventoryHasObject(nonChestEntityId, transferObjectType, 0);
 
-    assertEq(ObjectTypeMetadata.getMaxInventorySlots(transferObjectType), 0, "Max inventory slots is not 0");
+    assertEq(transferObjectType.getMaxInventorySlots(), 0, "Max inventory slots is not 0");
 
     SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });

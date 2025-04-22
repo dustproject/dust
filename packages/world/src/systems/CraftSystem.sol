@@ -20,6 +20,7 @@ import { ObjectType } from "../ObjectType.sol";
 
 import { ObjectTypes } from "../ObjectType.sol";
 
+import { NatureLib } from "../NatureLib.sol";
 import { Vec3 } from "../Vec3.sol";
 import { transferEnergyToPool } from "../utils/EnergyUtils.sol";
 import { createEntity } from "../utils/EntityUtils.sol";
@@ -72,7 +73,7 @@ contract CraftSystem is System {
 
       // Handle special case for coal ore
       if (recipeType == ObjectTypes.CoalOre) {
-        recipeType.burnOre(recipe.inputAmounts[i]);
+        NatureLib.burnOre(recipeType, recipe.inputAmounts[i]);
       }
     }
   }

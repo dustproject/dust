@@ -147,7 +147,7 @@ library BuildLib {
 
     removeEnergyFromLocalPool(baseCoord, ObjectTypeMetadata._getEnergy(buildType));
 
-    SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildType.timeToGrow());
+    SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildType.getTimeToGrow());
   }
 
   function _requireBuildsAllowed(

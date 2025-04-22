@@ -226,7 +226,9 @@ contract FarmingTest is DustTest {
     // Verify build time was set
     uint128 fullyGrownAt = SeedGrowth.getFullyGrownAt(cropEntityId);
     assertTrue(fullyGrownAt > 0, "FullyGrownAt not set correctly");
-    assertEq(fullyGrownAt, uint128(block.timestamp) + ObjectTypes.WheatSeed.timeToGrow(), "Incorrect fullyGrownAt set");
+    assertEq(
+      fullyGrownAt, uint128(block.timestamp) + ObjectTypes.WheatSeed.getTimeToGrow(), "Incorrect fullyGrownAt set"
+    );
 
     // Verify seeds were removed from inventory
     assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 0);

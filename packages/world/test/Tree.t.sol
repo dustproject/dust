@@ -88,7 +88,9 @@ contract TreeTest is DustTest {
 
     // Verify growth time was set
     uint128 fullyGrownAt = SeedGrowth.getFullyGrownAt(seedEntityId);
-    assertEq(fullyGrownAt, uint128(block.timestamp) + ObjectTypes.OakSapling.timeToGrow(), "Incorrect fullyGrownAt set");
+    assertEq(
+      fullyGrownAt, uint128(block.timestamp) + ObjectTypes.OakSapling.getTimeToGrow(), "Incorrect fullyGrownAt set"
+    );
 
     // Verify seeds were removed from inventory
     assertInventoryHasObject(aliceEntityId, ObjectTypes.OakSapling, 0);

@@ -376,13 +376,11 @@ contract MineTest is DustTest {
     setObjectAtCoord(mineCoord, mineObjectType);
 
     TestInventoryUtils.addObject(
-      aliceEntityId,
-      mineObjectType,
-      ObjectTypeMetadata.getMaxInventorySlots(ObjectTypes.Player) * ObjectTypeMetadata.getStackable(mineObjectType)
+      aliceEntityId, mineObjectType, ObjectTypes.Player.getMaxInventorySlots() * mineObjectType.getStackable()
     );
     assertEq(
       Inventory.length(aliceEntityId),
-      ObjectTypeMetadata.getMaxInventorySlots(ObjectTypes.Player),
+      ObjectTypes.Player.getMaxInventorySlots(),
       "Wrong number of occupied inventory slots"
     );
 

@@ -3,6 +3,7 @@ pragma solidity >=0.8.24;
 
 import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
+import { BurnedResourceCount } from "./codegen/tables/BurnedResourceCount.sol";
 import { DisabledExtraDrops } from "./codegen/tables/DisabledExtraDrops.sol";
 import { ResourceCount } from "./codegen/tables/ResourceCount.sol";
 
@@ -174,7 +175,7 @@ library NatureLib {
     // Select sapling drop based on calculated weights
     ObjectAmount memory saplingDrop = selectObjectByWeight(saplingOptions, weights, randomSeed);
 
-    if (saplingDrop.objectTypeId != ObjectTypes.Null) {
+    if (saplingDrop.objectType != ObjectTypes.Null) {
       result = new ObjectAmount[](2);
       result[0] = ObjectAmount(objectType, 1);
       result[1] = saplingDrop;
@@ -276,6 +277,20 @@ library NatureLib {
       }
 
       weights[i] = p;
+    }
+  }
+
+  function burnOre(ObjectType self, uint256 amount) internal {
+    // This increases the availability of the ores being burned
+    ResourceCount._set(self, ResourceCount._get(self) - amount);
+    // This allows the same amount of ores to respawn
+    BurnedResourceCount._set(ObjectTypes.AnyOre, BurnedResourceCount._get(ObjectTypes.AnyOre) + amount);
+  }
+
+  function burnOres(ObjectType self) internal {
+    ObjectAmount memory oreAmount = self.getOreAmount();
+    if (!oreAmount.objectType.isNull()) {
+      burnOre(oreAmount.objectType, oreAmount.amount);
     }
   }
 }
