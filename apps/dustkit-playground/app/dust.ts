@@ -1,9 +1,5 @@
-import { Messenger } from "dustkit";
+import { type ClientRpcSchema, messagePort } from "dustkit/internal";
 
-export const dustBridge =
-  typeof window !== "undefined"
-    ? Messenger.bridge({
-        from: Messenger.fromWindow(window),
-        to: Messenger.fromWindow(window.opener ?? window.parent),
-      })
-    : Messenger.noop();
+export const dustClient = messagePort<ClientRpcSchema>(
+  window.opener ?? window.parent,
+);

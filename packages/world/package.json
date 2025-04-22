@@ -1,22 +1,25 @@
 {
   "name": "@dust/world",
   "version": "0.0.0",
+  "type": "module",
   "exports": {
-    "./mud.config": "./dist/mud.config.js",
     "./worlds.json": "./worlds.json",
-    "./out/*": "./out/*",
+    "./mud.config": "./dist/mud.config.js",
+    "./out/*": "./dist/out/*.js",
     "./tree-lib": "./dist/tree-lib.js"
   },
   "typesVersions": {
     "*": {
       "mud.config": ["./dist/mud.config.d.ts"],
+      "out/*": ["./dist/out/*.d.ts"],
       "tree-lib": ["./dist/tree-lib.d.ts"]
     }
   },
   "files": ["src", "out", "dist", "worlds.json"],
   "scripts": {
-    "build": "mud build && pnpm run build:js",
+    "build": "pnpm run build:mud && pnpm run build:js",
     "build:js": "tsc",
+    "build:mud": "mud build && abi-ts --extension .ts",
     "clean": "forge clean && shx rm -rf src/**/codegen",
     "deploy:local": "pnpm entrykit-deploy && pnpm run build && mud deploy",
     "dev": "pnpm entrykit-deploy && pnpm run build && pnpm mud dev-contracts --rpc http://127.0.0.1:8545",
@@ -29,6 +32,7 @@
     "test": "./runTests.bash"
   },
   "dependencies": {
+    "@latticexyz/abi-ts": "2.2.22-f0c0b982573f9953e1c726c0bef91671efaaa545",
     "@latticexyz/cli": "2.2.22-f0c0b982573f9953e1c726c0bef91671efaaa545",
     "@latticexyz/config": "2.2.22-f0c0b982573f9953e1c726c0bef91671efaaa545",
     "@latticexyz/gas-report": "2.2.22-f0c0b982573f9953e1c726c0bef91671efaaa545",
@@ -44,7 +48,6 @@
     "forge-std": "https://github.com/foundry-rs/forge-std.git#3b20d60d14b343ee4f908cb8079495c07f5e8981",
     "solhint": "^3.4.1",
     "solhint-config-mud": "2.2.22-f0c0b982573f9953e1c726c0bef91671efaaa545",
-    "solhint-plugin-mud": "2.2.22-f0c0b982573f9953e1c726c0bef91671efaaa545",
-    "typescript": "^5.8.3"
+    "solhint-plugin-mud": "2.2.22-f0c0b982573f9953e1c726c0bef91671efaaa545"
   }
 }

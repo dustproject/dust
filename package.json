@@ -8,6 +8,7 @@
     "deploy:dev": "pnpm --filter 'world' run dev",
     "deploy:local": "pnpm --filter 'world' deploy:local",
     "dev": "echo clearing anvil cache... && shx rm -rf ~/.foundry/anvil/tmp packages/world/deploys/31337/latest.json && mprocs",
+    "dustkit": "pnpm install && pnpm build && pnpm --filter dustkit-playground run dev",
     "fix": "pnpm run fix:package-json && biome check --write && pnpm recursive run fix",
     "fix:package-json": "pnpx sort-package-json package.json 'packages/*/package.json'",
     "foundry:up": "curl -L https://foundry.paradigm.xyz | bash && bash $HOME/.foundry/bin/foundryup",
