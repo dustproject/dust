@@ -49,7 +49,7 @@ library ObjectTypeLib {
     if (self == ObjectTypes.Workbench) {
       Vec3[] memory relativePositions = new Vec3[](2);
       relativePositions[0] = vec3(0, 0, 1);
-      relativePositions[1] = vec3(0, 0, 2);
+      relativePositions[1] = vec3(0, 0, -1);
       return relativePositions;
     }
 
