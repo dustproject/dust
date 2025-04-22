@@ -1,6 +1,6 @@
-export * from "../apps/getEntityProgram";
-export * from "../apps/getProgramAppConfigUrl";
-export * from "../apps/getProgramDefaultAppConfigUrl";
+export { getEntityProgram } from "../apps/getEntityProgram";
+export { getProgramAppConfigUrl } from "../apps/getProgramAppConfigUrl";
+export { getProgramDefaultAppConfigUrl } from "../apps/getProgramDefaultAppConfigUrl";
 
 export { createMessagePortRpcServer } from "../rpc/createMessagePortRpcServer";
 export {
@@ -9,4 +9,8 @@ export {
   type MessagePortTransportConfig,
   type MessagePortTransportErrorType,
 } from "../rpc/messagePort";
-export { AppRpcSchema, ClientRpcSchema } from "../rpc/schemas";
+export {
+  AppRpcSchema,
+  ClientRpcSchema,
+  ClientViemRpcSchema,
+} from "../rpc/schemas";

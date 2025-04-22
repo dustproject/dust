@@ -1,7 +1,6 @@
 import type { RpcSchema } from "ox";
 import {
   type CreateTransportErrorType,
-  type EIP1193RequestFn,
   RpcRequestError,
   type Transport,
   type TransportConfig,
@@ -29,7 +28,18 @@ export type MessagePortTransport<schema extends RpcSchema.Generic> = Transport<
   "messagePort",
   // biome-ignore lint/complexity/noBannedTypes: not needed yet
   {},
-  EIP1193RequestFn<OxRpcSchemaToViemRpcSchema<schema>>
+  // @ts-ignore I can't get this to comply with Viem's `EIP1193RequestFn`. I tried to convert the Ox `RpcSchema` to a Viem `RpcSchema`, but then calling the `request` function doesn't narrow types based on `method`.
+  <method extends RpcSchema.ExtractMethodName<schema>>(
+    args: unknown extends RpcSchema.ExtractParams<schema, method>
+      ? {
+          method: method;
+          params?: RpcSchema.ExtractParams<schema, method>;
+        }
+      : {
+          method: method;
+          params: RpcSchema.ExtractParams<schema, method>;
+        },
+  ) => Promise<RpcSchema.ExtractReturnType<schema, method>>
 >;
 
 export type MessagePortTransportErrorType =
@@ -81,27 +91,3 @@ export function messagePort<schema extends RpcSchema.Generic>(
     );
   };
 }
-
-/** @internal */
-type OxRpcSchemaToViemRpcSchema<schema extends RpcSchema.Generic> = readonly {
-  [method in RpcSchema.ExtractMethodName<schema>]: unknown extends RpcSchema.ExtractParams<
-    schema,
-    method
-  >
-    ? {
-        Method: method;
-        Parameters?: RpcSchema.ExtractParams<schema, method>;
-        ReturnType: RpcSchema.ExtractReturnType<schema, method>;
-      }
-    : RpcSchema.ExtractParams<schema, method> extends undefined
-      ? {
-          Method: method;
-          Parameters?: RpcSchema.ExtractParams<schema, method>;
-          ReturnType: RpcSchema.ExtractReturnType<schema, method>;
-        }
-      : {
-          Method: method;
-          Parameters: RpcSchema.ExtractParams<schema, method>;
-          ReturnType: RpcSchema.ExtractReturnType<schema, method>;
-        };
-}[RpcSchema.ExtractMethodName<schema>][];

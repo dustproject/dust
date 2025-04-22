@@ -16,6 +16,8 @@ export function createMessagePortRpcServer<schema extends RpcSchema.Generic>(
     ) => Promise<RpcSchema.ExtractReturnType<schema, method>>;
   },
 ): () => void {
+  let connectedPort: MessagePort | undefined;
+
   function onMessage(event: MessageEvent) {
     if (event.data !== initMessage) return;
 
@@ -28,7 +30,7 @@ export function createMessagePortRpcServer<schema extends RpcSchema.Generic>(
       "message",
       async (event: MessageEvent<RpcRequest.RpcRequest>) => {
         const { jsonrpc, id, method, params } = event.data;
-        console.info("RPC request", method, params);
+        console.info("got rpc request", { id, method, params });
         try {
           const handler =
             handlers[method as RpcSchema.ExtractMethodName<schema>];
@@ -36,12 +38,14 @@ export function createMessagePortRpcServer<schema extends RpcSchema.Generic>(
           if (!handler) throw new MethodNotSupportedError();
 
           const result = await handler(params);
+          console.info("got result", { id, method, params, result });
           port.postMessage({
             jsonrpc,
             id,
             result,
           } satisfies RpcResponse.RpcResponse);
         } catch (error) {
+          console.info("got error", { id, method, params, error });
           port.postMessage({
             jsonrpc,
             id,
@@ -53,11 +57,14 @@ export function createMessagePortRpcServer<schema extends RpcSchema.Generic>(
 
     port.start();
     port.postMessage("ready");
+
+    connectedPort?.close();
+    connectedPort = port;
   }
 
   window.addEventListener("message", onMessage);
   return () => {
     window.removeEventListener("message", onMessage);
-    // TODO: close port?
+    connectedPort?.close();
   };
 }

@@ -1,51 +1,26 @@
-import {
-  type AppRpcSchema,
-  type ClientRpcSchema,
-  createMessagePortRpcServer,
-  messagePort,
-} from "dustkit/internal";
+import { AccountButton, useSessionClient } from "@latticexyz/entrykit/internal";
+import { type AppRpcSchema, messagePort } from "dustkit/internal";
 import { useEffect } from "react";
-import { useConnect, useConnectorClient, useDisconnect } from "wagmi";
+import { getWorldAddress } from "./common";
+import { createClientRpcServer } from "./createClientRpcServer";
 
 export function App() {
-  // TODO: pass in chain ID?
-  const connectorClient = useConnectorClient();
-  const { connect, connectors } = useConnect();
-  const { disconnect } = useDisconnect();
+  const { data: sessionClient, status: sessionClientStatus } =
+    useSessionClient();
 
   useEffect(
     () =>
-      createMessagePortRpcServer<ClientRpcSchema>({
-        async dustClient_setWaypoint(params) {
-          if (!connectorClient.data) {
-            throw new Error("Not connected.");
-          }
-          console.info("app asked for waypoint", params);
-        },
-      }),
-    [connectorClient],
+      createClientRpcServer({ sessionClient, worldAddress: getWorldAddress() }),
+    [sessionClient],
   );
 
   return (
     <div>
       <h1>Client</h1>
+      <AccountButton />
       <p>
-        Connector client {connectorClient.status} for chain{" "}
-        {connectorClient.data?.chain.id} (uid: {connectorClient.data?.uid})
-      </p>
-      <p>
-        {connectorClient.data ? (
-          <button type="button" onClick={() => disconnect()}>
-            Disconnect
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => connect({ connector: connectors[0]! })}
-          >
-            Connect
-          </button>
-        )}
+        Connector client {sessionClientStatus} for chain{" "}
+        {sessionClient?.chain.id} (uid: {sessionClient?.uid})
       </p>
       <iframe
         title="DustKit app"

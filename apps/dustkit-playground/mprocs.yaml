@@ -9,4 +9,6 @@ procs:
   anvil:
     shell: anvil
   dustkit:
-    shell: pnpm --filter dustkit dev
+    shell: pnpm --filter dustkit run dev
+  world:
+    shell: pnpm --filter world run dev

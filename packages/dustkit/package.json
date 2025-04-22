@@ -6,7 +6,7 @@
     ".": "./dist/src/exports/index.js",
     "./internal": "./dist/src/exports/internal.js",
     "./mud.config": "./dist/mud.config.js",
-    "./out/*": "./dist/out/*"
+    "./out/*": "./dist/out/*.js"
   },
   "typesVersions": {
     "*": {

@@ -3,5 +3,5 @@
   "compilerOptions": {
     "outDir": "dist"
   },
-  "include": ["mud.config.ts", "tree-lib.ts"]
+  "include": ["mud.config.ts", "out", "tree-lib.ts"]
 }
