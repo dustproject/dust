@@ -1,10 +1,26 @@
-import { type AppRpcSchema, messagePort } from "dustkit/internal";
+import {
+  type AppRpcSchema,
+  type ClientRpcSchema,
+  createMessagePortRpcServer,
+  messagePort,
+} from "dustkit/internal";
+import { useEffect } from "react";
 import { useConnect, useConnectorClient } from "wagmi";
 
 export function App() {
   // TODO: pass in chain ID?
   const connectorClient = useConnectorClient();
   const { connect, connectors } = useConnect();
+
+  useEffect(
+    () =>
+      createMessagePortRpcServer<ClientRpcSchema>({
+        async dustClient_setWaypoint(params) {
+          console.info("app asked for waypoint", params);
+        },
+      }),
+    [],
+  );
 
   return (
     <div>

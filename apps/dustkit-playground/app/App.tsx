@@ -4,15 +4,18 @@ import {
 } from "dustkit/internal";
 import { useEffect } from "react";
 import { useConnectorClient } from "wagmi";
+import { dustClient } from "./dust";
 
 export function App() {
-  useEffect(() =>
-    createMessagePortRpcServer<AppRpcSchema>({
-      async dustApp_init(params) {
-        console.info("client asked this app to initialize with", params);
-        return { success: true };
-      },
-    }),
+  useEffect(
+    () =>
+      createMessagePortRpcServer<AppRpcSchema>({
+        async dustApp_init(params) {
+          console.info("client asked this app to initialize with", params);
+          return { success: true };
+        },
+      }),
+    [],
   );
 
   // TODO: pass in chain ID?
@@ -28,8 +31,15 @@ export function App() {
       <p>
         <button
           type="button"
-          disabled={!connectorClient.isSuccess}
-          onClick={() => {}}
+          onClick={async () => {
+            await dustClient({}).request({
+              method: "dustClient_setWaypoint",
+              params: {
+                entity: "0x",
+                label: "Somewhere",
+              },
+            });
+          }}
         >
           Write
         </button>
