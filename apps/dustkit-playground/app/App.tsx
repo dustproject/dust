@@ -1,10 +1,13 @@
-import { type AppSchema, createMessagePortRpcServer } from "dustkit/internal";
+import {
+  type AppRpcSchema,
+  createMessagePortRpcServer,
+} from "dustkit/internal";
 import { useEffect } from "react";
 import { useConnectorClient } from "wagmi";
 
 export function App() {
   useEffect(() =>
-    createMessagePortRpcServer<AppSchema>({
+    createMessagePortRpcServer<AppRpcSchema>({
       async dustApp_init(params) {
         console.info("client asked this app to initialize with", params);
         return { success: true };

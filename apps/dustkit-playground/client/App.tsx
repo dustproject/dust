@@ -1,4 +1,4 @@
-import { type AppSchema, messagePort } from "dustkit/internal";
+import { type AppRpcSchema, messagePort } from "dustkit/internal";
 import { useConnect, useConnectorClient } from "wagmi";
 
 export function App() {
@@ -26,7 +26,7 @@ export function App() {
         src={import.meta.env.VITE_DUSTKIT_APP_URL}
         onLoad={async (event) => {
           console.info("setting up app transport");
-          const appTransport = messagePort<AppSchema>(
+          const appTransport = messagePort<AppRpcSchema>(
             event.currentTarget.contentWindow!,
           );
           console.info("rpc client ready, sending hello");

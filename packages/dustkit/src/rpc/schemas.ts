@@ -2,7 +2,7 @@ import type { RpcSchema } from "ox";
 import type { AppConfig } from "../apps/appConfig";
 import type { EntityId, ProgramId } from "../common";
 
-export type ClientSchema = RpcSchema.From<{
+export type ClientRpcSchema = RpcSchema.From<{
   Request: {
     method: "dustClient_setWaypoint";
     params: {
@@ -12,7 +12,7 @@ export type ClientSchema = RpcSchema.From<{
   };
 }>;
 
-export type AppSchema = RpcSchema.From<{
+export type AppRpcSchema = RpcSchema.From<{
   Request: {
     method: "dustApp_init";
     params: {

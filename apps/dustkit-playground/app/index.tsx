@@ -1,6 +1,4 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { type AppSchema, createMessagePortRpcServer } from "dustkit/internal";
-import { MethodNotSupportedError } from "ox/RpcResponse";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { WagmiProvider } from "wagmi";
