@@ -9,9 +9,9 @@ struct ObjectAmount {
   uint16 amount;
 }
 
-// Category bits (bits 15..11), id bits (bits 10..0)
+// 7 category bits (bits 15..9), 9 index bits (bits 8..0)
 uint16 constant CATEGORY_MASK = 0xF800;
-uint16 constant CATEGORY_SHIFT = 11;
+uint16 constant CATEGORY_SHIFT = 9;
 uint16 constant BLOCK_CATEGORY_COUNT = 128 / 2; // 31
 
 // ------------------------------------------------------------
@@ -627,6 +627,24 @@ library ObjectTypeLib {
       ObjectTypes.Bone,
       ObjectTypes.TextSign
     ];
+  }
+
+  // Specialized getters
+  function getOreAmount(ObjectType self) internal pure returns (bool) { }
+
+  function getTimeToGrow(ObjectType self) internal pure returns (bool) {
+    if (self == ObjectTypes.WheatSeed) return 900;
+    if (self == ObjectTypes.PumpkinSeed) return 3600;
+    if (self == ObjectTypes.MelonSeed) return 3600;
+    if (self == ObjectTypes.OakSapling) return 345600;
+    if (self == ObjectTypes.BirchSapling) return 345600;
+    if (self == ObjectTypes.JungleSapling) return 345600;
+    if (self == ObjectTypes.SakuraSapling) return 345600;
+    if (self == ObjectTypes.AcaciaSapling) return 345600;
+    if (self == ObjectTypes.SpruceSapling) return 345600;
+    if (self == ObjectTypes.DarkOakSapling) return 345600;
+    if (self == ObjectTypes.MangroveSapling) return 345600;
+    return 0;
   }
 
   // Meta Category Checks

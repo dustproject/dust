@@ -190,6 +190,6 @@ function updateSleepingPlayerEnergy(EntityId player, EntityId bed, uint128 deple
 }
 
 function burnToolEnergy(ObjectType toolType, Vec3 coord) {
-  uint16 numPlanks = toolType.getToolPlankAmount();
+  uint16 numPlanks = toolType.getPlankAmount();
   addEnergyToLocalPool(coord, numPlanks * ObjectTypeMetadata._getMass(ObjectTypes.AnyPlank));
 }

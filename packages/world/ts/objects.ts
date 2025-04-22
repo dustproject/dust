@@ -83,6 +83,8 @@ export interface ObjectType {
   mass: bigint;
   energy: bigint;
   timeToGrow?: bigint;
+  isTillable?: boolean;
+  stackable?: number;
 }
 
 // Helper function to define objects for a category
@@ -391,6 +393,15 @@ export const objects: ObjectType[] = [
     { name: "TextSign", mass: 17800000000000000n },
   ]),
 ];
+
+export type ObjectTypeName = (typeof objects)[number]["name"];
+
+export type ObjectAmount = [ObjectTypeName, number];
+
+export const objectsByName = objects.reduce((acc, obj) => {
+  acc[obj.id] = obj;
+  return acc;
+}, {});
 
 // Meta-categories (categories that should be included in pass-through check)
 export const passThroughCategories: Category[] = [

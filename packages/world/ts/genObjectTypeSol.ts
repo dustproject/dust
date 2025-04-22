@@ -1,8 +1,6 @@
 import {
   type Category,
-  allCategories,
   allCategoryMetadata,
-  blockCategories,
   blockCategoryMetadata,
   hasAnyCategories,
   nonBlockCategoryMetadata,
@@ -21,6 +19,13 @@ function renderMetaCategoryMask(categories: Category[]): string {
     .join(" | ");
 }
 
+function renderObjectAmount(objectAmount: {
+  objectType: string;
+  amount: bigint;
+}): string {
+  return `ObjectAmount(${objectAmount.objectType}, ${objectAmount.amount.toString()})`;
+}
+
 // Template for the Solidity file
 function generateObjectTypeSol(): string {
   return `// SPDX-License-Identifier: MIT
@@ -34,9 +39,9 @@ struct ObjectAmount {
   uint16 amount;
 }
 
-// Category bits (bits 15..11), id bits (bits 10..0)
+// 7 category bits (bits 15..9), 9 index bits (bits 8..0)
 uint16 constant CATEGORY_MASK = 0xF800;
-uint16 constant CATEGORY_SHIFT = 11;
+uint16 constant CATEGORY_SHIFT = 9;
 uint16 constant BLOCK_CATEGORY_COUNT = 128 / 2; // 31
 
 // ------------------------------------------------------------
@@ -112,6 +117,27 @@ ${allCategoryMetadata
   })
   .join("")}
 
+  // Specialized getters
+  function getOreAmount(ObjectType self) internal pure returns(bool) {
+    ${objects
+      .filter((obj) => obj.oreAmount !== undefined)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ${renderObjectAmount(obj.oreAmount!)};`,
+      )
+      .join("\n    ")}
+  }
+
+  function getTimeToGrow(ObjectType self) internal pure returns(bool) {
+    ${objects
+      .filter((obj) => obj.timeToGrow)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ${obj.timeToGrow};`,
+      )
+      .join("\n    ")}
+    return 0;
+  }
 
   // Meta Category Checks
   function isAny(ObjectType self) internal pure returns (bool) {
