@@ -192,8 +192,16 @@ library ObjectTypes {
   ObjectTypeId constant NeptuniumBlock = ObjectTypeId.wrap(Block | 277);
   ObjectTypeId constant WetFarmland = ObjectTypeId.wrap(Block | 278);
   ObjectTypeId constant WheatSeed = ObjectTypeId.wrap(Block | 279);
-  ObjectTypeId constant OakSeed = ObjectTypeId.wrap(Block | 280);
-  ObjectTypeId constant SpruceSeed = ObjectTypeId.wrap(Block | 281);
+  ObjectTypeId constant MelonSeed = ObjectTypeId.wrap(Block | 280);
+  ObjectTypeId constant PumpkinSeed = ObjectTypeId.wrap(Block | 281);
+  ObjectTypeId constant OakSapling = ObjectTypeId.wrap(Block | 282);
+  ObjectTypeId constant BirchSapling = ObjectTypeId.wrap(Block | 283);
+  ObjectTypeId constant JungleSapling = ObjectTypeId.wrap(Block | 284);
+  ObjectTypeId constant SakuraSapling = ObjectTypeId.wrap(Block | 285);
+  ObjectTypeId constant AcaciaSapling = ObjectTypeId.wrap(Block | 286);
+  ObjectTypeId constant SpruceSapling = ObjectTypeId.wrap(Block | 287);
+  ObjectTypeId constant DarkOakSapling = ObjectTypeId.wrap(Block | 288);
+  ObjectTypeId constant MangroveSapling = ObjectTypeId.wrap(Block | 289);
   ObjectTypeId constant ForceField = ObjectTypeId.wrap(Block | 600);
   ObjectTypeId constant Chest = ObjectTypeId.wrap(Block | 601);
   ObjectTypeId constant TextSign = ObjectTypeId.wrap(Block | 602);
@@ -237,6 +245,7 @@ library ObjectTypes {
   // ------------------------------------------------------------
   ObjectTypeId constant Player = ObjectTypeId.wrap(Misc | 0);
   ObjectTypeId constant Fragment = ObjectTypeId.wrap(Misc | 1);
-  ObjectTypeId constant AnyLog = ObjectTypeId.wrap(Misc | 2047);
-  ObjectTypeId constant AnyPlanks = ObjectTypeId.wrap(Misc | 2046);
+  ObjectTypeId constant AnyLog = ObjectTypeId.wrap(Misc | 2);
+  ObjectTypeId constant AnyPlank = ObjectTypeId.wrap(Misc | 3);
+  ObjectTypeId constant AnyLeaf = ObjectTypeId.wrap(Misc | 4);
 }

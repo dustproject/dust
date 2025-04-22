@@ -152,14 +152,18 @@ contract SpawnSystem is System {
     (EntityId forceField,) = ForceFieldUtils.getForceField(spawnCoord);
     require(!forceField.exists(), "Cannot spawn in force field");
 
-    // Extract energy from local pool
-    removeEnergyFromLocalPool(spawnCoord, MAX_PLAYER_ENERGY);
+    // Extract energy from local pool (half of max player energy)
+    removeEnergyFromLocalPool(spawnCoord, MAX_PLAYER_ENERGY / 2);
 
     return _spawnPlayer(spawnCoord);
   }
 
-  function spawn(EntityId spawnTile, Vec3 spawnCoord, bytes memory extraData) public returns (EntityId) {
+  function spawn(EntityId spawnTile, Vec3 spawnCoord, uint128 spawnEnergy, bytes memory extraData)
+    public
+    returns (EntityId)
+  {
     checkWorldStatus();
+    require(spawnEnergy <= MAX_PLAYER_ENERGY, "Cannot spawn with more than max player energy");
     ObjectTypeId objectTypeId = ObjectType._get(spawnTile);
     require(objectTypeId == ObjectTypes.SpawnTile, "Not a spawn tile");
 
@@ -169,12 +173,12 @@ contract SpawnSystem is System {
     (EntityId forceField,) = ForceFieldUtils.getForceField(spawnTileCoord);
     require(forceField.exists(), "Spawn tile is not inside a forcefield");
     (EnergyData memory machineData,) = updateMachineEnergy(forceField);
-    require(machineData.energy >= MAX_PLAYER_ENERGY, "Not enough energy in spawn tile forcefield");
+    require(machineData.energy >= spawnEnergy, "Not enough energy in spawn tile forcefield");
     Energy._setEnergy(forceField, machineData.energy - MAX_PLAYER_ENERGY);
 
     EntityId player = _spawnPlayer(spawnCoord);
 
-    bytes memory onSpawn = abi.encodeCall(ISpawnHook.onSpawn, (player, spawnTile, extraData));
+    bytes memory onSpawn = abi.encodeCall(ISpawnHook.onSpawn, (player, spawnTile, spawnEnergy, extraData));
     spawnTile.getProgram().callOrRevert(onSpawn);
 
     return player;

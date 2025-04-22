@@ -40,7 +40,7 @@ import { ProgramId } from "../src/ProgramId.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 
-import { SlotTransfer } from "../src/utils/InventoryUtils.sol";
+import { SlotData, SlotTransfer } from "../src/utils/InventoryUtils.sol";
 import { Position } from "../src/utils/Vec3Storage.sol";
 
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
@@ -49,10 +49,7 @@ contract TestChestProgram is System {
   // Control revert behavior
   bool revertOnTransfer;
 
-  function onTransfer(EntityId, EntityId, EntityId, EntityId, ObjectAmount[] memory, EntityId[] memory, bytes memory)
-    external
-    view
-  {
+  function onTransfer(EntityId, EntityId, SlotData[] memory, SlotData[] memory, bytes memory) external view {
     require(!revertOnTransfer, "Transfer not allowed by chest");
   }
 
@@ -494,5 +491,204 @@ contract TransferTest is DustTest {
     program.call(
       world, abi.encodeCall(world.transfer, (chestEntityId, chestEntityId, otherChestEntityId, slotsToTransfer, ""))
     );
+  }
+
+  function testSwapPartiallyFilledSlots() public {
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+
+    ObjectTypeId fromType = ObjectTypes.Grass;
+    uint16 fromAmount = 10;
+    TestInventoryUtils.addObject(aliceEntityId, fromType, fromAmount);
+
+    ObjectTypeId toType = ObjectTypes.Dirt;
+    uint16 toAmount = 5;
+    TestInventoryUtils.addObject(aliceEntityId, toType, toAmount);
+
+    assertInventoryHasObjectInSlot(aliceEntityId, fromType, fromAmount, 0);
+    assertInventoryHasObjectInSlot(aliceEntityId, toType, toAmount, 1);
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+
+    SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 1, amount: fromAmount });
+
+    vm.prank(alice);
+    startGasReport("swap partially filled slots");
+    world.transfer(aliceEntityId, aliceEntityId, aliceEntityId, slotsToTransfer, "");
+    endGasReport();
+
+    assertInventoryHasObjectInSlot(aliceEntityId, fromType, fromAmount, 1);
+    assertInventoryHasObjectInSlot(aliceEntityId, toType, toAmount, 0);
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+  }
+
+  function testSwapEntityAndObjectSlots() public {
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+
+    ObjectTypeId fromType = ObjectTypes.Grass;
+    uint16 fromAmount = 10;
+    TestInventoryUtils.addObject(aliceEntityId, fromType, fromAmount);
+
+    ObjectTypeId toType = ObjectTypes.NeptuniumPick;
+    TestInventoryUtils.addEntity(aliceEntityId, toType);
+
+    assertInventoryHasObjectInSlot(aliceEntityId, fromType, fromAmount, 0);
+    assertInventoryHasObjectInSlot(aliceEntityId, toType, 1, 1);
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+
+    // Transfer all grass
+    SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 1, amount: fromAmount });
+
+    vm.prank(alice);
+    startGasReport("swap entity and object slots");
+    world.transfer(aliceEntityId, aliceEntityId, aliceEntityId, slotsToTransfer, "");
+    endGasReport();
+
+    assertInventoryHasObjectInSlot(aliceEntityId, fromType, fromAmount, 1);
+    assertInventoryHasObjectInSlot(aliceEntityId, toType, 1, 0);
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+  }
+
+  function testSwapEntitySlots() public {
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+
+    ObjectTypeId fromType = ObjectTypes.GoldPick;
+    TestInventoryUtils.addEntity(aliceEntityId, fromType);
+
+    ObjectTypeId toType = ObjectTypes.NeptuniumPick;
+    TestInventoryUtils.addEntity(aliceEntityId, toType);
+
+    assertInventoryHasObjectInSlot(aliceEntityId, fromType, 1, 0);
+    assertInventoryHasObjectInSlot(aliceEntityId, toType, 1, 1);
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+
+    SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 1, amount: 1 });
+
+    vm.prank(alice);
+    startGasReport("swap entity slots");
+    world.transfer(aliceEntityId, aliceEntityId, aliceEntityId, slotsToTransfer, "");
+    endGasReport();
+
+    assertInventoryHasObjectInSlot(aliceEntityId, fromType, 1, 1);
+    assertInventoryHasObjectInSlot(aliceEntityId, toType, 1, 0);
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+  }
+
+  function testSelfTransferEntityToNullSlot() public {
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+
+    ObjectTypeId fromType = ObjectTypes.GoldPick;
+    TestInventoryUtils.addEntity(aliceEntityId, fromType);
+
+    assertInventoryHasObjectInSlot(aliceEntityId, fromType, 1, 0);
+    assertEq(Inventory.length(aliceEntityId), 1, "Wrong number of occupied inventory slots");
+
+    SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 1, amount: 1 });
+
+    vm.prank(alice);
+    startGasReport("swap entity with null slot");
+    world.transfer(aliceEntityId, aliceEntityId, aliceEntityId, slotsToTransfer, "");
+    endGasReport();
+
+    assertInventoryHasObjectInSlot(aliceEntityId, fromType, 1, 1);
+    assertEq(Inventory.length(aliceEntityId), 1, "Wrong number of occupied inventory slots");
+  }
+
+  function testTransferWithinChestInventory() public {
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+    Vec3 chestCoord = vec3(0, 0, 0);
+    EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
+
+    ObjectTypeId transferObjectTypeId = ObjectTypes.Grass;
+    uint16 numToTransfer = 10;
+    TestInventoryUtils.addObject(chestEntityId, transferObjectTypeId, numToTransfer);
+    assertInventoryHasObject(chestEntityId, transferObjectTypeId, numToTransfer);
+
+    SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 1, amount: numToTransfer });
+
+    vm.prank(alice);
+    startGasReport("transfer within chest inventory");
+    world.transfer(aliceEntityId, chestEntityId, chestEntityId, slotsToTransfer, "");
+    endGasReport();
+
+    assertInventoryHasObject(chestEntityId, transferObjectTypeId, numToTransfer);
+  }
+
+  function testTransferWithinChestInventoryFailsIfProgramReverts() public {
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+    Vec3 chestCoord = vec3(0, 0, 0);
+    EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
+
+    ObjectTypeId transferObjectTypeId = ObjectTypes.Grass;
+    uint16 numToTransfer = 10;
+    TestInventoryUtils.addObject(chestEntityId, transferObjectTypeId, numToTransfer);
+    assertInventoryHasObject(chestEntityId, transferObjectTypeId, numToTransfer);
+
+    setupForceField(
+      chestCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000 * 10 ** 14, drainRate: 1 })
+    );
+
+    TestChestProgram program = new TestChestProgram();
+    attachTestProgram(chestEntityId, program, "namespace");
+
+    program.setRevertOnTransfer(true);
+
+    SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 1, amount: numToTransfer });
+
+    vm.prank(alice);
+    vm.expectRevert("Transfer not allowed by chest");
+    world.transfer(aliceEntityId, chestEntityId, chestEntityId, slotsToTransfer, "");
+  }
+
+  function testTransferFailsToOtherPlayers() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupAirChunkWithPlayer();
+    (, EntityId bobEntityId) = createTestPlayer(coord + vec3(1, 0, 0));
+
+    ObjectTypeId transferObjectTypeId = ObjectTypes.Grass;
+    uint16 numToTransfer = 10;
+    TestInventoryUtils.addObject(aliceEntityId, transferObjectTypeId, numToTransfer);
+
+    SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: numToTransfer });
+
+    vm.prank(alice);
+    vm.expectRevert("Cannot access another player's inventory");
+    world.transfer(aliceEntityId, aliceEntityId, bobEntityId, slotsToTransfer, "");
+  }
+
+  function testTransferFailsFromOtherPlayers() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupAirChunkWithPlayer();
+    (, EntityId bobEntityId) = createTestPlayer(coord + vec3(1, 0, 0));
+
+    ObjectTypeId transferObjectTypeId = ObjectTypes.Grass;
+    uint16 numToTransfer = 10;
+    TestInventoryUtils.addObject(bobEntityId, transferObjectTypeId, numToTransfer);
+
+    SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: numToTransfer });
+
+    vm.prank(alice);
+    vm.expectRevert("Cannot access another player's inventory");
+    world.transfer(aliceEntityId, bobEntityId, aliceEntityId, slotsToTransfer, "");
+  }
+
+  function testTransferFailsWithinOtherPlayers() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupAirChunkWithPlayer();
+    (, EntityId bobEntityId) = createTestPlayer(coord + vec3(1, 0, 0));
+
+    ObjectTypeId transferObjectTypeId = ObjectTypes.Grass;
+    uint16 numToTransfer = 10;
+    TestInventoryUtils.addObject(bobEntityId, transferObjectTypeId, numToTransfer);
+
+    SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 1, amount: numToTransfer });
+
+    vm.prank(alice);
+    vm.expectRevert("Cannot access another player's inventory");
+    world.transfer(aliceEntityId, bobEntityId, bobEntityId, slotsToTransfer, "");
   }
 }

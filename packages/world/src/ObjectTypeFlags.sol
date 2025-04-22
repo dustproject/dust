@@ -19,15 +19,47 @@ function isCropSeed(ObjectTypeId objectTypeId) pure returns (bool) {
     return true;
   }
 
+  if (objectTypeId == ObjectTypes.MelonSeed) {
+    return true;
+  }
+
+  if (objectTypeId == ObjectTypes.PumpkinSeed) {
+    return true;
+  }
+
   return false;
 }
 
 function isTreeSeed(ObjectTypeId objectTypeId) pure returns (bool) {
-  if (objectTypeId == ObjectTypes.OakSeed) {
+  if (objectTypeId == ObjectTypes.OakSapling) {
     return true;
   }
 
-  if (objectTypeId == ObjectTypes.SpruceSeed) {
+  if (objectTypeId == ObjectTypes.BirchSapling) {
+    return true;
+  }
+
+  if (objectTypeId == ObjectTypes.JungleSapling) {
+    return true;
+  }
+
+  if (objectTypeId == ObjectTypes.SakuraSapling) {
+    return true;
+  }
+
+  if (objectTypeId == ObjectTypes.AcaciaSapling) {
+    return true;
+  }
+
+  if (objectTypeId == ObjectTypes.SpruceSapling) {
+    return true;
+  }
+
+  if (objectTypeId == ObjectTypes.DarkOakSapling) {
+    return true;
+  }
+
+  if (objectTypeId == ObjectTypes.MangroveSapling) {
     return true;
   }
 

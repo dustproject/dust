@@ -19,7 +19,7 @@ import { Position } from "../utils/Vec3Storage.sol";
 import { MAX_RESPAWN_HALF_WIDTH, PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
 import { ObjectTypeId } from "../ObjectTypeId.sol";
 import { ObjectTypes } from "../ObjectTypes.sol";
-import { checkWorldStatus, getUniqueEntity } from "../Utils.sol";
+import { checkWorldStatus } from "../Utils.sol";
 
 import {
   decreaseFragmentDrainRate,

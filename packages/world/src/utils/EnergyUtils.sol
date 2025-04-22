@@ -7,6 +7,7 @@ import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { Fragment } from "../codegen/tables/Fragment.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
+import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { ReversePlayer } from "../codegen/tables/ReversePlayer.sol";
 
 import { getEntityAt } from "../utils/EntityUtils.sol";
@@ -91,24 +92,29 @@ function updatePlayerEnergy(EntityId player) returns (EnergyData memory) {
   return energyData;
 }
 
-function decreaseMachineEnergy(EntityId machine, uint128 amount) {
+function decreaseMachineEnergy(EntityId machine, uint128 amount) returns (uint128) {
   require(amount > 0, "Cannot decrease 0 energy");
   uint128 current = Energy._getEnergy(machine);
+  // For now we are keeping this restriction for machines
   require(current >= amount, "Not enough energy");
-  Energy._setEnergy(machine, current - amount);
+  uint128 newEnergy = current - amount;
+  Energy._setEnergy(machine, newEnergy);
+
+  return newEnergy;
 }
 
-function decreasePlayerEnergy(EntityId player, Vec3 playerCoord, uint128 amount) {
+function decreasePlayerEnergy(EntityId player, Vec3 playerCoord, uint128 amount) returns (uint128) {
   require(amount > 0, "Cannot decrease 0 energy");
   uint128 current = Energy._getEnergy(player);
-  require(current >= amount, "Not enough energy");
 
-  uint128 newEnergy = current - amount;
+  uint128 newEnergy = current >= amount ? current - amount : 0;
   Energy._setEnergy(player, newEnergy);
 
   if (newEnergy == 0) {
     PlayerUtils.killPlayer(player, playerCoord);
   }
+
+  return newEnergy;
 }
 
 function increaseFragmentDrainRate(EntityId forceField, EntityId fragment, uint128 amount) returns (uint128) {
@@ -132,20 +138,22 @@ function addEnergyToLocalPool(Vec3 coord, uint128 numToAdd) returns (uint128) {
   return newLocalEnergy;
 }
 
-function transferEnergyToPool(EntityId entityId, uint128 amount) {
+function transferEnergyToPool(EntityId entityId, uint128 amount) returns (uint128, uint128) {
   Vec3 coord = entityId.getPosition();
   ObjectTypeId objectTypeId = ObjectType._get(entityId);
 
+  uint128 newEntityEnergy;
   if (objectTypeId == ObjectTypes.Player) {
-    decreasePlayerEnergy(entityId, coord, amount);
+    newEntityEnergy = decreasePlayerEnergy(entityId, coord, amount);
   } else {
     if (!objectTypeId.isMachine()) {
       (entityId,) = ForceFieldUtils.getForceField(coord);
     }
-    decreaseMachineEnergy(entityId, amount);
+    newEntityEnergy = decreaseMachineEnergy(entityId, amount);
   }
 
-  addEnergyToLocalPool(coord, amount);
+  uint128 newLocalEnergy = addEnergyToLocalPool(coord, amount);
+  return (newEntityEnergy, newLocalEnergy);
 }
 
 function removeEnergyFromLocalPool(Vec3 coord, uint128 numToRemove) returns (uint128) {
@@ -180,4 +188,9 @@ function updateSleepingPlayerEnergy(EntityId player, EntityId bed, uint128 deple
   BedPlayer._setLastDepletedTime(bed, depletedTime);
 
   return playerEnergyData;
+}
+
+function burnToolEnergy(ObjectTypeId toolType, Vec3 coord) {
+  uint16 numPlanks = toolType.getToolPlankAmount();
+  addEnergyToLocalPool(coord, numPlanks * ObjectTypeMetadata._getMass(ObjectTypes.AnyPlank));
 }

@@ -4,17 +4,24 @@ pragma solidity >=0.8.24;
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
+import { UniqueEntity } from "../codegen/tables/UniqueEntity.sol";
 import { TerrainLib } from "../systems/libraries/TerrainLib.sol";
 import { MovablePosition, Position, ReverseMovablePosition, ReversePosition } from "../utils/Vec3Storage.sol";
 
 import { EntityId } from "../EntityId.sol";
 import { ObjectTypeId } from "../ObjectTypeId.sol";
 import { ObjectTypeLib } from "../ObjectTypeLib.sol";
-import { getUniqueEntity } from "../Utils.sol";
 
 import { Vec3 } from "../Vec3.sol";
 
 using ObjectTypeLib for ObjectTypeId;
+
+function getUniqueEntity() returns (EntityId) {
+  uint256 uniqueEntity = UniqueEntity._get() + 1;
+  UniqueEntity._set(uniqueEntity);
+
+  return EntityId.wrap(bytes32(uniqueEntity));
+}
 
 /// @notice Get the object type id at a given coordinate.
 /// @dev Returns ObjectTypes.Null if the chunk is not explored yet.

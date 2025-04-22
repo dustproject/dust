@@ -22,17 +22,6 @@ struct ObjectAmount {
   uint16 amount;
 }
 
-struct TreeData {
-  ObjectTypeId logType;
-  ObjectTypeId leafType;
-  uint32 trunkHeight;
-  uint32 canopyStart;
-  uint32 canopyEnd;
-  uint32 canopyWidth;
-  uint32 stretchFactor;
-  int32 centerOffset;
-}
-
 library ObjectTypeLib {
   function unwrap(ObjectTypeId self) internal pure returns (uint16) {
     return ObjectTypeId.unwrap(self);
@@ -117,7 +106,12 @@ library ObjectTypeLib {
   }
 
   function isAny(ObjectTypeId self) internal pure returns (bool) {
-    return self == ObjectTypes.AnyLog || self == ObjectTypes.AnyPlanks;
+    return self == ObjectTypes.AnyLog || self == ObjectTypes.AnyPlank || self == ObjectTypes.AnyLeaf;
+  }
+
+  function isSmartEntity(ObjectTypeId self) internal pure returns (bool) {
+    return self == ObjectTypes.Chest || self == ObjectTypes.ForceField || self == ObjectTypes.Fragment
+      || self == ObjectTypes.SpawnTile || self == ObjectTypes.Bed;
   }
 
   function isHoe(ObjectTypeId self) internal pure returns (bool) {
@@ -143,20 +137,20 @@ library ObjectTypeLib {
     return _isFood(self);
   }
 
-  function isSeed(ObjectTypeId self) internal pure returns (bool) {
-    return isCropSeed(self) || isTreeSeed(self);
+  function isGrowable(ObjectTypeId self) internal pure returns (bool) {
+    return isSeed(self) || isSapling(self);
   }
 
-  function isCropSeed(ObjectTypeId self) internal pure returns (bool) {
+  function isSeed(ObjectTypeId self) internal pure returns (bool) {
     return _isCropSeed(self);
   }
 
-  function isTreeSeed(ObjectTypeId self) internal pure returns (bool) {
+  function isSapling(ObjectTypeId self) internal pure returns (bool) {
     return _isTreeSeed(self);
   }
 
   function isCrop(ObjectTypeId self) internal pure returns (bool) {
-    return self == ObjectTypes.Wheat;
+    return self == ObjectTypes.Wheat || self == ObjectTypes.Melon || self == ObjectTypes.Pumpkin;
   }
 
   function isLog(ObjectTypeId self) internal pure returns (bool) {
@@ -179,6 +173,32 @@ library ObjectTypeLib {
     return false;
   }
 
+  function hasExtraDrops(ObjectTypeId self) internal pure returns (bool) {
+    return self == ObjectTypes.FescueGrass || self.isCrop() || self.isLeaf();
+  }
+
+  function getSapling(ObjectTypeId self) internal pure returns (ObjectTypeId) {
+    if (self == ObjectTypes.OakLeaf) {
+      return ObjectTypes.OakSapling;
+    } else if (self == ObjectTypes.SpruceLeaf) {
+      return ObjectTypes.SpruceSapling;
+    } else if (self == ObjectTypes.MangroveLeaf) {
+      return ObjectTypes.MangroveSapling;
+    } else if (self == ObjectTypes.SakuraLeaf) {
+      return ObjectTypes.SakuraSapling;
+    } else if (self == ObjectTypes.DarkOakLeaf) {
+      return ObjectTypes.DarkOakSapling;
+    } else if (self == ObjectTypes.BirchLeaf) {
+      return ObjectTypes.BirchSapling;
+    } else if (self == ObjectTypes.AcaciaLeaf) {
+      return ObjectTypes.AcaciaSapling;
+    } else if (self == ObjectTypes.JungleLeaf) {
+      return ObjectTypes.JungleSapling;
+    }
+
+    revert("Invalid log type");
+  }
+
   // TODO: one possible way to optimize is to follow some kind of schema for crops and their seeds
   function getCrop(ObjectTypeId self) internal pure returns (ObjectTypeId) {
     if (self == ObjectTypes.WheatSeed) {
@@ -186,34 +206,6 @@ library ObjectTypeLib {
     }
 
     revert("Invalid crop seed type");
-  }
-
-  function getTreeData(ObjectTypeId seedType) internal pure returns (TreeData memory) {
-    if (seedType == ObjectTypes.OakSeed) {
-      return TreeData({
-        logType: ObjectTypes.OakLog,
-        leafType: ObjectTypes.OakLeaf,
-        trunkHeight: 5,
-        canopyStart: 3,
-        canopyEnd: 7,
-        canopyWidth: 2,
-        stretchFactor: 2,
-        centerOffset: -2
-      });
-    } else if (seedType == ObjectTypes.SpruceSeed) {
-      return TreeData({
-        logType: ObjectTypes.SpruceLog,
-        leafType: ObjectTypes.SpruceLeaf,
-        trunkHeight: 7,
-        canopyStart: 2,
-        canopyEnd: 10,
-        canopyWidth: 2,
-        stretchFactor: 3,
-        centerOffset: -5
-      });
-    }
-
-    revert("Invalid tree seed type");
   }
 
   function timeToGrow(ObjectTypeId objectTypeId) internal pure returns (uint128) {
@@ -225,12 +217,25 @@ library ObjectTypeLib {
       return getLogObjectTypes();
     }
 
-    if (self == ObjectTypes.AnyPlanks) {
+    if (self == ObjectTypes.AnyPlank) {
       return getPlanksObjectTypes();
+    }
+
+    if (self == ObjectTypes.AnyLeaf) {
+      return getLeafObjectTypes();
     }
 
     // Return empty array for non-Any types
     return new ObjectTypeId[](0);
+  }
+
+  /// @dev Get seed amounts that should be burned when this object is consumed
+  function getSeedAmount(ObjectTypeId self) internal pure returns (ObjectAmount memory) {
+    // TODO: add all foods
+    if (self == ObjectTypes.Wheat) {
+      return ObjectAmount(ObjectTypes.WheatSeed, 1);
+    }
+    return ObjectAmount(ObjectTypes.Null, 0);
   }
 
   /// @dev Get ore amounts that should be burned when this object is burned
@@ -267,8 +272,27 @@ library ObjectTypeLib {
       return ObjectAmount(ObjectTypes.NeptuniumOre, 3); // 3 neptunium bars = 3 ores
     }
 
-    // Return zero amount for any other tool
+    // Return zero amount for any other type
     return ObjectAmount(ObjectTypes.Null, 0);
+  }
+
+  function getToolPlankAmount(ObjectTypeId self) internal pure returns (uint16) {
+    require(self.isTool(), "Not a tool");
+
+    if (self == ObjectTypes.WoodenPick || self == ObjectTypes.WoodenAxe) {
+      return 5;
+    }
+
+    if (self == ObjectTypes.WoodenHoe) {
+      return 4;
+    }
+
+    if (self == ObjectTypes.WoodenWhacker) {
+      return 8;
+    }
+
+    // All other tools use 2 planks
+    return 2;
   }
 
   function burnOre(ObjectTypeId self, uint256 amount) internal {

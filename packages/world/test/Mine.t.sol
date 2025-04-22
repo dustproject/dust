@@ -196,7 +196,7 @@ contract MineTest is DustTest {
     // Check that the type has been set to specific resource
     mineEntityId = ReversePosition.get(mineCoord);
     ObjectTypeId resourceType = ObjectType.get(mineEntityId);
-    assertNeq(resourceType, ObjectTypes.AnyOre, "Resource type should have been set to a specific resource");
+    assertNotEq(resourceType, ObjectTypes.AnyOre, "Resource type should have been set to a specific resource");
 
     // Verify mass has been set to the resource's
     uint128 mass = Mass.getMass(mineEntityId);
@@ -213,7 +213,7 @@ contract MineTest is DustTest {
     // Verify the resource type hasn't changed even though commitment expired
     mineEntityId = ReversePosition.get(mineCoord);
     resourceType = ObjectType.get(mineEntityId);
-    assertNeq(resourceType, ObjectTypes.AnyOre, "Resource type should remain consistent after commitment expired");
+    assertNotEq(resourceType, ObjectTypes.AnyOre, "Resource type should remain consistent after commitment expired");
 
     // Verify mass has been set to the resource's
     mass = Mass.getMass(mineEntityId);
@@ -282,9 +282,11 @@ contract MineTest is DustTest {
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
 
+    uint16 signSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.TextSign);
+
     // Mine again but with a non-base coord
     vm.prank(alice);
-    world.build(aliceEntityId, ObjectTypes.TextSign, mineCoord, "");
+    world.build(aliceEntityId, mineCoord, signSlot, "");
 
     mineEntityId = ReversePosition.get(mineCoord);
     topEntityId = ReversePosition.get(topCoord);
@@ -337,7 +339,7 @@ contract MineTest is DustTest {
     world.mine(aliceEntityId, mineCoord, "");
   }
 
-  function testMineFailsIfNotEnoughEnergy() public {
+  function testMineKillsIfNotEnoughEnergy() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     Vec3 mineCoord = playerCoord + vec3(1, 0, 0);
@@ -347,8 +349,9 @@ contract MineTest is DustTest {
     Energy.set(aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1, drainRate: 0 }));
 
     vm.prank(alice);
-    vm.expectRevert("Not enough energy");
     world.mine(aliceEntityId, mineCoord, "");
+
+    assertPlayerIsDead(aliceEntityId, playerCoord);
   }
 
   function testMineFatal() public {
@@ -368,18 +371,7 @@ contract MineTest is DustTest {
     vm.prank(alice);
     world.mine(aliceEntityId, mineCoord, "");
 
-    // Check energy is zero
-    assertEq(Energy.getEnergy(aliceEntityId), 0, "Player energy is not 0");
-
-    // Verify the player entity is still registered to the address, but removed from the grid
-    assertEq(Player.get(alice), aliceEntityId, "Player entity was deleted");
-    assertEq(MovablePosition.get(aliceEntityId), vec3(0, 0, 0), "Player position was not deleted");
-    assertEq(ReverseMovablePosition.get(playerCoord), EntityId.wrap(0), "Player reverse position was not deleted");
-    assertEq(
-      ReverseMovablePosition.get(playerCoord + vec3(0, 1, 0)),
-      EntityId.wrap(0),
-      "Player reverse position at head was not deleted"
-    );
+    assertPlayerIsDead(aliceEntityId, playerCoord);
   }
 
   function testMineFailsIfInventoryFull() public {

@@ -5,8 +5,11 @@ import { System } from "@latticexyz/world/src/System.sol";
 
 import { Action, Direction } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
+
+import { DisabledExtraDrops } from "../codegen/tables/DisabledExtraDrops.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { Inventory } from "../codegen/tables/Inventory.sol";
+import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
@@ -16,8 +19,6 @@ import { Orientation } from "../codegen/tables/Orientation.sol";
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
 import { MovablePosition, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
-
-import { getUniqueEntity } from "../Utils.sol";
 
 import { removeEnergyFromLocalPool, transferEnergyToPool, updateMachineEnergy } from "../utils/EnergyUtils.sol";
 import { getMovableEntityAt, getObjectTypeIdAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
@@ -41,51 +42,47 @@ import { Vec3, vec3 } from "../Vec3.sol";
 using ObjectTypeLib for ObjectTypeId;
 
 contract BuildSystem is System {
-  function build(EntityId caller, ObjectTypeId buildObjectTypeId, Vec3 baseCoord, bytes calldata extraData)
+  function build(EntityId caller, Vec3 coord, uint16 slot, bytes calldata extraData) public returns (EntityId) {
+    return buildWithDirection(caller, coord, slot, Direction.PositiveZ, extraData);
+  }
+
+  function buildWithDirection(EntityId caller, Vec3 coord, uint16 slot, Direction direction, bytes calldata extraData)
     public
     returns (EntityId)
   {
-    return buildWithDirection(caller, buildObjectTypeId, baseCoord, Direction.PositiveZ, extraData);
-  }
-
-  function buildWithDirection(
-    EntityId caller,
-    ObjectTypeId buildObjectTypeId,
-    Vec3 baseCoord,
-    Direction direction,
-    bytes calldata extraData
-  ) public returns (EntityId) {
     caller.activate();
-    caller.requireConnected(baseCoord);
-    require(buildObjectTypeId.isBlock(), "Cannot build non-block object");
+    caller.requireConnected(coord);
+    ObjectTypeId buildType = InventorySlot._getObjectType(caller, slot);
+    require(buildType.isBlock(), "Cannot build non-block object");
 
-    (EntityId base, Vec3[] memory coords) = BuildLib._addBlocks(baseCoord, buildObjectTypeId, direction);
-
-    if (buildObjectTypeId.isSeed()) {
-      BuildLib._handleSeed(base, buildObjectTypeId, baseCoord);
+    // If player died, return early
+    (uint128 callerEnergy,) = transferEnergyToPool(caller, BUILD_ENERGY_COST);
+    if (callerEnergy == 0) {
+      return EntityId.wrap(0);
     }
 
-    InventoryUtils.removeObject(caller, buildObjectTypeId, 1);
+    (EntityId base, Vec3[] memory coords) = BuildLib._addBlocks(coord, buildType, direction);
 
-    transferEnergyToPool(caller, BUILD_ENERGY_COST);
+    BuildLib._handleBuildType(base, buildType, coord);
+
+    InventoryUtils.removeObjectFromSlot(caller, slot, 1);
 
     // Note: we call this after the build state has been updated, to prevent re-entrancy attacks
-    BuildLib._requireBuildsAllowed(caller, base, buildObjectTypeId, coords, extraData);
+    BuildLib._requireBuildsAllowed(caller, base, buildType, coords, extraData);
 
-    notify(
-      caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectTypeId: buildObjectTypeId })
-    );
+    notify(caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectTypeId: buildType }));
 
     return base;
   }
 
-  function jumpBuildWithDirection(
-    EntityId caller,
-    ObjectTypeId buildObjectTypeId,
-    Direction direction,
-    bytes calldata extraData
-  ) public {
+  function jumpBuildWithDirection(EntityId caller, uint16 slot, Direction direction, bytes calldata extraData)
+    public
+    returns (EntityId)
+  {
     caller.activate();
+
+    ObjectTypeId buildObjectType = InventorySlot._getObjectType(caller, slot);
+    require(!ObjectTypeMetadata._getCanPassThrough(buildObjectType), "Cannot jump build on a pass-through block");
 
     Vec3 coord = MovablePosition._get(caller);
 
@@ -95,65 +92,71 @@ contract BuildSystem is System {
 
     notify(caller, MoveNotification({ moveCoords: moveCoords }));
 
-    require(!ObjectTypeMetadata._getCanPassThrough(buildObjectTypeId), "Cannot jump build on a pass-through block");
-
-    buildWithDirection(caller, buildObjectTypeId, coord, direction, extraData);
+    return buildWithDirection(caller, coord, slot, direction, extraData);
   }
 
-  function jumpBuild(EntityId caller, ObjectTypeId buildObjectTypeId, bytes calldata extraData) public {
-    jumpBuildWithDirection(caller, buildObjectTypeId, Direction.PositiveZ, extraData);
+  function jumpBuild(EntityId caller, uint16 slot, bytes calldata extraData) public returns (EntityId) {
+    return jumpBuildWithDirection(caller, slot, Direction.PositiveZ, extraData);
   }
 }
 
 library BuildLib {
-  function _addBlock(ObjectTypeId buildObjectTypeId, Vec3 coord) internal returns (EntityId) {
+  function _handleBuildType(EntityId base, ObjectTypeId buildType, Vec3 coord) public {
+    if (buildType.isGrowable()) {
+      _handleGrowable(base, buildType, coord);
+    } else if (buildType.hasExtraDrops()) {
+      DisabledExtraDrops._set(base, true);
+    }
+  }
+
+  function _addBlock(ObjectTypeId buildObjectType, Vec3 coord) internal returns (EntityId) {
     (EntityId terrain, ObjectTypeId terrainObjectTypeId) = getOrCreateEntityAt(coord);
     require(terrainObjectTypeId == ObjectTypes.Air, "Cannot build on a non-air block");
     require(Inventory._length(terrain) == 0, "Cannot build where there are dropped objects");
-    if (!ObjectTypeMetadata._getCanPassThrough(buildObjectTypeId)) {
+    if (!ObjectTypeMetadata._getCanPassThrough(buildObjectType)) {
       require(!getMovableEntityAt(coord).exists(), "Cannot build on a movable entity");
     }
 
-    ObjectType._set(terrain, buildObjectTypeId);
+    ObjectType._set(terrain, buildObjectType);
 
     return terrain;
   }
 
-  function _addBlocks(Vec3 baseCoord, ObjectTypeId buildObjectTypeId, Direction direction)
+  function _addBlocks(Vec3 baseCoord, ObjectTypeId buildType, Direction direction)
     public
     returns (EntityId, Vec3[] memory)
   {
-    Vec3[] memory coords = buildObjectTypeId.getRelativeCoords(baseCoord, direction);
-    EntityId base = _addBlock(buildObjectTypeId, baseCoord);
+    Vec3[] memory coords = buildType.getRelativeCoords(baseCoord, direction);
+    EntityId base = _addBlock(buildType, baseCoord);
     Orientation._set(base, direction);
-    uint128 mass = ObjectTypeMetadata._getMass(buildObjectTypeId);
+    uint128 mass = ObjectTypeMetadata._getMass(buildType);
     Mass._setMass(base, mass);
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];
-      EntityId relative = _addBlock(buildObjectTypeId, relativeCoord);
+      EntityId relative = _addBlock(buildType, relativeCoord);
       BaseEntity._set(relative, base);
     }
     return (base, coords);
   }
 
-  function _handleSeed(EntityId base, ObjectTypeId buildObjectTypeId, Vec3 baseCoord) public {
+  function _handleGrowable(EntityId base, ObjectTypeId buildType, Vec3 baseCoord) public {
     ObjectTypeId belowTypeId = getObjectTypeIdAt(baseCoord - vec3(0, 1, 0));
-    if (buildObjectTypeId.isCropSeed()) {
-      require(belowTypeId == ObjectTypes.WetFarmland, "Crop seeds need wet farmland");
-    } else if (buildObjectTypeId.isTreeSeed()) {
-      require(belowTypeId == ObjectTypes.Dirt || belowTypeId == ObjectTypes.Grass, "Tree seeds need dirt or grass");
+    if (buildType.isSeed()) {
+      require(belowTypeId == ObjectTypes.WetFarmland, "Seeds need wet farmland");
+    } else if (buildType.isSapling()) {
+      require(belowTypeId == ObjectTypes.Dirt || belowTypeId == ObjectTypes.Grass, "Tree saplings need dirt or grass");
     }
 
-    removeEnergyFromLocalPool(baseCoord, ObjectTypeMetadata._getEnergy(buildObjectTypeId));
+    removeEnergyFromLocalPool(baseCoord, ObjectTypeMetadata._getEnergy(buildType));
 
-    SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildObjectTypeId.timeToGrow());
+    SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildType.timeToGrow());
   }
 
   function _requireBuildsAllowed(
     EntityId caller,
     EntityId base,
-    ObjectTypeId objectTypeId,
+    ObjectTypeId buildType,
     Vec3[] memory coords,
     bytes calldata extraData
   ) public {
@@ -162,7 +165,7 @@ library BuildLib {
       (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
 
       // If placing a forcefield, there should be no active forcefield at coord
-      if (objectTypeId == ObjectTypes.ForceField) {
+      if (buildType == ObjectTypes.ForceField) {
         require(!forceField.exists(), "Force field overlaps with another force field");
         ForceFieldUtils.setupForceField(base, coord);
       }
@@ -176,8 +179,7 @@ library BuildLib {
             program = forceField.getProgram();
           }
 
-          bytes memory onBuild =
-            abi.encodeCall(IBuildHook.onBuild, (caller, forceField, objectTypeId, coord, extraData));
+          bytes memory onBuild = abi.encodeCall(IBuildHook.onBuild, (caller, forceField, buildType, coord, extraData));
 
           program.callOrRevert(onBuild);
         }

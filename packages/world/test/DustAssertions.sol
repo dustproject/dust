@@ -10,7 +10,7 @@ import { NamespaceOwner } from "@latticexyz/world/src/codegen/tables/NamespaceOw
 
 import { ObjectAmount, getOreObjectTypes } from "../src/ObjectTypeLib.sol";
 
-import { Vec3 } from "../src/Vec3.sol";
+import { Vec3, vec3 } from "../src/Vec3.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
@@ -142,6 +142,22 @@ abstract contract DustAssertions is MudTest, GasReporter {
     assertEq(localPoolEnergyGained, playerEnergyLost, "Local pool energy did not gain energy");
   }
 
+  function assertPlayerIsDead(EntityId player, Vec3 playerCoord) internal view {
+    // Check energy is zero
+    assertEq(Energy.getEnergy(player), 0, "Player energy is not 0");
+
+    // Verify the player entity is still registered to the address, but removed from the grid
+    assertNotEq(ReversePlayer.get(player), address(0), "Player entity was deleted");
+    assertNotEq(Player.get(ReversePlayer.get(player)), EntityId.wrap(0), "Player entity was deleted");
+    assertEq(MovablePosition.get(player), vec3(0, 0, 0), "Player position was not deleted");
+    assertEq(ReverseMovablePosition.get(playerCoord), EntityId.wrap(0), "Player reverse position was not deleted");
+    assertEq(
+      ReverseMovablePosition.get(playerCoord + vec3(0, 1, 0)),
+      EntityId.wrap(0),
+      "Player reverse position at head was not deleted"
+    );
+  }
+
   function assertEq(Vec3 a, Vec3 b, string memory err) internal pure {
     assertTrue(a == b, err);
   }
@@ -156,6 +172,14 @@ abstract contract DustAssertions is MudTest, GasReporter {
 
   function assertEq(EntityId a, EntityId b) internal pure {
     assertTrue(a == b);
+  }
+
+  function assertNotEq(EntityId a, EntityId b) internal pure {
+    assertNotEq(a, b);
+  }
+
+  function assertNotEq(EntityId a, EntityId b, string memory err) internal pure {
+    assertNotEq(a.unwrap(), b.unwrap(), err);
   }
 
   function assertEq(ProgramId a, ProgramId b, string memory err) internal pure {
@@ -174,11 +198,11 @@ abstract contract DustAssertions is MudTest, GasReporter {
     assertTrue(a == b);
   }
 
-  function assertNeq(ObjectTypeId a, ObjectTypeId b, string memory err) internal pure {
+  function assertNotEq(ObjectTypeId a, ObjectTypeId b, string memory err) internal pure {
     assertTrue(a != b, err);
   }
 
-  function assertNeq(ObjectTypeId a, ObjectTypeId b) internal pure {
+  function assertNotEq(ObjectTypeId a, ObjectTypeId b) internal pure {
     assertTrue(a != b);
   }
 }

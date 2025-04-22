@@ -4,6 +4,9 @@ export default defineWorld({
   deploy: {
     upgradeableWorldImplementation: true,
   },
+  codegen: {
+    generateSystemLibraries: true,
+  },
   enums: {
     Action: [
       "None",
@@ -362,6 +365,13 @@ export default defineWorld({
         count: "uint256",
       },
       key: ["objectTypeId"],
+    },
+    DisabledExtraDrops: {
+      schema: {
+        entityId: "EntityId",
+        disabled: "bool",
+      },
+      key: ["entityId"],
     },
     // ------------------------------------------------------------
     // Farming

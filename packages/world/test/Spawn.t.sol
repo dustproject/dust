@@ -38,10 +38,6 @@ contract TestSpawnProgram is System {
 contract SpawnTest is DustTest {
   using ObjectTypeLib for ObjectTypeId;
 
-  function spawnEnergy() internal view returns (uint128) {
-    return MAX_PLAYER_ENERGY;
-  }
-
   function testRandomSpawn() public {
     uint256 blockNumber = block.number - 5;
     address alice = vm.randomAddress();
@@ -59,7 +55,7 @@ contract SpawnTest is DustTest {
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
-    LocalEnergyPool.set(shardCoord, spawnEnergy());
+    LocalEnergyPool.set(shardCoord, MAX_PLAYER_ENERGY);
 
     vm.prank(alice);
     EntityId playerEntityId = world.randomSpawn(blockNumber, 0);
@@ -91,7 +87,7 @@ contract SpawnTest is DustTest {
     Energy.set(
       forceFieldEntityId,
       EnergyData({
-        energy: spawnEnergy(),
+        energy: MAX_PLAYER_ENERGY,
         lastUpdatedTime: uint128(block.timestamp),
         drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
@@ -118,7 +114,7 @@ contract SpawnTest is DustTest {
 
     // Spawn alice
     vm.prank(alice);
-    EntityId playerEntityId = world.spawn(spawnTileEntityId, spawnCoord, "");
+    EntityId playerEntityId = world.spawn(spawnTileEntityId, spawnCoord, 1, "");
     assertTrue(playerEntityId.exists());
   }
 
@@ -131,7 +127,7 @@ contract SpawnTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Not a spawn tile");
-    world.spawn(spawnTileEntityId, spawnCoord, "");
+    world.spawn(spawnTileEntityId, spawnCoord, 1, "");
   }
 
   function testSpawnFailsIfNotInSpawnArea() public {
@@ -152,7 +148,7 @@ contract SpawnTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Spawn tile is too far away");
-    world.spawn(spawnTileEntityId, spawnCoord, "");
+    world.spawn(spawnTileEntityId, spawnCoord, 1, "");
   }
 
   function testSpawnFailsIfNoForceField() public {
@@ -170,7 +166,7 @@ contract SpawnTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Spawn tile is not inside a forcefield");
-    world.spawn(spawnTileEntityId, spawnCoord, "");
+    world.spawn(spawnTileEntityId, spawnCoord, 1, "");
   }
 
   function testSpawnFailsIfNotEnoughForceFieldEnergy() public {
@@ -191,7 +187,7 @@ contract SpawnTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Not enough energy in spawn tile forcefield");
-    world.spawn(spawnTileEntityId, spawnCoord, "");
+    world.spawn(spawnTileEntityId, spawnCoord, 1, "");
   }
 
   function testSpawnAfterDeath() public {
@@ -209,7 +205,7 @@ contract SpawnTest is DustTest {
     Energy.set(
       forceFieldEntityId,
       EnergyData({
-        energy: spawnEnergy(),
+        energy: MAX_PLAYER_ENERGY,
         lastUpdatedTime: uint128(block.timestamp),
         drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
@@ -223,7 +219,7 @@ contract SpawnTest is DustTest {
 
     // Spawn player
     vm.prank(alice);
-    EntityId playerEntityId = world.spawn(spawnTileEntityId, spawnCoord, "");
+    EntityId playerEntityId = world.spawn(spawnTileEntityId, spawnCoord, 1, "");
 
     assertEq(playerEntityId, aliceEntityId, "Player entity doesn't match");
   }
@@ -240,7 +236,7 @@ contract SpawnTest is DustTest {
     Energy.set(
       forceFieldEntityId,
       EnergyData({
-        energy: spawnEnergy(),
+        energy: MAX_PLAYER_ENERGY,
         lastUpdatedTime: uint128(block.timestamp),
         drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
@@ -255,7 +251,7 @@ contract SpawnTest is DustTest {
     // Spawn player should fail as the player has energy
     vm.prank(alice);
     vm.expectRevert("Player already spawned");
-    world.spawn(spawnTileEntityId, spawnCoord, "");
+    world.spawn(spawnTileEntityId, spawnCoord, 1, "");
   }
 
   function testRandomSpawnAfterDeath() public {
@@ -277,7 +273,7 @@ contract SpawnTest is DustTest {
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
-    LocalEnergyPool.set(shardCoord, spawnEnergy());
+    LocalEnergyPool.set(shardCoord, MAX_PLAYER_ENERGY);
 
     vm.prank(alice);
     EntityId playerEntityId = world.randomSpawn(blockNumber, 0);
@@ -300,7 +296,7 @@ contract SpawnTest is DustTest {
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
-    LocalEnergyPool.set(shardCoord, spawnEnergy());
+    LocalEnergyPool.set(shardCoord, MAX_PLAYER_ENERGY);
 
     // Spawn player should fail as the player has energy
     vm.prank(alice);

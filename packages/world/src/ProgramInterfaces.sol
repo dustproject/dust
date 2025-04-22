@@ -7,6 +7,7 @@ import { ObjectTypeId } from "./ObjectTypeId.sol";
 import { ObjectAmount } from "./ObjectTypeLib.sol";
 import { ProgramId } from "./ProgramId.sol";
 import { Vec3 } from "./Vec3.sol";
+import { SlotData } from "./utils/InventoryUtils.sol";
 
 /**
  * Naming convention for all hooks/getters:
@@ -35,10 +36,8 @@ interface ITransferHook {
   function onTransfer(
     EntityId caller,
     EntityId target,
-    EntityId from,
-    EntityId to,
-    ObjectAmount[] memory objectAmounts,
-    EntityId[] memory entities,
+    SlotData[] memory deposits,
+    SlotData[] memory withdrawals,
     bytes memory extraData
   ) external;
 }
@@ -70,7 +69,7 @@ interface IMineHook {
 }
 
 interface ISpawnHook {
-  function onSpawn(EntityId caller, EntityId target, bytes memory extraData) external;
+  function onSpawn(EntityId caller, EntityId target, uint128 spawnEnergy, bytes memory extraData) external;
 }
 
 interface ISleepHook {

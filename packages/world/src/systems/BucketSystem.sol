@@ -25,7 +25,7 @@ contract BucketSystem is System {
     require(InventorySlot._getObjectType(caller, bucketSlot) == ObjectTypes.Bucket, "Must use an empty Bucket");
 
     // We know buckets are not stackable, so we can directly replace the slot
-    InventoryUtils.removeObjectFromSlot(caller, ObjectTypes.Bucket, 1, bucketSlot);
+    InventoryUtils.removeObjectFromSlot(caller, bucketSlot, 1);
     InventoryUtils.addObjectToSlot(caller, ObjectTypes.WaterBucket, 1, bucketSlot);
   }
 
@@ -39,7 +39,7 @@ contract BucketSystem is System {
     require(InventorySlot._getObjectType(caller, bucketSlot) == ObjectTypes.WaterBucket, "Must use a Water Bucket");
 
     // We know buckets are not stackable, so we can directly replace the slot
-    InventoryUtils.removeObjectFromSlot(caller, ObjectTypes.WaterBucket, 1, bucketSlot);
+    InventoryUtils.removeObjectFromSlot(caller, bucketSlot, 1);
     InventoryUtils.addObjectToSlot(caller, ObjectTypes.Bucket, 1, bucketSlot);
 
     ObjectType._set(farmland, ObjectTypes.WetFarmland);

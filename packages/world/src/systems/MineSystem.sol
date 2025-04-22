@@ -16,13 +16,10 @@ import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { Orientation } from "../codegen/tables/Orientation.sol";
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 
-import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
 import { Position } from "../utils/Vec3Storage.sol";
 import { ResourcePosition } from "../utils/Vec3Storage.sol";
-
-import { getUniqueEntity } from "../Utils.sol";
 
 import {
   addEnergyToLocalPool,
@@ -42,7 +39,7 @@ import {
   getOrCreateEntityAt
 } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
-import { InventoryUtils } from "../utils/InventoryUtils.sol";
+import { InventoryUtils, ToolData } from "../utils/InventoryUtils.sol";
 import { DeathNotification, MineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
@@ -94,7 +91,7 @@ contract MineSystem is System {
 
   function _mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) internal returns (EntityId) {
     caller.activate();
-    caller.requireConnected(coord);
+    (Vec3 callerCoord,) = caller.requireConnected(coord);
 
     (EntityId mined, ObjectTypeId minedType) = getOrCreateEntityAt(coord);
     require(minedType.isMineable(), "Object is not mineable");
@@ -109,7 +106,10 @@ contract MineSystem is System {
       minedType = RandomResourceLib._collapseRandomOre(mined, coord);
     }
 
-    uint128 finalMass = MassReductionLib._processMassReduction(caller, mined, toolSlot);
+    (uint128 finalMass, bool canMine) = _processMassReduction(caller, callerCoord, toolSlot, mined);
+    if (!canMine) {
+      return mined;
+    }
 
     if (finalMass != 0) {
       Mass._setMass(mined, finalMass);
@@ -120,21 +120,11 @@ contract MineSystem is System {
     // The block was fully mined
     Mass._deleteRecord(mined);
 
-    // Remove seed on top of this block
-    Vec3 aboveCoord = baseCoord + vec3(0, 1, 0);
-    // If above is a seed, the entity must exist as there are not seeds in the base terrain
-    (EntityId above, ObjectTypeId aboveTypeId) = getEntityAt(aboveCoord);
-    if (aboveTypeId.isSeed()) {
-      if (!above.exists()) {
-        above = createEntityAt(aboveCoord, aboveTypeId);
-      }
-      _removeSeed(above, aboveTypeId, aboveCoord);
-      _handleDrop(caller, aboveTypeId, aboveCoord);
-    }
+    _handleGrowable(caller, baseCoord);
 
     _removeBlock(mined, minedType, baseCoord);
     _removeRelativeBlocks(mined, minedType, baseCoord);
-    _handleDrop(caller, minedType, baseCoord);
+    _handleDrop(caller, mined, minedType, baseCoord);
 
     _destroyEntity(caller, mined, minedType, baseCoord);
 
@@ -145,7 +135,21 @@ contract MineSystem is System {
     return mined;
   }
 
-  function _removeSeed(EntityId entityId, ObjectTypeId objectType, Vec3 coord) internal {
+  function _handleGrowable(EntityId caller, Vec3 coord) internal {
+    // Remove growables on top of this block
+    Vec3 aboveCoord = coord + vec3(0, 1, 0);
+    // If above is growable, the entity must exist as there are not growables in the base terrain
+    (EntityId above, ObjectTypeId aboveType) = getEntityAt(aboveCoord);
+    if (aboveType.isGrowable()) {
+      if (!above.exists()) {
+        above = createEntityAt(aboveCoord, aboveType);
+      }
+      _removeGrowable(above, aboveType, aboveCoord);
+      _handleDrop(caller, above, aboveType, aboveCoord);
+    }
+  }
+
+  function _removeGrowable(EntityId entityId, ObjectTypeId objectType, Vec3 coord) internal {
     ObjectType._set(entityId, ObjectTypes.Air);
     require(SeedGrowth._getFullyGrownAt(entityId) > block.timestamp, "Cannot mine fully grown seed");
     addEnergyToLocalPool(coord, ObjectTypeMetadata._getEnergy(objectType));
@@ -153,8 +157,8 @@ contract MineSystem is System {
 
   function _removeBlock(EntityId entityId, ObjectTypeId objectType, Vec3 coord) internal {
     // If object being mined is seed, no need to check above entities
-    if (objectType.isSeed()) {
-      _removeSeed(entityId, objectType, coord);
+    if (objectType.isGrowable()) {
+      _removeGrowable(entityId, objectType, coord);
       return;
     }
 
@@ -200,9 +204,9 @@ contract MineSystem is System {
     }
   }
 
-  function _handleDrop(EntityId caller, ObjectTypeId mineObjectTypeId, Vec3 coord) internal {
+  function _handleDrop(EntityId caller, EntityId mined, ObjectTypeId minedType, Vec3 coord) internal {
     // Get drops with all metadata for resource tracking
-    ObjectAmount[] memory result = RandomResourceLib._getMineDrops(mineObjectTypeId, coord);
+    ObjectAmount[] memory result = RandomResourceLib._getMineDrops(mined, minedType, coord);
 
     for (uint256 i = 0; i < result.length; i++) {
       (ObjectTypeId dropType, uint16 amount) = (result[i].objectTypeId, uint16(result[i].amount));
@@ -210,10 +214,56 @@ contract MineSystem is System {
 
       // Track mined resource count for seeds
       // TODO: could make it more general like .isCappedResource() or something
-      if (dropType.isSeed()) {
+      if (dropType.isGrowable()) {
         ResourceCount._set(dropType, ResourceCount._get(dropType) + amount);
       }
     }
+  }
+
+  // TODO: this is ugly, but doing this to avoid stack too deep errors. We should refactor later.
+  function _processMassReduction(EntityId caller, Vec3 callerCoord, uint16 toolSlot, EntityId mined)
+    internal
+    returns (uint128, bool)
+  {
+    ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
+    (uint128 finalMass, uint128 toolMassReduction, uint128 energyReduction) = _getMassReduction(toolData, mined);
+
+    if (energyReduction > 0) {
+      // If player died, return early
+      (uint128 callerEnergy,) = transferEnergyToPool(caller, energyReduction);
+      if (callerEnergy == 0) {
+        return (finalMass, false);
+      }
+    }
+
+    // Apply tool usage after decreasing player energy so we make sure the player is alive
+    toolData.applyMassReduction(callerCoord, toolMassReduction);
+    return (finalMass, true);
+  }
+
+  function _getMassReduction(ToolData memory toolData, EntityId mined)
+    internal
+    view
+    returns (uint128, uint128, uint128)
+  {
+    uint128 massLeft = Mass._getMass(mined);
+    if (massLeft == 0) {
+      return (0, 0, 0);
+    }
+
+    uint128 toolMassReduction = toolData.getMassReduction(massLeft);
+
+    // if tool mass reduction is not enough, consume energy from player up to mine energy cost
+    uint128 energyReduction = 0;
+    if (toolMassReduction < massLeft) {
+      uint128 remaining = massLeft - toolMassReduction;
+      energyReduction = MINE_ENERGY_COST <= remaining ? MINE_ENERGY_COST : remaining;
+      massLeft -= energyReduction;
+    }
+
+    uint128 finalMass = massLeft - toolMassReduction;
+
+    return (finalMass, toolMassReduction, energyReduction);
   }
 }
 
@@ -265,30 +315,13 @@ library MineLib {
   }
 }
 
-library MassReductionLib {
-  function _processMassReduction(EntityId caller, EntityId mined, uint16 toolSlot) public returns (uint128) {
-    uint128 massLeft = Mass._getMass(mined);
-    if (massLeft == 0) {
-      return 0;
-    }
-
-    (uint128 toolMassReduction,) = InventoryUtils.useTool(caller, toolSlot, massLeft);
-
-    // if tool mass reduction is not enough, consume energy from player up to mine energy cost
-    if (toolMassReduction < massLeft) {
-      uint128 remaining = massLeft - toolMassReduction;
-      uint128 energyReduction = MINE_ENERGY_COST <= remaining ? MINE_ENERGY_COST : remaining;
-      transferEnergyToPool(caller, energyReduction);
-      massLeft -= energyReduction;
-    }
-
-    return massLeft - toolMassReduction;
-  }
-}
-
 library RandomResourceLib {
-  function _getMineDrops(ObjectTypeId objectTypeId, Vec3 coord) public view returns (ObjectAmount[] memory) {
-    return NatureLib.getMineDrops(objectTypeId, coord);
+  function _getMineDrops(EntityId mined, ObjectTypeId objectTypeId, Vec3 coord)
+    public
+    view
+    returns (ObjectAmount[] memory)
+  {
+    return NatureLib.getMineDrops(mined, objectTypeId, coord);
   }
 
   function _getRandomOre(Vec3 coord) public view returns (ObjectTypeId) {
