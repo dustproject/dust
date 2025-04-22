@@ -21,14 +21,9 @@ root.render(
 );
 
 createMessagePortRpcServer<AppSchema>({
-  async onRequest({ method, params }) {
-    if (method === "dustApp_init") {
-      console.info("client asked this app to initialize with", params);
-      return;
-    }
-
-    throw new MethodNotSupportedError({
-      message: `"${method}" not supported.`,
-    });
+  async dustApp_init(params) {
+    console.info("client asked this app to initialize with", params);
+    return { success: true };
   },
+  async example() {},
 });

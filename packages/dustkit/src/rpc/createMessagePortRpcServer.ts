@@ -1,21 +1,21 @@
 import { type RpcRequest, RpcResponse, type RpcSchema } from "ox";
+import { MethodNotSupportedError } from "ox/RpcResponse";
 import { initMessage } from "./getMessagePortRpcClient";
 
-export function createMessagePortRpcServer<schema extends RpcSchema.Generic>({
-  onRequest,
-}: {
-  onRequest: {
-    [method in RpcSchema.ExtractMethodName<schema>]: (request: {
-      method: method;
-      params: RpcSchema.ExtractParams<schema, method>;
-    }) => Promise<RpcSchema.ExtractReturnType<schema, method>>;
-  }[RpcSchema.ExtractMethodName<schema>];
+// Ideally we'd have one `onRequest` handler, but unfortunately I couldn't figure out how
+// to get strong types, where narrowing on the RPC method would also narrow the params and
+// enforce the method's specific return type.
+//
+// Instead, we have a map of `handlers`, where each RPC method is implemented as its own
+// handler function.
 
-  // onRequest: <method extends RpcSchema.ExtractMethodName<schema>>(request: {
-  //   method: method;
-  //   params: RpcSchema.ExtractParams<schema, method>;
-  // }) => Promise<RpcSchema.ExtractReturnType<schema, method>>;
-}) {
+export function createMessagePortRpcServer<schema extends RpcSchema.Generic>(
+  handlers: {
+    [method in RpcSchema.ExtractMethodName<schema>]: (
+      params: RpcSchema.ExtractParams<schema, method>,
+    ) => Promise<RpcSchema.ExtractReturnType<schema, method>>;
+  },
+) {
   window.addEventListener("message", (event) => {
     if (event.data !== initMessage) return;
 
@@ -28,8 +28,13 @@ export function createMessagePortRpcServer<schema extends RpcSchema.Generic>({
       "message",
       async (event: MessageEvent<RpcRequest.RpcRequest>) => {
         const { jsonrpc, id, method, params } = event.data;
+        console.info("RPC request", method, params);
         try {
-          const result = await onRequest({ method, params });
+          const handler =
+            handlers[method as RpcSchema.ExtractMethodName<schema>];
+          if (!handler) throw new MethodNotSupportedError();
+
+          const result = await handler(params);
           port.postMessage({
             jsonrpc,
             id,
