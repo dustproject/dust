@@ -10,7 +10,7 @@ import {
   smartEntityCategories,
   toolCategories,
   uniqueObjectCategories,
-} from "./objects";
+} from "../objects";
 
 // Helper to format category names correctly for function generation
 function formatCategoryName(name: string): string {
@@ -54,7 +54,7 @@ struct ObjectAmount {
 
 // 7 category bits (bits 15..9), 9 index bits (bits 8..0)
 uint16 constant OFFSET_BITS = 9;
-uint16 constant CATEGORY_MASK = (uint16(2)**OFFSET_BITS - 1) << OFFSET_BITS;
+uint16 constant CATEGORY_MASK = type(uint16).max << OFFSET_BITS;
 uint16 constant BLOCK_CATEGORY_COUNT = 128 / 2; // 31
 
 // ------------------------------------------------------------
@@ -82,7 +82,6 @@ ${nonBlockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(
 // Object Types
 // ------------------------------------------------------------
 library ObjectTypes {
-  ObjectType constant Null = ObjectType.wrap(0);
 ${objects
   .map((obj) => {
     const categoryRef = `Category.${obj.category}`;
@@ -103,6 +102,10 @@ library ObjectTypeLib {
     return self.unwrap() & CATEGORY_MASK;
   }
 
+  function index(ObjectType self) internal pure returns (uint16) {
+    return self.unwrap() & ~CATEGORY_MASK;
+  }
+
   /// @dev True if this is the null object
   function isNull(ObjectType self) internal pure returns (bool) {
     return self.unwrap() == 0;
@@ -110,7 +113,7 @@ library ObjectTypeLib {
 
   /// @dev True if this is any block category
   function isBlock(ObjectType self) internal pure returns (bool) {
-    return category(self) < BLOCK_CATEGORY_COUNT && !self.isNull();
+    return (category(self) >> OFFSET_BITS) < BLOCK_CATEGORY_COUNT && !self.isNull();
   }
 
   // Direct Category Checks

@@ -5,8 +5,6 @@ import { ObjectTypes } from "../src/ObjectType.sol";
 import { ObjectTypeMetadata, ObjectTypeMetadataData } from "../src/codegen/tables/ObjectTypeMetadata.sol";
 
 function initObjects() {
-  ObjectTypeMetadata.set(ObjectTypes.Air, ObjectTypeMetadataData({ mass: 0, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Water, ObjectTypeMetadataData({ mass: 0, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Lava, ObjectTypeMetadataData({ mass: 500000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Stone, ObjectTypeMetadataData({ mass: 12000000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Bedrock, ObjectTypeMetadataData({ mass: 1000000000000000000, energy: 0 }));
@@ -235,6 +233,4 @@ function initObjects() {
   ObjectTypeMetadata.set(
     ObjectTypes.WheatSlop, ObjectTypeMetadataData({ mass: 1000000000000000, energy: 5000000000000000 })
   );
-  ObjectTypeMetadata.set(ObjectTypes.Player, ObjectTypeMetadataData({ mass: 0, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Fragment, ObjectTypeMetadataData({ mass: 0, energy: 0 }));
 }

@@ -1,6 +1,7 @@
 export const numBlockCategories = 128 / 2;
 
 export const blockCategories = [
+  // terrain categories
   "NON_SOLID",
   "STONE",
   "GEMSTONE",
@@ -16,6 +17,7 @@ export const blockCategories = [
   "UNDERWATER_PLANT",
   "PLANK",
   "ORE_BLOCK",
+  // non-terrain categories
   "SEED",
   "SAPLING",
   "STATION",
@@ -52,7 +54,7 @@ export interface CategoryMetadata {
 export const blockCategoryMetadata: CategoryMetadata[] = blockCategories.map(
   (name, index) => ({
     name,
-    id: index + 1,
+    id: index,
   }),
 );
 
@@ -108,6 +110,7 @@ function defineCategoryObjects(
 export const objects: ObjectType[] = [
   // NonSolid category
   ...defineCategoryObjects("NON_SOLID", [
+    "Null", // We add null so we don't waste a category
     "Air",
     "Water",
     { name: "Lava", mass: 500000000000000n },
@@ -381,7 +384,7 @@ export const objects: ObjectType[] = [
   ]),
   // Smart category
   ...defineCategoryObjects("SMART_ENTITY_BLOCK", [
-    { name: "ForceField", mass: 3735000000000000000n },
+    { name: "ForceField", mass: 3735000000000000000n, isMachine: true },
     { name: "Chest", mass: 35600000000000000n },
     { name: "SpawnTile", mass: 9135000000000000000n },
     { name: "Bed", mass: 13350000000000000n },

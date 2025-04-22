@@ -1,4 +1,4 @@
-import { TREES, classifyLeaves } from "./trees";
+import { TREES, classifyLeaves } from "../trees";
 
 interface Vec3 {
   x: number;

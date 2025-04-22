@@ -117,11 +117,11 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
         chunk[x][y] = new uint8[](uint256(int256(CHUNK_SIZE)));
         for (uint256 z = 0; z < uint256(int256(CHUNK_SIZE)); z++) {
           if (y < uint256(int256(FLAT_CHUNK_GRASS_LEVEL))) {
-            chunk[x][y][z] = uint8(ObjectType.unwrap(ObjectTypes.Dirt));
+            chunk[x][y][z] = _packObjectType(ObjectTypes.Dirt);
           } else if (y == uint256(int256(FLAT_CHUNK_GRASS_LEVEL))) {
-            chunk[x][y][z] = uint8(ObjectType.unwrap(ObjectTypes.Grass));
+            chunk[x][y][z] = _packObjectType(ObjectTypes.Grass);
           } else {
-            chunk[x][y][z] = uint8(ObjectType.unwrap(ObjectTypes.Air));
+            chunk[x][y][z] = _packObjectType(ObjectTypes.Air);
           }
         }
       }
@@ -163,14 +163,19 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     return (alice, aliceEntityId, playerCoord);
   }
 
+  function _packObjectType(ObjectType objectType) internal pure returns (uint8 packed) {
+    packed = uint8(objectType.category() >> 5) | uint8(objectType.index());
+  }
+
   function _getChunk(ObjectType objectType) internal pure returns (uint8[][][] memory chunk) {
+    uint8 packed = _packObjectType(objectType);
     chunk = new uint8[][][](uint256(int256(CHUNK_SIZE)));
     for (uint256 x = 0; x < uint256(int256(CHUNK_SIZE)); x++) {
       chunk[x] = new uint8[][](uint256(int256(CHUNK_SIZE)));
       for (uint256 y = 0; y < uint256(int256(CHUNK_SIZE)); y++) {
         chunk[x][y] = new uint8[](uint256(int256(CHUNK_SIZE)));
         for (uint256 z = 0; z < uint256(int256(CHUNK_SIZE)); z++) {
-          chunk[x][y][z] = uint8(ObjectType.unwrap(objectType));
+          chunk[x][y][z] = packed;
         }
       }
     }
@@ -226,7 +231,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
 
     bytes memory chunk = chunkPointer.code;
     // Add SSTORE2 offset
-    chunk[blockIndex + 1] = bytes1(uint8(objectType.unwrap()));
+    chunk[blockIndex + 1] = bytes1(_packObjectType(objectType));
 
     vm.etch(chunkPointer, chunk);
   }

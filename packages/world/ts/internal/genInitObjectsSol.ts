@@ -1,4 +1,4 @@
-import { objects } from "./objects";
+import { objects } from "../objects";
 
 // Template for the Solidity file
 function generateInitObjectsSol(): string {

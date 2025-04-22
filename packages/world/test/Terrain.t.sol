@@ -131,7 +131,7 @@ contract TerrainTest is DustTest {
     blockType = TerrainLib.getBlockType(coord, worldAddress);
     endGasReport();
 
-    assertEq(ObjectType.unwrap(blockType), uint16(chunk[1][2][3]));
+    assertEq(_packObjectType(blockType), uint16(chunk[1][2][3]));
 
     startGasReport("TerrainLib.getBiome (non-root)");
     uint8 biome = TerrainLib.getBiome(coord);
@@ -159,7 +159,7 @@ contract TerrainTest is DustTest {
           coord = vec3(x, y, z);
           blockType = TerrainLib.getBlockType(coord);
           assertEq(
-            ObjectType.unwrap(blockType), uint16(chunk[uint256(int256(x))][uint256(int256(y))][uint256(int256(z))])
+            _packObjectType(blockType), uint16(chunk[uint256(int256(x))][uint256(int256(y))][uint256(int256(z))])
           );
         }
       }
@@ -182,21 +182,21 @@ contract TerrainTest is DustTest {
     // Test we can get the block type for a voxel in the chunk
     Vec3 coord = vec3(1, 2, 3);
     ObjectType blockType = TerrainLib.getBlockType(coord);
-    assertEq(ObjectType.unwrap(blockType), uint16(chunk[1][2][3]));
+    assertEq(_packObjectType(blockType), uint16(chunk[1][2][3]));
 
     // Test for chunks that are not at the origin
     chunkCoord = vec3(1, 2, 3);
     chunk = _setupTestChunk(chunkCoord);
     coord = vec3(16 + 1, 16 * 2 + 2, 16 * 3 + 3);
     blockType = TerrainLib.getBlockType(coord);
-    assertEq(ObjectType.unwrap(blockType), uint16(chunk[1][2][3]));
+    assertEq(_packObjectType(blockType), uint16(chunk[1][2][3]));
 
     // Test for negative coordinates
     chunkCoord = vec3(-1, -2, -3);
     chunk = _setupTestChunk(chunkCoord);
     coord = vec3(-16 + 1, -16 * 2 + 2, -16 * 3 + 3);
     blockType = TerrainLib.getBlockType(coord);
-    assertEq(ObjectType.unwrap(blockType), uint16(chunk[1][2][3]));
+    assertEq(_packObjectType(blockType), uint16(chunk[1][2][3]));
   }
 
   function testGetBlockType_ChunkNotExplored() public view {

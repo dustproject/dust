@@ -191,14 +191,15 @@ library NatureLib {
     uint256 randomSeed = getRandomSeed(coord);
 
     // Get ore options and their weights (based on remaining amounts)
-    ObjectAmount[] memory oreOptions = new ObjectAmount[](5);
-    uint256[] memory weights = new uint256[](5);
+    ObjectAmount[] memory oreOptions = new ObjectAmount[](6);
+    uint256[] memory weights = new uint256[](6);
 
     ObjectType[7] memory oreTypes = ObjectTypeLib.getOreTypes();
     // Use remaining amounts directly as weights
-    for (uint256 i = 0; i < weights.length; i++) {
-      oreOptions[i] = ObjectAmount(oreTypes[i], 1);
-      (, weights[i]) = getCapAndRemaining(oreTypes[i]);
+    // Skip AnyOre (index 0) since it's not a specific ore type
+    for (uint256 i = 1; i < oreTypes.length; i++) {
+      oreOptions[i - 1] = ObjectAmount(oreTypes[i], 1);
+      (, weights[i - 1]) = getCapAndRemaining(oreTypes[i]);
     }
 
     // Select ore based on availability

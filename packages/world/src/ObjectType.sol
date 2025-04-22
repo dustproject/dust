@@ -16,7 +16,7 @@ struct ObjectAmount {
 
 // 7 category bits (bits 15..9), 9 index bits (bits 8..0)
 uint16 constant OFFSET_BITS = 9;
-uint16 constant CATEGORY_MASK = (uint16(2) ** OFFSET_BITS - 1) << OFFSET_BITS;
+uint16 constant CATEGORY_MASK = type(uint16).max << OFFSET_BITS;
 uint16 constant BLOCK_CATEGORY_COUNT = 128 / 2; // 31
 
 // ------------------------------------------------------------
@@ -24,26 +24,26 @@ uint16 constant BLOCK_CATEGORY_COUNT = 128 / 2; // 31
 // ------------------------------------------------------------
 library Category {
   // Block Categories
-  uint16 constant NON_SOLID = uint16(1) << OFFSET_BITS;
-  uint16 constant STONE = uint16(2) << OFFSET_BITS;
-  uint16 constant GEMSTONE = uint16(3) << OFFSET_BITS;
-  uint16 constant SOIL = uint16(4) << OFFSET_BITS;
-  uint16 constant ORE = uint16(5) << OFFSET_BITS;
-  uint16 constant SAND = uint16(6) << OFFSET_BITS;
-  uint16 constant CLAY = uint16(7) << OFFSET_BITS;
-  uint16 constant LOG = uint16(8) << OFFSET_BITS;
-  uint16 constant LEAF = uint16(9) << OFFSET_BITS;
-  uint16 constant FLOWER = uint16(10) << OFFSET_BITS;
-  uint16 constant GREENERY = uint16(11) << OFFSET_BITS;
-  uint16 constant CROP = uint16(12) << OFFSET_BITS;
-  uint16 constant UNDERWATER_PLANT = uint16(13) << OFFSET_BITS;
-  uint16 constant PLANK = uint16(14) << OFFSET_BITS;
-  uint16 constant ORE_BLOCK = uint16(15) << OFFSET_BITS;
-  uint16 constant SEED = uint16(16) << OFFSET_BITS;
-  uint16 constant SAPLING = uint16(17) << OFFSET_BITS;
-  uint16 constant STATION = uint16(18) << OFFSET_BITS;
-  uint16 constant SMART_ENTITY_BLOCK = uint16(19) << OFFSET_BITS;
-  uint16 constant MISC_BLOCK = uint16(20) << OFFSET_BITS;
+  uint16 constant NON_SOLID = uint16(0) << OFFSET_BITS;
+  uint16 constant STONE = uint16(1) << OFFSET_BITS;
+  uint16 constant GEMSTONE = uint16(2) << OFFSET_BITS;
+  uint16 constant SOIL = uint16(3) << OFFSET_BITS;
+  uint16 constant ORE = uint16(4) << OFFSET_BITS;
+  uint16 constant SAND = uint16(5) << OFFSET_BITS;
+  uint16 constant CLAY = uint16(6) << OFFSET_BITS;
+  uint16 constant LOG = uint16(7) << OFFSET_BITS;
+  uint16 constant LEAF = uint16(8) << OFFSET_BITS;
+  uint16 constant FLOWER = uint16(9) << OFFSET_BITS;
+  uint16 constant GREENERY = uint16(10) << OFFSET_BITS;
+  uint16 constant CROP = uint16(11) << OFFSET_BITS;
+  uint16 constant UNDERWATER_PLANT = uint16(12) << OFFSET_BITS;
+  uint16 constant PLANK = uint16(13) << OFFSET_BITS;
+  uint16 constant ORE_BLOCK = uint16(14) << OFFSET_BITS;
+  uint16 constant SEED = uint16(15) << OFFSET_BITS;
+  uint16 constant SAPLING = uint16(16) << OFFSET_BITS;
+  uint16 constant STATION = uint16(17) << OFFSET_BITS;
+  uint16 constant SMART_ENTITY_BLOCK = uint16(18) << OFFSET_BITS;
+  uint16 constant MISC_BLOCK = uint16(19) << OFFSET_BITS;
   // Non-Block Categories
   uint16 constant PICK = uint16(65) << OFFSET_BITS;
   uint16 constant AXE = uint16(66) << OFFSET_BITS;
@@ -79,10 +79,10 @@ library Category {
 // Object Types
 // ------------------------------------------------------------
 library ObjectTypes {
-  ObjectType constant Null = ObjectType.wrap(0);
-  ObjectType constant Air = ObjectType.wrap(Category.NON_SOLID | 0);
-  ObjectType constant Water = ObjectType.wrap(Category.NON_SOLID | 1);
-  ObjectType constant Lava = ObjectType.wrap(Category.NON_SOLID | 2);
+  ObjectType constant Null = ObjectType.wrap(Category.NON_SOLID | 0);
+  ObjectType constant Air = ObjectType.wrap(Category.NON_SOLID | 1);
+  ObjectType constant Water = ObjectType.wrap(Category.NON_SOLID | 2);
+  ObjectType constant Lava = ObjectType.wrap(Category.NON_SOLID | 3);
   ObjectType constant Stone = ObjectType.wrap(Category.STONE | 0);
   ObjectType constant Bedrock = ObjectType.wrap(Category.STONE | 1);
   ObjectType constant Deepslate = ObjectType.wrap(Category.STONE | 2);
@@ -273,6 +273,10 @@ library ObjectTypeLib {
     return self.unwrap() & CATEGORY_MASK;
   }
 
+  function index(ObjectType self) internal pure returns (uint16) {
+    return self.unwrap() & ~CATEGORY_MASK;
+  }
+
   /// @dev True if this is the null object
   function isNull(ObjectType self) internal pure returns (bool) {
     return self.unwrap() == 0;
@@ -280,7 +284,7 @@ library ObjectTypeLib {
 
   /// @dev True if this is any block category
   function isBlock(ObjectType self) internal pure returns (bool) {
-    return category(self) < BLOCK_CATEGORY_COUNT && !self.isNull();
+    return (category(self) >> OFFSET_BITS) < BLOCK_CATEGORY_COUNT && !self.isNull();
   }
 
   // Direct Category Checks
@@ -402,8 +406,8 @@ library ObjectTypeLib {
   }
 
   // Category getters
-  function getNonSolidTypes() internal pure returns (ObjectType[3] memory) {
-    return [ObjectTypes.Air, ObjectTypes.Water, ObjectTypes.Lava];
+  function getNonSolidTypes() internal pure returns (ObjectType[4] memory) {
+    return [ObjectTypes.Null, ObjectTypes.Air, ObjectTypes.Water, ObjectTypes.Lava];
   }
 
   function getStoneTypes() internal pure returns (ObjectType[16] memory) {
@@ -829,6 +833,7 @@ library ObjectTypeLib {
   }
 
   function isMachine(ObjectType self) internal pure returns (bool) {
+    if (self == ObjectTypes.ForceField) return true;
     return false;
   }
 
