@@ -288,7 +288,6 @@ export const categoryObjects: {
   Greenery: [
     { name: "FescueGrass", mass: 200000000000000n },
     { name: "SwitchGrass", mass: 200000000000000n },
-    { name: "CottonBush", mass: 300000000000000n },
     { name: "VinesBush", mass: 200000000000000n },
     { name: "IvyVine", mass: 200000000000000n },
     { name: "HempBush", mass: 200000000000000n },
@@ -312,6 +311,7 @@ export const categoryObjects: {
     { name: "StrawberryBush", mass: 300000000000000n },
     { name: "RaspberryBush", mass: 300000000000000n },
     { name: "Wheat", mass: 300000000000000n, energy: 500000000000000n },
+    { name: "CottonBush", mass: 300000000000000n },
   ],
   CropBlock: [
     { name: "Pumpkin", mass: 1300000000000000n, energy: 16500000000000000n },
@@ -338,21 +338,27 @@ export const categoryObjects: {
   Seed: [
     {
       name: "WheatSeed",
-      energy: 10000000000000000n,
+      energy: 800000000000000n,
       timeToGrow: 900n,
       crop: "Wheat",
     },
     {
       name: "PumpkinSeed",
-      energy: 10000000000000000n,
+      energy: 17800000000000000n,
       timeToGrow: 3600n,
       crop: "Pumpkin",
     },
     {
       name: "MelonSeed",
-      energy: 10000000000000000n,
+      energy: 17800000000000000n,
       timeToGrow: 3600n,
       crop: "Melon",
+    },
+    {
+      name: "CottonSeed",
+      energy: 300000000000000n,
+      timeToGrow: 3600n,
+      crop: "CottonBush",
     },
   ],
   Sapling: [
