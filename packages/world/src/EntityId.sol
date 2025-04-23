@@ -79,7 +79,7 @@ library EntityIdLib {
   }
 
   function getPosition(EntityId self) internal view returns (Vec3) {
-    return EntityObjectType._get(self).isMovable() ? MovablePosition._get(self) : Position._get(self);
+    return EntityObjectType._get(self).isPlayer() ? MovablePosition._get(self) : Position._get(self);
   }
 
   function getProgram(EntityId self) internal view returns (ProgramId) {

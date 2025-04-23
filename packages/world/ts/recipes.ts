@@ -372,17 +372,19 @@ export function getRecipesByOutput(objectType: ObjectTypeName): Recipe[] {
 }
 
 // Validate that a recipe maintains mass+energy balance
-export function validateRecipeMassEnergy(recipe: Recipe): boolean {
+export function validateRecipe(recipe: Recipe) {
   const totalInputMassEnergy = getTotalMassEnergy(recipe.inputs);
   const totalOutputMassEnergy = getTotalMassEnergy(recipe.outputs);
   if (totalInputMassEnergy !== totalOutputMassEnergy) {
-    console.error(
-      `Recipe validation failed: Recipe ${JSON.stringify(recipe)} has input mass+energy of ${totalInputMassEnergy} but expected ${totalOutputMassEnergy}`,
-    );
-    return false;
-  }
+    // throw new Error(
+    //   `Recipe does not maintain mass+energy balance\n${JSON.stringify(recipe)}\nmass: ${totalInputMassEnergy} != ${totalOutputMassEnergy}`,
+    // );
 
-  return true;
+    // TODO: throw an error once coal based recipes are fixed
+    console.warn(
+      `Recipe does not maintain mass+energy balance\n${JSON.stringify(recipe)}\ninput: ${totalInputMassEnergy} != output: ${totalOutputMassEnergy}`,
+    );
+  }
 }
 
 function getTotalMassEnergy(objectAmounts: ObjectAmount[]): bigint {

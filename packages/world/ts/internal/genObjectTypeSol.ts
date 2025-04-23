@@ -205,6 +205,7 @@ ${allCategoryMetadata
 
   function getStackable(ObjectType self) internal pure returns (uint16) {
     if (self.isUniqueObject()) return 1;
+    if (self.isNonSolid() || self.isPlayer()) return 0;
     return 99;
   }
 

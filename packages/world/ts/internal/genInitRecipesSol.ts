@@ -1,5 +1,5 @@
 import type { ObjectTypeName } from "../objects";
-import { type Recipe, recipes } from "../recipes";
+import { type Recipe, recipes, validateRecipe } from "../recipes";
 
 function renderRecipe(recipe: Recipe): string {
   const station: ObjectTypeName = recipe.station ?? "Null";
@@ -48,5 +48,7 @@ function initRecipes() {
 }
 `;
 }
+
+recipes.forEach(validateRecipe);
 
 console.info(generateInitRecipesSol());

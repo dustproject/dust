@@ -36,7 +36,7 @@ export const nonBlockCategories = [
   "Bucket",
   "Food",
   "Fuel",
-  "Movable",
+  "Player",
   "SmartEntityNonBlock",
 ] as const;
 
@@ -330,8 +330,8 @@ export const categoryObjects: {
     { name: "MangrovePlanks", mass: 4500000000000000n },
   ],
   OreBlock: [
-    { name: "CopperBlock", mass: 675000000000000000n },
-    { name: "IronBlock", mass: 675000000000000000n },
+    { name: "CopperBlock", mass: 6075000000000000000n },
+    { name: "IronBlock", mass: 6075000000000000000n },
     { name: "GoldBlock", mass: 14400000000000000000n },
     { name: "DiamondBlock", mass: 45000000000000000000n },
     { name: "NeptuniumBlock", mass: 45000000000000000000n },
@@ -376,14 +376,14 @@ export const categoryObjects: {
   ],
   Station: [
     { name: "Furnace", mass: 108000000000000000n },
-    { name: "Workbench", mass: 17800000000000000n },
-    { name: "Powerstone", mass: 3735000000000000000n },
+    { name: "Workbench", mass: 18000000000000000n },
+    { name: "Powerstone", mass: 80000000000000000n },
   ],
   SmartEntityBlock: [
     { name: "ForceField", mass: 3735000000000000000n, isMachine: true },
-    { name: "Chest", mass: 35600000000000000n },
+    { name: "Chest", mass: 36000000000000000n },
     { name: "SpawnTile", mass: 9135000000000000000n },
-    { name: "Bed", mass: 13350000000000000n },
+    { name: "Bed", mass: 13500000000000000n },
   ],
   MiscBlock: [
     // TODO: must assign some of these to terrain categories
@@ -395,93 +395,93 @@ export const categoryObjects: {
     { name: "Ice", mass: 4000000000000000n },
     { name: "SpiderWeb", mass: 100000000000000n },
     { name: "Bone", mass: 1000000000000000n },
-    { name: "TextSign", mass: 17800000000000000n },
+    { name: "TextSign", mass: 18000000000000000n },
   ],
 
   // NON BLOCKS
 
   Pick: [
-    { name: "WoodenPick", mass: 22250000000000000n, plankAmount: 5 },
+    { name: "WoodenPick", mass: 22500000000000000n, plankAmount: 5 },
     {
       name: "CopperPick",
-      mass: 2033900000000000000n,
+      mass: 2034000000000000000n,
       plankAmount: 2,
       oreAmount: ["CopperOre", 3],
     },
     {
       name: "IronPick",
-      mass: 2033900000000000000n,
+      mass: 2034000000000000000n,
       plankAmount: 2,
       oreAmount: ["IronOre", 3],
     },
     {
       name: "GoldPick",
-      mass: 4808900000000000000n,
+      mass: 4809000000000000000n,
       plankAmount: 2,
       oreAmount: ["GoldOre", 3],
     },
     {
       name: "DiamondPick",
-      mass: 15008900000000000000n,
+      mass: 15009000000000000000n,
       plankAmount: 2,
       oreAmount: ["DiamondOre", 3],
     },
     {
       name: "NeptuniumPick",
-      mass: 15008900000000000000n,
+      mass: 15009000000000000000n,
       plankAmount: 2,
       oreAmount: ["NeptuniumOre", 3],
     },
   ],
   Axe: [
-    { name: "WoodenAxe", mass: 22250000000000000n, plankAmount: 5 },
+    { name: "WoodenAxe", mass: 22500000000000000n, plankAmount: 5 },
     {
       name: "CopperAxe",
-      mass: 2033900000000000000n,
+      mass: 2034000000000000000n,
       plankAmount: 2,
       oreAmount: ["CopperOre", 3],
     },
     {
       name: "IronAxe",
-      mass: 2033900000000000000n,
+      mass: 2034000000000000000n,
       plankAmount: 2,
       oreAmount: ["IronOre", 3],
     },
     {
       name: "GoldAxe",
-      mass: 4808900000000000000n,
+      mass: 4809000000000000000n,
       plankAmount: 2,
       oreAmount: ["GoldOre", 3],
     },
     {
       name: "DiamondAxe",
-      mass: 15008900000000000000n,
+      mass: 15009000000000000000n,
       plankAmount: 2,
       oreAmount: ["DiamondOre", 3],
     },
     {
       name: "NeptuniumAxe",
-      mass: 15008900000000000000n,
+      mass: 15009000000000000000n,
       plankAmount: 2,
       oreAmount: ["NeptuniumOre", 3],
     },
   ],
   Whacker: [
-    { name: "WoodenWhacker", mass: 35600000000000000n, plankAmount: 8 },
+    { name: "WoodenWhacker", mass: 36000000000000000n, plankAmount: 8 },
     {
       name: "CopperWhacker",
-      mass: 4058900000000000000n,
+      mass: 4059000000000000000n,
       plankAmount: 2,
       oreAmount: ["CopperOre", 6],
     },
     {
       name: "IronWhacker",
-      mass: 4058900000000000000n,
+      mass: 4059000000000000000n,
       plankAmount: 2,
       oreAmount: ["IronOre", 6],
     },
   ],
-  Hoe: [{ name: "WoodenHoe", mass: 17800000000000000n, plankAmount: 4 }],
+  Hoe: [{ name: "WoodenHoe", mass: 18000000000000000n, plankAmount: 4 }],
   OreBar: [
     { name: "GoldBar", mass: 1600000000000000000n },
     { name: "IronBar", mass: 675000000000000000n },
@@ -489,17 +489,12 @@ export const categoryObjects: {
     { name: "NeptuniumBar", mass: 5000000000000000000n },
   ],
   Bucket: [
-    { name: "Bucket", mass: 675000000000000000n },
-    {
-      name: "WaterBucket",
-      mass: 675000000000000000n,
-      energy: 4000000000000000n,
-    },
+    { name: "Bucket", mass: 2025000000000000000n },
+    { name: "WaterBucket", mass: 2025000000000000000n },
   ],
   Food: [{ name: "WheatSlop", energy: 12800000000000000n }],
   Fuel: [{ name: "Fuel", energy: 90000000000000000n }],
-  // TODO: rename to agent? so we include bots later
-  Movable: [{ name: "Player" }],
+  Player: [{ name: "Player" }],
   SmartEntityNonBlock: [{ name: "Fragment" }],
 } as const;
 

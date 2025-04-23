@@ -55,7 +55,7 @@ library Category {
   uint16 constant Bucket = uint16(69) << OFFSET_BITS;
   uint16 constant Food = uint16(70) << OFFSET_BITS;
   uint16 constant Fuel = uint16(71) << OFFSET_BITS;
-  uint16 constant Movable = uint16(72) << OFFSET_BITS;
+  uint16 constant Player = uint16(72) << OFFSET_BITS;
   uint16 constant SmartEntityNonBlock = uint16(73) << OFFSET_BITS;
   // ------------------------------------------------------------
   // Meta Category Masks (fits within uint128; mask bit k set if raw category ID k belongs)
@@ -262,7 +262,7 @@ library ObjectTypes {
   ObjectType constant WaterBucket = ObjectType.wrap(Category.Bucket | 1);
   ObjectType constant WheatSlop = ObjectType.wrap(Category.Food | 0);
   ObjectType constant Fuel = ObjectType.wrap(Category.Fuel | 0);
-  ObjectType constant Player = ObjectType.wrap(Category.Movable | 0);
+  ObjectType constant Player = ObjectType.wrap(Category.Player | 0);
   ObjectType constant Fragment = ObjectType.wrap(Category.SmartEntityNonBlock | 0);
 }
 
@@ -413,8 +413,8 @@ library ObjectTypeLib {
     return category(self) == Category.Fuel;
   }
 
-  function isMovable(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Movable;
+  function isPlayer(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.Player;
   }
 
   function isSmartEntityNonBlock(ObjectType self) internal pure returns (bool) {
@@ -699,7 +699,7 @@ library ObjectTypeLib {
     return [ObjectTypes.Fuel];
   }
 
-  function getMovableTypes() internal pure returns (ObjectType[1] memory) {
+  function getPlayerTypes() internal pure returns (ObjectType[1] memory) {
     return [ObjectTypes.Player];
   }
 
@@ -784,6 +784,7 @@ library ObjectTypeLib {
 
   function getStackable(ObjectType self) internal pure returns (uint16) {
     if (self.isUniqueObject()) return 1;
+    if (self.isNonSolid() || self.isPlayer()) return 0;
     return 99;
   }
 
