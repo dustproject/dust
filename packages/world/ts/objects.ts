@@ -77,7 +77,6 @@ export const allCategoryMetadata: CategoryMetadata[] = [
 // Meta-categories (categories that should be included in pass-through check)
 export const passThroughCategories: Category[] = [
   "NonSolid",
-  "Leaf",
   "Flower",
   "Seed",
   "Sapling",
@@ -290,7 +289,6 @@ export const categoryObjects: {
     { name: "FescueGrass", mass: 200000000000000n },
     { name: "SwitchGrass", mass: 200000000000000n },
     { name: "CottonBush", mass: 300000000000000n },
-    { name: "BambooBush", mass: 200000000000000n },
     { name: "VinesBush", mass: 200000000000000n },
     { name: "IvyVine", mass: 200000000000000n },
     { name: "HempBush", mass: 200000000000000n },
@@ -387,10 +385,11 @@ export const categoryObjects: {
     { name: "Bed", mass: 13500000000000000n },
   ],
   MiscBlock: [
-    // TODO: must assign some of these to terrain categories
+    // TODO: MUST assign most of these to terrain categories
     { name: "RedMushroomBlock", mass: 12500000000000000n },
     { name: "BrownMushroomBlock", mass: 12500000000000000n },
     { name: "MushroomStem", mass: 12500000000000000n },
+    { name: "BambooBush", mass: 200000000000000n },
     { name: "Cactus", mass: 1300000000000000n },
     { name: "Snow", mass: 4000000000000000n },
     { name: "Ice", mass: 4000000000000000n },

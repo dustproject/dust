@@ -140,7 +140,6 @@ function initObjects() {
   ObjectTypeMetadata.set(ObjectTypes.FescueGrass, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.SwitchGrass, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.CottonBush, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.BambooBush, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.VinesBush, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.IvyVine, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.HempBush, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
@@ -199,6 +198,7 @@ function initObjects() {
   ObjectTypeMetadata.set(ObjectTypes.RedMushroomBlock, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.BrownMushroomBlock, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.MushroomStem, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 0 }));
+  ObjectTypeMetadata.set(ObjectTypes.BambooBush, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Cactus, ObjectTypeMetadataData({ mass: 1300000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Snow, ObjectTypeMetadataData({ mass: 4000000000000000, energy: 0 }));
   ObjectTypeMetadata.set(ObjectTypes.Ice, ObjectTypeMetadataData({ mass: 4000000000000000, energy: 0 }));

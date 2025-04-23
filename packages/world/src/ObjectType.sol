@@ -64,14 +64,15 @@ library Category {
     | (uint128(1) << (Plank >> OFFSET_BITS)) | (uint128(1) << (Ore >> OFFSET_BITS));
   uint128 constant HAS_EXTRA_DROPS_MASK = (uint128(1) << (Leaf >> OFFSET_BITS)) | (uint128(1) << (Crop >> OFFSET_BITS))
     | (uint128(1) << (Greenery >> OFFSET_BITS));
-  uint128 constant PASS_THROUGH_MASK = (uint128(1) << (NonSolid >> OFFSET_BITS)) | (uint128(1) << (Leaf >> OFFSET_BITS))
+  uint128 constant PASS_THROUGH_MASK = (uint128(1) << (NonSolid >> OFFSET_BITS))
     | (uint128(1) << (Flower >> OFFSET_BITS)) | (uint128(1) << (Seed >> OFFSET_BITS))
     | (uint128(1) << (Sapling >> OFFSET_BITS)) | (uint128(1) << (Greenery >> OFFSET_BITS))
     | (uint128(1) << (Crop >> OFFSET_BITS)) | (uint128(1) << (UnderwaterPlant >> OFFSET_BITS));
   uint128 constant GROWABLE_MASK = (uint128(1) << (Seed >> OFFSET_BITS)) | (uint128(1) << (Sapling >> OFFSET_BITS));
   uint128 constant UNIQUE_OBJECT_MASK = (uint128(1) << (Pick >> OFFSET_BITS)) | (uint128(1) << (Axe >> OFFSET_BITS))
     | (uint128(1) << (Whacker >> OFFSET_BITS)) | (uint128(1) << (Hoe >> OFFSET_BITS))
-    | (uint128(1) << (SmartEntityBlock >> OFFSET_BITS)) | (uint128(1) << (Bucket >> OFFSET_BITS));
+    | (uint128(1) << (SmartEntityBlock >> OFFSET_BITS)) | (uint128(1) << (Bucket >> OFFSET_BITS))
+    | (uint128(1) << (SmartEntityNonBlock >> OFFSET_BITS));
   uint128 constant SMART_ENTITY_MASK =
     (uint128(1) << (SmartEntityBlock >> OFFSET_BITS)) | (uint128(1) << (SmartEntityNonBlock >> OFFSET_BITS));
   uint128 constant TOOL_MASK = (uint128(1) << (Pick >> OFFSET_BITS)) | (uint128(1) << (Axe >> OFFSET_BITS))
@@ -177,10 +178,9 @@ library ObjectTypes {
   ObjectType constant FescueGrass = ObjectType.wrap(Category.Greenery | 0);
   ObjectType constant SwitchGrass = ObjectType.wrap(Category.Greenery | 1);
   ObjectType constant CottonBush = ObjectType.wrap(Category.Greenery | 2);
-  ObjectType constant BambooBush = ObjectType.wrap(Category.Greenery | 3);
-  ObjectType constant VinesBush = ObjectType.wrap(Category.Greenery | 4);
-  ObjectType constant IvyVine = ObjectType.wrap(Category.Greenery | 5);
-  ObjectType constant HempBush = ObjectType.wrap(Category.Greenery | 6);
+  ObjectType constant VinesBush = ObjectType.wrap(Category.Greenery | 3);
+  ObjectType constant IvyVine = ObjectType.wrap(Category.Greenery | 4);
+  ObjectType constant HempBush = ObjectType.wrap(Category.Greenery | 5);
   ObjectType constant Coral = ObjectType.wrap(Category.UnderwaterPlant | 0);
   ObjectType constant SeaAnemone = ObjectType.wrap(Category.UnderwaterPlant | 1);
   ObjectType constant Algae = ObjectType.wrap(Category.UnderwaterPlant | 2);
@@ -232,12 +232,13 @@ library ObjectTypes {
   ObjectType constant RedMushroomBlock = ObjectType.wrap(Category.MiscBlock | 0);
   ObjectType constant BrownMushroomBlock = ObjectType.wrap(Category.MiscBlock | 1);
   ObjectType constant MushroomStem = ObjectType.wrap(Category.MiscBlock | 2);
-  ObjectType constant Cactus = ObjectType.wrap(Category.MiscBlock | 3);
-  ObjectType constant Snow = ObjectType.wrap(Category.MiscBlock | 4);
-  ObjectType constant Ice = ObjectType.wrap(Category.MiscBlock | 5);
-  ObjectType constant SpiderWeb = ObjectType.wrap(Category.MiscBlock | 6);
-  ObjectType constant Bone = ObjectType.wrap(Category.MiscBlock | 7);
-  ObjectType constant TextSign = ObjectType.wrap(Category.MiscBlock | 8);
+  ObjectType constant BambooBush = ObjectType.wrap(Category.MiscBlock | 3);
+  ObjectType constant Cactus = ObjectType.wrap(Category.MiscBlock | 4);
+  ObjectType constant Snow = ObjectType.wrap(Category.MiscBlock | 5);
+  ObjectType constant Ice = ObjectType.wrap(Category.MiscBlock | 6);
+  ObjectType constant SpiderWeb = ObjectType.wrap(Category.MiscBlock | 7);
+  ObjectType constant Bone = ObjectType.wrap(Category.MiscBlock | 8);
+  ObjectType constant TextSign = ObjectType.wrap(Category.MiscBlock | 9);
   ObjectType constant WoodenPick = ObjectType.wrap(Category.Pick | 0);
   ObjectType constant CopperPick = ObjectType.wrap(Category.Pick | 1);
   ObjectType constant IronPick = ObjectType.wrap(Category.Pick | 2);
@@ -549,12 +550,11 @@ library ObjectTypeLib {
     ];
   }
 
-  function getGreeneryTypes() internal pure returns (ObjectType[7] memory) {
+  function getGreeneryTypes() internal pure returns (ObjectType[6] memory) {
     return [
       ObjectTypes.FescueGrass,
       ObjectTypes.SwitchGrass,
       ObjectTypes.CottonBush,
-      ObjectTypes.BambooBush,
       ObjectTypes.VinesBush,
       ObjectTypes.IvyVine,
       ObjectTypes.HempBush
@@ -639,11 +639,12 @@ library ObjectTypeLib {
     return [ObjectTypes.ForceField, ObjectTypes.Chest, ObjectTypes.SpawnTile, ObjectTypes.Bed];
   }
 
-  function getMiscBlockTypes() internal pure returns (ObjectType[9] memory) {
+  function getMiscBlockTypes() internal pure returns (ObjectType[10] memory) {
     return [
       ObjectTypes.RedMushroomBlock,
       ObjectTypes.BrownMushroomBlock,
       ObjectTypes.MushroomStem,
+      ObjectTypes.BambooBush,
       ObjectTypes.Cactus,
       ObjectTypes.Snow,
       ObjectTypes.Ice,
