@@ -8,7 +8,6 @@ import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectType } from "../codegen/tables/ObjectType.sol";
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 
-import { EntityId } from "../EntityId.sol";
 import { ObjectTypeId } from "../ObjectTypeId.sol";
 import { ObjectAmount, ObjectTypeLib } from "../ObjectTypeLib.sol";
 import { ObjectTypes } from "../ObjectTypes.sol";
@@ -340,6 +339,10 @@ library InventoryUtils {
       }
     }
 
+    if (InventoryTypeSlots._length(from, ObjectTypes.Null) > 0) {
+      InventoryTypeSlots._deleteRecord(from, ObjectTypes.Null);
+    }
+
     Inventory._deleteRecord(from);
   }
 
@@ -418,6 +421,10 @@ library InventoryUtils {
 
     // Pop the last element
     InventoryTypeSlots._pop(owner, objectType);
+
+    if (numTypeSlots == 1) {
+      InventoryTypeSlots._deleteRecord(owner, objectType);
+    }
   }
 
   // Gets a slot to use - either reuses an empty slot or creates a new one - O(1)
