@@ -4,8 +4,7 @@ pragma solidity >=0.8.24;
 import { IBaseWorld } from "@latticexyz/world-consumer/src/experimental/WorldConsumer.sol";
 
 import { EntityId } from "@dust/world/src/EntityId.sol";
-import { ObjectTypeId } from "@dust/world/src/ObjectTypeId.sol";
-import { ObjectAmount } from "@dust/world/src/ObjectTypeLib.sol";
+import { ObjectAmount, ObjectType } from "@dust/world/src/ObjectType.sol";
 import { ProgramId } from "@dust/world/src/ProgramId.sol";
 import { Vec3 } from "@dust/world/src/Vec3.sol";
 
@@ -53,14 +52,14 @@ contract ForceFieldProgram is
     require(_isAllowed(target, caller), "Only approved callers can remove fragments from the force field");
   }
 
-  function onBuild(EntityId caller, EntityId target, ObjectTypeId objectTypeId, Vec3 coord, bytes memory extraData)
+  function onBuild(EntityId caller, EntityId target, ObjectType objectType, Vec3 coord, bytes memory extraData)
     external
     onlyWorld
   {
     require(_isAllowed(target, caller), "Only approved callers can build in the force field");
   }
 
-  function onMine(EntityId caller, EntityId target, ObjectTypeId objectTypeId, Vec3 coord, bytes memory extraData)
+  function onMine(EntityId caller, EntityId target, ObjectType objectType, Vec3 coord, bytes memory extraData)
     external
     onlyWorld
   {

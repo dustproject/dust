@@ -1,3 +1,5 @@
+import type { ObjectTypeName } from "./objects";
+
 interface Vec3 {
   x: number;
   y: number;
@@ -6,9 +8,9 @@ interface Vec3 {
 
 interface TreeDef {
   name: string;
-  objectTypeId: string;
-  logType: string;
-  leafType: string;
+  sapling: ObjectTypeName;
+  log: ObjectTypeName;
+  leaf: ObjectTypeName;
   trunkHeight: number;
   canopyStart: number;
   canopyEnd: number; // exclusive
@@ -20,9 +22,9 @@ interface TreeDef {
 export const TREES: TreeDef[] = [
   {
     name: "Oak",
-    objectTypeId: "ObjectTypes.OakSapling",
-    logType: "ObjectTypes.OakLog",
-    leafType: "ObjectTypes.OakLeaf",
+    sapling: "OakSapling",
+    log: "OakLog",
+    leaf: "OakLeaf",
     trunkHeight: 5,
     canopyStart: 3,
     canopyEnd: 7,
@@ -32,9 +34,9 @@ export const TREES: TreeDef[] = [
   },
   {
     name: "Birch",
-    objectTypeId: "ObjectTypes.BirchSapling",
-    logType: "ObjectTypes.BirchLog",
-    leafType: "ObjectTypes.BirchLeaf",
+    sapling: "BirchSapling",
+    log: "BirchLog",
+    leaf: "BirchLeaf",
     trunkHeight: 7,
     canopyStart: 6,
     canopyEnd: 8,
@@ -44,9 +46,9 @@ export const TREES: TreeDef[] = [
   },
   {
     name: "Jungle",
-    objectTypeId: "ObjectTypes.JungleSapling",
-    logType: "ObjectTypes.JungleLog",
-    leafType: "ObjectTypes.JungleLeaf",
+    sapling: "JungleSapling",
+    log: "JungleLog",
+    leaf: "JungleLeaf",
     trunkHeight: 12,
     canopyStart: 11,
     canopyEnd: 16,
@@ -56,9 +58,9 @@ export const TREES: TreeDef[] = [
   },
   {
     name: "Sakura",
-    objectTypeId: "ObjectTypes.SakuraSapling",
-    logType: "ObjectTypes.SakuraLog",
-    leafType: "ObjectTypes.SakuraLeaf",
+    sapling: "SakuraSapling",
+    log: "SakuraLog",
+    leaf: "SakuraLeaf",
     trunkHeight: 6,
     canopyStart: 4,
     canopyEnd: 9,
@@ -68,9 +70,9 @@ export const TREES: TreeDef[] = [
   },
   {
     name: "Acacia",
-    objectTypeId: "ObjectTypes.AcaciaSapling",
-    logType: "ObjectTypes.AcaciaLog",
-    leafType: "ObjectTypes.AcaciaLeaf",
+    sapling: "AcaciaSapling",
+    log: "AcaciaLog",
+    leaf: "AcaciaLeaf",
     trunkHeight: 6,
     canopyStart: 6,
     canopyEnd: 8,
@@ -80,9 +82,9 @@ export const TREES: TreeDef[] = [
   },
   {
     name: "Spruce",
-    objectTypeId: "ObjectTypes.SpruceSapling",
-    logType: "ObjectTypes.SpruceLog",
-    leafType: "ObjectTypes.SpruceLeaf",
+    sapling: "SpruceSapling",
+    log: "SpruceLog",
+    leaf: "SpruceLeaf",
     trunkHeight: 9,
     canopyStart: 3,
     canopyEnd: 12,
@@ -92,9 +94,9 @@ export const TREES: TreeDef[] = [
   },
   {
     name: "DarkOak",
-    objectTypeId: "ObjectTypes.DarkOakSapling",
-    logType: "ObjectTypes.DarkOakLog",
-    leafType: "ObjectTypes.DarkOakLeaf",
+    sapling: "DarkOakSapling",
+    log: "DarkOakLog",
+    leaf: "DarkOakLeaf",
     trunkHeight: 6,
     canopyStart: 2,
     canopyEnd: 8,
@@ -104,9 +106,9 @@ export const TREES: TreeDef[] = [
   },
   {
     name: "Mangrove",
-    objectTypeId: "ObjectTypes.MangroveSapling",
-    logType: "ObjectTypes.MangroveLog",
-    leafType: "ObjectTypes.MangroveLeaf",
+    sapling: "MangroveSapling",
+    log: "MangroveLog",
+    leaf: "MangroveLeaf",
     trunkHeight: 8,
     canopyStart: 6,
     canopyEnd: 12,

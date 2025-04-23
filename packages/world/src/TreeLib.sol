@@ -2,8 +2,7 @@
 /* Auto‑generated. DO NOT EDIT. */
 pragma solidity >=0.8.24;
 
-import { ObjectType } from "./ObjectType.sol";
-import { ObjectTypes } from "./ObjectType.sol";
+import { ObjectType, ObjectTypes } from "./ObjectType.sol";
 import { Vec3 } from "./Vec3.sol";
 
 library TreeBlobs {

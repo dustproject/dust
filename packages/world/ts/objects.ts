@@ -96,6 +96,7 @@ export const uniqueObjectCategories: Category[] = [
   "Hoe",
   "SmartEntityBlock",
   "Bucket",
+  "SmartEntityNonBlock",
 ];
 
 export const toolCategories: Category[] = ["Pick", "Axe", "Whacker", "Hoe"];
@@ -495,6 +496,7 @@ export const categoryObjects: {
   Food: [{ name: "WheatSlop", energy: 12800000000000000n }],
   Fuel: [{ name: "Fuel", energy: 90000000000000000n }],
   Player: [{ name: "Player" }],
+  // TODO: change this category name for fragments
   SmartEntityNonBlock: [{ name: "Fragment" }],
 } as const;
 

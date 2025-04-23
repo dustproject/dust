@@ -44,22 +44,22 @@ export function genTreeLib(): string {
   bytes constant ${N}_RANDOM = hex"${RND}";`);
 
     treePieces.push(`
-    if (objectType == ${t.objectTypeId}) {
+    if (objectType == ObjectTypes.${t.sapling}) {
       fixedLeaves  = _loadLeaves(TreeBlobs.${N}_FIXED );
       randomLeaves = _loadLeaves(TreeBlobs.${N}_RANDOM);
     }`);
 
     dataPieces.push(`
-    if (objectType == ${t.objectTypeId}) {
+    if (objectType == ObjectTypes.${t.sapling}) {
       return TreeData({
-        logType:  ${t.logType},
-        leafType: ${t.leafType},
+        logType:  ObjectTypes.${t.log},
+        leafType: ObjectTypes.${t.leaf},
         trunkHeight: ${t.trunkHeight}
       });
     }`);
 
     chancePieces.push(`
-    if (objectType == ${t.leafType}) {
+    if (objectType == ObjectTypes.${t.leaf}) {
       return uint256(3) * 100 / ${fixed.length + random.length};
     }`);
   }
@@ -69,8 +69,7 @@ export function genTreeLib(): string {
 pragma solidity >=0.8.24;
 
 import { Vec3 }         from "./Vec3.sol";
-import { ObjectType } from "./ObjectType.sol";
-import { ObjectTypes }  from "./ObjectType.sol";
+import { ObjectType, ObjectTypes  } from "./ObjectType.sol";
 
 library TreeBlobs {${blobs.join("")}
 }
@@ -78,7 +77,7 @@ library TreeBlobs {${blobs.join("")}
 struct TreeData {
   ObjectType logType;
   ObjectType leafType;
-  uint32       trunkHeight;
+  uint32     trunkHeight;
 }
 
 library TreeLib {
