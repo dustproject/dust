@@ -52,4 +52,11 @@ contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, WorldConsumer
   function _isAllowed(EntityId target, EntityId caller) internal view returns (bool) {
     return AllowedCaller.get(SmartItem.get(target), caller);
   }
+
+  // We include a fallback function to prevent hooks not implemented
+  // or new hooks added after the program is deployed, to be called
+  // and not revert
+  fallback() external {
+    // Do nothing
+  }
 }
