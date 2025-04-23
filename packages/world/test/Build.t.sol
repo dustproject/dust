@@ -170,7 +170,7 @@ contract BuildTest is DustTest {
 
     (,, Vec3 bobCoord) = spawnPlayerOnAirChunk(aliceCoord + vec3(0, 0, 3));
 
-    ObjectType buildObjectType = ObjectTypes.SakuraLeaf;
+    ObjectType buildObjectType = ObjectTypes.FescueGrass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 4);
     assertInventoryHasObject(aliceEntityId, buildObjectType, 4);
 
@@ -210,7 +210,7 @@ contract BuildTest is DustTest {
   function testJumpBuildFailsIfPassThrough() public {
     (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
-    ObjectType buildObjectType = ObjectTypes.SakuraLeaf;
+    ObjectType buildObjectType = ObjectTypes.FescueGrass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
