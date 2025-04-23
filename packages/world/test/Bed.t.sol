@@ -8,12 +8,14 @@ import { WorldContextConsumer } from "@latticexyz/world/src/WorldContext.sol";
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
-import { TestEnergyUtils } from "./utils/TestUtils.sol";
+import { TestEnergyUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 import { EntityId } from "../src/EntityId.sol";
 
 import { BedPlayer, BedPlayerData } from "../src/codegen/tables/BedPlayer.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
+
+import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { Machine } from "../src/codegen/tables/Machine.sol";
 
 import { ObjectType } from "../src/codegen/tables/ObjectType.sol";
@@ -395,6 +397,91 @@ contract BedTest is DustTest {
 
     // Check that the player energy was drained during the playerDrainTime seconds that the forcefield was off
     assertEq(Energy.getEnergy(aliceEntityId), 0, "Player energy was not drained");
+  }
+
+  function testSleepWakeupSleep() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupFlatChunkWithPlayer();
+
+    Vec3 bedCoord = coord - vec3(2, 0, 0);
+
+    uint128 initialPlayerEnergy = Energy.getEnergy(aliceEntityId);
+
+    uint128 initialForcefieldEnergy = 1_000_000 * 10 ** 14;
+    // Set forcefield
+    EntityId forcefieldEntityId = setupForceField(
+      bedCoord,
+      EnergyData({
+        energy: initialForcefieldEnergy,
+        lastUpdatedTime: uint128(vm.getBlockTimestamp()),
+        drainRate: MACHINE_ENERGY_DRAIN_RATE
+      })
+    );
+
+    EntityId bedEntityId = createBed(bedCoord);
+
+    attachTestProgram(bedEntityId);
+
+    // Give objects to the player to test that transfers work
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Grass, 1);
+    TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.IronPick);
+
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Grass, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.IronPick, 1);
+    assertInventoryHasObject(bedEntityId, ObjectTypes.Grass, 0);
+    assertInventoryHasObject(bedEntityId, ObjectTypes.IronPick, 0);
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(bedEntityId), 0, "Wrong number of occupied inventory slots");
+
+    vm.prank(alice);
+    world.sleep(aliceEntityId, bedEntityId, "");
+
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Grass, 0);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.IronPick, 0);
+    assertInventoryHasObject(bedEntityId, ObjectTypes.Grass, 1);
+    assertInventoryHasObject(bedEntityId, ObjectTypes.IronPick, 1);
+    assertEq(Inventory.length(aliceEntityId), 0, "Alice shouldn't have occupied inventory slots");
+    assertEq(Inventory.length(bedEntityId), 2, "Items should have been transferred to bed");
+
+    uint128 timeDelta = 1000 seconds;
+    vm.warp(vm.getBlockTimestamp() + timeDelta);
+
+    // Wakeup in the original coord
+    vm.prank(alice);
+    world.wakeup(aliceEntityId, coord, "");
+
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Grass, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.IronPick, 1);
+    assertInventoryHasObject(bedEntityId, ObjectTypes.Grass, 0);
+    assertInventoryHasObject(bedEntityId, ObjectTypes.IronPick, 0);
+    assertEq(Inventory.length(aliceEntityId), 2, "Items should have been transferred back to alice after wakeup");
+    assertEq(Inventory.length(bedEntityId), 0, "Bed shouldn't have occupied inventory slots");
+
+    EnergyData memory ffEnergyData = Energy.get(forcefieldEntityId);
+    assertEq(
+      ffEnergyData.energy,
+      initialForcefieldEnergy - timeDelta * (MACHINE_ENERGY_DRAIN_RATE + PLAYER_ENERGY_DRAIN_RATE),
+      "Forcefield energy wasn't drained correctly"
+    );
+
+    assertEq(ffEnergyData.drainRate, MACHINE_ENERGY_DRAIN_RATE, "Forcefield drain rate was not restored");
+    assertEq(Energy.getEnergy(aliceEntityId), initialPlayerEnergy, "Player energy was drained while sleeping");
+
+    // Sleep again
+    vm.prank(alice);
+    world.sleep(aliceEntityId, bedEntityId, "");
+
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Grass, 0);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.IronPick, 0);
+    assertInventoryHasObject(bedEntityId, ObjectTypes.Grass, 1);
+    assertInventoryHasObject(bedEntityId, ObjectTypes.IronPick, 1);
+    assertEq(Inventory.length(aliceEntityId), 0, "Alice shouldn't have occupied inventory slots");
+    assertEq(Inventory.length(bedEntityId), 2, "Items should have been transferred to bed");
+
+    BedPlayerData memory bedPlayerData = BedPlayer.get(bedEntityId);
+    assertEq(bedPlayerData.playerEntityId.unwrap(), aliceEntityId.unwrap(), "Bed's player entity is not alice");
+    assertEq(
+      PlayerStatus.getBedEntityId(aliceEntityId).unwrap(), bedEntityId.unwrap(), "Player's bed entity is not the bed"
+    );
   }
 
   function testTransfersInventoryToBed() public {
