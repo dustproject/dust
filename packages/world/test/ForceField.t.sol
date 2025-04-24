@@ -13,9 +13,9 @@ import { TestEnergyUtils, TestForceFieldUtils, TestInventoryUtils } from "./util
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
+import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { EntityProgram } from "../src/codegen/tables/EntityProgram.sol";
 import { Machine } from "../src/codegen/tables/Machine.sol";
-import { ObjectType } from "../src/codegen/tables/ObjectType.sol";
 import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
 import { DustTest, console } from "./DustTest.sol";
 
@@ -24,8 +24,8 @@ import { FragmentPosition, MovablePosition, Position, ReversePosition } from "..
 
 import { FRAGMENT_SIZE, MACHINE_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
-import { ObjectTypeId } from "../src/ObjectTypeId.sol";
-import { ObjectTypes } from "../src/ObjectTypes.sol";
+import { ObjectType } from "../src/ObjectType.sol";
+import { ObjectTypes } from "../src/ObjectType.sol";
 import { ProgramId } from "../src/ProgramId.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 
@@ -40,11 +40,11 @@ contract TestForceFieldProgram is System {
     // Function is now empty since we use vm.expectCall to verify it was called with correct parameters
   }
 
-  function onBuild(EntityId, EntityId, ObjectTypeId, Vec3, bytes memory) external view {
+  function onBuild(EntityId, EntityId, ObjectType, Vec3, bytes memory) external view {
     require(!revertOnBuild, "Not allowed by forcefield");
   }
 
-  function onMine(EntityId, EntityId, ObjectTypeId, Vec3, bytes memory) external view {
+  function onMine(EntityId, EntityId, ObjectType, Vec3, bytes memory) external view {
     require(!revertOnMine, "Not allowed by forcefield");
   }
 
@@ -74,11 +74,11 @@ contract TestFragmentProgram is System {
     // Function is now empty since we use vm.expectCall to verify it was called with correct parameters
   }
 
-  function onBuild(EntityId, EntityId, ObjectTypeId, Vec3, bytes memory) external view {
+  function onBuild(EntityId, EntityId, ObjectType, Vec3, bytes memory) external view {
     require(!revertOnBuild, "Not allowed by forcefield fragment");
   }
 
-  function onMine(EntityId, EntityId, ObjectTypeId, Vec3, bytes memory) external view {
+  function onMine(EntityId, EntityId, ObjectType, Vec3, bytes memory) external view {
     require(!revertOnMine, "Not allowed by forcefield fragment");
   }
 
@@ -111,7 +111,7 @@ contract ForceFieldTest is DustTest {
 
     Vec3 coord;
     // Handle force field fragments differently than regular entities
-    if (ObjectType.get(entityId) == ObjectTypes.Fragment) {
+    if (EntityObjectType.get(entityId) == ObjectTypes.Fragment) {
       // For fragments, we need to use FragmentPosition instead of Position
       coord = FragmentPosition.get(entityId).fromFragmentCoord();
     } else {
@@ -143,9 +143,9 @@ contract ForceFieldTest is DustTest {
     // Mine a block within the force field's area
     Vec3 mineCoord = forceFieldCoord + vec3(1, 0, 0);
 
-    ObjectTypeId mineObjectTypeId = ObjectTypes.Grass;
-    ObjectTypeMetadata.setMass(mineObjectTypeId, playerHandMassReduction - 1);
-    setObjectAtCoord(mineCoord, mineObjectTypeId);
+    ObjectType mineObjectType = ObjectTypes.Grass;
+    ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction - 1);
+    setObjectAtCoord(mineCoord, mineObjectType);
 
     // Prank as the player to mine the block
     vm.prank(alice);
@@ -153,7 +153,7 @@ contract ForceFieldTest is DustTest {
 
     // Verify that the block was successfully mined (should be replaced with Air)
     EntityId mineEntityId = ReversePosition.get(mineCoord);
-    assertTrue(ObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
+    assertTrue(EntityObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
   }
 
   function testMineFailsIfNotAllowedByForceField() public {
@@ -173,9 +173,9 @@ contract ForceFieldTest is DustTest {
     // Mine a block within the force field's area
     Vec3 mineCoord = forceFieldCoord + vec3(1, 0, 0);
 
-    ObjectTypeId mineObjectTypeId = ObjectTypes.Grass;
-    ObjectTypeMetadata.setMass(mineObjectTypeId, playerHandMassReduction - 1);
-    setObjectAtCoord(mineCoord, mineObjectTypeId);
+    ObjectType mineObjectType = ObjectTypes.Grass;
+    ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction - 1);
+    setObjectAtCoord(mineCoord, mineObjectType);
 
     // Prank as the player to mine the block
     vm.prank(alice);
@@ -202,9 +202,9 @@ contract ForceFieldTest is DustTest {
     // Mine a block within the force field's area
     Vec3 mineCoord = forceFieldCoord + vec3(1, 0, 0);
 
-    ObjectTypeId mineObjectTypeId = ObjectTypes.Grass;
-    ObjectTypeMetadata.setMass(mineObjectTypeId, playerHandMassReduction - 1);
-    setObjectAtCoord(mineCoord, mineObjectTypeId);
+    ObjectType mineObjectType = ObjectTypes.Grass;
+    ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction - 1);
+    setObjectAtCoord(mineCoord, mineObjectType);
 
     // Prank as the player to mine the block
     vm.prank(alice);
@@ -233,11 +233,11 @@ contract ForceFieldTest is DustTest {
     setTerrainAtCoord(buildCoord, ObjectTypes.Air);
 
     // Add block to player's inventory
-    ObjectTypeId buildObjectTypeId = ObjectTypes.Grass;
-    TestInventoryUtils.addObject(aliceEntityId, buildObjectTypeId, 1);
-    assertInventoryHasObject(aliceEntityId, buildObjectTypeId, 1);
+    ObjectType buildObjectType = ObjectTypes.Grass;
+    TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
-    uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectTypeId);
+    uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
 
     // Build the block
     vm.prank(alice);
@@ -245,7 +245,7 @@ contract ForceFieldTest is DustTest {
 
     // Verify that the block was successfully built
     EntityId buildEntityId = ReversePosition.get(buildCoord);
-    assertTrue(ObjectType.get(buildEntityId) == buildObjectTypeId, "Block was not built correctly");
+    assertTrue(EntityObjectType.get(buildEntityId) == buildObjectType, "Block was not built correctly");
   }
 
   function testBuildFailsIfNotAllowedByForceField() public {
@@ -269,12 +269,12 @@ contract ForceFieldTest is DustTest {
     setTerrainAtCoord(buildCoord, ObjectTypes.Air);
 
     // Add block to player's inventory
-    ObjectTypeId buildObjectTypeId = ObjectTypes.Grass;
-    TestInventoryUtils.addObject(aliceEntityId, buildObjectTypeId, 1);
-    assertInventoryHasObject(aliceEntityId, buildObjectTypeId, 1);
+    ObjectType buildObjectType = ObjectTypes.Grass;
+    TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Try to build the block, should fail
-    uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectTypeId);
+    uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
     vm.prank(alice);
     vm.expectRevert("Not allowed by forcefield");
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
@@ -303,11 +303,11 @@ contract ForceFieldTest is DustTest {
     setTerrainAtCoord(buildCoord, ObjectTypes.Air);
 
     // Add block to player's inventory
-    ObjectTypeId buildObjectTypeId = ObjectTypes.Grass;
-    TestInventoryUtils.addObject(aliceEntityId, buildObjectTypeId, 1);
-    assertInventoryHasObject(aliceEntityId, buildObjectTypeId, 1);
+    ObjectType buildObjectType = ObjectTypes.Grass;
+    TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
-    uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectTypeId);
+    uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
 
     // Try to build the block, should fail
     vm.prank(alice);
@@ -356,9 +356,9 @@ contract ForceFieldTest is DustTest {
     // Mine a block within the force field's area
     Vec3 mineCoord = forceFieldCoord + vec3(1, 0, 0);
 
-    ObjectTypeId mineObjectTypeId = ObjectTypes.Grass;
-    ObjectTypeMetadata.setMass(mineObjectTypeId, playerHandMassReduction - 1);
-    setObjectAtCoord(mineCoord, mineObjectTypeId);
+    ObjectType mineObjectType = ObjectTypes.Grass;
+    ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction - 1);
+    setObjectAtCoord(mineCoord, mineObjectType);
 
     // Prank as the player to mine the block, should not revert since forcefield has no energy
     vm.prank(alice);
@@ -366,7 +366,7 @@ contract ForceFieldTest is DustTest {
 
     // Verify that the block was successfully mined (should be replaced with Air)
     EntityId mineEntityId = ReversePosition.get(mineCoord);
-    assertTrue(ObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
+    assertTrue(EntityObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
   }
 
   function testFragmentProgramIsNotUsedIfNotActive() public {
@@ -393,9 +393,9 @@ contract ForceFieldTest is DustTest {
     // Mine a block within the force field's area
     Vec3 mineCoord = forceFieldCoord + vec3(1, 0, 0);
 
-    ObjectTypeId mineObjectTypeId = ObjectTypes.Grass;
-    ObjectTypeMetadata.setMass(mineObjectTypeId, playerHandMassReduction - 1);
-    setObjectAtCoord(mineCoord, mineObjectTypeId);
+    ObjectType mineObjectType = ObjectTypes.Grass;
+    ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction - 1);
+    setObjectAtCoord(mineCoord, mineObjectType);
 
     // Prank as the player to mine the block, should not revert since forcefield is destroyed
     vm.prank(alice);
@@ -403,7 +403,7 @@ contract ForceFieldTest is DustTest {
 
     // Verify that the block was successfully mined (should be replaced with Air)
     EntityId mineEntityId = ReversePosition.get(mineCoord);
-    assertTrue(ObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
+    assertTrue(EntityObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
   }
 
   function testAddFragment() public {
@@ -730,11 +730,11 @@ contract ForceFieldTest is DustTest {
       setTerrainAtCoord(buildCoord, ObjectTypes.Air);
 
       // Add block to player's inventory
-      ObjectTypeId buildObjectTypeId = ObjectTypes.Grass;
-      TestInventoryUtils.addObject(aliceEntityId, buildObjectTypeId, 1);
-      assertInventoryHasObject(aliceEntityId, buildObjectTypeId, 1);
+      ObjectType buildObjectType = ObjectTypes.Grass;
+      TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+      assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
-      uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectTypeId);
+      uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
 
       // Build should succeed
       vm.prank(alice);
@@ -742,7 +742,7 @@ contract ForceFieldTest is DustTest {
 
       // Verify build succeeded
       EntityId buildEntityId = ReversePosition.get(buildCoord);
-      assertTrue(ObjectType.get(buildEntityId) == buildObjectTypeId, "Block was not built correctly");
+      assertTrue(EntityObjectType.get(buildEntityId) == buildObjectType, "Block was not built correctly");
 
       // Now set the program to disallow building
       program.setRevertOnBuild(true);
@@ -754,10 +754,10 @@ contract ForceFieldTest is DustTest {
       setTerrainAtCoord(buildCoord2, ObjectTypes.Air);
 
       // Add block to player's inventory
-      TestInventoryUtils.addObject(aliceEntityId, buildObjectTypeId, 1);
-      assertInventoryHasObject(aliceEntityId, buildObjectTypeId, 1);
+      TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+      assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
-      inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectTypeId);
+      inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
 
       // Build should fail
       vm.prank(alice);
@@ -773,9 +773,9 @@ contract ForceFieldTest is DustTest {
       // Mine a block within the force field's area
       Vec3 mineCoord = forceFieldCoord + vec3(1, 0, 0);
 
-      ObjectTypeId mineObjectTypeId = ObjectTypes.Grass;
-      ObjectTypeMetadata.setMass(mineObjectTypeId, playerHandMassReduction - 1);
-      setObjectAtCoord(mineCoord, mineObjectTypeId);
+      ObjectType mineObjectType = ObjectTypes.Grass;
+      ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction - 1);
+      setObjectAtCoord(mineCoord, mineObjectType);
 
       // Mining should succeed
       vm.prank(alice);
@@ -783,7 +783,7 @@ contract ForceFieldTest is DustTest {
 
       // Verify mining succeeded
       EntityId mineEntityId = ReversePosition.get(mineCoord);
-      assertTrue(ObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
+      assertTrue(EntityObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
 
       // Now set the program to disallow mining
       program.setRevertOnMine(true);
@@ -791,7 +791,7 @@ contract ForceFieldTest is DustTest {
       // Define new mine coordinates
       Vec3 mineCoord2 = forceFieldCoord + vec3(-1, 0, 0);
 
-      setObjectAtCoord(mineCoord2, mineObjectTypeId);
+      setObjectAtCoord(mineCoord2, mineObjectType);
 
       // Mining should fail
       vm.prank(alice);

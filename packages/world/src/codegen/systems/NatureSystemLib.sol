@@ -6,7 +6,7 @@ pragma solidity >=0.8.24;
 import { NatureSystem } from "../../systems/NatureSystem.sol";
 import { EntityId } from "../../EntityId.sol";
 import { Vec3 } from "../../Vec3.sol";
-import { ObjectTypeId } from "../../ObjectTypeId.sol";
+import { ObjectType } from "../../ObjectType.sol";
 import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 import { IWorldCall } from "@latticexyz/world/src/IWorldKernel.sol";
 import { SystemCall } from "@latticexyz/world/src/SystemCall.sol";
@@ -44,7 +44,7 @@ library NatureSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).chunkCommit(caller, chunkCoord);
   }
 
-  function respawnResource(NatureSystemType self, uint256 blockNumber, ObjectTypeId resourceType) internal {
+  function respawnResource(NatureSystemType self, uint256 blockNumber, ObjectType resourceType) internal {
     return CallWrapper(self.toResourceId(), address(0)).respawnResource(blockNumber, resourceType);
   }
 
@@ -62,12 +62,12 @@ library NatureSystemLib {
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
-  function respawnResource(CallWrapper memory self, uint256 blockNumber, ObjectTypeId resourceType) internal {
+  function respawnResource(CallWrapper memory self, uint256 blockNumber, ObjectType resourceType) internal {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert NatureSystemLib_CallingFromRootSystem();
 
     bytes memory systemCall = abi.encodeCall(
-      _respawnResource_uint256_ObjectTypeId.respawnResource,
+      _respawnResource_uint256_ObjectType.respawnResource,
       (blockNumber, resourceType)
     );
     self.from == address(0)
@@ -90,9 +90,9 @@ library NatureSystemLib {
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
-  function respawnResource(RootCallWrapper memory self, uint256 blockNumber, ObjectTypeId resourceType) internal {
+  function respawnResource(RootCallWrapper memory self, uint256 blockNumber, ObjectType resourceType) internal {
     bytes memory systemCall = abi.encodeCall(
-      _respawnResource_uint256_ObjectTypeId.respawnResource,
+      _respawnResource_uint256_ObjectType.respawnResource,
       (blockNumber, resourceType)
     );
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
@@ -145,8 +145,8 @@ interface _chunkCommit_EntityId_Vec3 {
   function chunkCommit(EntityId caller, Vec3 chunkCoord) external;
 }
 
-interface _respawnResource_uint256_ObjectTypeId {
-  function respawnResource(uint256 blockNumber, ObjectTypeId resourceType) external;
+interface _respawnResource_uint256_ObjectType {
+  function respawnResource(uint256 blockNumber, ObjectType resourceType) external;
 }
 
 interface _growSeed_EntityId_Vec3 {

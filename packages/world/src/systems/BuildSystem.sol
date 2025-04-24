@@ -8,10 +8,11 @@ import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 
 import { DisabledExtraDrops } from "../codegen/tables/DisabledExtraDrops.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Inventory } from "../codegen/tables/Inventory.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
-import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { Orientation } from "../codegen/tables/Orientation.sol";
@@ -21,7 +22,7 @@ import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 import { MovablePosition, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
 
 import { removeEnergyFromLocalPool, transferEnergyToPool, updateMachineEnergy } from "../utils/EnergyUtils.sol";
-import { getMovableEntityAt, getObjectTypeIdAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
+import { getMovableEntityAt, getObjectTypeAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { BuildNotification, MoveNotification, notify } from "../utils/NotifUtils.sol";
@@ -31,15 +32,11 @@ import { TerrainLib } from "./libraries/TerrainLib.sol";
 
 import { BUILD_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
-import { ObjectTypeId } from "../ObjectTypeId.sol";
-import { ObjectTypeLib } from "../ObjectTypeLib.sol";
-import { ObjectTypes } from "../ObjectTypes.sol";
+import { ObjectType, ObjectTypes } from "../ObjectType.sol";
 
 import { ProgramId } from "../ProgramId.sol";
 import { IBuildHook } from "../ProgramInterfaces.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
-
-using ObjectTypeLib for ObjectTypeId;
 
 contract BuildSystem is System {
   function build(EntityId caller, Vec3 coord, uint16 slot, bytes calldata extraData) public returns (EntityId) {
@@ -52,7 +49,7 @@ contract BuildSystem is System {
   {
     caller.activate();
     caller.requireConnected(coord);
-    ObjectTypeId buildType = InventorySlot._getObjectType(caller, slot);
+    ObjectType buildType = InventorySlot._getObjectType(caller, slot);
     require(buildType.isBlock(), "Cannot build non-block object");
 
     // If player died, return early
@@ -70,7 +67,7 @@ contract BuildSystem is System {
     // Note: we call this after the build state has been updated, to prevent re-entrancy attacks
     BuildLib._requireBuildsAllowed(caller, base, buildType, coords, extraData);
 
-    notify(caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectTypeId: buildType }));
+    notify(caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectType: buildType }));
 
     return base;
   }
@@ -81,8 +78,8 @@ contract BuildSystem is System {
   {
     caller.activate();
 
-    ObjectTypeId buildObjectType = InventorySlot._getObjectType(caller, slot);
-    require(!ObjectTypeMetadata._getCanPassThrough(buildObjectType), "Cannot jump build on a pass-through block");
+    ObjectType buildObjectType = InventorySlot._getObjectType(caller, slot);
+    require(!buildObjectType.isPassThrough(), "Cannot jump build on a pass-through block");
 
     Vec3 coord = MovablePosition._get(caller);
 
@@ -101,7 +98,7 @@ contract BuildSystem is System {
 }
 
 library BuildLib {
-  function _handleBuildType(EntityId base, ObjectTypeId buildType, Vec3 coord) public {
+  function _handleBuildType(EntityId base, ObjectType buildType, Vec3 coord) public {
     if (buildType.isGrowable()) {
       _handleGrowable(base, buildType, coord);
     } else if (buildType.hasExtraDrops()) {
@@ -109,20 +106,20 @@ library BuildLib {
     }
   }
 
-  function _addBlock(ObjectTypeId buildObjectType, Vec3 coord) internal returns (EntityId) {
-    (EntityId terrain, ObjectTypeId terrainObjectTypeId) = getOrCreateEntityAt(coord);
-    require(terrainObjectTypeId == ObjectTypes.Air, "Cannot build on a non-air block");
+  function _addBlock(ObjectType buildType, Vec3 coord) internal returns (EntityId) {
+    (EntityId terrain, ObjectType terrainObjectType) = getOrCreateEntityAt(coord);
+    require(terrainObjectType == ObjectTypes.Air, "Cannot build on a non-air block");
     require(Inventory._length(terrain) == 0, "Cannot build where there are dropped objects");
-    if (!ObjectTypeMetadata._getCanPassThrough(buildObjectType)) {
+    if (!buildType.isPassThrough()) {
       require(!getMovableEntityAt(coord).exists(), "Cannot build on a movable entity");
     }
 
-    ObjectType._set(terrain, buildObjectType);
+    EntityObjectType._set(terrain, buildType);
 
     return terrain;
   }
 
-  function _addBlocks(Vec3 baseCoord, ObjectTypeId buildType, Direction direction)
+  function _addBlocks(Vec3 baseCoord, ObjectType buildType, Direction direction)
     public
     returns (EntityId, Vec3[] memory)
   {
@@ -140,23 +137,23 @@ library BuildLib {
     return (base, coords);
   }
 
-  function _handleGrowable(EntityId base, ObjectTypeId buildType, Vec3 baseCoord) public {
-    ObjectTypeId belowTypeId = getObjectTypeIdAt(baseCoord - vec3(0, 1, 0));
+  function _handleGrowable(EntityId base, ObjectType buildType, Vec3 baseCoord) public {
+    ObjectType belowType = getObjectTypeAt(baseCoord - vec3(0, 1, 0));
     if (buildType.isSeed()) {
-      require(belowTypeId == ObjectTypes.WetFarmland, "Seeds need wet farmland");
+      require(belowType == ObjectTypes.WetFarmland, "Seeds need wet farmland");
     } else if (buildType.isSapling()) {
-      require(belowTypeId == ObjectTypes.Dirt || belowTypeId == ObjectTypes.Grass, "Tree saplings need dirt or grass");
+      require(belowType == ObjectTypes.Dirt || belowType == ObjectTypes.Grass, "Tree saplings need dirt or grass");
     }
 
     removeEnergyFromLocalPool(baseCoord, ObjectTypeMetadata._getEnergy(buildType));
 
-    SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildType.timeToGrow());
+    SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildType.getTimeToGrow());
   }
 
   function _requireBuildsAllowed(
     EntityId caller,
     EntityId base,
-    ObjectTypeId buildType,
+    ObjectType buildType,
     Vec3[] memory coords,
     bytes calldata extraData
   ) public {

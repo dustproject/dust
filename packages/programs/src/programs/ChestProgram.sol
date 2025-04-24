@@ -4,8 +4,6 @@ pragma solidity >=0.8.24;
 import { IBaseWorld } from "@latticexyz/world-consumer/src/experimental/WorldConsumer.sol";
 
 import { EntityId } from "@dust/world/src/EntityId.sol";
-import { ObjectTypeId } from "@dust/world/src/ObjectTypeId.sol";
-import { ObjectAmount } from "@dust/world/src/ObjectTypeLib.sol";
 
 import { ITransferHook, SlotData } from "@dust/world/src/ProgramInterfaces.sol";
 

@@ -13,25 +13,23 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { MAX_PLAYER_ENERGY } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
-import { ObjectTypeId } from "../ObjectTypeId.sol";
-import { ObjectTypeLib } from "../ObjectTypeLib.sol";
+import { ObjectType } from "../ObjectType.sol";
+
 import { Vec3 } from "../Vec3.sol";
 
 contract FoodSystem is System {
-  using ObjectTypeLib for ObjectTypeId;
-
-  function eat(EntityId caller, ObjectTypeId objectTypeId, uint16 numToEat) public {
+  function eat(EntityId caller, ObjectType objectType, uint16 numToEat) public {
     EnergyData memory energyData = caller.activate();
 
-    require(objectTypeId.isFood(), "Object is not food");
+    require(objectType.isFood(), "Object is not food");
 
-    uint128 newEnergy = ObjectTypeMetadata._getEnergy(objectTypeId) * numToEat + energyData.energy;
+    uint128 newEnergy = ObjectTypeMetadata._getEnergy(objectType) * numToEat + energyData.energy;
     if (newEnergy > MAX_PLAYER_ENERGY) {
       addEnergyToLocalPool(caller.getPosition(), newEnergy - MAX_PLAYER_ENERGY);
       newEnergy = MAX_PLAYER_ENERGY;
     }
 
-    InventoryUtils.removeObject(caller, objectTypeId, numToEat);
+    InventoryUtils.removeObject(caller, objectType, numToEat);
 
     Energy._setEnergy(caller, newEnergy);
   }

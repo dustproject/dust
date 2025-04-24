@@ -7,10 +7,11 @@ import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Furnace, FurnaceData } from "../codegen/tables/Furnace.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
-import { ObjectType } from "../codegen/tables/ObjectType.sol";
+
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { Recipes, RecipesData } from "../codegen/tables/Recipes.sol";
 
@@ -21,15 +22,16 @@ import { CraftNotification, notify } from "../utils/NotifUtils.sol";
 
 import { CRAFT_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
-import { ObjectTypeId } from "../ObjectTypeId.sol";
-import { ObjectTypeLib } from "../ObjectTypeLib.sol";
-import { ObjectTypes } from "../ObjectTypes.sol";
+
+import { ObjectType, ObjectTypes } from "../ObjectType.sol";
 import { ITransferHook } from "../ProgramInterfaces.sol";
+
+import { ObjectTypes } from "../ObjectType.sol";
+
+import { NatureLib } from "../NatureLib.sol";
 import { Vec3 } from "../Vec3.sol";
 
 contract CraftSystem is System {
-  using ObjectTypeLib for ObjectTypeId;
-
   function craftWithStation(EntityId caller, EntityId station, bytes32 recipeId, SlotAmount[] memory inputs) public {
     caller.activate();
     RecipesData memory recipe = Recipes._get(recipeId);
@@ -37,7 +39,7 @@ contract CraftSystem is System {
 
     if (!recipe.stationTypeId.isNull()) {
       require(station.exists(), "This recipe requires a station");
-      require(ObjectType._get(station) == recipe.stationTypeId, "Invalid station");
+      require(EntityObjectType._get(station) == recipe.stationTypeId, "Invalid station");
       caller.requireConnected(station);
     }
 
@@ -46,7 +48,7 @@ contract CraftSystem is System {
 
     // If the recipe requires a furnace, the input slots reference the furnace
     if (recipe.stationTypeId == ObjectTypes.Furnace) {
-      _beginSmelting(station, recipeId, recipe, inputs);
+      CraftLib._beginSmelting(station, recipeId, recipe, inputs);
     } else {
       CraftLib._consumeRecipeInputs(caller, recipe, inputs);
       CraftLib._createRecipeOutputs(caller, recipe);
@@ -61,7 +63,7 @@ contract CraftSystem is System {
 
   function finishSmelting(EntityId caller, EntityId furnace, bytes memory extraData) public {
     caller.activate();
-    require(ObjectType._get(furnace) == ObjectTypes.Furnace, "Not a furnace");
+    require(EntityObjectType._get(furnace) == ObjectTypes.Furnace, "Not a furnace");
     caller.requireConnected(furnace);
 
     FurnaceData memory furnaceData = Furnace._get(furnace);
@@ -81,9 +83,11 @@ contract CraftSystem is System {
 
     notify(caller, CraftNotification({ recipeId: furnaceData.recipeId, station: furnace }));
   }
+}
 
+library CraftLib {
   function _beginSmelting(EntityId furnace, bytes32 recipeId, RecipesData memory recipe, SlotAmount[] memory inputs)
-    private
+    public
   {
     FurnaceData memory furnaceData = Furnace._get(furnace);
     require(furnaceData.recipeId == bytes32(0), "Furnace is already smelting");
@@ -92,7 +96,7 @@ contract CraftSystem is System {
 
     uint256 currentInput = 0;
     for (uint256 i = 0; i < recipe.inputTypes.length; i++) {
-      ObjectTypeId recipeType = ObjectTypeId.wrap(recipe.inputTypes[i]);
+      ObjectType recipeType = ObjectType.wrap(recipe.inputTypes[i]);
       uint16 remainingAmount = recipe.inputAmounts[i];
 
       while (remainingAmount > 0) {
@@ -100,39 +104,17 @@ contract CraftSystem is System {
         uint16 amount = inputs[currentInput].amount;
         require(amount > 0, "Input amount must be greater than 0");
 
-        ObjectTypeId inputType = InventorySlot._getObjectType(furnace, inputs[currentInput].slot);
-        CraftLib._validateRecipeInput(recipeType, inputType);
+        ObjectType inputType = InventorySlot._getObjectType(furnace, inputs[currentInput].slot);
+        require(recipeType.matches(inputType), "Input type does not match required recipe type");
 
         // Only burn the coal inputs so they can't be retrieved
         if (recipeType == ObjectTypes.CoalOre) {
           InventoryUtils.removeObjectFromSlot(furnace, inputs[currentInput].slot, amount);
-          recipeType.burnOre(recipe.inputAmounts[i]);
+          NatureLib.burnOre(recipeType, recipe.inputAmounts[i]);
         }
         remainingAmount -= amount;
         currentInput++;
       }
-    }
-  }
-}
-
-library CraftLib {
-  using ObjectTypeLib for ObjectTypeId;
-
-  function _validateRecipeInput(ObjectTypeId recipeType, ObjectTypeId inputType) public pure {
-    if (recipeType.isAny()) {
-      ObjectTypeId[] memory validTypes = recipeType.getObjectTypes();
-      bool matchFound = false;
-
-      for (uint256 j = 0; j < validTypes.length; j++) {
-        if (validTypes[j] == inputType) {
-          matchFound = true;
-          break;
-        }
-      }
-
-      require(matchFound, "Input type does not match any valid type for this recipe");
-    } else {
-      require(recipeType == inputType, "Input type does not match required recipe type");
     }
   }
 
@@ -140,7 +122,7 @@ library CraftLib {
     uint256 currentInput = 0;
 
     for (uint256 i = 0; i < recipe.inputTypes.length; i++) {
-      ObjectTypeId recipeType = ObjectTypeId.wrap(recipe.inputTypes[i]);
+      ObjectType recipeType = ObjectType.wrap(recipe.inputTypes[i]);
       uint16 remainingAmount = recipe.inputAmounts[i];
 
       while (remainingAmount > 0) {
@@ -148,8 +130,8 @@ library CraftLib {
         uint16 amount = inputs[currentInput].amount;
         require(amount > 0, "Input amount must be greater than 0");
 
-        ObjectTypeId inputType = InventorySlot._getObjectType(caller, inputs[currentInput].slot);
-        _validateRecipeInput(recipeType, inputType);
+        ObjectType inputType = InventorySlot._getObjectType(caller, inputs[currentInput].slot);
+        require(recipeType.matches(inputType), "Input type does not match required recipe type");
 
         InventoryUtils.removeObjectFromSlot(caller, inputs[currentInput].slot, amount);
         remainingAmount -= amount;
@@ -158,7 +140,7 @@ library CraftLib {
 
       // Handle special case for ores
       if (recipeType.isOre()) {
-        recipeType.burnOre(recipe.inputAmounts[i]);
+        NatureLib.burnOre(recipeType, recipe.inputAmounts[i]);
       }
     }
   }
@@ -167,7 +149,7 @@ library CraftLib {
     // First, calculate the total length needed for the withdrawals array
     uint256 totalWithdrawals = 0;
     for (uint256 i = 0; i < recipe.outputTypes.length; i++) {
-      ObjectTypeId outputType = ObjectTypeId.wrap(recipe.outputTypes[i]);
+      ObjectType outputType = ObjectType.wrap(recipe.outputTypes[i]);
       uint16 outputAmount = recipe.outputAmounts[i];
       totalWithdrawals += outputType.isTool() ? outputAmount : 1; // Each tool needs its own slot
     }
@@ -176,7 +158,7 @@ library CraftLib {
 
     uint256 withdrawalIndex = 0;
     for (uint256 i = 0; i < recipe.outputTypes.length; i++) {
-      ObjectTypeId outputType = ObjectTypeId.wrap(recipe.outputTypes[i]);
+      ObjectType outputType = ObjectType.wrap(recipe.outputTypes[i]);
       uint16 outputAmount = recipe.outputAmounts[i];
 
       if (outputType.isTool()) {

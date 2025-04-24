@@ -6,7 +6,7 @@ import { MachineData } from "../../codegen/tables/Machine.sol";
 import { ResourceId } from "@latticexyz/world/src/WorldResourceId.sol";
 
 import { EntityId } from "../../EntityId.sol";
-import { ObjectTypeId } from "../../ObjectTypeId.sol";
+import { ObjectType } from "../../ObjectType.sol";
 import { Vec3 } from "../../Vec3.sol";
 import { Direction } from "../../codegen/common.sol";
 
@@ -16,7 +16,7 @@ struct InventoryEntity {
 }
 
 struct InventoryObject {
-  ObjectTypeId objectTypeId;
+  ObjectType objectType;
   uint16 numObjects;
   InventoryEntity[] inventoryEntities;
 }
@@ -30,7 +30,7 @@ struct PlayerEntityData {
 struct EntityData {
   EntityId entityId;
   EntityId baseEntityId;
-  ObjectTypeId objectTypeId;
+  ObjectType objectType;
   Vec3 position;
   Direction orientation;
   InventoryObject[] inventory;

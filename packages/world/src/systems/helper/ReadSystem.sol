@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { ObjectTypeId } from "../../ObjectTypeId.sol";
+import { ObjectType } from "../../ObjectType.sol";
 import { Vec3, vec3 } from "../../Vec3.sol";
 
 import { InventorySlot, InventorySlotData } from "../../codegen/tables/InventorySlot.sol";
@@ -14,9 +14,9 @@ import { Energy, EnergyData } from "../../codegen/tables/Energy.sol";
 import { EntityProgram } from "../../codegen/tables/EntityProgram.sol";
 import { Inventory } from "../../codegen/tables/Inventory.sol";
 
+import { EntityObjectType } from "../../codegen/tables/EntityObjectType.sol";
 import { Machine, MachineData } from "../../codegen/tables/Machine.sol";
 import { Mass } from "../../codegen/tables/Mass.sol";
-import { ObjectType } from "../../codegen/tables/ObjectType.sol";
 
 import { ObjectTypeMetadata } from "../../codegen/tables/ObjectTypeMetadata.sol";
 import { Orientation } from "../../codegen/tables/Orientation.sol";
@@ -26,7 +26,7 @@ import { PlayerStatus } from "../../codegen/tables/PlayerStatus.sol";
 import { MovablePosition, Position, ReverseMovablePosition, ReversePosition } from "../../utils/Vec3Storage.sol";
 
 import { EntityId } from "../../EntityId.sol";
-import { ObjectTypes } from "../../ObjectTypes.sol";
+import { ObjectTypes } from "../../ObjectType.sol";
 
 import { TerrainLib } from "../libraries/TerrainLib.sol";
 
@@ -39,7 +39,7 @@ contract ReadSystem is System {
       return EntityData({
         entityId: EntityId.wrap(0),
         baseEntityId: EntityId.wrap(0),
-        objectTypeId: ObjectTypes.Null,
+        objectType: ObjectTypes.Null,
         inventory: new InventoryObject[](0),
         position: vec3(0, 0, 0),
         orientation: Direction.PositiveX,
@@ -56,7 +56,7 @@ contract ReadSystem is System {
     return EntityData({
       entityId: entityId,
       baseEntityId: rawBase,
-      objectTypeId: ObjectType._get(entityId),
+      objectType: EntityObjectType._get(entityId),
       position: getCoordFor(entityId),
       orientation: Orientation._get(base),
       inventory: getEntityInventory(base),
@@ -73,7 +73,7 @@ contract ReadSystem is System {
       return EntityData({
         entityId: EntityId.wrap(0),
         baseEntityId: EntityId.wrap(0),
-        objectTypeId: TerrainLib._getBlockType(coord),
+        objectType: TerrainLib._getBlockType(coord),
         inventory: new InventoryObject[](0),
         position: coord,
         orientation: Direction.PositiveX,
@@ -90,7 +90,7 @@ contract ReadSystem is System {
     return EntityData({
       entityId: entityId,
       baseEntityId: rawBase,
-      objectTypeId: ObjectType._get(entityId),
+      objectType: EntityObjectType._get(entityId),
       position: coord,
       orientation: Orientation._get(base),
       inventory: getEntityInventory(base),
@@ -143,7 +143,7 @@ contract ReadSystem is System {
 
     // Count unique object types to determine array size
     uint256 uniqueTypeCount = 0;
-    ObjectTypeId[] memory uniqueTypes = new ObjectTypeId[](slots.length);
+    ObjectType[] memory uniqueTypes = new ObjectType[](slots.length);
     bool[] memory typeExists = new bool[](slots.length);
 
     for (uint256 i = 0; i < slots.length; i++) {
@@ -167,7 +167,7 @@ contract ReadSystem is System {
     InventoryObject[] memory result = new InventoryObject[](uniqueTypeCount);
 
     for (uint256 i = 0; i < uniqueTypeCount; i++) {
-      result[i].objectTypeId = uniqueTypes[i];
+      result[i].objectType = uniqueTypes[i];
       result[i].numObjects = 0;
       result[i].inventoryEntities = new InventoryEntity[](0);
     }
@@ -224,8 +224,8 @@ contract ReadSystem is System {
   }
 
   function getCoordFor(EntityId entityId) internal view returns (Vec3) {
-    ObjectTypeId objectTypeId = ObjectType._get(entityId);
-    if (objectTypeId == ObjectTypes.Player) {
+    ObjectType objectType = EntityObjectType._get(entityId);
+    if (objectType == ObjectTypes.Player) {
       EntityId bed = PlayerStatus._getBedEntityId(entityId);
       if (bed.exists()) {
         return Position._get(bed);

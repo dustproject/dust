@@ -8,9 +8,9 @@ import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
 import { MAX_PLAYER_ENERGY } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
-import { ObjectTypeId } from "../src/ObjectTypeId.sol";
-import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
-import { ObjectTypes } from "../src/ObjectTypes.sol";
+import { ObjectType } from "../src/ObjectType.sol";
+
+import { ObjectTypes } from "../src/ObjectType.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
@@ -18,8 +18,6 @@ import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol
 import { LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 contract FoodTest is DustTest {
-  using ObjectTypeLib for ObjectTypeId;
-
   function testEatFood() public {
     // Setup player with initial energy at 50% of max
     (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupFlatChunkWithPlayer();
@@ -29,7 +27,7 @@ contract FoodTest is DustTest {
     );
 
     // Add some wheat_slop to player inventory
-    ObjectTypeId foodType = ObjectTypes.WheatSlop;
+    ObjectType foodType = ObjectTypes.WheatSlop;
     uint16 foodAmount = 3;
     TestInventoryUtils.addObject(aliceEntityId, foodType, foodAmount);
 
@@ -51,7 +49,7 @@ contract FoodTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupFlatChunkWithPlayer();
 
     // Add non-food item to inventory
-    ObjectTypeId nonFoodType = ObjectTypes.Dirt;
+    ObjectType nonFoodType = ObjectTypes.Dirt;
     uint16 amount = 3;
     TestInventoryUtils.addObject(aliceEntityId, nonFoodType, amount);
 
@@ -70,7 +68,7 @@ contract FoodTest is DustTest {
     );
 
     // Add food to player inventory
-    ObjectTypeId foodType = ObjectTypes.WheatSlop;
+    ObjectType foodType = ObjectTypes.WheatSlop;
     uint16 foodAmount = 3;
     TestInventoryUtils.addObject(aliceEntityId, foodType, foodAmount);
 
@@ -99,7 +97,7 @@ contract FoodTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupFlatChunkWithPlayer();
 
     // Add food to player inventory
-    ObjectTypeId foodType = ObjectTypes.WheatSlop;
+    ObjectType foodType = ObjectTypes.WheatSlop;
     uint16 foodAmount = 3;
     TestInventoryUtils.addObject(aliceEntityId, foodType, foodAmount);
 
@@ -114,7 +112,7 @@ contract FoodTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupFlatChunkWithPlayer();
 
     // Add food to player inventory
-    ObjectTypeId foodType = ObjectTypes.WheatSlop;
+    ObjectType foodType = ObjectTypes.WheatSlop;
     uint16 initialFoodAmount = 5;
     TestInventoryUtils.addObject(aliceEntityId, foodType, initialFoodAmount);
 

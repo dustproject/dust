@@ -7,7 +7,7 @@
 Ores follow a complete lifecycle with position tracking and respawning.
 
 #### Mining Ores
-- Ores initially exist as `AnyOre` blocks in the world
+- Ores initially exist as `UnrevealedOre` blocks in the world
 - When mined, they are collapsed into a specific ore type by choosing an ore at random weighted by availability
 - Positions of mined ores are tracked using the ResourcePosition and ResourceCount so that they can be respawned
 - The ResourceCount table is incremented for the specific ore type
@@ -15,7 +15,7 @@ Ores follow a complete lifecycle with position tracking and respawning.
 #### Burning Ores
 - When tools containing ores are burned (via `ObjectTypeLib.burnOres`), the ore resource is made available again
 - ResourceCount is decreased for that specific ore
-- BurnedResourceCount is increased for AnyOre category
+- BurnedResourceCount is increased for UnrevealedOre category
 - This creates a "pool" of ores that can respawn
 
 #### Respawning Ores
@@ -44,25 +44,25 @@ Seeds have a simpler approach focused on tracking quantities without position ma
 
 ### ResourceCount
 - **Purpose**: Tracks the current number of each resource type in circulation
-- **Key**: ObjectTypeId (resource type)
+- **Key**: ObjectType (resource type)
 - **Value**: count (how many of this resource exist)
 - **Usage**: Used for cap enforcement and probability adjustments
 
 ### TotalResourceCount
 - **Purpose**: Tracks the total resources mined over time (for position tracking)
-- **Key**: ObjectTypeId (resource type)
+- **Key**: ObjectType (resource type)
 - **Value**: count (total number mined)
 - **Usage**: Only used for ores to maintain the position array
 
 ### ResourcePosition
 - **Purpose**: Stores the positions where resources were mined
-- **Key**: ObjectTypeId and index
+- **Key**: ObjectType and index
 - **Value**: Vec3 coordinates
 - **Usage**: Used only for ores to enable respawning at previously mined locations
 
 ### BurnedResourceCount
 - **Purpose**: Tracks resources that have been "burned" and can respawn
-- **Key**: ObjectTypeId (resource type)
+- **Key**: ObjectType (resource type)
 - **Value**: count (how many available to respawn)
 - **Usage**: Used only for ores to maintain the respawn pool
 
@@ -75,7 +75,7 @@ Seeds have a simpler approach focused on tracking quantities without position ma
 ## Resource Availability and Probabilities
 
 ### Ore Selection Logic
-- When a player mines an `AnyOre`, a specific ore type is selected
+- When a player mines an `UnrevealedOre`, a specific ore type is selected
 - Selection probability is directly proportional to the remaining capacity
 - Formula: `remaining = cap - mined`
 - Higher remaining count = higher probability
@@ -97,7 +97,7 @@ Seeds have a simpler approach focused on tracking quantities without position ma
 
 #### RandomResourceLib._trackPosition
 ```solidity
-function _trackPosition(Vec3 coord, ObjectTypeId objectType) public {
+function _trackPosition(Vec3 coord, ObjectType objectType) public {
   // Track resource position for mining/respawning
   uint256 totalResources = TotalResourceCount._get(objectType);
   ResourcePosition._set(objectType, totalResources, coord);
@@ -118,20 +118,20 @@ function selectObjectByWeight(ObjectAmount[] memory options, uint256[] memory we
 #### FarmingSystem.growSeed
 ```solidity
 // When a seed grows, it's permanently removed from circulation
-ResourceCount._set(objectTypeId, ResourceCount._get(objectTypeId) - 1);
+ResourceCount._set(objectType, ResourceCount._get(objectType) - 1);
 ```
 
 #### ObjectTypeLib.burnOres
 ```solidity
-function burnOres(ObjectTypeId self) internal {
+function burnOres(ObjectType self) internal {
   ObjectAmount memory ores = self.getOreAmount();
-  ObjectTypeId objectTypeId = ores.objectTypeId;
-  if (!objectTypeId.isNull()) {
+  ObjectType objectType = ores.objectType;
+  if (!objectType.isNull()) {
     uint256 amount = ores.amount;
     // This increases the availability of the ores being burned
-    ResourceCount._set(objectTypeId, ResourceCount._get(objectTypeId) - amount);
+    ResourceCount._set(objectType, ResourceCount._get(objectType) - amount);
     // This allows the same amount of ores to respawn
-    BurnedResourceCount._set(ObjectTypes.AnyOre, BurnedResourceCount._get(ObjectTypes.AnyOre) + amount);
+    BurnedResourceCount._set(ObjectTypes.UnrevealedOre, BurnedResourceCount._get(ObjectTypes.UnrevealedOre) + amount);
   }
 }
 ```
@@ -141,7 +141,7 @@ function burnOres(ObjectTypeId self) internal {
 ### Resource Lifecycle
 
 1. **Creation**
-   - Ores: Exist in the world as `AnyOre`, collapse to specific types when mined
+   - Ores: Exist in the world as `UnrevealedOre`, collapse to specific types when mined
    - Seeds: Created as drops from mining certain blocks
 
 2. **Circulation**

@@ -4,9 +4,9 @@ pragma solidity >=0.8.24;
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Fragment } from "../codegen/tables/Fragment.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
-import { ObjectType } from "../codegen/tables/ObjectType.sol";
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { ReversePlayer } from "../codegen/tables/ReversePlayer.sol";
 
@@ -19,12 +19,11 @@ import { LocalEnergyPool, MovablePosition, Position } from "../utils/Vec3Storage
 
 import { PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
-import { ObjectTypeId } from "../ObjectTypeId.sol";
-import { ObjectTypeLib } from "../ObjectTypeLib.sol";
-import { ObjectTypes } from "../ObjectTypes.sol";
-import { Vec3 } from "../Vec3.sol";
+import { ObjectType } from "../ObjectType.sol";
 
-using ObjectTypeLib for ObjectTypeId;
+import { ObjectTypes } from "../ObjectType.sol";
+
+import { Vec3 } from "../Vec3.sol";
 
 function getLatestEnergyData(EntityId entityId) view returns (EnergyData memory, uint128, uint128) {
   EnergyData memory energyData = Energy._get(entityId);
@@ -140,13 +139,13 @@ function addEnergyToLocalPool(Vec3 coord, uint128 numToAdd) returns (uint128) {
 
 function transferEnergyToPool(EntityId entityId, uint128 amount) returns (uint128, uint128) {
   Vec3 coord = entityId.getPosition();
-  ObjectTypeId objectTypeId = ObjectType._get(entityId);
+  ObjectType objectType = EntityObjectType._get(entityId);
 
   uint128 newEntityEnergy;
-  if (objectTypeId == ObjectTypes.Player) {
+  if (objectType == ObjectTypes.Player) {
     newEntityEnergy = decreasePlayerEnergy(entityId, coord, amount);
   } else {
-    if (!objectTypeId.isMachine()) {
+    if (!objectType.isMachine()) {
       (entityId,) = ForceFieldUtils.getForceField(coord);
     }
     newEntityEnergy = decreaseMachineEnergy(entityId, amount);
@@ -190,7 +189,7 @@ function updateSleepingPlayerEnergy(EntityId player, EntityId bed, uint128 deple
   return playerEnergyData;
 }
 
-function burnToolEnergy(ObjectTypeId toolType, Vec3 coord) {
-  uint16 numPlanks = toolType.getToolPlankAmount();
+function burnToolEnergy(ObjectType toolType, Vec3 coord) {
+  uint16 numPlanks = toolType.getPlankAmount();
   addEnergyToLocalPool(coord, numPlanks * ObjectTypeMetadata._getMass(ObjectTypes.AnyPlank));
 }

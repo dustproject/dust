@@ -1,5 +1,4 @@
-import { TREES } from "./tree-lib";
-import { classifyLeaves } from "./tree-lib";
+import { TREES, classifyLeaves } from "../trees";
 
 interface Vec3 {
   x: number;
@@ -27,7 +26,7 @@ const blobHex = (vs: Vec3[]) =>
 /* convert "Dark Oak" -> "DARK_OAK" */
 const constName = (label: string) => label.replace(/\s+/g, "_").toUpperCase();
 
-export function genTreeLib() {
+export function genTreeLib(): string {
   const blobs: string[] = [];
   const treePieces: string[] = [];
   const dataPieces: string[] = [];
@@ -45,45 +44,44 @@ export function genTreeLib() {
   bytes constant ${N}_RANDOM = hex"${RND}";`);
 
     treePieces.push(`
-    if (objectType == ${t.objectTypeId}) {
+    if (objectType == ObjectTypes.${t.sapling}) {
       fixedLeaves  = _loadLeaves(TreeBlobs.${N}_FIXED );
       randomLeaves = _loadLeaves(TreeBlobs.${N}_RANDOM);
     }`);
 
     dataPieces.push(`
-    if (objectType == ${t.objectTypeId}) {
+    if (objectType == ObjectTypes.${t.sapling}) {
       return TreeData({
-        logType:  ${t.logType},
-        leafType: ${t.leafType},
+        logType:  ObjectTypes.${t.log},
+        leafType: ObjectTypes.${t.leaf},
         trunkHeight: ${t.trunkHeight}
       });
     }`);
 
     chancePieces.push(`
-    if (objectType == ${t.leafType}) {
+    if (objectType == ObjectTypes.${t.leaf}) {
       return uint256(3) * 100 / ${fixed.length + random.length};
     }`);
   }
 
-  console.info(`// SPDX-License-Identifier: MIT
+  return `// SPDX-License-Identifier: MIT
 /* Auto‑generated. DO NOT EDIT. */
 pragma solidity >=0.8.24;
 
 import { Vec3 }         from "./Vec3.sol";
-import { ObjectTypeId } from "./ObjectTypeId.sol";
-import { ObjectTypes }  from "./ObjectTypes.sol";
+import { ObjectType, ObjectTypes  } from "./ObjectType.sol";
 
 library TreeBlobs {${blobs.join("")}
 }
 
 struct TreeData {
-  ObjectTypeId logType;
-  ObjectTypeId leafType;
-  uint32       trunkHeight;
+  ObjectType logType;
+  ObjectType leafType;
+  uint32     trunkHeight;
 }
 
 library TreeLib {
-  function getTreeData(ObjectTypeId objectType)
+  function getTreeData(ObjectType objectType)
     internal
     pure
     returns (TreeData memory)
@@ -91,7 +89,7 @@ library TreeLib {
     revert("Tree type not supported");
   }
 
-  function getLeafCoords(ObjectTypeId objectType)
+  function getLeafCoords(ObjectType objectType)
     internal
     pure
     returns (Vec3[] memory fixedLeaves, Vec3[] memory randomLeaves)
@@ -101,7 +99,7 @@ library TreeLib {
     }
   }
 
-  function getLeafDropChance(ObjectTypeId objectType)
+  function getLeafDropChance(ObjectType objectType)
     internal
     pure
     returns (uint256)
@@ -132,7 +130,7 @@ library TreeLib {
   }
 
 }
-`);
+`;
 }
 
-genTreeLib();
+console.info(genTreeLib());

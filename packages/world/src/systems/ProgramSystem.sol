@@ -9,8 +9,9 @@ import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
 import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { EnergyData } from "../codegen/tables/Energy.sol";
+
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
-import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
 import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
@@ -19,22 +20,19 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { SAFE_PROGRAM_GAS } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
-import { ObjectTypeId } from "../ObjectTypeId.sol";
+import { ObjectType } from "../ObjectType.sol";
 
-import { ObjectTypeLib } from "../ObjectTypeLib.sol";
-import { ObjectTypes } from "../ObjectTypes.sol";
+import { ObjectTypes } from "../ObjectType.sol";
 
 import { ProgramId } from "../ProgramId.sol";
 import { IAttachProgramHook, IDetachProgramHook, IProgramValidator } from "../ProgramInterfaces.sol";
 import { Vec3 } from "../Vec3.sol";
 
 contract ProgramSystem is System {
-  using ObjectTypeLib for ObjectTypeId;
-
   function attachProgram(EntityId caller, EntityId target, ProgramId program, bytes calldata extraData) public {
     caller.activate();
 
-    ObjectTypeId targetType = ObjectType._get(target);
+    ObjectType targetType = EntityObjectType._get(target);
     require(targetType.isSmartEntity(), "Can only attach programs to smart entities");
 
     Vec3 validatorCoord;
@@ -72,7 +70,7 @@ contract ProgramSystem is System {
     caller.activate();
 
     Vec3 forceFieldCoord;
-    if (ObjectType._get(target) == ObjectTypes.Fragment) {
+    if (EntityObjectType._get(target) == ObjectTypes.Fragment) {
       (, Vec3 fragmentCoord) = caller.requireAdjacentToFragment(target);
       forceFieldCoord = fragmentCoord.fromFragmentCoord();
     } else {

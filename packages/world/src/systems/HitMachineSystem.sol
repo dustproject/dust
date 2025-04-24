@@ -4,8 +4,9 @@ pragma solidity >=0.8.24;
 import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { LocalEnergyPool } from "../codegen/tables/LocalEnergyPool.sol";
-import { ObjectType } from "../codegen/tables/ObjectType.sol";
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { ERC165Checker } from "@latticexyz/world/src/ERC165Checker.sol";
 import { System } from "@latticexyz/world/src/System.sol";
@@ -25,15 +26,13 @@ import { HitMachineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { EntityId } from "../EntityId.sol";
-import { ObjectTypeId } from "../ObjectTypeId.sol";
-import { ObjectTypeLib } from "../ObjectTypeLib.sol";
+import { ObjectType } from "../ObjectType.sol";
+
 import { ProgramId } from "../ProgramId.sol";
 import { IHitHook } from "../ProgramInterfaces.sol";
 import { Vec3 } from "../Vec3.sol";
 
 contract HitMachineSystem is System {
-  using ObjectTypeLib for ObjectTypeId;
-
   function hitForceField(EntityId caller, Vec3 coord, uint16 toolSlot) public {
     _hitForceField(caller, coord, toolSlot);
   }

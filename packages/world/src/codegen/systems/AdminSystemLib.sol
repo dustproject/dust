@@ -5,7 +5,7 @@ pragma solidity >=0.8.24;
 
 import { AdminSystem } from "../../systems/admin/AdminSystem.sol";
 import { EntityId } from "../../EntityId.sol";
-import { ObjectTypeId } from "../../ObjectTypeId.sol";
+import { ObjectType } from "../../ObjectType.sol";
 import { Vec3 } from "../../Vec3.sol";
 import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 import { IWorldCall } from "@latticexyz/world/src/IWorldKernel.sol";
@@ -43,28 +43,27 @@ library AdminSystemLib {
   function adminAddToInventory(
     AdminSystemType self,
     EntityId owner,
-    ObjectTypeId objectTypeId,
+    ObjectType objectType,
     uint16 numObjectsToAdd
   ) internal {
-    return CallWrapper(self.toResourceId(), address(0)).adminAddToInventory(owner, objectTypeId, numObjectsToAdd);
+    return CallWrapper(self.toResourceId(), address(0)).adminAddToInventory(owner, objectType, numObjectsToAdd);
   }
 
   function adminAddToolToInventory(
     AdminSystemType self,
     EntityId owner,
-    ObjectTypeId toolObjectTypeId
+    ObjectType toolObjectType
   ) internal returns (EntityId) {
-    return CallWrapper(self.toResourceId(), address(0)).adminAddToolToInventory(owner, toolObjectTypeId);
+    return CallWrapper(self.toResourceId(), address(0)).adminAddToolToInventory(owner, toolObjectType);
   }
 
   function adminRemoveFromInventory(
     AdminSystemType self,
     EntityId owner,
-    ObjectTypeId objectTypeId,
+    ObjectType objectType,
     uint16 numObjectsToRemove
   ) internal {
-    return
-      CallWrapper(self.toResourceId(), address(0)).adminRemoveFromInventory(owner, objectTypeId, numObjectsToRemove);
+    return CallWrapper(self.toResourceId(), address(0)).adminRemoveFromInventory(owner, objectType, numObjectsToRemove);
   }
 
   function adminRemoveToolFromInventory(AdminSystemType self, EntityId owner, EntityId tool) internal {
@@ -78,15 +77,15 @@ library AdminSystemLib {
   function adminAddToInventory(
     CallWrapper memory self,
     EntityId owner,
-    ObjectTypeId objectTypeId,
+    ObjectType objectType,
     uint16 numObjectsToAdd
   ) internal {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert AdminSystemLib_CallingFromRootSystem();
 
     bytes memory systemCall = abi.encodeCall(
-      _adminAddToInventory_EntityId_ObjectTypeId_uint16.adminAddToInventory,
-      (owner, objectTypeId, numObjectsToAdd)
+      _adminAddToInventory_EntityId_ObjectType_uint16.adminAddToInventory,
+      (owner, objectType, numObjectsToAdd)
     );
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
@@ -96,14 +95,14 @@ library AdminSystemLib {
   function adminAddToolToInventory(
     CallWrapper memory self,
     EntityId owner,
-    ObjectTypeId toolObjectTypeId
+    ObjectType toolObjectType
   ) internal returns (EntityId) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert AdminSystemLib_CallingFromRootSystem();
 
     bytes memory systemCall = abi.encodeCall(
-      _adminAddToolToInventory_EntityId_ObjectTypeId.adminAddToolToInventory,
-      (owner, toolObjectTypeId)
+      _adminAddToolToInventory_EntityId_ObjectType.adminAddToolToInventory,
+      (owner, toolObjectType)
     );
 
     bytes memory result = self.from == address(0)
@@ -115,15 +114,15 @@ library AdminSystemLib {
   function adminRemoveFromInventory(
     CallWrapper memory self,
     EntityId owner,
-    ObjectTypeId objectTypeId,
+    ObjectType objectType,
     uint16 numObjectsToRemove
   ) internal {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert AdminSystemLib_CallingFromRootSystem();
 
     bytes memory systemCall = abi.encodeCall(
-      _adminRemoveFromInventory_EntityId_ObjectTypeId_uint16.adminRemoveFromInventory,
-      (owner, objectTypeId, numObjectsToRemove)
+      _adminRemoveFromInventory_EntityId_ObjectType_uint16.adminRemoveFromInventory,
+      (owner, objectType, numObjectsToRemove)
     );
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
@@ -159,12 +158,12 @@ library AdminSystemLib {
   function adminAddToInventory(
     RootCallWrapper memory self,
     EntityId owner,
-    ObjectTypeId objectTypeId,
+    ObjectType objectType,
     uint16 numObjectsToAdd
   ) internal {
     bytes memory systemCall = abi.encodeCall(
-      _adminAddToInventory_EntityId_ObjectTypeId_uint16.adminAddToInventory,
-      (owner, objectTypeId, numObjectsToAdd)
+      _adminAddToInventory_EntityId_ObjectType_uint16.adminAddToInventory,
+      (owner, objectType, numObjectsToAdd)
     );
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
@@ -172,11 +171,11 @@ library AdminSystemLib {
   function adminAddToolToInventory(
     RootCallWrapper memory self,
     EntityId owner,
-    ObjectTypeId toolObjectTypeId
+    ObjectType toolObjectType
   ) internal returns (EntityId) {
     bytes memory systemCall = abi.encodeCall(
-      _adminAddToolToInventory_EntityId_ObjectTypeId.adminAddToolToInventory,
-      (owner, toolObjectTypeId)
+      _adminAddToolToInventory_EntityId_ObjectType.adminAddToolToInventory,
+      (owner, toolObjectType)
     );
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
@@ -186,12 +185,12 @@ library AdminSystemLib {
   function adminRemoveFromInventory(
     RootCallWrapper memory self,
     EntityId owner,
-    ObjectTypeId objectTypeId,
+    ObjectType objectType,
     uint16 numObjectsToRemove
   ) internal {
     bytes memory systemCall = abi.encodeCall(
-      _adminRemoveFromInventory_EntityId_ObjectTypeId_uint16.adminRemoveFromInventory,
-      (owner, objectTypeId, numObjectsToRemove)
+      _adminRemoveFromInventory_EntityId_ObjectType_uint16.adminRemoveFromInventory,
+      (owner, objectType, numObjectsToRemove)
     );
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
@@ -250,16 +249,16 @@ library AdminSystemLib {
  * Each interface is uniquely named based on the function name and parameters to prevent collisions.
  */
 
-interface _adminAddToInventory_EntityId_ObjectTypeId_uint16 {
-  function adminAddToInventory(EntityId owner, ObjectTypeId objectTypeId, uint16 numObjectsToAdd) external;
+interface _adminAddToInventory_EntityId_ObjectType_uint16 {
+  function adminAddToInventory(EntityId owner, ObjectType objectType, uint16 numObjectsToAdd) external;
 }
 
-interface _adminAddToolToInventory_EntityId_ObjectTypeId {
-  function adminAddToolToInventory(EntityId owner, ObjectTypeId toolObjectTypeId) external;
+interface _adminAddToolToInventory_EntityId_ObjectType {
+  function adminAddToolToInventory(EntityId owner, ObjectType toolObjectType) external;
 }
 
-interface _adminRemoveFromInventory_EntityId_ObjectTypeId_uint16 {
-  function adminRemoveFromInventory(EntityId owner, ObjectTypeId objectTypeId, uint16 numObjectsToRemove) external;
+interface _adminRemoveFromInventory_EntityId_ObjectType_uint16 {
+  function adminRemoveFromInventory(EntityId owner, ObjectType objectType, uint16 numObjectsToRemove) external;
 }
 
 interface _adminRemoveToolFromInventory_EntityId_EntityId {

@@ -10,13 +10,12 @@ import { Vec3 } from "../../src/Vec3.sol";
 
 import { EnergyData } from "../../src/codegen/tables/Energy.sol";
 
+import { EntityObjectType } from "../../src/codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../../src/codegen/tables/InventorySlot.sol";
 import { InventoryTypeSlots } from "../../src/codegen/tables/InventoryTypeSlots.sol";
-import { ObjectType } from "../../src/codegen/tables/ObjectType.sol";
 
-import { ObjectTypeId } from "../../src/ObjectTypeId.sol";
+import { ObjectType } from "../../src/ObjectType.sol";
 
-import { ObjectAmount, ObjectTypeLib, getOreObjectTypes } from "../../src/ObjectTypeLib.sol";
 import {
   updateMachineEnergy as _updateMachineEnergy,
   updatePlayerEnergy as _updatePlayerEnergy
@@ -27,8 +26,6 @@ import { ForceFieldUtils } from "../../src/utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../../src/utils/InventoryUtils.sol";
 
 Vm constant vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
-
-using ObjectTypeLib for ObjectTypeId;
 
 library TestUtils {
   /// @dev Allows calling test utils in the context of world
@@ -71,36 +68,37 @@ library TestInventoryUtils {
     TestUtils.init(LIB_ADDRESS_SLOT, libAddress);
   }
 
-  function addObject(EntityId ownerEntityId, ObjectTypeId objectTypeId, uint16 numObjectsToAdd) public asWorld {
-    InventoryUtils.addObject(ownerEntityId, objectTypeId, numObjectsToAdd);
+  function addObject(EntityId ownerEntityId, ObjectType objectType, uint16 numObjectsToAdd) public asWorld {
+    InventoryUtils.addObject(ownerEntityId, objectType, numObjectsToAdd);
   }
 
-  function addObjectToSlot(EntityId ownerEntityId, ObjectTypeId objectTypeId, uint16 numObjectsToAdd, uint16 slot)
+  function addObjectToSlot(EntityId ownerEntityId, ObjectType objectType, uint16 numObjectsToAdd, uint16 slot)
     public
     asWorld
   {
-    InventoryUtils.addObjectToSlot(ownerEntityId, objectTypeId, numObjectsToAdd, slot);
+    InventoryUtils.addObjectToSlot(ownerEntityId, objectType, numObjectsToAdd, slot);
   }
 
-  function addEntity(EntityId ownerEntityId, ObjectTypeId toolObjectTypeId) public asWorld returns (EntityId) {
-    EntityId entityId = createEntity(toolObjectTypeId);
+  function addEntity(EntityId ownerEntityId, ObjectType toolObjectType) public asWorld returns (EntityId) {
+    EntityId entityId = createEntity(toolObjectType);
     InventoryUtils.addEntity(ownerEntityId, entityId);
     return entityId;
   }
 
-  function removeFromInventory(EntityId ownerEntityId, ObjectTypeId objectTypeId, uint16 numObjectsToRemove)
-    public
-    asWorld
-  {
-    InventoryUtils.removeObject(ownerEntityId, objectTypeId, numObjectsToRemove);
+  function removeFromInventory(EntityId ownerEntityId, ObjectType objectType, uint16 numObjectsToRemove) public asWorld {
+    InventoryUtils.removeObject(ownerEntityId, objectType, numObjectsToRemove);
   }
 
   function transferAll(EntityId fromEntityId, EntityId toEntityId) public asWorld {
     InventoryUtils.transferAll(fromEntityId, toEntityId);
   }
 
+  function removeObjectFromSlot(EntityId ownerEntityId, uint16 slot, uint16 numObjectsToRemove) public asWorld {
+    InventoryUtils.removeObjectFromSlot(ownerEntityId, slot, numObjectsToRemove);
+  }
+
   function getEntitySlot(EntityId owner, EntityId entityId) public asWorld returns (uint16) {
-    ObjectTypeId objectType = ObjectType._get(entityId);
+    ObjectType objectType = EntityObjectType._get(entityId);
     uint16[] memory slots = InventoryTypeSlots._get(owner, objectType);
     for (uint256 i = 0; i < slots.length; i++) {
       EntityId slotEntityId = InventorySlot._getEntityId(owner, slots[i]);
