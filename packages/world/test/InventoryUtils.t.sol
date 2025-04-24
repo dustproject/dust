@@ -35,28 +35,28 @@ contract InventoryUtilsTest is DustTest {
     TestInventoryUtils.addEntity(aliceEntity, ObjectTypes.IronPick);
     TestInventoryUtils.addEntity(aliceEntity, ObjectTypes.NeptuniumAxe);
 
-    // 27 as forcefields use a single slot each
-    assertEq(Inventory.length(aliceEntity), 27);
+    // 36 as forcefields and buckets use a single slot each
+    assertEq(Inventory.length(aliceEntity), 36);
     assertEq(Inventory.length(bobEntity), 0);
 
     TestInventoryUtils.removeObjectFromSlot(aliceEntity, 1, 1);
 
-    assertEq(Inventory.length(aliceEntity), 26);
+    assertEq(Inventory.length(aliceEntity), 35);
     assertEq(Inventory.length(bobEntity), 0);
 
     TestInventoryUtils.transferAll(aliceEntity, bobEntity);
 
     assertEq(Inventory.length(aliceEntity), 0);
-    assertEq(Inventory.length(bobEntity), 26);
+    assertEq(Inventory.length(bobEntity), 35);
 
     TestInventoryUtils.transferAll(bobEntity, aliceEntity);
 
-    assertEq(Inventory.length(aliceEntity), 26);
+    assertEq(Inventory.length(aliceEntity), 35);
     assertEq(Inventory.length(bobEntity), 0);
 
     TestInventoryUtils.transferAll(aliceEntity, bobEntity);
 
     assertEq(Inventory.length(aliceEntity), 0);
-    assertEq(Inventory.length(bobEntity), 26);
+    assertEq(Inventory.length(bobEntity), 35);
   }
 }

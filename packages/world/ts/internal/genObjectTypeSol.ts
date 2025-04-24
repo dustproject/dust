@@ -199,7 +199,7 @@ ${allCategoryMetadata
   function getMaxInventorySlots(ObjectType self) internal pure returns (uint16) {
     if (self == ObjectTypes.Player) return 36;
     if (self == ObjectTypes.Chest) return 27;
-    if (self.isPassThrough()) return type(uint16).max;
+    if (self.isPassThrough() || self == ObjectTypes.Bed) return type(uint16).max;
     return 0;
   }
 
