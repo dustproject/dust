@@ -65,9 +65,10 @@ contract CraftSystem is System {
     caller.requireConnected(furnace);
 
     FurnaceData memory furnaceData = Furnace._get(furnace);
-    require(furnaceData.finishesAt < block.timestamp, "Smelting not finished yet");
     RecipesData memory recipe = Recipes._get(furnaceData.recipeId);
     require(recipe.inputTypes.length > 0, "Furnace is not smelting");
+    require(furnaceData.finishesAt < block.timestamp, "Smelting not finished yet");
+    Furnace._deleteRecord(furnace);
 
     // Create the outputs
     SlotData[] memory withdrawals = CraftLib._createRecipeOutputs(caller, recipe);
