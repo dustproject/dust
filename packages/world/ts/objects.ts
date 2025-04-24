@@ -731,15 +731,3 @@ export const objectsByName = objects.reduce(
   },
   {} as Record<ObjectName, ObjectDefinition>,
 );
-
-console.warn("logging");
-// log max terrain id
-console.warn(
-  objects.reduce(
-    (max, obj) => (obj.terrainId ? Math.max(max, obj.terrainId) : max),
-    0,
-  ),
-);
-console.warn(
-  objects.reduce((max, obj) => (obj.id ? Math.max(max, obj.id) : max), 0),
-);
