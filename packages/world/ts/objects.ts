@@ -112,7 +112,8 @@ export const hasExtraDropsCategories: Category[] = ["Leaf", "Crop", "Greenery"];
 // Define object type interface
 export interface ObjectType {
   name: string;
-  id: bigint;
+  id: number;
+  terrainId?: number;
   category: Category;
   index: number;
   mass?: bigint;
@@ -510,10 +511,15 @@ export const categoryObjects: {
 
 export const objects: ObjectType[] = Object.entries(categoryObjects).flatMap(
   ([category, objects], categoryIndex) =>
-    objects.map((obj, i) => ({
+    objects.map((obj, index) => ({
       ...obj,
-      id: (BigInt(categoryIndex) << 8n) | BigInt(i),
-      index: i,
+      id: (categoryIndex << 8) | index,
+      terrainId:
+        categoryIndex < 16 && index < 16
+          ? (categoryIndex << 4) | index
+          : undefined,
+      categoryIndex,
+      index,
       category: category as Category,
     })),
 );
