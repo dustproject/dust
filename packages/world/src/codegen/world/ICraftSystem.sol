@@ -12,7 +12,9 @@ import { SlotAmount } from "../../utils/InventoryUtils.sol";
  * @dev This interface is automatically generated from the corresponding system contract. Do not edit manually.
  */
 interface ICraftSystem {
-  function craftWithStation(EntityId caller, bytes32 recipeId, EntityId station, SlotAmount[] memory inputs) external;
+  function craftWithStation(EntityId caller, EntityId station, bytes32 recipeId, SlotAmount[] memory inputs) external;
 
   function craft(EntityId caller, bytes32 recipeId, SlotAmount[] memory inputs) external;
+
+  function finishSmelting(EntityId caller, EntityId furnace, bytes memory extraData) external;
 }

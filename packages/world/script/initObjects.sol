@@ -1213,7 +1213,7 @@ function initObjects() {
     ObjectTypes.Furnace,
     ObjectTypeMetadataData({
       stackable: 1,
-      maxInventorySlots: 0,
+      maxInventorySlots: 1,
       mass: 108000000000000000,
       energy: 0,
       canPassThrough: false

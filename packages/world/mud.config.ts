@@ -330,6 +330,14 @@ export default defineWorld({
       },
       key: ["entityId"],
     },
+    Furnace: {
+      schema: {
+        entityId: "EntityId",
+        recipeId: "bytes32",
+        finishesAt: "uint128",
+      },
+      key: ["entityId"],
+    },
     // ------------------------------------------------------------
     // Resources
     // ------------------------------------------------------------

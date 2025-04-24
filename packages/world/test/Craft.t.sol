@@ -120,7 +120,7 @@ contract CraftTest is DustTest {
 
     vm.prank(alice);
     startGasReport("handcraft multiple inputs");
-    world.craftWithStation(aliceEntityId, recipeId, stationEntityId, inputs);
+    world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
     endGasReport();
 
     for (uint256 i = 0; i < inputTypes.length; i++) {
@@ -165,7 +165,7 @@ contract CraftTest is DustTest {
 
     vm.prank(alice);
     startGasReport("craft with station");
-    world.craftWithStation(aliceEntityId, recipeId, stationEntityId, inputs);
+    world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
     endGasReport();
 
     for (uint256 i = 0; i < inputTypes.length; i++) {
@@ -218,7 +218,7 @@ contract CraftTest is DustTest {
 
       vm.prank(alice);
       startGasReport("craft with any input");
-      world.craftWithStation(aliceEntityId, recipeId, stationEntityId, inputs);
+      world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
       endGasReport();
 
       EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
@@ -380,7 +380,7 @@ contract CraftTest is DustTest {
     inputs[0] = SlotAmount({ slot: 0, amount: 0 });
 
     vm.prank(alice);
-    vm.expectRevert("Input amount must be greater than zero");
+    vm.expectRevert("Input amount must be greater than 0");
     world.craft(aliceEntityId, recipeId, inputs);
 
     inputTypes = new ObjectTypeId[](1);
@@ -412,7 +412,7 @@ contract CraftTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Not enough inputs for recipe");
-    world.craftWithStation(aliceEntityId, recipeId, stationEntityId, inputs);
+    world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
   }
 
   function testCraftFailsIfInvalidRecipe() public {
@@ -469,14 +469,14 @@ contract CraftTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Invalid station");
-    world.craftWithStation(aliceEntityId, recipeId, stationEntityId, inputs);
+    world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
 
     stationCoord = playerCoord + vec3(int32(MAX_ENTITY_INFLUENCE_HALF_WIDTH) + 1, 0, 0);
     stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
 
     vm.prank(alice);
     vm.expectRevert("Entity is too far");
-    world.craftWithStation(aliceEntityId, recipeId, stationEntityId, inputs);
+    world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
   }
 
   function testCraftFailsIfFullInventory() public {
