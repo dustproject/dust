@@ -338,6 +338,10 @@ library InventoryUtils {
       }
     }
 
+    if (InventoryTypeSlots._length(from, ObjectTypes.Null) > 0) {
+      InventoryTypeSlots._deleteRecord(from, ObjectTypes.Null);
+    }
+
     Inventory._deleteRecord(from);
   }
 
@@ -416,6 +420,10 @@ library InventoryUtils {
 
     // Pop the last element
     InventoryTypeSlots._pop(owner, objectType);
+
+    if (numTypeSlots == 1) {
+      InventoryTypeSlots._deleteRecord(owner, objectType);
+    }
   }
 
   // Gets a slot to use - either reuses an empty slot or creates a new one - O(1)

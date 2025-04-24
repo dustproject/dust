@@ -11,6 +11,7 @@ import { Vec3 } from "@dust/world/src/Vec3.sol";
 import {
   IAddFragmentHook,
   IBuildHook,
+  IFuelHook,
   IMineHook,
   IProgramValidator,
   IRemoveFragmentHook
@@ -25,6 +26,7 @@ contract ForceFieldProgram is
   IProgramValidator,
   IAddFragmentHook,
   IRemoveFragmentHook,
+  IFuelHook,
   IBuildHook,
   IMineHook
 {
@@ -39,6 +41,10 @@ contract ForceFieldProgram is
   ) external view onlyWorld {
     // Allow all programs
     // TODO: should we add a method to restrict programs?
+  }
+
+  function onFuel(EntityId caller, EntityId target, uint16 fuelAmount, bytes memory extraData) external onlyWorld {
+    // Allow anyone to fuel the force field
   }
 
   function onAddFragment(EntityId caller, EntityId target, EntityId added, bytes memory extraData) external onlyWorld {

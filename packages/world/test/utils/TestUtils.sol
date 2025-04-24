@@ -93,6 +93,10 @@ library TestInventoryUtils {
     InventoryUtils.transferAll(fromEntityId, toEntityId);
   }
 
+  function removeObjectFromSlot(EntityId ownerEntityId, uint16 slot, uint16 numObjectsToRemove) public asWorld {
+    InventoryUtils.removeObjectFromSlot(ownerEntityId, slot, numObjectsToRemove);
+  }
+
   function getEntitySlot(EntityId owner, EntityId entityId) public asWorld returns (uint16) {
     ObjectType objectType = EntityObjectType._get(entityId);
     uint16[] memory slots = InventoryTypeSlots._get(owner, objectType);
