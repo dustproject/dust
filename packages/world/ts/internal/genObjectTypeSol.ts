@@ -16,7 +16,7 @@ import {
 
 function renderMetaCategoryMask(categories: Category[]): string {
   return categories
-    .map((cat) => `(uint128(1) << (${cat} >> OFFSET_BITS))`)
+    .map((cat) => `(uint256(1) << (${cat} >> OFFSET_BITS))`)
     .join(" | ");
 }
 
@@ -42,10 +42,10 @@ struct ObjectAmount {
   uint16 amount;
 }
 
-// 7 category bits (bits 15..9), 9 index bits (bits 8..0)
-uint16 constant OFFSET_BITS = 9;
+// 8 category bits (bits 15..8), 8 index bits (bits 7..0)
+uint16 constant OFFSET_BITS = 8;
 uint16 constant CATEGORY_MASK = type(uint16).max << OFFSET_BITS;
-uint16 constant BLOCK_CATEGORY_COUNT = 128 / 2; // 31
+uint16 constant BLOCK_CATEGORY_COUNT = 256 / 2; // 128
 
 // ------------------------------------------------------------
 // Object Categories
@@ -56,16 +56,16 @@ ${blockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(${c
   // Non-Block Categories
 ${nonBlockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(${cat.index}) << OFFSET_BITS;`).join("\n")}
   // ------------------------------------------------------------
-  // Meta Category Masks (fits within uint128; mask bit k set if raw category ID k belongs)
-  uint128 constant BLOCK_MASK = uint128(type(uint64).max);
-  uint128 constant HAS_ANY_MASK = ${renderMetaCategoryMask(hasAnyCategories)};
-  uint128 constant HAS_EXTRA_DROPS_MASK = ${renderMetaCategoryMask(hasExtraDropsCategories)};
-  uint128 constant PASS_THROUGH_MASK = ${renderMetaCategoryMask(passThroughCategories)};
-  uint128 constant GROWABLE_MASK = ${renderMetaCategoryMask(growableCategories)};
-  uint128 constant UNIQUE_OBJECT_MASK = ${renderMetaCategoryMask(uniqueObjectCategories)};
-  uint128 constant SMART_ENTITY_MASK = ${renderMetaCategoryMask(smartEntityCategories)};
-  uint128 constant TOOL_MASK = ${renderMetaCategoryMask(toolCategories)};
-  uint128 constant MINEABLE_MASK = BLOCK_MASK & ~${renderMetaCategoryMask(["NonSolid"])};
+  // Meta Category Masks (fits within uint256; mask bit k set if raw category ID k belongs)
+  uint256 constant BLOCK_MASK = uint256(type(uint128).max);
+  uint256 constant HAS_ANY_MASK = ${renderMetaCategoryMask(hasAnyCategories)};
+  uint256 constant HAS_EXTRA_DROPS_MASK = ${renderMetaCategoryMask(hasExtraDropsCategories)};
+  uint256 constant PASS_THROUGH_MASK = ${renderMetaCategoryMask(passThroughCategories)};
+  uint256 constant GROWABLE_MASK = ${renderMetaCategoryMask(growableCategories)};
+  uint256 constant UNIQUE_OBJECT_MASK = ${renderMetaCategoryMask(uniqueObjectCategories)};
+  uint256 constant SMART_ENTITY_MASK = ${renderMetaCategoryMask(smartEntityCategories)};
+  uint256 constant TOOL_MASK = ${renderMetaCategoryMask(toolCategories)};
+  uint256 constant MINEABLE_MASK = BLOCK_MASK & ~${renderMetaCategoryMask(["NonSolid"])};
 }
 
 
@@ -279,11 +279,9 @@ ${allCategoryMetadata
   // Meta Category Checks
   function isAny(ObjectType self) internal pure returns (bool) {
     // Check if:
-    // 1. ID bits are all 0
+    // 1. Index bits are all 0
     // 2. Category is one that supports "Any" types
-    uint16 idx = self.unwrap() & ~CATEGORY_MASK;
-
-    return idx == 0 && hasMetaCategory(self, Category.HAS_ANY_MASK);
+    return self.index() == 0 && hasMetaCategory(self, Category.HAS_ANY_MASK);
   }
 
   function hasExtraDrops(ObjectType self) internal pure returns (bool) {
@@ -314,9 +312,9 @@ ${allCategoryMetadata
     return hasMetaCategory(self, Category.GROWABLE_MASK);
   }
 
-  function hasMetaCategory(ObjectType self, uint128 mask) internal pure returns (bool) {
+  function hasMetaCategory(ObjectType self, uint256 mask) internal pure returns (bool) {
     uint16 c = category(self);
-    return ((uint128(1) << (c >> OFFSET_BITS)) & mask) != 0;
+    return ((uint256(1) << (c >> OFFSET_BITS)) & mask) != 0;
   }
 
 

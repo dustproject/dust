@@ -1,4 +1,4 @@
-export const numBlockCategories = 128 / 2;
+export const numBlockCategories = 256 / 2;
 
 export const blockCategories = [
   // terrain categories
@@ -17,6 +17,7 @@ export const blockCategories = [
   "CropBlock",
   "UnderwaterPlant",
   "UnderwaterBlock",
+  "MiscBlock",
   // non-terrain categories
   "Plank",
   "OreBlock",
@@ -24,7 +25,6 @@ export const blockCategories = [
   "Sapling",
   "Station",
   "SmartEntityBlock",
-  "MiscBlock",
 ] as const;
 
 export const nonBlockCategories = [
@@ -93,8 +93,8 @@ export const uniqueObjectCategories: Category[] = [
   "Axe",
   "Whacker",
   "Hoe",
-  "SmartEntityBlock",
   "Bucket",
+  "SmartEntityBlock",
   "SmartEntityNonBlock",
 ];
 
@@ -105,13 +105,14 @@ export const smartEntityCategories: Category[] = [
   "SmartEntityNonBlock",
 ];
 
-export const hasAnyCategories: Category[] = ["Log", "Leaf", "Plank", "Ore"];
+export const hasAnyCategories: Category[] = ["Log", "Leaf", "Plank"];
 
 export const hasExtraDropsCategories: Category[] = ["Leaf", "Crop", "Greenery"];
 
 // Define object type interface
 export interface ObjectType {
   name: string;
+  id: bigint;
   category: Category;
   index: number;
   mass?: bigint;
@@ -128,7 +129,7 @@ export interface ObjectType {
 }
 
 export const categoryObjects: {
-  [key in Category]: Omit<ObjectType, "category" | "index">[];
+  [key in Category]: Omit<ObjectType, "id" | "category" | "index">[];
 } = {
   NonSolid: [
     { name: "Null" },
@@ -168,9 +169,11 @@ export const categoryObjects: {
     { name: "PackedMud", mass: 5000000000000000n },
     { name: "Farmland", mass: 3000000000000000n },
     { name: "WetFarmland", mass: 3000000000000000n },
+    { name: "Snow", mass: 4000000000000000n },
+    { name: "Ice", mass: 4000000000000000n },
   ],
   Ore: [
-    { name: "AnyOre", mass: 10000000000000000n },
+    { name: "UnrevealedOre", mass: 10000000000000000n },
     { name: "CoalOre", mass: 540000000000000000n },
     { name: "CopperOre", mass: 675000000000000000n },
     { name: "IronOre", mass: 675000000000000000n },
@@ -304,6 +307,13 @@ export const categoryObjects: {
     { name: "BubbleCoralBlock", mass: 37500000000000000n },
     { name: "BrainCoralBlock", mass: 37500000000000000n },
   ],
+  MiscBlock: [
+    { name: "SpiderWeb", mass: 100000000000000n },
+    { name: "Bone", mass: 1000000000000000n },
+  ],
+
+  // NON-TERRAIN BLOCKS
+
   Crop: [
     { name: "GoldenMushroom", mass: 300000000000000n },
     { name: "RedMushroom", mass: 300000000000000n },
@@ -316,6 +326,11 @@ export const categoryObjects: {
   CropBlock: [
     { name: "Pumpkin", mass: 1300000000000000n, energy: 16500000000000000n },
     { name: "Melon", mass: 1300000000000000n, energy: 16500000000000000n },
+    { name: "RedMushroomBlock", mass: 12500000000000000n },
+    { name: "BrownMushroomBlock", mass: 12500000000000000n },
+    { name: "MushroomStem", mass: 12500000000000000n },
+    { name: "BambooBush", mass: 200000000000000n },
+    { name: "Cactus", mass: 1300000000000000n },
   ],
   Plank: [
     { name: "AnyPlank", mass: 4500000000000000n },
@@ -389,18 +404,6 @@ export const categoryObjects: {
     { name: "Chest", mass: 36000000000000000n },
     { name: "SpawnTile", mass: 9135000000000000000n },
     { name: "Bed", mass: 13500000000000000n },
-  ],
-  MiscBlock: [
-    // TODO: MUST assign most of these to terrain categories
-    { name: "RedMushroomBlock", mass: 12500000000000000n },
-    { name: "BrownMushroomBlock", mass: 12500000000000000n },
-    { name: "MushroomStem", mass: 12500000000000000n },
-    { name: "BambooBush", mass: 200000000000000n },
-    { name: "Cactus", mass: 1300000000000000n },
-    { name: "Snow", mass: 4000000000000000n },
-    { name: "Ice", mass: 4000000000000000n },
-    { name: "SpiderWeb", mass: 100000000000000n },
-    { name: "Bone", mass: 1000000000000000n },
     { name: "TextSign", mass: 18000000000000000n },
   ],
 
@@ -506,9 +509,10 @@ export const categoryObjects: {
 } as const;
 
 export const objects: ObjectType[] = Object.entries(categoryObjects).flatMap(
-  ([category, objects]) =>
+  ([category, objects], categoryIndex) =>
     objects.map((obj, i) => ({
       ...obj,
+      id: (BigInt(categoryIndex) << 8n) | BigInt(i),
       index: i,
       category: category as Category,
     })),

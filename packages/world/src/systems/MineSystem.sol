@@ -99,7 +99,7 @@ contract MineSystem is System {
     if (minedType.isMachine()) {
       (EnergyData memory machineData,) = updateMachineEnergy(mined);
       require(machineData.energy == 0, "Cannot mine a machine that has energy");
-    } else if (minedType == ObjectTypes.AnyOre) {
+    } else if (minedType == ObjectTypes.UnrevealedOre) {
       minedType = RandomResourceLib._collapseRandomOre(mined, coord);
     }
 
@@ -322,8 +322,8 @@ library RandomResourceLib {
   function _collapseRandomOre(EntityId entityId, Vec3 coord) public returns (ObjectType) {
     ObjectType ore = _getRandomOre(coord);
 
-    // We use AnyOre as we want to track for all ores
-    _trackPosition(coord, ObjectTypes.AnyOre);
+    // We use UnrevealedOre as we want to track for all ores
+    _trackPosition(coord, ObjectTypes.UnrevealedOre);
 
     // Set mined resource count for the specific ore
     ResourceCount._set(ore, ResourceCount._get(ore) + 1);

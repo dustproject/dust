@@ -14,10 +14,10 @@ struct ObjectAmount {
   uint16 amount;
 }
 
-// 7 category bits (bits 15..9), 9 index bits (bits 8..0)
-uint16 constant OFFSET_BITS = 9;
+// 8 category bits (bits 15..8), 8 index bits (bits 7..0)
+uint16 constant OFFSET_BITS = 8;
 uint16 constant CATEGORY_MASK = type(uint16).max << OFFSET_BITS;
-uint16 constant BLOCK_CATEGORY_COUNT = 128 / 2; // 31
+uint16 constant BLOCK_CATEGORY_COUNT = 256 / 2; // 128
 
 // ------------------------------------------------------------
 // Object Categories
@@ -39,45 +39,45 @@ library Category {
   uint16 constant CropBlock = uint16(12) << OFFSET_BITS;
   uint16 constant UnderwaterPlant = uint16(13) << OFFSET_BITS;
   uint16 constant UnderwaterBlock = uint16(14) << OFFSET_BITS;
-  uint16 constant Plank = uint16(15) << OFFSET_BITS;
-  uint16 constant OreBlock = uint16(16) << OFFSET_BITS;
-  uint16 constant Seed = uint16(17) << OFFSET_BITS;
-  uint16 constant Sapling = uint16(18) << OFFSET_BITS;
-  uint16 constant Station = uint16(19) << OFFSET_BITS;
-  uint16 constant SmartEntityBlock = uint16(20) << OFFSET_BITS;
-  uint16 constant MiscBlock = uint16(21) << OFFSET_BITS;
+  uint16 constant MiscBlock = uint16(15) << OFFSET_BITS;
+  uint16 constant Plank = uint16(16) << OFFSET_BITS;
+  uint16 constant OreBlock = uint16(17) << OFFSET_BITS;
+  uint16 constant Seed = uint16(18) << OFFSET_BITS;
+  uint16 constant Sapling = uint16(19) << OFFSET_BITS;
+  uint16 constant Station = uint16(20) << OFFSET_BITS;
+  uint16 constant SmartEntityBlock = uint16(21) << OFFSET_BITS;
   // Non-Block Categories
-  uint16 constant Pick = uint16(64) << OFFSET_BITS;
-  uint16 constant Axe = uint16(65) << OFFSET_BITS;
-  uint16 constant Hoe = uint16(66) << OFFSET_BITS;
-  uint16 constant Whacker = uint16(67) << OFFSET_BITS;
-  uint16 constant OreBar = uint16(68) << OFFSET_BITS;
-  uint16 constant Bucket = uint16(69) << OFFSET_BITS;
-  uint16 constant Food = uint16(70) << OFFSET_BITS;
-  uint16 constant Fuel = uint16(71) << OFFSET_BITS;
-  uint16 constant Player = uint16(72) << OFFSET_BITS;
-  uint16 constant SmartEntityNonBlock = uint16(73) << OFFSET_BITS;
+  uint16 constant Pick = uint16(128) << OFFSET_BITS;
+  uint16 constant Axe = uint16(129) << OFFSET_BITS;
+  uint16 constant Hoe = uint16(130) << OFFSET_BITS;
+  uint16 constant Whacker = uint16(131) << OFFSET_BITS;
+  uint16 constant OreBar = uint16(132) << OFFSET_BITS;
+  uint16 constant Bucket = uint16(133) << OFFSET_BITS;
+  uint16 constant Food = uint16(134) << OFFSET_BITS;
+  uint16 constant Fuel = uint16(135) << OFFSET_BITS;
+  uint16 constant Player = uint16(136) << OFFSET_BITS;
+  uint16 constant SmartEntityNonBlock = uint16(137) << OFFSET_BITS;
   // ------------------------------------------------------------
-  // Meta Category Masks (fits within uint128; mask bit k set if raw category ID k belongs)
-  uint128 constant BLOCK_MASK = uint128(type(uint64).max);
-  uint128 constant HAS_ANY_MASK = (uint128(1) << (Log >> OFFSET_BITS)) | (uint128(1) << (Leaf >> OFFSET_BITS))
-    | (uint128(1) << (Plank >> OFFSET_BITS)) | (uint128(1) << (Ore >> OFFSET_BITS));
-  uint128 constant HAS_EXTRA_DROPS_MASK = (uint128(1) << (Leaf >> OFFSET_BITS)) | (uint128(1) << (Crop >> OFFSET_BITS))
-    | (uint128(1) << (Greenery >> OFFSET_BITS));
-  uint128 constant PASS_THROUGH_MASK = (uint128(1) << (NonSolid >> OFFSET_BITS))
-    | (uint128(1) << (Flower >> OFFSET_BITS)) | (uint128(1) << (Seed >> OFFSET_BITS))
-    | (uint128(1) << (Sapling >> OFFSET_BITS)) | (uint128(1) << (Greenery >> OFFSET_BITS))
-    | (uint128(1) << (Crop >> OFFSET_BITS)) | (uint128(1) << (UnderwaterPlant >> OFFSET_BITS));
-  uint128 constant GROWABLE_MASK = (uint128(1) << (Seed >> OFFSET_BITS)) | (uint128(1) << (Sapling >> OFFSET_BITS));
-  uint128 constant UNIQUE_OBJECT_MASK = (uint128(1) << (Pick >> OFFSET_BITS)) | (uint128(1) << (Axe >> OFFSET_BITS))
-    | (uint128(1) << (Whacker >> OFFSET_BITS)) | (uint128(1) << (Hoe >> OFFSET_BITS))
-    | (uint128(1) << (SmartEntityBlock >> OFFSET_BITS)) | (uint128(1) << (Bucket >> OFFSET_BITS))
-    | (uint128(1) << (SmartEntityNonBlock >> OFFSET_BITS));
-  uint128 constant SMART_ENTITY_MASK =
-    (uint128(1) << (SmartEntityBlock >> OFFSET_BITS)) | (uint128(1) << (SmartEntityNonBlock >> OFFSET_BITS));
-  uint128 constant TOOL_MASK = (uint128(1) << (Pick >> OFFSET_BITS)) | (uint128(1) << (Axe >> OFFSET_BITS))
-    | (uint128(1) << (Whacker >> OFFSET_BITS)) | (uint128(1) << (Hoe >> OFFSET_BITS));
-  uint128 constant MINEABLE_MASK = BLOCK_MASK & ~(uint128(1) << (NonSolid >> OFFSET_BITS));
+  // Meta Category Masks (fits within uint256; mask bit k set if raw category ID k belongs)
+  uint256 constant BLOCK_MASK = uint256(type(uint128).max);
+  uint256 constant HAS_ANY_MASK = (uint256(1) << (Log >> OFFSET_BITS)) | (uint256(1) << (Leaf >> OFFSET_BITS))
+    | (uint256(1) << (Plank >> OFFSET_BITS));
+  uint256 constant HAS_EXTRA_DROPS_MASK = (uint256(1) << (Leaf >> OFFSET_BITS)) | (uint256(1) << (Crop >> OFFSET_BITS))
+    | (uint256(1) << (Greenery >> OFFSET_BITS));
+  uint256 constant PASS_THROUGH_MASK = (uint256(1) << (NonSolid >> OFFSET_BITS))
+    | (uint256(1) << (Flower >> OFFSET_BITS)) | (uint256(1) << (Seed >> OFFSET_BITS))
+    | (uint256(1) << (Sapling >> OFFSET_BITS)) | (uint256(1) << (Greenery >> OFFSET_BITS))
+    | (uint256(1) << (Crop >> OFFSET_BITS)) | (uint256(1) << (UnderwaterPlant >> OFFSET_BITS));
+  uint256 constant GROWABLE_MASK = (uint256(1) << (Seed >> OFFSET_BITS)) | (uint256(1) << (Sapling >> OFFSET_BITS));
+  uint256 constant UNIQUE_OBJECT_MASK = (uint256(1) << (Pick >> OFFSET_BITS)) | (uint256(1) << (Axe >> OFFSET_BITS))
+    | (uint256(1) << (Whacker >> OFFSET_BITS)) | (uint256(1) << (Hoe >> OFFSET_BITS))
+    | (uint256(1) << (Bucket >> OFFSET_BITS)) | (uint256(1) << (SmartEntityBlock >> OFFSET_BITS))
+    | (uint256(1) << (SmartEntityNonBlock >> OFFSET_BITS));
+  uint256 constant SMART_ENTITY_MASK =
+    (uint256(1) << (SmartEntityBlock >> OFFSET_BITS)) | (uint256(1) << (SmartEntityNonBlock >> OFFSET_BITS));
+  uint256 constant TOOL_MASK = (uint256(1) << (Pick >> OFFSET_BITS)) | (uint256(1) << (Axe >> OFFSET_BITS))
+    | (uint256(1) << (Whacker >> OFFSET_BITS)) | (uint256(1) << (Hoe >> OFFSET_BITS));
+  uint256 constant MINEABLE_MASK = BLOCK_MASK & ~(uint256(1) << (NonSolid >> OFFSET_BITS));
 }
 
 // ------------------------------------------------------------
@@ -115,7 +115,9 @@ library ObjectTypes {
   ObjectType constant PackedMud = ObjectType.wrap(Category.Soil | 6);
   ObjectType constant Farmland = ObjectType.wrap(Category.Soil | 7);
   ObjectType constant WetFarmland = ObjectType.wrap(Category.Soil | 8);
-  ObjectType constant AnyOre = ObjectType.wrap(Category.Ore | 0);
+  ObjectType constant Snow = ObjectType.wrap(Category.Soil | 9);
+  ObjectType constant Ice = ObjectType.wrap(Category.Soil | 10);
+  ObjectType constant UnrevealedOre = ObjectType.wrap(Category.Ore | 0);
   ObjectType constant CoalOre = ObjectType.wrap(Category.Ore | 1);
   ObjectType constant CopperOre = ObjectType.wrap(Category.Ore | 2);
   ObjectType constant IronOre = ObjectType.wrap(Category.Ore | 3);
@@ -177,10 +179,9 @@ library ObjectTypes {
   ObjectType constant FlyTrap = ObjectType.wrap(Category.Flower | 11);
   ObjectType constant FescueGrass = ObjectType.wrap(Category.Greenery | 0);
   ObjectType constant SwitchGrass = ObjectType.wrap(Category.Greenery | 1);
-  ObjectType constant CottonBush = ObjectType.wrap(Category.Greenery | 2);
-  ObjectType constant VinesBush = ObjectType.wrap(Category.Greenery | 3);
-  ObjectType constant IvyVine = ObjectType.wrap(Category.Greenery | 4);
-  ObjectType constant HempBush = ObjectType.wrap(Category.Greenery | 5);
+  ObjectType constant VinesBush = ObjectType.wrap(Category.Greenery | 2);
+  ObjectType constant IvyVine = ObjectType.wrap(Category.Greenery | 3);
+  ObjectType constant HempBush = ObjectType.wrap(Category.Greenery | 4);
   ObjectType constant Coral = ObjectType.wrap(Category.UnderwaterPlant | 0);
   ObjectType constant SeaAnemone = ObjectType.wrap(Category.UnderwaterPlant | 1);
   ObjectType constant Algae = ObjectType.wrap(Category.UnderwaterPlant | 2);
@@ -189,14 +190,22 @@ library ObjectTypes {
   ObjectType constant TubeCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 2);
   ObjectType constant BubbleCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 3);
   ObjectType constant BrainCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 4);
+  ObjectType constant SpiderWeb = ObjectType.wrap(Category.MiscBlock | 0);
+  ObjectType constant Bone = ObjectType.wrap(Category.MiscBlock | 1);
   ObjectType constant GoldenMushroom = ObjectType.wrap(Category.Crop | 0);
   ObjectType constant RedMushroom = ObjectType.wrap(Category.Crop | 1);
   ObjectType constant CoffeeBush = ObjectType.wrap(Category.Crop | 2);
   ObjectType constant StrawberryBush = ObjectType.wrap(Category.Crop | 3);
   ObjectType constant RaspberryBush = ObjectType.wrap(Category.Crop | 4);
   ObjectType constant Wheat = ObjectType.wrap(Category.Crop | 5);
+  ObjectType constant CottonBush = ObjectType.wrap(Category.Crop | 6);
   ObjectType constant Pumpkin = ObjectType.wrap(Category.CropBlock | 0);
   ObjectType constant Melon = ObjectType.wrap(Category.CropBlock | 1);
+  ObjectType constant RedMushroomBlock = ObjectType.wrap(Category.CropBlock | 2);
+  ObjectType constant BrownMushroomBlock = ObjectType.wrap(Category.CropBlock | 3);
+  ObjectType constant MushroomStem = ObjectType.wrap(Category.CropBlock | 4);
+  ObjectType constant BambooBush = ObjectType.wrap(Category.CropBlock | 5);
+  ObjectType constant Cactus = ObjectType.wrap(Category.CropBlock | 6);
   ObjectType constant AnyPlank = ObjectType.wrap(Category.Plank | 0);
   ObjectType constant OakPlanks = ObjectType.wrap(Category.Plank | 1);
   ObjectType constant BirchPlanks = ObjectType.wrap(Category.Plank | 2);
@@ -214,6 +223,7 @@ library ObjectTypes {
   ObjectType constant WheatSeed = ObjectType.wrap(Category.Seed | 0);
   ObjectType constant PumpkinSeed = ObjectType.wrap(Category.Seed | 1);
   ObjectType constant MelonSeed = ObjectType.wrap(Category.Seed | 2);
+  ObjectType constant CottonSeed = ObjectType.wrap(Category.Seed | 3);
   ObjectType constant OakSapling = ObjectType.wrap(Category.Sapling | 0);
   ObjectType constant BirchSapling = ObjectType.wrap(Category.Sapling | 1);
   ObjectType constant JungleSapling = ObjectType.wrap(Category.Sapling | 2);
@@ -229,16 +239,7 @@ library ObjectTypes {
   ObjectType constant Chest = ObjectType.wrap(Category.SmartEntityBlock | 1);
   ObjectType constant SpawnTile = ObjectType.wrap(Category.SmartEntityBlock | 2);
   ObjectType constant Bed = ObjectType.wrap(Category.SmartEntityBlock | 3);
-  ObjectType constant RedMushroomBlock = ObjectType.wrap(Category.MiscBlock | 0);
-  ObjectType constant BrownMushroomBlock = ObjectType.wrap(Category.MiscBlock | 1);
-  ObjectType constant MushroomStem = ObjectType.wrap(Category.MiscBlock | 2);
-  ObjectType constant BambooBush = ObjectType.wrap(Category.MiscBlock | 3);
-  ObjectType constant Cactus = ObjectType.wrap(Category.MiscBlock | 4);
-  ObjectType constant Snow = ObjectType.wrap(Category.MiscBlock | 5);
-  ObjectType constant Ice = ObjectType.wrap(Category.MiscBlock | 6);
-  ObjectType constant SpiderWeb = ObjectType.wrap(Category.MiscBlock | 7);
-  ObjectType constant Bone = ObjectType.wrap(Category.MiscBlock | 8);
-  ObjectType constant TextSign = ObjectType.wrap(Category.MiscBlock | 9);
+  ObjectType constant TextSign = ObjectType.wrap(Category.SmartEntityBlock | 4);
   ObjectType constant WoodenPick = ObjectType.wrap(Category.Pick | 0);
   ObjectType constant CopperPick = ObjectType.wrap(Category.Pick | 1);
   ObjectType constant IronPick = ObjectType.wrap(Category.Pick | 2);
@@ -354,6 +355,10 @@ library ObjectTypeLib {
     return category(self) == Category.UnderwaterBlock;
   }
 
+  function isMiscBlock(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.MiscBlock;
+  }
+
   function isPlank(ObjectType self) internal pure returns (bool) {
     return category(self) == Category.Plank;
   }
@@ -376,10 +381,6 @@ library ObjectTypeLib {
 
   function isSmartEntityBlock(ObjectType self) internal pure returns (bool) {
     return category(self) == Category.SmartEntityBlock;
-  }
-
-  function isMiscBlock(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.MiscBlock;
   }
 
   function isPick(ObjectType self) internal pure returns (bool) {
@@ -452,7 +453,7 @@ library ObjectTypeLib {
     return [ObjectTypes.Amethyst, ObjectTypes.Glowstone];
   }
 
-  function getSoilTypes() internal pure returns (ObjectType[9] memory) {
+  function getSoilTypes() internal pure returns (ObjectType[11] memory) {
     return [
       ObjectTypes.Grass,
       ObjectTypes.Dirt,
@@ -462,13 +463,15 @@ library ObjectTypeLib {
       ObjectTypes.Mud,
       ObjectTypes.PackedMud,
       ObjectTypes.Farmland,
-      ObjectTypes.WetFarmland
+      ObjectTypes.WetFarmland,
+      ObjectTypes.Snow,
+      ObjectTypes.Ice
     ];
   }
 
   function getOreTypes() internal pure returns (ObjectType[7] memory) {
     return [
-      ObjectTypes.AnyOre,
+      ObjectTypes.UnrevealedOre,
       ObjectTypes.CoalOre,
       ObjectTypes.CopperOre,
       ObjectTypes.IronOre,
@@ -550,30 +553,38 @@ library ObjectTypeLib {
     ];
   }
 
-  function getGreeneryTypes() internal pure returns (ObjectType[6] memory) {
+  function getGreeneryTypes() internal pure returns (ObjectType[5] memory) {
     return [
       ObjectTypes.FescueGrass,
       ObjectTypes.SwitchGrass,
-      ObjectTypes.CottonBush,
       ObjectTypes.VinesBush,
       ObjectTypes.IvyVine,
       ObjectTypes.HempBush
     ];
   }
 
-  function getCropTypes() internal pure returns (ObjectType[6] memory) {
+  function getCropTypes() internal pure returns (ObjectType[7] memory) {
     return [
       ObjectTypes.GoldenMushroom,
       ObjectTypes.RedMushroom,
       ObjectTypes.CoffeeBush,
       ObjectTypes.StrawberryBush,
       ObjectTypes.RaspberryBush,
-      ObjectTypes.Wheat
+      ObjectTypes.Wheat,
+      ObjectTypes.CottonBush
     ];
   }
 
-  function getCropBlockTypes() internal pure returns (ObjectType[2] memory) {
-    return [ObjectTypes.Pumpkin, ObjectTypes.Melon];
+  function getCropBlockTypes() internal pure returns (ObjectType[7] memory) {
+    return [
+      ObjectTypes.Pumpkin,
+      ObjectTypes.Melon,
+      ObjectTypes.RedMushroomBlock,
+      ObjectTypes.BrownMushroomBlock,
+      ObjectTypes.MushroomStem,
+      ObjectTypes.BambooBush,
+      ObjectTypes.Cactus
+    ];
   }
 
   function getUnderwaterPlantTypes() internal pure returns (ObjectType[3] memory) {
@@ -588,6 +599,10 @@ library ObjectTypeLib {
       ObjectTypes.BubbleCoralBlock,
       ObjectTypes.BrainCoralBlock
     ];
+  }
+
+  function getMiscBlockTypes() internal pure returns (ObjectType[2] memory) {
+    return [ObjectTypes.SpiderWeb, ObjectTypes.Bone];
   }
 
   function getPlankTypes() internal pure returns (ObjectType[9] memory) {
@@ -614,8 +629,8 @@ library ObjectTypeLib {
     ];
   }
 
-  function getSeedTypes() internal pure returns (ObjectType[3] memory) {
-    return [ObjectTypes.WheatSeed, ObjectTypes.PumpkinSeed, ObjectTypes.MelonSeed];
+  function getSeedTypes() internal pure returns (ObjectType[4] memory) {
+    return [ObjectTypes.WheatSeed, ObjectTypes.PumpkinSeed, ObjectTypes.MelonSeed, ObjectTypes.CottonSeed];
   }
 
   function getSaplingTypes() internal pure returns (ObjectType[8] memory) {
@@ -635,23 +650,8 @@ library ObjectTypeLib {
     return [ObjectTypes.Furnace, ObjectTypes.Workbench, ObjectTypes.Powerstone];
   }
 
-  function getSmartEntityBlockTypes() internal pure returns (ObjectType[4] memory) {
-    return [ObjectTypes.ForceField, ObjectTypes.Chest, ObjectTypes.SpawnTile, ObjectTypes.Bed];
-  }
-
-  function getMiscBlockTypes() internal pure returns (ObjectType[10] memory) {
-    return [
-      ObjectTypes.RedMushroomBlock,
-      ObjectTypes.BrownMushroomBlock,
-      ObjectTypes.MushroomStem,
-      ObjectTypes.BambooBush,
-      ObjectTypes.Cactus,
-      ObjectTypes.Snow,
-      ObjectTypes.Ice,
-      ObjectTypes.SpiderWeb,
-      ObjectTypes.Bone,
-      ObjectTypes.TextSign
-    ];
+  function getSmartEntityBlockTypes() internal pure returns (ObjectType[5] memory) {
+    return [ObjectTypes.ForceField, ObjectTypes.Chest, ObjectTypes.SpawnTile, ObjectTypes.Bed, ObjectTypes.TextSign];
   }
 
   function getPickTypes() internal pure returns (ObjectType[6] memory) {
@@ -829,6 +829,7 @@ library ObjectTypeLib {
     if (self == ObjectTypes.WheatSeed) return ObjectTypes.Wheat;
     if (self == ObjectTypes.PumpkinSeed) return ObjectTypes.Pumpkin;
     if (self == ObjectTypes.MelonSeed) return ObjectTypes.Melon;
+    if (self == ObjectTypes.CottonSeed) return ObjectTypes.CottonBush;
     return ObjectTypes.Null;
   }
 
@@ -847,6 +848,7 @@ library ObjectTypeLib {
     if (self == ObjectTypes.WheatSeed) return 900;
     if (self == ObjectTypes.PumpkinSeed) return 3600;
     if (self == ObjectTypes.MelonSeed) return 3600;
+    if (self == ObjectTypes.CottonSeed) return 3600;
     if (self == ObjectTypes.OakSapling) return 345600;
     if (self == ObjectTypes.BirchSapling) return 345600;
     if (self == ObjectTypes.JungleSapling) return 345600;
@@ -866,11 +868,9 @@ library ObjectTypeLib {
   // Meta Category Checks
   function isAny(ObjectType self) internal pure returns (bool) {
     // Check if:
-    // 1. ID bits are all 0
+    // 1. Index bits are all 0
     // 2. Category is one that supports "Any" types
-    uint16 idx = self.unwrap() & ~CATEGORY_MASK;
-
-    return idx == 0 && hasMetaCategory(self, Category.HAS_ANY_MASK);
+    return self.index() == 0 && hasMetaCategory(self, Category.HAS_ANY_MASK);
   }
 
   function hasExtraDrops(ObjectType self) internal pure returns (bool) {
@@ -901,9 +901,9 @@ library ObjectTypeLib {
     return hasMetaCategory(self, Category.GROWABLE_MASK);
   }
 
-  function hasMetaCategory(ObjectType self, uint128 mask) internal pure returns (bool) {
+  function hasMetaCategory(ObjectType self, uint256 mask) internal pure returns (bool) {
     uint16 c = category(self);
-    return ((uint128(1) << (c >> OFFSET_BITS)) & mask) != 0;
+    return ((uint256(1) << (c >> OFFSET_BITS)) & mask) != 0;
   }
 
   function matches(ObjectType self, ObjectType other) internal pure returns (bool) {

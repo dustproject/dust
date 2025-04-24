@@ -196,7 +196,7 @@ library NatureLib {
 
     ObjectType[7] memory oreTypes = ObjectTypeLib.getOreTypes();
     // Use remaining amounts directly as weights
-    // Skip AnyOre (index 0) since it's not a specific ore type
+    // Skip UnrevealedOre (index 0) since it's not a specific ore type
     for (uint256 i = 1; i < oreTypes.length; i++) {
       oreOptions[i - 1] = ObjectAmount(oreTypes[i], 1);
       (, weights[i - 1]) = getCapAndRemaining(oreTypes[i]);
@@ -285,7 +285,7 @@ library NatureLib {
     // This increases the availability of the ores being burned
     ResourceCount._set(self, ResourceCount._get(self) - amount);
     // This allows the same amount of ores to respawn
-    BurnedResourceCount._set(ObjectTypes.AnyOre, BurnedResourceCount._get(ObjectTypes.AnyOre) + amount);
+    BurnedResourceCount._set(ObjectTypes.UnrevealedOre, BurnedResourceCount._get(ObjectTypes.UnrevealedOre) + amount);
   }
 
   function burnOres(ObjectType self) internal {

@@ -164,7 +164,10 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
   }
 
   function _packObjectType(ObjectType objectType) internal pure returns (uint8 packed) {
-    packed = uint8(objectType.category() >> 5) | uint8(objectType.index());
+    uint16 category = objectType.category();
+    uint16 index = objectType.index();
+    require((category >> 8) < 16 && index < 16, "Type can't be packed");
+    packed = uint8(category >> 4) | uint8(index);
   }
 
   function _getChunk(ObjectType objectType) internal pure returns (uint8[][][] memory chunk) {

@@ -7,7 +7,7 @@
 Ores follow a complete lifecycle with position tracking and respawning.
 
 #### Mining Ores
-- Ores initially exist as `AnyOre` blocks in the world
+- Ores initially exist as `UnrevealedOre` blocks in the world
 - When mined, they are collapsed into a specific ore type by choosing an ore at random weighted by availability
 - Positions of mined ores are tracked using the ResourcePosition and ResourceCount so that they can be respawned
 - The ResourceCount table is incremented for the specific ore type
@@ -15,7 +15,7 @@ Ores follow a complete lifecycle with position tracking and respawning.
 #### Burning Ores
 - When tools containing ores are burned (via `ObjectTypeLib.burnOres`), the ore resource is made available again
 - ResourceCount is decreased for that specific ore
-- BurnedResourceCount is increased for AnyOre category
+- BurnedResourceCount is increased for UnrevealedOre category
 - This creates a "pool" of ores that can respawn
 
 #### Respawning Ores
@@ -75,7 +75,7 @@ Seeds have a simpler approach focused on tracking quantities without position ma
 ## Resource Availability and Probabilities
 
 ### Ore Selection Logic
-- When a player mines an `AnyOre`, a specific ore type is selected
+- When a player mines an `UnrevealedOre`, a specific ore type is selected
 - Selection probability is directly proportional to the remaining capacity
 - Formula: `remaining = cap - mined`
 - Higher remaining count = higher probability
@@ -131,7 +131,7 @@ function burnOres(ObjectType self) internal {
     // This increases the availability of the ores being burned
     ResourceCount._set(objectType, ResourceCount._get(objectType) - amount);
     // This allows the same amount of ores to respawn
-    BurnedResourceCount._set(ObjectTypes.AnyOre, BurnedResourceCount._get(ObjectTypes.AnyOre) + amount);
+    BurnedResourceCount._set(ObjectTypes.UnrevealedOre, BurnedResourceCount._get(ObjectTypes.UnrevealedOre) + amount);
   }
 }
 ```
@@ -141,7 +141,7 @@ function burnOres(ObjectType self) internal {
 ### Resource Lifecycle
 
 1. **Creation**
-   - Ores: Exist in the world as `AnyOre`, collapse to specific types when mined
+   - Ores: Exist in the world as `UnrevealedOre`, collapse to specific types when mined
    - Seeds: Created as drops from mining certain blocks
 
 2. **Circulation**

@@ -129,17 +129,17 @@ contract MineTest is DustTest {
 
     Vec3 mineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
 
-    setTerrainAtCoord(mineCoord, ObjectTypes.AnyOre);
+    setTerrainAtCoord(mineCoord, ObjectTypes.UnrevealedOre);
     ObjectType o = TerrainLib.getBlockType(mineCoord);
-    assertEq(o, ObjectTypes.AnyOre, "Didn't work");
+    assertEq(o, ObjectTypes.UnrevealedOre, "Didn't work");
     EntityId mineEntityId = ReversePosition.get(mineCoord);
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.AnyOre, 0);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.UnrevealedOre, 0);
 
     EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     ObjectAmount[] memory oreAmounts = inventoryGetOreAmounts(aliceEntityId);
     assertEq(oreAmounts.length, 0, "Existing ores in inventory");
-    assertEq(ResourceCount.get(ObjectTypes.AnyOre), 0, "Mined resource count is not 0");
+    assertEq(ResourceCount.get(ObjectTypes.UnrevealedOre), 0, "Mined resource count is not 0");
 
     vm.prank(alice);
     world.chunkCommit(aliceEntityId, mineCoord.toChunkCoord());
@@ -154,13 +154,13 @@ contract MineTest is DustTest {
     mineEntityId = ReversePosition.get(mineCoord);
     assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Entity should be air");
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.AnyOre, 0);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.UnrevealedOre, 0);
     assertEq(Inventory.length(aliceEntityId), 1, "Wrong number of occupied inventory slots");
     oreAmounts = inventoryGetOreAmounts(aliceEntityId);
     assertEq(oreAmounts.length, 1, "No ores in inventory");
     assertEq(oreAmounts[0].amount, 1, "Did not get exactly one ore");
     assertEq(ResourceCount.get(oreAmounts[0].objectType), 1, "Resource count was not updated");
-    assertEq(ResourceCount.get(ObjectTypes.AnyOre), 1, "Total resource count was not updated");
+    assertEq(ResourceCount.get(ObjectTypes.UnrevealedOre), 1, "Total resource count was not updated");
 
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
@@ -171,9 +171,9 @@ contract MineTest is DustTest {
 
     Vec3 mineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
 
-    setTerrainAtCoord(mineCoord, ObjectTypes.AnyOre);
+    setTerrainAtCoord(mineCoord, ObjectTypes.UnrevealedOre);
     ObjectType o = TerrainLib.getBlockType(mineCoord);
-    assertEq(o, ObjectTypes.AnyOre, "Didn't work");
+    assertEq(o, ObjectTypes.UnrevealedOre, "Didn't work");
     EntityId mineEntityId = ReversePosition.get(mineCoord);
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
 
@@ -191,7 +191,7 @@ contract MineTest is DustTest {
     // Check that the type has been set to specific resource
     mineEntityId = ReversePosition.get(mineCoord);
     ObjectType resourceType = EntityObjectType.get(mineEntityId);
-    assertNotEq(resourceType, ObjectTypes.AnyOre, "Resource type should have been set to a specific resource");
+    assertNotEq(resourceType, ObjectTypes.UnrevealedOre, "Resource type should have been set to a specific resource");
 
     // Verify mass has been set to the resource's
     uint128 mass = Mass.getMass(mineEntityId);
@@ -208,7 +208,9 @@ contract MineTest is DustTest {
     // Verify the resource type hasn't changed even though commitment expired
     mineEntityId = ReversePosition.get(mineCoord);
     resourceType = EntityObjectType.get(mineEntityId);
-    assertNotEq(resourceType, ObjectTypes.AnyOre, "Resource type should remain consistent after commitment expired");
+    assertNotEq(
+      resourceType, ObjectTypes.UnrevealedOre, "Resource type should remain consistent after commitment expired"
+    );
 
     // Verify mass has been set to the resource's
     mass = Mass.getMass(mineEntityId);
