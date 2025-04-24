@@ -1,8 +1,8 @@
-import type { ObjectTypeName } from "../objects";
+import type { ObjectName } from "../objects";
 import { type Recipe, recipes, validateRecipe } from "../recipes";
 
 function renderRecipe(recipe: Recipe): string {
-  const station: ObjectTypeName = recipe.station ?? "Null";
+  const station: ObjectName = recipe.station ?? "Null";
 
   return `{
     uint16[] memory inputTypes = new uint16[](${recipe.inputs.length});

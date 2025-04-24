@@ -109,20 +109,207 @@ export const hasAnyCategories: Category[] = ["Log", "Leaf", "Plank"];
 
 export const hasExtraDropsCategories: Category[] = ["Leaf", "Crop", "Greenery"];
 
+export const objectNames = [
+  "Null",
+  "Air",
+  "Water",
+  "Lava",
+  "Stone",
+  "Bedrock",
+  "Deepslate",
+  "Granite",
+  "Tuff",
+  "Calcite",
+  "Basalt",
+  "SmoothBasalt",
+  "Andesite",
+  "Diorite",
+  "Cobblestone",
+  "MossyCobblestone",
+  "Obsidian",
+  "Dripstone",
+  "Blackstone",
+  "CobbledDeepslate",
+  "Amethyst",
+  "Glowstone",
+  "Grass",
+  "Dirt",
+  "Moss",
+  "Podzol",
+  "DirtPath",
+  "Mud",
+  "PackedMud",
+  "Farmland",
+  "WetFarmland",
+  "Snow",
+  "Ice",
+  "UnrevealedOre",
+  "CoalOre",
+  "CopperOre",
+  "IronOre",
+  "GoldOre",
+  "DiamondOre",
+  "NeptuniumOre",
+  "Gravel",
+  "Sand",
+  "RedSand",
+  "Sandstone",
+  "RedSandstone",
+  "Clay",
+  "Terracotta",
+  "BrownTerracotta",
+  "OrangeTerracotta",
+  "WhiteTerracotta",
+  "LightGrayTerracotta",
+  "YellowTerracotta",
+  "RedTerracotta",
+  "LightBlueTerracotta",
+  "CyanTerracotta",
+  "BlackTerracotta",
+  "PurpleTerracotta",
+  "BlueTerracotta",
+  "MagentaTerracotta",
+  "AnyLog",
+  "OakLog",
+  "BirchLog",
+  "JungleLog",
+  "SakuraLog",
+  "AcaciaLog",
+  "SpruceLog",
+  "DarkOakLog",
+  "MangroveLog",
+  "AnyLeaf",
+  "OakLeaf",
+  "BirchLeaf",
+  "JungleLeaf",
+  "SakuraLeaf",
+  "SpruceLeaf",
+  "AcaciaLeaf",
+  "DarkOakLeaf",
+  "AzaleaLeaf",
+  "FloweringAzaleaLeaf",
+  "MangroveLeaf",
+  "MangroveRoots",
+  "MuddyMangroveRoots",
+  "AzaleaFlower",
+  "BellFlower",
+  "DandelionFlower",
+  "DaylilyFlower",
+  "LilacFlower",
+  "RoseFlower",
+  "FireFlower",
+  "MorninggloryFlower",
+  "PeonyFlower",
+  "Ultraviolet",
+  "SunFlower",
+  "FlyTrap",
+  "FescueGrass",
+  "SwitchGrass",
+  "VinesBush",
+  "IvyVine",
+  "HempBush",
+  "Coral",
+  "SeaAnemone",
+  "Algae",
+  "HornCoralBlock",
+  "FireCoralBlock",
+  "TubeCoralBlock",
+  "BubbleCoralBlock",
+  "BrainCoralBlock",
+  "SpiderWeb",
+  "Bone",
+  "GoldenMushroom",
+  "RedMushroom",
+  "CoffeeBush",
+  "StrawberryBush",
+  "RaspberryBush",
+  "Wheat",
+  "CottonBush",
+  "Pumpkin",
+  "Melon",
+  "RedMushroomBlock",
+  "BrownMushroomBlock",
+  "MushroomStem",
+  "BambooBush",
+  "Cactus",
+  "AnyPlank",
+  "OakPlanks",
+  "BirchPlanks",
+  "JunglePlanks",
+  "SakuraPlanks",
+  "SprucePlanks",
+  "AcaciaPlanks",
+  "DarkOakPlanks",
+  "MangrovePlanks",
+  "CopperBlock",
+  "IronBlock",
+  "GoldBlock",
+  "DiamondBlock",
+  "NeptuniumBlock",
+  "WheatSeed",
+  "PumpkinSeed",
+  "MelonSeed",
+  "CottonSeed",
+  "OakSapling",
+  "BirchSapling",
+  "JungleSapling",
+  "SakuraSapling",
+  "AcaciaSapling",
+  "SpruceSapling",
+  "DarkOakSapling",
+  "MangroveSapling",
+  "Furnace",
+  "Workbench",
+  "Powerstone",
+  "ForceField",
+  "Chest",
+  "SpawnTile",
+  "Bed",
+  "TextSign",
+  "WoodenPick",
+  "CopperPick",
+  "IronPick",
+  "GoldPick",
+  "DiamondPick",
+  "NeptuniumPick",
+  "WoodenAxe",
+  "CopperAxe",
+  "IronAxe",
+  "GoldAxe",
+  "DiamondAxe",
+  "NeptuniumAxe",
+  "WoodenWhacker",
+  "CopperWhacker",
+  "IronWhacker",
+  "WoodenHoe",
+  "GoldBar",
+  "IronBar",
+  "Diamond",
+  "NeptuniumBar",
+  "Bucket",
+  "WaterBucket",
+  "WheatSlop",
+  "Fuel",
+  "Player",
+  "Fragment",
+] as const;
+
+export type ObjectName = (typeof objectNames)[number];
+
 // Define object type interface
-export interface ObjectType {
-  name: string;
-  id: number;
-  terrainId?: number;
+export interface ObjectDefinition {
+  name: ObjectName;
   category: Category;
   index: number;
+  id: number;
+  terrainId?: number;
   mass?: bigint;
   energy?: bigint;
   timeToGrow?: bigint;
   isTillable?: boolean;
   stackable?: number;
-  sapling?: ObjectTypeName;
-  crop?: ObjectTypeName;
+  sapling?: ObjectName;
+  crop?: ObjectName;
   isMachine?: boolean;
   // Used for tools
   plankAmount?: number;
@@ -130,7 +317,10 @@ export interface ObjectType {
 }
 
 export const categoryObjects: {
-  [key in Category]: Omit<ObjectType, "id" | "category" | "index">[];
+  [key in Category]: Omit<
+    ObjectDefinition,
+    "id" | "category" | "index" | "terrainId"
+  >[];
 } = {
   NonSolid: [
     { name: "Null" },
@@ -509,24 +699,28 @@ export const categoryObjects: {
   SmartEntityNonBlock: [{ name: "Fragment" }],
 } as const;
 
-export const objects: ObjectType[] = Object.entries(categoryObjects).flatMap(
-  ([category, objects], categoryIndex) =>
-    objects.map((obj, index) => ({
-      ...obj,
-      id: (categoryIndex << 8) | index,
-      terrainId:
-        categoryIndex < 16 && index < 16
-          ? (categoryIndex << 4) | index
-          : undefined,
-      categoryIndex,
-      index,
-      category: category as Category,
-    })),
+export const objects: ObjectDefinition[] = Object.entries(
+  categoryObjects,
+).flatMap(([category, objects], categoryIndex) =>
+  objects.map((obj, index) => ({
+    ...obj,
+    id: (categoryIndex << 8) | index,
+    terrainId:
+      categoryIndex < 16 && index < 16
+        ? (categoryIndex << 4) | index
+        : undefined,
+    categoryIndex,
+    index,
+    category: category as Category,
+  })),
 );
 
-export type ObjectTypeName = (typeof objects)[number]["name"];
+export type ObjectAmount = [ObjectName, number | bigint];
 
-export type ObjectAmount = [ObjectTypeName, number | bigint];
-
-export const objectsByName: Record<ObjectTypeName, ObjectType> =
-  Object.fromEntries(objects.map((obj) => [obj.name, obj]));
+export const objectsByName = objects.reduce(
+  (acc, obj) => {
+    acc[obj.name] = obj;
+    return acc;
+  },
+  {} as Record<ObjectName, ObjectDefinition>,
+);

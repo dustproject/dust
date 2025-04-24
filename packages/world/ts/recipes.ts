@@ -1,11 +1,7 @@
-import {
-  type ObjectAmount,
-  type ObjectTypeName,
-  objectsByName,
-} from "./objects";
+import { type ObjectAmount, type ObjectName, objectsByName } from "./objects";
 
 export interface Recipe {
-  station?: ObjectTypeName;
+  station?: ObjectName;
   inputs: ObjectAmount[];
   outputs: ObjectAmount[];
 }
@@ -358,14 +354,14 @@ export const recipes: Recipe[] = [
 ];
 
 // Get recipes where an object is used as input
-export function getRecipesByInput(objectType: ObjectTypeName): Recipe[] {
+export function getRecipesByInput(objectType: ObjectName): Recipe[] {
   return recipes.filter((recipe) =>
     recipe.inputs.some((input) => input[0] === objectType),
   );
 }
 
 // Get recipes where an object is produced as output
-export function getRecipesByOutput(objectType: ObjectTypeName): Recipe[] {
+export function getRecipesByOutput(objectType: ObjectName): Recipe[] {
   return recipes.filter((recipe) =>
     recipe.outputs.some((output) => output[0] === objectType),
   );

@@ -1,4 +1,4 @@
-import type { ObjectTypeName } from "./objects";
+import type { ObjectName } from "./objects";
 
 interface Vec3 {
   x: number;
@@ -8,9 +8,9 @@ interface Vec3 {
 
 interface TreeDef {
   name: string;
-  sapling: ObjectTypeName;
-  log: ObjectTypeName;
-  leaf: ObjectTypeName;
+  sapling: ObjectName;
+  log: ObjectName;
+  leaf: ObjectName;
   trunkHeight: number;
   canopyStart: number;
   canopyEnd: number; // exclusive
