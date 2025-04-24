@@ -49,7 +49,7 @@ export type Category = (typeof allCategories)[number];
 
 // Define categories that pass metadata for the template
 export interface CategoryMetadata {
-  name: string;
+  name: Category;
   index: number;
 }
 
@@ -73,6 +73,14 @@ export const allCategoryMetadata: CategoryMetadata[] = [
   ...blockCategoryMetadata,
   ...nonBlockCategoryMetadata,
 ];
+
+const categoryIndex = allCategoryMetadata.reduce(
+  (acc, category) => {
+    acc[category.name] = category.index;
+    return acc;
+  },
+  {} as Record<Category, number>,
+);
 
 // Meta-categories (categories that should be included in pass-through check)
 export const passThroughCategories: Category[] = [
@@ -701,19 +709,18 @@ export const categoryObjects: {
 
 export const objects: ObjectDefinition[] = Object.entries(
   categoryObjects,
-).flatMap(([category, objects], categoryIndex) =>
-  objects.map((obj, index) => ({
+).flatMap(([category, objects]) => {
+  const catIndex = categoryIndex[category as Category];
+  return objects.map((obj, index) => ({
     ...obj,
-    id: (categoryIndex << 8) | index,
+    id: (catIndex << 8) | index,
     terrainId:
-      categoryIndex < 16 && index < 16
-        ? (categoryIndex << 4) | index
-        : undefined,
-    categoryIndex,
+      catIndex < 16 && index < 16 ? (catIndex << 4) | index : undefined,
+    categoryIndex: catIndex,
     index,
     category: category as Category,
-  })),
-);
+  }));
+});
 
 export type ObjectAmount = [ObjectName, number | bigint];
 
@@ -723,4 +730,16 @@ export const objectsByName = objects.reduce(
     return acc;
   },
   {} as Record<ObjectName, ObjectDefinition>,
+);
+
+console.warn("logging");
+// log max terrain id
+console.warn(
+  objects.reduce(
+    (max, obj) => (obj.terrainId ? Math.max(max, obj.terrainId) : max),
+    0,
+  ),
+);
+console.warn(
+  objects.reduce((max, obj) => (obj.id ? Math.max(max, obj.id) : max), 0),
 );
