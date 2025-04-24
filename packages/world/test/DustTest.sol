@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { GasReporter } from "@latticexyz/gas-report/src/GasReporter.sol";
-import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 import { console } from "forge-std/console.sol";
+
+import { GasReporter } from "@latticexyz/gas-report/src/GasReporter.sol";
 
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { NamespaceOwner } from "@latticexyz/world/src/codegen/tables/NamespaceOwner.sol";
+import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 
 import {
   CHUNK_SIZE, MAX_PLAYER_ENERGY, MINE_ENERGY_COST, PLAYER_ENERGY_DRAIN_RATE, REGION_SIZE

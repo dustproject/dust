@@ -69,7 +69,7 @@ contract CraftSystem is System {
     FurnaceData memory furnaceData = Furnace._get(furnace);
     RecipesData memory recipe = Recipes._get(furnaceData.recipeId);
     require(recipe.inputTypes.length > 0, "Furnace is not smelting");
-    require(furnaceData.finishesAt < block.timestamp, "Smelting not finished yet");
+    require(furnaceData.finishesAt <= block.timestamp, "Smelting not finished yet");
     Furnace._deleteRecord(furnace);
 
     // Create the outputs
@@ -93,6 +93,7 @@ library CraftLib {
     require(furnaceData.recipeId == bytes32(0), "Furnace is already smelting");
     furnaceData.recipeId = recipeId;
     furnaceData.finishesAt = uint128(block.timestamp) + recipe.smeltTime;
+    Furnace._set(furnace, furnaceData);
 
     uint256 currentInput = 0;
     for (uint256 i = 0; i < recipe.inputTypes.length; i++) {

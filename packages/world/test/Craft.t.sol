@@ -446,6 +446,8 @@ contract CraftTest is DustTest {
     uint128 finishesAt = Furnace.getFinishesAt(furnaceEntityId);
     assertTrue(finishesAt > 0, "Furnace finish time not set");
 
+    vm.warp(finishesAt);
+
     vm.prank(alice);
     startGasReport("finish smelting in furnace");
     world.finishSmelting(aliceEntityId, furnaceEntityId, "");
@@ -548,6 +550,10 @@ contract CraftTest is DustTest {
     Vec3 furnaceCoord = playerCoord + vec3(1, 0, 0);
     EntityId furnaceEntityId = setObjectAtCoord(furnaceCoord, ObjectTypes.Furnace);
 
+    // Set resource count so they can be burnt
+    ResourceCount.set(ObjectTypes.GoldOre, 1);
+    ResourceCount.set(ObjectTypes.CoalOre, 1);
+
     // Add items to furnace inventory
     TestInventoryUtils.addObject(furnaceEntityId, ObjectTypes.GoldOre, 1);
     TestInventoryUtils.addObject(furnaceEntityId, ObjectTypes.CoalOre, 1);
@@ -568,6 +574,11 @@ contract CraftTest is DustTest {
     // Verify Furnace table entry was created
     bytes32 storedRecipeId = Furnace.getRecipeId(furnaceEntityId);
     assertEq(storedRecipeId, recipeId, "Recipe ID not correctly stored in Furnace table");
+
+    uint128 finishesAt = Furnace.getFinishesAt(furnaceEntityId);
+    assertTrue(finishesAt > 0, "Furnace finish time not set");
+
+    vm.warp(finishesAt);
 
     vm.prank(alice);
     world.finishSmelting(aliceEntityId, furnaceEntityId, "");
