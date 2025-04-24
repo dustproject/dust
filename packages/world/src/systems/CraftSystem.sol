@@ -41,14 +41,15 @@ contract CraftSystem is System {
       caller.requireConnected(station);
     }
 
-    CraftLib._processEnergyReduction(caller);
+    (uint128 callerEnergy,) = transferEnergyToPool(caller, CRAFT_ENERGY_COST);
+    require(callerEnergy > 0, "Not enough energy");
 
     // If the recipe requires a furnace, the input slots reference the furnace
     if (recipe.stationTypeId == ObjectTypes.Furnace) {
-      _beginSmelting(station, recipe, inputs);
+      _beginSmelting(station, recipeId, recipe, inputs);
     } else {
-      _consumeRecipeInputs(caller, recipe, inputs);
-      _createRecipeOutputs(caller, recipe);
+      CraftLib._consumeRecipeInputs(caller, recipe, inputs);
+      CraftLib._createRecipeOutputs(caller, recipe);
 
       notify(caller, CraftNotification({ recipeId: recipeId, station: station }));
     }
@@ -69,7 +70,7 @@ contract CraftSystem is System {
     require(recipe.inputTypes.length > 0, "Furnace is not smelting");
 
     // Create the outputs
-    SlotData[] memory withdrawals = _createRecipeOutputs(caller, recipe);
+    SlotData[] memory withdrawals = CraftLib._createRecipeOutputs(caller, recipe);
 
     // We need to notify the furnace that the outputs are being withdrawn
     bytes memory onTransfer =
@@ -80,7 +81,43 @@ contract CraftSystem is System {
     notify(caller, CraftNotification({ recipeId: furnaceData.recipeId, station: furnace }));
   }
 
-  function _validateRecipeInput(ObjectTypeId recipeType, ObjectTypeId inputType) private pure {
+  function _beginSmelting(EntityId furnace, bytes32 recipeId, RecipesData memory recipe, SlotAmount[] memory inputs)
+    private
+  {
+    FurnaceData memory furnaceData = Furnace._get(furnace);
+    require(furnaceData.recipeId == bytes32(0), "Furnace is already smelting");
+    furnaceData.recipeId = recipeId;
+    furnaceData.finishesAt = uint128(block.timestamp) + recipe.smeltTime;
+
+    uint256 currentInput = 0;
+    for (uint256 i = 0; i < recipe.inputTypes.length; i++) {
+      ObjectTypeId recipeType = ObjectTypeId.wrap(recipe.inputTypes[i]);
+      uint16 remainingAmount = recipe.inputAmounts[i];
+
+      while (remainingAmount > 0) {
+        require(currentInput < inputs.length, "Not enough inputs for recipe");
+        uint16 amount = inputs[currentInput].amount;
+        require(amount > 0, "Input amount must be greater than 0");
+
+        ObjectTypeId inputType = InventorySlot._getObjectType(furnace, inputs[currentInput].slot);
+        CraftLib._validateRecipeInput(recipeType, inputType);
+
+        // Only burn the coal inputs so they can't be retrieved
+        if (recipeType == ObjectTypes.CoalOre) {
+          InventoryUtils.removeObjectFromSlot(furnace, inputs[currentInput].slot, amount);
+          recipeType.burnOre(recipe.inputAmounts[i]);
+        }
+        remainingAmount -= amount;
+        currentInput++;
+      }
+    }
+  }
+}
+
+library CraftLib {
+  using ObjectTypeLib for ObjectTypeId;
+
+  function _validateRecipeInput(ObjectTypeId recipeType, ObjectTypeId inputType) public pure {
     if (recipeType.isAny()) {
       ObjectTypeId[] memory validTypes = recipeType.getObjectTypes();
       bool matchFound = false;
@@ -98,7 +135,7 @@ contract CraftSystem is System {
     }
   }
 
-  function _consumeRecipeInputs(EntityId caller, RecipesData memory recipe, SlotAmount[] memory inputs) private {
+  function _consumeRecipeInputs(EntityId caller, RecipesData memory recipe, SlotAmount[] memory inputs) public {
     uint256 currentInput = 0;
 
     for (uint256 i = 0; i < recipe.inputTypes.length; i++) {
@@ -125,7 +162,7 @@ contract CraftSystem is System {
     }
   }
 
-  function _createRecipeOutputs(EntityId caller, RecipesData memory recipe) private returns (SlotData[] memory) {
+  function _createRecipeOutputs(EntityId caller, RecipesData memory recipe) public returns (SlotData[] memory) {
     // First, calculate the total length needed for the withdrawals array
     uint256 totalWithdrawals = 0;
     for (uint256 i = 0; i < recipe.outputTypes.length; i++) {
@@ -157,37 +194,5 @@ contract CraftSystem is System {
     }
 
     return withdrawals;
-  }
-
-  function _beginSmelting(EntityId furnace, RecipesData memory recipe, SlotAmount[] memory inputs) private {
-    uint256 currentInput = 0;
-    for (uint256 i = 0; i < recipe.inputTypes.length; i++) {
-      ObjectTypeId recipeType = ObjectTypeId.wrap(recipe.inputTypes[i]);
-      uint16 remainingAmount = recipe.inputAmounts[i];
-
-      while (remainingAmount > 0) {
-        require(currentInput < inputs.length, "Not enough inputs for recipe");
-        uint16 amount = inputs[currentInput].amount;
-        require(amount > 0, "Input amount must be greater than 0");
-
-        ObjectTypeId inputType = InventorySlot._getObjectType(furnace, inputs[currentInput].slot);
-        _validateRecipeInput(recipeType, inputType);
-
-        // Only burn the coal inputs so they can't be retrieved
-        if (recipeType == ObjectTypes.CoalOre) {
-          InventoryUtils.removeObjectFromSlot(furnace, inputs[currentInput].slot, amount);
-          recipeType.burnOre(recipe.inputAmounts[i]);
-        }
-        remainingAmount -= amount;
-        currentInput++;
-      }
-    }
-  }
-}
-
-library CraftLib {
-  function _processEnergyReduction(EntityId caller) public {
-    (uint128 callerEnergy,) = transferEnergyToPool(caller, CRAFT_ENERGY_COST);
-    require(callerEnergy > 0, "Not enough energy");
   }
 }

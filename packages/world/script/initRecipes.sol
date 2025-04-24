@@ -33,6 +33,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -63,6 +64,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -93,6 +95,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -123,6 +126,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -153,6 +157,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -183,6 +188,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -213,6 +219,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -243,6 +250,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -273,6 +281,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -303,6 +312,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -335,6 +345,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -365,6 +376,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -397,6 +409,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -427,6 +440,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -459,6 +473,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -489,6 +504,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -521,6 +537,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -551,6 +568,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -581,6 +599,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -611,6 +630,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -641,6 +661,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -671,6 +692,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -701,6 +723,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -731,6 +754,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -761,6 +785,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -791,6 +816,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -821,6 +847,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -851,6 +878,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -881,6 +909,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -911,6 +940,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -941,6 +971,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -973,6 +1004,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1005,6 +1037,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1037,6 +1070,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1069,6 +1103,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1099,6 +1134,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1129,6 +1165,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1161,6 +1198,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1193,6 +1231,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1223,6 +1262,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1253,6 +1293,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1283,6 +1324,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1313,6 +1355,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1343,6 +1386,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1375,6 +1419,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1407,6 +1452,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1439,6 +1485,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1471,6 +1518,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1503,6 +1551,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1535,6 +1584,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1567,6 +1617,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1599,6 +1650,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1631,6 +1683,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1663,6 +1716,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1695,6 +1749,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1727,6 +1782,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1757,6 +1813,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1787,6 +1844,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,
@@ -1817,6 +1875,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(stationObjectTypeId, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       stationObjectTypeId,
+      0,
       _inputTypes,
       inputAmounts,
       _outputTypes,

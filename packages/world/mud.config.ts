@@ -90,6 +90,7 @@ export default defineWorld({
       schema: {
         recipeId: "bytes32",
         stationTypeId: "ObjectTypeId",
+        smeltTime: "uint128",
         inputTypes: "uint16[]",
         inputAmounts: "uint16[]",
         outputTypes: "uint16[]",

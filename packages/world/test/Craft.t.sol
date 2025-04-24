@@ -11,9 +11,11 @@ import { EntityId } from "../src/EntityId.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Furnace } from "../src/codegen/tables/Furnace.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
+
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 import { LocalEnergyPool } from "../src/codegen/tables/LocalEnergyPool.sol";
+import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 
 import { Mass } from "../src/codegen/tables/Mass.sol";
 import { MovablePosition } from "../src/codegen/tables/MovablePosition.sol";
@@ -397,7 +399,7 @@ contract CraftTest is DustTest {
     }
   }
 
-  function testCraftWithCoal() public {
+  function testCraftWithFurnace() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     // Iron ore smelting recipe (iron ore + coal = iron bar)
@@ -417,6 +419,10 @@ contract CraftTest is DustTest {
     Vec3 furnaceCoord = playerCoord + vec3(1, 0, 0);
     EntityId furnaceEntityId = setObjectAtCoord(furnaceCoord, ObjectTypes.Furnace);
 
+    // Set resource count so they can be burnt
+    ResourceCount.set(ObjectTypes.IronOre, 1);
+    ResourceCount.set(ObjectTypes.CoalOre, 1);
+
     // Add items to furnace inventory
     TestInventoryUtils.addObject(furnaceEntityId, ObjectTypes.IronOre, 1);
     TestInventoryUtils.addObject(furnaceEntityId, ObjectTypes.CoalOre, 1);
@@ -428,7 +434,6 @@ contract CraftTest is DustTest {
     inputs[1] = SlotAmount({ slot: 1, amount: 1 }); // CoalOre
 
     vm.prank(alice);
-    startGasReport("begin smelting in furnace");
     world.craftWithStation(aliceEntityId, furnaceEntityId, recipeId, inputs);
     endGasReport();
 
@@ -613,7 +618,7 @@ contract CraftTest is DustTest {
     EntityId furnaceEntityId = setObjectAtCoord(furnaceCoord, ObjectTypes.Furnace);
 
     vm.prank(alice);
-    vm.expectRevert("Recipe not found");
+    vm.expectRevert("Furnace is not smelting");
     world.finishSmelting(aliceEntityId, furnaceEntityId, "");
   }
 
