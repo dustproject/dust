@@ -59,11 +59,6 @@ export const recipes: Recipe[] = [
     outputs: [["IronBar", 1]],
   },
   {
-    station: "Workbench",
-    inputs: [["IronBar", 1]],
-    outputs: [["IronOre", 1]],
-  },
-  {
     station: "Furnace",
     inputs: [
       ["GoldOre", 1],
@@ -72,22 +67,12 @@ export const recipes: Recipe[] = [
     outputs: [["GoldBar", 1]],
   },
   {
-    station: "Workbench",
-    inputs: [["GoldBar", 1]],
-    outputs: [["GoldOre", 1]],
-  },
-  {
     station: "Furnace",
     inputs: [
       ["DiamondOre", 1],
       ["CoalOre", 1],
     ],
     outputs: [["Diamond", 1]],
-  },
-  {
-    station: "Workbench",
-    inputs: [["Diamond", 1]],
-    outputs: [["DiamondOre", 1]],
   },
   {
     station: "Furnace",
@@ -99,18 +84,8 @@ export const recipes: Recipe[] = [
   },
   {
     station: "Workbench",
-    inputs: [["NeptuniumBar", 1]],
-    outputs: [["NeptuniumOre", 1]],
-  },
-  {
-    station: "Workbench",
     inputs: [["CopperOre", 9]],
     outputs: [["CopperBlock", 1]],
-  },
-  {
-    station: "Workbench",
-    inputs: [["CopperBlock", 1]],
-    outputs: [["CopperOre", 9]],
   },
   {
     station: "Workbench",
@@ -119,18 +94,8 @@ export const recipes: Recipe[] = [
   },
   {
     station: "Workbench",
-    inputs: [["IronBlock", 1]],
-    outputs: [["IronBar", 9]],
-  },
-  {
-    station: "Workbench",
     inputs: [["GoldBar", 9]],
     outputs: [["GoldBlock", 1]],
-  },
-  {
-    station: "Workbench",
-    inputs: [["GoldBlock", 1]],
-    outputs: [["GoldBar", 9]],
   },
   {
     station: "Workbench",
@@ -139,26 +104,12 @@ export const recipes: Recipe[] = [
   },
   {
     station: "Workbench",
-    inputs: [["DiamondBlock", 1]],
-    outputs: [["Diamond", 9]],
-  },
-  {
-    station: "Workbench",
     inputs: [["NeptuniumBar", 9]],
     outputs: [["NeptuniumBlock", 1]],
   },
   {
-    station: "Workbench",
-    inputs: [["NeptuniumBlock", 1]],
-    outputs: [["NeptuniumBar", 9]],
-  },
-  {
     inputs: [["Stone", 9]],
     outputs: [["Furnace", 1]],
-  },
-  {
-    inputs: [["Furnace", 1]],
-    outputs: [["Stone", 9]],
   },
   {
     inputs: [["AnyPlank", 4]],
@@ -174,27 +125,11 @@ export const recipes: Recipe[] = [
   },
   {
     station: "Workbench",
-    inputs: [["Powerstone", 1]],
-    outputs: [
-      ["Stone", 6],
-      ["Sand", 2],
-    ],
-  },
-  {
-    station: "Workbench",
     inputs: [
       ["Stone", 30],
       ["IronBar", 5],
     ],
     outputs: [["ForceField", 1]],
-  },
-  {
-    station: "Workbench",
-    inputs: [["ForceField", 1]],
-    outputs: [
-      ["Stone", 30],
-      ["IronBar", 5],
-    ],
   },
   {
     station: "Workbench",
@@ -213,14 +148,6 @@ export const recipes: Recipe[] = [
       ["IronBar", 8],
     ],
     outputs: [["SpawnTile", 1]],
-  },
-  {
-    station: "Workbench",
-    inputs: [["SpawnTile", 1]],
-    outputs: [
-      ["ForceField", 1],
-      ["IronBar", 8],
-    ],
   },
   {
     station: "Workbench",
@@ -342,10 +269,6 @@ export const recipes: Recipe[] = [
   {
     inputs: [["IronBar", 3]],
     outputs: [["Bucket", 1]],
-  },
-  {
-    inputs: [["Bucket", 1]],
-    outputs: [["IronBar", 3]],
   },
   {
     inputs: [["Wheat", 16]],
