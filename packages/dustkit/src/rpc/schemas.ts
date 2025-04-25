@@ -1,6 +1,6 @@
 import type { SystemCalls } from "@latticexyz/world/internal";
 import type { RpcSchema } from "ox";
-import type { Abi, Hex, OneOf } from "viem";
+import type { Abi, Address, Hex, OneOf } from "viem";
 import type { RpcSchema as viem_RpcSchema } from "viem";
 import type { AppConfig } from "../apps/appConfig";
 import type { EntityId, ProgramId } from "../common";
@@ -60,6 +60,7 @@ export type AppRpcSchema = RpcSchema.From<{
         entity: EntityId;
         program: ProgramId;
       };
+      userAddress?: Address;
     };
   };
 }>;
