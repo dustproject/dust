@@ -289,6 +289,11 @@ library InventoryUtils {
         "Cannot store different object types in the same slot"
       );
 
+      // If transferring within the same inventory, create the corresponding withdrawal
+      if (from == to) {
+        tempToSlotData[tempIndex++] = SlotData(sourceSlot.entityId, sourceSlot.objectType, amount);
+      }
+
       if (sourceSlot.entityId.exists()) {
         // Entities are unique and always have amount=1
         require(amount == 1, "Entity transfer amount should be 1");
@@ -318,7 +323,7 @@ library InventoryUtils {
     // Inventory is empty
     if (slots.length == 0) return;
 
-    // Group slots by object type to optimize transfers
+    // Iterate through all from's slots
     for (uint256 i = 0; i < slots.length; i++) {
       InventorySlotData memory slotData = InventorySlot._get(from, slots[i]);
 
