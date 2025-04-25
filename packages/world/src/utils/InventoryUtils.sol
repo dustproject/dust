@@ -269,7 +269,7 @@ library InventoryUtils {
 
       InventorySlotData memory sourceSlot = InventorySlot._get(from, slotFrom);
       require(!sourceSlot.objectType.isNull(), "Empty slot");
-      fromSlotData[i] = SlotData(sourceSlot.entityId, sourceSlot.objectType, sourceSlot.amount);
+      fromSlotData[i] = SlotData(sourceSlot.entityId, sourceSlot.objectType, amount);
 
       InventorySlotData memory destSlot = InventorySlot._get(to, slotTo);
 
