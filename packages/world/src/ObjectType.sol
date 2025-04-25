@@ -30,7 +30,7 @@ library Category {
   uint16 constant Soil = uint16(3) << OFFSET_BITS;
   uint16 constant Ore = uint16(4) << OFFSET_BITS;
   uint16 constant Sand = uint16(5) << OFFSET_BITS;
-  uint16 constant Clay = uint16(6) << OFFSET_BITS;
+  uint16 constant Terracotta = uint16(6) << OFFSET_BITS;
   uint16 constant Log = uint16(7) << OFFSET_BITS;
   uint16 constant Leaf = uint16(8) << OFFSET_BITS;
   uint16 constant Flower = uint16(9) << OFFSET_BITS;
@@ -126,20 +126,21 @@ library ObjectTypes {
   ObjectType constant RedSand = ObjectType.wrap(Category.Sand | 2);
   ObjectType constant Sandstone = ObjectType.wrap(Category.Sand | 3);
   ObjectType constant RedSandstone = ObjectType.wrap(Category.Sand | 4);
-  ObjectType constant Clay = ObjectType.wrap(Category.Clay | 0);
-  ObjectType constant Terracotta = ObjectType.wrap(Category.Clay | 1);
-  ObjectType constant BrownTerracotta = ObjectType.wrap(Category.Clay | 2);
-  ObjectType constant OrangeTerracotta = ObjectType.wrap(Category.Clay | 3);
-  ObjectType constant WhiteTerracotta = ObjectType.wrap(Category.Clay | 4);
-  ObjectType constant LightGrayTerracotta = ObjectType.wrap(Category.Clay | 5);
-  ObjectType constant YellowTerracotta = ObjectType.wrap(Category.Clay | 6);
-  ObjectType constant RedTerracotta = ObjectType.wrap(Category.Clay | 7);
-  ObjectType constant LightBlueTerracotta = ObjectType.wrap(Category.Clay | 8);
-  ObjectType constant CyanTerracotta = ObjectType.wrap(Category.Clay | 9);
-  ObjectType constant BlackTerracotta = ObjectType.wrap(Category.Clay | 10);
-  ObjectType constant PurpleTerracotta = ObjectType.wrap(Category.Clay | 11);
-  ObjectType constant BlueTerracotta = ObjectType.wrap(Category.Clay | 12);
-  ObjectType constant MagentaTerracotta = ObjectType.wrap(Category.Clay | 13);
+  ObjectType constant Clay = ObjectType.wrap(Category.Sand | 5);
+  ObjectType constant AnyTerracotta = ObjectType.wrap(Category.Terracotta | 0);
+  ObjectType constant Terracotta = ObjectType.wrap(Category.Terracotta | 1);
+  ObjectType constant BrownTerracotta = ObjectType.wrap(Category.Terracotta | 2);
+  ObjectType constant OrangeTerracotta = ObjectType.wrap(Category.Terracotta | 3);
+  ObjectType constant WhiteTerracotta = ObjectType.wrap(Category.Terracotta | 4);
+  ObjectType constant LightGrayTerracotta = ObjectType.wrap(Category.Terracotta | 5);
+  ObjectType constant YellowTerracotta = ObjectType.wrap(Category.Terracotta | 6);
+  ObjectType constant RedTerracotta = ObjectType.wrap(Category.Terracotta | 7);
+  ObjectType constant LightBlueTerracotta = ObjectType.wrap(Category.Terracotta | 8);
+  ObjectType constant CyanTerracotta = ObjectType.wrap(Category.Terracotta | 9);
+  ObjectType constant BlackTerracotta = ObjectType.wrap(Category.Terracotta | 10);
+  ObjectType constant PurpleTerracotta = ObjectType.wrap(Category.Terracotta | 11);
+  ObjectType constant BlueTerracotta = ObjectType.wrap(Category.Terracotta | 12);
+  ObjectType constant MagentaTerracotta = ObjectType.wrap(Category.Terracotta | 13);
   ObjectType constant AnyLog = ObjectType.wrap(Category.Log | 0);
   ObjectType constant OakLog = ObjectType.wrap(Category.Log | 1);
   ObjectType constant BirchLog = ObjectType.wrap(Category.Log | 2);
@@ -318,8 +319,8 @@ library ObjectTypeLib {
     return category(self) == Category.Sand;
   }
 
-  function isClay(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Clay;
+  function isTerracotta(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.Terracotta;
   }
 
   function isLog(ObjectType self) internal pure returns (bool) {
@@ -478,13 +479,20 @@ library ObjectTypeLib {
     ];
   }
 
-  function getSandTypes() internal pure returns (ObjectType[5] memory) {
-    return [ObjectTypes.Gravel, ObjectTypes.Sand, ObjectTypes.RedSand, ObjectTypes.Sandstone, ObjectTypes.RedSandstone];
+  function getSandTypes() internal pure returns (ObjectType[6] memory) {
+    return [
+      ObjectTypes.Gravel,
+      ObjectTypes.Sand,
+      ObjectTypes.RedSand,
+      ObjectTypes.Sandstone,
+      ObjectTypes.RedSandstone,
+      ObjectTypes.Clay
+    ];
   }
 
-  function getClayTypes() internal pure returns (ObjectType[14] memory) {
+  function getTerracottaTypes() internal pure returns (ObjectType[14] memory) {
     return [
-      ObjectTypes.Clay,
+      ObjectTypes.AnyTerracotta,
       ObjectTypes.Terracotta,
       ObjectTypes.BrownTerracotta,
       ObjectTypes.OrangeTerracotta,
