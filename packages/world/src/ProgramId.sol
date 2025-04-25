@@ -7,8 +7,8 @@ import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
 import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 
 import { EntityId } from "./EntityId.sol";
-import { ObjectTypeId } from "./ObjectTypeId.sol";
-import { ObjectAmount } from "./ObjectTypeLib.sol";
+import { ObjectType } from "./ObjectType.sol";
+
 import { Vec3 } from "./Vec3.sol";
 
 type ProgramId is bytes32;

@@ -4,7 +4,7 @@ pragma solidity >=0.8.24;
 import { DustTest, console } from "./DustTest.sol";
 
 import { EntityId } from "../src/EntityId.sol";
-import { ObjectTypes } from "../src/ObjectTypes.sol";
+import { ObjectTypes } from "../src/ObjectType.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
@@ -35,28 +35,28 @@ contract InventoryUtilsTest is DustTest {
     TestInventoryUtils.addEntity(aliceEntity, ObjectTypes.IronPick);
     TestInventoryUtils.addEntity(aliceEntity, ObjectTypes.NeptuniumAxe);
 
-    // 27 as forcefields use a single slot each
-    assertEq(Inventory.length(aliceEntity), 27);
+    // 36 as forcefields and buckets use a single slot each
+    assertEq(Inventory.length(aliceEntity), 36);
     assertEq(Inventory.length(bobEntity), 0);
 
     TestInventoryUtils.removeObjectFromSlot(aliceEntity, 1, 1);
 
-    assertEq(Inventory.length(aliceEntity), 26);
+    assertEq(Inventory.length(aliceEntity), 35);
     assertEq(Inventory.length(bobEntity), 0);
 
     TestInventoryUtils.transferAll(aliceEntity, bobEntity);
 
     assertEq(Inventory.length(aliceEntity), 0);
-    assertEq(Inventory.length(bobEntity), 26);
+    assertEq(Inventory.length(bobEntity), 35);
 
     TestInventoryUtils.transferAll(bobEntity, aliceEntity);
 
-    assertEq(Inventory.length(aliceEntity), 26);
+    assertEq(Inventory.length(aliceEntity), 35);
     assertEq(Inventory.length(bobEntity), 0);
 
     TestInventoryUtils.transferAll(aliceEntity, bobEntity);
 
     assertEq(Inventory.length(aliceEntity), 0);
-    assertEq(Inventory.length(bobEntity), 26);
+    assertEq(Inventory.length(bobEntity), 35);
   }
 }

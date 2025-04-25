@@ -3,8 +3,8 @@ pragma solidity >=0.8.24;
 
 import { EntityId } from "./EntityId.sol";
 
-import { ObjectTypeId } from "./ObjectTypeId.sol";
-import { ObjectAmount } from "./ObjectTypeLib.sol";
+import { ObjectType } from "./ObjectType.sol";
+
 import { ProgramId } from "./ProgramId.sol";
 import { Vec3 } from "./Vec3.sol";
 import { SlotData } from "./utils/InventoryUtils.sol";
@@ -59,13 +59,12 @@ interface IRemoveFragmentHook {
 }
 
 interface IBuildHook {
-  function onBuild(EntityId caller, EntityId target, ObjectTypeId objectTypeId, Vec3 coord, bytes memory extraData)
+  function onBuild(EntityId caller, EntityId target, ObjectType objectType, Vec3 coord, bytes memory extraData)
     external;
 }
 
 interface IMineHook {
-  function onMine(EntityId caller, EntityId target, ObjectTypeId objectTypeId, Vec3 coord, bytes memory extraData)
-    external;
+  function onMine(EntityId caller, EntityId target, ObjectType objectType, Vec3 coord, bytes memory extraData) external;
 }
 
 interface ISpawnHook {

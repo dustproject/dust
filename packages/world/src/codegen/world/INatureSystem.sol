@@ -5,7 +5,7 @@ pragma solidity >=0.8.24;
 
 import { EntityId } from "../../EntityId.sol";
 import { Vec3 } from "../../Vec3.sol";
-import { ObjectTypeId } from "../../ObjectTypeId.sol";
+import { ObjectType } from "../../ObjectType.sol";
 
 /**
  * @title INatureSystem
@@ -15,7 +15,7 @@ import { ObjectTypeId } from "../../ObjectTypeId.sol";
 interface INatureSystem {
   function chunkCommit(EntityId caller, Vec3 chunkCoord) external;
 
-  function respawnResource(uint256 blockNumber, ObjectTypeId resourceType) external;
+  function respawnResource(uint256 blockNumber, ObjectType resourceType) external;
 
   function growSeed(EntityId caller, Vec3 coord) external;
 }

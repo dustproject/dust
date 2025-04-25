@@ -9,7 +9,7 @@ import { IWorld } from "../../src/codegen/world/IWorld.sol";
 
 import { EntityId } from "../../src/EntityId.sol";
 
-import { ObjectTypes } from "../../src/ObjectTypes.sol";
+import { ObjectTypes } from "../../src/ObjectType.sol";
 import { ProgramId } from "../../src/ProgramId.sol";
 
 import { EntityProgram } from "../../src/codegen/tables/EntityProgram.sol";

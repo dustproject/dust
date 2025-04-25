@@ -2,8 +2,7 @@
 /* Auto‑generated. DO NOT EDIT. */
 pragma solidity >=0.8.24;
 
-import { ObjectTypeId } from "./ObjectTypeId.sol";
-import { ObjectTypes } from "./ObjectTypes.sol";
+import { ObjectType, ObjectTypes } from "./ObjectType.sol";
 import { Vec3 } from "./Vec3.sol";
 
 library TreeBlobs {
@@ -48,13 +47,13 @@ library TreeBlobs {
 }
 
 struct TreeData {
-  ObjectTypeId logType;
-  ObjectTypeId leafType;
+  ObjectType logType;
+  ObjectType leafType;
   uint32 trunkHeight;
 }
 
 library TreeLib {
-  function getTreeData(ObjectTypeId objectType) internal pure returns (TreeData memory) {
+  function getTreeData(ObjectType objectType) internal pure returns (TreeData memory) {
     if (objectType == ObjectTypes.OakSapling) {
       return TreeData({ logType: ObjectTypes.OakLog, leafType: ObjectTypes.OakLeaf, trunkHeight: 5 });
     }
@@ -82,7 +81,7 @@ library TreeLib {
     revert("Tree type not supported");
   }
 
-  function getLeafCoords(ObjectTypeId objectType)
+  function getLeafCoords(ObjectType objectType)
     internal
     pure
     returns (Vec3[] memory fixedLeaves, Vec3[] memory randomLeaves)
@@ -116,7 +115,7 @@ library TreeLib {
     }
   }
 
-  function getLeafDropChance(ObjectTypeId objectType) internal pure returns (uint256) {
+  function getLeafDropChance(ObjectType objectType) internal pure returns (uint256) {
     if (objectType == ObjectTypes.OakLeaf) {
       return uint256(3) * 100 / 58;
     }

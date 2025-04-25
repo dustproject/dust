@@ -14,17 +14,15 @@ import {
   PLAYER_FALL_ENERGY_COST
 } from "../../Constants.sol";
 import { EntityId } from "../../EntityId.sol";
-import { ObjectTypeId } from "../../ObjectTypeId.sol";
-import { ObjectTypeLib } from "../../ObjectTypeLib.sol";
-import { ObjectTypes } from "../../ObjectTypes.sol";
+import { ObjectType } from "../../ObjectType.sol";
+
+import { ObjectTypes } from "../../ObjectType.sol";
 
 import { Vec3, vec3 } from "../../Vec3.sol";
 import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../../utils/EnergyUtils.sol";
-import { getMovableEntityAt, safeGetObjectTypeIdAt, setMovableEntityAt } from "../../utils/EntityUtils.sol";
+import { getMovableEntityAt, safeGetObjectTypeAt, setMovableEntityAt } from "../../utils/EntityUtils.sol";
 
 library MoveLib {
-  using ObjectTypeLib for ObjectTypeId;
-
   function _requireValidMove(Vec3 baseOldCoord, Vec3 baseNewCoord) internal view {
     require(baseOldCoord.inSurroundingCube(baseNewCoord, 1), "New coord is too far from old coord");
 
@@ -33,8 +31,8 @@ library MoveLib {
     for (uint256 i = 0; i < newPlayerCoords.length; i++) {
       Vec3 newCoord = newPlayerCoords[i];
 
-      ObjectTypeId newObjectTypeId = safeGetObjectTypeIdAt(newCoord);
-      require(ObjectTypeMetadata._getCanPassThrough(newObjectTypeId), "Cannot move through a non-passable block");
+      ObjectType newObjectType = safeGetObjectTypeAt(newCoord);
+      require(newObjectType.isPassThrough(), "Cannot move through a non-passable block");
 
       require(!getMovableEntityAt(newCoord).exists(), "Cannot move through a player");
     }
@@ -53,9 +51,9 @@ library MoveLib {
   function _gravityApplies(Vec3 playerCoord) internal view returns (bool) {
     Vec3 belowCoord = playerCoord - vec3(0, 1, 0);
 
-    ObjectTypeId belowObjectTypeId = safeGetObjectTypeIdAt(belowCoord);
+    ObjectType belowObjectType = safeGetObjectTypeAt(belowCoord);
     // Players can swim in water so we don't want to apply gravity to them
-    if (belowObjectTypeId == ObjectTypes.Water || !ObjectTypeMetadata._getCanPassThrough(belowObjectTypeId)) {
+    if (belowObjectType == ObjectTypes.Water || !belowObjectType.isPassThrough()) {
       return false;
     }
 

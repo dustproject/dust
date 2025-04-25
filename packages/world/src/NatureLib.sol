@@ -3,11 +3,11 @@ pragma solidity >=0.8.24;
 
 import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
+import { BurnedResourceCount } from "./codegen/tables/BurnedResourceCount.sol";
 import { DisabledExtraDrops } from "./codegen/tables/DisabledExtraDrops.sol";
-import { ObjectType } from "./codegen/tables/ObjectType.sol";
 import { ResourceCount } from "./codegen/tables/ResourceCount.sol";
 
-import { getObjectTypeIdAt, getOrCreateEntityAt } from "./utils/EntityUtils.sol";
+import { getObjectTypeAt, getOrCreateEntityAt } from "./utils/EntityUtils.sol";
 import { ChunkCommitment } from "./utils/Vec3Storage.sol";
 
 import {
@@ -30,19 +30,14 @@ import {
   MAX_SPRUCE_SAPLING,
   MAX_WHEAT_SEED
 } from "./Constants.sol";
+import { ObjectAmount, ObjectType, ObjectTypeLib, ObjectTypes } from "./ObjectType.sol";
 
 import { EntityId } from "./EntityId.sol";
-import { ObjectTypeId } from "./ObjectTypeId.sol";
-import { ObjectAmount, ObjectTypeLib, getOreObjectTypes } from "./ObjectTypeLib.sol";
-import { ObjectTypes } from "./ObjectTypes.sol";
 import { TreeLib } from "./TreeLib.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
 
 library NatureLib {
-  using ObjectTypeLib for ObjectTypeId;
-
   function getRandomSeed(Vec3 coord) internal view returns (uint256) {
-    // Get chunk commitment for the coord, but only validate it for random resources (done in NatureLib)
     Vec3 chunkCoord = coord.toChunkCoord();
     uint256 commitment = ChunkCommitment._get(chunkCoord);
     // We can't get blockhash of current block
@@ -52,39 +47,39 @@ library NatureLib {
   }
 
   // Get resource cap for a specific resource type
-  function getResourceCap(ObjectTypeId objectTypeId) internal pure returns (uint256) {
-    if (objectTypeId == ObjectTypes.CoalOre) return MAX_COAL;
-    if (objectTypeId == ObjectTypes.CopperOre) return MAX_COPPER;
-    if (objectTypeId == ObjectTypes.IronOre) return MAX_IRON;
-    if (objectTypeId == ObjectTypes.GoldOre) return MAX_GOLD;
-    if (objectTypeId == ObjectTypes.DiamondOre) return MAX_DIAMOND;
-    if (objectTypeId == ObjectTypes.NeptuniumOre) return MAX_NEPTUNIUM;
-    if (objectTypeId == ObjectTypes.WheatSeed) return MAX_WHEAT_SEED;
-    if (objectTypeId == ObjectTypes.MelonSeed) return MAX_MELON_SEED;
-    if (objectTypeId == ObjectTypes.PumpkinSeed) return MAX_PUMPKIN_SEED;
-    if (objectTypeId == ObjectTypes.OakSapling) return MAX_OAK_SAPLING;
-    if (objectTypeId == ObjectTypes.SpruceSapling) return MAX_SPRUCE_SAPLING;
-    if (objectTypeId == ObjectTypes.MangroveSapling) return MAX_MANGROVE_SAPLING;
-    if (objectTypeId == ObjectTypes.SakuraSapling) return MAX_SAKURA_SAPLING;
-    if (objectTypeId == ObjectTypes.DarkOakSapling) return MAX_DARK_OAK_SAPLING;
-    if (objectTypeId == ObjectTypes.BirchSapling) return MAX_BIRCH_SAPLING;
-    if (objectTypeId == ObjectTypes.AcaciaSapling) return MAX_ACACIA_SAPLING;
-    if (objectTypeId == ObjectTypes.JungleSapling) return MAX_JUNGLE_SAPLING;
+  function getResourceCap(ObjectType objectType) internal pure returns (uint256) {
+    if (objectType == ObjectTypes.CoalOre) return MAX_COAL;
+    if (objectType == ObjectTypes.CopperOre) return MAX_COPPER;
+    if (objectType == ObjectTypes.IronOre) return MAX_IRON;
+    if (objectType == ObjectTypes.GoldOre) return MAX_GOLD;
+    if (objectType == ObjectTypes.DiamondOre) return MAX_DIAMOND;
+    if (objectType == ObjectTypes.NeptuniumOre) return MAX_NEPTUNIUM;
+    if (objectType == ObjectTypes.WheatSeed) return MAX_WHEAT_SEED;
+    if (objectType == ObjectTypes.MelonSeed) return MAX_MELON_SEED;
+    if (objectType == ObjectTypes.PumpkinSeed) return MAX_PUMPKIN_SEED;
+    if (objectType == ObjectTypes.OakSapling) return MAX_OAK_SAPLING;
+    if (objectType == ObjectTypes.SpruceSapling) return MAX_SPRUCE_SAPLING;
+    if (objectType == ObjectTypes.MangroveSapling) return MAX_MANGROVE_SAPLING;
+    if (objectType == ObjectTypes.SakuraSapling) return MAX_SAKURA_SAPLING;
+    if (objectType == ObjectTypes.DarkOakSapling) return MAX_DARK_OAK_SAPLING;
+    if (objectType == ObjectTypes.BirchSapling) return MAX_BIRCH_SAPLING;
+    if (objectType == ObjectTypes.AcaciaSapling) return MAX_ACACIA_SAPLING;
+    if (objectType == ObjectTypes.JungleSapling) return MAX_JUNGLE_SAPLING;
 
     // If no specific cap, use a high value
     return type(uint256).max;
   }
 
   // Get remaining amount of a resource
-  function getCapAndRemaining(ObjectTypeId objectTypeId) internal view returns (uint256, uint256) {
-    if (objectTypeId == ObjectTypes.Null) return (type(uint256).max, type(uint256).max);
+  function getCapAndRemaining(ObjectType objectType) internal view returns (uint256, uint256) {
+    if (objectType == ObjectTypes.Null) return (type(uint256).max, type(uint256).max);
 
-    uint256 cap = getResourceCap(objectTypeId);
-    uint256 mined = ResourceCount._get(objectTypeId);
+    uint256 cap = getResourceCap(objectType);
+    uint256 mined = ResourceCount._get(objectType);
     return (cap, mined >= cap ? 0 : cap - mined);
   }
 
-  function getMineDrops(EntityId mined, ObjectTypeId objectType, Vec3 coord)
+  function getMineDrops(EntityId mined, ObjectType objectType, Vec3 coord)
     internal
     view
     returns (ObjectAmount[] memory result)
@@ -133,7 +128,7 @@ library NatureLib {
     ObjectAmount memory seedDrop = selectObjectByWeight(seedOptions, weights, randomSeed);
 
     // Always drop wheat, plus seeds if any were selected
-    if (seedDrop.objectTypeId != ObjectTypes.Null) {
+    if (seedDrop.objectType != ObjectTypes.Null) {
       result = new ObjectAmount[](2);
       result[0] = ObjectAmount(ObjectTypes.Wheat, 1);
       result[1] = seedDrop;
@@ -155,7 +150,7 @@ library NatureLib {
     // Select drop based on calculated weights
     ObjectAmount memory seedDrop = selectObjectByWeight(grassOptions, weights, randomSeed);
 
-    if (seedDrop.objectTypeId != ObjectTypes.Null) {
+    if (seedDrop.objectType != ObjectTypes.Null) {
       result = new ObjectAmount[](2);
       result[0] = ObjectAmount(ObjectTypes.FescueGrass, 1);
       result[1] = seedDrop;
@@ -167,11 +162,7 @@ library NatureLib {
     return result;
   }
 
-  function getLeafDrops(ObjectTypeId objectType, uint256 randomSeed)
-    internal
-    view
-    returns (ObjectAmount[] memory result)
-  {
+  function getLeafDrops(ObjectType objectType, uint256 randomSeed) internal view returns (ObjectAmount[] memory result) {
     uint256 chance = TreeLib.getLeafDropChance(objectType);
     uint256[] memory distribution = new uint256[](2);
     distribution[0] = 100 - chance; // No sapling
@@ -184,7 +175,7 @@ library NatureLib {
     // Select sapling drop based on calculated weights
     ObjectAmount memory saplingDrop = selectObjectByWeight(saplingOptions, weights, randomSeed);
 
-    if (saplingDrop.objectTypeId != ObjectTypes.Null) {
+    if (saplingDrop.objectType != ObjectTypes.Null) {
       result = new ObjectAmount[](2);
       result[0] = ObjectAmount(objectType, 1);
       result[1] = saplingDrop;
@@ -196,25 +187,26 @@ library NatureLib {
     return result;
   }
 
-  function getRandomOre(Vec3 coord) internal view returns (ObjectTypeId) {
+  function getRandomOre(Vec3 coord) internal view returns (ObjectType) {
     uint256 randomSeed = getRandomSeed(coord);
 
     // Get ore options and their weights (based on remaining amounts)
-    ObjectAmount[] memory oreOptions = new ObjectAmount[](5);
-    uint256[] memory weights = new uint256[](5);
+    ObjectAmount[] memory oreOptions = new ObjectAmount[](6);
+    uint256[] memory weights = new uint256[](6);
 
-    ObjectTypeId[] memory oreTypes = getOreObjectTypes();
+    ObjectType[7] memory oreTypes = ObjectTypeLib.getOreTypes();
     // Use remaining amounts directly as weights
-    for (uint256 i = 0; i < weights.length; i++) {
-      oreOptions[i] = ObjectAmount(oreTypes[i], 1);
-      (, weights[i]) = getCapAndRemaining(oreTypes[i]);
+    // Skip UnrevealedOre (index 0) since it's not a specific ore type
+    for (uint256 i = 1; i < oreTypes.length; i++) {
+      oreOptions[i - 1] = ObjectAmount(oreTypes[i], 1);
+      (, weights[i - 1]) = getCapAndRemaining(oreTypes[i]);
     }
 
     // Select ore based on availability
     ObjectAmount memory selectedOre = selectObjectByWeight(oreOptions, weights, randomSeed);
 
     // Return selected ore type and current mined count
-    return selectedOre.objectTypeId;
+    return selectedOre.objectType;
   }
 
   // Simple random selection based on weights
@@ -249,7 +241,7 @@ library NatureLib {
   }
 
   // Adjusts pre-calculated weights based on resource availability
-  function getDropWeights(ObjectTypeId objectType, uint256[] memory distribution)
+  function getDropWeights(ObjectType objectType, uint256[] memory distribution)
     internal
     view
     returns (ObjectAmount[] memory options, uint256[] memory weights)
@@ -286,6 +278,20 @@ library NatureLib {
       }
 
       weights[i] = p;
+    }
+  }
+
+  function burnOre(ObjectType self, uint256 amount) internal {
+    // This increases the availability of the ores being burned
+    ResourceCount._set(self, ResourceCount._get(self) - amount);
+    // This allows the same amount of ores to respawn
+    BurnedResourceCount._set(ObjectTypes.UnrevealedOre, BurnedResourceCount._get(ObjectTypes.UnrevealedOre) + amount);
+  }
+
+  function burnOres(ObjectType self) internal {
+    ObjectAmount memory oreAmount = self.getOreAmount();
+    if (!oreAmount.objectType.isNull()) {
+      burnOre(oreAmount.objectType, oreAmount.amount);
     }
   }
 }

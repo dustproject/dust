@@ -6,21 +6,26 @@
     "./worlds.json": "./worlds.json",
     "./mud.config": "./dist/mud.config.js",
     "./out/*": "./dist/out/*.js",
-    "./tree-lib": "./dist/tree-lib.js"
+    "./ts/*": "./dist/ts/*.js"
   },
   "typesVersions": {
     "*": {
       "mud.config": ["./dist/mud.config.d.ts"],
-      "out/*": ["./dist/out/*.d.ts"],
-      "tree-lib": ["./dist/tree-lib.d.ts"]
+      "ts/*": ["./dist/ts/*.d.ts"],
+      "out/*": ["./dist/out/*.d.ts"]
     }
   },
-  "files": ["src", "out", "dist", "worlds.json"],
+  "files": ["src", "out", "dist", "ts", "worlds.json"],
   "scripts": {
-    "build": "pnpm run build:mud && pnpm run build:js",
+    "build": "pnpm run codegen && pnpm run build:mud && pnpm run build:js",
     "build:js": "tsc",
     "build:mud": "mud build && abi-ts --extension .ts",
     "clean": "forge clean && shx rm -rf src/**/codegen",
+    "codegen": "pnpm run codegen:object-type && pnpm run codegen:init-objects && pnpm run codegen:init-recipes && pnpm run codegen:tree-lib && forge fmt",
+    "codegen:init-objects": "tsx ./ts/internal/genInitObjectsSol.ts> ./script/initObjects.sol",
+    "codegen:init-recipes": "tsx ./ts/internal/genInitRecipesSol.ts > ./script/initRecipes.sol",
+    "codegen:object-type": "tsx ./ts/internal/genObjectTypeSol.ts > ./src/ObjectType.sol",
+    "codegen:tree-lib": "tsx ./ts/internal/genTreeLibSol.ts > ./src/TreeLib.sol",
     "deploy:local": "pnpm entrykit-deploy && pnpm run build && mud deploy",
     "dev": "pnpm entrykit-deploy && pnpm run build && pnpm mud dev-contracts --rpc http://127.0.0.1:8545",
     "fix": "pnpm run fix:format",
@@ -48,6 +53,8 @@
     "forge-std": "https://github.com/foundry-rs/forge-std.git#3b20d60d14b343ee4f908cb8079495c07f5e8981",
     "solhint": "^3.4.1",
     "solhint-config-mud": "2.2.22-d621dc7c427a59eb74f4d379862646355a149338",
-    "solhint-plugin-mud": "2.2.22-d621dc7c427a59eb74f4d379862646355a149338"
+    "solhint-plugin-mud": "2.2.22-d621dc7c427a59eb74f4d379862646355a149338",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
   }
 }

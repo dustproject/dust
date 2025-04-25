@@ -6,8 +6,9 @@ import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 import { console } from "forge-std/console.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
+
+import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
-import { ObjectType } from "../src/codegen/tables/ObjectType.sol";
 import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
 import { PlayerStatus } from "../src/codegen/tables/PlayerStatus.sol";
 
@@ -27,9 +28,9 @@ import {
 } from "../src/Constants.sol";
 
 import { EntityId } from "../src/EntityId.sol";
-import { ObjectTypeId } from "../src/ObjectTypeId.sol";
-import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
-import { ObjectTypes } from "../src/ObjectTypes.sol";
+import { ObjectType } from "../src/ObjectType.sol";
+
+import { ObjectTypes } from "../src/ObjectType.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
@@ -38,8 +39,6 @@ import { DustTest } from "./DustTest.sol";
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract FarmingTest is DustTest {
-  using ObjectTypeLib for ObjectTypeId;
-
   function newCommit(address commiterAddress, EntityId commiter, Vec3 coord, bytes32 blockHash) internal {
     // Set up chunk commitment for randomness when mining grass
     Vec3 chunkCoord = coord.toChunkCoord();
@@ -72,7 +71,7 @@ contract FarmingTest is DustTest {
 
     dirtEntityId = ReversePosition.get(dirtCoord);
     assertTrue(dirtEntityId.exists(), "Dirt entity doesn't exist after tilling");
-    assertEq(ObjectType.get(dirtEntityId), ObjectTypes.Farmland, "Dirt was not converted to farmland");
+    assertEq(EntityObjectType.get(dirtEntityId), ObjectTypes.Farmland, "Dirt was not converted to farmland");
 
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
@@ -97,7 +96,7 @@ contract FarmingTest is DustTest {
 
     grassEntityId = ReversePosition.get(grassCoord);
     assertTrue(grassEntityId.exists(), "Grass entity doesn't exist after tilling");
-    assertEq(ObjectType.get(grassEntityId), ObjectTypes.Farmland, "Grass was not converted to farmland");
+    assertEq(EntityObjectType.get(grassEntityId), ObjectTypes.Farmland, "Grass was not converted to farmland");
 
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
@@ -109,7 +108,7 @@ contract FarmingTest is DustTest {
     Vec3 dirtCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
     setTerrainAtCoord(dirtCoord, ObjectTypes.Dirt);
 
-    ObjectTypeId[] memory hoeTypes = new ObjectTypeId[](1);
+    ObjectType[] memory hoeTypes = new ObjectType[](1);
     hoeTypes[0] = ObjectTypes.WoodenHoe;
 
     for (uint256 i = 0; i < hoeTypes.length; i++) {
@@ -123,7 +122,7 @@ contract FarmingTest is DustTest {
 
       EntityId farmlandEntityId = ReversePosition.get(testCoord);
       assertTrue(farmlandEntityId.exists(), "Farmland entity doesn't exist after tilling");
-      assertEq(ObjectType.get(farmlandEntityId), ObjectTypes.Farmland, "Dirt was not converted to farmland");
+      assertEq(EntityObjectType.get(farmlandEntityId), ObjectTypes.Farmland, "Dirt was not converted to farmland");
     }
   }
 
@@ -215,7 +214,7 @@ contract FarmingTest is DustTest {
     // Verify seeds were planted
     EntityId cropEntityId = ReversePosition.get(farmlandCoord + vec3(0, 1, 0));
     assertTrue(cropEntityId.exists(), "Crop entity doesn't exist after planting");
-    assertEq(ObjectType.get(cropEntityId), ObjectTypes.WheatSeed, "Wheat seeds were not planted correctly");
+    assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.WheatSeed, "Wheat seeds were not planted correctly");
 
     // Verify energy was taken from local pool
     assertEq(
@@ -227,7 +226,9 @@ contract FarmingTest is DustTest {
     // Verify build time was set
     uint128 fullyGrownAt = SeedGrowth.getFullyGrownAt(cropEntityId);
     assertTrue(fullyGrownAt > 0, "FullyGrownAt not set correctly");
-    assertEq(fullyGrownAt, uint128(block.timestamp) + ObjectTypes.WheatSeed.timeToGrow(), "Incorrect fullyGrownAt set");
+    assertEq(
+      fullyGrownAt, uint128(block.timestamp) + ObjectTypes.WheatSeed.getTimeToGrow(), "Incorrect fullyGrownAt set"
+    );
 
     // Verify seeds were removed from inventory
     assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 0);
@@ -306,7 +307,7 @@ contract FarmingTest is DustTest {
     assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 0);
 
     // Verify crop no longer exists
-    assertEq(ObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
+    assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
     assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seed was removed from circulation");
 
     // Verify local energy pool hasn't changed (energy not returned since crop was fully grown)
@@ -369,7 +370,7 @@ contract FarmingTest is DustTest {
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 0);
 
     // Verify crop no longer exists
-    assertEq(ObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
+    assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
 
     // Verify energy was returned to local pool
     // Note: currently player's energy is only decreased if the

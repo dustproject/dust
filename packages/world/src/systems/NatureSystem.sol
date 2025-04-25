@@ -3,8 +3,8 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Inventory } from "../codegen/tables/Inventory.sol";
-import { ObjectType } from "../codegen/tables/ObjectType.sol";
 
 import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
 
@@ -14,23 +14,20 @@ import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
 import { addEnergyToLocalPool } from "../utils/EnergyUtils.sol";
 
-import { getObjectTypeIdAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
+import { getObjectTypeAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
 import { ChunkCommitment, Position, ResourcePosition, ReversePosition } from "../utils/Vec3Storage.sol";
 
 import { CHUNK_COMMIT_EXPIRY_BLOCKS, CHUNK_COMMIT_HALF_WIDTH, RESPAWN_ORE_BLOCK_RANGE } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
+import { ObjectType } from "../ObjectType.sol";
+import { ObjectTypes } from "../ObjectType.sol";
 
 import { NatureLib } from "../NatureLib.sol";
-import { ObjectTypeId } from "../ObjectTypeId.sol";
-import { ObjectTypeLib } from "../ObjectTypeLib.sol";
-import { ObjectTypes } from "../ObjectTypes.sol";
 import { TreeData, TreeLib } from "../TreeLib.sol";
 
 import { Vec3, vec3 } from "../Vec3.sol";
 
 contract NatureSystem is System {
-  using ObjectTypeLib for ObjectTypeId;
-
   function chunkCommit(EntityId caller, Vec3 chunkCoord) public {
     caller.activate();
 
@@ -45,7 +42,7 @@ contract NatureSystem is System {
     ChunkCommitment._set(chunkCoord, block.number + 1);
   }
 
-  function respawnResource(uint256 blockNumber, ObjectTypeId resourceType) public {
+  function respawnResource(uint256 blockNumber, ObjectType resourceType) public {
     require(
       blockNumber < block.number && blockNumber >= block.number - RESPAWN_ORE_BLOCK_RANGE,
       "Can only choose past 10 blocks"
@@ -61,7 +58,7 @@ contract NatureSystem is System {
 
     // Check existing entity
     EntityId entityId = ReversePosition._get(resourceCoord);
-    ObjectTypeId objectType = ObjectType._get(entityId);
+    ObjectType objectType = EntityObjectType._get(entityId);
     require(objectType == ObjectTypes.Air, "Resource coordinate is not air");
     require(Inventory._length(entityId) == 0, "Cannot respawn where there are dropped objects");
 
@@ -77,7 +74,7 @@ contract NatureSystem is System {
     ResourceCount._set(resourceType, collected - 1);
 
     // This is enough to respawn the resource block, as it will be read from the original terrain next time
-    ObjectType._deleteRecord(entityId);
+    EntityObjectType._deleteRecord(entityId);
     Position._deleteRecord(entityId);
     ReversePosition._deleteRecord(resourceCoord);
   }
@@ -86,7 +83,7 @@ contract NatureSystem is System {
     caller.activate();
     // TODO: should we do proximity checks?
 
-    (EntityId seed, ObjectTypeId objectType) = getOrCreateEntityAt(coord);
+    (EntityId seed, ObjectType objectType) = getOrCreateEntityAt(coord);
     require(objectType.isGrowable(), "Not growable");
     require(SeedGrowth._getFullyGrownAt(seed) <= block.timestamp, "Seed cannot be grown yet");
 
@@ -98,13 +95,13 @@ contract NatureSystem is System {
 
     if (objectType.isSeed()) {
       // Turn wet farmland to regular farmland if mining a seed or crop
-      (EntityId below, ObjectTypeId belowType) = getOrCreateEntityAt(coord - vec3(0, 1, 0));
+      (EntityId below, ObjectType belowType) = getOrCreateEntityAt(coord - vec3(0, 1, 0));
       // Sanity check
       if (belowType == ObjectTypes.WetFarmland) {
-        ObjectType._set(below, ObjectTypes.Farmland);
+        EntityObjectType._set(below, ObjectTypes.Farmland);
       }
 
-      ObjectType._set(seed, objectType.getCrop());
+      EntityObjectType._set(seed, objectType.getCrop());
     } else if (objectType.isSapling()) {
       // Grow the tree (replace the seed with the trunk and add blocks)
       TreeData memory treeData = TreeLib.getTreeData(objectType);
@@ -123,7 +120,7 @@ contract NatureSystem is System {
     }
   }
 
-  function _growTree(EntityId seed, Vec3 baseCoord, TreeData memory treeData, ObjectTypeId saplingType)
+  function _growTree(EntityId seed, Vec3 baseCoord, TreeData memory treeData, ObjectType saplingType)
     private
     returns (uint32, uint32)
   {
@@ -145,7 +142,7 @@ contract NatureSystem is System {
     uint256 rand = uint256(keccak256(abi.encodePacked(block.timestamp, baseCoord)));
 
     uint32 leafCount;
-    ObjectTypeId leafType = treeData.leafType;
+    ObjectType leafType = treeData.leafType;
 
     for (uint256 i = 0; i < fixedLeaves.length; ++i) {
       Vec3 rel = fixedLeaves[i];
@@ -176,29 +173,29 @@ contract NatureSystem is System {
     return (trunkHeight, leafCount);
   }
 
-  function _tryCreateLeaf(ObjectTypeId leafType, Vec3 coord) private returns (bool) {
-    (EntityId leaf, ObjectTypeId existing) = getOrCreateEntityAt(coord);
+  function _tryCreateLeaf(ObjectType leafType, Vec3 coord) private returns (bool) {
+    (EntityId leaf, ObjectType existing) = getOrCreateEntityAt(coord);
     if (existing != ObjectTypes.Air) {
       return false;
     }
 
-    ObjectType._set(leaf, leafType);
+    EntityObjectType._set(leaf, leafType);
     return true;
   }
 
   function _growTreeTrunk(EntityId seed, Vec3 baseCoord, TreeData memory treeData) private returns (uint32) {
     // Replace the seed with the trunk
-    ObjectType._set(seed, treeData.logType);
+    EntityObjectType._set(seed, treeData.logType);
 
     // Create the trunk up to available space
     for (uint32 i = 1; i < treeData.trunkHeight; i++) {
       Vec3 trunkCoord = baseCoord + vec3(0, int32(i), 0);
-      (EntityId trunk, ObjectTypeId objectTypeId) = getOrCreateEntityAt(trunkCoord);
-      if (objectTypeId != ObjectTypes.Air) {
+      (EntityId trunk, ObjectType objectType) = getOrCreateEntityAt(trunkCoord);
+      if (objectType != ObjectTypes.Air) {
         return i;
       }
 
-      ObjectType._set(trunk, treeData.logType);
+      EntityObjectType._set(trunk, treeData.logType);
     }
 
     return treeData.trunkHeight;

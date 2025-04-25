@@ -5,7 +5,7 @@ pragma solidity >=0.8.24;
 
 import { MineSystem } from "../../systems/MineSystem.sol";
 import { Vec3 } from "../../Vec3.sol";
-import { ObjectTypeId } from "../../ObjectTypeId.sol";
+import { ObjectType } from "../../ObjectType.sol";
 import { EntityId } from "../../EntityId.sol";
 import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 import { IWorldCall } from "@latticexyz/world/src/IWorldKernel.sol";
@@ -40,7 +40,7 @@ struct RootCallWrapper {
 library MineSystemLib {
   error MineSystemLib_CallingFromRootSystem();
 
-  function getRandomOreType(MineSystemType self, Vec3 coord) internal view returns (ObjectTypeId) {
+  function getRandomOreType(MineSystemType self, Vec3 coord) internal view returns (ObjectType) {
     return CallWrapper(self.toResourceId(), address(0)).getRandomOreType(coord);
   }
 
@@ -72,7 +72,7 @@ library MineSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).mineUntilDestroyed(caller, coord, extraData);
   }
 
-  function getRandomOreType(CallWrapper memory self, Vec3 coord) internal view returns (ObjectTypeId) {
+  function getRandomOreType(CallWrapper memory self, Vec3 coord) internal view returns (ObjectType) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert MineSystemLib_CallingFromRootSystem();
 
@@ -84,7 +84,7 @@ library MineSystemLib {
     if (!success) revertWithBytes(returnData);
 
     bytes memory result = abi.decode(returnData, (bytes));
-    return abi.decode(result, (ObjectTypeId));
+    return abi.decode(result, (ObjectType));
   }
 
   function mine(

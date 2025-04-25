@@ -9,7 +9,7 @@ import { EntityId } from "../src/EntityId.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
-import { ObjectType } from "../src/codegen/tables/ObjectType.sol";
+import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
 import { Player } from "../src/codegen/tables/Player.sol";
 
@@ -19,17 +19,16 @@ import { DustTest } from "./DustTest.sol";
 import { LocalEnergyPool, MovablePosition, Position, ReversePosition } from "../src/utils/Vec3Storage.sol";
 
 import { CHUNK_SIZE, MACHINE_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
-import { ObjectTypeId } from "../src/ObjectTypeId.sol";
-import { ObjectTypeLib } from "../src/ObjectTypeLib.sol";
-import { ObjectTypes } from "../src/ObjectTypes.sol";
+import { ObjectType } from "../src/ObjectType.sol";
+
+import { ObjectTypes } from "../src/ObjectType.sol";
+
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 
 import { TestUtils } from "./utils/TestUtils.sol";
 
 contract EnergyTest is DustTest {
-  using ObjectTypeLib for ObjectTypeId;
-
   function testPlayerLosesEnergyWhenIdle() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 

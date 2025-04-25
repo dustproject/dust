@@ -6,7 +6,7 @@ pragma solidity >=0.8.24;
 import { ObjectTypeMetadata, ObjectTypeMetadataData } from "./tables/ObjectTypeMetadata.sol";
 import { Recipes, RecipesData } from "./tables/Recipes.sol";
 import { InitialEnergyPool } from "./tables/InitialEnergyPool.sol";
-import { ObjectType } from "./tables/ObjectType.sol";
+import { EntityObjectType } from "./tables/EntityObjectType.sol";
 import { Position, PositionData } from "./tables/Position.sol";
 import { ReversePosition } from "./tables/ReversePosition.sol";
 import { Orientation } from "./tables/Orientation.sol";

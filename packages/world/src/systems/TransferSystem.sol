@@ -4,15 +4,15 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 
 import { EnergyData } from "../codegen/tables/Energy.sol";
-import { ObjectType } from "../codegen/tables/ObjectType.sol";
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 
 import { InventoryUtils, SlotData, SlotTransfer } from "../utils/InventoryUtils.sol";
 import { TransferNotification, notify } from "../utils/NotifUtils.sol";
 
 import { EntityId } from "../EntityId.sol";
-import { ObjectTypeId } from "../ObjectTypeId.sol";
-import { ObjectAmount } from "../ObjectTypeLib.sol";
-import { ObjectTypes } from "../ObjectTypes.sol";
+import { ObjectType } from "../ObjectType.sol";
+
+import { ObjectTypes } from "../ObjectType.sol";
 
 import { ITransferHook } from "../ProgramInterfaces.sol";
 import { Vec3 } from "../Vec3.sol";
@@ -47,7 +47,7 @@ contract TransferSystem is System {
 
     if (target.exists()) {
       caller.requireConnected(target);
-      require(ObjectType._get(target) != ObjectTypes.Player, "Cannot access another player's inventory");
+      require(EntityObjectType._get(target) != ObjectTypes.Player, "Cannot access another player's inventory");
     }
 
     (SlotData[] memory deposits, SlotData[] memory withdrawals) = InventoryUtils.transfer(from, to, transfers);
