@@ -56,11 +56,11 @@ export type AppRpcSchema = RpcSchema.From<{
     method: "dustApp_init";
     params: {
       appConfig: AppConfig;
+      userAddress: Address;
       via?: {
         entity: EntityId;
         program: ProgramId;
       };
-      userAddress?: Address;
     };
   };
 }>;
