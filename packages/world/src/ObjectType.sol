@@ -862,6 +862,22 @@ library ObjectTypeLib {
     return false;
   }
 
+  function isTillable(ObjectType self) internal pure returns (bool) {
+    if (self == ObjectTypes.Grass) return true;
+    if (self == ObjectTypes.Dirt) return true;
+    return false;
+  }
+
+  function isPlantableOn(ObjectType self, ObjectType on) internal pure returns (bool) {
+    if (self.isSeed()) {
+      return on == ObjectTypes.WetFarmland;
+    }
+    if (self.isSapling()) {
+      return on == ObjectTypes.Dirt || on == ObjectTypes.Grass;
+    }
+    return false;
+  }
+
   // Meta Category Checks
   function isAny(ObjectType self) internal pure returns (bool) {
     // Check if:

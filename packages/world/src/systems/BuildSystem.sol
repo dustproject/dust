@@ -139,11 +139,7 @@ library BuildLib {
 
   function _handleGrowable(EntityId base, ObjectType buildType, Vec3 baseCoord) public {
     ObjectType belowType = getObjectTypeAt(baseCoord - vec3(0, 1, 0));
-    if (buildType.isSeed()) {
-      require(belowType == ObjectTypes.WetFarmland, "Seeds need wet farmland");
-    } else if (buildType.isSapling()) {
-      require(belowType == ObjectTypes.Dirt || belowType == ObjectTypes.Grass, "Tree saplings need dirt or grass");
-    }
+    require(buildType.isPlantableOn(belowType), "Cannot plant on this block");
 
     removeEnergyFromLocalPool(baseCoord, ObjectTypeMetadata._getEnergy(buildType));
 
