@@ -257,7 +257,6 @@ export const objectNames = [
   "WheatSeed",
   "PumpkinSeed",
   "MelonSeed",
-  "CottonSeed",
   "OakSapling",
   "BirchSapling",
   "JungleSapling",
@@ -567,12 +566,6 @@ export const categoryObjects: {
       energy: 17800000000000000n,
       timeToGrow: 3600n,
       crop: "Melon",
-    },
-    {
-      name: "CottonSeed",
-      energy: 300000000000000n,
-      timeToGrow: 3600n,
-      crop: "CottonBush",
     },
   ],
   Sapling: [

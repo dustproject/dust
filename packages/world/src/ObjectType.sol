@@ -223,7 +223,6 @@ library ObjectTypes {
   ObjectType constant WheatSeed = ObjectType.wrap(Category.Seed | 0);
   ObjectType constant PumpkinSeed = ObjectType.wrap(Category.Seed | 1);
   ObjectType constant MelonSeed = ObjectType.wrap(Category.Seed | 2);
-  ObjectType constant CottonSeed = ObjectType.wrap(Category.Seed | 3);
   ObjectType constant OakSapling = ObjectType.wrap(Category.Sapling | 0);
   ObjectType constant BirchSapling = ObjectType.wrap(Category.Sapling | 1);
   ObjectType constant JungleSapling = ObjectType.wrap(Category.Sapling | 2);
@@ -629,8 +628,8 @@ library ObjectTypeLib {
     ];
   }
 
-  function getSeedTypes() internal pure returns (ObjectType[4] memory) {
-    return [ObjectTypes.WheatSeed, ObjectTypes.PumpkinSeed, ObjectTypes.MelonSeed, ObjectTypes.CottonSeed];
+  function getSeedTypes() internal pure returns (ObjectType[3] memory) {
+    return [ObjectTypes.WheatSeed, ObjectTypes.PumpkinSeed, ObjectTypes.MelonSeed];
   }
 
   function getSaplingTypes() internal pure returns (ObjectType[8] memory) {
@@ -829,7 +828,6 @@ library ObjectTypeLib {
     if (self == ObjectTypes.WheatSeed) return ObjectTypes.Wheat;
     if (self == ObjectTypes.PumpkinSeed) return ObjectTypes.Pumpkin;
     if (self == ObjectTypes.MelonSeed) return ObjectTypes.Melon;
-    if (self == ObjectTypes.CottonSeed) return ObjectTypes.CottonBush;
     return ObjectTypes.Null;
   }
 
@@ -848,7 +846,6 @@ library ObjectTypeLib {
     if (self == ObjectTypes.WheatSeed) return 900;
     if (self == ObjectTypes.PumpkinSeed) return 3600;
     if (self == ObjectTypes.MelonSeed) return 3600;
-    if (self == ObjectTypes.CottonSeed) return 3600;
     if (self == ObjectTypes.OakSapling) return 345600;
     if (self == ObjectTypes.BirchSapling) return 345600;
     if (self == ObjectTypes.JungleSapling) return 345600;

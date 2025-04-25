@@ -189,7 +189,6 @@ function initObjects() {
   ObjectTypeMetadata.set(ObjectTypes.WheatSeed, ObjectTypeMetadataData({ mass: 0, energy: 800000000000000 }));
   ObjectTypeMetadata.set(ObjectTypes.PumpkinSeed, ObjectTypeMetadataData({ mass: 0, energy: 17800000000000000 }));
   ObjectTypeMetadata.set(ObjectTypes.MelonSeed, ObjectTypeMetadataData({ mass: 0, energy: 17800000000000000 }));
-  ObjectTypeMetadata.set(ObjectTypes.CottonSeed, ObjectTypeMetadataData({ mass: 0, energy: 300000000000000 }));
   ObjectTypeMetadata.set(ObjectTypes.OakSapling, ObjectTypeMetadataData({ mass: 0, energy: 148000000000000000 }));
   ObjectTypeMetadata.set(ObjectTypes.BirchSapling, ObjectTypeMetadataData({ mass: 0, energy: 139000000000000000 }));
   ObjectTypeMetadata.set(ObjectTypes.JungleSapling, ObjectTypeMetadataData({ mass: 0, energy: 300000000000000000 }));
