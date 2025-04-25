@@ -27,7 +27,7 @@ contract FarmingSystem is System {
     (Vec3 callerCoord,) = caller.requireConnected(coord);
 
     (EntityId farmland, ObjectType objectType) = getOrCreateEntityAt(coord);
-    require(objectType == ObjectTypes.Dirt || objectType == ObjectTypes.Grass, "Not dirt or grass");
+    require(objectType.isTillable(), "Not tillable");
 
     // If player died, return early
     uint128 callerEnergy = FarmingLib._processEnergyReduction(caller);

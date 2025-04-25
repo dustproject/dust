@@ -107,7 +107,7 @@ contract TreeTest is DustTest {
     setTerrainAtCoord(stoneCoord, ObjectTypes.Stone);
 
     vm.prank(alice);
-    vm.expectRevert("Tree saplings need dirt or grass");
+    vm.expectRevert("Cannot plant on this block");
     world.build(aliceEntityId, stoneCoord + vec3(0, 1, 0), 0, "");
 
     // Try to plant on farmland
@@ -115,7 +115,7 @@ contract TreeTest is DustTest {
     setTerrainAtCoord(farmlandCoord, ObjectTypes.Farmland);
 
     vm.prank(alice);
-    vm.expectRevert("Tree saplings need dirt or grass");
+    vm.expectRevert("Cannot plant on this block");
     world.build(aliceEntityId, farmlandCoord + vec3(0, 1, 0), 0, "");
   }
 

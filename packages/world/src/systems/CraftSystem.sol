@@ -6,12 +6,10 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
-
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Furnace, FurnaceData } from "../codegen/tables/Furnace.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
-
 import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { Recipes, RecipesData } from "../codegen/tables/Recipes.sol";
 
@@ -23,12 +21,9 @@ import { CraftNotification, notify } from "../utils/NotifUtils.sol";
 import { CRAFT_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 
+import { NatureLib } from "../NatureLib.sol";
 import { ObjectType, ObjectTypes } from "../ObjectType.sol";
 import { ITransferHook } from "../ProgramInterfaces.sol";
-
-import { ObjectTypes } from "../ObjectType.sol";
-
-import { NatureLib } from "../NatureLib.sol";
 import { Vec3 } from "../Vec3.sol";
 
 contract CraftSystem is System {

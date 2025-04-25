@@ -257,7 +257,6 @@ export const objectNames = [
   "WheatSeed",
   "PumpkinSeed",
   "MelonSeed",
-  "CottonSeed",
   "OakSapling",
   "BirchSapling",
   "JungleSapling",
@@ -315,7 +314,6 @@ export interface ObjectDefinition {
   energy?: bigint;
   timeToGrow?: bigint;
   isTillable?: boolean;
-  stackable?: number;
   sapling?: ObjectName;
   crop?: ObjectName;
   isMachine?: boolean;
@@ -338,20 +336,20 @@ export const categoryObjects: {
   ],
   Stone: [
     { name: "Stone", mass: 12000000000000000n },
-    { name: "Bedrock", mass: 1000000000000000000n },
-    { name: "Deepslate", mass: 22500000000000000n },
-    { name: "Granite", mass: 30000000000000000n },
-    { name: "Tuff", mass: 22500000000000000n },
-    { name: "Calcite", mass: 30000000000000000n },
-    { name: "Basalt", mass: 22500000000000000n },
-    { name: "SmoothBasalt", mass: 30000000000000000n },
-    { name: "Andesite", mass: 30000000000000000n },
-    { name: "Diorite", mass: 30000000000000000n },
+    { name: "Bedrock", mass: 50000000000000000000n },
+    { name: "Deepslate", mass: 40000000000000000n },
+    { name: "Granite", mass: 15000000000000000n },
+    { name: "Tuff", mass: 15000000000000000n },
+    { name: "Calcite", mass: 75000000000000000n },
+    { name: "Basalt", mass: 75000000000000000n },
+    { name: "SmoothBasalt", mass: 75000000000000000n },
+    { name: "Andesite", mass: 15000000000000000n },
+    { name: "Diorite", mass: 18000000000000000n },
     { name: "Cobblestone", mass: 22500000000000000n },
-    { name: "MossyCobblestone", mass: 22500000000000000n },
-    { name: "Obsidian", mass: 90000000000000000n },
+    { name: "MossyCobblestone", mass: 37500000000000000n },
+    { name: "Obsidian", mass: 9000000000000000000n },
     { name: "Dripstone", mass: 75000000000000000n },
-    { name: "Blackstone", mass: 30000000000000000n },
+    { name: "Blackstone", mass: 50000000000000000n },
     { name: "CobbledDeepslate", mass: 100000000000000000n },
   ],
   Gemstone: [
@@ -359,8 +357,8 @@ export const categoryObjects: {
     { name: "Glowstone", mass: 37500000000000000n },
   ],
   Soil: [
-    { name: "Grass", mass: 3000000000000000n },
-    { name: "Dirt", mass: 2400000000000000n },
+    { name: "Grass", mass: 3000000000000000n, isTillable: true },
+    { name: "Dirt", mass: 2400000000000000n, isTillable: true },
     { name: "Moss", mass: 200000000000000n },
     { name: "Podzol", mass: 5000000000000000n },
     { name: "DirtPath", mass: 5000000000000000n },
@@ -368,8 +366,8 @@ export const categoryObjects: {
     { name: "PackedMud", mass: 5000000000000000n },
     { name: "Farmland", mass: 3000000000000000n },
     { name: "WetFarmland", mass: 3000000000000000n },
-    { name: "Snow", mass: 4000000000000000n },
-    { name: "Ice", mass: 4000000000000000n },
+    { name: "Snow", mass: 300000000000000n },
+    { name: "Ice", mass: 200000000000000n },
   ],
   Ore: [
     { name: "UnrevealedOre", mass: 10000000000000000n },
@@ -507,8 +505,8 @@ export const categoryObjects: {
     { name: "BrainCoralBlock", mass: 37500000000000000n },
   ],
   MiscBlock: [
-    { name: "SpiderWeb", mass: 100000000000000n },
-    { name: "Bone", mass: 1000000000000000n },
+    { name: "SpiderWeb", mass: 300000000000000n },
+    { name: "Bone", mass: 37500000000000000n },
   ],
 
   // NON-TERRAIN BLOCKS
@@ -567,12 +565,6 @@ export const categoryObjects: {
       energy: 17800000000000000n,
       timeToGrow: 3600n,
       crop: "Melon",
-    },
-    {
-      name: "CottonSeed",
-      energy: 300000000000000n,
-      timeToGrow: 3600n,
-      crop: "CottonBush",
     },
   ],
   Sapling: [
