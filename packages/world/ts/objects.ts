@@ -314,7 +314,6 @@ export interface ObjectDefinition {
   energy?: bigint;
   timeToGrow?: bigint;
   isTillable?: boolean;
-  stackable?: number;
   sapling?: ObjectName;
   crop?: ObjectName;
   isMachine?: boolean;
@@ -358,8 +357,8 @@ export const categoryObjects: {
     { name: "Glowstone", mass: 37500000000000000n },
   ],
   Soil: [
-    { name: "Grass", mass: 3000000000000000n },
-    { name: "Dirt", mass: 2400000000000000n },
+    { name: "Grass", mass: 3000000000000000n, isTillable: true },
+    { name: "Dirt", mass: 2400000000000000n, isTillable: true },
     { name: "Moss", mass: 200000000000000n },
     { name: "Podzol", mass: 5000000000000000n },
     { name: "DirtPath", mass: 5000000000000000n },

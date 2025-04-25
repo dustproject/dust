@@ -126,7 +126,7 @@ contract FarmingTest is DustTest {
     }
   }
 
-  function testTillFailsIfNotDirtOrGrass() public {
+  function testTillFailsIfNotTillable() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     Vec3 nonDirtCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
@@ -135,7 +135,7 @@ contract FarmingTest is DustTest {
     TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenHoe);
 
     vm.prank(alice);
-    vm.expectRevert("Not dirt or grass");
+    vm.expectRevert("Not tillable");
     world.till(aliceEntityId, nonDirtCoord, 0);
   }
 
@@ -247,7 +247,7 @@ contract FarmingTest is DustTest {
     uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
 
     vm.prank(alice);
-    vm.expectRevert("Seeds need wet farmland");
+    vm.expectRevert("Cannot plant on this block");
     world.build(aliceEntityId, dirtCoord + vec3(0, 1, 0), seedSlot, "");
 
     // Try to plant on farmland (not wet)
@@ -257,7 +257,7 @@ contract FarmingTest is DustTest {
     seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
 
     vm.prank(alice);
-    vm.expectRevert("Seeds need wet farmland");
+    vm.expectRevert("Cannot plant on this block");
     world.build(aliceEntityId, farmlandCoord + vec3(0, 1, 0), seedSlot, "");
   }
 

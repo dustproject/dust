@@ -264,7 +264,6 @@ ${allCategoryMetadata
     return 0;
   }
 
-
   function isMachine(ObjectType self) internal pure returns (bool) {
     ${objects
       .filter((obj) => obj.isMachine)
@@ -273,6 +272,24 @@ ${allCategoryMetadata
           `if (self == ObjectTypes.${obj.name}) return ${obj.isMachine};`,
       )
       .join("\n    ")}
+    return false;
+  }
+
+  function isTillable(ObjectType self) internal pure returns (bool) {
+    ${objects
+      .filter((obj) => obj.isTillable)
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return true;`)
+      .join("\n    ")}
+    return false;
+  }
+
+  function isPlantableOn(ObjectType self, ObjectType on) internal pure returns (bool) {
+    if(self.isSeed()) {
+      return on == ObjectTypes.WetFarmland;
+    }
+    if(self.isSapling()) {
+      return on == ObjectTypes.Dirt || on == ObjectTypes.Grass;
+    }
     return false;
   }
 
