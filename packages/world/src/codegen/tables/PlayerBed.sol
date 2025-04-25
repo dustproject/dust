@@ -19,9 +19,9 @@ import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 // Import user types
 import { EntityId } from "../../EntityId.sol";
 
-library PlayerStatus {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "PlayerStatus", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x74620000000000000000000000000000506c6179657253746174757300000000);
+library PlayerBed {
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "PlayerBed", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x74620000000000000000000000000000506c6179657242656400000000000000);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0020010020000000000000000000000000000000000000000000000000000000);

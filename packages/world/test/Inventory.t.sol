@@ -11,10 +11,10 @@ import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
-import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
+import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 import { Player } from "../src/codegen/tables/Player.sol";
 
-import { PlayerStatus } from "../src/codegen/tables/PlayerStatus.sol";
+import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
@@ -280,7 +280,7 @@ contract InventoryTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
-    ObjectTypeMetadata.setMass(ObjectTypes.Chest, playerHandMassReduction - 1);
+    ObjectPhysics.setMass(ObjectTypes.Chest, playerHandMassReduction - 1);
     EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
     ObjectType transferObjectType = ObjectTypes.Grass;
     uint16 numToPickup = 10;
@@ -545,7 +545,7 @@ contract InventoryTest is DustTest {
     assertInventoryHasObject(airEntityId, transferObjectType, 1);
     assertInventoryHasObject(aliceEntityId, transferObjectType, 0);
 
-    PlayerStatus.setBedEntityId(aliceEntityId, randomEntityId());
+    PlayerBed.setBedEntityId(aliceEntityId, randomEntityId());
 
     SlotTransfer[] memory pickup = new SlotTransfer[](1);
     pickup[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
@@ -564,7 +564,7 @@ contract InventoryTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, transferObjectType, 1);
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
 
-    PlayerStatus.setBedEntityId(aliceEntityId, randomEntityId());
+    PlayerBed.setBedEntityId(aliceEntityId, randomEntityId());
 
     SlotTransfer[] memory drops = new SlotTransfer[](1);
     drops[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });

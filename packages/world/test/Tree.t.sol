@@ -9,8 +9,7 @@ import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
-import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
-import { PlayerStatus } from "../src/codegen/tables/PlayerStatus.sol";
+import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 import { SeedGrowth } from "../src/codegen/tables/SeedGrowth.sol";
@@ -65,7 +64,7 @@ contract TreeTest is DustTest {
 
     // Check initial local energy pool
     uint128 initialLocalEnergy = LocalEnergyPool.get(dirtCoord.toLocalEnergyPoolShardCoord());
-    uint128 seedEnergy = ObjectTypeMetadata.getEnergy(ObjectTypes.OakSapling);
+    uint128 seedEnergy = ObjectPhysics.getEnergy(ObjectTypes.OakSapling);
 
     // Plant oak seeds
     Vec3 seedCoord = dirtCoord + vec3(0, 1, 0);
@@ -294,7 +293,7 @@ contract TreeTest is DustTest {
     assertTrue(seedEntityId.exists(), "Seed entity doesn't exist after planting");
 
     // Get initial energy
-    uint128 seedEnergy = ObjectTypeMetadata.getEnergy(ObjectTypes.OakSapling);
+    uint128 seedEnergy = ObjectPhysics.getEnergy(ObjectTypes.OakSapling);
 
     // Get full grown time
     uint128 fullyGrownAt = SeedGrowth.getFullyGrownAt(seedEntityId);

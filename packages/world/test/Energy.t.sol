@@ -10,7 +10,6 @@ import { EntityId } from "../src/EntityId.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
 import { Player } from "../src/codegen/tables/Player.sol";
 
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";

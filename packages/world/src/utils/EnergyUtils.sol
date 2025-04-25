@@ -7,7 +7,7 @@ import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Fragment } from "../codegen/tables/Fragment.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
-import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
+import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { ReversePlayer } from "../codegen/tables/ReversePlayer.sol";
 
 import { getEntityAt } from "../utils/EntityUtils.sol";
@@ -191,5 +191,5 @@ function updateSleepingPlayerEnergy(EntityId player, EntityId bed, uint128 deple
 
 function burnToolEnergy(ObjectType toolType, Vec3 coord) {
   uint16 numPlanks = toolType.getPlankAmount();
-  addEnergyToLocalPool(coord, numPlanks * ObjectTypeMetadata._getMass(ObjectTypes.AnyPlank));
+  addEnergyToLocalPool(coord, numPlanks * ObjectPhysics._getMass(ObjectTypes.AnyPlank));
 }

@@ -4,7 +4,7 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
-import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
+import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 
 import { addEnergyToLocalPool } from "../utils/EnergyUtils.sol";
 
@@ -23,7 +23,7 @@ contract FoodSystem is System {
 
     require(objectType.isFood(), "Object is not food");
 
-    uint128 newEnergy = ObjectTypeMetadata._getEnergy(objectType) * numToEat + energyData.energy;
+    uint128 newEnergy = ObjectPhysics._getEnergy(objectType) * numToEat + energyData.energy;
     if (newEnergy > MAX_PLAYER_ENERGY) {
       addEnergyToLocalPool(caller.getPosition(), newEnergy - MAX_PLAYER_ENERGY);
       newEnergy = MAX_PLAYER_ENERGY;

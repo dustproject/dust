@@ -7,7 +7,7 @@ import { InventorySlot, InventorySlotData } from "../codegen/tables/InventorySlo
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { InventoryTypeSlots } from "../codegen/tables/InventoryTypeSlots.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
-import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
+import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 
 import { ObjectAmount, ObjectType, ObjectTypes } from "../ObjectType.sol";
 
@@ -53,7 +53,7 @@ library InventoryUtils {
     ObjectType toolType = EntityObjectType._get(tool);
     require(toolType.isTool(), "Inventory item is not a tool");
 
-    uint128 maxMass = ObjectTypeMetadata._getMass(toolType);
+    uint128 maxMass = ObjectPhysics._getMass(toolType);
     uint128 maxUsePerCall = maxMass / 10; // Limit to 10% of max mass per use
 
     return ToolData(owner, tool, toolType, slot, Mass._getMass(tool), maxUsePerCall);

@@ -44,7 +44,7 @@ contract GiveScript is Script {
     world.adminAddToInventory(playerEntityId, ObjectTypes.WaterBucket, 3);
     world.adminAddToInventory(playerEntityId, ObjectTypes.OakSapling, 10);
     world.adminAddToInventory(playerEntityId, ObjectTypes.SpruceSapling, 10);
-    world.adminAddToInventory(playerEntityId, ObjectTypes.Fuel, 10);
+    world.adminAddToInventory(playerEntityId, ObjectTypes.Battery, 10);
     world.adminAddToInventory(playerEntityId, ObjectTypes.Wheat, 10);
     world.adminAddToolToInventory(playerEntityId, ObjectTypes.WoodenHoe);
     world.adminAddToolToInventory(playerEntityId, ObjectTypes.IronPick);

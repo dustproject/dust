@@ -19,14 +19,14 @@ import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 // Import user types
 import { ObjectType } from "../../ObjectType.sol";
 
-struct ObjectTypeMetadataData {
+struct ObjectPhysicsData {
   uint128 mass;
   uint128 energy;
 }
 
-library ObjectTypeMetadata {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "ObjectTypeMetada", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x746200000000000000000000000000004f626a656374547970654d6574616461);
+library ObjectPhysics {
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "ObjectPhysics", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x746200000000000000000000000000004f626a65637450687973696373000000);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0020020010100000000000000000000000000000000000000000000000000000);
@@ -156,7 +156,7 @@ library ObjectTypeMetadata {
   /**
    * @notice Get the full data.
    */
-  function get(ObjectType objectType) internal view returns (ObjectTypeMetadataData memory _table) {
+  function get(ObjectType objectType) internal view returns (ObjectPhysicsData memory _table) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(ObjectType.unwrap(objectType)));
 
@@ -171,7 +171,7 @@ library ObjectTypeMetadata {
   /**
    * @notice Get the full data.
    */
-  function _get(ObjectType objectType) internal view returns (ObjectTypeMetadataData memory _table) {
+  function _get(ObjectType objectType) internal view returns (ObjectPhysicsData memory _table) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(ObjectType.unwrap(objectType)));
 
@@ -216,7 +216,7 @@ library ObjectTypeMetadata {
   /**
    * @notice Set the full data using the data struct.
    */
-  function set(ObjectType objectType, ObjectTypeMetadataData memory _table) internal {
+  function set(ObjectType objectType, ObjectPhysicsData memory _table) internal {
     bytes memory _staticData = encodeStatic(_table.mass, _table.energy);
 
     EncodedLengths _encodedLengths;
@@ -231,7 +231,7 @@ library ObjectTypeMetadata {
   /**
    * @notice Set the full data using the data struct.
    */
-  function _set(ObjectType objectType, ObjectTypeMetadataData memory _table) internal {
+  function _set(ObjectType objectType, ObjectPhysicsData memory _table) internal {
     bytes memory _staticData = encodeStatic(_table.mass, _table.energy);
 
     EncodedLengths _encodedLengths;
@@ -262,7 +262,7 @@ library ObjectTypeMetadata {
     bytes memory _staticData,
     EncodedLengths,
     bytes memory
-  ) internal pure returns (ObjectTypeMetadataData memory _table) {
+  ) internal pure returns (ObjectPhysicsData memory _table) {
     (_table.mass, _table.energy) = decodeStatic(_staticData);
   }
 

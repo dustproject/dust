@@ -11,7 +11,7 @@ import { Energy, EnergyData } from "./codegen/tables/Energy.sol";
 
 import { EntityObjectType } from "./codegen/tables/EntityObjectType.sol";
 import { EntityProgram } from "./codegen/tables/EntityProgram.sol";
-import { PlayerStatus } from "./codegen/tables/PlayerStatus.sol";
+import { PlayerBed } from "./codegen/tables/PlayerBed.sol";
 import { ReversePlayer } from "./codegen/tables/ReversePlayer.sol";
 
 import { updateMachineEnergy, updatePlayerEnergy } from "./utils/EnergyUtils.sol";
@@ -114,7 +114,7 @@ library ActivateLib {
 
     EnergyData memory energyData;
     if (objectType == ObjectTypes.Player) {
-      require(!PlayerStatus._getBedEntityId(self).exists(), "Player is sleeping");
+      require(!PlayerBed._getBedEntityId(self).exists(), "Player is sleeping");
       energyData = updatePlayerEnergy(self);
     } else {
       EntityId forceField;

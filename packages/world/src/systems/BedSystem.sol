@@ -10,9 +10,8 @@ import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Fragment } from "../codegen/tables/Fragment.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
-import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { Player } from "../codegen/tables/Player.sol";
-import { PlayerStatus } from "../codegen/tables/PlayerStatus.sol";
+import { PlayerBed } from "../codegen/tables/PlayerBed.sol";
 
 import { Position } from "../utils/Vec3Storage.sol";
 
@@ -58,7 +57,7 @@ contract BedSystem is System {
     require(forceField.exists(), "Bed is not inside a forcefield");
 
     uint128 depletedTime = increaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
-    PlayerStatus._setBedEntityId(caller, bed);
+    PlayerBed._setBedEntityId(caller, bed);
     BedPlayer._set(bed, caller, depletedTime);
 
     BedLib.transferInventory(caller, bed);
@@ -77,7 +76,7 @@ contract BedSystem is System {
 
     caller.requireCallerAllowed(_msgSender());
 
-    EntityId bed = PlayerStatus._getBedEntityId(caller);
+    EntityId bed = PlayerBed._getBedEntityId(caller);
     require(bed.exists(), "Player is not sleeping");
 
     Vec3 bedCoord = Position._get(bed);
@@ -106,7 +105,7 @@ contract BedSystem is System {
   function removeDeadPlayerFromBed(EntityId player, Vec3 dropCoord) public {
     checkWorldStatus();
 
-    EntityId bed = PlayerStatus._getBedEntityId(player);
+    EntityId bed = PlayerBed._getBedEntityId(player);
     require(bed.exists(), "Player is not in a bed");
 
     Vec3 bedCoord = Position._get(bed);

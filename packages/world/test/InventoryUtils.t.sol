@@ -29,7 +29,7 @@ contract InventoryUtilsTest is DustTest {
     TestInventoryUtils.addObject(aliceEntity, ObjectTypes.WaterBucket, 10);
     TestInventoryUtils.addObject(aliceEntity, ObjectTypes.OakSapling, 10);
     TestInventoryUtils.addObject(aliceEntity, ObjectTypes.SpruceSapling, 10);
-    TestInventoryUtils.addObject(aliceEntity, ObjectTypes.Fuel, 10);
+    TestInventoryUtils.addObject(aliceEntity, ObjectTypes.Battery, 10);
     TestInventoryUtils.addObject(aliceEntity, ObjectTypes.Wheat, 10);
     TestInventoryUtils.addEntity(aliceEntity, ObjectTypes.WoodenHoe);
     TestInventoryUtils.addEntity(aliceEntity, ObjectTypes.IronPick);

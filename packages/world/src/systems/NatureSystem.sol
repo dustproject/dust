@@ -8,7 +8,7 @@ import { Inventory } from "../codegen/tables/Inventory.sol";
 
 import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
 
-import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
+import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
@@ -108,9 +108,9 @@ contract NatureSystem is System {
 
       (uint32 trunkHeight, uint32 leaves) = _growTree(seed, coord, treeData, objectType);
 
-      uint128 seedEnergy = ObjectTypeMetadata._getEnergy(objectType);
-      uint128 trunkEnergy = trunkHeight * ObjectTypeMetadata._getEnergy(treeData.logType);
-      uint128 leafEnergy = leaves * ObjectTypeMetadata._getEnergy(treeData.leafType);
+      uint128 seedEnergy = ObjectPhysics._getEnergy(objectType);
+      uint128 trunkEnergy = trunkHeight * ObjectPhysics._getEnergy(treeData.logType);
+      uint128 leafEnergy = leaves * ObjectPhysics._getEnergy(treeData.leafType);
 
       uint128 energyToReturn = seedEnergy - trunkEnergy - leafEnergy;
 

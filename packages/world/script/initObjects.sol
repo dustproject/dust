@@ -2,231 +2,185 @@
 pragma solidity >=0.8.24;
 
 import { ObjectTypes } from "../src/ObjectType.sol";
-import { ObjectTypeMetadata, ObjectTypeMetadataData } from "../src/codegen/tables/ObjectTypeMetadata.sol";
+import { ObjectPhysics, ObjectPhysicsData } from "../src/codegen/tables/ObjectPhysics.sol";
 
 function initObjects() {
-  ObjectTypeMetadata.set(ObjectTypes.Lava, ObjectTypeMetadataData({ mass: 500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Stone, ObjectTypeMetadataData({ mass: 12000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Bedrock, ObjectTypeMetadataData({ mass: 50000000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Deepslate, ObjectTypeMetadataData({ mass: 40000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Granite, ObjectTypeMetadataData({ mass: 15000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Tuff, ObjectTypeMetadataData({ mass: 15000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Calcite, ObjectTypeMetadataData({ mass: 75000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Basalt, ObjectTypeMetadataData({ mass: 75000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.SmoothBasalt, ObjectTypeMetadataData({ mass: 75000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Andesite, ObjectTypeMetadataData({ mass: 15000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Diorite, ObjectTypeMetadataData({ mass: 18000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Cobblestone, ObjectTypeMetadataData({ mass: 22500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.MossyCobblestone, ObjectTypeMetadataData({ mass: 37500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Obsidian, ObjectTypeMetadataData({ mass: 9000000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Dripstone, ObjectTypeMetadataData({ mass: 75000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Blackstone, ObjectTypeMetadataData({ mass: 50000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.CobbledDeepslate, ObjectTypeMetadataData({ mass: 100000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Amethyst, ObjectTypeMetadataData({ mass: 100000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Glowstone, ObjectTypeMetadataData({ mass: 37500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Grass, ObjectTypeMetadataData({ mass: 3000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Dirt, ObjectTypeMetadataData({ mass: 2400000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Moss, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Podzol, ObjectTypeMetadataData({ mass: 5000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.DirtPath, ObjectTypeMetadataData({ mass: 5000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Mud, ObjectTypeMetadataData({ mass: 4000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.PackedMud, ObjectTypeMetadataData({ mass: 5000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Farmland, ObjectTypeMetadataData({ mass: 3000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.WetFarmland, ObjectTypeMetadataData({ mass: 3000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Snow, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Ice, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.UnrevealedOre, ObjectTypeMetadataData({ mass: 10000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.CoalOre, ObjectTypeMetadataData({ mass: 540000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.CopperOre, ObjectTypeMetadataData({ mass: 675000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.IronOre, ObjectTypeMetadataData({ mass: 675000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.GoldOre, ObjectTypeMetadataData({ mass: 1600000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.DiamondOre, ObjectTypeMetadataData({ mass: 5000000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.NeptuniumOre, ObjectTypeMetadataData({ mass: 5000000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Gravel, ObjectTypeMetadataData({ mass: 2400000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Sand, ObjectTypeMetadataData({ mass: 4000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.RedSand, ObjectTypeMetadataData({ mass: 5000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Sandstone, ObjectTypeMetadataData({ mass: 30000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.RedSandstone, ObjectTypeMetadataData({ mass: 37500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Clay, ObjectTypeMetadataData({ mass: 2400000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Terracotta, ObjectTypeMetadataData({ mass: 18000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.BrownTerracotta, ObjectTypeMetadataData({ mass: 22500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.OrangeTerracotta, ObjectTypeMetadataData({ mass: 30000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.WhiteTerracotta, ObjectTypeMetadataData({ mass: 22500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(
-    ObjectTypes.LightGrayTerracotta, ObjectTypeMetadataData({ mass: 30000000000000000, energy: 0 })
+  ObjectPhysics.set(ObjectTypes.Stone, ObjectPhysicsData({ mass: 12000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Bedrock, ObjectPhysicsData({ mass: 50000000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Deepslate, ObjectPhysicsData({ mass: 40000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Granite, ObjectPhysicsData({ mass: 15000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Tuff, ObjectPhysicsData({ mass: 15000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Calcite, ObjectPhysicsData({ mass: 75000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Basalt, ObjectPhysicsData({ mass: 75000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.SmoothBasalt, ObjectPhysicsData({ mass: 75000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Andesite, ObjectPhysicsData({ mass: 15000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Diorite, ObjectPhysicsData({ mass: 18000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Cobblestone, ObjectPhysicsData({ mass: 22500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.MossyCobblestone, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Obsidian, ObjectPhysicsData({ mass: 9000000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Dripstone, ObjectPhysicsData({ mass: 75000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Blackstone, ObjectPhysicsData({ mass: 50000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.CobbledDeepslate, ObjectPhysicsData({ mass: 100000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Amethyst, ObjectPhysicsData({ mass: 100000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Glowstone, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Grass, ObjectPhysicsData({ mass: 3000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Dirt, ObjectPhysicsData({ mass: 2400000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Moss, ObjectPhysicsData({ mass: 200000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Podzol, ObjectPhysicsData({ mass: 5000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.DirtPath, ObjectPhysicsData({ mass: 5000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Mud, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.PackedMud, ObjectPhysicsData({ mass: 5000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Farmland, ObjectPhysicsData({ mass: 3000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.WetFarmland, ObjectPhysicsData({ mass: 3000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.UnrevealedOre, ObjectPhysicsData({ mass: 10000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.CoalOre, ObjectPhysicsData({ mass: 540000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.CopperOre, ObjectPhysicsData({ mass: 675000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.IronOre, ObjectPhysicsData({ mass: 675000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.GoldOre, ObjectPhysicsData({ mass: 1600000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.DiamondOre, ObjectPhysicsData({ mass: 5000000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.NeptuniumOre, ObjectPhysicsData({ mass: 5000000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Gravel, ObjectPhysicsData({ mass: 2400000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Sand, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.RedSand, ObjectPhysicsData({ mass: 5000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Sandstone, ObjectPhysicsData({ mass: 30000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.RedSandstone, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Clay, ObjectPhysicsData({ mass: 2400000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Terracotta, ObjectPhysicsData({ mass: 18000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.BrownTerracotta, ObjectPhysicsData({ mass: 22500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.OrangeTerracotta, ObjectPhysicsData({ mass: 30000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.WhiteTerracotta, ObjectPhysicsData({ mass: 22500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.LightGrayTerracotta, ObjectPhysicsData({ mass: 30000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.YellowTerracotta, ObjectPhysicsData({ mass: 30000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.RedTerracotta, ObjectPhysicsData({ mass: 30000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.LightBlueTerracotta, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.CyanTerracotta, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.BlackTerracotta, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.PurpleTerracotta, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.BlueTerracotta, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.MagentaTerracotta, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.AnyLog, ObjectPhysicsData({ mass: 12500000000000000, energy: 5500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.OakLog, ObjectPhysicsData({ mass: 12500000000000000, energy: 5500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.BirchLog, ObjectPhysicsData({ mass: 12500000000000000, energy: 5500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.JungleLog, ObjectPhysicsData({ mass: 12500000000000000, energy: 5500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.SakuraLog, ObjectPhysicsData({ mass: 12500000000000000, energy: 5500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.AcaciaLog, ObjectPhysicsData({ mass: 12500000000000000, energy: 5500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.SpruceLog, ObjectPhysicsData({ mass: 12500000000000000, energy: 5500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.DarkOakLog, ObjectPhysicsData({ mass: 12500000000000000, energy: 5500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.MangroveLog, ObjectPhysicsData({ mass: 12500000000000000, energy: 5500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.AnyLeaf, ObjectPhysicsData({ mass: 500000000000000, energy: 500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.OakLeaf, ObjectPhysicsData({ mass: 500000000000000, energy: 500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.BirchLeaf, ObjectPhysicsData({ mass: 500000000000000, energy: 500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.JungleLeaf, ObjectPhysicsData({ mass: 500000000000000, energy: 500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.SakuraLeaf, ObjectPhysicsData({ mass: 500000000000000, energy: 500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.SpruceLeaf, ObjectPhysicsData({ mass: 500000000000000, energy: 500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.AcaciaLeaf, ObjectPhysicsData({ mass: 500000000000000, energy: 500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.DarkOakLeaf, ObjectPhysicsData({ mass: 500000000000000, energy: 500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.AzaleaLeaf, ObjectPhysicsData({ mass: 500000000000000, energy: 500000000000000 }));
+  ObjectPhysics.set(
+    ObjectTypes.FloweringAzaleaLeaf, ObjectPhysicsData({ mass: 500000000000000, energy: 500000000000000 })
   );
-  ObjectTypeMetadata.set(ObjectTypes.YellowTerracotta, ObjectTypeMetadataData({ mass: 30000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.RedTerracotta, ObjectTypeMetadataData({ mass: 30000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(
-    ObjectTypes.LightBlueTerracotta, ObjectTypeMetadataData({ mass: 37500000000000000, energy: 0 })
-  );
-  ObjectTypeMetadata.set(ObjectTypes.CyanTerracotta, ObjectTypeMetadataData({ mass: 37500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.BlackTerracotta, ObjectTypeMetadataData({ mass: 37500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.PurpleTerracotta, ObjectTypeMetadataData({ mass: 37500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.BlueTerracotta, ObjectTypeMetadataData({ mass: 37500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.MagentaTerracotta, ObjectTypeMetadataData({ mass: 37500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(
-    ObjectTypes.AnyLog, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 5500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.OakLog, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 5500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.BirchLog, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 5500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.JungleLog, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 5500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.SakuraLog, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 5500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.AcaciaLog, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 5500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.SpruceLog, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 5500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.DarkOakLog, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 5500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.MangroveLog, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 5500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.AnyLeaf, ObjectTypeMetadataData({ mass: 500000000000000, energy: 500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.OakLeaf, ObjectTypeMetadataData({ mass: 500000000000000, energy: 500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.BirchLeaf, ObjectTypeMetadataData({ mass: 500000000000000, energy: 500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.JungleLeaf, ObjectTypeMetadataData({ mass: 500000000000000, energy: 500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.SakuraLeaf, ObjectTypeMetadataData({ mass: 500000000000000, energy: 500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.SpruceLeaf, ObjectTypeMetadataData({ mass: 500000000000000, energy: 500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.AcaciaLeaf, ObjectTypeMetadataData({ mass: 500000000000000, energy: 500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.DarkOakLeaf, ObjectTypeMetadataData({ mass: 500000000000000, energy: 500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.AzaleaLeaf, ObjectTypeMetadataData({ mass: 500000000000000, energy: 500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.FloweringAzaleaLeaf, ObjectTypeMetadataData({ mass: 500000000000000, energy: 500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.MangroveLeaf, ObjectTypeMetadataData({ mass: 500000000000000, energy: 500000000000000 })
-  );
-  ObjectTypeMetadata.set(ObjectTypes.MangroveRoots, ObjectTypeMetadataData({ mass: 400000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.MuddyMangroveRoots, ObjectTypeMetadataData({ mass: 400000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.AzaleaFlower, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.BellFlower, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.DandelionFlower, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.DaylilyFlower, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.LilacFlower, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.RoseFlower, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.FireFlower, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.MorninggloryFlower, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.PeonyFlower, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Ultraviolet, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.SunFlower, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.FlyTrap, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.FescueGrass, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.SwitchGrass, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.VinesBush, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.IvyVine, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.HempBush, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Coral, ObjectTypeMetadataData({ mass: 400000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.SeaAnemone, ObjectTypeMetadataData({ mass: 400000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Algae, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.HornCoralBlock, ObjectTypeMetadataData({ mass: 37500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.FireCoralBlock, ObjectTypeMetadataData({ mass: 37500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.TubeCoralBlock, ObjectTypeMetadataData({ mass: 37500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.BubbleCoralBlock, ObjectTypeMetadataData({ mass: 37500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.BrainCoralBlock, ObjectTypeMetadataData({ mass: 37500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.SpiderWeb, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Bone, ObjectTypeMetadataData({ mass: 37500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.GoldenMushroom, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.RedMushroom, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.CoffeeBush, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.StrawberryBush, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.RaspberryBush, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Wheat, ObjectTypeMetadataData({ mass: 300000000000000, energy: 500000000000000 }));
-  ObjectTypeMetadata.set(ObjectTypes.CottonBush, ObjectTypeMetadataData({ mass: 300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(
-    ObjectTypes.Pumpkin, ObjectTypeMetadataData({ mass: 1300000000000000, energy: 16500000000000000 })
-  );
-  ObjectTypeMetadata.set(
-    ObjectTypes.Melon, ObjectTypeMetadataData({ mass: 1300000000000000, energy: 16500000000000000 })
-  );
-  ObjectTypeMetadata.set(ObjectTypes.RedMushroomBlock, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.BrownMushroomBlock, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.MushroomStem, ObjectTypeMetadataData({ mass: 12500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.BambooBush, ObjectTypeMetadataData({ mass: 200000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Cactus, ObjectTypeMetadataData({ mass: 1300000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.AnyPlank, ObjectTypeMetadataData({ mass: 4500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.OakPlanks, ObjectTypeMetadataData({ mass: 4500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.BirchPlanks, ObjectTypeMetadataData({ mass: 4500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.JunglePlanks, ObjectTypeMetadataData({ mass: 4500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.SakuraPlanks, ObjectTypeMetadataData({ mass: 4500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.SprucePlanks, ObjectTypeMetadataData({ mass: 4500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.AcaciaPlanks, ObjectTypeMetadataData({ mass: 4500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.DarkOakPlanks, ObjectTypeMetadataData({ mass: 4500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.MangrovePlanks, ObjectTypeMetadataData({ mass: 4500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.CopperBlock, ObjectTypeMetadataData({ mass: 6075000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.IronBlock, ObjectTypeMetadataData({ mass: 6075000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.GoldBlock, ObjectTypeMetadataData({ mass: 14400000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.DiamondBlock, ObjectTypeMetadataData({ mass: 45000000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.NeptuniumBlock, ObjectTypeMetadataData({ mass: 45000000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.WheatSeed, ObjectTypeMetadataData({ mass: 0, energy: 800000000000000 }));
-  ObjectTypeMetadata.set(ObjectTypes.PumpkinSeed, ObjectTypeMetadataData({ mass: 0, energy: 17800000000000000 }));
-  ObjectTypeMetadata.set(ObjectTypes.MelonSeed, ObjectTypeMetadataData({ mass: 0, energy: 17800000000000000 }));
-  ObjectTypeMetadata.set(ObjectTypes.OakSapling, ObjectTypeMetadataData({ mass: 0, energy: 148000000000000000 }));
-  ObjectTypeMetadata.set(ObjectTypes.BirchSapling, ObjectTypeMetadataData({ mass: 0, energy: 139000000000000000 }));
-  ObjectTypeMetadata.set(ObjectTypes.JungleSapling, ObjectTypeMetadataData({ mass: 0, energy: 300000000000000000 }));
-  ObjectTypeMetadata.set(ObjectTypes.SakuraSapling, ObjectTypeMetadataData({ mass: 0, energy: 187000000000000000 }));
-  ObjectTypeMetadata.set(ObjectTypes.AcaciaSapling, ObjectTypeMetadataData({ mass: 0, energy: 158000000000000000 }));
-  ObjectTypeMetadata.set(ObjectTypes.SpruceSapling, ObjectTypeMetadataData({ mass: 0, energy: 256000000000000000 }));
-  ObjectTypeMetadata.set(ObjectTypes.DarkOakSapling, ObjectTypeMetadataData({ mass: 0, energy: 202000000000000000 }));
-  ObjectTypeMetadata.set(ObjectTypes.MangroveSapling, ObjectTypeMetadataData({ mass: 0, energy: 232000000000000000 }));
-  ObjectTypeMetadata.set(ObjectTypes.Furnace, ObjectTypeMetadataData({ mass: 108000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Workbench, ObjectTypeMetadataData({ mass: 18000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Powerstone, ObjectTypeMetadataData({ mass: 80000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.ForceField, ObjectTypeMetadataData({ mass: 3735000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Chest, ObjectTypeMetadataData({ mass: 36000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.SpawnTile, ObjectTypeMetadataData({ mass: 9135000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Bed, ObjectTypeMetadataData({ mass: 13500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.TextSign, ObjectTypeMetadataData({ mass: 18000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.WoodenPick, ObjectTypeMetadataData({ mass: 22500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.CopperPick, ObjectTypeMetadataData({ mass: 2034000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.IronPick, ObjectTypeMetadataData({ mass: 2034000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.GoldPick, ObjectTypeMetadataData({ mass: 4809000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.DiamondPick, ObjectTypeMetadataData({ mass: 15009000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.NeptuniumPick, ObjectTypeMetadataData({ mass: 15009000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.WoodenAxe, ObjectTypeMetadataData({ mass: 22500000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.CopperAxe, ObjectTypeMetadataData({ mass: 2034000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.IronAxe, ObjectTypeMetadataData({ mass: 2034000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.GoldAxe, ObjectTypeMetadataData({ mass: 4809000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.DiamondAxe, ObjectTypeMetadataData({ mass: 15009000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.NeptuniumAxe, ObjectTypeMetadataData({ mass: 15009000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.WoodenWhacker, ObjectTypeMetadataData({ mass: 36000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.CopperWhacker, ObjectTypeMetadataData({ mass: 4059000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.IronWhacker, ObjectTypeMetadataData({ mass: 4059000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.WoodenHoe, ObjectTypeMetadataData({ mass: 18000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.GoldBar, ObjectTypeMetadataData({ mass: 1600000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.IronBar, ObjectTypeMetadataData({ mass: 675000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Diamond, ObjectTypeMetadataData({ mass: 5000000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.NeptuniumBar, ObjectTypeMetadataData({ mass: 5000000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.Bucket, ObjectTypeMetadataData({ mass: 2025000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.WaterBucket, ObjectTypeMetadataData({ mass: 2025000000000000000, energy: 0 }));
-  ObjectTypeMetadata.set(ObjectTypes.WheatSlop, ObjectTypeMetadataData({ mass: 0, energy: 12800000000000000 }));
-  ObjectTypeMetadata.set(ObjectTypes.Fuel, ObjectTypeMetadataData({ mass: 0, energy: 90000000000000000 }));
+  ObjectPhysics.set(ObjectTypes.MangroveLeaf, ObjectPhysicsData({ mass: 500000000000000, energy: 500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.MangroveRoots, ObjectPhysicsData({ mass: 400000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.MuddyMangroveRoots, ObjectPhysicsData({ mass: 400000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.AzaleaFlower, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.BellFlower, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.DandelionFlower, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.DaylilyFlower, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.LilacFlower, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.RoseFlower, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.FireFlower, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.MorninggloryFlower, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.PeonyFlower, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Ultraviolet, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.SunFlower, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.FlyTrap, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.FescueGrass, ObjectPhysicsData({ mass: 200000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.SwitchGrass, ObjectPhysicsData({ mass: 200000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.VinesBush, ObjectPhysicsData({ mass: 200000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.IvyVine, ObjectPhysicsData({ mass: 200000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.HempBush, ObjectPhysicsData({ mass: 200000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Coral, ObjectPhysicsData({ mass: 400000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.SeaAnemone, ObjectPhysicsData({ mass: 400000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Algae, ObjectPhysicsData({ mass: 200000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.HornCoralBlock, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.FireCoralBlock, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.TubeCoralBlock, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.BubbleCoralBlock, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.BrainCoralBlock, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Snow, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Ice, ObjectPhysicsData({ mass: 200000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Magma, ObjectPhysicsData({ mass: 500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.SpiderWeb, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Bone, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.GoldenMushroom, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.RedMushroom, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.CoffeeBush, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.StrawberryBush, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.RaspberryBush, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Wheat, ObjectPhysicsData({ mass: 300000000000000, energy: 500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.CottonBush, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Pumpkin, ObjectPhysicsData({ mass: 1300000000000000, energy: 16500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.Melon, ObjectPhysicsData({ mass: 1300000000000000, energy: 16500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.RedMushroomBlock, ObjectPhysicsData({ mass: 12500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.BrownMushroomBlock, ObjectPhysicsData({ mass: 12500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.MushroomStem, ObjectPhysicsData({ mass: 12500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.BambooBush, ObjectPhysicsData({ mass: 200000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Cactus, ObjectPhysicsData({ mass: 1300000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.AnyPlank, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.OakPlanks, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.BirchPlanks, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.JunglePlanks, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.SakuraPlanks, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.SprucePlanks, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.AcaciaPlanks, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.DarkOakPlanks, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.MangrovePlanks, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.CopperBlock, ObjectPhysicsData({ mass: 6075000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.IronBlock, ObjectPhysicsData({ mass: 6075000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.GoldBlock, ObjectPhysicsData({ mass: 14400000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.DiamondBlock, ObjectPhysicsData({ mass: 45000000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.NeptuniumBlock, ObjectPhysicsData({ mass: 45000000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.WheatSeed, ObjectPhysicsData({ mass: 0, energy: 800000000000000 }));
+  ObjectPhysics.set(ObjectTypes.PumpkinSeed, ObjectPhysicsData({ mass: 0, energy: 17800000000000000 }));
+  ObjectPhysics.set(ObjectTypes.MelonSeed, ObjectPhysicsData({ mass: 0, energy: 17800000000000000 }));
+  ObjectPhysics.set(ObjectTypes.OakSapling, ObjectPhysicsData({ mass: 0, energy: 148000000000000000 }));
+  ObjectPhysics.set(ObjectTypes.BirchSapling, ObjectPhysicsData({ mass: 0, energy: 139000000000000000 }));
+  ObjectPhysics.set(ObjectTypes.JungleSapling, ObjectPhysicsData({ mass: 0, energy: 300000000000000000 }));
+  ObjectPhysics.set(ObjectTypes.SakuraSapling, ObjectPhysicsData({ mass: 0, energy: 187000000000000000 }));
+  ObjectPhysics.set(ObjectTypes.AcaciaSapling, ObjectPhysicsData({ mass: 0, energy: 158000000000000000 }));
+  ObjectPhysics.set(ObjectTypes.SpruceSapling, ObjectPhysicsData({ mass: 0, energy: 256000000000000000 }));
+  ObjectPhysics.set(ObjectTypes.DarkOakSapling, ObjectPhysicsData({ mass: 0, energy: 202000000000000000 }));
+  ObjectPhysics.set(ObjectTypes.MangroveSapling, ObjectPhysicsData({ mass: 0, energy: 232000000000000000 }));
+  ObjectPhysics.set(ObjectTypes.Furnace, ObjectPhysicsData({ mass: 108000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Workbench, ObjectPhysicsData({ mass: 18000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Powerstone, ObjectPhysicsData({ mass: 80000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.ForceField, ObjectPhysicsData({ mass: 3735000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Chest, ObjectPhysicsData({ mass: 36000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.SpawnTile, ObjectPhysicsData({ mass: 9135000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Bed, ObjectPhysicsData({ mass: 13500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.TextSign, ObjectPhysicsData({ mass: 18000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.WoodenPick, ObjectPhysicsData({ mass: 22500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.CopperPick, ObjectPhysicsData({ mass: 2034000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.IronPick, ObjectPhysicsData({ mass: 2034000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.GoldPick, ObjectPhysicsData({ mass: 4809000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.DiamondPick, ObjectPhysicsData({ mass: 15009000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.NeptuniumPick, ObjectPhysicsData({ mass: 15009000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.WoodenAxe, ObjectPhysicsData({ mass: 22500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.CopperAxe, ObjectPhysicsData({ mass: 2034000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.IronAxe, ObjectPhysicsData({ mass: 2034000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.GoldAxe, ObjectPhysicsData({ mass: 4809000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.DiamondAxe, ObjectPhysicsData({ mass: 15009000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.NeptuniumAxe, ObjectPhysicsData({ mass: 15009000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.WoodenWhacker, ObjectPhysicsData({ mass: 36000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.CopperWhacker, ObjectPhysicsData({ mass: 4059000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.IronWhacker, ObjectPhysicsData({ mass: 4059000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.WoodenHoe, ObjectPhysicsData({ mass: 18000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.GoldBar, ObjectPhysicsData({ mass: 1600000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.IronBar, ObjectPhysicsData({ mass: 675000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Diamond, ObjectPhysicsData({ mass: 5000000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.NeptuniumBar, ObjectPhysicsData({ mass: 5000000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Bucket, ObjectPhysicsData({ mass: 2025000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.WaterBucket, ObjectPhysicsData({ mass: 2025000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.WheatSlop, ObjectPhysicsData({ mass: 0, energy: 12800000000000000 }));
+  ObjectPhysics.set(ObjectTypes.Battery, ObjectPhysicsData({ mass: 0, energy: 90000000000000000 }));
 }

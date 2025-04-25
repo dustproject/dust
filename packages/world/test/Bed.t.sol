@@ -19,8 +19,7 @@ import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { Machine } from "../src/codegen/tables/Machine.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
-import { PlayerStatus } from "../src/codegen/tables/PlayerStatus.sol";
+import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest, console } from "./DustTest.sol";
 
@@ -88,7 +87,7 @@ contract BedTest is DustTest {
     assertEq(bedPlayerData.playerEntityId.unwrap(), aliceEntityId.unwrap(), "Bed's player entity is not alice");
     assertEq(bedPlayerData.lastDepletedTime, initialTimestamp, "Wrong lastDepletedTime");
     assertEq(
-      PlayerStatus.getBedEntityId(aliceEntityId).unwrap(), bedEntityId.unwrap(), "Player's bed entity is not the bed"
+      PlayerBed.getBedEntityId(aliceEntityId).unwrap(), bedEntityId.unwrap(), "Player's bed entity is not the bed"
     );
   }
 
@@ -478,7 +477,7 @@ contract BedTest is DustTest {
     BedPlayerData memory bedPlayerData = BedPlayer.get(bedEntityId);
     assertEq(bedPlayerData.playerEntityId.unwrap(), aliceEntityId.unwrap(), "Bed's player entity is not alice");
     assertEq(
-      PlayerStatus.getBedEntityId(aliceEntityId).unwrap(), bedEntityId.unwrap(), "Player's bed entity is not the bed"
+      PlayerBed.getBedEntityId(aliceEntityId).unwrap(), bedEntityId.unwrap(), "Player's bed entity is not the bed"
     );
   }
 

@@ -14,7 +14,7 @@ import { ObjectTypes } from "../src/ObjectType.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
-import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
+import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 import { LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 contract FoodTest is DustTest {
@@ -32,7 +32,7 @@ contract FoodTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, foodType, foodAmount);
 
     // Get energy value of food
-    uint128 foodEnergyValue = ObjectTypeMetadata.getEnergy(foodType);
+    uint128 foodEnergyValue = ObjectPhysics.getEnergy(foodType);
 
     // Eat food
     uint16 amountToEat = 2;
@@ -73,7 +73,7 @@ contract FoodTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, foodType, foodAmount);
 
     // Get energy value of food (which will be > 10)
-    uint128 foodEnergyValue = ObjectTypeMetadata.getEnergy(foodType);
+    uint128 foodEnergyValue = ObjectPhysics.getEnergy(foodType);
 
     // Record initial local energy pool value
     Vec3 shardCoord = aliceCoord.toLocalEnergyPoolShardCoord();

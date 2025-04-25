@@ -87,7 +87,6 @@ library ObjectTypes {
   ObjectType constant Null = ObjectType.wrap(Category.NonSolid | 0);
   ObjectType constant Air = ObjectType.wrap(Category.NonSolid | 1);
   ObjectType constant Water = ObjectType.wrap(Category.NonSolid | 2);
-  ObjectType constant Lava = ObjectType.wrap(Category.NonSolid | 3);
   ObjectType constant Stone = ObjectType.wrap(Category.Stone | 0);
   ObjectType constant Bedrock = ObjectType.wrap(Category.Stone | 1);
   ObjectType constant Deepslate = ObjectType.wrap(Category.Stone | 2);
@@ -115,8 +114,6 @@ library ObjectTypes {
   ObjectType constant PackedMud = ObjectType.wrap(Category.Soil | 6);
   ObjectType constant Farmland = ObjectType.wrap(Category.Soil | 7);
   ObjectType constant WetFarmland = ObjectType.wrap(Category.Soil | 8);
-  ObjectType constant Snow = ObjectType.wrap(Category.Soil | 9);
-  ObjectType constant Ice = ObjectType.wrap(Category.Soil | 10);
   ObjectType constant UnrevealedOre = ObjectType.wrap(Category.Ore | 0);
   ObjectType constant CoalOre = ObjectType.wrap(Category.Ore | 1);
   ObjectType constant CopperOre = ObjectType.wrap(Category.Ore | 2);
@@ -190,8 +187,11 @@ library ObjectTypes {
   ObjectType constant TubeCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 2);
   ObjectType constant BubbleCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 3);
   ObjectType constant BrainCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 4);
-  ObjectType constant SpiderWeb = ObjectType.wrap(Category.MiscBlock | 0);
-  ObjectType constant Bone = ObjectType.wrap(Category.MiscBlock | 1);
+  ObjectType constant Snow = ObjectType.wrap(Category.MiscBlock | 0);
+  ObjectType constant Ice = ObjectType.wrap(Category.MiscBlock | 1);
+  ObjectType constant Magma = ObjectType.wrap(Category.MiscBlock | 2);
+  ObjectType constant SpiderWeb = ObjectType.wrap(Category.MiscBlock | 3);
+  ObjectType constant Bone = ObjectType.wrap(Category.MiscBlock | 4);
   ObjectType constant GoldenMushroom = ObjectType.wrap(Category.Crop | 0);
   ObjectType constant RedMushroom = ObjectType.wrap(Category.Crop | 1);
   ObjectType constant CoffeeBush = ObjectType.wrap(Category.Crop | 2);
@@ -262,7 +262,7 @@ library ObjectTypes {
   ObjectType constant Bucket = ObjectType.wrap(Category.Bucket | 0);
   ObjectType constant WaterBucket = ObjectType.wrap(Category.Bucket | 1);
   ObjectType constant WheatSlop = ObjectType.wrap(Category.Food | 0);
-  ObjectType constant Fuel = ObjectType.wrap(Category.Fuel | 0);
+  ObjectType constant Battery = ObjectType.wrap(Category.Fuel | 0);
   ObjectType constant Player = ObjectType.wrap(Category.Player | 0);
   ObjectType constant Fragment = ObjectType.wrap(Category.SmartEntityNonBlock | 0);
 }
@@ -423,8 +423,8 @@ library ObjectTypeLib {
   }
 
   // Category getters
-  function getNonSolidTypes() internal pure returns (ObjectType[4] memory) {
-    return [ObjectTypes.Null, ObjectTypes.Air, ObjectTypes.Water, ObjectTypes.Lava];
+  function getNonSolidTypes() internal pure returns (ObjectType[3] memory) {
+    return [ObjectTypes.Null, ObjectTypes.Air, ObjectTypes.Water];
   }
 
   function getStoneTypes() internal pure returns (ObjectType[16] memory) {
@@ -452,7 +452,7 @@ library ObjectTypeLib {
     return [ObjectTypes.Amethyst, ObjectTypes.Glowstone];
   }
 
-  function getSoilTypes() internal pure returns (ObjectType[11] memory) {
+  function getSoilTypes() internal pure returns (ObjectType[9] memory) {
     return [
       ObjectTypes.Grass,
       ObjectTypes.Dirt,
@@ -462,9 +462,7 @@ library ObjectTypeLib {
       ObjectTypes.Mud,
       ObjectTypes.PackedMud,
       ObjectTypes.Farmland,
-      ObjectTypes.WetFarmland,
-      ObjectTypes.Snow,
-      ObjectTypes.Ice
+      ObjectTypes.WetFarmland
     ];
   }
 
@@ -600,8 +598,8 @@ library ObjectTypeLib {
     ];
   }
 
-  function getMiscBlockTypes() internal pure returns (ObjectType[2] memory) {
-    return [ObjectTypes.SpiderWeb, ObjectTypes.Bone];
+  function getMiscBlockTypes() internal pure returns (ObjectType[5] memory) {
+    return [ObjectTypes.Snow, ObjectTypes.Ice, ObjectTypes.Magma, ObjectTypes.SpiderWeb, ObjectTypes.Bone];
   }
 
   function getPlankTypes() internal pure returns (ObjectType[9] memory) {
@@ -696,7 +694,7 @@ library ObjectTypeLib {
   }
 
   function getFuelTypes() internal pure returns (ObjectType[1] memory) {
-    return [ObjectTypes.Fuel];
+    return [ObjectTypes.Battery];
   }
 
   function getPlayerTypes() internal pure returns (ObjectType[1] memory) {

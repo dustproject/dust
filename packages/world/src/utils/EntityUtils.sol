@@ -3,7 +3,7 @@ pragma solidity >=0.8.24;
 
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
-import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
+import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { UniqueEntity } from "../codegen/tables/UniqueEntity.sol";
 import { TerrainLib } from "../systems/libraries/TerrainLib.sol";
 import { MovablePosition, Position, ReverseMovablePosition, ReversePosition } from "../utils/Vec3Storage.sol";
@@ -67,7 +67,7 @@ function createEntityAt(Vec3 coord, ObjectType objectType) returns (EntityId) {
 function createEntity(ObjectType objectType) returns (EntityId) {
   EntityId entityId = getUniqueEntity();
   EntityObjectType._set(entityId, objectType);
-  uint128 mass = ObjectTypeMetadata._getMass(objectType);
+  uint128 mass = ObjectPhysics._getMass(objectType);
   if (mass > 0) {
     Mass._setMass(entityId, mass);
   }

@@ -12,7 +12,7 @@ import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
-import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
+import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { Orientation } from "../codegen/tables/Orientation.sol";
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 
@@ -149,7 +149,7 @@ contract MineSystem is System {
   function _removeGrowable(EntityId entityId, ObjectType objectType, Vec3 coord) internal {
     EntityObjectType._set(entityId, ObjectTypes.Air);
     require(SeedGrowth._getFullyGrownAt(entityId) > block.timestamp, "Cannot mine fully grown seed");
-    addEnergyToLocalPool(coord, ObjectTypeMetadata._getEnergy(objectType));
+    addEnergyToLocalPool(coord, ObjectPhysics._getEnergy(objectType));
   }
 
   function _removeBlock(EntityId entityId, ObjectType objectType, Vec3 coord) internal {
@@ -328,7 +328,7 @@ library RandomResourceLib {
     // Set mined resource count for the specific ore
     ResourceCount._set(ore, ResourceCount._get(ore) + 1);
     EntityObjectType._set(entityId, ore);
-    Mass._setMass(entityId, ObjectTypeMetadata._getMass(ore));
+    Mass._setMass(entityId, ObjectPhysics._getMass(ore));
 
     return ore;
   }

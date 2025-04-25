@@ -14,7 +14,7 @@ import { Inventory } from "../codegen/tables/Inventory.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 
-import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
+import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { Orientation } from "../codegen/tables/Orientation.sol";
 
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
@@ -126,7 +126,7 @@ library BuildLib {
     Vec3[] memory coords = buildType.getRelativeCoords(baseCoord, direction);
     EntityId base = _addBlock(buildType, baseCoord);
     Orientation._set(base, direction);
-    uint128 mass = ObjectTypeMetadata._getMass(buildType);
+    uint128 mass = ObjectPhysics._getMass(buildType);
     Mass._setMass(base, mass);
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
@@ -141,7 +141,7 @@ library BuildLib {
     ObjectType belowType = getObjectTypeAt(baseCoord - vec3(0, 1, 0));
     require(buildType.isPlantableOn(belowType), "Cannot plant on this block");
 
-    removeEnergyFromLocalPool(baseCoord, ObjectTypeMetadata._getEnergy(buildType));
+    removeEnergyFromLocalPool(baseCoord, ObjectPhysics._getEnergy(buildType));
 
     SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildType.getTimeToGrow());
   }
