@@ -731,3 +731,21 @@ export const objectsByName = objects.reduce(
   },
   {} as Record<ObjectName, ObjectDefinition>,
 );
+
+export const objectsById = objects.reduce(
+  (acc, obj) => {
+    acc[obj.id] = obj;
+    return acc;
+  },
+  {} as Record<number, ObjectDefinition>,
+);
+
+export const objectsByTerrainId = objects.reduce(
+  (acc, obj) => {
+    if (obj.terrainId) {
+      acc[obj.terrainId] = obj;
+    }
+    return acc;
+  },
+  {} as Record<number, ObjectDefinition>,
+);
