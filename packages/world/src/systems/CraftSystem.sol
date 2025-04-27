@@ -11,7 +11,6 @@ import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 
-import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { Recipes, RecipesData } from "../codegen/tables/Recipes.sol";
 
 import { CRAFT_ENERGY_COST } from "../Constants.sol";

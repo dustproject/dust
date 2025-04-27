@@ -156,7 +156,7 @@ function initRecipes() {
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    (outputTypes[0], outputAmounts[0]) = (ObjectTypes.Fuel.unwrap(), 1);
+    (outputTypes[0], outputAmounts[0]) = (ObjectTypes.Battery.unwrap(), 1);
 
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Powerstone, inputTypes, inputAmounts, outputTypes, outputAmounts)),
@@ -174,7 +174,7 @@ function initRecipes() {
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    (outputTypes[0], outputAmounts[0]) = (ObjectTypes.Fuel.unwrap(), 1);
+    (outputTypes[0], outputAmounts[0]) = (ObjectTypes.Battery.unwrap(), 1);
 
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Powerstone, inputTypes, inputAmounts, outputTypes, outputAmounts)),

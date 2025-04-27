@@ -12,10 +12,10 @@ import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
+import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 import { Player } from "../src/codegen/tables/Player.sol";
 
-import { PlayerStatus } from "../src/codegen/tables/PlayerStatus.sol";
+import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 
@@ -64,9 +64,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
-    assertEq(
-      Mass.getMass(buildEntityId), ObjectTypeMetadata.getMass(buildObjectType), "Build entity mass is not correct"
-    );
+    assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
   }
 
   function testBuildNonTerrain() public {
@@ -94,9 +92,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
-    assertEq(
-      Mass.getMass(buildEntityId), ObjectTypeMetadata.getMass(buildObjectType), "Build entity mass is not correct"
-    );
+    assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
   }
 
   function testBuildMultiSize() public {
@@ -129,9 +125,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
-    assertEq(
-      Mass.getMass(buildEntityId), ObjectTypeMetadata.getMass(buildObjectType), "Build entity mass is not correct"
-    );
+    assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
     assertEq(Mass.getMass(topEntityId), 0, "Top entity mass is not correct");
   }
 
@@ -160,9 +154,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
-    assertEq(
-      Mass.getMass(buildEntityId), ObjectTypeMetadata.getMass(buildObjectType), "Build entity mass is not correct"
-    );
+    assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
   }
 
   function testBuildPassThroughAtPlayer() public {
@@ -182,29 +174,27 @@ contract BuildTest is DustTest {
 
     EntityId buildEntityId = ReversePosition.get(bobCoord);
     assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
-    assertEq(
-      Mass.getMass(buildEntityId), ObjectTypeMetadata.getMass(buildObjectType), "Build entity mass is not correct"
-    );
+    assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
 
     Vec3 aboveBobCoord = bobCoord + vec3(0, 1, 0);
     vm.prank(alice);
     world.build(aliceEntityId, aboveBobCoord, inventorySlot, "");
     buildEntityId = ReversePosition.get(aboveBobCoord);
     assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Top entity is not build object type");
-    assertEq(Mass.getMass(buildEntityId), ObjectTypeMetadata.getMass(buildObjectType), "Top entity mass is not correct");
+    assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Top entity mass is not correct");
 
     vm.prank(alice);
     world.build(aliceEntityId, aliceCoord, inventorySlot, "");
     buildEntityId = ReversePosition.get(aliceCoord);
     assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Top entity is not build object type");
-    assertEq(Mass.getMass(buildEntityId), ObjectTypeMetadata.getMass(buildObjectType), "Top entity mass is not correct");
+    assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Top entity mass is not correct");
 
     Vec3 aboveAliceCoord = aliceCoord + vec3(0, 1, 0);
     vm.prank(alice);
     world.build(aliceEntityId, aboveAliceCoord, inventorySlot, "");
     buildEntityId = ReversePosition.get(aboveAliceCoord);
     assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Top entity is not build object type");
-    assertEq(Mass.getMass(buildEntityId), ObjectTypeMetadata.getMass(buildObjectType), "Top entity mass is not correct");
+    assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Top entity mass is not correct");
   }
 
   function testJumpBuildFailsIfPassThrough() public {
@@ -480,7 +470,7 @@ contract BuildTest is DustTest {
     // Use any slot for this test
     uint8 inventorySlot = 0;
 
-    PlayerStatus.setBedEntityId(aliceEntityId, randomEntityId());
+    PlayerBed.setBedEntityId(aliceEntityId, randomEntityId());
 
     vm.prank(alice);
     vm.expectRevert("Player is sleeping");

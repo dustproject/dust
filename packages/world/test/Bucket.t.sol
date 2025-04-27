@@ -12,8 +12,6 @@ import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
-import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
-import { PlayerStatus } from "../src/codegen/tables/PlayerStatus.sol";
 
 import { MovablePosition, ReversePosition } from "../src/utils/Vec3Storage.sol";
 

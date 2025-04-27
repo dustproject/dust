@@ -22,10 +22,9 @@ import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { MovablePosition } from "../src/codegen/tables/MovablePosition.sol";
-import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
 import { Player } from "../src/codegen/tables/Player.sol";
 
-import { PlayerStatus } from "../src/codegen/tables/PlayerStatus.sol";
+import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 import { ReverseMovablePosition } from "../src/codegen/tables/ReverseMovablePosition.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
@@ -393,7 +392,7 @@ contract TransferTest is DustTest {
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
     assertInventoryHasObject(chestEntityId, transferObjectType, 0);
 
-    PlayerStatus.setBedEntityId(aliceEntityId, randomEntityId());
+    PlayerBed.setBedEntityId(aliceEntityId, randomEntityId());
 
     SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });

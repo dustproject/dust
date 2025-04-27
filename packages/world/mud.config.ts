@@ -75,7 +75,7 @@ export default defineWorld({
     // ------------------------------------------------------------
     // Static Data
     // ------------------------------------------------------------
-    ObjectTypeMetadata: {
+    ObjectPhysics: {
       schema: {
         objectType: "ObjectType",
         mass: "uint128",
@@ -272,10 +272,9 @@ export default defineWorld({
       },
       key: ["bedEntityId"],
     },
-    PlayerStatus: {
+    PlayerBed: {
       schema: {
         entityId: "EntityId",
-        // TODO: maybe move this to another table?
         bedEntityId: "EntityId",
       },
       key: ["entityId"],

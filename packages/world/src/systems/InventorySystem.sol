@@ -5,7 +5,6 @@ import { System } from "@latticexyz/world/src/System.sol";
 
 import { Action } from "../codegen/common.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
-import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { Position } from "../codegen/tables/Position.sol";
 import { ReversePosition } from "../utils/Vec3Storage.sol";
 

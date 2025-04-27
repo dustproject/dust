@@ -5,7 +5,6 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
-import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 

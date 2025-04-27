@@ -2,7 +2,6 @@
 pragma solidity >=0.8.24;
 
 import { Energy } from "../../codegen/tables/Energy.sol";
-import { ObjectTypeMetadata } from "../../codegen/tables/ObjectTypeMetadata.sol";
 
 import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
 

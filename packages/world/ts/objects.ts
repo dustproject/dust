@@ -8,7 +8,7 @@ export const blockCategories = [
   "Soil",
   "Ore",
   "Sand",
-  "Clay",
+  "Terracotta",
   "Log",
   "Leaf",
   "Flower",
@@ -121,7 +121,7 @@ export const objectNames = [
   "Null",
   "Air",
   "Water",
-  "Lava",
+  "Magma",
   "Stone",
   "Bedrock",
   "Deepslate",
@@ -164,6 +164,7 @@ export const objectNames = [
   "Sandstone",
   "RedSandstone",
   "Clay",
+  "AnyTerracotta",
   "Terracotta",
   "BrownTerracotta",
   "OrangeTerracotta",
@@ -296,7 +297,7 @@ export const objectNames = [
   "Bucket",
   "WaterBucket",
   "WheatSlop",
-  "Fuel",
+  "Battery",
   "Player",
   "Fragment",
 ] as const;
@@ -328,12 +329,7 @@ export const categoryObjects: {
     "id" | "category" | "index" | "terrainId"
   >[];
 } = {
-  NonSolid: [
-    { name: "Null" },
-    { name: "Air" },
-    { name: "Water" },
-    { name: "Lava", mass: 500000000000000n },
-  ],
+  NonSolid: [{ name: "Null" }, { name: "Air" }, { name: "Water" }],
   Stone: [
     { name: "Stone", mass: 12000000000000000n },
     { name: "Bedrock", mass: 50000000000000000000n },
@@ -366,8 +362,6 @@ export const categoryObjects: {
     { name: "PackedMud", mass: 5000000000000000n },
     { name: "Farmland", mass: 3000000000000000n },
     { name: "WetFarmland", mass: 3000000000000000n },
-    { name: "Snow", mass: 300000000000000n },
-    { name: "Ice", mass: 200000000000000n },
   ],
   Ore: [
     { name: "UnrevealedOre", mass: 10000000000000000n },
@@ -384,16 +378,17 @@ export const categoryObjects: {
     { name: "RedSand", mass: 5000000000000000n },
     { name: "Sandstone", mass: 30000000000000000n },
     { name: "RedSandstone", mass: 37500000000000000n },
-  ],
-  Clay: [
     { name: "Clay", mass: 2400000000000000n },
-    { name: "Terracotta", mass: 18000000000000000n },
-    { name: "BrownTerracotta", mass: 22500000000000000n },
-    { name: "OrangeTerracotta", mass: 30000000000000000n },
-    { name: "WhiteTerracotta", mass: 22500000000000000n },
-    { name: "LightGrayTerracotta", mass: 30000000000000000n },
-    { name: "YellowTerracotta", mass: 30000000000000000n },
-    { name: "RedTerracotta", mass: 30000000000000000n },
+  ],
+  Terracotta: [
+    { name: "AnyTerracotta", mass: 37500000000000000n },
+    { name: "Terracotta", mass: 37500000000000000n },
+    { name: "BrownTerracotta", mass: 37500000000000000n },
+    { name: "OrangeTerracotta", mass: 37500000000000000n },
+    { name: "WhiteTerracotta", mass: 37500000000000000n },
+    { name: "LightGrayTerracotta", mass: 37500000000000000n },
+    { name: "YellowTerracotta", mass: 37500000000000000n },
+    { name: "RedTerracotta", mass: 37500000000000000n },
     { name: "LightBlueTerracotta", mass: 37500000000000000n },
     { name: "CyanTerracotta", mass: 37500000000000000n },
     { name: "BlackTerracotta", mass: 37500000000000000n },
@@ -505,6 +500,9 @@ export const categoryObjects: {
     { name: "BrainCoralBlock", mass: 37500000000000000n },
   ],
   MiscBlock: [
+    { name: "Snow", mass: 300000000000000n },
+    { name: "Ice", mass: 200000000000000n },
+    { name: "Magma", mass: 500000000000000n },
     { name: "SpiderWeb", mass: 300000000000000n },
     { name: "Bone", mass: 37500000000000000n },
   ],
@@ -693,7 +691,7 @@ export const categoryObjects: {
     { name: "WaterBucket", mass: 2025000000000000000n },
   ],
   Food: [{ name: "WheatSlop", energy: 12800000000000000n }],
-  Fuel: [{ name: "Fuel", energy: 90000000000000000n }],
+  Fuel: [{ name: "Battery", energy: 90000000000000000n }],
   Player: [{ name: "Player" }],
   // TODO: change this category name for fragments
   SmartEntityNonBlock: [{ name: "Fragment" }],
