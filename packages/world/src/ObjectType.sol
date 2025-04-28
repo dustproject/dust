@@ -715,10 +715,6 @@ library ObjectTypeLib {
 
   // Specialized getters
 
-  function isStation(ObjectType self) internal pure returns (bool) {
-    return self == ObjectTypes.Workbench || self == ObjectTypes.Powerstone || self == ObjectTypes.Furnace;
-  }
-
   // TODO: these are currently part of the codegen, but we should define them in Solidity and import them here
   function getObjectTypeSchema(ObjectType self) internal pure returns (Vec3[] memory) {
     if (self == ObjectTypes.Player) {

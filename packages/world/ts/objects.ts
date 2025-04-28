@@ -694,12 +694,6 @@ export const categoryObjects: {
   SmartEntityNonBlock: [{ name: "Fragment" }],
 } as const;
 
-export const stationObjects: ObjectName[] = [
-  "Workbench",
-  "Powerstone",
-  "Furnace",
-];
-
 export const objects: ObjectDefinition[] = Object.entries(
   categoryObjects,
 ).flatMap(([category, objects]) => {

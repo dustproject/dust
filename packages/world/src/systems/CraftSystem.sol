@@ -132,11 +132,6 @@ library CraftLib {
         remainingAmount -= amount;
         currentInput++;
       }
-
-      // Handle special case for ores
-      if (recipeType.isOre()) {
-        NatureLib.burnOre(recipeType, recipe.inputAmounts[i]);
-      }
     }
   }
 

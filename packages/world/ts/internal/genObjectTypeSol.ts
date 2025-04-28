@@ -10,7 +10,6 @@ import {
   objects,
   passThroughCategories,
   smartEntityCategories,
-  stationObjects,
   toolCategories,
   uniqueObjectCategories,
 } from "../objects";
@@ -138,8 +137,6 @@ ${allCategoryMetadata
   .join("\n")}
 
   // Specialized getters
-
-  ${renderMultiObjectCheck("isStation", stationObjects)}
 
   // TODO: these are currently part of the codegen, but we should define them in Solidity and import them here
   function getObjectTypeSchema(ObjectType self) internal pure returns (Vec3[] memory) {
