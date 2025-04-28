@@ -32,7 +32,6 @@ import { Position } from "../src/utils/Vec3Storage.sol";
 import { SlotData, SlotTransfer } from "../src/utils/InventoryUtils.sol";
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
-// Mock program for testing mine hooks
 contract TestProgram is System {
   bool public shouldRevert = false;
 
