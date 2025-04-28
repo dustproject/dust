@@ -60,8 +60,6 @@ contract BedSystem is System {
     PlayerBed._setBedEntityId(caller, bed);
     BedPlayer._set(bed, caller, depletedTime);
 
-    BedLib.transferInventory(caller, bed);
-
     PlayerUtils.removePlayerFromGrid(caller, callerCoord);
 
     bytes memory onSleep = abi.encodeCall(ISleepHook.onSleep, (caller, bed, extraData));
@@ -94,8 +92,6 @@ contract BedSystem is System {
     PlayerUtils.removePlayerFromBed(caller, bed);
     PlayerUtils.addPlayerToGrid(caller, spawnCoord);
 
-    BedLib.transferInventory(bed, caller);
-
     bytes memory onWakeup = abi.encodeCall(IWakeupHook.onWakeup, (caller, bed, extraData));
     bed.getProgram().callOrRevert(onWakeup);
 
@@ -122,9 +118,9 @@ contract BedSystem is System {
     EnergyData memory playerData = BedLib.updateSleepingPlayer(player, bed, depletedTime, bedCoord);
     require(playerData.energy == 0, "Player is not dead");
 
-    PlayerUtils.removePlayerFromBed(player, bed);
+    BedLib.transferInventory(player, drop);
 
-    BedLib.transferInventory(bed, drop);
+    PlayerUtils.removePlayerFromBed(player, bed);
     // TODO: Should we safecall the program?
   }
 }

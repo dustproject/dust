@@ -278,7 +278,11 @@ library MineLib {
     (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
     uint128 depletedTime = decreaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
     EnergyData memory playerData = updateSleepingPlayerEnergy(sleepingPlayerId, bed, depletedTime, bedCoord);
+
     PlayerUtils.removePlayerFromBed(sleepingPlayerId, bed);
+
+    // Bed entity should now be Air
+    InventoryUtils.transferAll(sleepingPlayerId, bed);
 
     // Kill the player
     // The player is not on the grid so no need to call killPlayer

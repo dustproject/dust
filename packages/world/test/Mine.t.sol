@@ -3,7 +3,7 @@ pragma solidity >=0.8.24;
 
 import { console } from "forge-std/console.sol";
 
-import { EntityId } from "../src/EntityId.sol";
+import { Direction } from "../src/codegen/common.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
@@ -14,6 +14,8 @@ import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 import { Player } from "../src/codegen/tables/Player.sol";
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 
+import { Machine } from "../src/codegen/tables/Machine.sol";
+import { Orientation } from "../src/codegen/tables/Orientation.sol";
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 
 import { BurnedResourceCount } from "../src/codegen/tables/BurnedResourceCount.sol";
@@ -31,9 +33,16 @@ import {
   ReversePosition
 } from "../src/utils/Vec3Storage.sol";
 
-import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_HALF_WIDTH, MINE_ENERGY_COST } from "../src/Constants.sol";
+import {
+  CHUNK_SIZE,
+  MACHINE_ENERGY_DRAIN_RATE,
+  MAX_ENTITY_INFLUENCE_HALF_WIDTH,
+  MINE_ENERGY_COST,
+  PLAYER_ENERGY_DRAIN_RATE
+} from "../src/Constants.sol";
 import { ObjectAmount, ObjectType, ObjectTypes } from "../src/ObjectType.sol";
 
+import { EntityId } from "../src/EntityId.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
@@ -241,6 +250,66 @@ contract MineTest is DustTest {
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+  }
+
+  function testMineBedWithPlayer() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupFlatChunkWithPlayer();
+
+    // Give objects to the player to test that transfers work
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Grass, 1);
+    TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.IronPick);
+
+    Vec3 bedCoord = coord + vec3(2, 0, 0);
+
+    uint128 initialPlayerEnergy = Energy.getEnergy(aliceEntityId);
+
+    // Set the forcefield's energy to fully deplete after 1000 seconds (with 1 sleeping player)
+    uint128 initialForcefieldEnergy = (MACHINE_ENERGY_DRAIN_RATE + PLAYER_ENERGY_DRAIN_RATE) * 1000;
+
+    uint128 initialTimestamp = uint128(vm.getBlockTimestamp());
+
+    // Set forcefield
+    setupForceField(
+      bedCoord,
+      EnergyData({
+        energy: initialForcefieldEnergy,
+        lastUpdatedTime: initialTimestamp,
+        drainRate: MACHINE_ENERGY_DRAIN_RATE
+      })
+    );
+
+    // Create bed
+    EntityId bedEntityId = randomEntityId();
+    Position.set(bedEntityId, bedCoord);
+    ReversePosition.set(bedCoord, bedEntityId);
+    EntityObjectType.set(bedEntityId, ObjectTypes.Bed);
+    Orientation.set(bedEntityId, Direction.NegativeZ);
+
+    vm.prank(alice);
+    world.sleep(aliceEntityId, bedEntityId, "");
+
+    // After 1000 seconds, the forcefield should be depleted
+    // We wait more time so the player's energy is FULLY depleted in this period
+    // + 1 so the player is fully drained
+    uint128 playerDrainTime = initialPlayerEnergy / PLAYER_ENERGY_DRAIN_RATE + 1;
+    uint128 timeDelta = 1000 seconds + playerDrainTime;
+    vm.warp(vm.getBlockTimestamp() + timeDelta);
+
+    (address bob, EntityId bobEntityId) = createTestPlayer(bedCoord - vec3(1, 0, 0));
+
+    // Remove alice and drop inventory in the original coord
+    vm.prank(bob);
+    startGasReport("mine bed with player");
+    world.mineUntilDestroyed(bobEntityId, bedCoord, "");
+    endGasReport();
+
+    // Check that the player got killed
+    assertPlayerIsDead(aliceEntityId, coord);
+
+    // bed entity id should now be air and contain the inventory
+    assertEq(EntityObjectType.get(bedEntityId), ObjectTypes.Air, "Top entity is not air");
+    assertInventoryHasObject(bedEntityId, ObjectTypes.Grass, 1);
+    assertInventoryHasObject(bedEntityId, ObjectTypes.IronPick, 1);
   }
 
   function testMineMultiSize() public {
