@@ -86,7 +86,7 @@ contract TestChestProgram is System {
   }
 
   function lastWithdrawals() external view returns (SlotData[] memory) {
-    return _lastDeposits;
+    return _lastWithdrawals;
   }
 
   function setShouldRevert(bool _shouldRevert) external {
@@ -728,9 +728,6 @@ contract TransferTest is DustTest {
     Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
     EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
 
-    // Setup energy field for the chest program
-    setupForceField(chestCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 }));
-
     // Attach program to chest
     TestChestProgram program = new TestChestProgram();
     attachTestProgram(chestEntityId, program, "namespace");
@@ -764,6 +761,10 @@ contract TransferTest is DustTest {
     assertEq(deposit.entityId, EntityId.wrap(0), "Deposit entity ID should be zero for regular objects");
     assertEq(deposit.objectType, transferObjectType, "Incorrect deposit object type");
     assertEq(deposit.amount, numToTransfer, "Incorrect deposit amount");
+    SlotData[] memory withdrawals = program.lastWithdrawals();
+    for (uint256 i = 0; i < withdrawals.length; i++) {
+      console.log("withdrawal %d: %s", i, withdrawals[i].amount);
+    }
 
     // Verify no withdrawals (nothing taken from chest)
     assertEq(program.lastWithdrawals().length, 0, "Should have 0 withdrawals");
@@ -774,9 +775,6 @@ contract TransferTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
     Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
     EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
-
-    // Setup energy field for the chest program
-    setupForceField(chestCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 }));
 
     // Attach program to chest
     TestChestProgram program = new TestChestProgram();
@@ -821,9 +819,6 @@ contract TransferTest is DustTest {
     Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
     EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
 
-    // Setup energy field for the chest program
-    setupForceField(chestCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 }));
-
     // Attach program to chest
     TestChestProgram program = new TestChestProgram();
     attachTestProgram(chestEntityId, program, "namespace");
@@ -855,9 +850,6 @@ contract TransferTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
     Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
     EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
-
-    // Setup energy field for the chest program
-    setupForceField(chestCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 }));
 
     // Attach program to chest
     TestChestProgram program = new TestChestProgram();
@@ -900,9 +892,6 @@ contract TransferTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
     Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
     EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
-
-    // Setup energy field for the chest program
-    setupForceField(chestCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 }));
 
     // Attach program to chest
     TestChestProgram program = new TestChestProgram();
