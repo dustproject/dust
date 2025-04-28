@@ -20,6 +20,15 @@ function renderMetaCategoryMask(categories: Category[]): string {
     .join(" | ");
 }
 
+function renderMultiObjectCheck(
+  functionName: string,
+  objectTypes: string[],
+): string {
+  return `function ${functionName}(ObjectType self) internal pure returns (bool) {
+    return ${objectTypes.map((obj) => `self == ObjectTypes.${obj}`).join(" || ")};
+  }`;
+}
+
 function renderObjectAmount([objectType, amount]: ObjectAmount): string {
   return `ObjectAmount(ObjectTypes.${objectType}, ${amount})`;
 }
@@ -128,6 +137,7 @@ ${allCategoryMetadata
   .join("\n")}
 
   // Specialized getters
+
   // TODO: these are currently part of the codegen, but we should define them in Solidity and import them here
   function getObjectTypeSchema(ObjectType self) internal pure returns (Vec3[] memory) {
     if (self == ObjectTypes.Player) {
@@ -199,6 +209,7 @@ ${allCategoryMetadata
   function getMaxInventorySlots(ObjectType self) internal pure returns (uint16) {
     if (self == ObjectTypes.Player) return 36;
     if (self == ObjectTypes.Chest) return 27;
+    if (self == ObjectTypes.Furnace) return 2;
     if (self.isPassThrough()) return type(uint16).max;
     return 0;
   }

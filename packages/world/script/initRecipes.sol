@@ -17,6 +17,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Null,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -35,6 +36,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Null,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -53,6 +55,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Null,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -71,6 +74,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Null,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -89,6 +93,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Null,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -107,6 +112,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Null,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -125,6 +131,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Null,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -143,6 +150,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Null,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -161,6 +169,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Powerstone, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Powerstone,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -179,6 +188,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Powerstone, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Powerstone,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -198,6 +208,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Furnace,
+      60,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -217,6 +228,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Furnace,
+      60,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -236,6 +248,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Furnace,
+      60,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -255,6 +268,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Furnace,
+      60,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -273,24 +287,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
-      inputTypes,
-      inputAmounts,
-      outputTypes,
-      outputAmounts
-    );
-  }
-  {
-    uint16[] memory inputTypes = new uint16[](1);
-    uint16[] memory inputAmounts = new uint16[](1);
-    (inputTypes[0], inputAmounts[0]) = (ObjectTypes.IronBar.unwrap(), 9);
-
-    uint16[] memory outputTypes = new uint16[](1);
-    uint16[] memory outputAmounts = new uint16[](1);
-    (outputTypes[0], outputAmounts[0]) = (ObjectTypes.IronBlock.unwrap(), 1);
-
-    Recipes.set(
-      keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
-      ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -309,6 +306,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -327,6 +325,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -345,6 +344,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -363,6 +363,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Null,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -381,6 +382,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Null,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -400,6 +402,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -419,6 +422,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -437,6 +441,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -455,6 +460,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -474,6 +480,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -492,6 +499,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -510,6 +518,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Null,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -528,6 +537,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Null,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -546,6 +556,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Null,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -564,6 +575,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Null,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -583,6 +595,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -602,6 +615,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -621,6 +635,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -640,6 +655,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -659,6 +675,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -678,6 +695,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -697,6 +715,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -716,6 +735,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -735,6 +755,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -754,6 +775,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -773,6 +795,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -792,6 +815,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Workbench,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -810,6 +834,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Null,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -828,6 +853,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Null,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,

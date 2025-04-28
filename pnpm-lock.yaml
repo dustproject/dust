@@ -224,9 +224,6 @@ importers:
       '@latticexyz/world-consumer':
         specifier: 2.2.22-d621dc7c427a59eb74f4d379862646355a149338
         version: 2.2.22-d621dc7c427a59eb74f4d379862646355a149338(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
-      '@latticexyz/world-modules':
-        specifier: 2.2.22-d621dc7c427a59eb74f4d379862646355a149338
-        version: 2.2.22-d621dc7c427a59eb74f4d379862646355a149338(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))
       '@openzeppelin/contracts':
         specifier: ^4.9.6
         version: 4.9.6

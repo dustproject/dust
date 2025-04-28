@@ -45,7 +45,6 @@
     "@latticexyz/store": "2.2.22-d621dc7c427a59eb74f4d379862646355a149338",
     "@latticexyz/world": "2.2.22-d621dc7c427a59eb74f4d379862646355a149338",
     "@latticexyz/world-consumer": "2.2.22-d621dc7c427a59eb74f4d379862646355a149338",
-    "@latticexyz/world-modules": "2.2.22-d621dc7c427a59eb74f4d379862646355a149338",
     "@openzeppelin/contracts": "^4.9.6",
     "solady": "^0.1.12"
   },

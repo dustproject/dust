@@ -21,6 +21,7 @@ import { ObjectType } from "../../ObjectType.sol";
 
 struct RecipesData {
   ObjectType stationTypeId;
+  uint128 smeltTime;
   uint16[] inputTypes;
   uint16[] inputAmounts;
   uint16[] outputTypes;
@@ -32,12 +33,12 @@ library Recipes {
   ResourceId constant _tableId = ResourceId.wrap(0x7462000000000000000000000000000052656369706573000000000000000000);
 
   FieldLayout constant _fieldLayout =
-    FieldLayout.wrap(0x0002010402000000000000000000000000000000000000000000000000000000);
+    FieldLayout.wrap(0x0012020402100000000000000000000000000000000000000000000000000000);
 
   // Hex-encoded key schema of (bytes32)
   Schema constant _keySchema = Schema.wrap(0x002001005f000000000000000000000000000000000000000000000000000000);
-  // Hex-encoded value schema of (uint16, uint16[], uint16[], uint16[], uint16[])
-  Schema constant _valueSchema = Schema.wrap(0x0002010401636363630000000000000000000000000000000000000000000000);
+  // Hex-encoded value schema of (uint16, uint128, uint16[], uint16[], uint16[], uint16[])
+  Schema constant _valueSchema = Schema.wrap(0x00120204010f6363636300000000000000000000000000000000000000000000);
 
   /**
    * @notice Get the table's key field names.
@@ -53,12 +54,13 @@ library Recipes {
    * @return fieldNames An array of strings with the names of value fields.
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
-    fieldNames = new string[](5);
+    fieldNames = new string[](6);
     fieldNames[0] = "stationTypeId";
-    fieldNames[1] = "inputTypes";
-    fieldNames[2] = "inputAmounts";
-    fieldNames[3] = "outputTypes";
-    fieldNames[4] = "outputAmounts";
+    fieldNames[1] = "smeltTime";
+    fieldNames[2] = "inputTypes";
+    fieldNames[3] = "inputAmounts";
+    fieldNames[4] = "outputTypes";
+    fieldNames[5] = "outputAmounts";
   }
 
   /**
@@ -121,6 +123,48 @@ library Recipes {
     _keyTuple[0] = recipeId;
 
     StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(ObjectType.unwrap(stationTypeId)), _fieldLayout);
+  }
+
+  /**
+   * @notice Get smeltTime.
+   */
+  function getSmeltTime(bytes32 recipeId) internal view returns (uint128 smeltTime) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = recipeId;
+
+    bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 1, _fieldLayout);
+    return (uint128(bytes16(_blob)));
+  }
+
+  /**
+   * @notice Get smeltTime.
+   */
+  function _getSmeltTime(bytes32 recipeId) internal view returns (uint128 smeltTime) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = recipeId;
+
+    bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 1, _fieldLayout);
+    return (uint128(bytes16(_blob)));
+  }
+
+  /**
+   * @notice Set smeltTime.
+   */
+  function setSmeltTime(bytes32 recipeId, uint128 smeltTime) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = recipeId;
+
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked((smeltTime)), _fieldLayout);
+  }
+
+  /**
+   * @notice Set smeltTime.
+   */
+  function _setSmeltTime(bytes32 recipeId, uint128 smeltTime) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = recipeId;
+
+    StoreCore.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked((smeltTime)), _fieldLayout);
   }
 
   /**
@@ -807,12 +851,13 @@ library Recipes {
   function set(
     bytes32 recipeId,
     ObjectType stationTypeId,
+    uint128 smeltTime,
     uint16[] memory inputTypes,
     uint16[] memory inputAmounts,
     uint16[] memory outputTypes,
     uint16[] memory outputAmounts
   ) internal {
-    bytes memory _staticData = encodeStatic(stationTypeId);
+    bytes memory _staticData = encodeStatic(stationTypeId, smeltTime);
 
     EncodedLengths _encodedLengths = encodeLengths(inputTypes, inputAmounts, outputTypes, outputAmounts);
     bytes memory _dynamicData = encodeDynamic(inputTypes, inputAmounts, outputTypes, outputAmounts);
@@ -829,12 +874,13 @@ library Recipes {
   function _set(
     bytes32 recipeId,
     ObjectType stationTypeId,
+    uint128 smeltTime,
     uint16[] memory inputTypes,
     uint16[] memory inputAmounts,
     uint16[] memory outputTypes,
     uint16[] memory outputAmounts
   ) internal {
-    bytes memory _staticData = encodeStatic(stationTypeId);
+    bytes memory _staticData = encodeStatic(stationTypeId, smeltTime);
 
     EncodedLengths _encodedLengths = encodeLengths(inputTypes, inputAmounts, outputTypes, outputAmounts);
     bytes memory _dynamicData = encodeDynamic(inputTypes, inputAmounts, outputTypes, outputAmounts);
@@ -849,7 +895,7 @@ library Recipes {
    * @notice Set the full data using the data struct.
    */
   function set(bytes32 recipeId, RecipesData memory _table) internal {
-    bytes memory _staticData = encodeStatic(_table.stationTypeId);
+    bytes memory _staticData = encodeStatic(_table.stationTypeId, _table.smeltTime);
 
     EncodedLengths _encodedLengths = encodeLengths(
       _table.inputTypes,
@@ -874,7 +920,7 @@ library Recipes {
    * @notice Set the full data using the data struct.
    */
   function _set(bytes32 recipeId, RecipesData memory _table) internal {
-    bytes memory _staticData = encodeStatic(_table.stationTypeId);
+    bytes memory _staticData = encodeStatic(_table.stationTypeId, _table.smeltTime);
 
     EncodedLengths _encodedLengths = encodeLengths(
       _table.inputTypes,
@@ -898,8 +944,10 @@ library Recipes {
   /**
    * @notice Decode the tightly packed blob of static data using this table's field layout.
    */
-  function decodeStatic(bytes memory _blob) internal pure returns (ObjectType stationTypeId) {
+  function decodeStatic(bytes memory _blob) internal pure returns (ObjectType stationTypeId, uint128 smeltTime) {
     stationTypeId = ObjectType.wrap(uint16(Bytes.getBytes2(_blob, 0)));
+
+    smeltTime = (uint128(Bytes.getBytes16(_blob, 2)));
   }
 
   /**
@@ -955,7 +1003,7 @@ library Recipes {
     EncodedLengths _encodedLengths,
     bytes memory _dynamicData
   ) internal pure returns (RecipesData memory _table) {
-    (_table.stationTypeId) = decodeStatic(_staticData);
+    (_table.stationTypeId, _table.smeltTime) = decodeStatic(_staticData);
 
     (_table.inputTypes, _table.inputAmounts, _table.outputTypes, _table.outputAmounts) = decodeDynamic(
       _encodedLengths,
@@ -987,8 +1035,8 @@ library Recipes {
    * @notice Tightly pack static (fixed length) data using this table's schema.
    * @return The static data, encoded into a sequence of bytes.
    */
-  function encodeStatic(ObjectType stationTypeId) internal pure returns (bytes memory) {
-    return abi.encodePacked(stationTypeId);
+  function encodeStatic(ObjectType stationTypeId, uint128 smeltTime) internal pure returns (bytes memory) {
+    return abi.encodePacked(stationTypeId, smeltTime);
   }
 
   /**
@@ -1039,12 +1087,13 @@ library Recipes {
    */
   function encode(
     ObjectType stationTypeId,
+    uint128 smeltTime,
     uint16[] memory inputTypes,
     uint16[] memory inputAmounts,
     uint16[] memory outputTypes,
     uint16[] memory outputAmounts
   ) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
-    bytes memory _staticData = encodeStatic(stationTypeId);
+    bytes memory _staticData = encodeStatic(stationTypeId, smeltTime);
 
     EncodedLengths _encodedLengths = encodeLengths(inputTypes, inputAmounts, outputTypes, outputAmounts);
     bytes memory _dynamicData = encodeDynamic(inputTypes, inputAmounts, outputTypes, outputAmounts);

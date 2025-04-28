@@ -2,6 +2,7 @@ import { type ObjectAmount, type ObjectName, objectsByName } from "./objects";
 
 export interface Recipe {
   station?: ObjectName;
+  smeltingTime?: bigint;
   inputs: ObjectAmount[];
   outputs: ObjectAmount[];
 }
@@ -52,6 +53,7 @@ export const recipes: Recipe[] = [
   },
   {
     station: "Furnace",
+    smeltingTime: 60n,
     inputs: [
       ["IronOre", 1],
       ["CoalOre", 1],
@@ -60,6 +62,7 @@ export const recipes: Recipe[] = [
   },
   {
     station: "Furnace",
+    smeltingTime: 60n,
     inputs: [
       ["GoldOre", 1],
       ["CoalOre", 1],
@@ -68,6 +71,7 @@ export const recipes: Recipe[] = [
   },
   {
     station: "Furnace",
+    smeltingTime: 60n,
     inputs: [
       ["DiamondOre", 1],
       ["CoalOre", 1],
@@ -76,6 +80,7 @@ export const recipes: Recipe[] = [
   },
   {
     station: "Furnace",
+    smeltingTime: 60n,
     inputs: [
       ["NeptuniumOre", 1],
       ["CoalOre", 1],
@@ -86,11 +91,6 @@ export const recipes: Recipe[] = [
     station: "Workbench",
     inputs: [["CopperOre", 9]],
     outputs: [["CopperBlock", 1]],
-  },
-  {
-    station: "Workbench",
-    inputs: [["IronBar", 9]],
-    outputs: [["IronBlock", 1]],
   },
   {
     station: "Workbench",
@@ -292,7 +292,11 @@ export function getRecipesByOutput(objectType: ObjectName): Recipe[] {
 
 // Validate that a recipe maintains mass+energy balance
 export function validateRecipe(recipe: Recipe) {
-  const totalInputMassEnergy = getTotalMassEnergy(recipe.inputs);
+  const inputs =
+    recipe.station !== "Furnace"
+      ? recipe.inputs
+      : recipe.inputs.filter((input) => input[0] !== "CoalOre");
+  const totalInputMassEnergy = getTotalMassEnergy(inputs);
   const totalOutputMassEnergy = getTotalMassEnergy(recipe.outputs);
   if (totalInputMassEnergy !== totalOutputMassEnergy) {
     // throw new Error(

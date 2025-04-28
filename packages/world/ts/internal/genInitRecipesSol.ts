@@ -27,6 +27,7 @@ function renderRecipe(recipe: Recipe): string {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.${station}, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.${station},
+      ${recipe.smeltingTime ?? 0},
       inputTypes,
       inputAmounts,
       outputTypes,

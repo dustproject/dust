@@ -87,6 +87,7 @@ export default defineWorld({
       schema: {
         recipeId: "bytes32",
         stationTypeId: "ObjectType",
+        smeltTime: "uint128",
         inputTypes: "uint16[]",
         inputAmounts: "uint16[]",
         outputTypes: "uint16[]",
@@ -323,6 +324,14 @@ export default defineWorld({
         entityId: "EntityId",
         createdAt: "uint128",
         depletedTime: "uint128",
+      },
+      key: ["entityId"],
+    },
+    Furnace: {
+      schema: {
+        entityId: "EntityId",
+        recipeId: "bytes32",
+        finishesAt: "uint128",
       },
       key: ["entityId"],
     },

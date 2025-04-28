@@ -23,7 +23,6 @@ export const blockCategories = [
   "OreBlock",
   "Seed",
   "Sapling",
-  "Station",
   "SmartEntityBlock",
 ] as const;
 
@@ -583,17 +582,15 @@ export const categoryObjects: {
       timeToGrow: 345600n,
     },
   ],
-  Station: [
-    { name: "Furnace", mass: 108000000000000000n },
-    { name: "Workbench", mass: 18000000000000000n },
-    { name: "Powerstone", mass: 80000000000000000n },
-  ],
   SmartEntityBlock: [
     { name: "ForceField", mass: 3735000000000000000n, isMachine: true },
     { name: "Chest", mass: 36000000000000000n },
     { name: "SpawnTile", mass: 9135000000000000000n },
     { name: "Bed", mass: 13500000000000000n },
     { name: "TextSign", mass: 18000000000000000n },
+    { name: "Workbench", mass: 18000000000000000n },
+    { name: "Powerstone", mass: 80000000000000000n },
+    { name: "Furnace", mass: 108000000000000000n },
   ],
 
   // NON BLOCKS
