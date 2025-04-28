@@ -108,6 +108,7 @@ library CraftLib {
         require(currentInput < inputs.length, "Not enough inputs for recipe");
         uint16 amount = inputs[currentInput].amount;
         require(amount > 0, "Input amount must be greater than 0");
+        require(amount <= remainingAmount, "Input amount exceeds remaining amount");
 
         ObjectType inputType = InventorySlot._getObjectType(furnace, inputs[currentInput].slot);
         require(recipeType.matches(inputType), "Input type does not match required recipe type");
@@ -134,6 +135,7 @@ library CraftLib {
         require(currentInput < inputs.length, "Not enough inputs for recipe");
         uint16 amount = inputs[currentInput].amount;
         require(amount > 0, "Input amount must be greater than 0");
+        require(amount <= remainingAmount, "Input amount exceeds remaining amount");
 
         ObjectType inputType = InventorySlot._getObjectType(caller, inputs[currentInput].slot);
         require(recipeType.matches(inputType), "Input type does not match required recipe type");
