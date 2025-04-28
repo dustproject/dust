@@ -257,9 +257,9 @@ library InventoryUtils {
     returns (SlotData[] memory fromSlotData, SlotData[] memory toSlotData)
   {
     fromSlotData = new SlotData[](slotTransfers.length);
-    SlotData[] memory tempToSlotData = new SlotData[](slotTransfers.length);
+    toSlotData = new SlotData[](slotTransfers.length);
 
-    uint256 tempIndex = 0;
+    uint256 toSlotDataLength = 0;
     for (uint256 i = 0; i < slotTransfers.length; i++) {
       uint16 slotFrom = slotTransfers[i].slotFrom;
       uint16 slotTo = slotTransfers[i].slotTo;
@@ -276,7 +276,7 @@ library InventoryUtils {
       // Handle slot swaps (transferring all to an existing slot with a different type)
       if (amount == sourceSlot.amount && sourceSlot.objectType != destSlot.objectType && !destSlot.objectType.isNull())
       {
-        tempToSlotData[tempIndex++] = SlotData(destSlot.entityId, destSlot.objectType, destSlot.amount);
+        toSlotData[toSlotDataLength++] = SlotData(destSlot.entityId, destSlot.objectType, destSlot.amount);
 
         _replaceSlot(from, slotFrom, sourceSlot.objectType, destSlot.entityId, destSlot.objectType, destSlot.amount);
         _replaceSlot(to, slotTo, destSlot.objectType, sourceSlot.entityId, sourceSlot.objectType, sourceSlot.amount);
@@ -288,6 +288,11 @@ library InventoryUtils {
         destSlot.objectType.isNull() || destSlot.objectType == sourceSlot.objectType,
         "Cannot store different object types in the same slot"
       );
+
+      // If transferring within the same inventory, create the corresponding withdrawal
+      if (from == to) {
+        toSlotData[toSlotDataLength++] = SlotData(sourceSlot.entityId, sourceSlot.objectType, amount);
+      }
 
       if (sourceSlot.entityId.exists()) {
         // Entities are unique and always have amount=1
@@ -303,9 +308,10 @@ library InventoryUtils {
       }
     }
 
-    toSlotData = new SlotData[](tempIndex);
-    for (uint256 i = 0; i < tempIndex; i++) {
-      toSlotData[i] = tempToSlotData[i];
+    // Truncate array
+    /// @solidity memory-safe-assembly
+    assembly {
+      mstore(toSlotData, toSlotDataLength)
     }
   }
 
@@ -318,7 +324,7 @@ library InventoryUtils {
     // Inventory is empty
     if (slots.length == 0) return;
 
-    // Group slots by object type to optimize transfers
+    // Iterate through all from's slots
     for (uint256 i = 0; i < slots.length; i++) {
       InventorySlotData memory slotData = InventorySlot._get(from, slots[i]);
 
