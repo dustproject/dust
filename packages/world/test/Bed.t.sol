@@ -10,13 +10,12 @@ import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
 import { TestEnergyUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
-import { EntityId } from "../src/EntityId.sol";
-
 import { BedPlayer, BedPlayerData } from "../src/codegen/tables/BedPlayer.sol";
-import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
+import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { Machine } from "../src/codegen/tables/Machine.sol";
+import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
@@ -27,9 +26,7 @@ import { LocalEnergyPool, Position, ReversePosition } from "../src/utils/Vec3Sto
 
 import { CHUNK_SIZE, MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
-import { ObjectType } from "../src/ObjectType.sol";
-
-import { ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectType, ObjectTypes } from "../src/ObjectType.sol";
 
 import { ProgramId } from "../src/ProgramId.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
@@ -129,10 +126,6 @@ contract BedTest is DustTest {
     vm.prank(alice);
     vm.expectRevert("Bed is not inside a forcefield");
     world.sleep(aliceEntityId, bedEntityId, "");
-  }
-
-  function testSleepFailsIfNotEnoughForceFieldEnergy() public {
-    vm.skip(true, "TODO");
   }
 
   function testWakeup() public {
@@ -432,12 +425,12 @@ contract BedTest is DustTest {
     vm.prank(alice);
     world.sleep(aliceEntityId, bedEntityId, "");
 
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.Grass, 0);
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.IronPick, 0);
-    assertInventoryHasObject(bedEntityId, ObjectTypes.Grass, 1);
-    assertInventoryHasObject(bedEntityId, ObjectTypes.IronPick, 1);
-    assertEq(Inventory.length(aliceEntityId), 0, "Alice shouldn't have occupied inventory slots");
-    assertEq(Inventory.length(bedEntityId), 2, "Items should have been transferred to bed");
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Grass, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.IronPick, 1);
+    assertInventoryHasObject(bedEntityId, ObjectTypes.Grass, 0);
+    assertInventoryHasObject(bedEntityId, ObjectTypes.IronPick, 0);
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(bedEntityId), 0, "Wrong number of occupied inventory slots");
 
     uint128 timeDelta = 1000 seconds;
     vm.warp(vm.getBlockTimestamp() + timeDelta);
@@ -450,8 +443,8 @@ contract BedTest is DustTest {
     assertInventoryHasObject(aliceEntityId, ObjectTypes.IronPick, 1);
     assertInventoryHasObject(bedEntityId, ObjectTypes.Grass, 0);
     assertInventoryHasObject(bedEntityId, ObjectTypes.IronPick, 0);
-    assertEq(Inventory.length(aliceEntityId), 2, "Items should have been transferred back to alice after wakeup");
-    assertEq(Inventory.length(bedEntityId), 0, "Bed shouldn't have occupied inventory slots");
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(bedEntityId), 0, "Wrong number of occupied inventory slots");
 
     EnergyData memory ffEnergyData = Energy.get(forcefieldEntityId);
     assertEq(
@@ -467,29 +460,17 @@ contract BedTest is DustTest {
     vm.prank(alice);
     world.sleep(aliceEntityId, bedEntityId, "");
 
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.Grass, 0);
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.IronPick, 0);
-    assertInventoryHasObject(bedEntityId, ObjectTypes.Grass, 1);
-    assertInventoryHasObject(bedEntityId, ObjectTypes.IronPick, 1);
-    assertEq(Inventory.length(aliceEntityId), 0, "Alice shouldn't have occupied inventory slots");
-    assertEq(Inventory.length(bedEntityId), 2, "Items should have been transferred to bed");
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Grass, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.IronPick, 1);
+    assertInventoryHasObject(bedEntityId, ObjectTypes.Grass, 0);
+    assertInventoryHasObject(bedEntityId, ObjectTypes.IronPick, 0);
+    assertEq(Inventory.length(aliceEntityId), 2, "Wrong number of occupied inventory slots");
+    assertEq(Inventory.length(bedEntityId), 0, "Wrong number of occupied inventory slots");
 
     BedPlayerData memory bedPlayerData = BedPlayer.get(bedEntityId);
     assertEq(bedPlayerData.playerEntityId.unwrap(), aliceEntityId.unwrap(), "Bed's player entity is not alice");
     assertEq(
       PlayerBed.getBedEntityId(aliceEntityId).unwrap(), bedEntityId.unwrap(), "Player's bed entity is not the bed"
     );
-  }
-
-  function testTransfersInventoryToBed() public {
-    vm.skip(true, "TODO");
-  }
-
-  function testTransfersInventoryToPlayer() public {
-    vm.skip(true, "TODO");
-  }
-
-  function testTransfersInventoryToAirOnMined() public {
-    vm.skip(true, "TODO");
   }
 }
