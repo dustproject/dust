@@ -381,7 +381,6 @@ contract CraftTest is DustTest {
     EntityId furnaceEntityId = setObjectAtCoord(furnaceCoord, ObjectTypes.Furnace);
 
     // Set resource count so they can be burnt
-    ResourceCount.set(ObjectTypes.IronOre, 1);
     ResourceCount.set(ObjectTypes.CoalOre, 1);
 
     // Add items to furnace inventory
@@ -395,6 +394,7 @@ contract CraftTest is DustTest {
     inputs[1] = SlotAmount({ slot: 1, amount: 1 }); // CoalOre
 
     vm.prank(alice);
+    startGasReport("begin smelting with furnace");
     world.craftWithStation(aliceEntityId, furnaceEntityId, recipeId, inputs);
     endGasReport();
 
@@ -415,6 +415,10 @@ contract CraftTest is DustTest {
     startGasReport("finish smelting in furnace");
     world.finishSmelting(aliceEntityId, furnaceEntityId, "");
     endGasReport();
+
+    // Furnace should be empty now
+    assertInventoryHasObject(furnaceEntityId, ObjectTypes.IronOre, 0);
+    assertInventoryHasObject(furnaceEntityId, ObjectTypes.IronBar, 0);
 
     // Player should now have the output item
     assertInventoryHasObject(aliceEntityId, ObjectTypes.IronBar, 1);
@@ -514,7 +518,6 @@ contract CraftTest is DustTest {
     EntityId furnaceEntityId = setObjectAtCoord(furnaceCoord, ObjectTypes.Furnace);
 
     // Set resource count so they can be burnt
-    ResourceCount.set(ObjectTypes.GoldOre, 1);
     ResourceCount.set(ObjectTypes.CoalOre, 1);
 
     // Add items to furnace inventory
@@ -546,6 +549,9 @@ contract CraftTest is DustTest {
     vm.prank(alice);
     world.finishSmelting(aliceEntityId, furnaceEntityId, "");
 
+    // Furnace should not have inputs nor outputs
+    assertInventoryHasObject(furnaceEntityId, ObjectTypes.GoldOre, 0);
+    assertInventoryHasObject(furnaceEntityId, ObjectTypes.GoldBar, 0);
     // Player should now have the output item
     assertInventoryHasObject(aliceEntityId, ObjectTypes.GoldBar, 1);
   }

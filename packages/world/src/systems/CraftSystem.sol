@@ -64,6 +64,16 @@ contract CraftSystem is System {
     RecipesData memory recipe = Recipes._get(furnaceData.recipeId);
     require(recipe.inputTypes.length > 0, "Furnace is not smelting");
     require(furnaceData.finishesAt <= block.timestamp, "Smelting not finished yet");
+
+    for (uint256 i = 0; i < recipe.inputTypes.length; i++) {
+      ObjectType recipeType = ObjectType.wrap(recipe.inputTypes[i]);
+
+      // Coal was already burned when smelting began
+      if (recipeType == ObjectTypes.CoalOre) continue;
+
+      InventoryUtils.removeObject(furnace, recipeType, recipe.inputAmounts[i]);
+    }
+
     Furnace._deleteRecord(furnace);
 
     // Create the outputs
