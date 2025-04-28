@@ -10,11 +10,11 @@ import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
+import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 import { Player } from "../src/codegen/tables/Player.sol";
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 
-import { PlayerStatus } from "../src/codegen/tables/PlayerStatus.sol";
+import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 
 import { BurnedResourceCount } from "../src/codegen/tables/BurnedResourceCount.sol";
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
@@ -44,7 +44,7 @@ contract MineTest is DustTest {
 
     Vec3 mineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
     ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
-    ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction - 1);
+    ObjectPhysics.setMass(mineObjectType, playerHandMassReduction - 1);
     EntityId mineEntityId = ReversePosition.get(mineCoord);
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
@@ -69,7 +69,7 @@ contract MineTest is DustTest {
 
     Vec3 mineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
     ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
-    ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction * 2);
+    ObjectPhysics.setMass(mineObjectType, playerHandMassReduction * 2);
     EntityId mineEntityId = ReversePosition.get(mineCoord);
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
@@ -104,7 +104,7 @@ contract MineTest is DustTest {
 
     Vec3 mineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
     ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
-    ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction * 2);
+    ObjectPhysics.setMass(mineObjectType, playerHandMassReduction * 2);
     EntityId mineEntityId = ReversePosition.get(mineCoord);
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
@@ -195,7 +195,7 @@ contract MineTest is DustTest {
 
     // Verify mass has been set to the resource's
     uint128 mass = Mass.getMass(mineEntityId);
-    uint128 expectedMass = ObjectTypeMetadata.getMass(resourceType) - MINE_ENERGY_COST;
+    uint128 expectedMass = ObjectPhysics.getMass(resourceType) - MINE_ENERGY_COST;
     assertEq(mass, expectedMass, "Mass was not set correctly");
 
     // Roll forward many blocks to ensure the commitment expires
@@ -223,7 +223,7 @@ contract MineTest is DustTest {
 
     Vec3 mineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
     ObjectType mineObjectType = ObjectTypes.Grass;
-    ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction - 1);
+    ObjectPhysics.setMass(mineObjectType, playerHandMassReduction - 1);
     setObjectAtCoord(mineCoord, mineObjectType);
     EntityId mineEntityId = ReversePosition.get(mineCoord);
     assertTrue(mineEntityId.exists(), "Mine entity does not exist");
@@ -248,7 +248,7 @@ contract MineTest is DustTest {
 
     Vec3 mineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
     ObjectType mineObjectType = ObjectTypes.TextSign;
-    ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction - 1);
+    ObjectPhysics.setMass(mineObjectType, playerHandMassReduction - 1);
     setObjectAtCoord(mineCoord, mineObjectType);
     Vec3 topCoord = mineCoord + vec3(0, 1, 0);
     EntityId mineEntityId = ReversePosition.get(mineCoord);
@@ -257,7 +257,7 @@ contract MineTest is DustTest {
     assertTrue(topEntityId.exists(), "Top entity does not exist");
     assertEq(EntityObjectType.get(mineEntityId), mineObjectType, "Mine entity is not mine object type");
     assertEq(EntityObjectType.get(topEntityId), mineObjectType, "Top entity is not air");
-    assertEq(Mass.getMass(mineEntityId), ObjectTypeMetadata.getMass(mineObjectType), "Mine entity mass is not correct");
+    assertEq(Mass.getMass(mineEntityId), ObjectPhysics.getMass(mineObjectType), "Mine entity mass is not correct");
     assertEq(Mass.getMass(topEntityId), 0, "Top entity mass is not correct");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
@@ -354,7 +354,7 @@ contract MineTest is DustTest {
 
     Vec3 mineCoord = playerCoord + vec3(1, 0, 0);
     ObjectType mineObjectType = ObjectTypes.Dirt;
-    ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction);
+    ObjectPhysics.setMass(mineObjectType, playerHandMassReduction);
     setObjectAtCoord(mineCoord, mineObjectType);
 
     // Set player energy to exactly enough for one mine operation
@@ -374,7 +374,7 @@ contract MineTest is DustTest {
 
     Vec3 mineCoord = playerCoord + vec3(1, 0, 0);
     ObjectType mineObjectType = ObjectTypes.Dirt;
-    ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction - 1);
+    ObjectPhysics.setMass(mineObjectType, playerHandMassReduction - 1);
     setObjectAtCoord(mineCoord, mineObjectType);
 
     TestInventoryUtils.addObject(
@@ -409,7 +409,7 @@ contract MineTest is DustTest {
     ObjectType mineObjectType = ObjectTypes.Dirt;
     setObjectAtCoord(mineCoord, mineObjectType);
 
-    PlayerStatus.setBedEntityId(aliceEntityId, randomEntityId());
+    PlayerBed.setBedEntityId(aliceEntityId, randomEntityId());
 
     vm.prank(alice);
     vm.expectRevert("Player is sleeping");

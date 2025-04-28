@@ -10,7 +10,6 @@ import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Furnace, FurnaceData } from "../codegen/tables/Furnace.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
-import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { Recipes, RecipesData } from "../codegen/tables/Recipes.sol";
 
 import { transferEnergyToPool } from "../utils/EnergyUtils.sol";

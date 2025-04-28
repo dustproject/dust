@@ -7,7 +7,6 @@ import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { LocalEnergyPool } from "../codegen/tables/LocalEnergyPool.sol";
-import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { ERC165Checker } from "@latticexyz/world/src/ERC165Checker.sol";
 import { System } from "@latticexyz/world/src/System.sol";
 

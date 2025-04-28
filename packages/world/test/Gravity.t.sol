@@ -14,7 +14,7 @@ import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
+import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 import { Player } from "../src/codegen/tables/Player.sol";
 
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
@@ -43,7 +43,7 @@ contract GravityTest is DustTest {
 
     Vec3 mineCoord = playerCoord - vec3(0, 1, 0);
     ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
-    ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction);
+    ObjectPhysics.setMass(mineObjectType, playerHandMassReduction);
     EntityId mineEntityId = ReversePosition.get(mineCoord);
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
@@ -78,7 +78,7 @@ contract GravityTest is DustTest {
 
     Vec3 mineCoord = playerCoord - vec3(0, 1, 0);
     ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
-    ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction);
+    ObjectPhysics.setMass(mineObjectType, playerHandMassReduction);
     EntityId mineEntityId = ReversePosition.get(mineCoord);
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
@@ -130,7 +130,7 @@ contract GravityTest is DustTest {
 
     Vec3 mineCoord = aliceCoord - vec3(0, 1, 0);
     ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
-    ObjectTypeMetadata.setMass(mineObjectType, playerHandMassReduction);
+    ObjectPhysics.setMass(mineObjectType, playerHandMassReduction);
     EntityId mineEntityId = ReversePosition.get(mineCoord);
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);

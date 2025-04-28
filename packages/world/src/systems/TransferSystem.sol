@@ -52,7 +52,12 @@ contract TransferSystem is System {
       require(EntityObjectType._get(target) != ObjectTypes.Player, "Cannot access another player's inventory");
     }
 
-    (SlotData[] memory deposits, SlotData[] memory withdrawals) = InventoryUtils.transfer(from, to, transfers);
+    (SlotData[] memory fromSlotData, SlotData[] memory toSlotData) = InventoryUtils.transfer(from, to, transfers);
+
+    // Get deposits and withdrawals FROM THE TARGET's PERSPECTIVE
+    // If target == to, we are depositing fromSlotData and withdrawing toSlotData
+    (SlotData[] memory deposits, SlotData[] memory withdrawals) =
+      target == to ? (fromSlotData, toSlotData) : (toSlotData, fromSlotData);
 
     if (target.exists()) {
       // Delete furnace data if any (we need to stop any ongoing smelting)

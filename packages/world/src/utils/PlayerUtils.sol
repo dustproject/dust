@@ -10,9 +10,8 @@ import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 
-import { ObjectTypeMetadata } from "../codegen/tables/ObjectTypeMetadata.sol";
 import { Player } from "../codegen/tables/Player.sol";
-import { PlayerStatus } from "../codegen/tables/PlayerStatus.sol";
+import { PlayerBed } from "../codegen/tables/PlayerBed.sol";
 import { ReversePlayer } from "../codegen/tables/ReversePlayer.sol";
 
 import { FragmentPosition, MovablePosition, Position, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
@@ -99,7 +98,7 @@ library PlayerUtils {
   }
 
   function removePlayerFromBed(EntityId player, EntityId bed) internal {
-    PlayerStatus._deleteRecord(player);
+    PlayerBed._deleteRecord(player);
     BedPlayer._deleteRecord(bed);
   }
 

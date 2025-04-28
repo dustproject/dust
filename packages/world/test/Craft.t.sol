@@ -20,10 +20,10 @@ import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 import { MovablePosition } from "../src/codegen/tables/MovablePosition.sol";
-import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
+import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 import { Player } from "../src/codegen/tables/Player.sol";
 
-import { PlayerStatus } from "../src/codegen/tables/PlayerStatus.sol";
+import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 import { Position } from "../src/codegen/tables/Position.sol";
 import { ReversePosition } from "../src/codegen/tables/ReversePosition.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
@@ -272,7 +272,7 @@ contract CraftTest is DustTest {
     ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
-    assertEq(Mass.get(toolEntityId), ObjectTypeMetadata.getMass(outputTypes[0]), "mass should be equal to tool mass");
+    assertEq(Mass.get(toolEntityId), ObjectPhysics.getMass(outputTypes[0]), "mass should be equal to tool mass");
 
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
@@ -311,7 +311,7 @@ contract CraftTest is DustTest {
     ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
-    assertEq(Mass.get(toolEntityId), ObjectTypeMetadata.getMass(outputTypes[0]), "mass should be equal to tool mass");
+    assertEq(Mass.get(toolEntityId), ObjectPhysics.getMass(outputTypes[0]), "mass should be equal to tool mass");
 
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
@@ -350,7 +350,7 @@ contract CraftTest is DustTest {
     ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
-    assertEq(Mass.get(toolEntityId), ObjectTypeMetadata.getMass(outputTypes[0]), "mass should be equal to tool mass");
+    assertEq(Mass.get(toolEntityId), ObjectPhysics.getMass(outputTypes[0]), "mass should be equal to tool mass");
 
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
@@ -738,7 +738,7 @@ contract CraftTest is DustTest {
       assertInventoryHasObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
     }
 
-    PlayerStatus.setBedEntityId(aliceEntityId, randomEntityId());
+    PlayerBed.setBedEntityId(aliceEntityId, randomEntityId());
 
     SlotAmount[] memory inputs = new SlotAmount[](1);
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });

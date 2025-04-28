@@ -44,12 +44,12 @@ export const recipes: Recipe[] = [
   {
     station: "Powerstone",
     inputs: [["AnyLog", 5]],
-    outputs: [["Fuel", 1]],
+    outputs: [["Battery", 1]],
   },
   {
     station: "Powerstone",
     inputs: [["AnyLeaf", 90]],
-    outputs: [["Fuel", 1]],
+    outputs: [["Battery", 1]],
   },
   {
     station: "Furnace",

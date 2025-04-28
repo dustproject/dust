@@ -29,7 +29,7 @@ import { Machine } from "../src/codegen/tables/Machine.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-import { ObjectTypeMetadata } from "../src/codegen/tables/ObjectTypeMetadata.sol";
+import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
 import { Player } from "../src/codegen/tables/Player.sol";
 
@@ -250,7 +250,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     EntityObjectType.set(entityId, objectType);
     Position.set(entityId, coord);
     ReversePosition.set(coord, entityId);
-    Mass.set(entityId, ObjectTypeMetadata.getMass(objectType));
+    Mass.set(entityId, ObjectPhysics.getMass(objectType));
 
     Vec3[] memory coords = objectType.getRelativeCoords(coord);
     // Only iterate through relative schema coords
