@@ -114,7 +114,32 @@ contract GravityTest is DustTest {
   }
 
   function testMineFallFatal() public {
-    vm.skip(true, "TODO");
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Set player energy to exactly enough for a mine, but not for a fall
+    uint128 exactEnergy = MINE_ENERGY_COST + 1;
+    Energy.set(
+      aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: exactEnergy, drainRate: 0 })
+    );
+
+    // Create a scenario where after mining, player will fall and the fall energy cost will kill them
+    Vec3 mineCoord = playerCoord - vec3(0, 1, 0);
+    ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
+    ObjectPhysics.setMass(mineObjectType, MINE_ENERGY_COST);
+
+    // Set up a deep pit underneath
+    setTerrainAtCoord(mineCoord - vec3(0, 1, 0), ObjectTypes.Air);
+    setTerrainAtCoord(mineCoord - vec3(0, 2, 0), ObjectTypes.Air);
+    setTerrainAtCoord(mineCoord - vec3(0, 3, 0), ObjectTypes.Air);
+    setTerrainAtCoord(mineCoord - vec3(0, 4, 0), ObjectTypes.Dirt);
+
+    // Mining should use MINE_ENERGY_COST, and falling should require PLAYER_FALL_ENERGY_COST,
+    // which the player doesn't have enough for, resulting in death
+    vm.prank(alice);
+    world.mine(aliceEntityId, mineCoord, "");
+
+    // Verify player is dead
+    assertPlayerIsDead(aliceEntityId, playerCoord);
   }
 
   function testMineStackedPlayers() public {
@@ -312,7 +337,34 @@ contract GravityTest is DustTest {
   }
 
   function testMoveFallFatal() public {
-    vm.skip(true, "TODO");
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    // Set player energy to exactly enough for a move, but not for a fall
+    uint128 exactEnergy = MOVE_ENERGY_COST + 1;
+    Energy.set(
+      aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: exactEnergy, drainRate: 0 })
+    );
+
+    // Set up destination with a deep pit
+    Vec3[] memory newCoords = new Vec3[](1);
+    newCoords[0] = playerCoord + vec3(0, 0, 1);
+
+    setObjectAtCoord(newCoords[0], ObjectTypes.Air);
+    setObjectAtCoord(newCoords[0] + vec3(0, 1, 0), ObjectTypes.Air);
+
+    // Create a long fall (4+ blocks) below the destination
+    setObjectAtCoord(newCoords[0] - vec3(0, 1, 0), ObjectTypes.Air);
+    setObjectAtCoord(newCoords[0] - vec3(0, 2, 0), ObjectTypes.Air);
+    setObjectAtCoord(newCoords[0] - vec3(0, 3, 0), ObjectTypes.Air);
+    setObjectAtCoord(newCoords[0] - vec3(0, 4, 0), ObjectTypes.Air);
+    setObjectAtCoord(newCoords[0] - vec3(0, 5, 0), ObjectTypes.Dirt);
+
+    // Move to destination which should trigger fatal fall
+    vm.prank(alice);
+    world.move(aliceEntityId, newCoords);
+
+    // Verify player is dead
+    assertPlayerIsDead(aliceEntityId, playerCoord);
   }
 
   function testMoveFailsIfGravityOutsideExploredChunk() public {
