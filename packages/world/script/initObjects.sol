@@ -152,14 +152,14 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.SpruceSapling, ObjectPhysicsData({ mass: 0, energy: 256000000000000000 }));
   ObjectPhysics.set(ObjectTypes.DarkOakSapling, ObjectPhysicsData({ mass: 0, energy: 202000000000000000 }));
   ObjectPhysics.set(ObjectTypes.MangroveSapling, ObjectPhysicsData({ mass: 0, energy: 232000000000000000 }));
-  ObjectPhysics.set(ObjectTypes.Furnace, ObjectPhysicsData({ mass: 108000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.Workbench, ObjectPhysicsData({ mass: 18000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.Powerstone, ObjectPhysicsData({ mass: 80000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.ForceField, ObjectPhysicsData({ mass: 3735000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Chest, ObjectPhysicsData({ mass: 36000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.SpawnTile, ObjectPhysicsData({ mass: 9135000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Bed, ObjectPhysicsData({ mass: 13500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.TextSign, ObjectPhysicsData({ mass: 18000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Workbench, ObjectPhysicsData({ mass: 18000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Powerstone, ObjectPhysicsData({ mass: 80000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Furnace, ObjectPhysicsData({ mass: 108000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.WoodenPick, ObjectPhysicsData({ mass: 22500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.CopperPick, ObjectPhysicsData({ mass: 2034000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.IronPick, ObjectPhysicsData({ mass: 2034000000000000000, energy: 0 }));

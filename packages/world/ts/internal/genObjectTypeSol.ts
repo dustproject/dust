@@ -10,6 +10,7 @@ import {
   objects,
   passThroughCategories,
   smartEntityCategories,
+  stationObjects,
   toolCategories,
   uniqueObjectCategories,
 } from "../objects";
@@ -18,6 +19,15 @@ function renderMetaCategoryMask(categories: Category[]): string {
   return categories
     .map((cat) => `(uint256(1) << (${cat} >> OFFSET_BITS))`)
     .join(" | ");
+}
+
+function renderMultiObjectCheck(
+  functionName: string,
+  objectTypes: string[],
+): string {
+  return `function ${functionName}(ObjectType self) internal pure returns (bool) {
+    return ${objectTypes.map((obj) => `self == ObjectTypes.${obj}`).join(" || ")};
+  }`;
 }
 
 function renderObjectAmount([objectType, amount]: ObjectAmount): string {
@@ -128,6 +138,9 @@ ${allCategoryMetadata
   .join("\n")}
 
   // Specialized getters
+
+  ${renderMultiObjectCheck("isStation", stationObjects)}
+
   // TODO: these are currently part of the codegen, but we should define them in Solidity and import them here
   function getObjectTypeSchema(ObjectType self) internal pure returns (Vec3[] memory) {
     if (self == ObjectTypes.Player) {

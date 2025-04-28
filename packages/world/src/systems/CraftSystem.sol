@@ -159,15 +159,13 @@ library CraftLib {
       if (outputType.isTool()) {
         for (uint256 j = 0; j < outputAmount; j++) {
           EntityId tool = createEntity(outputType);
-          withdrawals[withdrawalIndex] = SlotData({ entityId: tool, objectType: outputType, amount: 1 });
+          withdrawals[withdrawalIndex++] = SlotData({ entityId: tool, objectType: outputType, amount: 1 });
           InventoryUtils.addEntity(caller, tool);
-          withdrawalIndex++;
         }
       } else {
-        withdrawals[withdrawalIndex] =
+        withdrawals[withdrawalIndex++] =
           SlotData({ entityId: EntityId.wrap(0), objectType: outputType, amount: outputAmount });
         InventoryUtils.addObject(caller, outputType, outputAmount);
-        withdrawalIndex++;
       }
     }
 
