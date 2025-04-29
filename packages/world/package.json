@@ -37,10 +37,7 @@
     "test": "./runTests.bash"
   },
   "dependencies": {
-    "@latticexyz/abi-ts": "2.2.22-d621dc7c427a59eb74f4d379862646355a149338",
-    "@latticexyz/cli": "2.2.22-d621dc7c427a59eb74f4d379862646355a149338",
     "@latticexyz/config": "2.2.22-d621dc7c427a59eb74f4d379862646355a149338",
-    "@latticexyz/gas-report": "2.2.22-d621dc7c427a59eb74f4d379862646355a149338",
     "@latticexyz/schema-type": "2.2.22-d621dc7c427a59eb74f4d379862646355a149338",
     "@latticexyz/store": "2.2.22-d621dc7c427a59eb74f4d379862646355a149338",
     "@latticexyz/world": "2.2.22-d621dc7c427a59eb74f4d379862646355a149338",
