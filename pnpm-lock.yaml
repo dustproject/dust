@@ -26,9 +26,6 @@ importers:
       '@latticexyz/explorer':
         specifier: 2.2.22-d621dc7c427a59eb74f4d379862646355a149338
         version: 2.2.22-d621dc7c427a59eb74f4d379862646355a149338(@aws-sdk/client-kms@3.750.0)(@babel/core@7.26.10)(@opentelemetry/api@1.9.0)(@tanstack/query-core@5.74.4)(@types/react-dom@19.1.2)(asn1.js@5.4.1)(better-sqlite3@8.7.0)(bufferutil@4.0.9)(kysely@0.26.3)(react-native@0.78.0(@babel/core@7.26.10)(@babel/preset-env@7.26.9(@babel/core@7.26.10))(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(rollup@4.40.0)(sql.js@1.12.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))
-      '@latticexyz/gas-report':
-        specifier: 2.2.22-d621dc7c427a59eb74f4d379862646355a149338
-        version: 2.2.22-d621dc7c427a59eb74f4d379862646355a149338
       '@latticexyz/store-indexer':
         specifier: 2.2.22-d621dc7c427a59eb74f4d379862646355a149338
         version: 2.2.22-d621dc7c427a59eb74f4d379862646355a149338(@aws-sdk/client-kms@3.750.0)(@opentelemetry/api@1.9.0)(@tanstack/react-query@5.74.4(react@18.3.1))(asn1.js@5.4.1)(kysely@0.26.3)(react@18.3.1)(sql.js@1.12.0)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(wagmi@2.12.11(@tanstack/query-core@5.74.4)(@tanstack/react-query@5.74.4(react@18.3.1))(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react-native@0.78.0(@babel/core@7.26.10)(@babel/preset-env@7.26.9(@babel/core@7.26.10))(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(rollup@4.40.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8))
@@ -179,6 +176,9 @@ importers:
         specifier: ^0.1.12
         version: 0.1.12
     devDependencies:
+      '@latticexyz/gas-report':
+        specifier: 2.2.22-d621dc7c427a59eb74f4d379862646355a149338
+        version: 2.2.22-d621dc7c427a59eb74f4d379862646355a149338
       forge-std:
         specifier: https://github.com/foundry-rs/forge-std.git#3b20d60d14b343ee4f908cb8079495c07f5e8981
         version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/3b20d60d14b343ee4f908cb8079495c07f5e8981
@@ -216,6 +216,9 @@ importers:
         specifier: ^0.1.12
         version: 0.1.12
     devDependencies:
+      '@latticexyz/gas-report':
+        specifier: 2.2.22-d621dc7c427a59eb74f4d379862646355a149338
+        version: 2.2.22-d621dc7c427a59eb74f4d379862646355a149338
       forge-std:
         specifier: https://github.com/foundry-rs/forge-std.git#3b20d60d14b343ee4f908cb8079495c07f5e8981
         version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/3b20d60d14b343ee4f908cb8079495c07f5e8981
