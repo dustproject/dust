@@ -15,7 +15,7 @@
     "parseStats": "npx tsx parseStats.ts"
   },
   "dependencies": {
-    "@dust/world": "link:../world",
+    "@dust/world": "workspace:*",
     "@latticexyz/common": "2.2.22-d621dc7c427a59eb74f4d379862646355a149338",
     "@latticexyz/store": "2.2.22-d621dc7c427a59eb74f4d379862646355a149338",
     "@latticexyz/store-sync": "2.2.22-d621dc7c427a59eb74f4d379862646355a149338",
