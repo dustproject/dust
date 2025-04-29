@@ -2,7 +2,7 @@ import { type ObjectAmount, type ObjectName, objectsByName } from "./objects";
 
 export interface Recipe {
   station?: ObjectName;
-  smeltingTime?: bigint;
+  craftingTime?: bigint;
   inputs: ObjectAmount[];
   outputs: ObjectAmount[];
 }
@@ -53,7 +53,6 @@ export const recipes: Recipe[] = [
   },
   {
     station: "Furnace",
-    smeltingTime: 60n,
     inputs: [
       ["IronOre", 1],
       ["CoalOre", 1],
@@ -62,7 +61,6 @@ export const recipes: Recipe[] = [
   },
   {
     station: "Furnace",
-    smeltingTime: 60n,
     inputs: [
       ["GoldOre", 1],
       ["CoalOre", 1],
@@ -71,7 +69,6 @@ export const recipes: Recipe[] = [
   },
   {
     station: "Furnace",
-    smeltingTime: 60n,
     inputs: [
       ["DiamondOre", 1],
       ["CoalOre", 1],
@@ -80,7 +77,6 @@ export const recipes: Recipe[] = [
   },
   {
     station: "Furnace",
-    smeltingTime: 60n,
     inputs: [
       ["NeptuniumOre", 1],
       ["CoalOre", 1],

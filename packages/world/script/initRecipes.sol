@@ -208,7 +208,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Furnace,
-      60,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -228,7 +228,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Furnace,
-      60,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -248,7 +248,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Furnace,
-      60,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,
@@ -268,7 +268,7 @@ function initRecipes() {
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts)),
       ObjectTypes.Furnace,
-      60,
+      0,
       inputTypes,
       inputAmounts,
       outputTypes,

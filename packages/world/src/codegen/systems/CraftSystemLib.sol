@@ -53,10 +53,6 @@ library CraftSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).craft(caller, recipeId, inputs);
   }
 
-  function finishSmelting(CraftSystemType self, EntityId caller, EntityId furnace, bytes memory extraData) internal {
-    return CallWrapper(self.toResourceId(), address(0)).finishSmelting(caller, furnace, extraData);
-  }
-
   function craftWithStation(
     CallWrapper memory self,
     EntityId caller,
@@ -86,19 +82,6 @@ library CraftSystemLib {
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
-  function finishSmelting(CallWrapper memory self, EntityId caller, EntityId furnace, bytes memory extraData) internal {
-    // if the contract calling this function is a root system, it should use `callAsRoot`
-    if (address(_world()) == address(this)) revert CraftSystemLib_CallingFromRootSystem();
-
-    bytes memory systemCall = abi.encodeCall(
-      _finishSmelting_EntityId_EntityId_bytes.finishSmelting,
-      (caller, furnace, extraData)
-    );
-    self.from == address(0)
-      ? _world().call(self.systemId, systemCall)
-      : _world().callFrom(self.from, self.systemId, systemCall);
-  }
-
   function craftWithStation(
     RootCallWrapper memory self,
     EntityId caller,
@@ -115,19 +98,6 @@ library CraftSystemLib {
 
   function craft(RootCallWrapper memory self, EntityId caller, bytes32 recipeId, SlotAmount[] memory inputs) internal {
     bytes memory systemCall = abi.encodeCall(_craft_EntityId_bytes32_SlotAmountArray.craft, (caller, recipeId, inputs));
-    SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
-  }
-
-  function finishSmelting(
-    RootCallWrapper memory self,
-    EntityId caller,
-    EntityId furnace,
-    bytes memory extraData
-  ) internal {
-    bytes memory systemCall = abi.encodeCall(
-      _finishSmelting_EntityId_EntityId_bytes.finishSmelting,
-      (caller, furnace, extraData)
-    );
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
@@ -175,10 +145,6 @@ interface _craftWithStation_EntityId_EntityId_bytes32_SlotAmountArray {
 
 interface _craft_EntityId_bytes32_SlotAmountArray {
   function craft(EntityId caller, bytes32 recipeId, SlotAmount[] memory inputs) external;
-}
-
-interface _finishSmelting_EntityId_EntityId_bytes {
-  function finishSmelting(EntityId caller, EntityId furnace, bytes memory extraData) external;
 }
 
 using CraftSystemLib for CraftSystemType global;

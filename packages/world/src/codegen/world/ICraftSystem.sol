@@ -15,6 +15,4 @@ interface ICraftSystem {
   function craftWithStation(EntityId caller, EntityId station, bytes32 recipeId, SlotAmount[] memory inputs) external;
 
   function craft(EntityId caller, bytes32 recipeId, SlotAmount[] memory inputs) external;
-
-  function finishSmelting(EntityId caller, EntityId furnace, bytes memory extraData) external;
 }
