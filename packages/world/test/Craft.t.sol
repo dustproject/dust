@@ -9,7 +9,6 @@ import { console } from "forge-std/console.sol";
 import { EntityId } from "../src/EntityId.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
-import { Furnace } from "../src/codegen/tables/Furnace.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
 
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
@@ -360,70 +359,6 @@ contract CraftTest is DustTest {
     vm.skip(true, "TODO");
   }
 
-  function testCraftWithFurnace() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
-
-    // Iron ore smelting recipe (iron ore + coal = iron bar)
-    ObjectType[] memory inputTypes = new ObjectType[](2);
-    inputTypes[0] = ObjectTypes.IronOre;
-    inputTypes[1] = ObjectTypes.CoalOre;
-    uint16[] memory inputAmounts = new uint16[](2);
-    inputAmounts[0] = 1;
-    inputAmounts[1] = 1;
-    ObjectType[] memory outputTypes = new ObjectType[](1);
-    outputTypes[0] = ObjectTypes.IronBar;
-    uint16[] memory outputAmounts = new uint16[](1);
-    outputAmounts[0] = 1;
-    bytes32 recipeId = hashRecipe(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts);
-
-    // Place furnace next to player
-    Vec3 furnaceCoord = playerCoord + vec3(1, 0, 0);
-    EntityId furnaceEntityId = setObjectAtCoord(furnaceCoord, ObjectTypes.Furnace);
-
-    // Set resource count so they can be burnt
-    ResourceCount.set(ObjectTypes.CoalOre, 1);
-
-    // Add items to furnace inventory
-    TestInventoryUtils.addObject(furnaceEntityId, ObjectTypes.IronOre, 1);
-    TestInventoryUtils.addObject(furnaceEntityId, ObjectTypes.CoalOre, 1);
-    assertInventoryHasObject(furnaceEntityId, ObjectTypes.IronOre, 1);
-    assertInventoryHasObject(furnaceEntityId, ObjectTypes.CoalOre, 1);
-
-    SlotAmount[] memory inputs = new SlotAmount[](2);
-    inputs[0] = SlotAmount({ slot: 0, amount: 1 }); // IronOre
-    inputs[1] = SlotAmount({ slot: 1, amount: 1 }); // CoalOre
-
-    vm.prank(alice);
-    startGasReport("begin smelting with furnace");
-    world.craftWithStation(aliceEntityId, furnaceEntityId, recipeId, inputs);
-    endGasReport();
-
-    // Coal should be consumed, iron ore should remain
-    assertInventoryHasObject(furnaceEntityId, ObjectTypes.CoalOre, 0);
-    assertInventoryHasObject(furnaceEntityId, ObjectTypes.IronOre, 1);
-
-    // Verify Furnace table entry was created
-    bytes32 storedRecipeId = Furnace.getRecipeId(furnaceEntityId);
-    assertEq(storedRecipeId, recipeId, "Recipe ID not correctly stored in Furnace table");
-
-    uint128 finishesAt = Furnace.getFinishesAt(furnaceEntityId);
-    assertTrue(finishesAt > 0, "Furnace finish time not set");
-
-    vm.warp(finishesAt);
-
-    vm.prank(alice);
-    startGasReport("finish smelting in furnace");
-    world.finishSmelting(aliceEntityId, furnaceEntityId, "");
-    endGasReport();
-
-    // Furnace should be empty now
-    assertInventoryHasObject(furnaceEntityId, ObjectTypes.IronOre, 0);
-    assertInventoryHasObject(furnaceEntityId, ObjectTypes.IronBar, 0);
-
-    // Player should now have the output item
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.IronBar, 1);
-  }
-
   function testCraftFailsIfNotEnoughInputs() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
@@ -495,109 +430,6 @@ contract CraftTest is DustTest {
     vm.prank(alice);
     vm.expectRevert("Recipe not found");
     world.craft(aliceEntityId, recipeId, inputs);
-  }
-
-  function testFurnaceGoldSmelting() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
-
-    // Gold ore smelting recipe (gold ore + coal = gold bar)
-    ObjectType[] memory inputTypes = new ObjectType[](2);
-    inputTypes[0] = ObjectTypes.GoldOre;
-    inputTypes[1] = ObjectTypes.CoalOre;
-    uint16[] memory inputAmounts = new uint16[](2);
-    inputAmounts[0] = 1;
-    inputAmounts[1] = 1;
-    ObjectType[] memory outputTypes = new ObjectType[](1);
-    outputTypes[0] = ObjectTypes.GoldBar;
-    uint16[] memory outputAmounts = new uint16[](1);
-    outputAmounts[0] = 1;
-    bytes32 recipeId = hashRecipe(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts);
-
-    // Place furnace next to player
-    Vec3 furnaceCoord = playerCoord + vec3(1, 0, 0);
-    EntityId furnaceEntityId = setObjectAtCoord(furnaceCoord, ObjectTypes.Furnace);
-
-    // Set resource count so they can be burnt
-    ResourceCount.set(ObjectTypes.CoalOre, 1);
-
-    // Add items to furnace inventory
-    TestInventoryUtils.addObject(furnaceEntityId, ObjectTypes.GoldOre, 1);
-    TestInventoryUtils.addObject(furnaceEntityId, ObjectTypes.CoalOre, 1);
-    assertInventoryHasObject(furnaceEntityId, ObjectTypes.GoldOre, 1);
-    assertInventoryHasObject(furnaceEntityId, ObjectTypes.CoalOre, 1);
-
-    SlotAmount[] memory inputs = new SlotAmount[](2);
-    inputs[0] = SlotAmount({ slot: 0, amount: 1 }); // GoldOre
-    inputs[1] = SlotAmount({ slot: 1, amount: 1 }); // CoalOre
-
-    vm.prank(alice);
-    world.craftWithStation(aliceEntityId, furnaceEntityId, recipeId, inputs);
-
-    // Coal should be consumed, gold ore should remain
-    assertInventoryHasObject(furnaceEntityId, ObjectTypes.CoalOre, 0);
-    assertInventoryHasObject(furnaceEntityId, ObjectTypes.GoldOre, 1);
-
-    // Verify Furnace table entry was created
-    bytes32 storedRecipeId = Furnace.getRecipeId(furnaceEntityId);
-    assertEq(storedRecipeId, recipeId, "Recipe ID not correctly stored in Furnace table");
-
-    uint128 finishesAt = Furnace.getFinishesAt(furnaceEntityId);
-    assertTrue(finishesAt > 0, "Furnace finish time not set");
-
-    vm.warp(finishesAt);
-
-    vm.prank(alice);
-    world.finishSmelting(aliceEntityId, furnaceEntityId, "");
-
-    // Furnace should not have inputs nor outputs
-    assertInventoryHasObject(furnaceEntityId, ObjectTypes.GoldOre, 0);
-    assertInventoryHasObject(furnaceEntityId, ObjectTypes.GoldBar, 0);
-    // Player should now have the output item
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.GoldBar, 1);
-  }
-
-  function testFurnaceFailsWithoutRequiredInputs() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
-
-    // Iron ore smelting recipe (iron ore + coal = iron bar)
-    ObjectType[] memory inputTypes = new ObjectType[](2);
-    inputTypes[0] = ObjectTypes.IronOre;
-    inputTypes[1] = ObjectTypes.CoalOre;
-    uint16[] memory inputAmounts = new uint16[](2);
-    inputAmounts[0] = 1;
-    inputAmounts[1] = 1;
-    ObjectType[] memory outputTypes = new ObjectType[](1);
-    outputTypes[0] = ObjectTypes.IronBar;
-    uint16[] memory outputAmounts = new uint16[](1);
-    outputAmounts[0] = 1;
-    bytes32 recipeId = hashRecipe(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts);
-
-    // Place furnace next to player
-    Vec3 furnaceCoord = playerCoord + vec3(1, 0, 0);
-    EntityId furnaceEntityId = setObjectAtCoord(furnaceCoord, ObjectTypes.Furnace);
-
-    // Add only iron ore to furnace inventory (missing coal)
-    TestInventoryUtils.addObject(furnaceEntityId, ObjectTypes.IronOre, 1);
-    assertInventoryHasObject(furnaceEntityId, ObjectTypes.IronOre, 1);
-
-    SlotAmount[] memory inputs = new SlotAmount[](1);
-    inputs[0] = SlotAmount({ slot: 0, amount: 1 }); // IronOre
-
-    vm.prank(alice);
-    vm.expectRevert("Not enough inputs for recipe");
-    world.craftWithStation(aliceEntityId, furnaceEntityId, recipeId, inputs);
-  }
-
-  function testFinishSmeltingWithoutActiveFurnace() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
-
-    // Place furnace next to player
-    Vec3 furnaceCoord = playerCoord + vec3(1, 0, 0);
-    EntityId furnaceEntityId = setObjectAtCoord(furnaceCoord, ObjectTypes.Furnace);
-
-    vm.prank(alice);
-    vm.expectRevert("Furnace is not smelting");
-    world.finishSmelting(aliceEntityId, furnaceEntityId, "");
   }
 
   function testCraftFailsIfInvalidStation() public {

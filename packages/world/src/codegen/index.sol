@@ -31,7 +31,6 @@ import { Fragment, FragmentData } from "./tables/Fragment.sol";
 import { FragmentPosition, FragmentPositionData } from "./tables/FragmentPosition.sol";
 import { ReverseFragmentPosition } from "./tables/ReverseFragmentPosition.sol";
 import { Machine, MachineData } from "./tables/Machine.sol";
-import { Furnace, FurnaceData } from "./tables/Furnace.sol";
 import { ChunkCommitment } from "./tables/ChunkCommitment.sol";
 import { ResourcePosition, ResourcePositionData } from "./tables/ResourcePosition.sol";
 import { ResourceCount } from "./tables/ResourceCount.sol";

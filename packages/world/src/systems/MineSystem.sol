@@ -8,7 +8,6 @@ import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
-import { Furnace } from "../codegen/tables/Furnace.sol";
 
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
@@ -190,8 +189,6 @@ contract MineSystem is System {
       MineLib._mineBed(mined, baseCoord);
     } else if (minedType == ObjectTypes.ForceField) {
       Machine._deleteRecord(mined);
-    } else if (minedType == ObjectTypes.Furnace) {
-      Furnace._deleteRecord(mined);
     }
 
     // Detach program if it exists

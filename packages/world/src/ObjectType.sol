@@ -785,7 +785,6 @@ library ObjectTypeLib {
   function getMaxInventorySlots(ObjectType self) internal pure returns (uint16) {
     if (self == ObjectTypes.Player) return 36;
     if (self == ObjectTypes.Chest) return 27;
-    if (self == ObjectTypes.Furnace) return 2;
     if (self.isPassThrough()) return type(uint16).max;
     return 0;
   }

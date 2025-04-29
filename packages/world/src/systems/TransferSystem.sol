@@ -6,7 +6,6 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { EnergyData } from "../codegen/tables/Energy.sol";
 
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
-import { Furnace } from "../codegen/tables/Furnace.sol";
 
 import { InventoryUtils, SlotData, SlotTransfer } from "../utils/InventoryUtils.sol";
 import { TransferNotification, notify } from "../utils/NotifUtils.sol";
@@ -60,12 +59,6 @@ contract TransferSystem is System {
       target == to ? (fromSlotData, toSlotData) : (toSlotData, fromSlotData);
 
     if (target.exists()) {
-      // Delete furnace data if any (we need to stop any ongoing smelting)
-      // TODO: we could check if the furnace has enough ingredients after the withdrawal
-      if (withdrawals.length > 0 && EntityObjectType._get(target) == ObjectTypes.Furnace) {
-        Furnace._deleteRecord(target);
-      }
-
       bytes memory onTransfer =
         abi.encodeCall(ITransferHook.onTransfer, (caller, target, deposits, withdrawals, extraData));
 
