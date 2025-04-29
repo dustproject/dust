@@ -19,22 +19,23 @@ import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 // Import user types
 import { EntityId } from "../../EntityId.sol";
 
-struct FurnaceData {
+struct StationData {
   bytes32 recipeId;
-  uint128 finishesAt;
+  uint128 beganCraftingAt;
+  uint16 maxOutputAmount;
 }
 
-library Furnace {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "Furnace", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x746200000000000000000000000000004675726e616365000000000000000000);
+library Station {
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "Station", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x7462000000000000000000000000000053746174696f6e000000000000000000);
 
   FieldLayout constant _fieldLayout =
-    FieldLayout.wrap(0x0030020020100000000000000000000000000000000000000000000000000000);
+    FieldLayout.wrap(0x0032030020100200000000000000000000000000000000000000000000000000);
 
   // Hex-encoded key schema of (bytes32)
   Schema constant _keySchema = Schema.wrap(0x002001005f000000000000000000000000000000000000000000000000000000);
-  // Hex-encoded value schema of (bytes32, uint128)
-  Schema constant _valueSchema = Schema.wrap(0x003002005f0f0000000000000000000000000000000000000000000000000000);
+  // Hex-encoded value schema of (bytes32, uint128, uint16)
+  Schema constant _valueSchema = Schema.wrap(0x003203005f0f0100000000000000000000000000000000000000000000000000);
 
   /**
    * @notice Get the table's key field names.
@@ -50,9 +51,10 @@ library Furnace {
    * @return fieldNames An array of strings with the names of value fields.
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
-    fieldNames = new string[](2);
+    fieldNames = new string[](3);
     fieldNames[0] = "recipeId";
-    fieldNames[1] = "finishesAt";
+    fieldNames[1] = "beganCraftingAt";
+    fieldNames[2] = "maxOutputAmount";
   }
 
   /**
@@ -112,9 +114,9 @@ library Furnace {
   }
 
   /**
-   * @notice Get finishesAt.
+   * @notice Get beganCraftingAt.
    */
-  function getFinishesAt(EntityId entityId) internal view returns (uint128 finishesAt) {
+  function getBeganCraftingAt(EntityId entityId) internal view returns (uint128 beganCraftingAt) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -123,9 +125,9 @@ library Furnace {
   }
 
   /**
-   * @notice Get finishesAt.
+   * @notice Get beganCraftingAt.
    */
-  function _getFinishesAt(EntityId entityId) internal view returns (uint128 finishesAt) {
+  function _getBeganCraftingAt(EntityId entityId) internal view returns (uint128 beganCraftingAt) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -134,29 +136,71 @@ library Furnace {
   }
 
   /**
-   * @notice Set finishesAt.
+   * @notice Set beganCraftingAt.
    */
-  function setFinishesAt(EntityId entityId, uint128 finishesAt) internal {
+  function setBeganCraftingAt(EntityId entityId, uint128 beganCraftingAt) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked((finishesAt)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked((beganCraftingAt)), _fieldLayout);
   }
 
   /**
-   * @notice Set finishesAt.
+   * @notice Set beganCraftingAt.
    */
-  function _setFinishesAt(EntityId entityId, uint128 finishesAt) internal {
+  function _setBeganCraftingAt(EntityId entityId, uint128 beganCraftingAt) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked((finishesAt)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked((beganCraftingAt)), _fieldLayout);
+  }
+
+  /**
+   * @notice Get maxOutputAmount.
+   */
+  function getMaxOutputAmount(EntityId entityId) internal view returns (uint16 maxOutputAmount) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = EntityId.unwrap(entityId);
+
+    bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 2, _fieldLayout);
+    return (uint16(bytes2(_blob)));
+  }
+
+  /**
+   * @notice Get maxOutputAmount.
+   */
+  function _getMaxOutputAmount(EntityId entityId) internal view returns (uint16 maxOutputAmount) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = EntityId.unwrap(entityId);
+
+    bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 2, _fieldLayout);
+    return (uint16(bytes2(_blob)));
+  }
+
+  /**
+   * @notice Set maxOutputAmount.
+   */
+  function setMaxOutputAmount(EntityId entityId, uint16 maxOutputAmount) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = EntityId.unwrap(entityId);
+
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 2, abi.encodePacked((maxOutputAmount)), _fieldLayout);
+  }
+
+  /**
+   * @notice Set maxOutputAmount.
+   */
+  function _setMaxOutputAmount(EntityId entityId, uint16 maxOutputAmount) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = EntityId.unwrap(entityId);
+
+    StoreCore.setStaticField(_tableId, _keyTuple, 2, abi.encodePacked((maxOutputAmount)), _fieldLayout);
   }
 
   /**
    * @notice Get the full data.
    */
-  function get(EntityId entityId) internal view returns (FurnaceData memory _table) {
+  function get(EntityId entityId) internal view returns (StationData memory _table) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -171,7 +215,7 @@ library Furnace {
   /**
    * @notice Get the full data.
    */
-  function _get(EntityId entityId) internal view returns (FurnaceData memory _table) {
+  function _get(EntityId entityId) internal view returns (StationData memory _table) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -186,8 +230,8 @@ library Furnace {
   /**
    * @notice Set the full data using individual values.
    */
-  function set(EntityId entityId, bytes32 recipeId, uint128 finishesAt) internal {
-    bytes memory _staticData = encodeStatic(recipeId, finishesAt);
+  function set(EntityId entityId, bytes32 recipeId, uint128 beganCraftingAt, uint16 maxOutputAmount) internal {
+    bytes memory _staticData = encodeStatic(recipeId, beganCraftingAt, maxOutputAmount);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -201,8 +245,8 @@ library Furnace {
   /**
    * @notice Set the full data using individual values.
    */
-  function _set(EntityId entityId, bytes32 recipeId, uint128 finishesAt) internal {
-    bytes memory _staticData = encodeStatic(recipeId, finishesAt);
+  function _set(EntityId entityId, bytes32 recipeId, uint128 beganCraftingAt, uint16 maxOutputAmount) internal {
+    bytes memory _staticData = encodeStatic(recipeId, beganCraftingAt, maxOutputAmount);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -216,8 +260,8 @@ library Furnace {
   /**
    * @notice Set the full data using the data struct.
    */
-  function set(EntityId entityId, FurnaceData memory _table) internal {
-    bytes memory _staticData = encodeStatic(_table.recipeId, _table.finishesAt);
+  function set(EntityId entityId, StationData memory _table) internal {
+    bytes memory _staticData = encodeStatic(_table.recipeId, _table.beganCraftingAt, _table.maxOutputAmount);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -231,8 +275,8 @@ library Furnace {
   /**
    * @notice Set the full data using the data struct.
    */
-  function _set(EntityId entityId, FurnaceData memory _table) internal {
-    bytes memory _staticData = encodeStatic(_table.recipeId, _table.finishesAt);
+  function _set(EntityId entityId, StationData memory _table) internal {
+    bytes memory _staticData = encodeStatic(_table.recipeId, _table.beganCraftingAt, _table.maxOutputAmount);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -246,10 +290,14 @@ library Furnace {
   /**
    * @notice Decode the tightly packed blob of static data using this table's field layout.
    */
-  function decodeStatic(bytes memory _blob) internal pure returns (bytes32 recipeId, uint128 finishesAt) {
+  function decodeStatic(
+    bytes memory _blob
+  ) internal pure returns (bytes32 recipeId, uint128 beganCraftingAt, uint16 maxOutputAmount) {
     recipeId = (Bytes.getBytes32(_blob, 0));
 
-    finishesAt = (uint128(Bytes.getBytes16(_blob, 32)));
+    beganCraftingAt = (uint128(Bytes.getBytes16(_blob, 32)));
+
+    maxOutputAmount = (uint16(Bytes.getBytes2(_blob, 48)));
   }
 
   /**
@@ -262,8 +310,8 @@ library Furnace {
     bytes memory _staticData,
     EncodedLengths,
     bytes memory
-  ) internal pure returns (FurnaceData memory _table) {
-    (_table.recipeId, _table.finishesAt) = decodeStatic(_staticData);
+  ) internal pure returns (StationData memory _table) {
+    (_table.recipeId, _table.beganCraftingAt, _table.maxOutputAmount) = decodeStatic(_staticData);
   }
 
   /**
@@ -290,8 +338,12 @@ library Furnace {
    * @notice Tightly pack static (fixed length) data using this table's schema.
    * @return The static data, encoded into a sequence of bytes.
    */
-  function encodeStatic(bytes32 recipeId, uint128 finishesAt) internal pure returns (bytes memory) {
-    return abi.encodePacked(recipeId, finishesAt);
+  function encodeStatic(
+    bytes32 recipeId,
+    uint128 beganCraftingAt,
+    uint16 maxOutputAmount
+  ) internal pure returns (bytes memory) {
+    return abi.encodePacked(recipeId, beganCraftingAt, maxOutputAmount);
   }
 
   /**
@@ -302,9 +354,10 @@ library Furnace {
    */
   function encode(
     bytes32 recipeId,
-    uint128 finishesAt
+    uint128 beganCraftingAt,
+    uint16 maxOutputAmount
   ) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
-    bytes memory _staticData = encodeStatic(recipeId, finishesAt);
+    bytes memory _staticData = encodeStatic(recipeId, beganCraftingAt, maxOutputAmount);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
