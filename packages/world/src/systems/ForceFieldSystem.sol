@@ -25,45 +25,43 @@ import { Vec3, vec3 } from "../Vec3.sol";
 contract ForceFieldSystem is System {
   /**
    * @notice Validates that the boundary fragments form a connected component using a spanning tree
-   * @param boundaryFragments Array of boundary fragment coordinates
-   * @param len Number of boundaryFragments
+   * @param boundary Array of boundary fragment coordinates
    * @param parents Array indicating the parent of each fragment in the spanning tree
    * @return True if the spanning tree is valid and connects all boundary fragments
    */
-  function validateSpanningTree(Vec3[26] memory boundaryFragments, uint256 len, uint256[] calldata parents)
+  function validateSpanningTree(Vec3[] memory boundary, uint8[] calldata boundaryIdx, uint8[] calldata parents)
     public
     pure
     returns (bool)
   {
-    // If no boundary, it means no forcefield exists
-    if (len == 0) return false;
-    if (len == 1) return parents.length == 1 && parents[0] == 0;
+    uint32 len = uint32(boundary.length);
+    if (len == 0 || boundaryIdx.length != len || parents.length != len) return false;
+    if (parents[0] != 0) return false;
 
-    // Validate parents array
-    if (parents.length != len || parents[0] != 0) return false;
-
-    // Track visited nodes
-    bool[] memory visited = new bool[](len);
-    visited[0] = true; // Mark root as visited
-    uint256 visitedCount = 1;
-
-    // Validate each node's parent relationship
-    for (uint256 i = 1; i < len; i++) {
-      uint256 parent = parents[i];
-
-      // Parent must be in valid range, already visited and adjacent
-      if (
-        parent >= len || !visited[parent] || !boundaryFragments[parent].inVonNeumannNeighborhood(boundaryFragments[i])
-      ) {
-        return false;
-      }
-
-      // Mark as visited
-      visited[i] = true;
-      visitedCount++;
+    // permutation check with 32-bit bitmask (len ≤ 26)
+    uint32 seen;
+    for (uint8 i = 0; i < len; ++i) {
+      uint8 r = boundaryIdx[i];
+      if (r >= len) return false;
+      uint32 bit = uint32(1) << r;
+      if (seen & bit != 0) return false; // duplicate
+      seen |= bit;
     }
 
-    return visitedCount == len;
+    if (seen != (uint32(1) << len) - 1) return false; // missing index
+
+    unchecked {
+      for (uint8 i = 1; i < len; ++i) {
+        uint8 p = parents[i];
+        if (p >= i) return false; // order constraint
+
+        Vec3 child = boundary[boundaryIdx[i]];
+        Vec3 parent = boundary[boundaryIdx[p]];
+        if (!child.inVonNeumannNeighborhood(parent)) return false;
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -72,15 +70,11 @@ contract ForceFieldSystem is System {
    * @param fragmentCoord The coordinate of the fragment
    * @return An array of boundary fragment coordinates and its length (the array can be longer)
    */
-  function computeBoundaryFragments(EntityId forceField, Vec3 fragmentCoord)
-    public
-    view
-    returns (Vec3[26] memory, uint256)
-  {
+  function computeBoundaryFragments(EntityId forceField, Vec3 fragmentCoord) public view returns (Vec3[] memory) {
     uint256 count = 0;
 
     // Iterate through the entire boundary
-    Vec3[26] memory boundary;
+    Vec3[] memory boundary = new Vec3[](26);
     Vec3[26] memory neighbors = fragmentCoord.neighbors26();
     for (uint8 i = 0; i < neighbors.length; i++) {
       // Add to resulting boundary if it's a forcefield fragment
@@ -89,7 +83,13 @@ contract ForceFieldSystem is System {
       }
     }
 
-    return (boundary, count);
+    /// @solidity memory-safe-assembly
+    assembly {
+      // Resize the array to the actual count
+      mstore(boundary, count)
+    }
+
+    return boundary;
   }
 
   function addFragment(
@@ -133,7 +133,8 @@ contract ForceFieldSystem is System {
     EntityId caller,
     EntityId forceField,
     Vec3 fragmentCoord,
-    uint256[] calldata parents,
+    uint8[] calldata boundaryIdx,
+    uint8[] calldata parents,
     bytes calldata extraData
   ) public {
     caller.activate();
@@ -148,13 +149,15 @@ contract ForceFieldSystem is System {
     EntityId fragment = ForceFieldUtils.getFragmentAt(fragmentCoord);
     require(ForceFieldUtils.isFragment(forceField, fragment), "Fragment is not part of forcefield");
 
-    // First, identify all boundary fragments (fragments adjacent to the fragment to be removed)
-    (Vec3[26] memory boundary, uint256 len) = computeBoundaryFragments(forceField, fragmentCoord);
+    {
+      // First, identify all boundary fragments (fragments adjacent to the fragment to be removed)
+      Vec3[] memory boundary = computeBoundaryFragments(forceField, fragmentCoord);
 
-    require(len > 0, "No boundary fragments found");
+      require(boundary.length > 0, "No boundary fragments found");
 
-    // Validate that boundaryFragments are connected
-    require(validateSpanningTree(boundary, len, parents), "Invalid spanning tree");
+      // Validate that boundaryFragments are connected
+      require(validateSpanningTree(boundary, boundaryIdx, parents), "Invalid spanning tree");
+    }
 
     ForceFieldUtils.removeFragment(forceField, fragment);
 

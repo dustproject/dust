@@ -41,18 +41,18 @@ library ForceFieldSystemLib {
 
   function validateSpanningTree(
     ForceFieldSystemType self,
-    Vec3[26] memory boundaryFragments,
-    uint256 len,
-    uint256[] memory parents
+    Vec3[] memory boundary,
+    uint8[] memory boundaryIdx,
+    uint8[] memory parents
   ) internal view returns (bool) {
-    return CallWrapper(self.toResourceId(), address(0)).validateSpanningTree(boundaryFragments, len, parents);
+    return CallWrapper(self.toResourceId(), address(0)).validateSpanningTree(boundary, boundaryIdx, parents);
   }
 
   function computeBoundaryFragments(
     ForceFieldSystemType self,
     EntityId forceField,
     Vec3 fragmentCoord
-  ) internal view returns (Vec3[26] memory, uint256) {
+  ) internal view returns (Vec3[] memory) {
     return CallWrapper(self.toResourceId(), address(0)).computeBoundaryFragments(forceField, fragmentCoord);
   }
 
@@ -79,7 +79,8 @@ library ForceFieldSystemLib {
     EntityId caller,
     EntityId forceField,
     Vec3 fragmentCoord,
-    uint256[] memory parents,
+    uint8[] memory boundaryIdx,
+    uint8[] memory parents,
     bytes memory extraData
   ) internal {
     return
@@ -87,6 +88,7 @@ library ForceFieldSystemLib {
         caller,
         forceField,
         fragmentCoord,
+        boundaryIdx,
         parents,
         extraData
       );
@@ -94,16 +96,16 @@ library ForceFieldSystemLib {
 
   function validateSpanningTree(
     CallWrapper memory self,
-    Vec3[26] memory boundaryFragments,
-    uint256 len,
-    uint256[] memory parents
+    Vec3[] memory boundary,
+    uint8[] memory boundaryIdx,
+    uint8[] memory parents
   ) internal view returns (bool) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert ForceFieldSystemLib_CallingFromRootSystem();
 
     bytes memory systemCall = abi.encodeCall(
-      _validateSpanningTree_Vec30x5b32365d_uint256_uint256Array.validateSpanningTree,
-      (boundaryFragments, len, parents)
+      _validateSpanningTree_Vec3Array_uint8Array_uint8Array.validateSpanningTree,
+      (boundary, boundaryIdx, parents)
     );
     bytes memory worldCall = self.from == address(0)
       ? abi.encodeCall(IWorldCall.call, (self.systemId, systemCall))
@@ -119,7 +121,7 @@ library ForceFieldSystemLib {
     CallWrapper memory self,
     EntityId forceField,
     Vec3 fragmentCoord
-  ) internal view returns (Vec3[26] memory, uint256) {
+  ) internal view returns (Vec3[] memory) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert ForceFieldSystemLib_CallingFromRootSystem();
 
@@ -134,7 +136,7 @@ library ForceFieldSystemLib {
     if (!success) revertWithBytes(returnData);
 
     bytes memory result = abi.decode(returnData, (bytes));
-    return abi.decode(result, (Vec3[26], uint256));
+    return abi.decode(result, (Vec3[]));
   }
 
   function addFragment(
@@ -162,15 +164,16 @@ library ForceFieldSystemLib {
     EntityId caller,
     EntityId forceField,
     Vec3 fragmentCoord,
-    uint256[] memory parents,
+    uint8[] memory boundaryIdx,
+    uint8[] memory parents,
     bytes memory extraData
   ) internal {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert ForceFieldSystemLib_CallingFromRootSystem();
 
     bytes memory systemCall = abi.encodeCall(
-      _removeFragment_EntityId_EntityId_Vec3_uint256Array_bytes.removeFragment,
-      (caller, forceField, fragmentCoord, parents, extraData)
+      _removeFragment_EntityId_EntityId_Vec3_uint8Array_uint8Array_bytes.removeFragment,
+      (caller, forceField, fragmentCoord, boundaryIdx, parents, extraData)
     );
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
@@ -197,12 +200,13 @@ library ForceFieldSystemLib {
     EntityId caller,
     EntityId forceField,
     Vec3 fragmentCoord,
-    uint256[] memory parents,
+    uint8[] memory boundaryIdx,
+    uint8[] memory parents,
     bytes memory extraData
   ) internal {
     bytes memory systemCall = abi.encodeCall(
-      _removeFragment_EntityId_EntityId_Vec3_uint256Array_bytes.removeFragment,
-      (caller, forceField, fragmentCoord, parents, extraData)
+      _removeFragment_EntityId_EntityId_Vec3_uint8Array_uint8Array_bytes.removeFragment,
+      (caller, forceField, fragmentCoord, boundaryIdx, parents, extraData)
     );
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
@@ -245,8 +249,8 @@ library ForceFieldSystemLib {
  * Each interface is uniquely named based on the function name and parameters to prevent collisions.
  */
 
-interface _validateSpanningTree_Vec30x5b32365d_uint256_uint256Array {
-  function validateSpanningTree(Vec3[26] memory boundaryFragments, uint256 len, uint256[] memory parents) external;
+interface _validateSpanningTree_Vec3Array_uint8Array_uint8Array {
+  function validateSpanningTree(Vec3[] memory boundary, uint8[] memory boundaryIdx, uint8[] memory parents) external;
 }
 
 interface _computeBoundaryFragments_EntityId_Vec3 {
@@ -263,12 +267,13 @@ interface _addFragment_EntityId_EntityId_Vec3_Vec3_bytes {
   ) external;
 }
 
-interface _removeFragment_EntityId_EntityId_Vec3_uint256Array_bytes {
+interface _removeFragment_EntityId_EntityId_Vec3_uint8Array_uint8Array_bytes {
   function removeFragment(
     EntityId caller,
     EntityId forceField,
     Vec3 fragmentCoord,
-    uint256[] memory parents,
+    uint8[] memory boundaryIdx,
+    uint8[] memory parents,
     bytes memory extraData
   ) external;
 }

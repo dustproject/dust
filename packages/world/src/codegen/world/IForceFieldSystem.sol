@@ -13,15 +13,12 @@ import { EntityId } from "../../EntityId.sol";
  */
 interface IForceFieldSystem {
   function validateSpanningTree(
-    Vec3[26] memory boundaryFragments,
-    uint256 len,
-    uint256[] calldata parents
+    Vec3[] memory boundary,
+    uint8[] calldata boundaryIdx,
+    uint8[] calldata parents
   ) external pure returns (bool);
 
-  function computeBoundaryFragments(
-    EntityId forceField,
-    Vec3 fragmentCoord
-  ) external view returns (Vec3[26] memory, uint256);
+  function computeBoundaryFragments(EntityId forceField, Vec3 fragmentCoord) external view returns (Vec3[] memory);
 
   function addFragment(
     EntityId caller,
@@ -35,7 +32,8 @@ interface IForceFieldSystem {
     EntityId caller,
     EntityId forceField,
     Vec3 fragmentCoord,
-    uint256[] calldata parents,
+    uint8[] calldata boundaryIdx,
+    uint8[] calldata parents,
     bytes calldata extraData
   ) external;
 }

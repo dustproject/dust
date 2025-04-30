@@ -462,16 +462,19 @@ contract ForceFieldTest is DustTest {
     EnergyData memory afterAddEnergyData = Energy.get(forceFieldEntityId);
 
     // Compute boundary fragments
-    (, uint256 len) = world.computeBoundaryFragments(forceFieldEntityId, newFragmentCoord);
+    Vec3[] memory boundary = world.computeBoundaryFragments(forceFieldEntityId, newFragmentCoord);
+
+    uint8[] memory boundaryIdx = new uint8[](boundary.length);
+    boundaryIdx[0] = 0;
 
     // Create a valid parent array for the boundary
-    uint256[] memory parents = new uint256[](len);
+    uint8[] memory parents = new uint8[](boundary.length);
     parents[0] = 0; // Root
 
     // Remove the fragment
     vm.prank(alice);
     startGasReport("Remove forcefield fragment");
-    world.removeFragment(aliceEntityId, forceFieldEntityId, newFragmentCoord, parents, "");
+    world.removeFragment(aliceEntityId, forceFieldEntityId, newFragmentCoord, boundaryIdx, parents, "");
     endGasReport();
 
     // Get energy data after removal
@@ -580,16 +583,23 @@ contract ForceFieldTest is DustTest {
     vm.prank(alice);
     world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, newFragmentCoord, "");
 
-    // Create an INVALID parent array for the boundary fragments (all zeros)
-    uint256[] memory invalidParents = new uint256[](2);
-    for (uint256 i = 0; i < 2; i++) {
-      invalidParents[i] = 0;
+    // Compute boundary fragments
+    Vec3[] memory boundaryFragments = world.computeBoundaryFragments(forceFieldEntityId, newFragmentCoord);
+
+    // Create boundaryIdx as [0, 1, ..., len-1]
+    uint8[] memory boundaryIdx = new uint8[](boundaryFragments.length);
+    for (uint256 i = 0; i < boundaryIdx.length; i++) {
+      boundaryIdx[i] = uint8(i);
     }
+
+    // Create an invalid parents array
+    uint8[] memory invalidParents = new uint8[](boundaryIdx.length);
+    invalidParents[0] = 1; // Invalid: for len=1, parents[0] must be 0
 
     // Remove should fail because the parent array doesn't represent a valid spanning tree
     vm.prank(alice);
     vm.expectRevert("Invalid spanning tree");
-    world.removeFragment(aliceEntityId, forceFieldEntityId, newFragmentCoord, invalidParents, "");
+    world.removeFragment(aliceEntityId, forceFieldEntityId, newFragmentCoord, boundaryIdx, invalidParents, "");
   }
 
   function testComputeBoundaryFragments() public {
@@ -614,13 +624,13 @@ contract ForceFieldTest is DustTest {
     vm.stopPrank();
 
     // Compute the boundary fragments for fragment3
-    (Vec3[26] memory boundaryFragments, uint256 len) = world.computeBoundaryFragments(forceFieldEntityId, fragment3);
+    Vec3[] memory boundaryFragments = world.computeBoundaryFragments(forceFieldEntityId, fragment3);
 
     // We expect 2 boundary fragments (fragment1 and fragment2)
-    assertEq(len, 3, "Expected 3 boundary fragments");
+    assertEq(boundaryFragments.length, 3, "Expected 3 boundary fragments");
 
     // Verify that each boundary fragment is part of the force field
-    for (uint256 i = 0; i < len; i++) {
+    for (uint256 i = 0; i < boundaryFragments.length; i++) {
       assertTrue(
         TestForceFieldUtils.isFragment(forceFieldEntityId, boundaryFragments[i]),
         "Boundary fragment is not part of the force field"
@@ -631,7 +641,7 @@ contract ForceFieldTest is DustTest {
     bool foundRefFragment = false;
     bool foundFragment1 = false;
     bool foundFragment2 = false;
-    for (uint256 i = 0; i < len; i++) {
+    for (uint256 i = 0; i < boundaryFragments.length; i++) {
       if (boundaryFragments[i] == refFragmentCoord) foundRefFragment = true;
       if (boundaryFragments[i] == fragment1) foundFragment1 = true;
       if (boundaryFragments[i] == fragment2) foundFragment2 = true;
@@ -862,12 +872,16 @@ contract ForceFieldTest is DustTest {
     endGasReport();
 
     // Compute boundary fragments for removal
-    (, uint256 len) = world.computeBoundaryFragments(forceFieldEntityId, newFragmentCoord);
-    uint256[] memory parents = new uint256[](len);
+    Vec3[] memory boundary = world.computeBoundaryFragments(forceFieldEntityId, newFragmentCoord);
+    assertEq(boundary.length, 1, "Expected 1 boundary fragment");
+
+    uint8[] memory boundaryIdx = new uint8[](boundary.length);
+    boundaryIdx[0] = 0; // Root
+    uint8[] memory parents = new uint8[](boundary.length);
     parents[0] = 0; // Root
 
     startGasReport("Remove forcefield fragment");
-    world.removeFragment(aliceEntityId, forceFieldEntityId, newFragmentCoord, parents, "");
+    world.removeFragment(aliceEntityId, forceFieldEntityId, newFragmentCoord, boundaryIdx, parents, "");
     endGasReport();
 
     vm.stopPrank();
@@ -981,354 +995,469 @@ contract ForceFieldTest is DustTest {
   function testValidateSpanningTree() public view {
     // Test case 1: Empty array (trivial case)
     {
-      Vec3[26] memory fragments;
-      uint256[] memory parents = new uint256[](0);
-      assertFalse(world.validateSpanningTree(fragments, 0, parents), "Empty array should not be valid");
+      Vec3[] memory boundary = new Vec3[](0);
+      uint8[] memory boundaryIdx = new uint8[](0);
+      uint8[] memory parents = new uint8[](0);
+      assertFalse(world.validateSpanningTree(boundary, boundaryIdx, parents), "Empty array should not be valid");
     }
 
     // Test case 2: Single node (trivial case)
     {
-      Vec3[26] memory fragments;
-      fragments[0] = vec3(0, 0, 0);
-      uint256[] memory parents = new uint256[](1);
+      Vec3[] memory boundary = new Vec3[](1);
+      boundary[0] = vec3(0, 0, 0);
+      uint8[] memory boundaryIdx = new uint8[](1);
+      boundaryIdx[0] = 0;
+      uint8[] memory parents = new uint8[](1);
       parents[0] = 0; // Self-referential
-      assertTrue(world.validateSpanningTree(fragments, 1, parents), "Single node should be valid");
+      assertTrue(world.validateSpanningTree(boundary, boundaryIdx, parents), "Single node should be valid");
     }
 
     // Test case 3: Simple line of 3 nodes
     {
-      Vec3[26] memory fragments;
-      fragments[0] = vec3(0, 0, 0);
-      fragments[1] = vec3(1, 0, 0); // Adjacent to fragments[0]
-      fragments[2] = vec3(2, 0, 0); // Adjacent to fragments[1]
-
-      uint256[] memory parents = new uint256[](3);
+      Vec3[] memory boundary = new Vec3[](3);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(2, 0, 0);
+      uint8[] memory boundaryIdx = new uint8[](3);
+      boundaryIdx[0] = 0;
+      boundaryIdx[1] = 1;
+      boundaryIdx[2] = 2;
+      uint8[] memory parents = new uint8[](3);
       parents[0] = 0; // Root
-      parents[1] = 0; // Parent is fragments[0]
-      parents[2] = 1; // Parent is fragments[1]
-
-      assertTrue(world.validateSpanningTree(fragments, 3, parents), "Line of 3 nodes should be valid");
+      parents[1] = 0; // Parent is boundary[0]
+      parents[2] = 1; // Parent is boundary[1]
+      assertTrue(world.validateSpanningTree(boundary, boundaryIdx, parents), "Line of 3 nodes should be valid");
     }
 
     // Test case 4: Star pattern (all nodes connected to root)
     {
-      Vec3[26] memory fragments;
-      fragments[0] = vec3(0, 0, 0); // Center
-      fragments[1] = vec3(1, 0, 0); // East
-      fragments[2] = vec3(0, 1, 0); // North
-      fragments[3] = vec3(-1, 0, 0); // West
-      fragments[4] = vec3(0, -1, 0); // South
-
-      uint256[] memory parents = new uint256[](5);
+      Vec3[] memory boundary = new Vec3[](5);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(0, 1, 0);
+      boundary[3] = vec3(-1, 0, 0);
+      boundary[4] = vec3(0, -1, 0);
+      uint8[] memory boundaryIdx = new uint8[](5);
+      for (uint8 i = 0; i < 5; i++) {
+        boundaryIdx[i] = i;
+      }
+      uint8[] memory parents = new uint8[](5);
       parents[0] = 0; // Root
-      parents[1] = 0; // All connected to root
+      parents[1] = 0;
       parents[2] = 0;
       parents[3] = 0;
       parents[4] = 0;
-
-      assertTrue(world.validateSpanningTree(fragments, 5, parents), "Star pattern should be valid");
+      assertTrue(world.validateSpanningTree(boundary, boundaryIdx, parents), "Star pattern should be valid");
     }
 
     // Test case 5: Invalid - parents array length mismatch
     {
-      Vec3[26] memory fragments;
-      fragments[0] = vec3(0, 0, 0);
-      fragments[1] = vec3(1, 0, 0);
-      fragments[2] = vec3(2, 0, 0);
-
-      uint256[] memory parents = new uint256[](2); // Missing one parent
+      Vec3[] memory boundary = new Vec3[](3);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(2, 0, 0);
+      uint8[] memory boundaryIdx = new uint8[](3);
+      boundaryIdx[0] = 0;
+      boundaryIdx[1] = 1;
+      boundaryIdx[2] = 2;
+      uint8[] memory parents = new uint8[](2);
       parents[0] = 0;
       parents[1] = 0;
-
-      assertFalse(world.validateSpanningTree(fragments, 3, parents), "Invalid parents length");
+      assertFalse(world.validateSpanningTree(boundary, boundaryIdx, parents), "Invalid parents length");
     }
 
     // Test case 6: Invalid - non-adjacent nodes
     {
-      Vec3[26] memory fragments;
-      fragments[0] = vec3(0, 0, 0);
-      fragments[1] = vec3(1, 0, 0); // Adjacent to fragments[0]
-      fragments[2] = vec3(3, 0, 0); // NOT adjacent to fragments[1] (distance = 2)
-
-      uint256[] memory parents = new uint256[](3);
+      Vec3[] memory boundary = new Vec3[](3);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(3, 0, 0);
+      uint8[] memory boundaryIdx = new uint8[](3);
+      boundaryIdx[0] = 0;
+      boundaryIdx[1] = 1;
+      boundaryIdx[2] = 2;
+      uint8[] memory parents = new uint8[](3);
       parents[0] = 0;
       parents[1] = 0;
-      parents[2] = 1; // Claims fragments[1] is parent, but they're not adjacent
-
-      assertFalse(world.validateSpanningTree(fragments, 3, parents), "Non-adjacent fragments");
+      parents[2] = 1;
+      assertFalse(world.validateSpanningTree(boundary, boundaryIdx, parents), "Non-adjacent fragments");
     }
 
     // Test case 7: Invalid - disconnected graph
     {
-      Vec3[26] memory fragments;
-      fragments[0] = vec3(0, 0, 0);
-      fragments[1] = vec3(1, 0, 0); // Adjacent to fragments[0]
-      fragments[2] = vec3(5, 0, 0); // Disconnected from others
-      fragments[3] = vec3(6, 0, 0); // Adjacent to fragments[2] but not to fragments[0] or fragments[1]
-
-      uint256[] memory parents = new uint256[](4);
+      Vec3[] memory boundary = new Vec3[](4);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(5, 0, 0);
+      boundary[3] = vec3(6, 0, 0);
+      uint8[] memory boundaryIdx = new uint8[](4);
+      boundaryIdx[0] = 0;
+      boundaryIdx[1] = 1;
+      boundaryIdx[2] = 2;
+      boundaryIdx[3] = 3;
+      uint8[] memory parents = new uint8[](4);
       parents[0] = 0;
       parents[1] = 0;
-      parents[2] = 2; // Self-referential, creating a second "root"
+      parents[2] = 2;
       parents[3] = 2;
-
-      assertFalse(world.validateSpanningTree(fragments, 4, parents), "Disconnected graph should be invalid");
+      assertFalse(world.validateSpanningTree(boundary, boundaryIdx, parents), "Disconnected graph should be invalid");
     }
 
     // Test case 8: Invalid - cycle in the graph
     {
-      Vec3[26] memory fragments;
-      fragments[0] = vec3(0, 0, 0);
-      fragments[1] = vec3(1, 0, 0); // Adjacent to fragments[0]
-      fragments[2] = vec3(1, 1, 0); // Adjacent to fragments[1]
-
-      uint256[] memory parents = new uint256[](3);
-      parents[0] = 2; // Creates a cycle: 0->2->1->0
+      Vec3[] memory boundary = new Vec3[](3);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(1, 1, 0);
+      uint8[] memory boundaryIdx = new uint8[](3);
+      boundaryIdx[0] = 0;
+      boundaryIdx[1] = 1;
+      boundaryIdx[2] = 2;
+      uint8[] memory parents = new uint8[](3);
+      parents[0] = 2;
       parents[1] = 0;
       parents[2] = 1;
-
-      assertFalse(world.validateSpanningTree(fragments, 3, parents), "Root must be self-referential");
+      assertFalse(world.validateSpanningTree(boundary, boundaryIdx, parents), "Root must be self-referential");
     }
 
     // Test case 9: Valid - complex tree with branches
     {
-      Vec3[26] memory fragments;
-      fragments[0] = vec3(0, 0, 0); // Root
-      fragments[1] = vec3(1, 0, 0); // Level 1, branch 1
-      fragments[2] = vec3(0, 1, 0); // Level 1, branch 2
-      fragments[3] = vec3(2, 0, 0); // Level 2, from branch 1
-      fragments[4] = vec3(1, 1, 0); // Level 2, from branch 2
-      fragments[5] = vec3(0, 2, 0); // Level 2, from branch 2
-      fragments[6] = vec3(3, 0, 0); // Level 3, from branch 1
-
-      uint256[] memory parents = new uint256[](7);
-      parents[0] = 0; // Root
-      parents[1] = 0; // Connected to root
-      parents[2] = 0; // Connected to root
-      parents[3] = 1; // Connected to branch 1
-      parents[4] = 2; // Connected to branch 2
-      parents[5] = 2; // Connected to branch 2
-      parents[6] = 3; // Connected to level 2 of branch 1
-
-      assertTrue(world.validateSpanningTree(fragments, 7, parents), "Complex tree should be valid");
-    }
-
-    // Test case 10: Invalid - diagonal neighbors (not in Von Neumann neighborhood)
-    {
-      Vec3[26] memory fragments;
-      fragments[0] = vec3(0, 0, 0);
-      fragments[1] = vec3(1, 1, 0); // Diagonal to fragments[0], not in Von Neumann neighborhood
-
-      uint256[] memory parents = new uint256[](2);
+      Vec3[] memory boundary = new Vec3[](7);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(0, 1, 0);
+      boundary[3] = vec3(2, 0, 0);
+      boundary[4] = vec3(1, 1, 0);
+      boundary[5] = vec3(0, 2, 0);
+      boundary[6] = vec3(3, 0, 0);
+      uint8[] memory boundaryIdx = new uint8[](7);
+      for (uint8 i = 0; i < 7; i++) {
+        boundaryIdx[i] = i;
+      }
+      uint8[] memory parents = new uint8[](7);
       parents[0] = 0;
       parents[1] = 0;
+      parents[2] = 0;
+      parents[3] = 1;
+      parents[4] = 2;
+      parents[5] = 2;
+      parents[6] = 3;
+      assertTrue(world.validateSpanningTree(boundary, boundaryIdx, parents), "Complex tree should be valid");
+    }
 
-      assertFalse(world.validateSpanningTree(fragments, 2, parents), "Non-adjacent fragments");
+    // Test case 10: Invalid - diagonal neighbors
+    {
+      Vec3[] memory boundary = new Vec3[](2);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 1, 0);
+      uint8[] memory boundaryIdx = new uint8[](2);
+      boundaryIdx[0] = 0;
+      boundaryIdx[1] = 1;
+      uint8[] memory parents = new uint8[](2);
+      parents[0] = 0;
+      parents[1] = 0;
+      assertFalse(world.validateSpanningTree(boundary, boundaryIdx, parents), "Non-adjacent fragments");
     }
 
     // Test case 11: Invalid - parent index out of bounds
     {
-      Vec3[26] memory fragments;
-      fragments[0] = vec3(0, 0, 0);
-      fragments[1] = vec3(1, 0, 0);
-      fragments[2] = vec3(2, 0, 0);
-
-      uint256[] memory parents = new uint256[](3);
+      Vec3[] memory boundary = new Vec3[](3);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(2, 0, 0);
+      uint8[] memory boundaryIdx = new uint8[](3);
+      boundaryIdx[0] = 0;
+      boundaryIdx[1] = 1;
+      boundaryIdx[2] = 2;
+      uint8[] memory parents = new uint8[](3);
       parents[0] = 0;
       parents[1] = 0;
-      parents[2] = 999; // Parent index out of bounds
-
-      assertFalse(world.validateSpanningTree(fragments, 3, parents), "Parent index out of bounds");
+      parents[2] = 10;
+      assertFalse(world.validateSpanningTree(boundary, boundaryIdx, parents), "Parent index out of bounds");
     }
 
     // Test case 12: Invalid - cycle in the middle of the array
     {
-      Vec3[26] memory fragments;
-      fragments[0] = vec3(0, 0, 0);
-      fragments[1] = vec3(1, 0, 0);
-      fragments[2] = vec3(2, 0, 0);
-      fragments[3] = vec3(3, 0, 0);
-      fragments[4] = vec3(4, 0, 0);
-
-      uint256[] memory parents = new uint256[](5);
-      parents[0] = 0; // Root is valid
-      parents[1] = 0; // Valid
-      parents[2] = 3; // Creates a cycle with node 3
-      parents[3] = 2; // Part of the cycle
-      parents[4] = 3; // Valid connection to node 3
-
-      assertFalse(world.validateSpanningTree(fragments, 5, parents), "Cycle in the middle of the array");
+      Vec3[] memory boundary = new Vec3[](5);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(2, 0, 0);
+      boundary[3] = vec3(3, 0, 0);
+      boundary[4] = vec3(4, 0, 0);
+      uint8[] memory boundaryIdx = new uint8[](5);
+      for (uint8 i = 0; i < 5; i++) {
+        boundaryIdx[i] = i;
+      }
+      uint8[] memory parents = new uint8[](5);
+      parents[0] = 0;
+      parents[1] = 0;
+      parents[2] = 3;
+      parents[3] = 2;
+      parents[4] = 3;
+      assertFalse(world.validateSpanningTree(boundary, boundaryIdx, parents), "Cycle in the middle of the array");
     }
 
     // Test case 13: Invalid - multiple nodes pointing to non-existent parent
     {
-      Vec3[26] memory fragments;
-      fragments[0] = vec3(0, 0, 0);
-      fragments[1] = vec3(1, 0, 0);
-      fragments[2] = vec3(2, 0, 0);
-      fragments[3] = vec3(3, 0, 0);
-      fragments[4] = vec3(4, 0, 0);
-
-      uint256[] memory parents = new uint256[](5);
+      Vec3[] memory boundary = new Vec3[](5);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(2, 0, 0);
+      boundary[3] = vec3(3, 0, 0);
+      boundary[4] = vec3(4, 0, 0);
+      uint8[] memory boundaryIdx = new uint8[](5);
+      for (uint8 i = 0; i < 5; i++) {
+        boundaryIdx[i] = i;
+      }
+      uint8[] memory parents = new uint8[](5);
       parents[0] = 0;
-      parents[1] = 10; // Invalid parent
-      parents[2] = 10; // Same invalid parent
-      parents[3] = 10; // Same invalid parent
+      parents[1] = 10;
+      parents[2] = 10;
+      parents[3] = 10;
       parents[4] = 0;
-
-      assertFalse(world.validateSpanningTree(fragments, 5, parents), "Multiple nodes pointing to non-existent parent");
+      assertFalse(
+        world.validateSpanningTree(boundary, boundaryIdx, parents), "Multiple nodes pointing to non-existent parent"
+      );
     }
 
     // Test case 14: Invalid - node is its own parent (except root)
     {
-      Vec3[26] memory fragments;
-      fragments[0] = vec3(0, 0, 0);
-      fragments[1] = vec3(1, 0, 0);
-      fragments[2] = vec3(2, 0, 0);
-      fragments[3] = vec3(3, 0, 0);
-
-      uint256[] memory parents = new uint256[](4);
-      parents[0] = 0; // Valid root
-      parents[1] = 0; // Valid
-      parents[2] = 2; // Node is its own parent
-      parents[3] = 2; // Valid
-
-      assertFalse(world.validateSpanningTree(fragments, 4, parents), "Node cannot be its own parent");
+      Vec3[] memory boundary = new Vec3[](4);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(2, 0, 0);
+      boundary[3] = vec3(3, 0, 0);
+      uint8[] memory boundaryIdx = new uint8[](4);
+      for (uint8 i = 0; i < 4; i++) {
+        boundaryIdx[i] = i;
+      }
+      uint8[] memory parents = new uint8[](4);
+      parents[0] = 0;
+      parents[1] = 0;
+      parents[2] = 2;
+      parents[3] = 2;
+      assertFalse(world.validateSpanningTree(boundary, boundaryIdx, parents), "Node cannot be its own parent");
     }
 
     // Test case 15: Invalid - complex cycle in a larger graph
     {
-      Vec3[26] memory fragments;
-      fragments[0] = vec3(0, 0, 0);
-      fragments[1] = vec3(1, 0, 0);
-      fragments[2] = vec3(2, 0, 0);
-      fragments[3] = vec3(3, 0, 0);
-      fragments[4] = vec3(4, 0, 0);
-      fragments[5] = vec3(3, 1, 0);
-      fragments[6] = vec3(2, 1, 0);
-      fragments[7] = vec3(1, 1, 0);
-
-      uint256[] memory parents = new uint256[](8);
-      parents[0] = 0; // Root
-      parents[1] = 0; // Valid
-      parents[2] = 1; // Valid
-      parents[3] = 2; // Valid
-      parents[4] = 3; // Valid
-      parents[5] = 6; // Part of cycle
-      parents[6] = 7; // Part of cycle
-      parents[7] = 5; // Creates cycle: 5->6->7->5
-
-      assertFalse(world.validateSpanningTree(fragments, 8, parents), "Complex cycle in larger graph");
+      Vec3[] memory boundary = new Vec3[](8);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(2, 0, 0);
+      boundary[3] = vec3(3, 0, 0);
+      boundary[4] = vec3(4, 0, 0);
+      boundary[5] = vec3(3, 1, 0);
+      boundary[6] = vec3(2, 1, 0);
+      boundary[7] = vec3(1, 1, 0);
+      uint8[] memory boundaryIdx = new uint8[](8);
+      for (uint8 i = 0; i < 8; i++) {
+        boundaryIdx[i] = i;
+      }
+      uint8[] memory parents = new uint8[](8);
+      parents[0] = 0;
+      parents[1] = 0;
+      parents[2] = 1;
+      parents[3] = 2;
+      parents[4] = 3;
+      parents[5] = 6;
+      parents[6] = 7;
+      parents[7] = 5;
+      assertFalse(world.validateSpanningTree(boundary, boundaryIdx, parents), "Complex cycle in larger graph");
     }
 
     // Test case 16: Invalid - root not at index 0
     {
-      Vec3[26] memory fragments;
-      fragments[0] = vec3(0, 0, 0);
-      fragments[1] = vec3(1, 0, 0);
-      fragments[2] = vec3(2, 0, 0);
-      fragments[3] = vec3(3, 0, 0);
-
-      uint256[] memory parents = new uint256[](4);
-      parents[0] = 1; // Not self-referential
-      parents[1] = 1; // This is the root
+      Vec3[] memory boundary = new Vec3[](4);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(2, 0, 0);
+      boundary[3] = vec3(3, 0, 0);
+      uint8[] memory boundaryIdx = new uint8[](4);
+      for (uint8 i = 0; i < 4; i++) {
+        boundaryIdx[i] = i;
+      }
+      uint8[] memory parents = new uint8[](4);
+      parents[0] = 1;
+      parents[1] = 1;
       parents[2] = 1;
       parents[3] = 2;
-
-      assertFalse(world.validateSpanningTree(fragments, 4, parents), "Root must be at index 0");
+      assertFalse(world.validateSpanningTree(boundary, boundaryIdx, parents), "Root must be at index 0");
     }
 
-    // Test case 17: Invalid - parent references later index (creating forward reference)
+    // Test case 17: Invalid - parent references later index
     {
-      Vec3[26] memory fragments;
-      fragments[0] = vec3(0, 0, 0);
-      fragments[1] = vec3(1, 0, 0);
-      fragments[2] = vec3(1, 1, 0);
-      fragments[3] = vec3(0, 1, 0);
-
-      uint256[] memory parents = new uint256[](4);
-      parents[0] = 0; // Valid root
-      parents[1] = 3; // Forward reference to node 3
+      Vec3[] memory boundary = new Vec3[](4);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(1, 1, 0);
+      boundary[3] = vec3(0, 1, 0);
+      uint8[] memory boundaryIdx = new uint8[](4);
+      for (uint8 i = 0; i < 4; i++) {
+        boundaryIdx[i] = i;
+      }
+      uint8[] memory parents = new uint8[](4);
+      parents[0] = 0;
+      parents[1] = 3;
       parents[2] = 1;
       parents[3] = 0;
-
-      assertFalse(world.validateSpanningTree(fragments, 4, parents), "Forward reference creates invalid tree");
+      assertFalse(world.validateSpanningTree(boundary, boundaryIdx, parents), "Forward reference creates invalid tree");
     }
 
     // Test case 18: Valid - zigzag pattern
     {
-      Vec3[26] memory fragments;
-      fragments[0] = vec3(0, 0, 0);
-      fragments[1] = vec3(1, 0, 0);
-      fragments[2] = vec3(1, 1, 0);
-      fragments[3] = vec3(0, 1, 0);
-      fragments[4] = vec3(0, 2, 0);
-
-      uint256[] memory parents = new uint256[](5);
+      Vec3[] memory boundary = new Vec3[](5);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(1, 1, 0);
+      boundary[3] = vec3(0, 1, 0);
+      boundary[4] = vec3(0, 2, 0);
+      uint8[] memory boundaryIdx = new uint8[](5);
+      for (uint8 i = 0; i < 5; i++) {
+        boundaryIdx[i] = i;
+      }
+      uint8[] memory parents = new uint8[](5);
       parents[0] = 0;
       parents[1] = 0;
       parents[2] = 1;
       parents[3] = 2;
       parents[4] = 3;
-
-      assertTrue(world.validateSpanningTree(fragments, 5, parents), "Zigzag pattern should be valid");
+      assertTrue(world.validateSpanningTree(boundary, boundaryIdx, parents), "Zigzag pattern should be valid");
     }
 
     // Test case 19: Invalid - multiple roots
     {
-      Vec3[26] memory fragments;
-      fragments[0] = vec3(0, 0, 0);
-      fragments[1] = vec3(1, 0, 0);
-      fragments[2] = vec3(2, 0, 0);
-      fragments[3] = vec3(10, 0, 0); // Disconnected section
-      fragments[4] = vec3(11, 0, 0);
-      fragments[5] = vec3(12, 0, 0);
-
-      uint256[] memory parents = new uint256[](6);
-      parents[0] = 0; // First root
+      Vec3[] memory boundary = new Vec3[](6);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(2, 0, 0);
+      boundary[3] = vec3(10, 0, 0);
+      boundary[4] = vec3(11, 0, 0);
+      boundary[5] = vec3(12, 0, 0);
+      uint8[] memory boundaryIdx = new uint8[](6);
+      for (uint8 i = 0; i < 6; i++) {
+        boundaryIdx[i] = i;
+      }
+      uint8[] memory parents = new uint8[](6);
+      parents[0] = 0;
       parents[1] = 0;
       parents[2] = 1;
-      parents[3] = 3; // Second root
+      parents[3] = 3;
       parents[4] = 3;
       parents[5] = 4;
-
-      assertFalse(world.validateSpanningTree(fragments, 6, parents), "Multiple roots should be invalid");
+      assertFalse(world.validateSpanningTree(boundary, boundaryIdx, parents), "Multiple roots should be invalid");
     }
 
     // Test case 20: Invalid - complex disconnected components
     {
-      Vec3[26] memory fragments;
-      // Component 1
-      fragments[0] = vec3(0, 0, 0);
-      fragments[1] = vec3(1, 0, 0);
-      fragments[2] = vec3(2, 0, 0);
-      // Component 2
-      fragments[3] = vec3(10, 0, 0);
-      fragments[4] = vec3(11, 0, 0);
-      // Component 3
-      fragments[5] = vec3(20, 0, 0);
-      fragments[6] = vec3(21, 0, 0);
-      fragments[7] = vec3(22, 0, 0);
-      fragments[8] = vec3(23, 0, 0);
-      fragments[9] = vec3(24, 0, 0);
-
-      uint256[] memory parents = new uint256[](10);
-      // Component 1
+      Vec3[] memory boundary = new Vec3[](10);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(2, 0, 0);
+      boundary[3] = vec3(10, 0, 0);
+      boundary[4] = vec3(11, 0, 0);
+      boundary[5] = vec3(20, 0, 0);
+      boundary[6] = vec3(21, 0, 0);
+      boundary[7] = vec3(22, 0, 0);
+      boundary[8] = vec3(23, 0, 0);
+      boundary[9] = vec3(24, 0, 0);
+      uint8[] memory boundaryIdx = new uint8[](10);
+      for (uint8 i = 0; i < 10; i++) {
+        boundaryIdx[i] = i;
+      }
+      uint8[] memory parents = new uint8[](10);
       parents[0] = 0;
       parents[1] = 0;
       parents[2] = 1;
-      // Component 2
       parents[3] = 3;
       parents[4] = 3;
-      // Component 3
       parents[5] = 5;
       parents[6] = 5;
       parents[7] = 6;
       parents[8] = 7;
       parents[9] = 8;
-
       assertFalse(
-        world.validateSpanningTree(fragments, 10, parents), "Complex disconnected components should be invalid"
+        world.validateSpanningTree(boundary, boundaryIdx, parents), "Complex disconnected components should be invalid"
+      );
+    }
+
+    // Additional Test case 21: Valid - permuted order with valid parents
+    {
+      Vec3[] memory boundary = new Vec3[](3);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(2, 0, 0);
+      uint8[] memory boundaryIdx = new uint8[](3);
+      boundaryIdx[0] = 2; // Order: [2,1,0]
+      boundaryIdx[1] = 1;
+      boundaryIdx[2] = 0;
+      uint8[] memory parents = new uint8[](3);
+      parents[0] = 0; // Root is boundary[2]
+      parents[1] = 0; // boundary[1] is child of boundary[2]
+      parents[2] = 1; // boundary[0] is child of boundary[1]
+      assertTrue(
+        world.validateSpanningTree(boundary, boundaryIdx, parents), "Permuted order with valid parents should be valid"
+      );
+    }
+
+    // Additional Test case 22: Invalid - duplicate indices in boundaryIdx
+    {
+      Vec3[] memory boundary = new Vec3[](3);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(2, 0, 0);
+      uint8[] memory boundaryIdx = new uint8[](3);
+      boundaryIdx[0] = 0;
+      boundaryIdx[1] = 0; // Duplicate
+      boundaryIdx[2] = 2;
+      uint8[] memory parents = new uint8[](3);
+      parents[0] = 0;
+      parents[1] = 0;
+      parents[2] = 1;
+      assertFalse(
+        world.validateSpanningTree(boundary, boundaryIdx, parents), "Duplicate indices in boundaryIdx should be invalid"
+      );
+    }
+
+    // Additional Test case 23: Invalid - missing indices in boundaryIdx
+    {
+      Vec3[] memory boundary = new Vec3[](3);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(2, 0, 0);
+      uint8[] memory boundaryIdx = new uint8[](3);
+      boundaryIdx[0] = 0;
+      boundaryIdx[1] = 1;
+      boundaryIdx[2] = 1; // Missing index 2
+      uint8[] memory parents = new uint8[](3);
+      parents[0] = 0;
+      parents[1] = 0;
+      parents[2] = 1;
+      assertFalse(
+        world.validateSpanningTree(boundary, boundaryIdx, parents), "Missing indices in boundaryIdx should be invalid"
+      );
+    }
+
+    // Additional Test case 24: Valid - non-identity permutation with valid parents
+    {
+      Vec3[] memory boundary = new Vec3[](4);
+      boundary[0] = vec3(0, 0, 0);
+      boundary[1] = vec3(1, 0, 0);
+      boundary[2] = vec3(0, 1, 0);
+      boundary[3] = vec3(1, 1, 0);
+      uint8[] memory boundaryIdx = new uint8[](4);
+      boundaryIdx[0] = 3; // Order: [3,2,1,0]
+      boundaryIdx[1] = 2;
+      boundaryIdx[2] = 1;
+      boundaryIdx[3] = 0;
+      uint8[] memory parents = new uint8[](4);
+      parents[0] = 0; // Root is boundary[3]
+      parents[1] = 0; // boundary[2] -> boundary[3]
+      parents[2] = 0; // boundary[1] -> boundary[3]
+      parents[3] = 1; // boundary[0] -> boundary[2]
+      assertTrue(
+        world.validateSpanningTree(boundary, boundaryIdx, parents),
+        "Non-identity permutation with valid parents should be valid"
       );
     }
   }
