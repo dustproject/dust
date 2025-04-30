@@ -24,12 +24,10 @@ export type ClientRpcSchema = RpcSchema.From<
       ReturnType: OneOf<
         | {
             readonly userOperationHash: Hex;
-            readonly status: "success" | "reverted";
             readonly receipt: UserOperationReceipt;
           }
         | {
             readonly transactionHash: Hex;
-            readonly status: "success" | "reverted";
             readonly receipt: TransactionReceipt;
           }
       >;
