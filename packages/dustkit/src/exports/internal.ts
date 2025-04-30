@@ -12,5 +12,4 @@ export {
 export {
   AppRpcSchema,
   ClientRpcSchema,
-  ClientViemRpcSchema,
 } from "../rpc/schemas";
