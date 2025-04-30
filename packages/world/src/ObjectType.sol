@@ -45,6 +45,7 @@ library Category {
   uint16 constant Seed = uint16(18) << OFFSET_BITS;
   uint16 constant Sapling = uint16(19) << OFFSET_BITS;
   uint16 constant SmartEntityBlock = uint16(20) << OFFSET_BITS;
+  uint16 constant Station = uint16(21) << OFFSET_BITS;
   // Non-Block Categories
   uint16 constant Pick = uint16(128) << OFFSET_BITS;
   uint16 constant Axe = uint16(129) << OFFSET_BITS;
@@ -179,19 +180,6 @@ library ObjectTypes {
   ObjectType constant VinesBush = ObjectType.wrap(Category.Greenery | 2);
   ObjectType constant IvyVine = ObjectType.wrap(Category.Greenery | 3);
   ObjectType constant HempBush = ObjectType.wrap(Category.Greenery | 4);
-  ObjectType constant Coral = ObjectType.wrap(Category.UnderwaterPlant | 0);
-  ObjectType constant SeaAnemone = ObjectType.wrap(Category.UnderwaterPlant | 1);
-  ObjectType constant Algae = ObjectType.wrap(Category.UnderwaterPlant | 2);
-  ObjectType constant HornCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 0);
-  ObjectType constant FireCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 1);
-  ObjectType constant TubeCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 2);
-  ObjectType constant BubbleCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 3);
-  ObjectType constant BrainCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 4);
-  ObjectType constant Snow = ObjectType.wrap(Category.MiscBlock | 0);
-  ObjectType constant Ice = ObjectType.wrap(Category.MiscBlock | 1);
-  ObjectType constant Magma = ObjectType.wrap(Category.MiscBlock | 2);
-  ObjectType constant SpiderWeb = ObjectType.wrap(Category.MiscBlock | 3);
-  ObjectType constant Bone = ObjectType.wrap(Category.MiscBlock | 4);
   ObjectType constant GoldenMushroom = ObjectType.wrap(Category.Crop | 0);
   ObjectType constant RedMushroom = ObjectType.wrap(Category.Crop | 1);
   ObjectType constant CoffeeBush = ObjectType.wrap(Category.Crop | 2);
@@ -206,6 +194,20 @@ library ObjectTypes {
   ObjectType constant MushroomStem = ObjectType.wrap(Category.CropBlock | 4);
   ObjectType constant BambooBush = ObjectType.wrap(Category.CropBlock | 5);
   ObjectType constant Cactus = ObjectType.wrap(Category.CropBlock | 6);
+  ObjectType constant Coral = ObjectType.wrap(Category.UnderwaterPlant | 0);
+  ObjectType constant SeaAnemone = ObjectType.wrap(Category.UnderwaterPlant | 1);
+  ObjectType constant Algae = ObjectType.wrap(Category.UnderwaterPlant | 2);
+  ObjectType constant HornCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 0);
+  ObjectType constant FireCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 1);
+  ObjectType constant TubeCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 2);
+  ObjectType constant BubbleCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 3);
+  ObjectType constant BrainCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 4);
+  ObjectType constant Snow = ObjectType.wrap(Category.MiscBlock | 0);
+  ObjectType constant Ice = ObjectType.wrap(Category.MiscBlock | 1);
+  ObjectType constant Magma = ObjectType.wrap(Category.MiscBlock | 2);
+  ObjectType constant SpiderWeb = ObjectType.wrap(Category.MiscBlock | 3);
+  ObjectType constant Bone = ObjectType.wrap(Category.MiscBlock | 4);
+  ObjectType constant TextSign = ObjectType.wrap(Category.MiscBlock | 5);
   ObjectType constant AnyPlank = ObjectType.wrap(Category.Plank | 0);
   ObjectType constant OakPlanks = ObjectType.wrap(Category.Plank | 1);
   ObjectType constant BirchPlanks = ObjectType.wrap(Category.Plank | 2);
@@ -235,10 +237,9 @@ library ObjectTypes {
   ObjectType constant Chest = ObjectType.wrap(Category.SmartEntityBlock | 1);
   ObjectType constant SpawnTile = ObjectType.wrap(Category.SmartEntityBlock | 2);
   ObjectType constant Bed = ObjectType.wrap(Category.SmartEntityBlock | 3);
-  ObjectType constant TextSign = ObjectType.wrap(Category.SmartEntityBlock | 4);
-  ObjectType constant Workbench = ObjectType.wrap(Category.SmartEntityBlock | 5);
-  ObjectType constant Powerstone = ObjectType.wrap(Category.SmartEntityBlock | 6);
-  ObjectType constant Furnace = ObjectType.wrap(Category.SmartEntityBlock | 7);
+  ObjectType constant Workbench = ObjectType.wrap(Category.Station | 0);
+  ObjectType constant Powerstone = ObjectType.wrap(Category.Station | 1);
+  ObjectType constant Furnace = ObjectType.wrap(Category.Station | 2);
   ObjectType constant WoodenPick = ObjectType.wrap(Category.Pick | 0);
   ObjectType constant CopperPick = ObjectType.wrap(Category.Pick | 1);
   ObjectType constant IronPick = ObjectType.wrap(Category.Pick | 2);
@@ -376,6 +377,10 @@ library ObjectTypeLib {
 
   function isSmartEntityBlock(ObjectType self) internal pure returns (bool) {
     return category(self) == Category.SmartEntityBlock;
+  }
+
+  function isStation(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.Station;
   }
 
   function isPick(ObjectType self) internal pure returns (bool) {
@@ -601,8 +606,15 @@ library ObjectTypeLib {
     ];
   }
 
-  function getMiscBlockTypes() internal pure returns (ObjectType[5] memory) {
-    return [ObjectTypes.Snow, ObjectTypes.Ice, ObjectTypes.Magma, ObjectTypes.SpiderWeb, ObjectTypes.Bone];
+  function getMiscBlockTypes() internal pure returns (ObjectType[6] memory) {
+    return [
+      ObjectTypes.Snow,
+      ObjectTypes.Ice,
+      ObjectTypes.Magma,
+      ObjectTypes.SpiderWeb,
+      ObjectTypes.Bone,
+      ObjectTypes.TextSign
+    ];
   }
 
   function getPlankTypes() internal pure returns (ObjectType[9] memory) {
@@ -646,17 +658,12 @@ library ObjectTypeLib {
     ];
   }
 
-  function getSmartEntityBlockTypes() internal pure returns (ObjectType[8] memory) {
-    return [
-      ObjectTypes.ForceField,
-      ObjectTypes.Chest,
-      ObjectTypes.SpawnTile,
-      ObjectTypes.Bed,
-      ObjectTypes.TextSign,
-      ObjectTypes.Workbench,
-      ObjectTypes.Powerstone,
-      ObjectTypes.Furnace
-    ];
+  function getSmartEntityBlockTypes() internal pure returns (ObjectType[4] memory) {
+    return [ObjectTypes.ForceField, ObjectTypes.Chest, ObjectTypes.SpawnTile, ObjectTypes.Bed];
+  }
+
+  function getStationTypes() internal pure returns (ObjectType[3] memory) {
+    return [ObjectTypes.Workbench, ObjectTypes.Powerstone, ObjectTypes.Furnace];
   }
 
   function getPickTypes() internal pure returns (ObjectType[6] memory) {

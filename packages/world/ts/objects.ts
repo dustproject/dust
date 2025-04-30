@@ -24,6 +24,7 @@ export const blockCategories = [
   "Seed",
   "Sapling",
   "SmartEntityBlock",
+  "Station",
 ] as const;
 
 export const nonBlockCategories = [
@@ -410,7 +411,6 @@ export const categoryObjects: {
       energy: 5500000000000000n,
     },
   ],
-
   Leaf: [
     { name: "AnyLeaf", mass: 500000000000000n, energy: 500000000000000n },
     {
@@ -486,28 +486,6 @@ export const categoryObjects: {
     { name: "IvyVine", mass: 200000000000000n },
     { name: "HempBush", mass: 200000000000000n },
   ],
-  UnderwaterPlant: [
-    { name: "Coral", mass: 400000000000000n },
-    { name: "SeaAnemone", mass: 400000000000000n },
-    { name: "Algae", mass: 200000000000000n },
-  ],
-  UnderwaterBlock: [
-    { name: "HornCoralBlock", mass: 37500000000000000n },
-    { name: "FireCoralBlock", mass: 37500000000000000n },
-    { name: "TubeCoralBlock", mass: 37500000000000000n },
-    { name: "BubbleCoralBlock", mass: 37500000000000000n },
-    { name: "BrainCoralBlock", mass: 37500000000000000n },
-  ],
-  MiscBlock: [
-    { name: "Snow", mass: 300000000000000n },
-    { name: "Ice", mass: 200000000000000n },
-    { name: "Magma", mass: 500000000000000n },
-    { name: "SpiderWeb", mass: 300000000000000n },
-    { name: "Bone", mass: 37500000000000000n },
-  ],
-
-  // NON-TERRAIN BLOCKS
-
   Crop: [
     { name: "GoldenMushroom", mass: 300000000000000n },
     { name: "RedMushroom", mass: 300000000000000n },
@@ -526,6 +504,29 @@ export const categoryObjects: {
     { name: "BambooBush", mass: 200000000000000n },
     { name: "Cactus", mass: 1300000000000000n },
   ],
+  UnderwaterPlant: [
+    { name: "Coral", mass: 400000000000000n },
+    { name: "SeaAnemone", mass: 400000000000000n },
+    { name: "Algae", mass: 200000000000000n },
+  ],
+  UnderwaterBlock: [
+    { name: "HornCoralBlock", mass: 37500000000000000n },
+    { name: "FireCoralBlock", mass: 37500000000000000n },
+    { name: "TubeCoralBlock", mass: 37500000000000000n },
+    { name: "BubbleCoralBlock", mass: 37500000000000000n },
+    { name: "BrainCoralBlock", mass: 37500000000000000n },
+  ],
+  MiscBlock: [
+    { name: "Snow", mass: 300000000000000n },
+    { name: "Ice", mass: 200000000000000n },
+    { name: "Magma", mass: 500000000000000n },
+    { name: "SpiderWeb", mass: 300000000000000n },
+    { name: "Bone", mass: 37500000000000000n },
+    { name: "TextSign", mass: 18000000000000000n },
+  ],
+
+  // NON-TERRAIN CATEGORIES
+
   Plank: [
     { name: "AnyPlank", mass: 4500000000000000n },
     { name: "OakPlanks", mass: 4500000000000000n },
@@ -587,7 +588,8 @@ export const categoryObjects: {
     { name: "Chest", mass: 36000000000000000n },
     { name: "SpawnTile", mass: 9135000000000000000n },
     { name: "Bed", mass: 13500000000000000n },
-    { name: "TextSign", mass: 18000000000000000n },
+  ],
+  Station: [
     { name: "Workbench", mass: 18000000000000000n },
     { name: "Powerstone", mass: 80000000000000000n },
     { name: "Furnace", mass: 108000000000000000n },
