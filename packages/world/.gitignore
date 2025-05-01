@@ -9,4 +9,3 @@ broadcast/
 deploys/**/*.json
 dist/
 
-.env
