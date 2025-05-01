@@ -90,9 +90,9 @@ library NatureLib {
         return getWheatDrops(getRandomSeed(coord));
       }
 
-      // FescueGrass has a chance to drop wheat seeds
-      if (objectType == ObjectTypes.FescueGrass) {
-        return getGrassDrops(getRandomSeed(coord));
+      // Grass has a chance to drop wheat seeds
+      if (objectType == ObjectTypes.FescueGrass || objectType == ObjectTypes.SwitchGrass) {
+        return getGrassDrops(objectType, getRandomSeed(coord));
       }
 
       if (objectType.isLeaf()) {
@@ -140,7 +140,7 @@ library NatureLib {
     return result;
   }
 
-  function getGrassDrops(uint256 randomSeed) internal view returns (ObjectAmount[] memory result) {
+  function getGrassDrops(ObjectType grassType, uint256 randomSeed) internal view returns (ObjectAmount[] memory result) {
     uint256[] memory distribution = new uint256[](2);
     distribution[0] = 43; // No seed: 43%
     distribution[1] = 57; // 1 seed: 57%
@@ -152,11 +152,11 @@ library NatureLib {
 
     if (seedDrop.objectType != ObjectTypes.Null) {
       result = new ObjectAmount[](2);
-      result[0] = ObjectAmount(ObjectTypes.FescueGrass, 1);
+      result[0] = ObjectAmount(grassType, 1);
       result[1] = seedDrop;
     } else {
       result = new ObjectAmount[](1);
-      result[0] = ObjectAmount(ObjectTypes.FescueGrass, 1);
+      result[0] = ObjectAmount(grassType, 1);
     }
 
     return result;
