@@ -23,7 +23,7 @@ import {
 
 import { createEntity } from "../../src/utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../../src/utils/ForceFieldUtils.sol";
-import { InventoryUtils } from "../../src/utils/InventoryUtils.sol";
+import { InventoryUtils, SlotTransfer } from "../../src/utils/InventoryUtils.sol";
 
 Vm constant vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
@@ -89,8 +89,16 @@ library TestInventoryUtils {
     InventoryUtils.removeObject(ownerEntityId, objectType, numObjectsToRemove);
   }
 
+  function removeObject(EntityId ownerEntityId, ObjectType objectType, uint16 numObjectsToRemove) public asWorld {
+    InventoryUtils.removeObject(ownerEntityId, objectType, numObjectsToRemove);
+  }
+
   function transferAll(EntityId fromEntityId, EntityId toEntityId) public asWorld {
     InventoryUtils.transferAll(fromEntityId, toEntityId);
+  }
+
+  function transfer(EntityId fromEntityId, EntityId toEntityId, SlotTransfer[] memory transfers) public asWorld {
+    InventoryUtils.transfer(fromEntityId, toEntityId, transfers);
   }
 
   function removeObjectFromSlot(EntityId ownerEntityId, uint16 slot, uint16 numObjectsToRemove) public asWorld {

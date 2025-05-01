@@ -7,9 +7,11 @@ import { EntityId } from "../src/EntityId.sol";
 import { ObjectTypes } from "../src/ObjectType.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
+
+import { InventorySlot, InventorySlotData } from "../src/codegen/tables/InventorySlot.sol";
 import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 
-import { TestInventoryUtils } from "./utils/TestUtils.sol";
+import { SlotTransfer, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract InventoryUtilsTest is DustTest {
   function testMultipleTransferAll() public {
@@ -58,5 +60,46 @@ contract InventoryUtilsTest is DustTest {
 
     assertEq(Inventory.length(aliceEntity), 0);
     assertEq(Inventory.length(bobEntity), 35);
+  }
+
+  function testTransferEntityToNullSlot() public {
+    (, EntityId aliceEntity) = createTestPlayer(vec3(1, 0, 0));
+
+    TestInventoryUtils.addObject(aliceEntity, ObjectTypes.AcaciaLog, 1);
+    TestInventoryUtils.addEntity(aliceEntity, ObjectTypes.CopperAxe);
+    TestInventoryUtils.addObject(aliceEntity, ObjectTypes.FescueGrass, 1);
+
+    TestInventoryUtils.removeObject(aliceEntity, ObjectTypes.FescueGrass, 1);
+
+    // Transfer CopperAxe to the Null slot where FescueGrass was
+    SlotTransfer[] memory transfers = new SlotTransfer[](1);
+    transfers[0] = SlotTransfer({ slotFrom: 1, slotTo: 2, amount: 1 });
+
+    TestInventoryUtils.transfer(aliceEntity, aliceEntity, transfers);
+
+    assertEq(Inventory.length(aliceEntity), 2);
+
+    uint16[] memory slots = Inventory.get(aliceEntity);
+    for (uint256 i = 0; i < slots.length; i++) {
+      InventorySlotData memory slotData = InventorySlot.get(aliceEntity, slots[i]);
+      assertEq(i, slotData.occupiedIndex, "Wrong occupied index");
+    }
+  }
+
+  function _printInventory(EntityId entity) internal view {
+    console.log("-------- Inventory");
+    uint16[] memory slots = Inventory.get(entity);
+    for (uint256 i = 0; i < slots.length; i++) {
+      InventorySlotData memory slotData = InventorySlot.get(entity, slots[i]);
+      console.log("Slot", slots[i]);
+      if (slotData.entityId.exists()) {
+        console.log("  EntityId", uint256(slotData.entityId.unwrap()));
+      } else {
+        console.log("  EntityId null");
+      }
+      console.log("  ObjectType", slotData.objectType.unwrap());
+      console.log("  Amount", slotData.amount);
+      console.log("  occupiedIndex", slotData.occupiedIndex);
+    }
   }
 }

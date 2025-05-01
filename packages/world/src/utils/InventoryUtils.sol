@@ -100,9 +100,37 @@ library InventoryUtils {
   function addEntityToSlot(EntityId owner, EntityId entityId, uint16 slot) internal {
     uint16 maxSlots = EntityObjectType._get(owner).getMaxInventorySlots();
     require(slot < maxSlots, "Invalid slot");
-    require(entityId.exists(), "Entity must exist");
+    ObjectType objectType = EntityObjectType._get(entityId);
+    require(!objectType.isNull(), "Entity must exist");
+
+    InventorySlotData memory slotData = InventorySlot._get(owner, slot);
+
+    require(slotData.objectType.isNull(), "Slot must be empty");
+
+    // Entities always have amount 1
+    InventorySlot._setAmount(owner, slot, 1);
+    InventorySlot._setEntityId(owner, slot, entityId);
+    InventorySlot._setObjectType(owner, slot, objectType);
+    InventorySlot._setOccupiedIndex(owner, slot, uint16(Inventory._length(owner)));
+    Inventory._push(owner, slot);
+
+    if (slotData.typeIndex < InventoryTypeSlots._length(owner, ObjectTypes.Null)) {
+      uint16 nullSlot = InventoryTypeSlots._getItem(owner, ObjectTypes.Null, slotData.typeIndex);
+      if (nullSlot == slot) {
+        _removeFromTypeSlots(owner, ObjectTypes.Null, slot);
+      }
+    }
+
+    _addToTypeSlots(owner, objectType, slot);
+  }
+
+  function addEntity(EntityId owner, EntityId entityId) internal returns (uint16 slot) {
+    slot = _useEmptySlot(owner);
+    uint16 maxSlots = EntityObjectType._get(owner).getMaxInventorySlots();
+    require(slot < maxSlots, "Invalid slot");
 
     ObjectType objectType = EntityObjectType._get(entityId);
+    require(!objectType.isNull(), "Entity must exist");
 
     Inventory._push(owner, slot);
     InventorySlot._setEntityId(owner, slot, entityId);
@@ -111,11 +139,7 @@ library InventoryUtils {
     InventorySlot._setAmount(owner, slot, 1);
 
     _addToTypeSlots(owner, objectType, slot);
-  }
 
-  function addEntity(EntityId owner, EntityId entityId) internal returns (uint16 slot) {
-    slot = _useEmptySlot(owner);
-    addEntityToSlot(owner, entityId, slot);
     return slot;
   }
 
