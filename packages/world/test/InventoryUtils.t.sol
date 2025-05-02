@@ -86,20 +86,55 @@ contract InventoryUtilsTest is DustTest {
     }
   }
 
-  function _printInventory(EntityId entity) internal view {
-    console.log("-------- Inventory");
-    uint16[] memory slots = Inventory.get(entity);
+  function testDuplicateOccupiedSlots() public {
+    (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
+
+    TestInventoryUtils.addEntity(alice, ObjectTypes.WoodenHoe); // slot 0
+    TestInventoryUtils.addEntity(alice, ObjectTypes.IronPick); // slot 1
+    assertEq(Inventory.length(alice), 2, "expected two occupied slots");
+
+    TestInventoryUtils.removeEntityFromSlot(alice, 0);
+    TestInventoryUtils.removeEntityFromSlot(alice, 1);
+    assertEq(Inventory.length(alice), 0, "inventory should be empty");
+    assertEq(InventoryTypeSlots.length(alice, ObjectTypes.Null), 2, "expected two null slots");
+
+    // Reuse the slots twice
+    TestInventoryUtils.addEntity(alice, ObjectTypes.CopperAxe);
+    TestInventoryUtils.addEntity(alice, ObjectTypes.NeptuniumAxe);
+
+    // Occupied slots should be different
+    uint16[] memory slots = Inventory.get(alice);
+    assertEq(slots.length, 2, "length mismatch");
+    assertNotEq(slots[0], slots[1]);
+  }
+
+  function testDuplicateOccupiedSlotsWithSelfTransfers() public {
+    (, EntityId aliceEntity) = createTestPlayer(vec3(0, 0, 0));
+
+    TestInventoryUtils.addEntity(aliceEntity, ObjectTypes.WoodenHoe); // slot 0
+    TestInventoryUtils.addEntity(aliceEntity, ObjectTypes.IronPick); // slot 1
+    assertEq(Inventory.length(aliceEntity), 2, "expected 2 occupied slots");
+
+    SlotTransfer[] memory transfers = new SlotTransfer[](2);
+    transfers[0] = SlotTransfer({ slotFrom: 0, slotTo: 2, amount: 1 });
+    transfers[1] = SlotTransfer({ slotFrom: 1, slotTo: 3, amount: 1 });
+    TestInventoryUtils.transfer(aliceEntity, aliceEntity, transfers);
+
+    // Now the inventory holds slots 2 & 3, while slots 0 & 1 sit in Null
+    // (both with the same incorrect typeIndex = 0).
+    assertEq(Inventory.length(aliceEntity), 2, "inventory should still have 2 items");
+
+    // Require two fresh slots, `_useEmptySlot` will be invoked twice
+    TestInventoryUtils.addEntity(aliceEntity, ObjectTypes.CopperAxe);
+    TestInventoryUtils.addEntity(aliceEntity, ObjectTypes.NeptuniumAxe);
+
+    uint16[] memory slots = Inventory.get(aliceEntity);
+    assertEq(slots.length, 4, "expected 4 occupied-slot entries");
+
+    // All slots should be unique and correct
     for (uint256 i = 0; i < slots.length; i++) {
-      InventorySlotData memory slotData = InventorySlot.get(entity, slots[i]);
-      console.log("Slot", slots[i]);
-      if (slotData.entityId.exists()) {
-        console.log("  EntityId", uint256(slotData.entityId.unwrap()));
-      } else {
-        console.log("  EntityId null");
-      }
-      console.log("  ObjectType", slotData.objectType.unwrap());
-      console.log("  Amount", slotData.amount);
-      console.log("  occupiedIndex", slotData.occupiedIndex);
+      InventorySlotData memory slotData = InventorySlot.get(aliceEntity, slots[i]);
+      assertEq(i, slotData.occupiedIndex, "Wrong occupied index");
     }
   }
 }

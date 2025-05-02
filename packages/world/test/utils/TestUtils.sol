@@ -93,6 +93,10 @@ library TestInventoryUtils {
     InventoryUtils.removeObject(ownerEntityId, objectType, numObjectsToRemove);
   }
 
+  function removeEntityFromSlot(EntityId ownerEntityId, uint16 slot) public asWorld {
+    InventoryUtils.removeEntityFromSlot(ownerEntityId, slot);
+  }
+
   function transferAll(EntityId fromEntityId, EntityId toEntityId) public asWorld {
     InventoryUtils.transferAll(fromEntityId, toEntityId);
   }

@@ -88,8 +88,7 @@ library InventoryUtils {
 
     if (toolData.massLeft <= massReduction) {
       // Destroy tool
-      _recycleSlot(toolData.owner, toolData.slot);
-      Mass._deleteRecord(toolData.tool);
+      removeEntityFromSlot(toolData.owner, toolData.slot);
       NatureLib.burnOres(toolData.toolType);
       burnToolEnergy(toolData.toolType, ownerCoord);
     } else {
@@ -126,13 +125,10 @@ library InventoryUtils {
 
   function addEntity(EntityId owner, EntityId entityId) internal returns (uint16 slot) {
     slot = _useEmptySlot(owner);
-    uint16 maxSlots = EntityObjectType._get(owner).getMaxInventorySlots();
-    require(slot < maxSlots, "Invalid slot");
 
     ObjectType objectType = EntityObjectType._get(entityId);
     require(!objectType.isNull(), "Entity must exist");
 
-    Inventory._push(owner, slot);
     InventorySlot._setEntityId(owner, slot, entityId);
     InventorySlot._setObjectType(owner, slot, objectType);
     // Entities always have amount 1
@@ -172,7 +168,6 @@ library InventoryUtils {
       uint16 slot = _useEmptySlot(owner);
       uint16 toAdd = remaining < stackable ? uint16(remaining) : stackable;
 
-      Inventory._push(owner, slot);
       InventorySlot._setObjectType(owner, slot, objectType);
       InventorySlot._setAmount(owner, slot, toAdd);
 
@@ -224,6 +219,14 @@ library InventoryUtils {
     }
 
     revert("Entity not found");
+  }
+
+  function removeEntityFromSlot(EntityId owner, uint16 slot) public {
+    EntityId entity = InventorySlot._getEntityId(owner, slot);
+    require(entity.exists(), "Not an entity");
+
+    _recycleSlot(owner, slot);
+    Mass._deleteRecord(entity);
   }
 
   function removeObject(EntityId owner, ObjectType objectType, uint16 amount) public {
@@ -466,22 +469,20 @@ library InventoryUtils {
       uint16 slot = InventoryTypeSlots._getItem(owner, ObjectTypes.Null, emptyLength - 1);
       _removeFromTypeSlots(owner, ObjectTypes.Null, slot);
       InventorySlot._setOccupiedIndex(owner, slot, occupiedIndex);
+      Inventory._push(owner, slot);
       return slot;
     }
 
     uint16 maxSlots = EntityObjectType._get(owner).getMaxInventorySlots();
     require(occupiedIndex < maxSlots, "All slots used");
     InventorySlot._setOccupiedIndex(owner, occupiedIndex, occupiedIndex);
+    Inventory._push(owner, occupiedIndex);
     return occupiedIndex;
   }
 
   // Marks a slot as empty - O(1)
   function _recycleSlot(EntityId owner, uint16 slot) private {
     ObjectType objectType = InventorySlot._getObjectType(owner, slot);
-
-    // Move to null slots
-    _removeFromTypeSlots(owner, objectType, slot);
-    _addToTypeSlots(owner, ObjectTypes.Null, slot);
 
     // Swap and pop occupied slots to remove from active inventory
     uint16 occupiedIndex = InventorySlot._getOccupiedIndex(owner, slot);
@@ -494,7 +495,13 @@ library InventoryUtils {
       InventorySlot._setOccupiedIndex(owner, lastSlot, occupiedIndex);
     }
 
+    _removeFromTypeSlots(owner, objectType, slot);
+
     InventorySlot._deleteRecord(owner, slot);
+
+    // Add to null type slots AFTER deleteRecord, so it is not overwritten
+    _addToTypeSlots(owner, ObjectTypes.Null, slot);
+
     Inventory._pop(owner);
   }
 }
