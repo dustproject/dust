@@ -137,4 +137,23 @@ contract InventoryUtilsTest is DustTest {
       assertEq(i, slotData.occupiedIndex, "Wrong occupied index");
     }
   }
+
+  function testDuplicateOccupiedSlotsWhenUsingNonSequentialEmptySlots() public {
+    (, EntityId aliceEntity) = createTestPlayer(vec3(0, 0, 0));
+
+    TestInventoryUtils.addEntity(aliceEntity, ObjectTypes.WoodenHoe); // slot 0
+    TestInventoryUtils.addObjectToSlot(aliceEntity, ObjectTypes.Ice, 1, 2); // slot 2
+
+    // This will use an empty slot
+    TestInventoryUtils.addObject(aliceEntity, ObjectTypes.Snow, 1);
+
+    uint16[] memory slots = Inventory.get(aliceEntity);
+    assertEq(slots.length, 3, "expected 3 occupied-slot entries");
+
+    // All slots should be unique and correct
+    for (uint256 i = 0; i < slots.length; i++) {
+      InventorySlotData memory slotData = InventorySlot.get(aliceEntity, slots[i]);
+      assertEq(i, slotData.occupiedIndex, "Wrong occupied index");
+    }
+  }
 }

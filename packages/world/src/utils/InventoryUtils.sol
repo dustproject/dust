@@ -378,44 +378,6 @@ library InventoryUtils {
     Inventory._deleteRecord(from);
   }
 
-  function getSlotData(EntityId owner, SlotTransfer[] memory slotTransfers)
-    internal
-    view
-    returns (EntityId[] memory entities, ObjectAmount[] memory objects)
-  {
-    // Count entities and objects
-    uint256 entityCount = 0;
-    uint256 objectCount = 0;
-
-    for (uint256 i = 0; i < slotTransfers.length; i++) {
-      SlotTransfer memory slotTransfer = slotTransfers[i];
-      if (InventorySlot._getEntityId(owner, slotTransfer.slotFrom).exists()) {
-        entityCount++;
-      } else {
-        objectCount++;
-      }
-    }
-
-    entities = new EntityId[](entityCount);
-    objects = new ObjectAmount[](objectCount);
-
-    // Fill arrays
-    uint256 entityIndex = 0;
-    uint256 objectIndex = 0;
-
-    for (uint256 i = 0; i < slotTransfers.length; i++) {
-      SlotTransfer memory slotTransfer = slotTransfers[i];
-      InventorySlotData memory slotData = InventorySlot._get(owner, slotTransfer.slotFrom);
-      if (slotData.entityId.exists()) {
-        entities[entityIndex++] = slotData.entityId;
-      } else {
-        objects[objectIndex++] = ObjectAmount(slotData.objectType, slotTransfer.amount);
-      }
-    }
-
-    return (entities, objects);
-  }
-
   function _replaceSlot(
     EntityId owner,
     uint16 slot,
@@ -474,10 +436,18 @@ library InventoryUtils {
     }
 
     uint16 maxSlots = EntityObjectType._get(owner).getMaxInventorySlots();
-    require(occupiedIndex < maxSlots, "All slots used");
-    InventorySlot._setOccupiedIndex(owner, occupiedIndex, occupiedIndex);
-    Inventory._push(owner, occupiedIndex);
-    return occupiedIndex;
+    for (uint16 i = 0; i < maxSlots; i++) {
+      // If slot is occupied, skip it
+      if (!InventorySlot._getObjectType(owner, i).isNull()) {
+        continue;
+      }
+
+      InventorySlot._setOccupiedIndex(owner, i, occupiedIndex);
+      Inventory._push(owner, i);
+      return i;
+    }
+
+    revert("All slots used");
   }
 
   // Marks a slot as empty - O(1)
