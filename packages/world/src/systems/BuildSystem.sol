@@ -109,7 +109,7 @@ library BuildLib {
   function _addBlock(ObjectType buildType, Vec3 coord) internal returns (EntityId) {
     (EntityId terrain, ObjectType terrainObjectType) = getOrCreateEntityAt(coord);
     require(terrainObjectType == ObjectTypes.Air, "Cannot build on a non-air block");
-    require(Inventory._length(terrain) == 0, "Cannot build where there are dropped objects");
+    require(Inventory._lengthOccupiedSlots(terrain) == 0, "Cannot build where there are dropped objects");
     if (!buildType.isPassThrough()) {
       require(!getMovableEntityAt(coord).exists(), "Cannot build on a movable entity");
     }

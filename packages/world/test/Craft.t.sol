@@ -492,7 +492,7 @@ contract CraftTest is DustTest {
       aliceEntityId, ObjectTypes.OakLog, ObjectTypes.Player.getMaxInventorySlots() * ObjectTypes.OakLog.getStackable()
     );
     assertEq(
-      Inventory.length(aliceEntityId),
+      Inventory.lengthOccupiedSlots(aliceEntityId),
       ObjectTypes.Player.getMaxInventorySlots(),
       "Wrong number of occupied inventory slots"
     );

@@ -551,7 +551,7 @@ contract MoveTest is DustTest {
     assertInventoryHasObject(entityAtDeathLocation, ObjectTypes.IronOre, 5);
 
     // Player's inventory should be empty
-    assertEq(Inventory.length(aliceEntityId), 0, "Inventory not empty");
+    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Inventory not empty");
   }
 
   function testMoveHorizontalPathFatal() public {
@@ -600,7 +600,7 @@ contract MoveTest is DustTest {
     assertInventoryHasObject(entityAtDeathLocation, ObjectTypes.Diamond, 3);
 
     // Player's inventory should be empty
-    assertEq(Inventory.length(aliceEntityId), 0, "Player inventory not empty");
+    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Player inventory not empty");
   }
 
   function testMoveFailsIfNoPlayer() public {
