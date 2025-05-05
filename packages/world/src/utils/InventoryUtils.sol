@@ -106,8 +106,6 @@ library InventoryUtils {
     InventorySlot._setAmount(owner, slot, 1);
 
     _addToTypeSlots(owner, objectType, slot);
-
-    return slot;
   }
 
   function addEntityToSlot(EntityId owner, EntityId entityId, uint16 slot) internal {
