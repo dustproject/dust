@@ -74,7 +74,9 @@ contract MineSystem is System {
       // TODO: factor out the mass reduction logic so it's cheaper to call
       EntityId entityId = _mine(caller, coord, toolSlot, extraData);
       massLeft = Mass._getMass(entityId);
-    } while (massLeft > 0 && Energy._getEnergy(caller) > 0);
+    } while (
+      massLeft > 0 && Energy._getEnergy(caller) > 0 && InventoryUtils.getToolData(caller, toolSlot).massLeft > 0
+    );
   }
 
   function mineUntilDestroyed(EntityId caller, Vec3 coord, bytes calldata extraData) public {
