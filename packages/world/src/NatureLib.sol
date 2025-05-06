@@ -37,6 +37,11 @@ import { TreeLib } from "./TreeLib.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
 
 library NatureLib {
+  struct RandomDrop {
+    ObjectType objectType;
+    uint256[] distribution;
+  }
+
   function getRandomSeed(Vec3 coord) internal view returns (uint256) {
     Vec3 chunkCoord = coord.toChunkCoord();
     uint256 commitment = ChunkCommitment._get(chunkCoord);
@@ -84,138 +89,127 @@ library NatureLib {
     view
     returns (ObjectAmount[] memory result)
   {
-    if (objectType.hasExtraDrops() && !DisabledExtraDrops._get(mined)) {
-      // Wheat drops wheat + 0-3 wheat seeds
-      if (objectType == ObjectTypes.Wheat) {
-        return getWheatDrops(getRandomSeed(coord));
-      }
+    RandomDrop[] memory randomDrops = getRandomDrops(mined, objectType);
 
-      // Grass has a chance to drop wheat seeds
-      if (objectType == ObjectTypes.FescueGrass || objectType == ObjectTypes.SwitchGrass) {
-        return getGrassDrops(objectType, getRandomSeed(coord));
-      }
+    result = new ObjectAmount[](randomDrops.length + 1);
 
-      if (objectType.isLeaf()) {
-        return getLeafDrops(objectType, getRandomSeed(coord));
+    if (randomDrops.length > 0) {
+      uint256 randomSeed = getRandomSeed(coord);
+      for (uint256 i = 0; i < randomDrops.length; i++) {
+        RandomDrop memory drop = randomDrops[i];
+        (uint256 cap, uint256 remaining) = getCapAndRemaining(drop.objectType);
+        uint256[] memory weights = adjustWeights(drop.distribution, cap, remaining);
+        uint256 amount = selectByWeight(weights, randomSeed);
+        result[i] = ObjectAmount(drop.objectType, uint16(amount));
       }
     }
 
+    // If farmland, convert to dirt
     if (objectType == ObjectTypes.Farmland || objectType == ObjectTypes.WetFarmland) {
-      result = new ObjectAmount[](1);
-      result[0] = ObjectAmount(ObjectTypes.Dirt, 1);
-      return result;
+      objectType = ObjectTypes.Dirt;
     }
 
-    // Default behavior for all other objects
-    result = new ObjectAmount[](1);
-    result[0] = ObjectAmount(objectType, 1);
+    // Add base type as a drop for all objects
+    result[result.length - 1] = ObjectAmount(objectType, 1);
 
     return result;
   }
 
-  function getWheatDrops(uint256 randomSeed) internal view returns (ObjectAmount[] memory result) {
-    // Distribution with expected value of exactly 1
-    uint256[] memory distribution = new uint256[](4);
-    distribution[0] = 40; // 0 seeds: 40%
-    distribution[1] = 30; // 1 seed: 30%
-    distribution[2] = 20; // 2 seeds: 20%
-    distribution[3] = 10; // 3 seeds: 10%
-
-    // Get wheat seed options and their weights using distribution
-    (ObjectAmount[] memory seedOptions, uint256[] memory weights) = getDropWeights(ObjectTypes.WheatSeed, distribution);
-
-    // Select seed drop based on calculated weights
-    ObjectAmount memory seedDrop = selectObjectByWeight(seedOptions, weights, randomSeed);
-
-    // Always drop wheat, plus seeds if any were selected
-    if (seedDrop.objectType != ObjectTypes.Null) {
-      result = new ObjectAmount[](2);
-      result[0] = ObjectAmount(ObjectTypes.Wheat, 1);
-      result[1] = seedDrop;
-    } else {
-      result = new ObjectAmount[](1);
-      result[0] = ObjectAmount(ObjectTypes.Wheat, 1);
+  function getRandomDrops(EntityId mined, ObjectType objectType) internal view returns (RandomDrop[] memory drops) {
+    if (!objectType.hasExtraDrops() || DisabledExtraDrops._get(mined)) {
+      return drops;
     }
 
-    return result;
-  }
+    if (objectType == ObjectTypes.FescueGrass || objectType == ObjectTypes.SwitchGrass) {
+      uint256[] memory distribution = new uint256[](2);
+      distribution[0] = 43; // 0 seeds: 43%
+      distribution[1] = 57; // 1 seed:  57%
 
-  function getGrassDrops(ObjectType grassType, uint256 randomSeed) internal view returns (ObjectAmount[] memory result) {
-    uint256[] memory distribution = new uint256[](2);
-    distribution[0] = 43; // No seed: 43%
-    distribution[1] = 57; // 1 seed: 57%
-
-    (ObjectAmount[] memory grassOptions, uint256[] memory weights) = getDropWeights(ObjectTypes.WheatSeed, distribution);
-
-    // Select drop based on calculated weights
-    ObjectAmount memory seedDrop = selectObjectByWeight(grassOptions, weights, randomSeed);
-
-    if (seedDrop.objectType != ObjectTypes.Null) {
-      result = new ObjectAmount[](2);
-      result[0] = ObjectAmount(grassType, 1);
-      result[1] = seedDrop;
-    } else {
-      result = new ObjectAmount[](1);
-      result[0] = ObjectAmount(grassType, 1);
+      drops = new RandomDrop[](1);
+      drops[0] = RandomDrop(ObjectTypes.WheatSeed, distribution);
+      return drops;
     }
 
-    return result;
-  }
+    if (objectType == ObjectTypes.Wheat) {
+      uint256[] memory distribution = new uint256[](4);
+      distribution[0] = 40; // 0 seeds: 40%
+      distribution[1] = 30; // 1 seed:  30%
+      distribution[2] = 20; // 2 seeds: 20%
+      distribution[3] = 10; // 3 seeds: 10%
 
-  function getLeafDrops(ObjectType objectType, uint256 randomSeed) internal view returns (ObjectAmount[] memory result) {
-    uint256 chance = TreeLib.getLeafDropChance(objectType);
-    uint256[] memory distribution = new uint256[](2);
-    distribution[0] = 100 - chance; // No sapling
-    distribution[1] = chance; // 1 sapling
-
-    // Get sapling options and their weights using distribution
-    (ObjectAmount[] memory saplingOptions, uint256[] memory weights) =
-      getDropWeights(objectType.getSapling(), distribution);
-
-    // Select sapling drop based on calculated weights
-    ObjectAmount memory saplingDrop = selectObjectByWeight(saplingOptions, weights, randomSeed);
-
-    if (saplingDrop.objectType != ObjectTypes.Null) {
-      result = new ObjectAmount[](2);
-      result[0] = ObjectAmount(objectType, 1);
-      result[1] = saplingDrop;
-    } else {
-      result = new ObjectAmount[](1);
-      result[0] = ObjectAmount(objectType, 1);
+      drops = new RandomDrop[](1);
+      drops[0] = RandomDrop(ObjectTypes.WheatSeed, distribution);
+      return drops;
     }
 
-    return result;
+    if (objectType == ObjectTypes.Melon) {
+      // Expected return 1.86
+      uint256[] memory distribution = new uint256[](4);
+      distribution[0] = 10; // 0 seeds: 10%
+      distribution[1] = 20; // 1 seed:  20%
+      distribution[2] = 44; // 2 seeds: 44%
+      distribution[3] = 26; // 3 seeds: 26%
+
+      drops = new RandomDrop[](1);
+      drops[0] = RandomDrop(ObjectTypes.MelonSeed, distribution);
+      return drops;
+    }
+
+    if (objectType == ObjectTypes.Pumpkin) {
+      // Expected return 1.86
+      uint256[] memory distribution = new uint256[](4);
+      distribution[0] = 10; // 0 seeds: 10%
+      distribution[1] = 20; // 1 seed:  20%
+      distribution[2] = 44; // 2 seeds: 44%
+      distribution[3] = 26; // 3 seeds: 26%
+
+      drops = new RandomDrop[](1);
+      drops[0] = RandomDrop(ObjectTypes.PumpkinSeed, distribution);
+      return drops;
+    }
+
+    if (objectType.isLeaf()) {
+      uint256 chance = TreeLib.getLeafDropChance(objectType);
+      uint256[] memory distribution = new uint256[](2);
+      distribution[0] = 100 - chance; // No sapling
+      distribution[1] = chance; // 1 sapling
+
+      drops = new RandomDrop[](1);
+      drops[0] = RandomDrop(objectType.getSapling(), distribution);
+      return drops;
+    }
   }
 
   function getRandomOre(Vec3 coord) internal view returns (ObjectType) {
     uint256 randomSeed = getRandomSeed(coord);
 
     // Get ore options and their weights (based on remaining amounts)
-    ObjectAmount[] memory oreOptions = new ObjectAmount[](6);
-    uint256[] memory weights = new uint256[](6);
 
     ObjectType[7] memory oreTypes = ObjectTypeLib.getOreTypes();
+    uint256[] memory weights = new uint256[](oreTypes.length - 1);
+
     // Use remaining amounts directly as weights
     // Skip UnrevealedOre (index 0) since it's not a specific ore type
     for (uint256 i = 1; i < oreTypes.length; i++) {
-      oreOptions[i - 1] = ObjectAmount(oreTypes[i], 1);
       (, weights[i - 1]) = getCapAndRemaining(oreTypes[i]);
     }
 
     // Select ore based on availability
-    ObjectAmount memory selectedOre = selectObjectByWeight(oreOptions, weights, randomSeed);
-
-    // Return selected ore type and current mined count
-    return selectedOre.objectType;
+    return oreTypes[selectByWeight(weights, randomSeed) + 1];
   }
 
-  // Simple random selection based on weights
-  function selectObjectByWeight(ObjectAmount[] memory options, uint256[] memory weights, uint256 randomSeed)
-    private
-    pure
-    returns (ObjectAmount memory)
-  {
-    return options[selectByWeight(weights, randomSeed)];
+  function burnOre(ObjectType self, uint256 amount) internal {
+    // This increases the availability of the ores being burned
+    ResourceCount._set(self, ResourceCount._get(self) - amount);
+    // This allows the same amount of ores to respawn
+    BurnedResourceCount._set(ObjectTypes.UnrevealedOre, BurnedResourceCount._get(ObjectTypes.UnrevealedOre) + amount);
+  }
+
+  function burnOres(ObjectType self) internal {
+    ObjectAmount memory oreAmount = self.getOreAmount();
+    if (!oreAmount.objectType.isNull()) {
+      burnOre(oreAmount.objectType, oreAmount.amount);
+    }
   }
 
   // Simple weighted selection from an array of weights
@@ -241,26 +235,16 @@ library NatureLib {
   }
 
   // Adjusts pre-calculated weights based on resource availability
-  function getDropWeights(ObjectType objectType, uint256[] memory distribution)
-    internal
-    view
-    returns (ObjectAmount[] memory options, uint256[] memory weights)
+  function adjustWeights(uint256[] memory distribution, uint256 cap, uint256 remaining)
+    private
+    pure
+    returns (uint256[] memory weights)
   {
     uint8 maxAmount = uint8(distribution.length - 1);
 
-    options = new ObjectAmount[](distribution.length);
-    options[0] = ObjectAmount(ObjectTypes.Null, 0); // Option for 0 drops
-
-    for (uint8 i = 1; i <= maxAmount; i++) {
-      options[i] = ObjectAmount(objectType, i);
-    }
-
-    // Start with the base weights and adjust for availability
     weights = new uint256[](distribution.length);
-    weights[0] = distribution[0]; // Weight for 0 drops stays the same
 
-    // Get resource availability info
-    (uint256 cap, uint256 remaining) = getCapAndRemaining(objectType);
+    weights[0] = distribution[0]; // Weight for 0 drops stays the same
 
     // For each non-zero option, apply compound probability adjustment
     for (uint8 i = 1; i <= maxAmount; i++) {
@@ -278,20 +262,6 @@ library NatureLib {
       }
 
       weights[i] = p;
-    }
-  }
-
-  function burnOre(ObjectType self, uint256 amount) internal {
-    // This increases the availability of the ores being burned
-    ResourceCount._set(self, ResourceCount._get(self) - amount);
-    // This allows the same amount of ores to respawn
-    BurnedResourceCount._set(ObjectTypes.UnrevealedOre, BurnedResourceCount._get(ObjectTypes.UnrevealedOre) + amount);
-  }
-
-  function burnOres(ObjectType self) internal {
-    ObjectAmount memory oreAmount = self.getOreAmount();
-    if (!oreAmount.objectType.isNull()) {
-      burnOre(oreAmount.objectType, oreAmount.amount);
     }
   }
 }

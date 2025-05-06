@@ -5,7 +5,7 @@ pragma solidity >=0.8.24;
 
 import { FoodSystem } from "../../systems/FoodSystem.sol";
 import { EntityId } from "../../EntityId.sol";
-import { ObjectType } from "../../ObjectType.sol";
+import { SlotAmount } from "../../utils/InventoryUtils.sol";
 import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 import { IWorldCall } from "@latticexyz/world/src/IWorldKernel.sol";
 import { SystemCall } from "@latticexyz/world/src/SystemCall.sol";
@@ -39,22 +39,22 @@ struct RootCallWrapper {
 library FoodSystemLib {
   error FoodSystemLib_CallingFromRootSystem();
 
-  function eat(FoodSystemType self, EntityId caller, ObjectType objectType, uint16 numToEat) internal {
-    return CallWrapper(self.toResourceId(), address(0)).eat(caller, objectType, numToEat);
+  function eat(FoodSystemType self, EntityId caller, SlotAmount memory slotAmount) internal {
+    return CallWrapper(self.toResourceId(), address(0)).eat(caller, slotAmount);
   }
 
-  function eat(CallWrapper memory self, EntityId caller, ObjectType objectType, uint16 numToEat) internal {
+  function eat(CallWrapper memory self, EntityId caller, SlotAmount memory slotAmount) internal {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert FoodSystemLib_CallingFromRootSystem();
 
-    bytes memory systemCall = abi.encodeCall(_eat_EntityId_ObjectType_uint16.eat, (caller, objectType, numToEat));
+    bytes memory systemCall = abi.encodeCall(_eat_EntityId_SlotAmount.eat, (caller, slotAmount));
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
-  function eat(RootCallWrapper memory self, EntityId caller, ObjectType objectType, uint16 numToEat) internal {
-    bytes memory systemCall = abi.encodeCall(_eat_EntityId_ObjectType_uint16.eat, (caller, objectType, numToEat));
+  function eat(RootCallWrapper memory self, EntityId caller, SlotAmount memory slotAmount) internal {
+    bytes memory systemCall = abi.encodeCall(_eat_EntityId_SlotAmount.eat, (caller, slotAmount));
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
@@ -96,8 +96,8 @@ library FoodSystemLib {
  * Each interface is uniquely named based on the function name and parameters to prevent collisions.
  */
 
-interface _eat_EntityId_ObjectType_uint16 {
-  function eat(EntityId caller, ObjectType objectType, uint16 numToEat) external;
+interface _eat_EntityId_SlotAmount {
+  function eat(EntityId caller, SlotAmount memory slotAmount) external;
 }
 
 using FoodSystemLib for FoodSystemType global;

@@ -115,7 +115,12 @@ export const smartEntityCategories: Category[] = [
 
 export const hasAnyCategories: Category[] = ["Log", "Leaf", "Plank"];
 
-export const hasExtraDropsCategories: Category[] = ["Leaf", "Crop", "Greenery"];
+export const hasExtraDropsCategories: Category[] = [
+  "Leaf",
+  "Crop",
+  "CropBlock",
+  "Greenery",
+];
 
 export const objectNames = [
   "Null",
