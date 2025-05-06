@@ -87,7 +87,7 @@ library HitMachineLib {
 
     // If player is alive, apply tool usage and decrease machine's energy
     if (energyLeft != 0) {
-      toolData.applyMassReduction(callerCoord, toolMassReduction);
+      toolData.applyMassReduction(caller, callerCoord, toolMassReduction);
       machineEnergyReduction = playerEnergyReduction + toolMassReduction;
       decreaseMachineEnergy(forceField, machineEnergyReduction);
     }

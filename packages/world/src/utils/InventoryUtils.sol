@@ -35,7 +35,6 @@ struct SlotData {
 }
 
 struct ToolData {
-  EntityId owner;
   EntityId tool;
   ObjectType toolType;
   uint16 slot;
@@ -47,7 +46,7 @@ library InventoryUtils {
   function getToolData(EntityId owner, uint16 slot) public view returns (ToolData memory) {
     EntityId tool = InventorySlot._getEntityId(owner, slot);
     if (!tool.exists()) {
-      return ToolData(owner, tool, ObjectTypes.Null, slot, 0, 0);
+      return ToolData(tool, ObjectTypes.Null, slot, 0, 0);
     }
 
     ObjectType toolType = EntityObjectType._get(tool);
@@ -56,7 +55,7 @@ library InventoryUtils {
     uint128 maxMass = ObjectPhysics._getMass(toolType);
     uint128 maxUsePerCall = maxMass / 10; // Limit to 10% of max mass per use
 
-    return ToolData(owner, tool, toolType, slot, Mass._getMass(tool), maxUsePerCall);
+    return ToolData(tool, toolType, slot, Mass._getMass(tool), maxUsePerCall);
   }
 
   function useTool(EntityId owner, Vec3 ownerCoord, uint16 slot, uint128 useMassMax)
@@ -66,7 +65,7 @@ library InventoryUtils {
     ToolData memory toolData = getToolData(owner, slot);
 
     uint128 massReduction = toolData.getMassReduction(useMassMax);
-    applyMassReduction(toolData, ownerCoord, massReduction);
+    applyMassReduction(toolData, owner, ownerCoord, massReduction);
     return toolData.toolType;
   }
 
@@ -79,7 +78,7 @@ library InventoryUtils {
     return massReduction;
   }
 
-  function applyMassReduction(ToolData memory toolData, Vec3 ownerCoord, uint128 massReduction) public {
+  function applyMassReduction(ToolData memory toolData, EntityId owner, Vec3 ownerCoord, uint128 massReduction) public {
     if (!toolData.tool.exists()) {
       return;
     }
@@ -88,7 +87,7 @@ library InventoryUtils {
 
     if (toolData.massLeft <= massReduction) {
       // Destroy tool
-      removeEntityFromSlot(toolData.owner, toolData.slot);
+      removeEntityFromSlot(owner, toolData.slot);
       NatureLib.burnOres(toolData.toolType);
       burnToolEnergy(toolData.toolType, ownerCoord);
     } else {

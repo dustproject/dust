@@ -103,31 +103,30 @@ contract MineSystem is System {
       minedType = RandomResourceLib._collapseRandomOre(mined, coord);
     }
 
-    (uint128 finalMass, bool canMine) = _processMassReduction(caller, callerCoord, toolSlot, mined);
+    (uint128 massLeft, bool canMine) =
+      _applyMassReduction(caller, callerCoord, toolSlot, minedType, Mass._getMass(mined));
+
     if (!canMine) {
+      // Player died, return early
       return mined;
     }
 
-    if (finalMass != 0) {
-      Mass._setMass(mined, finalMass);
-      MineLib._requireMinesAllowed(caller, minedType, coord, extraData);
-      return mined;
+    if (massLeft == 0) {
+      // The block was fully mined
+      Mass._deleteRecord(mined);
+
+      _handleGrowable(caller, baseCoord);
+      _removeBlock(mined, minedType, baseCoord);
+      _removeRelativeBlocks(mined, minedType, baseCoord);
+      _handleDrop(caller, mined, minedType, baseCoord);
+      _destroyEntity(caller, mined, minedType, baseCoord);
+
+      notify(caller, MineNotification({ mineEntityId: mined, mineCoord: coord, mineObjectType: minedType }));
+    } else {
+      Mass._setMass(mined, massLeft);
     }
-
-    // The block was fully mined
-    Mass._deleteRecord(mined);
-
-    _handleGrowable(caller, baseCoord);
-
-    _removeBlock(mined, minedType, baseCoord);
-    _removeRelativeBlocks(mined, minedType, baseCoord);
-    _handleDrop(caller, mined, minedType, baseCoord);
-
-    _destroyEntity(caller, mined, minedType, baseCoord);
 
     MineLib._requireMinesAllowed(caller, minedType, coord, extraData);
-
-    notify(caller, MineNotification({ mineEntityId: mined, mineCoord: coord, mineObjectType: minedType }));
 
     return mined;
   }
@@ -217,50 +216,53 @@ contract MineSystem is System {
     }
   }
 
-  // TODO: this is ugly, but doing this to avoid stack too deep errors. We should refactor later.
-  function _processMassReduction(EntityId caller, Vec3 callerCoord, uint16 toolSlot, EntityId mined)
-    internal
-    returns (uint128, bool)
-  {
-    ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
-    (uint128 finalMass, uint128 toolMassReduction, uint128 energyReduction) = _getMassReduction(toolData, mined);
+  function _applyMassReduction(
+    EntityId caller,
+    Vec3 callerCoord,
+    uint16 toolSlot,
+    ObjectType minedType,
+    uint128 massLeft
+  ) internal returns (uint128, bool) {
+    if (massLeft != 0) {
+      ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
+      uint128 toolMassReduction = toolData.getMassReduction(massLeft);
+      uint128 mineMassReduction = _applyToolMultiplier(toolData.toolType, minedType, toolMassReduction);
+      uint128 energyReduction = _getEnergyReduction(mineMassReduction, massLeft);
 
-    if (energyReduction > 0) {
-      // If player died, return early
-      (uint128 callerEnergy,) = transferEnergyToPool(caller, energyReduction);
-      if (callerEnergy == 0) {
-        return (finalMass, false);
+      if (energyReduction > 0) {
+        // If player died, return early
+        (uint128 callerEnergy,) = transferEnergyToPool(caller, energyReduction);
+        if (callerEnergy == 0) {
+          return (massLeft, false);
+        }
+
+        massLeft -= energyReduction;
       }
+
+      // Apply tool usage after decreasing player energy so we make sure the player is alive
+      toolData.applyMassReduction(caller, callerCoord, toolMassReduction);
+
+      massLeft -= mineMassReduction;
     }
 
-    // Apply tool usage after decreasing player energy so we make sure the player is alive
-    toolData.applyMassReduction(callerCoord, toolMassReduction);
-    return (finalMass, true);
+    return (massLeft, true);
   }
 
-  function _getMassReduction(ToolData memory toolData, EntityId mined)
+  function _applyToolMultiplier(ObjectType toolType, ObjectType minedType, uint128 toolMassReduction)
     internal
-    view
-    returns (uint128, uint128, uint128)
+    pure
+    returns (uint128)
   {
-    uint128 massLeft = Mass._getMass(mined);
-    if (massLeft == 0) {
-      return (0, 0, 0);
-    }
+    return toolMassReduction;
+  }
 
-    uint128 toolMassReduction = toolData.getMassReduction(massLeft);
-
+  function _getEnergyReduction(uint128 mineMassReduction, uint128 massLeft) internal pure returns (uint128) {
     // if tool mass reduction is not enough, consume energy from player up to mine energy cost
-    uint128 energyReduction = 0;
-    if (toolMassReduction < massLeft) {
-      uint128 remaining = massLeft - toolMassReduction;
-      energyReduction = MINE_ENERGY_COST <= remaining ? MINE_ENERGY_COST : remaining;
-      massLeft -= energyReduction;
+    if (mineMassReduction < massLeft) {
+      uint128 remaining = massLeft - mineMassReduction;
+      return MINE_ENERGY_COST <= remaining ? MINE_ENERGY_COST : remaining;
     }
-
-    uint128 finalMass = massLeft - toolMassReduction;
-
-    return (finalMass, toolMassReduction, energyReduction);
+    return 0;
   }
 }
 
