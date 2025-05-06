@@ -1,37 +1,13 @@
 import {
   type Category,
+  type MetaCategory,
   type ObjectAmount,
   allCategoryMetadata,
   blockCategoryMetadata,
-  growableCategories,
-  hasAnyCategories,
-  hasAxeMultiplierCategories,
-  hasExtraDropsCategories,
-  hasPickMultiplierCategories,
+  metaCategories,
   nonBlockCategoryMetadata,
   objects,
-  passThroughCategories,
-  smartEntityCategories,
-  toolCategories,
-  uniqueObjectCategories,
 } from "../objects";
-
-interface MetaCategory {
-  name: string;
-  categories: Category[];
-}
-
-const metaCategories: MetaCategory[] = [
-  { name: "hasAny", categories: hasAnyCategories },
-  { name: "hasExtraDrops", categories: hasExtraDropsCategories },
-  { name: "hasAxeMultiplier", categories: hasAxeMultiplierCategories },
-  { name: "hasPickMultiplier", categories: hasPickMultiplierCategories },
-  { name: "isPassThrough", categories: passThroughCategories },
-  { name: "isGrowable", categories: growableCategories },
-  { name: "isUniqueObject", categories: uniqueObjectCategories },
-  { name: "isSmartEntity", categories: smartEntityCategories },
-  { name: "isTool", categories: toolCategories },
-];
 
 const constName = (str: string): string =>
   str
@@ -47,21 +23,26 @@ function renderMetaCategoryMask(categories: Category[]): string {
 }
 
 function renderMetaCategoryMaskDefinition(metaCategory: MetaCategory): string {
+  if (!metaCategory.categories) {
+    return "";
+  }
+
   return `uint256 constant ${constName(metaCategory.name)}_MASK = ${renderMetaCategoryMask(metaCategory.categories)};`;
 }
 
 function renderMetaCategoryCheck(metaCategory: MetaCategory): string {
-  return `function ${metaCategory.name}(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.${constName(metaCategory.name)}_MASK);
-  }`;
-}
+  const categoryCheck =
+    metaCategory.categories &&
+    `applyCategoryMask(self, Category.${constName(metaCategory.name)}_MASK)`;
 
-function renderMultiObjectCheck(
-  functionName: string,
-  objectTypes: string[],
-): string {
-  return `function ${functionName}(ObjectType self) internal pure returns (bool) {
-    return ${objectTypes.map((obj) => `self == ObjectTypes.${obj}`).join(" || ")};
+  const objectCheck = metaCategory.objects
+    ?.map((obj) => `self == ObjectTypes.${obj}`)
+    .join(" || ");
+
+  const condition = [categoryCheck, objectCheck].filter(Boolean).join(" || ");
+
+  return `function ${metaCategory.name}(ObjectType self) internal pure returns (bool) {
+    return ${condition};
   }`;
 }
 
@@ -234,7 +215,6 @@ ${allCategoryMetadata
     return false;
   }
 
-
   function getMaxInventorySlots(ObjectType self) internal pure returns (uint16) {
     if (self == ObjectTypes.Player) return 36;
     if (self == ObjectTypes.Chest) return 27;
@@ -303,25 +283,6 @@ ${allCategoryMetadata
     return 0;
   }
 
-  function isMachine(ObjectType self) internal pure returns (bool) {
-    ${objects
-      .filter((obj) => obj.isMachine)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ${obj.isMachine};`,
-      )
-      .join("\n    ")}
-    return false;
-  }
-
-  function isTillable(ObjectType self) internal pure returns (bool) {
-    ${objects
-      .filter((obj) => obj.isTillable)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return true;`)
-      .join("\n    ")}
-    return false;
-  }
-
   function isPlantableOn(ObjectType self, ObjectType on) internal pure returns (bool) {
     if(self.isSeed()) {
       return on == ObjectTypes.WetFarmland;
@@ -337,20 +298,19 @@ ${allCategoryMetadata
     // Check if:
     // 1. Index bits are all 0
     // 2. Category is one that supports "Any" types
-    return self.index() == 0 && hasMetaCategory(self, Category.HAS_ANY_MASK);
+    return self.index() == 0 && applyCategoryMask(self, Category.HAS_ANY_MASK);
   }
 
   function isMineable(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.MINEABLE_MASK);
+    return applyCategoryMask(self, Category.MINEABLE_MASK);
   }
 
   ${metaCategories.map(renderMetaCategoryCheck).join("\n  ")}
 
-  function hasMetaCategory(ObjectType self, uint256 mask) internal pure returns (bool) {
+  function applyCategoryMask(ObjectType self, uint256 mask) internal pure returns (bool) {
     uint16 c = category(self);
     return ((uint256(1) << (c >> OFFSET_BITS)) & mask) != 0;
   }
-
 
   function matches(ObjectType self, ObjectType other) internal pure returns (bool) {
     if (self.isAny()) {

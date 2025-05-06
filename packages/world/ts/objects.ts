@@ -82,56 +82,52 @@ const categoryIndex = allCategoryMetadata.reduce(
   {} as Record<Category, number>,
 );
 
-// Meta-categories (categories that should be included in pass-through check)
-export const passThroughCategories: Category[] = [
-  "NonSolid",
-  "Flower",
-  "Seed",
-  "Sapling",
-  "Greenery",
-  "Crop",
-  "UnderwaterPlant",
+export interface MetaCategory {
+  name: string;
+  categories?: Category[];
+  objects?: ObjectName[];
+}
+
+// Meta-categories
+export const metaCategories: MetaCategory[] = [
+  { name: "hasAny", categories: ["Log", "Leaf", "Plank"] },
+  { name: "hasExtraDrops", categories: ["Leaf", "Crop", "Greenery"] },
+  {
+    name: "hasAxeMultiplier",
+    categories: ["Log", "Leaf", "Plank", "CropBlock"],
+    objects: ["Chest", "Workbench", "SpawnTile", "Bed", "TextSign"],
+  },
+  {
+    name: "hasPickMultiplier",
+    categories: ["Ore", "Gemstone", "Stone", "Terracotta", "OreBlock"],
+    objects: ["Powerstone", "Furnace", "ForceField"],
+  },
+  {
+    name: "isPassThrough",
+    categories: [
+      "NonSolid",
+      "Flower",
+      "Seed",
+      "Sapling",
+      "Greenery",
+      "Crop",
+      "UnderwaterPlant",
+    ],
+  },
+  { name: "isGrowable", categories: ["Seed", "Sapling"] },
+  {
+    name: "isUniqueObject",
+    categories: ["Pick", "Axe", "Whacker", "Hoe", "Bucket"],
+    objects: ["ForceField", "Bed", "SpawnTile"],
+  },
+  {
+    name: "isSmartEntity",
+    categories: ["SmartEntityBlock", "SmartEntityNonBlock"],
+  },
+  { name: "isTool", categories: ["Pick", "Axe", "Whacker", "Hoe"] },
+  { name: "isTillable", objects: ["Dirt", "Grass"] },
+  { name: "isMachine", objects: ["ForceField"] },
 ];
-
-export const growableCategories: Category[] = ["Seed", "Sapling"];
-
-// TODO: adjust categories
-export const uniqueObjectCategories: Category[] = [
-  "Pick",
-  "Axe",
-  "Whacker",
-  "Hoe",
-  "Bucket",
-  "SmartEntityBlock",
-  "SmartEntityNonBlock",
-];
-
-export const toolCategories: Category[] = ["Pick", "Axe", "Whacker", "Hoe"];
-
-export const smartEntityCategories: Category[] = [
-  "SmartEntityBlock",
-  "SmartEntityNonBlock",
-];
-
-export const hasAxeMultiplierCategories: Category[] = [
-  "Log",
-  "Leaf",
-  "Plank",
-  "CropBlock",
-];
-
-export const hasPickMultiplierCategories: Category[] = [
-  "Ore",
-  "Gemstone",
-  "Stone",
-  "Sand",
-  "Terracotta",
-  "OreBlock",
-];
-
-export const hasAnyCategories: Category[] = ["Log", "Leaf", "Plank"];
-
-export const hasExtraDropsCategories: Category[] = ["Leaf", "Crop", "Greenery"];
 
 export const objectNames = [
   "Null",
@@ -330,10 +326,8 @@ export interface ObjectDefinition {
   mass?: bigint;
   energy?: bigint;
   timeToGrow?: bigint;
-  isTillable?: boolean;
   sapling?: ObjectName;
   crop?: ObjectName;
-  isMachine?: boolean;
   // Used for tools
   plankAmount?: number;
   oreAmount?: ObjectAmount;
@@ -369,8 +363,8 @@ export const categoryObjects: {
     { name: "Glowstone", mass: 37500000000000000n },
   ],
   Soil: [
-    { name: "Grass", mass: 3000000000000000n, isTillable: true },
-    { name: "Dirt", mass: 2400000000000000n, isTillable: true },
+    { name: "Grass", mass: 3000000000000000n },
+    { name: "Dirt", mass: 2400000000000000n },
     { name: "Moss", mass: 200000000000000n },
     { name: "Podzol", mass: 5000000000000000n },
     { name: "DirtPath", mass: 5000000000000000n },
@@ -600,7 +594,7 @@ export const categoryObjects: {
     },
   ],
   SmartEntityBlock: [
-    { name: "ForceField", mass: 3735000000000000000n, isMachine: true },
+    { name: "ForceField", mass: 3735000000000000000n },
     { name: "Chest", mass: 36000000000000000n },
     { name: "SpawnTile", mass: 9135000000000000000n },
     { name: "Bed", mass: 13500000000000000n },
@@ -708,7 +702,6 @@ export const categoryObjects: {
   Food: [{ name: "WheatSlop", energy: 12800000000000000n }],
   Fuel: [{ name: "Battery", energy: 90000000000000000n }],
   Player: [{ name: "Player" }],
-  // TODO: change this category name for fragments
   SmartEntityNonBlock: [{ name: "Fragment" }],
 } as const;
 

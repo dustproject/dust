@@ -51,6 +51,7 @@ import {
   PLAYER_ENERGY_DRAIN_RATE,
   SAFE_PROGRAM_GAS
 } from "../Constants.sol";
+
 import { EntityId } from "../EntityId.sol";
 import { ObjectAmount, ObjectType } from "../ObjectType.sol";
 import { MoveLib } from "./libraries/MoveLib.sol";

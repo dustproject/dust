@@ -70,8 +70,7 @@ library Category {
     | (uint256(1) << (CropBlock >> OFFSET_BITS));
   uint256 constant HAS_PICK_MULTIPLIER_MASK = (uint256(1) << (Ore >> OFFSET_BITS))
     | (uint256(1) << (Gemstone >> OFFSET_BITS)) | (uint256(1) << (Stone >> OFFSET_BITS))
-    | (uint256(1) << (Sand >> OFFSET_BITS)) | (uint256(1) << (Terracotta >> OFFSET_BITS))
-    | (uint256(1) << (OreBlock >> OFFSET_BITS));
+    | (uint256(1) << (Terracotta >> OFFSET_BITS)) | (uint256(1) << (OreBlock >> OFFSET_BITS));
   uint256 constant IS_PASS_THROUGH_MASK = (uint256(1) << (NonSolid >> OFFSET_BITS))
     | (uint256(1) << (Flower >> OFFSET_BITS)) | (uint256(1) << (Seed >> OFFSET_BITS))
     | (uint256(1) << (Sapling >> OFFSET_BITS)) | (uint256(1) << (Greenery >> OFFSET_BITS))
@@ -79,8 +78,7 @@ library Category {
   uint256 constant IS_GROWABLE_MASK = (uint256(1) << (Seed >> OFFSET_BITS)) | (uint256(1) << (Sapling >> OFFSET_BITS));
   uint256 constant IS_UNIQUE_OBJECT_MASK = (uint256(1) << (Pick >> OFFSET_BITS)) | (uint256(1) << (Axe >> OFFSET_BITS))
     | (uint256(1) << (Whacker >> OFFSET_BITS)) | (uint256(1) << (Hoe >> OFFSET_BITS))
-    | (uint256(1) << (Bucket >> OFFSET_BITS)) | (uint256(1) << (SmartEntityBlock >> OFFSET_BITS))
-    | (uint256(1) << (SmartEntityNonBlock >> OFFSET_BITS));
+    | (uint256(1) << (Bucket >> OFFSET_BITS));
   uint256 constant IS_SMART_ENTITY_MASK =
     (uint256(1) << (SmartEntityBlock >> OFFSET_BITS)) | (uint256(1) << (SmartEntityNonBlock >> OFFSET_BITS));
   uint256 constant IS_TOOL_MASK = (uint256(1) << (Pick >> OFFSET_BITS)) | (uint256(1) << (Axe >> OFFSET_BITS))
@@ -878,17 +876,6 @@ library ObjectTypeLib {
     return 0;
   }
 
-  function isMachine(ObjectType self) internal pure returns (bool) {
-    if (self == ObjectTypes.ForceField) return true;
-    return false;
-  }
-
-  function isTillable(ObjectType self) internal pure returns (bool) {
-    if (self == ObjectTypes.Grass) return true;
-    if (self == ObjectTypes.Dirt) return true;
-    return false;
-  }
-
   function isPlantableOn(ObjectType self, ObjectType on) internal pure returns (bool) {
     if (self.isSeed()) {
       return on == ObjectTypes.WetFarmland;
@@ -904,50 +891,62 @@ library ObjectTypeLib {
     // Check if:
     // 1. Index bits are all 0
     // 2. Category is one that supports "Any" types
-    return self.index() == 0 && hasMetaCategory(self, Category.HAS_ANY_MASK);
+    return self.index() == 0 && applyCategoryMask(self, Category.HAS_ANY_MASK);
   }
 
   function isMineable(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.MINEABLE_MASK);
+    return applyCategoryMask(self, Category.MINEABLE_MASK);
   }
 
   function hasAny(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.HAS_ANY_MASK);
+    return applyCategoryMask(self, Category.HAS_ANY_MASK);
   }
 
   function hasExtraDrops(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.HAS_EXTRA_DROPS_MASK);
+    return applyCategoryMask(self, Category.HAS_EXTRA_DROPS_MASK);
   }
 
   function hasAxeMultiplier(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.HAS_AXE_MULTIPLIER_MASK);
+    return applyCategoryMask(self, Category.HAS_AXE_MULTIPLIER_MASK) || self == ObjectTypes.Chest
+      || self == ObjectTypes.Workbench || self == ObjectTypes.SpawnTile || self == ObjectTypes.Bed
+      || self == ObjectTypes.TextSign;
   }
 
   function hasPickMultiplier(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.HAS_PICK_MULTIPLIER_MASK);
+    return applyCategoryMask(self, Category.HAS_PICK_MULTIPLIER_MASK) || self == ObjectTypes.Powerstone
+      || self == ObjectTypes.Furnace || self == ObjectTypes.ForceField;
   }
 
   function isPassThrough(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.IS_PASS_THROUGH_MASK);
+    return applyCategoryMask(self, Category.IS_PASS_THROUGH_MASK);
   }
 
   function isGrowable(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.IS_GROWABLE_MASK);
+    return applyCategoryMask(self, Category.IS_GROWABLE_MASK);
   }
 
   function isUniqueObject(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.IS_UNIQUE_OBJECT_MASK);
+    return applyCategoryMask(self, Category.IS_UNIQUE_OBJECT_MASK) || self == ObjectTypes.ForceField
+      || self == ObjectTypes.Bed || self == ObjectTypes.SpawnTile;
   }
 
   function isSmartEntity(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.IS_SMART_ENTITY_MASK);
+    return applyCategoryMask(self, Category.IS_SMART_ENTITY_MASK);
   }
 
   function isTool(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.IS_TOOL_MASK);
+    return applyCategoryMask(self, Category.IS_TOOL_MASK);
   }
 
-  function hasMetaCategory(ObjectType self, uint256 mask) internal pure returns (bool) {
+  function isTillable(ObjectType self) internal pure returns (bool) {
+    return self == ObjectTypes.Dirt || self == ObjectTypes.Grass;
+  }
+
+  function isMachine(ObjectType self) internal pure returns (bool) {
+    return self == ObjectTypes.ForceField;
+  }
+
+  function applyCategoryMask(ObjectType self, uint256 mask) internal pure returns (bool) {
     uint16 c = category(self);
     return ((uint256(1) << (c >> OFFSET_BITS)) & mask) != 0;
   }
