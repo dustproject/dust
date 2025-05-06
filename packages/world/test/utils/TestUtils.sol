@@ -109,6 +109,10 @@ library TestInventoryUtils {
     InventoryUtils.removeObjectFromSlot(ownerEntityId, slot, numObjectsToRemove);
   }
 
+  function useTool(EntityId owner, Vec3 ownerCoord, uint16 slot, uint128 useMassMax) public asWorld {
+    InventoryUtils.useTool(owner, ownerCoord, slot, useMassMax);
+  }
+
   function getEntitySlot(EntityId owner, EntityId entityId) public asWorld returns (uint16) {
     ObjectType objectType = EntityObjectType._get(entityId);
     uint16[] memory slots = InventoryTypeSlots._get(owner, objectType);

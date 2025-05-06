@@ -308,10 +308,10 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
 
   // Helper function to find the inventory slot with a specific object type
   function findInventorySlotWithObjectType(EntityId entityId, ObjectType objectType) internal view returns (uint8) {
-    uint256 numSlots = Inventory.length(entityId);
+    uint256 numSlots = Inventory.lengthOccupiedSlots(entityId);
     for (uint8 i = 0; i < numSlots; i++) {
       // Assuming 36 inventory slots
-      ObjectType slotObjectType = InventorySlot.getObjectType(entityId, Inventory.getItem(entityId, i));
+      ObjectType slotObjectType = InventorySlot.getObjectType(entityId, Inventory.getItemOccupiedSlots(entityId, i));
       if (slotObjectType == objectType) {
         return i;
       }
