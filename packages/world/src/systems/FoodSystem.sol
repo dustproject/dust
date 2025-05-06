@@ -4,32 +4,43 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
-import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
+import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
+import { ObjectPhysics, ObjectPhysicsData } from "../codegen/tables/ObjectPhysics.sol";
 
 import { addEnergyToLocalPool } from "../utils/EnergyUtils.sol";
 
-import { InventoryUtils } from "../utils/InventoryUtils.sol";
+import { InventoryUtils, SlotAmount } from "../utils/InventoryUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { MAX_PLAYER_ENERGY } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
-import { ObjectType } from "../ObjectType.sol";
+import { ObjectType, ObjectTypes } from "../ObjectType.sol";
 
 import { Vec3 } from "../Vec3.sol";
 
 contract FoodSystem is System {
-  function eat(EntityId caller, ObjectType objectType, uint16 numToEat) public {
+  function eat(EntityId caller, SlotAmount memory slotAmount) public {
     EnergyData memory energyData = caller.activate();
 
-    require(objectType.isFood(), "Object is not food");
+    ObjectType objectType = InventorySlot._getObjectType(caller, slotAmount.slot);
+    // TODO: remove special cases once we have fruit slices
+    require(
+      objectType.isFood() || objectType == ObjectTypes.Melon || objectType == ObjectTypes.Pumpkin, "Object is not food"
+    );
 
-    uint128 newEnergy = ObjectPhysics._getEnergy(objectType) * numToEat + energyData.energy;
+    ObjectPhysicsData memory physicsData = ObjectPhysics._get(objectType);
+
+    uint128 foodEnergy = (physicsData.energy + physicsData.mass) * slotAmount.amount;
+
+    uint128 newEnergy = foodEnergy + energyData.energy;
+
+    // Transfer overflow energy to local pool
     if (newEnergy > MAX_PLAYER_ENERGY) {
       addEnergyToLocalPool(caller.getPosition(), newEnergy - MAX_PLAYER_ENERGY);
       newEnergy = MAX_PLAYER_ENERGY;
     }
 
-    InventoryUtils.removeObject(caller, objectType, numToEat);
+    InventoryUtils.removeObjectFromSlot(caller, slotAmount.slot, slotAmount.amount);
 
     Energy._setEnergy(caller, newEnergy);
   }

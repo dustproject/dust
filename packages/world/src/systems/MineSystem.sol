@@ -206,7 +206,12 @@ contract MineSystem is System {
     ObjectAmount[] memory result = RandomResourceLib._getMineDrops(mined, minedType, coord);
 
     for (uint256 i = 0; i < result.length; i++) {
-      (ObjectType dropType, uint16 amount) = (result[i].objectType, uint16(result[i].amount));
+      (ObjectType dropType, uint16 amount) = (result[i].objectType, result[i].amount);
+
+      if (amount == 0) {
+        continue;
+      }
+
       InventoryUtils.addObject(caller, dropType, amount);
 
       // Track mined resource count for seeds

@@ -63,7 +63,7 @@ library Category {
   uint256 constant HAS_ANY_MASK = (uint256(1) << (Log >> OFFSET_BITS)) | (uint256(1) << (Leaf >> OFFSET_BITS))
     | (uint256(1) << (Plank >> OFFSET_BITS));
   uint256 constant HAS_EXTRA_DROPS_MASK = (uint256(1) << (Leaf >> OFFSET_BITS)) | (uint256(1) << (Crop >> OFFSET_BITS))
-    | (uint256(1) << (Greenery >> OFFSET_BITS));
+    | (uint256(1) << (CropBlock >> OFFSET_BITS)) | (uint256(1) << (Greenery >> OFFSET_BITS));
   uint256 constant PASS_THROUGH_MASK = (uint256(1) << (NonSolid >> OFFSET_BITS))
     | (uint256(1) << (Flower >> OFFSET_BITS)) | (uint256(1) << (Seed >> OFFSET_BITS))
     | (uint256(1) << (Sapling >> OFFSET_BITS)) | (uint256(1) << (Greenery >> OFFSET_BITS))
