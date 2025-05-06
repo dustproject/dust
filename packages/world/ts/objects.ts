@@ -113,6 +113,22 @@ export const smartEntityCategories: Category[] = [
   "SmartEntityNonBlock",
 ];
 
+export const hasAxeMultiplierCategories: Category[] = [
+  "Log",
+  "Leaf",
+  "Plank",
+  "CropBlock",
+];
+
+export const hasPickMultiplierCategories: Category[] = [
+  "Ore",
+  "Gemstone",
+  "Stone",
+  "Sand",
+  "Terracotta",
+  "OreBlock",
+];
+
 export const hasAnyCategories: Category[] = ["Log", "Leaf", "Plank"];
 
 export const hasExtraDropsCategories: Category[] = ["Leaf", "Crop", "Greenery"];

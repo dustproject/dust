@@ -5,7 +5,9 @@ import {
   blockCategoryMetadata,
   growableCategories,
   hasAnyCategories,
+  hasAxeMultiplierCategories,
   hasExtraDropsCategories,
+  hasPickMultiplierCategories,
   nonBlockCategoryMetadata,
   objects,
   passThroughCategories,
@@ -14,10 +16,44 @@ import {
   uniqueObjectCategories,
 } from "../objects";
 
+interface MetaCategory {
+  name: string;
+  categories: Category[];
+}
+
+const metaCategories: MetaCategory[] = [
+  { name: "hasAny", categories: hasAnyCategories },
+  { name: "hasExtraDrops", categories: hasExtraDropsCategories },
+  { name: "hasAxeMultiplier", categories: hasAxeMultiplierCategories },
+  { name: "hasPickMultiplier", categories: hasPickMultiplierCategories },
+  { name: "isPassThrough", categories: passThroughCategories },
+  { name: "isGrowable", categories: growableCategories },
+  { name: "isUniqueObject", categories: uniqueObjectCategories },
+  { name: "isSmartEntity", categories: smartEntityCategories },
+  { name: "isTool", categories: toolCategories },
+];
+
+const constName = (str: string): string =>
+  str
+    .replace(/\W+/g, " ")
+    .split(/ |\B(?=[A-Z])/)
+    .join("_")
+    .toUpperCase();
+
 function renderMetaCategoryMask(categories: Category[]): string {
   return categories
     .map((cat) => `(uint256(1) << (${cat} >> OFFSET_BITS))`)
     .join(" | ");
+}
+
+function renderMetaCategoryMaskDefinition(metaCategory: MetaCategory): string {
+  return `uint256 constant ${constName(metaCategory.name)}_MASK = ${renderMetaCategoryMask(metaCategory.categories)};`;
+}
+
+function renderMetaCategoryCheck(metaCategory: MetaCategory): string {
+  return `function ${metaCategory.name}(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.${constName(metaCategory.name)}_MASK);
+  }`;
 }
 
 function renderMultiObjectCheck(
@@ -67,16 +103,9 @@ ${nonBlockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(
   // ------------------------------------------------------------
   // Meta Category Masks (fits within uint256; mask bit k set if raw category ID k belongs)
   uint256 constant BLOCK_MASK = uint256(type(uint128).max);
-  uint256 constant HAS_ANY_MASK = ${renderMetaCategoryMask(hasAnyCategories)};
-  uint256 constant HAS_EXTRA_DROPS_MASK = ${renderMetaCategoryMask(hasExtraDropsCategories)};
-  uint256 constant PASS_THROUGH_MASK = ${renderMetaCategoryMask(passThroughCategories)};
-  uint256 constant GROWABLE_MASK = ${renderMetaCategoryMask(growableCategories)};
-  uint256 constant UNIQUE_OBJECT_MASK = ${renderMetaCategoryMask(uniqueObjectCategories)};
-  uint256 constant SMART_ENTITY_MASK = ${renderMetaCategoryMask(smartEntityCategories)};
-  uint256 constant TOOL_MASK = ${renderMetaCategoryMask(toolCategories)};
   uint256 constant MINEABLE_MASK = BLOCK_MASK & ~${renderMetaCategoryMask(["NonSolid"])};
+  ${metaCategories.map((metaCategory) => renderMetaCategoryMaskDefinition(metaCategory)).join("\n  ")}
 }
-
 
 // ------------------------------------------------------------
 // Object Types
@@ -311,33 +340,11 @@ ${allCategoryMetadata
     return self.index() == 0 && hasMetaCategory(self, Category.HAS_ANY_MASK);
   }
 
-  function hasExtraDrops(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.HAS_EXTRA_DROPS_MASK);
-  }
-
-  function isPassThrough(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.PASS_THROUGH_MASK);
-  }
-
   function isMineable(ObjectType self) internal pure returns (bool) {
     return hasMetaCategory(self, Category.MINEABLE_MASK);
   }
 
-  function isTool(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.TOOL_MASK);
-  }
-
-  function isUniqueObject(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.UNIQUE_OBJECT_MASK);
-  }
-
-  function isSmartEntity(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.SMART_ENTITY_MASK);
-  }
-
-  function isGrowable(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.GROWABLE_MASK);
-  }
+  ${metaCategories.map(renderMetaCategoryCheck).join("\n  ")}
 
   function hasMetaCategory(ObjectType self, uint256 mask) internal pure returns (bool) {
     uint16 c = category(self);

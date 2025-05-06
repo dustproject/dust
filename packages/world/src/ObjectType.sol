@@ -60,24 +60,31 @@ library Category {
   // ------------------------------------------------------------
   // Meta Category Masks (fits within uint256; mask bit k set if raw category ID k belongs)
   uint256 constant BLOCK_MASK = uint256(type(uint128).max);
+  uint256 constant MINEABLE_MASK = BLOCK_MASK & ~(uint256(1) << (NonSolid >> OFFSET_BITS));
   uint256 constant HAS_ANY_MASK = (uint256(1) << (Log >> OFFSET_BITS)) | (uint256(1) << (Leaf >> OFFSET_BITS))
     | (uint256(1) << (Plank >> OFFSET_BITS));
   uint256 constant HAS_EXTRA_DROPS_MASK = (uint256(1) << (Leaf >> OFFSET_BITS)) | (uint256(1) << (Crop >> OFFSET_BITS))
     | (uint256(1) << (Greenery >> OFFSET_BITS));
-  uint256 constant PASS_THROUGH_MASK = (uint256(1) << (NonSolid >> OFFSET_BITS))
+  uint256 constant HAS_AXE_MULTIPLIER_MASK = (uint256(1) << (Log >> OFFSET_BITS))
+    | (uint256(1) << (Leaf >> OFFSET_BITS)) | (uint256(1) << (Plank >> OFFSET_BITS))
+    | (uint256(1) << (CropBlock >> OFFSET_BITS));
+  uint256 constant HAS_PICK_MULTIPLIER_MASK = (uint256(1) << (Ore >> OFFSET_BITS))
+    | (uint256(1) << (Gemstone >> OFFSET_BITS)) | (uint256(1) << (Stone >> OFFSET_BITS))
+    | (uint256(1) << (Sand >> OFFSET_BITS)) | (uint256(1) << (Terracotta >> OFFSET_BITS))
+    | (uint256(1) << (OreBlock >> OFFSET_BITS));
+  uint256 constant IS_PASS_THROUGH_MASK = (uint256(1) << (NonSolid >> OFFSET_BITS))
     | (uint256(1) << (Flower >> OFFSET_BITS)) | (uint256(1) << (Seed >> OFFSET_BITS))
     | (uint256(1) << (Sapling >> OFFSET_BITS)) | (uint256(1) << (Greenery >> OFFSET_BITS))
     | (uint256(1) << (Crop >> OFFSET_BITS)) | (uint256(1) << (UnderwaterPlant >> OFFSET_BITS));
-  uint256 constant GROWABLE_MASK = (uint256(1) << (Seed >> OFFSET_BITS)) | (uint256(1) << (Sapling >> OFFSET_BITS));
-  uint256 constant UNIQUE_OBJECT_MASK = (uint256(1) << (Pick >> OFFSET_BITS)) | (uint256(1) << (Axe >> OFFSET_BITS))
+  uint256 constant IS_GROWABLE_MASK = (uint256(1) << (Seed >> OFFSET_BITS)) | (uint256(1) << (Sapling >> OFFSET_BITS));
+  uint256 constant IS_UNIQUE_OBJECT_MASK = (uint256(1) << (Pick >> OFFSET_BITS)) | (uint256(1) << (Axe >> OFFSET_BITS))
     | (uint256(1) << (Whacker >> OFFSET_BITS)) | (uint256(1) << (Hoe >> OFFSET_BITS))
     | (uint256(1) << (Bucket >> OFFSET_BITS)) | (uint256(1) << (SmartEntityBlock >> OFFSET_BITS))
     | (uint256(1) << (SmartEntityNonBlock >> OFFSET_BITS));
-  uint256 constant SMART_ENTITY_MASK =
+  uint256 constant IS_SMART_ENTITY_MASK =
     (uint256(1) << (SmartEntityBlock >> OFFSET_BITS)) | (uint256(1) << (SmartEntityNonBlock >> OFFSET_BITS));
-  uint256 constant TOOL_MASK = (uint256(1) << (Pick >> OFFSET_BITS)) | (uint256(1) << (Axe >> OFFSET_BITS))
+  uint256 constant IS_TOOL_MASK = (uint256(1) << (Pick >> OFFSET_BITS)) | (uint256(1) << (Axe >> OFFSET_BITS))
     | (uint256(1) << (Whacker >> OFFSET_BITS)) | (uint256(1) << (Hoe >> OFFSET_BITS));
-  uint256 constant MINEABLE_MASK = BLOCK_MASK & ~(uint256(1) << (NonSolid >> OFFSET_BITS));
 }
 
 // ------------------------------------------------------------
@@ -900,32 +907,44 @@ library ObjectTypeLib {
     return self.index() == 0 && hasMetaCategory(self, Category.HAS_ANY_MASK);
   }
 
-  function hasExtraDrops(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.HAS_EXTRA_DROPS_MASK);
-  }
-
-  function isPassThrough(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.PASS_THROUGH_MASK);
-  }
-
   function isMineable(ObjectType self) internal pure returns (bool) {
     return hasMetaCategory(self, Category.MINEABLE_MASK);
   }
 
-  function isTool(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.TOOL_MASK);
+  function hasAny(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.HAS_ANY_MASK);
   }
 
-  function isUniqueObject(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.UNIQUE_OBJECT_MASK);
+  function hasExtraDrops(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.HAS_EXTRA_DROPS_MASK);
   }
 
-  function isSmartEntity(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.SMART_ENTITY_MASK);
+  function hasAxeMultiplier(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.HAS_AXE_MULTIPLIER_MASK);
+  }
+
+  function hasPickMultiplier(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.HAS_PICK_MULTIPLIER_MASK);
+  }
+
+  function isPassThrough(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.IS_PASS_THROUGH_MASK);
   }
 
   function isGrowable(ObjectType self) internal pure returns (bool) {
-    return hasMetaCategory(self, Category.GROWABLE_MASK);
+    return hasMetaCategory(self, Category.IS_GROWABLE_MASK);
+  }
+
+  function isUniqueObject(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.IS_UNIQUE_OBJECT_MASK);
+  }
+
+  function isSmartEntity(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.IS_SMART_ENTITY_MASK);
+  }
+
+  function isTool(ObjectType self) internal pure returns (bool) {
+    return hasMetaCategory(self, Category.IS_TOOL_MASK);
   }
 
   function hasMetaCategory(ObjectType self, uint256 mask) internal pure returns (bool) {

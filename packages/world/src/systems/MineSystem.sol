@@ -43,7 +43,14 @@ import { InventoryUtils, ToolData } from "../utils/InventoryUtils.sol";
 import { DeathNotification, MineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
-import { MINE_ENERGY_COST, PLAYER_ENERGY_DRAIN_RATE, SAFE_PROGRAM_GAS } from "../Constants.sol";
+import {
+  AXE_MULTIPLIER,
+  DEFAULT_TOOL_MULTIPLIER,
+  MINE_ENERGY_COST,
+  PICK_MULTIPLIER,
+  PLAYER_ENERGY_DRAIN_RATE,
+  SAFE_PROGRAM_GAS
+} from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectAmount, ObjectType } from "../ObjectType.sol";
 import { MoveLib } from "./libraries/MoveLib.sol";
@@ -253,7 +260,15 @@ contract MineSystem is System {
     pure
     returns (uint128)
   {
-    return toolMassReduction;
+    uint128 multiplier = DEFAULT_TOOL_MULTIPLIER;
+
+    if (toolType.isAxe() && minedType.hasAxeMultiplier()) {
+      multiplier = AXE_MULTIPLIER;
+    } else if (toolType.isPick() && minedType.hasPickMultiplier()) {
+      multiplier = PICK_MULTIPLIER;
+    }
+
+    return toolMassReduction * multiplier;
   }
 
   function _getEnergyReduction(uint128 mineMassReduction, uint128 massLeft) internal pure returns (uint128) {
