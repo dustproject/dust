@@ -120,10 +120,20 @@ library NatureLib {
       return drops;
     }
 
+    if (objectType == ObjectTypes.FescueGrass || objectType == ObjectTypes.SwitchGrass) {
+      uint256[] memory distribution = new uint256[](2);
+      distribution[0] = 43; // 0 seeds: 43%
+      distribution[1] = 57; // 1 seed:  57%
+
+      drops = new RandomDrop[](1);
+      drops[0] = RandomDrop(ObjectTypes.WheatSeed, distribution);
+      return drops;
+    }
+
     if (objectType == ObjectTypes.Wheat) {
       uint256[] memory distribution = new uint256[](4);
       distribution[0] = 40; // 0 seeds: 40%
-      distribution[1] = 30; // 1 seed: 30%
+      distribution[1] = 30; // 1 seed:  30%
       distribution[2] = 20; // 2 seeds: 20%
       distribution[3] = 10; // 3 seeds: 10%
 
@@ -132,13 +142,29 @@ library NatureLib {
       return drops;
     }
 
-    if (objectType == ObjectTypes.FescueGrass || objectType == ObjectTypes.SwitchGrass) {
-      uint256[] memory distribution = new uint256[](2);
-      distribution[0] = 43; // No seed: 43%
-      distribution[1] = 57; // 1 seed: 57%
+    if (objectType == ObjectTypes.Melon) {
+      // Expected return 1.86
+      uint256[] memory distribution = new uint256[](4);
+      distribution[0] = 10; // 0 seeds: 10%
+      distribution[1] = 20; // 1 seed:  20%
+      distribution[2] = 44; // 2 seeds: 44%
+      distribution[3] = 26; // 3 seeds: 26%
 
       drops = new RandomDrop[](1);
-      drops[0] = RandomDrop(ObjectTypes.WheatSeed, distribution);
+      drops[0] = RandomDrop(ObjectTypes.MelonSeed, distribution);
+      return drops;
+    }
+
+    if (objectType == ObjectTypes.Pumpkin) {
+      // Expected return 1.86
+      uint256[] memory distribution = new uint256[](4);
+      distribution[0] = 10; // 0 seeds: 10%
+      distribution[1] = 20; // 1 seed:  20%
+      distribution[2] = 44; // 2 seeds: 44%
+      distribution[3] = 26; // 3 seeds: 26%
+
+      drops = new RandomDrop[](1);
+      drops[0] = RandomDrop(ObjectTypes.PumpkinSeed, distribution);
       return drops;
     }
 
