@@ -10,9 +10,14 @@ export const initMessage = "MessagePortRpcClient";
 export async function getMessagePortRpcClient(
   target: Window,
 ): Promise<SocketRpcClient<MessagePort>> {
+  let closed = false;
   return getSocketRpcClient({
     async getSocket({ onClose, onError, onOpen, onResponse }) {
-      let closed = false;
+      if (closed) {
+        // On closure, viem will try to reconnect, but we don't want that
+        // since we initiated the closure.
+        throw new Error("MessagePortRpcClient is closed.");
+      }
 
       const port = await new Promise<MessagePort>((resolve, reject) => {
         const channel = new MessageChannel();
