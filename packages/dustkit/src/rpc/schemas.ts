@@ -34,7 +34,7 @@ export type ClientRpcSchema = RpcSchema.From<
     }
   | {
       Request: {
-        method: "dustClient_playerPosition";
+        method: "dustClient_getPlayerPosition";
         params: {
           entity: EntityId;
         };
