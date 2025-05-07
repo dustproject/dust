@@ -1,1 +1,26 @@
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.8.24;
 
+import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
+
+library Math {
+  function max(uint256 a, uint256 b) internal pure returns (uint256) {
+    return FixedPointMathLib.max(a, b);
+  }
+
+  function max(uint256 a, uint256 b, uint256 c) internal pure returns (uint256) {
+    return max(a, max(b, c));
+  }
+
+  function min(uint128 a, uint128 b) internal pure returns (uint128) {
+    return uint128(FixedPointMathLib.min(a, b));
+  }
+
+  function dist(int128 a, int128 b) internal pure returns (uint128) {
+    return uint128(FixedPointMathLib.dist(a, b));
+  }
+
+  function divUp(uint128 a, uint128 b) internal pure returns (uint128) {
+    return uint128(FixedPointMathLib.divUp(a, b));
+  }
+}

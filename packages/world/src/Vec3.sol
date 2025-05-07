@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 import { LibString } from "solady/utils/LibString.sol";
 
-import { CHUNK_SIZE, FRAGMENT_SIZE, REGION_SIZE } from "./Constants.sol";
 import { Direction } from "./codegen/common.sol";
+
+import { CHUNK_SIZE, FRAGMENT_SIZE, REGION_SIZE } from "./Constants.sol";
+import { Math } from "./utils/Math.sol";
 
 // Vec3 stores 3 packed int32 values (x, y, z)
 type Vec3 is uint96;
@@ -80,7 +81,6 @@ function getDirectionVector(Direction direction) pure returns (Vec3) {
 
 library Vec3Lib {
   using LibString for *;
-  using FixedPointMathLib for *;
 
   function x(Vec3 a) internal pure returns (int32) {
     // Extract z component (leftmost 32 bits)
@@ -133,7 +133,7 @@ library Vec3Lib {
     uint256 dy = y(a).dist(y(b));
     uint256 dz = z(a).dist(z(b));
 
-    return FixedPointMathLib.max(FixedPointMathLib.max(dx, dy), dz);
+    return Math.max(dx, dy, dz);
   }
 
   function clamp(Vec3 self, Vec3 min, Vec3 max) internal pure returns (Vec3) {
@@ -263,8 +263,8 @@ library Vec3Lib {
   }
 
   // The `%` operator in Solidity is not a modulo operator, it's a remainder operator, which behaves differently for negative numbers.
-  function _mod(int32 x, int32 y) private pure returns (int32) {
-    return ((x % y) + y) % y;
+  function _mod(int32 a, int32 b) private pure returns (int32) {
+    return ((a % b) + b) % b;
   }
 }
 

@@ -2,7 +2,6 @@
 pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
-import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
@@ -19,6 +18,7 @@ import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
+import { Math } from "../utils/Math.sol";
 import { Position } from "../utils/Vec3Storage.sol";
 import { ResourcePosition } from "../utils/Vec3Storage.sol";
 
@@ -65,7 +65,7 @@ import { IDetachProgramHook, IMineHook } from "../ProgramInterfaces.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
 
 contract MineSystem is System {
-  using FixedPointMathLib for *;
+  using Math for *;
 
   function getRandomOreType(Vec3 coord) external view returns (ObjectType) {
     return RandomResourceLib._getRandomOre(coord);
@@ -247,9 +247,9 @@ contract MineSystem is System {
     uint128 toolMultiplier = _getToolMultiplier(toolData.toolType, minedType);
 
     // round up since we want to use up to massLeft after applying the multiplier
-    uint128 toolMassReduction = toolData.getMassReduction(uint128(massLeft.divUp(toolMultiplier)));
+    uint128 toolMassReduction = toolData.getMassReduction(massLeft.divUp(toolMultiplier));
     // If there were rounding errors, we need to make sure we don't go over the mass left
-    uint128 mineMassReduction = uint128(FixedPointMathLib.min(toolMassReduction * toolMultiplier, massLeft));
+    uint128 mineMassReduction = Math.min(toolMassReduction * toolMultiplier, massLeft);
     uint128 energyReduction = _getEnergyReduction(mineMassReduction, massLeft);
 
     if (energyReduction > 0) {
