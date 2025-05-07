@@ -42,12 +42,12 @@ export async function getMessagePortRpcClient(
 
       console.info("port ready");
 
+      const closePort = port.close.bind(port);
       return Object.assign(port, {
         close() {
           console.info("closing port");
           closed = true;
-          // TODO: figure out why this causes an infinite loop if called
-          // port.close();
+          closePort();
           onClose();
         },
         request({ body }) {
