@@ -97,7 +97,7 @@ contract MineSystem is System {
   }
 
   function _mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) internal returns (EntityId) {
-    EnergyData memory callerEnergy = caller.activate();
+    uint128 callerEnergy = caller.activate().energy;
     caller.requireConnected(coord);
 
     (EntityId mined, ObjectType minedType) = getOrCreateEntityAt(coord);
@@ -114,7 +114,7 @@ contract MineSystem is System {
     }
 
     (uint128 massLeft, bool canMine) =
-      _applyMassReduction(caller, callerEnergy.energy, toolSlot, minedType, Mass._getMass(mined));
+      _applyMassReduction(caller, callerEnergy, toolSlot, minedType, Mass._getMass(mined));
 
     if (!canMine) {
       // Player died, return early

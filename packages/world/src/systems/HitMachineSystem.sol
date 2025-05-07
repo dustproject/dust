@@ -43,7 +43,7 @@ contract HitMachineSystem is System {
   }
 
   function _hitForceField(EntityId caller, Vec3 coord, uint16 toolSlot) internal {
-    EnergyData memory callerEnergy = caller.activate();
+    uint128 callerEnergy = caller.activate().energy;
     (Vec3 callerCoord,) = caller.requireConnected(coord);
     (EntityId forceField,) = ForceFieldUtils.getForceField(coord);
     require(forceField.exists(), "No force field at this location");
@@ -57,7 +57,7 @@ contract HitMachineSystem is System {
     (uint128 massReduction, uint128 toolMassReduction) =
       toolData.getMassReduction(machineData.energy, _getToolMultiplier(toolData.toolType));
 
-    uint128 playerEnergyReduction = _getCallerEnergyReduction(callerEnergy.energy, massReduction, machineData.energy);
+    uint128 playerEnergyReduction = _getCallerEnergyReduction(callerEnergy, massReduction, machineData.energy);
 
     // Return early if player died
     if (playerEnergyReduction > 0 && decreasePlayerEnergy(caller, callerCoord, playerEnergyReduction) == 0) {
