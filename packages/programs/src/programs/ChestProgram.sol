@@ -19,4 +19,8 @@ contract ChestProgram is DefaultProgram, ITransferHook {
   {
     require(_isAllowed(target, caller), "Only approved callers can transfer to/from the chest");
   }
+
+  function appConfigURI(EntityId) external pure returns (string memory) {
+    return "http://localhost:5501/dust-app.json";
+  }
 }
