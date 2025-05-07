@@ -40,19 +40,10 @@ export type ClientRpcSchema = RpcSchema.From<
         };
       };
       ReturnType: {
-        x: bigint;
-        y: bigint;
-        z: bigint;
+        x: number;
+        y: number;
+        z: number;
       };
-    }
-  | {
-      Request: {
-        method: "dustClient_showChunks";
-        params: {
-          entity: EntityId;
-        };
-      };
-      ReturnType: void;
     }
 >;
 
