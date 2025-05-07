@@ -18,6 +18,19 @@ export type ClientRpcSchema = RpcSchema.From<
     }
   | {
       Request: {
+        method: "dustClient_getSlots";
+        params: {
+          entity: EntityId;
+          objectType: number;
+          amount: number;
+        };
+      };
+      ReturnType: {
+        slots: number;
+      };
+    }
+  | {
+      Request: {
         method: "dustClient_systemCall";
         params: SystemCalls<readonly Abi[]>;
       };
