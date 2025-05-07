@@ -246,11 +246,9 @@ contract MineSystem is System {
     ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
     uint128 toolMultiplier = _getToolMultiplier(toolData.toolType, minedType);
 
-    // round up since we want to use up to massLeft after applying the multiplier
-    uint128 toolMassReduction = toolData.getMassReduction(massLeft.divUp(toolMultiplier));
-    // If there were rounding errors, we need to make sure we don't go over the mass left
-    uint128 mineMassReduction = Math.min(toolMassReduction * toolMultiplier, massLeft);
-    uint128 energyReduction = _getEnergyReduction(mineMassReduction, massLeft);
+    (uint128 mineMassReduction, uint128 toolMassReduction) = toolData.getMassReduction(massLeft, toolMultiplier);
+
+    uint128 energyReduction = _getPlayerEnergyReduction(mineMassReduction, massLeft);
 
     if (energyReduction > 0) {
       // If player died, return early
@@ -263,7 +261,7 @@ contract MineSystem is System {
     }
 
     // Apply tool usage after decreasing player energy so we make sure the player is alive
-    toolData.applyMassReduction(caller, callerCoord, toolMassReduction);
+    toolData.reduceMass(caller, callerCoord, toolMassReduction);
 
     massLeft -= mineMassReduction;
 
@@ -286,7 +284,7 @@ contract MineSystem is System {
     return DEFAULT_TOOL_MULTIPLIER;
   }
 
-  function _getEnergyReduction(uint128 mineMassReduction, uint128 massLeft) internal pure returns (uint128) {
+  function _getPlayerEnergyReduction(uint128 mineMassReduction, uint128 massLeft) internal pure returns (uint128) {
     // if tool mass reduction is not enough, consume energy from player up to mine energy cost
     if (mineMassReduction < massLeft) {
       uint128 remaining = massLeft - mineMassReduction;

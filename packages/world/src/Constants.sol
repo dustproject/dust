@@ -39,6 +39,7 @@ uint128 constant PLAYER_FALL_ENERGY_COST = MAX_PLAYER_ENERGY / 25; // This makes
 uint128 constant DEFAULT_TOOL_MULTIPLIER = 10;
 uint128 constant AXE_MULTIPLIER = 30;
 uint128 constant PICK_MULTIPLIER = 30;
+uint128 constant WHACKER_MULTIPLIER = 30;
 
 // Resource caps
 uint256 constant MAX_WHEAT_SEED = 444_971;

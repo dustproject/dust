@@ -81,6 +81,7 @@ function getDirectionVector(Direction direction) pure returns (Vec3) {
 
 library Vec3Lib {
   using LibString for *;
+  using Math for *;
 
   function x(Vec3 a) internal pure returns (int32) {
     // Extract z component (leftmost 32 bits)

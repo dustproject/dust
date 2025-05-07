@@ -9,12 +9,12 @@ import { InventoryTypeSlots } from "../codegen/tables/InventoryTypeSlots.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 
-import { ObjectAmount, ObjectType, ObjectTypes } from "../ObjectType.sol";
+import { burnToolEnergy } from "../utils/EnergyUtils.sol";
+import { Math } from "../utils/Math.sol";
 
 import { EntityId } from "../EntityId.sol";
 import { NatureLib } from "../NatureLib.sol";
-import { burnToolEnergy } from "../utils/EnergyUtils.sol";
-
+import { ObjectAmount, ObjectType, ObjectTypes } from "../ObjectType.sol";
 import { Vec3 } from "../Vec3.sol";
 
 struct SlotTransfer {
@@ -39,23 +39,19 @@ struct ToolData {
   ObjectType toolType;
   uint16 slot;
   uint128 massLeft;
-  uint128 maxUseMass;
 }
 
 library InventoryUtils {
   function getToolData(EntityId owner, uint16 slot) public view returns (ToolData memory) {
     EntityId tool = InventorySlot._getEntityId(owner, slot);
     if (!tool.exists()) {
-      return ToolData(tool, ObjectTypes.Null, slot, 0, 0);
+      return ToolData(tool, ObjectTypes.Null, slot, 0);
     }
 
     ObjectType toolType = EntityObjectType._get(tool);
     require(toolType.isTool(), "Inventory item is not a tool");
 
-    uint128 maxMass = ObjectPhysics._getMass(toolType);
-    uint128 maxUsePerCall = maxMass / 10; // Limit to 10% of max mass per use
-
-    return ToolData(tool, toolType, slot, Mass._getMass(tool), maxUsePerCall);
+    return ToolData(tool, toolType, slot, Mass._getMass(tool));
   }
 
   function useTool(EntityId owner, Vec3 ownerCoord, uint16 slot, uint128 useMassMax)
@@ -64,21 +60,30 @@ library InventoryUtils {
   {
     ToolData memory toolData = getToolData(owner, slot);
 
-    uint128 massReduction = toolData.getMassReduction(useMassMax);
-    applyMassReduction(toolData, owner, ownerCoord, massReduction);
+    (, uint128 toolMassReduction) = toolData.getMassReduction(useMassMax, 1);
+    reduceMass(toolData, owner, ownerCoord, toolMassReduction);
     return toolData.toolType;
   }
 
-  function getMassReduction(ToolData memory toolData, uint128 useMassMax) internal pure returns (uint128) {
-    uint128 massReduction = useMassMax > toolData.maxUseMass ? toolData.maxUseMass : useMassMax;
-    if (toolData.massLeft <= massReduction) {
-      return toolData.massLeft;
-    }
+  function getMassReduction(ToolData memory toolData, uint128 massLeft, uint128 multiplier)
+    internal
+    view
+    returns (uint128, uint128)
+  {
+    uint128 toolMass = ObjectPhysics._getMass(toolData.toolType);
 
-    return massReduction;
+    // Limit to 10% of max mass per use
+    uint128 maxToolMassReduction = Math.min(toolMass / 10, toolData.massLeft);
+
+    uint128 massReduction = Math.min(maxToolMassReduction * multiplier, massLeft);
+
+    // Reverse operation to get the proportional tool mass reduction
+    uint128 toolMassReduction = massReduction / multiplier;
+
+    return (massReduction, toolMassReduction);
   }
 
-  function applyMassReduction(ToolData memory toolData, EntityId owner, Vec3 ownerCoord, uint128 massReduction) public {
+  function reduceMass(ToolData memory toolData, EntityId owner, Vec3 ownerCoord, uint128 massReduction) public {
     if (!toolData.tool.exists()) {
       return;
     }

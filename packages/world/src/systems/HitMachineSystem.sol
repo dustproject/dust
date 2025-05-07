@@ -12,7 +12,7 @@ import { System } from "@latticexyz/world/src/System.sol";
 
 import { Position } from "../utils/Vec3Storage.sol";
 
-import { HIT_ENERGY_COST, SAFE_PROGRAM_GAS } from "../Constants.sol";
+import { DEFAULT_TOOL_MULTIPLIER, HIT_ENERGY_COST, SAFE_PROGRAM_GAS, WHACKER_MULTIPLIER } from "../Constants.sol";
 import {
   addEnergyToLocalPool,
   decreaseMachineEnergy,
@@ -47,52 +47,55 @@ contract HitMachineSystem is System {
     require(forceField.exists(), "No force field at this location");
     Vec3 forceFieldCoord = Position._get(forceField);
 
-    uint128 energyReduction =
-      HitMachineLib._processEnergyReduction(caller, callerCoord, toolSlot, forceField, forceFieldCoord);
+    (EnergyData memory machineData,) = updateMachineEnergy(forceField);
+    require(machineData.energy > 0, "Cannot hit depleted forcefield");
+
+    ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
+
+    (uint128 massReduction, uint128 toolMassReduction) =
+      toolData.getMassReduction(machineData.energy, _getToolMultiplier(toolData.toolType));
+
+    uint128 playerEnergyReduction = _getPlayerEnergyReduction(massReduction, machineData.energy);
+
+    // Return early if player died
+    if (playerEnergyReduction > 0 && decreasePlayerEnergy(caller, callerCoord, playerEnergyReduction) == 0) {
+      addEnergyToLocalPool(forceFieldCoord, playerEnergyReduction);
+      return;
+    }
+
+    toolData.reduceMass(caller, callerCoord, toolMassReduction);
+
+    uint128 machineEnergyReduction = playerEnergyReduction + massReduction;
+    decreaseMachineEnergy(forceField, machineEnergyReduction);
+
+    addEnergyToLocalPool(forceFieldCoord, machineEnergyReduction + playerEnergyReduction);
 
     ProgramId program = forceField.getProgram();
-    bytes memory onHit = abi.encodeCall(IHitHook.onHit, (caller, forceField, energyReduction, ""));
+    bytes memory onHit = abi.encodeCall(IHitHook.onHit, (caller, forceField, machineEnergyReduction, ""));
     // Don't revert and use a fixed amount of gas so the program can't prevent hitting
     program.call({ gas: SAFE_PROGRAM_GAS, hook: onHit });
 
     notify(caller, HitMachineNotification({ machine: forceField, machineCoord: forceFieldCoord }));
   }
-}
 
-library HitMachineLib {
-  function _processEnergyReduction(
-    EntityId caller,
-    Vec3 callerCoord,
-    uint16 toolSlot,
-    EntityId forceField,
-    Vec3 forceFieldCoord
-  ) public returns (uint128) {
-    (EnergyData memory machineData,) = updateMachineEnergy(forceField);
-    require(machineData.energy > 0, "Cannot hit depleted forcefield");
-
-    ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
-    uint128 toolMassReduction = toolData.getMassReduction(machineData.energy);
-
-    uint128 playerEnergyReduction = 0;
-
+  function _getPlayerEnergyReduction(uint128 massReduction, uint128 massLeft) internal pure returns (uint128) {
     // if tool mass reduction is not enough, consume energy from player up to hit energy cost
-    uint128 energyLeft;
-    if (toolMassReduction < machineData.energy) {
-      uint128 remaining = machineData.energy - toolMassReduction;
-      playerEnergyReduction = HIT_ENERGY_COST <= remaining ? HIT_ENERGY_COST : remaining;
-      energyLeft = decreasePlayerEnergy(caller, callerCoord, playerEnergyReduction);
+    if (massReduction < massLeft) {
+      uint128 remaining = massLeft - massReduction;
+      return HIT_ENERGY_COST <= remaining ? HIT_ENERGY_COST : remaining;
+    }
+    return 0;
+  }
+
+  function _getToolMultiplier(ObjectType toolType) internal pure returns (uint128) {
+    if (toolType.isNull()) {
+      return 1;
     }
 
-    uint128 machineEnergyReduction = 0;
-
-    // If player is alive, apply tool usage and decrease machine's energy
-    if (energyLeft != 0) {
-      toolData.applyMassReduction(caller, callerCoord, toolMassReduction);
-      machineEnergyReduction = playerEnergyReduction + toolMassReduction;
-      decreaseMachineEnergy(forceField, machineEnergyReduction);
+    if (toolType.isWhacker()) {
+      return WHACKER_MULTIPLIER;
     }
 
-    addEnergyToLocalPool(forceFieldCoord, machineEnergyReduction + playerEnergyReduction);
-    return machineEnergyReduction;
+    return DEFAULT_TOOL_MULTIPLIER;
   }
 }
