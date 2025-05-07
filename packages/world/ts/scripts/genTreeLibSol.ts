@@ -9,7 +9,7 @@ interface Vec3 {
 /* uint32‑wrap (handles negative ints via 2‑complement) */
 const asU32 = (n: number) => n >>> 0;
 
-/* pack exactly like on‑chain vec3:  z | y | x  (uint96) */
+/* pack like on‑chain vec3:  z | y | x  (uint96) */
 function pack96(x: number, y: number, z: number): bigint {
   return (
     (BigInt(asU32(z)) << 64n) | (BigInt(asU32(y)) << 32n) | BigInt(asU32(x))
@@ -23,7 +23,6 @@ const hex96 = (b: bigint) => b.toString(16).padStart(24, "0");
 const blobHex = (vs: Vec3[]) =>
   vs.map((v) => hex96(pack96(v.x, v.y, v.z))).join("");
 
-/* convert "Dark Oak" -> "DARK_OAK" */
 const constName = (label: string) => label.replace(/\s+/g, "_").toUpperCase();
 
 export function genTreeLib(): string {

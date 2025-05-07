@@ -94,7 +94,6 @@ function updatePlayerEnergy(EntityId player) returns (EnergyData memory) {
 function decreaseMachineEnergy(EntityId machine, uint128 amount) returns (uint128) {
   require(amount > 0, "Cannot decrease 0 energy");
   uint128 current = Energy._getEnergy(machine);
-  // For now we are keeping this restriction for machines
   require(current >= amount, "Not enough energy");
   uint128 newEnergy = current - amount;
   Energy._setEnergy(machine, newEnergy);
@@ -105,8 +104,9 @@ function decreaseMachineEnergy(EntityId machine, uint128 amount) returns (uint12
 function decreasePlayerEnergy(EntityId player, Vec3 playerCoord, uint128 amount) returns (uint128) {
   require(amount > 0, "Cannot decrease 0 energy");
   uint128 current = Energy._getEnergy(player);
+  require(current >= amount, "Not enough energy");
 
-  uint128 newEnergy = current >= amount ? current - amount : 0;
+  uint128 newEnergy = current - amount;
   Energy._setEnergy(player, newEnergy);
 
   if (newEnergy == 0) {
