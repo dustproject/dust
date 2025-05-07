@@ -501,7 +501,7 @@ contract CraftTest is DustTest {
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
 
     vm.prank(alice);
-    vm.expectRevert("All slots used");
+    vm.expectRevert("Inventory is full");
     world.craft(aliceEntityId, recipeId, inputs);
   }
 

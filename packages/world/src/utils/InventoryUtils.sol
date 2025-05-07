@@ -412,7 +412,7 @@ library InventoryUtils {
     } else {
       slot = Inventory._getNextSlot(owner);
       uint16 maxSlots = EntityObjectType._get(owner).getMaxInventorySlots();
-      require(slot < maxSlots, "All slots used");
+      require(slot < maxSlots, "Inventory is full");
       Inventory._setNextSlot(owner, slot + 1);
     }
 

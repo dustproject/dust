@@ -33,6 +33,7 @@ import {
   MAX_PLAYER_GLIDES,
   MAX_PLAYER_JUMPS,
   MOVE_ENERGY_COST,
+  PLAYER_ENERGY_DRAIN_RATE,
   PLAYER_FALL_DAMAGE_THRESHOLD,
   PLAYER_FALL_ENERGY_COST
 } from "../src/Constants.sol";
@@ -417,7 +418,7 @@ contract MoveTest is DustTest {
   function testMoveFailsIfPlayer() public {
     (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupAirChunkWithPlayer();
 
-    (address bob, EntityId bobEntityId, Vec3 bobCoord) = spawnPlayerOnAirChunk(aliceCoord + vec3(0, 0, 2));
+    (,, Vec3 bobCoord) = spawnPlayerOnAirChunk(aliceCoord + vec3(0, 0, 2));
 
     Vec3[] memory newCoords = new Vec3[](2);
     newCoords[0] = aliceCoord + vec3(0, 0, 1);
@@ -604,7 +605,7 @@ contract MoveTest is DustTest {
   }
 
   function testMoveFailsIfNoPlayer() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     Vec3[] memory newCoords = new Vec3[](2);
     newCoords[0] = playerCoord + vec3(0, 0, 1);
@@ -625,6 +626,138 @@ contract MoveTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Player is sleeping");
+    world.move(aliceEntityId, newCoords);
+  }
+
+  function testMoveWithLowEnergy() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Set player energy to just enough for one move
+    Energy.set(
+      aliceEntityId,
+      EnergyData({
+        lastUpdatedTime: uint128(block.timestamp),
+        energy: MOVE_ENERGY_COST,
+        drainRate: PLAYER_ENERGY_DRAIN_RATE
+      })
+    );
+
+    // Try to move multiple steps
+    Vec3[] memory newCoords = new Vec3[](3);
+    for (uint32 i = 0; i < 3; i++) {
+      newCoords[i] = playerCoord + vec3(0, 0, int32(i) + 1);
+      setObjectAtCoord(newCoords[i], ObjectTypes.Air);
+      setObjectAtCoord(newCoords[i] + vec3(0, 1, 0), ObjectTypes.Air);
+      setObjectAtCoord(newCoords[i] - vec3(0, 1, 0), ObjectTypes.Grass);
+    }
+
+    vm.prank(alice);
+    world.move(aliceEntityId, newCoords);
+
+    // Should only move one step due to energy constraints
+    Vec3 expectedCoord = playerCoord + vec3(0, 0, 1);
+    assertEq(MovablePosition.get(aliceEntityId).x(), expectedCoord.x(), "X coordinate mismatch");
+    assertEq(MovablePosition.get(aliceEntityId).y(), expectedCoord.y(), "Y coordinate mismatch");
+    assertEq(MovablePosition.get(aliceEntityId).z(), expectedCoord.z(), "Z coordinate mismatch");
+
+    // Energy should be depleted
+    assertEq(Energy.getEnergy(aliceEntityId), 0, "Energy should be depleted");
+  }
+
+  function testMoveThroughDifferentBlockTypes() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Create a path with different block types
+    Vec3[] memory path = new Vec3[](3);
+    path[0] = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
+    path[1] = vec3(playerCoord.x() + 2, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
+    path[2] = vec3(playerCoord.x() + 3, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
+
+    // Set block types
+    setTerrainAtCoord(path[0], ObjectTypes.Water);
+    setTerrainAtCoord(path[1], ObjectTypes.Air);
+    setTerrainAtCoord(path[2], ObjectTypes.Grass);
+
+    vm.prank(alice);
+    world.move(aliceEntityId, path);
+
+    // Should be able to move through water and air, but stop at grass
+    Vec3 finalCoord = MovablePosition.get(aliceEntityId);
+    assertEq(finalCoord.x(), path[1].x(), "Should stop at air block");
+    assertEq(finalCoord.y(), path[1].y(), "Y coordinate mismatch");
+    assertEq(finalCoord.z(), path[1].z(), "Z coordinate mismatch");
+  }
+
+  function testFallDamage() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Create a high platform to fall from
+    Vec3 platformCoord =
+      vec3(playerCoord.x(), FLAT_CHUNK_GRASS_LEVEL + int32(uint32(PLAYER_FALL_DAMAGE_THRESHOLD)) + 1, playerCoord.z());
+    setTerrainAtCoord(platformCoord, ObjectTypes.Grass);
+
+    // Move player to platform
+    Vec3[] memory moveToPlatform = new Vec3[](1);
+    moveToPlatform[0] = platformCoord;
+    vm.prank(alice);
+    world.move(aliceEntityId, moveToPlatform);
+
+    // Record initial energy
+    uint128 initialEnergy = Energy.getEnergy(aliceEntityId);
+
+    // Let player fall
+    vm.roll(block.number + 1);
+
+    // Check final position and energy
+    Vec3 finalCoord = MovablePosition.get(aliceEntityId);
+    assertEq(finalCoord.y(), FLAT_CHUNK_GRASS_LEVEL + 1, "Should fall to ground level");
+
+    uint128 expectedEnergyCost = PLAYER_FALL_ENERGY_COST * (PLAYER_FALL_DAMAGE_THRESHOLD + 1);
+    assertEq(Energy.getEnergy(aliceEntityId), initialEnergy - expectedEnergyCost, "Incorrect fall damage energy cost");
+  }
+
+  function testMultiplePlayersCollision() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Create second player
+    Vec3 bobCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
+
+    createTestPlayer(bobCoord);
+
+    // Try to move through Bob
+    Vec3[] memory newCoords = new Vec3[](1);
+    newCoords[0] = bobCoord;
+
+    vm.prank(alice);
+    vm.expectRevert("Cannot move through a player");
+    world.move(aliceEntityId, newCoords);
+  }
+
+  function testJumpAndGlideLimits() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Create a path that requires jumping and gliding
+    Vec3[] memory newCoords = new Vec3[](MAX_PLAYER_JUMPS + MAX_PLAYER_GLIDES + 1);
+
+    // First do the jumps
+    for (uint256 i = 0; i < MAX_PLAYER_JUMPS; i++) {
+      newCoords[i] = playerCoord + vec3(0, int32(uint32(i)) + 1, 0);
+      setObjectAtCoord(newCoords[i], ObjectTypes.Air);
+      setObjectAtCoord(newCoords[i] + vec3(0, 1, 0), ObjectTypes.Air);
+    }
+
+    // Then do the glides
+    for (uint256 i = MAX_PLAYER_JUMPS; i < MAX_PLAYER_JUMPS + MAX_PLAYER_GLIDES; i++) {
+      newCoords[i] = playerCoord + vec3(0, 1, int32(int256(i - MAX_PLAYER_JUMPS + 1)));
+      setObjectAtCoord(newCoords[i], ObjectTypes.Air);
+      setObjectAtCoord(newCoords[i] + vec3(0, 1, 0), ObjectTypes.Air);
+    }
+
+    // One more move should fail
+    newCoords[MAX_PLAYER_JUMPS + MAX_PLAYER_GLIDES] = playerCoord + vec3(0, 1, int32(uint32(MAX_PLAYER_GLIDES + 1)));
+
+    vm.prank(alice);
+    vm.expectRevert("Cannot glide more than 10 blocks");
     world.move(aliceEntityId, newCoords);
   }
 }
