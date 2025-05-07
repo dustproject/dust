@@ -184,13 +184,13 @@ library MoveLib {
       totalCost += cost;
     }
 
-    if (totalCost > currentEnergy) {
-      totalCost = currentEnergy;
-    }
-
     Vec3[] memory newPlayerCoords = ObjectTypes.Player.getRelativeCoords(finalCoord);
     for (uint256 i = 0; i < newPlayerCoords.length; i++) {
       setMovableEntityAt(newPlayerCoords[i], players[i]);
+    }
+
+    if (totalCost > currentEnergy) {
+      totalCost = currentEnergy;
     }
 
     if (totalCost > 0) {

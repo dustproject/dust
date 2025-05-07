@@ -34,10 +34,13 @@ import {
 } from "../src/utils/Vec3Storage.sol";
 
 import {
+  AXE_MULTIPLIER,
   CHUNK_SIZE,
+  DEFAULT_TOOL_MULTIPLIER,
   MACHINE_ENERGY_DRAIN_RATE,
   MAX_ENTITY_INFLUENCE_HALF_WIDTH,
   MINE_ENERGY_COST,
+  PICK_MULTIPLIER,
   PLAYER_ENERGY_DRAIN_RATE
 } from "../src/Constants.sol";
 import { ObjectAmount, ObjectType, ObjectTypes } from "../src/ObjectType.sol";
@@ -496,5 +499,147 @@ contract MineTest is DustTest {
     vm.prank(alice);
     vm.expectRevert("Cannot mine a machine that has energy");
     world.mine(aliceEntityId, mineCoord, "");
+  }
+
+  function testMineAtChunkBoundary() public {
+    (address alice, EntityId aliceEntityId,) = setupFlatChunkWithPlayer();
+
+    // Place player at chunk boundary
+    Vec3 boundaryCoord = vec3(CHUNK_SIZE - 1, FLAT_CHUNK_GRASS_LEVEL, CHUNK_SIZE - 1);
+    Position.set(aliceEntityId, boundaryCoord);
+
+    // Try to mine block in adjacent chunk
+    Vec3 mineCoord = vec3(CHUNK_SIZE, FLAT_CHUNK_GRASS_LEVEL, CHUNK_SIZE);
+
+    vm.prank(alice);
+    vm.expectRevert("Chunk not explored yet");
+    world.mine(aliceEntityId, mineCoord, "");
+  }
+
+  function testMineWithInsufficientEnergy() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Drain player's energy
+    Energy.setEnergy(aliceEntityId, 0);
+
+    Vec3 mineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
+
+    vm.prank(alice);
+    vm.expectRevert("Entity has no energy");
+    world.mine(aliceEntityId, mineCoord, "");
+  }
+
+  function testMineWithFullInventory() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Fill inventory
+    for (uint256 i = 0; i < ObjectTypes.Player.getMaxInventorySlots(); i++) {
+      TestInventoryUtils.addObjectToSlot(aliceEntityId, ObjectTypes.Dirt, 1, uint16(i));
+    }
+
+    Vec3 mineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
+    // Set a different object so it doesn't fit in the inventory
+    setObjectAtCoord(mineCoord, ObjectTypes.Grass);
+
+    vm.prank(alice);
+    vm.expectRevert("All slots used");
+    world.mineUntilDestroyed(aliceEntityId, mineCoord, "");
+  }
+
+  function testMineWithInvalidCoordinates() public {
+    (address alice, EntityId aliceEntityId,) = setupFlatChunkWithPlayer();
+
+    // Try to mine at invalid coordinates
+    Vec3 invalidCoord = vec3(type(int32).max, type(int32).max, type(int32).max);
+
+    vm.prank(alice);
+    vm.expectRevert("Entity is too far");
+    world.mine(aliceEntityId, invalidCoord, "");
+  }
+
+  function testMineWithMultiplePlayers() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+    (address bob, EntityId bobEntityId) = createTestPlayer(playerCoord + vec3(1, 0, 1));
+
+    Vec3 mineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
+    ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
+    ObjectPhysics.setMass(mineObjectType, playerHandMassReduction * 2);
+
+    // First player mines partially
+    vm.prank(alice);
+    world.mine(aliceEntityId, mineCoord, "");
+
+    // Second player tries to mine the same block
+    vm.prank(bob);
+    world.mine(bobEntityId, mineCoord, "");
+
+    EntityId mineEntityId = ReversePosition.get(mineCoord);
+    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Block should be fully mined");
+    assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
+    assertInventoryHasObject(bobEntityId, mineObjectType, 1);
+  }
+
+  function testMineWithToolMultipliers() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    {
+      Vec3 stoneCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
+      ObjectType stoneType = ObjectTypes.Bedrock; // Has pick multiplier
+      setObjectAtCoord(stoneCoord, stoneType);
+
+      // Test pick on stone (should apply pick multiplier)
+      uint128 pickMass = ObjectPhysics.getMass(ObjectTypes.WoodenPick);
+      uint128 stoneMass = ObjectPhysics.getMass(stoneType);
+      EntityId tool = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenPick);
+      uint16 slot = TestInventoryUtils.getEntitySlot(aliceEntityId, tool);
+      vm.prank(alice);
+      world.mine(aliceEntityId, stoneCoord, slot, "");
+
+      EntityId mineEntityId = ReversePosition.get(stoneCoord);
+      uint128 massReduction = playerHandMassReduction + pickMass / 10 * PICK_MULTIPLIER;
+      uint128 expectedMass = stoneMass - massReduction;
+      assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden pick on stone");
+    }
+
+    {
+      Vec3 logCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z() + 1);
+      ObjectType logType = ObjectTypes.OakLog; // Has axe multiplier
+
+      // Test axe on log (should apply axe multiplier)
+      uint128 axeMass = ObjectPhysics.getMass(ObjectTypes.WoodenAxe);
+      // Set a manual mass so that it is only partially mined
+      uint128 logMass = axeMass * 1000;
+      ObjectPhysics.setMass(logType, logMass);
+      setObjectAtCoord(logCoord, logType);
+
+      EntityId tool = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenAxe);
+      uint16 slot = TestInventoryUtils.getEntitySlot(aliceEntityId, tool);
+      vm.prank(alice);
+      world.mine(aliceEntityId, logCoord, slot, "");
+
+      EntityId mineEntityId = ReversePosition.get(logCoord);
+      uint128 massReduction = playerHandMassReduction + axeMass / 10 * AXE_MULTIPLIER;
+      uint128 expectedMass = logMass - massReduction;
+      assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden axe on log");
+    }
+
+    {
+      Vec3 stoneCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z() + 2);
+      ObjectType stoneType = ObjectTypes.Bedrock; // No multiplier
+      setObjectAtCoord(stoneCoord, stoneType);
+
+      // Test axe on stone (should apply default multiplier)
+      uint128 axeMass = ObjectPhysics.getMass(ObjectTypes.WoodenAxe);
+      uint128 stoneMass = ObjectPhysics.getMass(stoneType);
+      EntityId tool = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenAxe);
+      uint16 slot = TestInventoryUtils.getEntitySlot(aliceEntityId, tool);
+      vm.prank(alice);
+      world.mine(aliceEntityId, stoneCoord, slot, "");
+
+      EntityId mineEntityId = ReversePosition.get(stoneCoord);
+      uint128 massReduction = playerHandMassReduction + axeMass / 10 * DEFAULT_TOOL_MULTIPLIER;
+      uint128 expectedMass = stoneMass - massReduction;
+      assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden axe on stone");
+    }
   }
 }

@@ -21,7 +21,6 @@ import { EntityId } from "../EntityId.sol";
 
 import { NatureLib } from "../NatureLib.sol";
 import { ObjectType, ObjectTypes } from "../ObjectType.sol";
-import { ITransferHook } from "../ProgramInterfaces.sol";
 import { Vec3 } from "../Vec3.sol";
 
 contract CraftSystem is System {

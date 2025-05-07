@@ -18,13 +18,13 @@ import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
+import { Math } from "../utils/Math.sol";
 import { Position } from "../utils/Vec3Storage.sol";
 import { ResourcePosition } from "../utils/Vec3Storage.sol";
 
 import {
   addEnergyToLocalPool,
   decreaseFragmentDrainRate,
-  decreasePlayerEnergy,
   transferEnergyToPool,
   updateMachineEnergy,
   updatePlayerEnergy,
@@ -43,7 +43,15 @@ import { InventoryUtils, ToolData } from "../utils/InventoryUtils.sol";
 import { DeathNotification, MineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
-import { MINE_ENERGY_COST, PLAYER_ENERGY_DRAIN_RATE, SAFE_PROGRAM_GAS } from "../Constants.sol";
+import {
+  AXE_MULTIPLIER,
+  DEFAULT_TOOL_MULTIPLIER,
+  MINE_ENERGY_COST,
+  PICK_MULTIPLIER,
+  PLAYER_ENERGY_DRAIN_RATE,
+  SAFE_PROGRAM_GAS
+} from "../Constants.sol";
+
 import { EntityId } from "../EntityId.sol";
 import { ObjectAmount, ObjectType } from "../ObjectType.sol";
 import { MoveLib } from "./libraries/MoveLib.sol";
@@ -56,6 +64,8 @@ import { IDetachProgramHook, IMineHook } from "../ProgramInterfaces.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
 
 contract MineSystem is System {
+  using Math for *;
+
   function getRandomOreType(Vec3 coord) external view returns (ObjectType) {
     return RandomResourceLib._getRandomOre(coord);
   }
@@ -87,8 +97,8 @@ contract MineSystem is System {
   }
 
   function _mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) internal returns (EntityId) {
-    caller.activate();
-    (Vec3 callerCoord,) = caller.requireConnected(coord);
+    uint128 callerEnergy = caller.activate().energy;
+    caller.requireConnected(coord);
 
     (EntityId mined, ObjectType minedType) = getOrCreateEntityAt(coord);
     require(minedType.isMineable(), "Object is not mineable");
@@ -103,31 +113,30 @@ contract MineSystem is System {
       minedType = RandomResourceLib._collapseRandomOre(mined, coord);
     }
 
-    (uint128 finalMass, bool canMine) = _processMassReduction(caller, callerCoord, toolSlot, mined);
+    (uint128 massLeft, bool canMine) =
+      _applyMassReduction(caller, callerEnergy, toolSlot, minedType, Mass._getMass(mined));
+
     if (!canMine) {
+      // Player died, return early
       return mined;
     }
 
-    if (finalMass != 0) {
-      Mass._setMass(mined, finalMass);
-      MineLib._requireMinesAllowed(caller, minedType, coord, extraData);
-      return mined;
+    if (massLeft == 0) {
+      // The block was fully mined
+      Mass._deleteRecord(mined);
+
+      _handleGrowable(caller, baseCoord);
+      _removeBlock(mined, minedType, baseCoord);
+      _removeRelativeBlocks(mined, minedType, baseCoord);
+      _handleDrop(caller, mined, minedType, baseCoord);
+      _destroyEntity(caller, mined, minedType, baseCoord);
+
+      notify(caller, MineNotification({ mineEntityId: mined, mineCoord: coord, mineObjectType: minedType }));
+    } else {
+      Mass._setMass(mined, massLeft);
     }
-
-    // The block was fully mined
-    Mass._deleteRecord(mined);
-
-    _handleGrowable(caller, baseCoord);
-
-    _removeBlock(mined, minedType, baseCoord);
-    _removeRelativeBlocks(mined, minedType, baseCoord);
-    _handleDrop(caller, mined, minedType, baseCoord);
-
-    _destroyEntity(caller, mined, minedType, baseCoord);
 
     MineLib._requireMinesAllowed(caller, minedType, coord, extraData);
-
-    notify(caller, MineNotification({ mineEntityId: mined, mineCoord: coord, mineObjectType: minedType }));
 
     return mined;
   }
@@ -206,7 +215,7 @@ contract MineSystem is System {
     ObjectAmount[] memory result = RandomResourceLib._getMineDrops(mined, minedType, coord);
 
     for (uint256 i = 0; i < result.length; i++) {
-      (ObjectType dropType, uint16 amount) = (result[i].objectType, result[i].amount);
+      (ObjectType dropType, uint128 amount) = (result[i].objectType, result[i].amount);
 
       if (amount == 0) {
         continue;
@@ -222,50 +231,70 @@ contract MineSystem is System {
     }
   }
 
-  // TODO: this is ugly, but doing this to avoid stack too deep errors. We should refactor later.
-  function _processMassReduction(EntityId caller, Vec3 callerCoord, uint16 toolSlot, EntityId mined)
-    internal
-    returns (uint128, bool)
-  {
+  function _applyMassReduction(
+    EntityId caller,
+    uint128 callerEnergy,
+    uint16 toolSlot,
+    ObjectType minedType,
+    uint128 massLeft
+  ) internal returns (uint128, bool) {
+    if (massLeft == 0) {
+      return (0, true);
+    }
+
     ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
-    (uint128 finalMass, uint128 toolMassReduction, uint128 energyReduction) = _getMassReduction(toolData, mined);
+    uint128 toolMultiplier = _getToolMultiplier(toolData.toolType, minedType);
+
+    (uint128 mineMassReduction, uint128 toolMassReduction) = toolData.getMassReduction(massLeft, toolMultiplier);
+
+    uint128 energyReduction = _getCallerEnergyReduction(callerEnergy, mineMassReduction, massLeft);
 
     if (energyReduction > 0) {
       // If player died, return early
-      (uint128 callerEnergy,) = transferEnergyToPool(caller, energyReduction);
+      (callerEnergy,) = transferEnergyToPool(caller, energyReduction);
       if (callerEnergy == 0) {
-        return (finalMass, false);
+        return (massLeft, false);
       }
-    }
 
-    // Apply tool usage after decreasing player energy so we make sure the player is alive
-    toolData.applyMassReduction(callerCoord, toolMassReduction);
-    return (finalMass, true);
-  }
-
-  function _getMassReduction(ToolData memory toolData, EntityId mined)
-    internal
-    view
-    returns (uint128, uint128, uint128)
-  {
-    uint128 massLeft = Mass._getMass(mined);
-    if (massLeft == 0) {
-      return (0, 0, 0);
-    }
-
-    uint128 toolMassReduction = toolData.getMassReduction(massLeft);
-
-    // if tool mass reduction is not enough, consume energy from player up to mine energy cost
-    uint128 energyReduction = 0;
-    if (toolMassReduction < massLeft) {
-      uint128 remaining = massLeft - toolMassReduction;
-      energyReduction = MINE_ENERGY_COST <= remaining ? MINE_ENERGY_COST : remaining;
       massLeft -= energyReduction;
     }
 
-    uint128 finalMass = massLeft - toolMassReduction;
+    // Apply tool usage after decreasing player energy so we make sure the player is alive
+    toolData.reduceMass(toolMassReduction);
 
-    return (finalMass, toolMassReduction, energyReduction);
+    massLeft -= mineMassReduction;
+
+    return (massLeft, true);
+  }
+
+  function _getToolMultiplier(ObjectType toolType, ObjectType minedType) internal pure returns (uint128) {
+    if (toolType.isNull()) {
+      return 1;
+    }
+
+    if (toolType.isAxe() && minedType.hasAxeMultiplier()) {
+      return AXE_MULTIPLIER;
+    }
+
+    if (toolType.isPick() && minedType.hasPickMultiplier()) {
+      return PICK_MULTIPLIER;
+    }
+
+    return DEFAULT_TOOL_MULTIPLIER;
+  }
+
+  function _getCallerEnergyReduction(uint128 currentEnergy, uint128 mineMassReduction, uint128 massLeft)
+    internal
+    pure
+    returns (uint128)
+  {
+    // if tool mass reduction is not enough, consume energy from player up to mine energy cost
+    if (mineMassReduction < massLeft) {
+      uint128 remaining = massLeft - mineMassReduction;
+      uint128 energyReduction = MINE_ENERGY_COST <= remaining ? MINE_ENERGY_COST : remaining;
+      return Math.min(currentEnergy, energyReduction);
+    }
+    return 0;
   }
 }
 
