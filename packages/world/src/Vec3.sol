@@ -247,26 +247,26 @@ library Vec3Lib {
   function toString(Vec3 a) internal pure returns (string memory) {
     return string(abi.encodePacked("(", x(a).toString(), ",", y(a).toString(), ",", z(a).toString(), ")"));
   }
+
+  // ======== Helper Functions ========
+
+  // Floor division (integer division that rounds down)
+  function _floorDiv(int32 a, int32 b) private pure returns (int32) {
+    require(b != 0, "Division by zero");
+
+    // Handle special case for negative numbers
+    if ((a < 0) != (b < 0) && a % b != 0) {
+      return a / b - 1;
+    }
+
+    return a / b;
+  }
+
+  // The `%` operator in Solidity is not a modulo operator, it's a remainder operator, which behaves differently for negative numbers.
+  function _mod(int32 x, int32 y) private pure returns (int32) {
+    return ((x % y) + y) % y;
+  }
 }
 
 using Vec3Lib for Vec3 global;
 using { eq as ==, neq as !=, add as +, sub as -, leq as <=, lt as < } for Vec3 global;
-
-// ======== Helper Functions ========
-
-// Floor division (integer division that rounds down)
-function _floorDiv(int32 a, int32 b) pure returns (int32) {
-  require(b != 0, "Division by zero");
-
-  // Handle special case for negative numbers
-  if ((a < 0) != (b < 0) && a % b != 0) {
-    return a / b - 1;
-  }
-
-  return a / b;
-}
-
-// The `%` operator in Solidity is not a modulo operator, it's a remainder operator, which behaves differently for negative numbers.
-function _mod(int32 x, int32 y) pure returns (int32) {
-  return ((x % y) + y) % y;
-}

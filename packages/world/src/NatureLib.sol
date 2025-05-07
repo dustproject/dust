@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
-
 import { BurnedResourceCount } from "./codegen/tables/BurnedResourceCount.sol";
 import { DisabledExtraDrops } from "./codegen/tables/DisabledExtraDrops.sol";
 import { ResourceCount } from "./codegen/tables/ResourceCount.sol";

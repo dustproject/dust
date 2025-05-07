@@ -2,7 +2,6 @@
 pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
-import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 
