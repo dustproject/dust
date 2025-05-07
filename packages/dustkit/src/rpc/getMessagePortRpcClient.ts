@@ -33,10 +33,9 @@ export async function getMessagePortRpcClient(
         target.postMessage(initMessage, "*", [channel.port2]);
       });
 
-      const messageHandler = function onMessage(event: MessageEvent) {
+      port.addEventListener("message", function onMessage(event: MessageEvent) {
         onResponse(event.data);
-      };
-      port.addEventListener("message", messageHandler);
+      });
       port.addEventListener("messageerror", onError);
 
       onOpen();
@@ -47,6 +46,7 @@ export async function getMessagePortRpcClient(
         close() {
           console.info("closing port");
           closed = true;
+          // TODO: figure out why this causes an infinite loop if called
           // port.close();
           onClose();
         },
