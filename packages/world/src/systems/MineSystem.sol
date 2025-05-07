@@ -213,7 +213,12 @@ contract MineSystem is System {
     ObjectAmount[] memory result = RandomResourceLib._getMineDrops(mined, minedType, coord);
 
     for (uint256 i = 0; i < result.length; i++) {
-      (ObjectType dropType, uint16 amount) = (result[i].objectType, uint16(result[i].amount));
+      (ObjectType dropType, uint128 amount) = (result[i].objectType, result[i].amount);
+
+      if (amount == 0) {
+        continue;
+      }
+
       InventoryUtils.addObject(caller, dropType, amount);
 
       // Track mined resource count for seeds
@@ -232,8 +237,9 @@ contract MineSystem is System {
     uint128 massLeft
   ) internal returns (uint128, bool) {
     if (massLeft == 0) {
-      return (massLeft, true);
+      return (0, true);
     }
+
     ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
     uint128 toolMassReduction = toolData.getMassReduction(massLeft);
     uint128 mineMassReduction = _applyToolMultiplier(toolData.toolType, minedType, toolMassReduction);

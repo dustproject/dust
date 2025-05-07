@@ -91,7 +91,10 @@ export interface MetaCategory {
 // Meta-categories
 export const metaCategories: MetaCategory[] = [
   { name: "hasAny", categories: ["Log", "Leaf", "Plank"] },
-  { name: "hasExtraDrops", categories: ["Leaf", "Crop", "Greenery"] },
+  {
+    name: "hasExtraDrops",
+    categories: ["Leaf", "Crop", "CropBlock", "Greenery"],
+  },
   {
     name: "hasAxeMultiplier",
     categories: ["Log", "Leaf", "Plank", "CropBlock"],

@@ -6,21 +6,22 @@ import { console } from "forge-std/console.sol";
 import { DustTest } from "./DustTest.sol";
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
+import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
+import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
+
+import { SlotAmount } from "../src/utils/InventoryUtils.sol";
+import { LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
+
 import { MAX_PLAYER_ENERGY } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
 import { ObjectType } from "../src/ObjectType.sol";
-
 import { ObjectTypes } from "../src/ObjectType.sol";
-
 import { Vec3, vec3 } from "../src/Vec3.sol";
-import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
-import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
-import { LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 contract FoodTest is DustTest {
   function testEatFood() public {
     // Setup player with initial energy at 50% of max
-    (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupFlatChunkWithPlayer();
+    (address alice, EntityId aliceEntityId,) = setupFlatChunkWithPlayer();
     uint128 initialEnergy = MAX_PLAYER_ENERGY / 2;
     Energy.set(
       aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: initialEnergy, drainRate: 1 })
@@ -37,7 +38,7 @@ contract FoodTest is DustTest {
     // Eat food
     uint16 amountToEat = 2;
     vm.prank(alice);
-    world.eat(aliceEntityId, foodType, amountToEat);
+    world.eat(aliceEntityId, SlotAmount({ slot: 0, amount: amountToEat }));
 
     // Check if energy was added correctly
     uint128 expectedEnergy = initialEnergy + (foodEnergyValue * amountToEat);
@@ -46,7 +47,7 @@ contract FoodTest is DustTest {
 
   function testEatInvalidFood() public {
     // Setup player
-    (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupFlatChunkWithPlayer();
+    (address alice, EntityId aliceEntityId,) = setupFlatChunkWithPlayer();
 
     // Add non-food item to inventory
     ObjectType nonFoodType = ObjectTypes.Dirt;
@@ -56,7 +57,7 @@ contract FoodTest is DustTest {
     // Try to eat non-food item
     vm.prank(alice);
     vm.expectRevert("Object is not food");
-    world.eat(aliceEntityId, nonFoodType, 1);
+    world.eat(aliceEntityId, SlotAmount({ slot: 0, amount: 1 }));
   }
 
   function testEatFoodOverMaxEnergy() public {
@@ -81,7 +82,7 @@ contract FoodTest is DustTest {
 
     // Eat food
     vm.prank(alice);
-    world.eat(aliceEntityId, foodType, 1);
+    world.eat(aliceEntityId, SlotAmount({ slot: 0, amount: 1 }));
 
     // Check if energy was capped at max
     assertEq(Energy.getEnergy(aliceEntityId), MAX_PLAYER_ENERGY, "Player energy not capped at max");
@@ -94,7 +95,7 @@ contract FoodTest is DustTest {
 
   function testEatMoreThanInventory() public {
     // Setup player
-    (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupFlatChunkWithPlayer();
+    (address alice, EntityId aliceEntityId,) = setupFlatChunkWithPlayer();
 
     // Add food to player inventory
     ObjectType foodType = ObjectTypes.WheatSlop;
@@ -103,13 +104,13 @@ contract FoodTest is DustTest {
 
     // Try to eat more than available
     vm.prank(alice);
-    vm.expectRevert("Not enough objects of this type in inventory");
-    world.eat(aliceEntityId, foodType, foodAmount + 1);
+    vm.expectRevert("Not enough objects in slot");
+    world.eat(aliceEntityId, SlotAmount({ slot: 0, amount: foodAmount + 1 }));
   }
 
   function testEatReducesInventory() public {
     // Setup player
-    (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupFlatChunkWithPlayer();
+    (address alice, EntityId aliceEntityId,) = setupFlatChunkWithPlayer();
 
     // Add food to player inventory
     ObjectType foodType = ObjectTypes.WheatSlop;
@@ -119,7 +120,7 @@ contract FoodTest is DustTest {
     // Eat some food
     uint16 amountToEat = 3;
     vm.prank(alice);
-    world.eat(aliceEntityId, foodType, amountToEat);
+    world.eat(aliceEntityId, SlotAmount({ slot: 0, amount: amountToEat }));
 
     // Check inventory was reduced correctly
     assertInventoryHasObject(aliceEntityId, foodType, initialFoodAmount - amountToEat);
