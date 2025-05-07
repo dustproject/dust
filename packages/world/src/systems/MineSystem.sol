@@ -231,27 +231,28 @@ contract MineSystem is System {
     ObjectType minedType,
     uint128 massLeft
   ) internal returns (uint128, bool) {
-    if (massLeft != 0) {
-      ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
-      uint128 toolMassReduction = toolData.getMassReduction(massLeft);
-      uint128 mineMassReduction = _applyToolMultiplier(toolData.toolType, minedType, toolMassReduction);
-      uint128 energyReduction = _getEnergyReduction(mineMassReduction, massLeft);
+    if (massLeft == 0) {
+      return (massLeft, true);
+    }
+    ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
+    uint128 toolMassReduction = toolData.getMassReduction(massLeft);
+    uint128 mineMassReduction = _applyToolMultiplier(toolData.toolType, minedType, toolMassReduction);
+    uint128 energyReduction = _getEnergyReduction(mineMassReduction, massLeft);
 
-      if (energyReduction > 0) {
-        // If player died, return early
-        (uint128 callerEnergy,) = transferEnergyToPool(caller, energyReduction);
-        if (callerEnergy == 0) {
-          return (massLeft, false);
-        }
-
-        massLeft -= energyReduction;
+    if (energyReduction > 0) {
+      // If player died, return early
+      (uint128 callerEnergy,) = transferEnergyToPool(caller, energyReduction);
+      if (callerEnergy == 0) {
+        return (massLeft, false);
       }
 
-      // Apply tool usage after decreasing player energy so we make sure the player is alive
-      toolData.applyMassReduction(caller, callerCoord, toolMassReduction);
-
-      massLeft -= mineMassReduction;
+      massLeft -= energyReduction;
     }
+
+    // Apply tool usage after decreasing player energy so we make sure the player is alive
+    toolData.applyMassReduction(caller, callerCoord, toolMassReduction);
+
+    massLeft -= mineMassReduction;
 
     return (massLeft, true);
   }
