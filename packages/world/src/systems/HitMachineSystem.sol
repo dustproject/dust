@@ -4,6 +4,7 @@ pragma solidity >=0.8.24;
 import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+import { console } from "forge-std/console.sol";
 
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { LocalEnergyPool } from "../codegen/tables/LocalEnergyPool.sol";
@@ -12,7 +13,6 @@ import { System } from "@latticexyz/world/src/System.sol";
 
 import { Position } from "../utils/Vec3Storage.sol";
 
-import { DEFAULT_TOOL_MULTIPLIER, HIT_ENERGY_COST, SAFE_PROGRAM_GAS, WHACKER_MULTIPLIER } from "../Constants.sol";
 import {
   addEnergyToLocalPool,
   decreaseMachineEnergy,
@@ -20,13 +20,15 @@ import {
   updateMachineEnergy
 } from "../utils/EnergyUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
+
 import { InventoryUtils, ToolData } from "../utils/InventoryUtils.sol";
+import { Math } from "../utils/Math.sol";
 import { HitMachineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
+import { DEFAULT_TOOL_MULTIPLIER, HIT_ENERGY_COST, SAFE_PROGRAM_GAS, WHACKER_MULTIPLIER } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
-
 import { ProgramId } from "../ProgramId.sol";
 import { IHitHook } from "../ProgramInterfaces.sol";
 import { Vec3 } from "../Vec3.sol";
@@ -41,7 +43,7 @@ contract HitMachineSystem is System {
   }
 
   function _hitForceField(EntityId caller, Vec3 coord, uint16 toolSlot) internal {
-    caller.activate();
+    EnergyData memory callerEnergy = caller.activate();
     (Vec3 callerCoord,) = caller.requireConnected(coord);
     (EntityId forceField,) = ForceFieldUtils.getForceField(coord);
     require(forceField.exists(), "No force field at this location");
@@ -55,7 +57,7 @@ contract HitMachineSystem is System {
     (uint128 massReduction, uint128 toolMassReduction) =
       toolData.getMassReduction(machineData.energy, _getToolMultiplier(toolData.toolType));
 
-    uint128 playerEnergyReduction = _getPlayerEnergyReduction(massReduction, machineData.energy);
+    uint128 playerEnergyReduction = _getCallerEnergyReduction(callerEnergy.energy, massReduction, machineData.energy);
 
     // Return early if player died
     if (playerEnergyReduction > 0 && decreasePlayerEnergy(caller, callerCoord, playerEnergyReduction) == 0) {
@@ -63,7 +65,7 @@ contract HitMachineSystem is System {
       return;
     }
 
-    toolData.reduceMass(caller, callerCoord, toolMassReduction);
+    toolData.reduceMass(toolMassReduction);
 
     uint128 machineEnergyReduction = playerEnergyReduction + massReduction;
     decreaseMachineEnergy(forceField, machineEnergyReduction);
@@ -78,11 +80,16 @@ contract HitMachineSystem is System {
     notify(caller, HitMachineNotification({ machine: forceField, machineCoord: forceFieldCoord }));
   }
 
-  function _getPlayerEnergyReduction(uint128 massReduction, uint128 massLeft) internal pure returns (uint128) {
+  function _getCallerEnergyReduction(uint128 currentEnergy, uint128 massReduction, uint128 massLeft)
+    internal
+    pure
+    returns (uint128)
+  {
     // if tool mass reduction is not enough, consume energy from player up to hit energy cost
     if (massReduction < massLeft) {
       uint128 remaining = massLeft - massReduction;
-      return HIT_ENERGY_COST <= remaining ? HIT_ENERGY_COST : remaining;
+      uint128 energyReduction = HIT_ENERGY_COST <= remaining ? HIT_ENERGY_COST : remaining;
+      return Math.min(currentEnergy, energyReduction);
     }
     return 0;
   }

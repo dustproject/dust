@@ -24,8 +24,29 @@ contract HitMachineTest is DustTest {
     EntityId forceField = setupForceField(forceFieldCoord);
 
     // Set initial energy
-    Energy._setEnergy(aliceEntityId, 1000);
-    Energy._setEnergy(forceField, 1000);
+    Energy.setEnergy(aliceEntityId, HIT_ENERGY_COST + 1);
+    Energy.setEnergy(forceField, HIT_ENERGY_COST);
+
+    // Hit force field without tool
+    vm.prank(alice);
+    startGasReport("hit force field without tool");
+    world.hitForceField(aliceEntityId, forceFieldCoord);
+    endGasReport();
+
+    // Check energy reduction
+    assertEq(Energy.getEnergy(forceField), 0);
+    assertEq(Energy.getEnergy(aliceEntityId), 1);
+  }
+
+  function testHitForceFieldWithoutToolFatal() public {
+    // Setup player and force field
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    Vec3 forceFieldCoord = playerCoord + vec3(1, 0, 0);
+    EntityId forceField = setupForceField(forceFieldCoord);
+
+    // Set initial energy
+    Energy.setEnergy(aliceEntityId, HIT_ENERGY_COST);
+    Energy.setEnergy(forceField, HIT_ENERGY_COST);
 
     EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
 
@@ -35,9 +56,10 @@ contract HitMachineTest is DustTest {
     world.hitForceField(aliceEntityId, forceFieldCoord);
     endGasReport();
 
-    // Check energy reduction
-    assertEq(Energy._getEnergy(forceField), 1000 - HIT_ENERGY_COST);
-    assertEq(Energy._getEnergy(aliceEntityId), 1000 - HIT_ENERGY_COST);
+    // Check energy didn't change because player died
+    assertEq(Energy.getEnergy(forceField), HIT_ENERGY_COST);
+
+    assertPlayerIsDead(aliceEntityId, playerCoord);
 
     EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
     assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
@@ -49,15 +71,17 @@ contract HitMachineTest is DustTest {
     Vec3 forceFieldCoord = playerCoord + vec3(1, 0, 0);
     EntityId forceField = setupForceField(forceFieldCoord);
 
-    // Set initial energy
-    Energy._setEnergy(aliceEntityId, 1000);
-    Energy._setEnergy(forceField, 1000);
-
     // Create and equip whacker
     EntityId whacker = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.CopperWhacker);
     uint16 slot = TestInventoryUtils.getEntitySlot(aliceEntityId, whacker);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    uint128 whackerMass = Mass.getMass(whacker);
+    uint128 forceFieldEnergy = whackerMass * 1000;
+    uint128 aliceEnergy = HIT_ENERGY_COST + 1;
+
+    // Set a manual energy so that it is not fully depleted
+    Energy.setEnergy(forceField, forceFieldEnergy);
+    Energy.setEnergy(aliceEntityId, aliceEnergy);
 
     // Hit force field with whacker
     vm.prank(alice);
@@ -66,15 +90,13 @@ contract HitMachineTest is DustTest {
     endGasReport();
 
     // Check energy reduction with whacker multiplier
-    uint128 expectedReduction = HIT_ENERGY_COST * WHACKER_MULTIPLIER;
-    assertEq(Energy.getEnergy(forceField), 1000 - expectedReduction);
-    assertEq(Energy.getEnergy(aliceEntityId), 1000 - HIT_ENERGY_COST);
+    uint128 massReduction = whackerMass / 10;
+    uint128 energyReduction = HIT_ENERGY_COST + massReduction * WHACKER_MULTIPLIER;
+    assertEq(Energy.getEnergy(forceField), forceFieldEnergy - energyReduction);
+    assertEq(Energy.getEnergy(aliceEntityId), aliceEnergy - HIT_ENERGY_COST);
 
     // Check tool mass reduction
-    assertEq(Mass.getMass(whacker), 99); // Assuming initial mass is 100
-
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEq(Mass.getMass(whacker), whackerMass - massReduction); // Assuming initial mass is 100
   }
 
   function testHitDepletedForceField() public {

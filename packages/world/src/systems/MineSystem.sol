@@ -25,7 +25,6 @@ import { ResourcePosition } from "../utils/Vec3Storage.sol";
 import {
   addEnergyToLocalPool,
   decreaseFragmentDrainRate,
-  decreasePlayerEnergy,
   transferEnergyToPool,
   updateMachineEnergy,
   updatePlayerEnergy,
@@ -98,8 +97,8 @@ contract MineSystem is System {
   }
 
   function _mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) internal returns (EntityId) {
-    caller.activate();
-    (Vec3 callerCoord,) = caller.requireConnected(coord);
+    EnergyData memory callerEnergy = caller.activate();
+    caller.requireConnected(coord);
 
     (EntityId mined, ObjectType minedType) = getOrCreateEntityAt(coord);
     require(minedType.isMineable(), "Object is not mineable");
@@ -115,7 +114,7 @@ contract MineSystem is System {
     }
 
     (uint128 massLeft, bool canMine) =
-      _applyMassReduction(caller, callerCoord, toolSlot, minedType, Mass._getMass(mined));
+      _applyMassReduction(caller, callerEnergy.energy, toolSlot, minedType, Mass._getMass(mined));
 
     if (!canMine) {
       // Player died, return early
@@ -234,7 +233,7 @@ contract MineSystem is System {
 
   function _applyMassReduction(
     EntityId caller,
-    Vec3 callerCoord,
+    uint128 callerEnergy,
     uint16 toolSlot,
     ObjectType minedType,
     uint128 massLeft
@@ -248,11 +247,11 @@ contract MineSystem is System {
 
     (uint128 mineMassReduction, uint128 toolMassReduction) = toolData.getMassReduction(massLeft, toolMultiplier);
 
-    uint128 energyReduction = _getPlayerEnergyReduction(mineMassReduction, massLeft);
+    uint128 energyReduction = _getCallerEnergyReduction(callerEnergy, mineMassReduction, massLeft);
 
     if (energyReduction > 0) {
       // If player died, return early
-      (uint128 callerEnergy,) = transferEnergyToPool(caller, energyReduction);
+      (callerEnergy,) = transferEnergyToPool(caller, energyReduction);
       if (callerEnergy == 0) {
         return (massLeft, false);
       }
@@ -261,7 +260,7 @@ contract MineSystem is System {
     }
 
     // Apply tool usage after decreasing player energy so we make sure the player is alive
-    toolData.reduceMass(caller, callerCoord, toolMassReduction);
+    toolData.reduceMass(toolMassReduction);
 
     massLeft -= mineMassReduction;
 
@@ -284,11 +283,16 @@ contract MineSystem is System {
     return DEFAULT_TOOL_MULTIPLIER;
   }
 
-  function _getPlayerEnergyReduction(uint128 mineMassReduction, uint128 massLeft) internal pure returns (uint128) {
+  function _getCallerEnergyReduction(uint128 currentEnergy, uint128 mineMassReduction, uint128 massLeft)
+    internal
+    pure
+    returns (uint128)
+  {
     // if tool mass reduction is not enough, consume energy from player up to mine energy cost
     if (mineMassReduction < massLeft) {
       uint128 remaining = massLeft - mineMassReduction;
-      return MINE_ENERGY_COST <= remaining ? MINE_ENERGY_COST : remaining;
+      uint128 energyReduction = MINE_ENERGY_COST <= remaining ? MINE_ENERGY_COST : remaining;
+      return Math.min(currentEnergy, energyReduction);
     }
     return 0;
   }

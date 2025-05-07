@@ -19,13 +19,13 @@ import { Orientation } from "../codegen/tables/Orientation.sol";
 
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
-import { MovablePosition, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
-
 import { removeEnergyFromLocalPool, transferEnergyToPool, updateMachineEnergy } from "../utils/EnergyUtils.sol";
 import { getMovableEntityAt, getObjectTypeAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
+import { Math } from "../utils/Math.sol";
 import { BuildNotification, MoveNotification, notify } from "../utils/NotifUtils.sol";
+import { MovablePosition, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
 
 import { MoveLib } from "./libraries/MoveLib.sol";
 import { TerrainLib } from "./libraries/TerrainLib.sol";
@@ -47,13 +47,13 @@ contract BuildSystem is System {
     public
     returns (EntityId)
   {
-    caller.activate();
+    uint128 callerEnergy = caller.activate().energy;
     caller.requireConnected(coord);
     ObjectType buildType = InventorySlot._getObjectType(caller, slot);
     require(buildType.isBlock(), "Cannot build non-block object");
 
     // If player died, return early
-    (uint128 callerEnergy,) = transferEnergyToPool(caller, BUILD_ENERGY_COST);
+    (callerEnergy,) = transferEnergyToPool(caller, Math.min(callerEnergy, BUILD_ENERGY_COST));
     if (callerEnergy == 0) {
       return EntityId.wrap(0);
     }

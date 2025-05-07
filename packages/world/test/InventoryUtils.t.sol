@@ -296,7 +296,7 @@ contract InventoryUtilsTest is DustTest {
     Mass.setMass(entityId, 1);
 
     // Use tool with mass reduction ≥ 1
-    TestInventoryUtils.useTool(alice, vec3(0, 0, 0), 0, 5);
+    TestInventoryUtils.useTool(alice, 0, 5);
 
     assertEq(Inventory.lengthOccupiedSlots(alice), 0, "slot not recycled");
     assertEq(InventoryTypeSlots.length(alice, ObjectTypes.Null), 1, "slot not in Null list");

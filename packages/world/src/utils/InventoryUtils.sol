@@ -35,6 +35,7 @@ struct SlotData {
 }
 
 struct ToolData {
+  EntityId owner;
   EntityId tool;
   ObjectType toolType;
   uint16 slot;
@@ -45,23 +46,20 @@ library InventoryUtils {
   function getToolData(EntityId owner, uint16 slot) public view returns (ToolData memory) {
     EntityId tool = InventorySlot._getEntityId(owner, slot);
     if (!tool.exists()) {
-      return ToolData(tool, ObjectTypes.Null, slot, 0);
+      return ToolData(owner, tool, ObjectTypes.Null, slot, 0);
     }
 
     ObjectType toolType = EntityObjectType._get(tool);
     require(toolType.isTool(), "Inventory item is not a tool");
 
-    return ToolData(tool, toolType, slot, Mass._getMass(tool));
+    return ToolData(owner, tool, toolType, slot, Mass._getMass(tool));
   }
 
-  function useTool(EntityId owner, Vec3 ownerCoord, uint16 slot, uint128 useMassMax)
-    public
-    returns (ObjectType toolType)
-  {
+  function useTool(EntityId owner, uint16 slot, uint128 useMassMax) public returns (ObjectType toolType) {
     ToolData memory toolData = getToolData(owner, slot);
 
     (, uint128 toolMassReduction) = toolData.getMassReduction(useMassMax, 1);
-    reduceMass(toolData, owner, ownerCoord, toolMassReduction);
+    reduceMass(toolData, toolMassReduction);
     return toolData.toolType;
   }
 
@@ -70,6 +68,10 @@ library InventoryUtils {
     view
     returns (uint128, uint128)
   {
+    if (toolData.toolType.isNull()) {
+      return (0, 0);
+    }
+
     uint128 toolMass = ObjectPhysics._getMass(toolData.toolType);
 
     // Limit to 10% of max mass per use
@@ -83,7 +85,7 @@ library InventoryUtils {
     return (massReduction, toolMassReduction);
   }
 
-  function reduceMass(ToolData memory toolData, EntityId owner, Vec3 ownerCoord, uint128 massReduction) public {
+  function reduceMass(ToolData memory toolData, uint128 massReduction) public {
     if (!toolData.tool.exists()) {
       return;
     }
@@ -92,9 +94,9 @@ library InventoryUtils {
 
     if (toolData.massLeft <= massReduction) {
       // Destroy tool
-      removeEntityFromSlot(owner, toolData.slot);
+      removeEntityFromSlot(toolData.owner, toolData.slot);
       NatureLib.burnOres(toolData.toolType);
-      burnToolEnergy(toolData.toolType, ownerCoord);
+      burnToolEnergy(toolData.toolType, toolData.owner.getPosition());
     } else {
       Mass._setMass(toolData.tool, toolData.massLeft - massReduction);
     }
