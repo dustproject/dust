@@ -13,3 +13,4 @@ export {
   AppRpcSchema,
   ClientRpcSchema,
 } from "../rpc/schemas";
+export { getMessagePortRpcClient } from "../rpc/getMessagePortRpcClient";

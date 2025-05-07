@@ -33,9 +33,10 @@ export async function getMessagePortRpcClient(
         target.postMessage(initMessage, "*", [channel.port2]);
       });
 
-      port.addEventListener("message", function onMessage(event: MessageEvent) {
+      const messageHandler = function onMessage(event: MessageEvent) {
         onResponse(event.data);
-      });
+      };
+      port.addEventListener("message", messageHandler);
       port.addEventListener("messageerror", onError);
 
       onOpen();
@@ -44,8 +45,9 @@ export async function getMessagePortRpcClient(
 
       return Object.assign(port, {
         close() {
+          console.info("closing port");
           closed = true;
-          port.close();
+          // port.close();
           onClose();
         },
         request({ body }) {
