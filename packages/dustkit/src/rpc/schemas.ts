@@ -26,7 +26,10 @@ export type ClientRpcSchema = RpcSchema.From<
         };
       };
       ReturnType: {
-        slots: number;
+        slots: {
+          slot: number;
+          amount: number;
+        }[];
       };
     }
   | {
