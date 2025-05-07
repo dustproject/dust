@@ -61,7 +61,7 @@ contract MineTest is DustTest {
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     startGasReport("mine terrain with hand, entirely mined");
@@ -72,8 +72,8 @@ contract MineTest is DustTest {
     assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testMineTerrainRequiresMultipleMines() public {
@@ -86,7 +86,7 @@ contract MineTest is DustTest {
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     startGasReport("mine terrain with hand, partially mined");
@@ -96,10 +96,10 @@ contract MineTest is DustTest {
     mineEntityId = ReversePosition.get(mineCoord);
     assertEq(EntityObjectType.get(mineEntityId), mineObjectType, "Mine entity is not mined object");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
 
-    beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+
+    snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     world.mine(aliceEntityId, mineCoord, "");
@@ -107,8 +107,7 @@ contract MineTest is DustTest {
     assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
-    afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testMineRequiresMultipleMinesUntilDestroyed() public {
@@ -121,19 +120,16 @@ contract MineTest is DustTest {
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     world.mineUntilDestroyed(aliceEntityId, mineCoord, "");
-
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
 
     mineEntityId = ReversePosition.get(mineCoord);
     assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
-    afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testMineResource() public {
@@ -148,7 +144,7 @@ contract MineTest is DustTest {
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
     assertInventoryHasObject(aliceEntityId, ObjectTypes.UnrevealedOre, 0);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
     ObjectAmount[] memory oreAmounts = inventoryGetOreAmounts(aliceEntityId);
     assertEq(oreAmounts.length, 0, "Existing ores in inventory");
     assertEq(ResourceCount.get(ObjectTypes.UnrevealedOre), 0, "Mined resource count is not 0");
@@ -174,8 +170,7 @@ contract MineTest is DustTest {
     assertEq(ResourceCount.get(oreAmounts[0].objectType), 1, "Resource count was not updated");
     assertEq(ResourceCount.get(ObjectTypes.UnrevealedOre), 1, "Total resource count was not updated");
 
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testMineResourceTypeIsFixedAfterPartialMine() public {
@@ -241,7 +236,7 @@ contract MineTest is DustTest {
     assertTrue(mineEntityId.exists(), "Mine entity does not exist");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     startGasReport("mine non-terrain with hand, entirely mined");
@@ -251,8 +246,8 @@ contract MineTest is DustTest {
     assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testMineBedWithPlayer() public {
@@ -333,7 +328,7 @@ contract MineTest is DustTest {
     assertEq(Mass.getMass(topEntityId), 0, "Top entity mass is not correct");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     startGasReport("mine multi-size with hand, entirely mined");
@@ -346,8 +341,8 @@ contract MineTest is DustTest {
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not correct");
     assertEq(Mass.getMass(topEntityId), 0, "Top entity mass is not correct");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
 
     uint16 signSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.TextSign);
 
@@ -542,7 +537,7 @@ contract MineTest is DustTest {
     setObjectAtCoord(mineCoord, ObjectTypes.Grass);
 
     vm.prank(alice);
-    vm.expectRevert("All slots used");
+    vm.expectRevert("Inventory is full");
     world.mineUntilDestroyed(aliceEntityId, mineCoord, "");
   }
 

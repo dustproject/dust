@@ -68,7 +68,7 @@ contract CraftTest is DustTest {
       assertInventoryHasObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
     }
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     SlotAmount[] memory inputs = new SlotAmount[](1);
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
@@ -85,8 +85,7 @@ contract CraftTest is DustTest {
       assertInventoryHasObject(aliceEntityId, outputTypes[i], outputAmounts[i]);
     }
 
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testCraftMultipleInputsSingleOutput() public {
@@ -112,7 +111,7 @@ contract CraftTest is DustTest {
     Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
     EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     SlotAmount[] memory inputs = new SlotAmount[](2);
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
@@ -130,8 +129,7 @@ contract CraftTest is DustTest {
       assertInventoryHasObject(aliceEntityId, outputTypes[i], outputAmounts[i]);
     }
 
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testCraftWithStation() public {
@@ -157,7 +155,7 @@ contract CraftTest is DustTest {
     Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
     EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     SlotAmount[] memory inputs = new SlotAmount[](2);
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
@@ -175,8 +173,7 @@ contract CraftTest is DustTest {
       assertInventoryHasObject(aliceEntityId, outputTypes[i], outputAmounts[i]);
     }
 
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testCraftAnyInput() public {
@@ -209,7 +206,7 @@ contract CraftTest is DustTest {
       Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
       EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
 
-      EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+      EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
       SlotAmount[] memory inputs = new SlotAmount[](3);
       inputs[0] = SlotAmount({ slot: 0, amount: 2 });
@@ -221,8 +218,7 @@ contract CraftTest is DustTest {
       world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
       endGasReport();
 
-      EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-      assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+      assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     }
 
     assertInventoryHasObject(aliceEntityId, inputObjectType1, 0);
@@ -252,7 +248,7 @@ contract CraftTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, inputObjectType, 5);
     assertInventoryHasObject(aliceEntityId, inputObjectType, 5);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     SlotAmount[] memory inputs = new SlotAmount[](1);
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
@@ -273,8 +269,7 @@ contract CraftTest is DustTest {
     assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
     assertEq(Mass.get(toolEntityId), ObjectPhysics.getMass(outputTypes[0]), "mass should be equal to tool mass");
 
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testCraftWoodenPick() public {
@@ -294,7 +289,7 @@ contract CraftTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, inputObjectType, 10);
     assertInventoryHasObject(aliceEntityId, inputObjectType, 10);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     SlotAmount[] memory inputs = new SlotAmount[](1);
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
@@ -312,8 +307,7 @@ contract CraftTest is DustTest {
     assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
     assertEq(Mass.get(toolEntityId), ObjectPhysics.getMass(outputTypes[0]), "mass should be equal to tool mass");
 
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testCraftWoodenAxe() public {
@@ -333,7 +327,7 @@ contract CraftTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, inputObjectType, 10);
     assertInventoryHasObject(aliceEntityId, inputObjectType, 10);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     SlotAmount[] memory inputs = new SlotAmount[](1);
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
@@ -351,8 +345,7 @@ contract CraftTest is DustTest {
     assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
     assertEq(Mass.get(toolEntityId), ObjectPhysics.getMass(outputTypes[0]), "mass should be equal to tool mass");
 
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testCraftMultipleOutputs() public {

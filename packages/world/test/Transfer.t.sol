@@ -760,10 +760,6 @@ contract TransferTest is DustTest {
     assertEq(deposit.entityId, EntityId.wrap(0), "Deposit entity ID should be zero for regular objects");
     assertEq(deposit.objectType, transferObjectType, "Incorrect deposit object type");
     assertEq(deposit.amount, numToTransfer, "Incorrect deposit amount");
-    SlotData[] memory withdrawals = program.lastWithdrawals();
-    for (uint256 i = 0; i < withdrawals.length; i++) {
-      console.log("withdrawal %d: %s", i, withdrawals[i].amount);
-    }
 
     // Verify no withdrawals (nothing taken from chest)
     assertEq(program.lastWithdrawals().length, 0, "Should have 0 withdrawals");

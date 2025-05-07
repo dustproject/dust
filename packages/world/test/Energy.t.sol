@@ -17,7 +17,9 @@ import { DustTest } from "./DustTest.sol";
 
 import { LocalEnergyPool, MovablePosition, Position, ReversePosition } from "../src/utils/Vec3Storage.sol";
 
-import { CHUNK_SIZE, MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
+import {
+  CHUNK_SIZE, MACHINE_ENERGY_DRAIN_RATE, MAX_PLAYER_ENERGY, PLAYER_ENERGY_DRAIN_RATE
+} from "../src/Constants.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
@@ -105,30 +107,25 @@ contract EnergyTest is DustTest {
   function testPlayerEnergyDrain() public {
     (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
-    uint128 initialEnergy = 1000;
-    Energy.set(
-      aliceEntityId,
-      EnergyData({
-        lastUpdatedTime: uint128(block.timestamp),
-        energy: initialEnergy,
-        drainRate: PLAYER_ENERGY_DRAIN_RATE
-      })
-    );
-
     // Pass time and activate player
     vm.warp(block.timestamp + 5);
     world.activatePlayer(alice);
 
     // Player energy should drain according to player-specific logic
-    uint128 energyLost = initialEnergy - Energy.getEnergy(aliceEntityId);
+    uint128 energyLost = MAX_PLAYER_ENERGY - Energy.getEnergy(aliceEntityId);
     assertEq(energyLost, PLAYER_ENERGY_DRAIN_RATE * 5, "Player energy should drain at player rate");
   }
 
   function testMachineEnergyDrain() public {
     Vec3 machineCoord = vec3(1, 1, 1);
+    uint128 initialEnergy = MACHINE_ENERGY_DRAIN_RATE * 1000;
     EntityId machineEntityId = setupForceField(
       machineCoord,
-      EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: MACHINE_ENERGY_DRAIN_RATE })
+      EnergyData({
+        lastUpdatedTime: uint128(block.timestamp),
+        energy: initialEnergy,
+        drainRate: MACHINE_ENERGY_DRAIN_RATE
+      })
     );
 
     // Pass time and activate machine
@@ -136,7 +133,7 @@ contract EnergyTest is DustTest {
     world.activate(machineEntityId);
 
     // Machine energy should drain according to machine-specific logic
-    uint128 energyLost = 1000 - Energy.getEnergy(machineEntityId);
+    uint128 energyLost = initialEnergy - Energy.getEnergy(machineEntityId);
     assertEq(energyLost, MACHINE_ENERGY_DRAIN_RATE * 5, "Machine energy should drain at machine rate");
   }
 
@@ -144,19 +141,9 @@ contract EnergyTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
     (address bob, EntityId bobEntityId) = createTestPlayer(playerCoord + vec3(1, 0, 0));
 
-    // Set up energy levels
-    Energy.set(
-      aliceEntityId,
-      EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: PLAYER_ENERGY_DRAIN_RATE })
-    );
-
-    Energy.set(
+    Energy.setDrainRate(
       bobEntityId,
-      EnergyData({
-        lastUpdatedTime: uint128(block.timestamp),
-        energy: 1000,
-        drainRate: PLAYER_ENERGY_DRAIN_RATE * 2 // Bob has double drain rate
-       })
+      PLAYER_ENERGY_DRAIN_RATE * 2 // Bob has double drain rate
     );
 
     // Record initial pool energy
@@ -172,8 +159,8 @@ contract EnergyTest is DustTest {
     uint128 energyAddedToPool = newPoolEnergy - initialPoolEnergy;
 
     // Bob should contribute more energy to the pool due to higher drain rate
-    uint128 aliceEnergyLost = 1000 - Energy.getEnergy(aliceEntityId);
-    uint128 bobEnergyLost = 1000 - Energy.getEnergy(bobEntityId);
+    uint128 aliceEnergyLost = MAX_PLAYER_ENERGY - Energy.getEnergy(aliceEntityId);
+    uint128 bobEnergyLost = MAX_PLAYER_ENERGY - Energy.getEnergy(bobEntityId);
     assertGt(bobEnergyLost, aliceEnergyLost, "Bob should lose more energy due to higher drain rate");
     assertEq(energyAddedToPool, aliceEnergyLost + bobEnergyLost, "Pool should receive all lost energy");
   }

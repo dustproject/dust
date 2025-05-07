@@ -43,6 +43,7 @@ import { IWorld } from "../src/codegen/world/IWorld.sol";
 
 abstract contract DustAssertions is MudTest, GasReporter {
   struct EnergyDataSnapshot {
+    EntityId playerEntityId;
     uint128 playerEnergy;
     uint128 localPoolEnergy;
     uint128 forceFieldEnergy;
@@ -115,12 +116,11 @@ abstract contract DustAssertions is MudTest, GasReporter {
     assertEq(found ? 1 : 0, amount, "Inventory entity doesn't match");
   }
 
-  function getEnergyDataSnapshot(EntityId playerEntityId, Vec3 snapshotCoord)
-    internal
-    returns (EnergyDataSnapshot memory)
-  {
+  function getEnergyDataSnapshot(EntityId playerEntityId) internal returns (EnergyDataSnapshot memory) {
     EnergyDataSnapshot memory snapshot;
+    snapshot.playerEntityId = playerEntityId;
     snapshot.playerEnergy = Energy.getEnergy(playerEntityId);
+    Vec3 snapshotCoord = MovablePosition.get(playerEntityId);
     Vec3 shardCoord = snapshotCoord.toLocalEnergyPoolShardCoord();
     snapshot.localPoolEnergy = LocalEnergyPool.get(shardCoord);
     (EntityId forceFieldEntityId,) = TestForceFieldUtils.getForceField(snapshotCoord);
@@ -128,13 +128,14 @@ abstract contract DustAssertions is MudTest, GasReporter {
     return snapshot;
   }
 
-  function assertEnergyFlowedFromPlayerToLocalPool(
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot,
-    EnergyDataSnapshot memory afterEnergyDataSnapshot
-  ) internal pure returns (uint128 playerEnergyLost) {
-    playerEnergyLost = beforeEnergyDataSnapshot.playerEnergy - afterEnergyDataSnapshot.playerEnergy;
+  function assertEnergyFlowedFromPlayerToLocalPool(EnergyDataSnapshot memory previousSnapshot)
+    internal
+    returns (uint128 playerEnergyLost)
+  {
+    EnergyDataSnapshot memory currentSnapshot = getEnergyDataSnapshot(previousSnapshot.playerEntityId);
+    playerEnergyLost = previousSnapshot.playerEnergy - currentSnapshot.playerEnergy;
     assertGt(playerEnergyLost, 0, "Player energy did not decrease");
-    uint128 localPoolEnergyGained = afterEnergyDataSnapshot.localPoolEnergy - beforeEnergyDataSnapshot.localPoolEnergy;
+    uint128 localPoolEnergyGained = currentSnapshot.localPoolEnergy - previousSnapshot.localPoolEnergy;
     assertEq(localPoolEnergyGained, playerEnergyLost, "Local pool energy did not gain all the player's energy");
   }
 

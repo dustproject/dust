@@ -51,7 +51,7 @@ contract BuildTest is DustTest {
     // Find the inventory slot with the Grass object
     uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     startGasReport("build terrain");
@@ -62,8 +62,8 @@ contract BuildTest is DustTest {
     assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
 
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
   }
 
@@ -81,7 +81,7 @@ contract BuildTest is DustTest {
     // Find the inventory slot with the Grass object
     uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     startGasReport("build non-terrain");
@@ -90,8 +90,8 @@ contract BuildTest is DustTest {
 
     assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
   }
 
@@ -113,7 +113,7 @@ contract BuildTest is DustTest {
     // Find the inventory slot with the TextSign object
     uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     startGasReport("build multi-size");
@@ -123,8 +123,8 @@ contract BuildTest is DustTest {
     assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
     assertEq(EntityObjectType.get(topEntityId), buildObjectType, "Top entity is not build object type");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
     assertEq(Mass.getMass(topEntityId), 0, "Top entity mass is not correct");
   }
@@ -139,7 +139,7 @@ contract BuildTest is DustTest {
     // Find the inventory slot with the Grass object
     uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     startGasReport("jump build");
@@ -152,8 +152,8 @@ contract BuildTest is DustTest {
     EntityId buildEntityId = ReversePosition.get(playerCoord);
     assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
   }
 

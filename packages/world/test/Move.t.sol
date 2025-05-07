@@ -66,8 +66,7 @@ contract MoveTest is DustTest {
       }
     }
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot =
-      getEnergyDataSnapshot(playerEntityId, newCoords[numBlocksToMove - 1]);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(playerEntityId);
 
     vm.prank(player);
     startGasReport(
@@ -87,58 +86,56 @@ contract MoveTest is DustTest {
       EntityId.unwrap(ReverseMovablePosition.get(startingCoord)), bytes32(0), "Above starting coord is not the player"
     );
 
-    EnergyDataSnapshot memory afterEnergyDataSnapshot =
-      getEnergyDataSnapshot(playerEntityId, newCoords[numBlocksToMove - 1]);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testMoveOneBlockTerrain() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice,,) = setupAirChunkWithPlayer();
     _testMoveMultipleBlocks(alice, 1, true);
   }
 
   function testMoveOneBlockNonTerrain() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice,,) = setupAirChunkWithPlayer();
     _testMoveMultipleBlocks(alice, 1, false);
   }
 
   function testMoveFiveBlocksTerrain() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice,,) = setupAirChunkWithPlayer();
     _testMoveMultipleBlocks(alice, 5, true);
   }
 
   function testMoveFiveBlocksNonTerrain() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice,,) = setupAirChunkWithPlayer();
     _testMoveMultipleBlocks(alice, 5, false);
   }
 
   function testMoveTenBlocksTerrain() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice,,) = setupAirChunkWithPlayer();
     _testMoveMultipleBlocks(alice, 10, true);
   }
 
   function testMoveTenBlocksNonTerrain() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice,,) = setupAirChunkWithPlayer();
     _testMoveMultipleBlocks(alice, 10, false);
   }
 
   function testMoveFiftyBlocksTerrain() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice,,) = setupAirChunkWithPlayer();
     _testMoveMultipleBlocks(alice, 50, true);
   }
 
   function testMoveFiftyBlocksNonTerrain() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice,,) = setupAirChunkWithPlayer();
     _testMoveMultipleBlocks(alice, 50, false);
   }
 
   function testMoveHundredBlocksTerrain() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice,,) = setupAirChunkWithPlayer();
     _testMoveMultipleBlocks(alice, 100, true);
   }
 
   function testMoveHundredBlocksNonTerrain() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice,,) = setupAirChunkWithPlayer();
     _testMoveMultipleBlocks(alice, 100, false);
   }
 
@@ -153,7 +150,7 @@ contract MoveTest is DustTest {
       setObjectAtCoord(newCoords[i] + vec3(0, 1, 0), ObjectTypes.Air);
     }
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     startGasReport("move single jump");
@@ -167,8 +164,7 @@ contract MoveTest is DustTest {
     assertEq(
       BaseEntity.get(ReverseMovablePosition.get(aboveFinalCoord)), aliceEntityId, "Above coord is not the player"
     );
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testMoveGlide() public {
@@ -184,7 +180,7 @@ contract MoveTest is DustTest {
     Vec3 expectedFinalCoord = playerCoord + vec3(0, 0, int32(int256(numGlides)));
     setObjectAtCoord(expectedFinalCoord - vec3(0, 1, 0), ObjectTypes.Grass);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);
@@ -196,8 +192,7 @@ contract MoveTest is DustTest {
     assertEq(
       BaseEntity.get(ReverseMovablePosition.get(aboveFinalCoord)), aliceEntityId, "Above coord is not the player"
     );
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testMoveFallWithoutDamage() public {
@@ -214,7 +209,7 @@ contract MoveTest is DustTest {
     newCoords[numFalls] = grassCoord + vec3(0, 1, 0);
     setObjectAtCoord(grassCoord, ObjectTypes.Grass);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);
@@ -226,9 +221,7 @@ contract MoveTest is DustTest {
     assertEq(
       BaseEntity.get(ReverseMovablePosition.get(aboveFinalCoord)), aliceEntityId, "Above coord is not the player"
     );
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    uint128 playerEnergyLost =
-      assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    uint128 playerEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     // Fall damage is greater than the move energy cost
     assertGt(PLAYER_FALL_ENERGY_COST, MOVE_ENERGY_COST, "Fall energy cost is not greater than the move energy cost");
     assertEq(
@@ -252,7 +245,7 @@ contract MoveTest is DustTest {
     newCoords[numFalls] = grassCoord + vec3(0, 1, 0);
     setObjectAtCoord(grassCoord, ObjectTypes.Grass);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);
@@ -264,9 +257,7 @@ contract MoveTest is DustTest {
     assertEq(
       BaseEntity.get(ReverseMovablePosition.get(aboveFinalCoord)), aliceEntityId, "Above coord is not the player"
     );
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    uint128 playerEnergyLost =
-      assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    uint128 playerEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     // Fall damage is greater than the move energy cost
     assertGt(PLAYER_FALL_ENERGY_COST, MOVE_ENERGY_COST, "Fall energy cost is not greater than the move energy cost");
     assertGt(
@@ -284,7 +275,7 @@ contract MoveTest is DustTest {
     newCoords[1] = playerCoord + vec3(0, 1, 1);
     newCoords[2] = playerCoord + vec3(0, 0, 2);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);
@@ -295,8 +286,7 @@ contract MoveTest is DustTest {
     assertEq(
       BaseEntity.get(ReverseMovablePosition.get(aboveFinalCoord)), aliceEntityId, "Above coord is not the player"
     );
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testMoveEndAtStart() public {
@@ -312,7 +302,7 @@ contract MoveTest is DustTest {
       setObjectAtCoord(newCoords[i] + vec3(0, 1, 0), ObjectTypes.Air);
     }
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);
@@ -323,8 +313,7 @@ contract MoveTest is DustTest {
     assertEq(
       BaseEntity.get(ReverseMovablePosition.get(aboveFinalCoord)), aliceEntityId, "Above coord is not the player"
     );
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testMoveOverlapStartingCoord() public {
@@ -344,7 +333,7 @@ contract MoveTest is DustTest {
     Vec3 expectedFinalCoord = newCoords[newCoords.length - 1];
     setObjectAtCoord(expectedFinalCoord - vec3(0, 1, 0), ObjectTypes.Grass);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);
@@ -355,8 +344,7 @@ contract MoveTest is DustTest {
     assertEq(
       BaseEntity.get(ReverseMovablePosition.get(aboveFinalCoord)), aliceEntityId, "Above coord is not the player"
     );
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testMoveFailsIfInvalidJump() public {
@@ -629,15 +617,15 @@ contract MoveTest is DustTest {
     world.move(aliceEntityId, newCoords);
   }
 
-  function testMoveWithLowEnergy() public {
+  function testMoveWithLowEnergyFatal() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
-    // Set player energy to just enough for one move
+    // Set player energy to just under one move
     Energy.set(
       aliceEntityId,
       EnergyData({
         lastUpdatedTime: uint128(block.timestamp),
-        energy: MOVE_ENERGY_COST,
+        energy: MOVE_ENERGY_COST - 1,
         drainRate: PLAYER_ENERGY_DRAIN_RATE
       })
     );
@@ -646,22 +634,13 @@ contract MoveTest is DustTest {
     Vec3[] memory newCoords = new Vec3[](3);
     for (uint32 i = 0; i < 3; i++) {
       newCoords[i] = playerCoord + vec3(0, 0, int32(i) + 1);
-      setObjectAtCoord(newCoords[i], ObjectTypes.Air);
-      setObjectAtCoord(newCoords[i] + vec3(0, 1, 0), ObjectTypes.Air);
-      setObjectAtCoord(newCoords[i] - vec3(0, 1, 0), ObjectTypes.Grass);
     }
 
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);
 
-    // Should only move one step due to energy constraints
-    Vec3 expectedCoord = playerCoord + vec3(0, 0, 1);
-    assertEq(MovablePosition.get(aliceEntityId).x(), expectedCoord.x(), "X coordinate mismatch");
-    assertEq(MovablePosition.get(aliceEntityId).y(), expectedCoord.y(), "Y coordinate mismatch");
-    assertEq(MovablePosition.get(aliceEntityId).z(), expectedCoord.z(), "Z coordinate mismatch");
-
-    // Energy should be depleted
-    assertEq(Energy.getEnergy(aliceEntityId), 0, "Energy should be depleted");
+    // Should not move but still deplete its energy
+    assertPlayerIsDead(aliceEntityId, playerCoord);
   }
 
   function testMoveThroughDifferentBlockTypes() public {
@@ -676,44 +655,13 @@ contract MoveTest is DustTest {
     // Set block types
     setTerrainAtCoord(path[0], ObjectTypes.Water);
     setTerrainAtCoord(path[1], ObjectTypes.Air);
-    setTerrainAtCoord(path[2], ObjectTypes.Grass);
+    setTerrainAtCoord(path[2], ObjectTypes.FescueGrass);
 
     vm.prank(alice);
     world.move(aliceEntityId, path);
 
-    // Should be able to move through water and air, but stop at grass
     Vec3 finalCoord = MovablePosition.get(aliceEntityId);
-    assertEq(finalCoord.x(), path[1].x(), "Should stop at air block");
-    assertEq(finalCoord.y(), path[1].y(), "Y coordinate mismatch");
-    assertEq(finalCoord.z(), path[1].z(), "Z coordinate mismatch");
-  }
-
-  function testFallDamage() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
-
-    // Create a high platform to fall from
-    Vec3 platformCoord =
-      vec3(playerCoord.x(), FLAT_CHUNK_GRASS_LEVEL + int32(uint32(PLAYER_FALL_DAMAGE_THRESHOLD)) + 1, playerCoord.z());
-    setTerrainAtCoord(platformCoord, ObjectTypes.Grass);
-
-    // Move player to platform
-    Vec3[] memory moveToPlatform = new Vec3[](1);
-    moveToPlatform[0] = platformCoord;
-    vm.prank(alice);
-    world.move(aliceEntityId, moveToPlatform);
-
-    // Record initial energy
-    uint128 initialEnergy = Energy.getEnergy(aliceEntityId);
-
-    // Let player fall
-    vm.roll(block.number + 1);
-
-    // Check final position and energy
-    Vec3 finalCoord = MovablePosition.get(aliceEntityId);
-    assertEq(finalCoord.y(), FLAT_CHUNK_GRASS_LEVEL + 1, "Should fall to ground level");
-
-    uint128 expectedEnergyCost = PLAYER_FALL_ENERGY_COST * (PLAYER_FALL_DAMAGE_THRESHOLD + 1);
-    assertEq(Energy.getEnergy(aliceEntityId), initialEnergy - expectedEnergyCost, "Incorrect fall damage energy cost");
+    assertEq(finalCoord, path[path.length - 1], "Player did not move to new coords");
   }
 
   function testMultiplePlayersCollision() public {
@@ -730,34 +678,6 @@ contract MoveTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Cannot move through a player");
-    world.move(aliceEntityId, newCoords);
-  }
-
-  function testJumpAndGlideLimits() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
-
-    // Create a path that requires jumping and gliding
-    Vec3[] memory newCoords = new Vec3[](MAX_PLAYER_JUMPS + MAX_PLAYER_GLIDES + 1);
-
-    // First do the jumps
-    for (uint256 i = 0; i < MAX_PLAYER_JUMPS; i++) {
-      newCoords[i] = playerCoord + vec3(0, int32(uint32(i)) + 1, 0);
-      setObjectAtCoord(newCoords[i], ObjectTypes.Air);
-      setObjectAtCoord(newCoords[i] + vec3(0, 1, 0), ObjectTypes.Air);
-    }
-
-    // Then do the glides
-    for (uint256 i = MAX_PLAYER_JUMPS; i < MAX_PLAYER_JUMPS + MAX_PLAYER_GLIDES; i++) {
-      newCoords[i] = playerCoord + vec3(0, 1, int32(int256(i - MAX_PLAYER_JUMPS + 1)));
-      setObjectAtCoord(newCoords[i], ObjectTypes.Air);
-      setObjectAtCoord(newCoords[i] + vec3(0, 1, 0), ObjectTypes.Air);
-    }
-
-    // One more move should fail
-    newCoords[MAX_PLAYER_JUMPS + MAX_PLAYER_GLIDES] = playerCoord + vec3(0, 1, int32(uint32(MAX_PLAYER_GLIDES + 1)));
-
-    vm.prank(alice);
-    vm.expectRevert("Cannot glide more than 10 blocks");
     world.move(aliceEntityId, newCoords);
   }
 }
