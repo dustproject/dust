@@ -23,10 +23,7 @@ contract FoodSystem is System {
     EnergyData memory energyData = caller.activate();
 
     ObjectType objectType = InventorySlot._getObjectType(caller, slotAmount.slot);
-    // TODO: remove special cases once we have fruit slices
-    require(
-      objectType.isFood() || objectType == ObjectTypes.Melon || objectType == ObjectTypes.Pumpkin, "Object is not food"
-    );
+    require(objectType.isFood(), "Object is not food");
 
     ObjectPhysicsData memory physicsData = ObjectPhysics._get(objectType);
 

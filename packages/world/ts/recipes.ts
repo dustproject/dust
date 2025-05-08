@@ -270,6 +270,14 @@ export const recipes: Recipe[] = [
     inputs: [["Wheat", 16]],
     outputs: [["WheatSlop", 1]],
   },
+  {
+    inputs: [["Pumpkin", 1]],
+    outputs: [["PumpkinSoup", 1]],
+  },
+  {
+    inputs: [["Melon", 1]],
+    outputs: [["MelonSmoothie", 1]],
+  },
 ];
 
 // Get recipes where an object is used as input
