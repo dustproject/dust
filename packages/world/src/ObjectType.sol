@@ -268,6 +268,8 @@ library ObjectTypes {
   ObjectType constant Bucket = ObjectType.wrap(Category.Bucket | 0);
   ObjectType constant WaterBucket = ObjectType.wrap(Category.Bucket | 1);
   ObjectType constant WheatSlop = ObjectType.wrap(Category.Food | 0);
+  ObjectType constant PumpkinSoup = ObjectType.wrap(Category.Food | 1);
+  ObjectType constant MelonSmoothie = ObjectType.wrap(Category.Food | 2);
   ObjectType constant Battery = ObjectType.wrap(Category.Fuel | 0);
   ObjectType constant Player = ObjectType.wrap(Category.Player | 0);
   ObjectType constant Fragment = ObjectType.wrap(Category.SmartEntityNonBlock | 0);
@@ -709,8 +711,8 @@ library ObjectTypeLib {
     return [ObjectTypes.Bucket, ObjectTypes.WaterBucket];
   }
 
-  function getFoodTypes() internal pure returns (ObjectType[1] memory) {
-    return [ObjectTypes.WheatSlop];
+  function getFoodTypes() internal pure returns (ObjectType[3] memory) {
+    return [ObjectTypes.WheatSlop, ObjectTypes.PumpkinSoup, ObjectTypes.MelonSmoothie];
   }
 
   function getFuelTypes() internal pure returns (ObjectType[1] memory) {

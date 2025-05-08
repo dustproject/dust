@@ -183,5 +183,7 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.Bucket, ObjectPhysicsData({ mass: 2025000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.WaterBucket, ObjectPhysicsData({ mass: 2025000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.WheatSlop, ObjectPhysicsData({ mass: 0, energy: 12800000000000000 }));
+  ObjectPhysics.set(ObjectTypes.PumpkinSoup, ObjectPhysicsData({ mass: 0, energy: 17800000000000000 }));
+  ObjectPhysics.set(ObjectTypes.MelonSmoothie, ObjectPhysicsData({ mass: 0, energy: 17800000000000000 }));
   ObjectPhysics.set(ObjectTypes.Battery, ObjectPhysicsData({ mass: 0, energy: 90000000000000000 }));
 }

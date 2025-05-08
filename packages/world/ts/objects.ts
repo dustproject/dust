@@ -706,8 +706,8 @@ export const categoryObjects: {
   ],
   Food: [
     { name: "WheatSlop", energy: 12800000000000000n },
-    { name: "PumpkinSoup", energy: 12800000000000000n },
-    { name: "MelonSmoothie", energy: 12800000000000000n },
+    { name: "PumpkinSoup", energy: 17800000000000000n },
+    { name: "MelonSmoothie", energy: 17800000000000000n },
   ],
   Fuel: [{ name: "Battery", energy: 90000000000000000n }],
   Player: [{ name: "Player" }],
