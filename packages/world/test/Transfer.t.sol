@@ -222,7 +222,7 @@ contract TransferTest is DustTest {
     assertEq(Inventory.lengthOccupiedSlots(chestEntityId), 0, "Wrong number of occupied inventory slots");
   }
 
-  function testTransferToChestFailsIfChestFull() public {
+  function testSwapToChestWorksIfChestFull() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
@@ -236,6 +236,31 @@ contract TransferTest is DustTest {
 
     TestInventoryUtils.addObject(aliceEntityId, transferObjectType, 1);
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
+
+    SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
+
+    vm.prank(alice);
+    world.transfer(aliceEntityId, aliceEntityId, chestEntityId, slotsToTransfer, "");
+
+    assertInventoryHasObject(aliceEntityId, transferObjectType, transferObjectType.getStackable());
+    assertEq(Inventory.lengthOccupiedSlots(chestEntityId), maxChestInventorySlots, "Inventory slots is not max");
+  }
+
+  function testTransferToChestFailsIfChestFull() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
+    EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
+    uint16 maxChestInventorySlots = ObjectTypes.Chest.getMaxInventorySlots();
+    ObjectType transferObjectType = ObjectTypes.Grass;
+    TestInventoryUtils.addObject(
+      chestEntityId, transferObjectType, transferObjectType.getStackable() * maxChestInventorySlots
+    );
+    assertEq(Inventory.lengthOccupiedSlots(chestEntityId), maxChestInventorySlots, "Inventory slots is not max");
+
+    TestInventoryUtils.addObject(aliceEntityId, transferObjectType, 2);
+    assertInventoryHasObject(aliceEntityId, transferObjectType, 2);
 
     SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
@@ -257,8 +282,9 @@ contract TransferTest is DustTest {
     );
     assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), maxPlayerInventorySlots, "Inventory slots is not max");
 
-    TestInventoryUtils.addObject(chestEntityId, transferObjectType, 1);
-    assertInventoryHasObject(chestEntityId, transferObjectType, 1);
+    // Add two object so it is not a swap
+    TestInventoryUtils.addObject(chestEntityId, transferObjectType, 2);
+    assertInventoryHasObject(chestEntityId, transferObjectType, 2);
 
     SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
@@ -266,6 +292,31 @@ contract TransferTest is DustTest {
     vm.prank(alice);
     vm.expectRevert("Object does not fit in slot");
     world.transfer(aliceEntityId, chestEntityId, aliceEntityId, slotsToTransfer, "");
+  }
+
+  function testSwapFromChestWorksIfPlayerFull() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
+    EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
+    uint16 maxPlayerInventorySlots = ObjectTypes.Player.getMaxInventorySlots();
+    ObjectType transferObjectType = ObjectTypes.Grass;
+    TestInventoryUtils.addObject(
+      aliceEntityId, transferObjectType, transferObjectType.getStackable() * maxPlayerInventorySlots
+    );
+    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), maxPlayerInventorySlots, "Inventory slots is not max");
+
+    TestInventoryUtils.addObject(chestEntityId, transferObjectType, 1);
+    assertInventoryHasObject(chestEntityId, transferObjectType, 1);
+
+    // This will swap the chest's object with the player's objects
+    SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
+
+    vm.prank(alice);
+    world.transfer(aliceEntityId, chestEntityId, aliceEntityId, slotsToTransfer, "");
+    assertInventoryHasObject(chestEntityId, transferObjectType, transferObjectType.getStackable());
+    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), maxPlayerInventorySlots, "Inventory slots is not max");
   }
 
   function testTransferFailsIfInvalidObject() public {

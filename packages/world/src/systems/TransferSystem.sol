@@ -28,7 +28,18 @@ contract TransferSystem is System {
   ) public {
     caller.activate();
 
+    bool selfTransfer = (from == to);
+    bool callerIsFrom = (caller == from);
+    bool callerIsTo = (caller == to);
+
     EntityId target;
+
+    if (selfTransfer) {
+      target = (callerIsFrom ? EntityId.wrap(0) : from);
+    } else {
+      require(callerIsFrom || callerIsTo, "caller not involved");
+      target = (callerIsFrom ? to : from);
+    }
 
     if (from == to) {
       // Transferring within the same inventory

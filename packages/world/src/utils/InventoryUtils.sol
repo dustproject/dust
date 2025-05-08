@@ -278,9 +278,8 @@ library InventoryUtils {
 
       InventorySlotData memory destSlot = InventorySlot._get(to, slotTo);
 
-      // Handle slot swaps (transferring all to an existing slot with a different type)
-      if (amount == sourceSlot.amount && sourceSlot.objectType != destSlot.objectType && !destSlot.objectType.isNull())
-      {
+      // Handle slot swaps (transferring all to an existing non-empty slot)
+      if (amount == sourceSlot.amount && !destSlot.objectType.isNull()) {
         toSlotData[toSlotDataLength++] = SlotData(destSlot.entityId, destSlot.objectType, destSlot.amount);
 
         _replaceSlot(from, slotFrom, sourceSlot.objectType, destSlot.entityId, destSlot.objectType, destSlot.amount);
