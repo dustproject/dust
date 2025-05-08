@@ -860,4 +860,42 @@ function initRecipes() {
       outputAmounts
     );
   }
+  {
+    uint16[] memory inputTypes = new uint16[](1);
+    uint16[] memory inputAmounts = new uint16[](1);
+    (inputTypes[0], inputAmounts[0]) = (ObjectTypes.Pumpkin.unwrap(), 1);
+
+    uint16[] memory outputTypes = new uint16[](1);
+    uint16[] memory outputAmounts = new uint16[](1);
+    (outputTypes[0], outputAmounts[0]) = (ObjectTypes.PumpkinSoup.unwrap(), 1);
+
+    Recipes.set(
+      keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      ObjectTypes.Null,
+      0,
+      inputTypes,
+      inputAmounts,
+      outputTypes,
+      outputAmounts
+    );
+  }
+  {
+    uint16[] memory inputTypes = new uint16[](1);
+    uint16[] memory inputAmounts = new uint16[](1);
+    (inputTypes[0], inputAmounts[0]) = (ObjectTypes.Melon.unwrap(), 1);
+
+    uint16[] memory outputTypes = new uint16[](1);
+    uint16[] memory outputAmounts = new uint16[](1);
+    (outputTypes[0], outputAmounts[0]) = (ObjectTypes.MelonSmoothie.unwrap(), 1);
+
+    Recipes.set(
+      keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      ObjectTypes.Null,
+      0,
+      inputTypes,
+      inputAmounts,
+      outputTypes,
+      outputAmounts
+    );
+  }
 }
