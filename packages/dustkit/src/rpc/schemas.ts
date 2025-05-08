@@ -23,6 +23,7 @@ export type ClientRpcSchema = RpcSchema.From<
           entity: EntityId;
           objectType: number;
           amount: number;
+          operationType: "withdraw" | "deposit";
         };
       };
       ReturnType: {
