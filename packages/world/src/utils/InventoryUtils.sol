@@ -278,8 +278,12 @@ library InventoryUtils {
 
       InventorySlotData memory destSlot = InventorySlot._get(to, slotTo);
 
-      // Handle slot swaps (transferring all to an existing non-empty slot)
-      if (amount == sourceSlot.amount && !destSlot.objectType.isNull()) {
+      // Can only stack if the two slots hold the same objectType and don't go over the limit
+      bool isSameType = sourceSlot.objectType == destSlot.objectType;
+      bool canStack = isSameType && sourceSlot.amount + destSlot.amount <= sourceSlot.objectType.getStackable();
+
+      // Handle slot swaps (transferring all to an existing slot)
+      if (amount == sourceSlot.amount && !destSlot.objectType.isNull() && !canStack) {
         toSlotData[toSlotDataLength++] = SlotData(destSlot.entityId, destSlot.objectType, destSlot.amount);
 
         _replaceSlot(from, slotFrom, sourceSlot.objectType, destSlot.entityId, destSlot.objectType, destSlot.amount);
