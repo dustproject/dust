@@ -46,17 +46,18 @@ contract SpawnTest is DustTest {
     // Explore chunk at (0, 0, 0)
     setupAirChunk(vec3(0, 0, 0));
 
-    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice);
+    vm.prank(alice);
+    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice) + vec3(0, 1, 0);
 
     // Set below entity to dirt so gravity doesn't apply
-    EntityId belowEntityId = setObjectAtCoord(spawnCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
+    setObjectAtCoord(spawnCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
     LocalEnergyPool.set(shardCoord, MAX_PLAYER_ENERGY);
 
     vm.prank(alice);
-    EntityId playerEntityId = world.randomSpawn(blockNumber, 0);
+    EntityId playerEntityId = world.randomSpawn(blockNumber, spawnCoord.y());
     assertTrue(playerEntityId.exists());
 
     assertEq(Energy.getEnergy(playerEntityId), MAX_PLAYER_ENERGY / 2, "Player energy is not correct after random spawn");
@@ -83,7 +84,7 @@ contract SpawnTest is DustTest {
     setupAirChunk(spawnCoord);
 
     // Set forcefield
-    EntityId forceFieldEntityId = setupForceField(
+    setupForceField(
       spawnTileCoord,
       EnergyData({
         energy: MAX_PLAYER_ENERGY,
@@ -244,17 +245,18 @@ contract SpawnTest is DustTest {
 
     uint256 blockNumber = vm.getBlockNumber() - 5;
 
-    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice);
+    vm.prank(alice);
+    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice) + vec3(0, 1, 0);
 
     // Set below entity to dirt so gravity doesn't apply
-    EntityId belowEntityId = setObjectAtCoord(spawnCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
+    setObjectAtCoord(spawnCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
     LocalEnergyPool.set(shardCoord, MAX_PLAYER_ENERGY);
 
     vm.prank(alice);
-    EntityId playerEntityId = world.randomSpawn(blockNumber, 0);
+    EntityId playerEntityId = world.randomSpawn(blockNumber, spawnCoord.y());
     assertEq(playerEntityId, aliceEntityId, "Player entity doesn't match");
   }
 
@@ -264,7 +266,8 @@ contract SpawnTest is DustTest {
 
     uint256 blockNumber = vm.getBlockNumber() - 5;
 
-    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice);
+    vm.prank(alice);
+    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice) + vec3(0, 1, 0);
 
     // Set below entity to dirt so gravity doesn't apply
     setObjectAtCoord(spawnCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
@@ -276,7 +279,7 @@ contract SpawnTest is DustTest {
     // Spawn player should fail as the player has energy
     vm.prank(alice);
     vm.expectRevert("Player already spawned");
-    world.randomSpawn(blockNumber, 0);
+    world.randomSpawn(blockNumber, spawnCoord.y());
   }
 
   function testSpawnRespawn() public {

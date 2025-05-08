@@ -35,26 +35,14 @@ contract TransferSystem is System {
     EntityId target;
 
     if (selfTransfer) {
+      // If it is a transfer within the same inventory,
+      // only call the hook if it is not the caller's inventory
       target = (callerIsFrom ? EntityId.wrap(0) : from);
     } else {
-      require(callerIsFrom || callerIsTo, "caller not involved");
+      // If transferring between different inventories,
+      // caller must be involved and the hook should be called for other party
+      require(callerIsFrom || callerIsTo, "Caller is not involved in transfer");
       target = (callerIsFrom ? to : from);
-    }
-
-    if (from == to) {
-      // Transferring within the same inventory
-      if (caller != from) {
-        target = from;
-      }
-    } else {
-      if (caller == to) {
-        target = from;
-      } else if (caller == from) {
-        target = to;
-      } else {
-        // TODO: remove this restriction
-        revert("Caller is not involved in transfer");
-      }
     }
 
     if (target.exists()) {

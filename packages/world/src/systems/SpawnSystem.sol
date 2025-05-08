@@ -2,7 +2,6 @@
 pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
-import { console } from "forge-std/console.sol";
 import { LibPRNG } from "solady/utils/LibPRNG.sol";
 
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
@@ -134,8 +133,6 @@ contract SpawnSystem is System {
     );
 
     Vec3 spawnCoord = getRandomSpawnCoord(blockNumber, _msgSender());
-    console.log(spawnCoord.toString());
-    console.log(y);
 
     require(spawnCoord.y() <= y && y < spawnCoord.y() + CHUNK_SIZE, "y coordinate outside of spawn chunk");
 
