@@ -162,8 +162,8 @@ contract TransferTest is DustTest {
     world.transfer(aliceEntityId, aliceEntityId, chestEntityId, slotsToTransfer, "");
     endGasReport();
 
-    assertInventoryHasTool(chestEntityId, toolEntityId, 1);
-    assertInventoryHasTool(aliceEntityId, toolEntityId, 0);
+    assertInventoryHasEntity(chestEntityId, toolEntityId, 1);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId, 0);
     assertEq(Inventory.lengthOccupiedSlots(chestEntityId), 1, "Wrong number of occupied inventory slots");
     assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Wrong number of occupied inventory slots");
   }
@@ -214,12 +214,37 @@ contract TransferTest is DustTest {
     world.transfer(aliceEntityId, chestEntityId, aliceEntityId, slotsToTransfer, "");
     endGasReport();
 
-    assertInventoryHasTool(aliceEntityId, toolEntityId1, 1);
-    assertInventoryHasTool(aliceEntityId, toolEntityId2, 1);
-    assertInventoryHasTool(chestEntityId, toolEntityId1, 0);
-    assertInventoryHasTool(chestEntityId, toolEntityId2, 0);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId1, 1);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId2, 1);
+    assertInventoryHasEntity(chestEntityId, toolEntityId1, 0);
+    assertInventoryHasEntity(chestEntityId, toolEntityId2, 0);
     assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 2, "Wrong number of occupied inventory slots");
     assertEq(Inventory.lengthOccupiedSlots(chestEntityId), 0, "Wrong number of occupied inventory slots");
+  }
+
+  function testSwapToChestWorksIfChestFull() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
+    EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
+    uint16 maxChestInventorySlots = ObjectTypes.Chest.getMaxInventorySlots();
+    ObjectType transferObjectType = ObjectTypes.Grass;
+    TestInventoryUtils.addObject(
+      chestEntityId, transferObjectType, transferObjectType.getStackable() * maxChestInventorySlots
+    );
+    assertEq(Inventory.lengthOccupiedSlots(chestEntityId), maxChestInventorySlots, "Inventory slots is not max");
+
+    TestInventoryUtils.addObject(aliceEntityId, transferObjectType, 1);
+    assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
+
+    SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
+
+    vm.prank(alice);
+    world.transfer(aliceEntityId, aliceEntityId, chestEntityId, slotsToTransfer, "");
+
+    assertInventoryHasObject(aliceEntityId, transferObjectType, transferObjectType.getStackable());
+    assertEq(Inventory.lengthOccupiedSlots(chestEntityId), maxChestInventorySlots, "Inventory slots is not max");
   }
 
   function testTransferToChestFailsIfChestFull() public {
@@ -234,8 +259,8 @@ contract TransferTest is DustTest {
     );
     assertEq(Inventory.lengthOccupiedSlots(chestEntityId), maxChestInventorySlots, "Inventory slots is not max");
 
-    TestInventoryUtils.addObject(aliceEntityId, transferObjectType, 1);
-    assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
+    TestInventoryUtils.addObject(aliceEntityId, transferObjectType, 2);
+    assertInventoryHasObject(aliceEntityId, transferObjectType, 2);
 
     SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
@@ -257,8 +282,9 @@ contract TransferTest is DustTest {
     );
     assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), maxPlayerInventorySlots, "Inventory slots is not max");
 
-    TestInventoryUtils.addObject(chestEntityId, transferObjectType, 1);
-    assertInventoryHasObject(chestEntityId, transferObjectType, 1);
+    // Add two object so it is not a swap
+    TestInventoryUtils.addObject(chestEntityId, transferObjectType, 2);
+    assertInventoryHasObject(chestEntityId, transferObjectType, 2);
 
     SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
@@ -266,6 +292,31 @@ contract TransferTest is DustTest {
     vm.prank(alice);
     vm.expectRevert("Object does not fit in slot");
     world.transfer(aliceEntityId, chestEntityId, aliceEntityId, slotsToTransfer, "");
+  }
+
+  function testSwapFromChestWorksIfPlayerFull() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
+    EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
+    uint16 maxPlayerInventorySlots = ObjectTypes.Player.getMaxInventorySlots();
+    ObjectType transferObjectType = ObjectTypes.Grass;
+    TestInventoryUtils.addObject(
+      aliceEntityId, transferObjectType, transferObjectType.getStackable() * maxPlayerInventorySlots
+    );
+    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), maxPlayerInventorySlots, "Inventory slots is not max");
+
+    TestInventoryUtils.addObject(chestEntityId, transferObjectType, 1);
+    assertInventoryHasObject(chestEntityId, transferObjectType, 1);
+
+    // This will swap the chest's object with the player's objects
+    SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
+    slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
+
+    vm.prank(alice);
+    world.transfer(aliceEntityId, chestEntityId, aliceEntityId, slotsToTransfer, "");
+    assertInventoryHasObject(chestEntityId, transferObjectType, transferObjectType.getStackable());
+    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), maxPlayerInventorySlots, "Inventory slots is not max");
   }
 
   function testTransferFailsIfInvalidObject() public {
@@ -760,10 +811,6 @@ contract TransferTest is DustTest {
     assertEq(deposit.entityId, EntityId.wrap(0), "Deposit entity ID should be zero for regular objects");
     assertEq(deposit.objectType, transferObjectType, "Incorrect deposit object type");
     assertEq(deposit.amount, numToTransfer, "Incorrect deposit amount");
-    SlotData[] memory withdrawals = program.lastWithdrawals();
-    for (uint256 i = 0; i < withdrawals.length; i++) {
-      console.log("withdrawal %d: %s", i, withdrawals[i].amount);
-    }
 
     // Verify no withdrawals (nothing taken from chest)
     assertEq(program.lastWithdrawals().length, 0, "Should have 0 withdrawals");

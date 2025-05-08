@@ -48,7 +48,7 @@ contract GravityTest is DustTest {
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     startGasReport("mine with single block fall");
@@ -65,9 +65,8 @@ contract GravityTest is DustTest {
     mineEntityId = ReversePosition.get(mineCoord);
     assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    uint128 playerEnergyLost =
-      assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+
+    uint128 playerEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     assertEq(
       playerEnergyLost, playerHandMassReduction, "Player shouldn't have lost energy from falling a safe distance"
     );
@@ -86,7 +85,7 @@ contract GravityTest is DustTest {
     setTerrainAtCoord(mineCoord - vec3(0, 1, 0), ObjectTypes.Air);
     setTerrainAtCoord(mineCoord - vec3(0, 2, 0), ObjectTypes.Air);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     startGasReport("mine with three block fall");
@@ -103,9 +102,8 @@ contract GravityTest is DustTest {
     mineEntityId = ReversePosition.get(mineCoord);
     assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    uint128 playerEnergyLost =
-      assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+
+    uint128 playerEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     assertEq(
       playerEnergyLost,
       playerHandMassReduction + PLAYER_FALL_ENERGY_COST,
@@ -223,7 +221,7 @@ contract GravityTest is DustTest {
     setObjectAtCoord(newCoords[newCoords.length - 1], ObjectTypes.Air);
     setObjectAtCoord(expectedFinalCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, expectedFinalCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     startGasReport("move with single block fall");
@@ -236,9 +234,8 @@ contract GravityTest is DustTest {
     assertEq(
       BaseEntity.get(ReverseMovablePosition.get(aboveFinalCoord)), aliceEntityId, "Above coord is not the player"
     );
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, expectedFinalCoord);
-    uint128 playerEnergyLost =
-      assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+
+    uint128 playerEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     assertEq(playerEnergyLost, MOVE_ENERGY_COST, "Player should only lose energy from the initial move");
   }
 
@@ -257,7 +254,7 @@ contract GravityTest is DustTest {
     Vec3 expectedFinalCoord = newCoords[newCoords.length - 1] - vec3(0, 3, 0);
     setObjectAtCoord(expectedFinalCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, expectedFinalCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     startGasReport("move with three block fall");
@@ -270,9 +267,8 @@ contract GravityTest is DustTest {
     assertEq(
       BaseEntity.get(ReverseMovablePosition.get(aboveFinalCoord)), aliceEntityId, "Above coord is not the player"
     );
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, expectedFinalCoord);
-    uint128 playerEnergyLost =
-      assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+
+    uint128 playerEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     assertEq(
       playerEnergyLost,
       MOVE_ENERGY_COST + PLAYER_FALL_ENERGY_COST,

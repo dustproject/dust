@@ -48,7 +48,7 @@ contract HitMachineTest is DustTest {
     Energy.setEnergy(aliceEntityId, HIT_ENERGY_COST);
     Energy.setEnergy(forceField, HIT_ENERGY_COST);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     // Hit force field without tool
     vm.prank(alice);
@@ -61,8 +61,7 @@ contract HitMachineTest is DustTest {
 
     assertPlayerIsDead(aliceEntityId, playerCoord);
 
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testHitForceFieldWithWhacker() public {
@@ -135,7 +134,7 @@ contract HitMachineTest is DustTest {
     Energy.setEnergy(aliceEntityId, HIT_ENERGY_COST - 1);
     Energy.setEnergy(forceField, HIT_ENERGY_COST);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     // Hit should still succeed but player energy should be 0
     vm.prank(alice);
@@ -149,7 +148,6 @@ contract HitMachineTest is DustTest {
     // Player died
     assertPlayerIsDead(aliceEntityId, playerCoord);
 
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 }

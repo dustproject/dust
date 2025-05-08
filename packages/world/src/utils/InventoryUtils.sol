@@ -278,9 +278,12 @@ library InventoryUtils {
 
       InventorySlotData memory destSlot = InventorySlot._get(to, slotTo);
 
-      // Handle slot swaps (transferring all to an existing slot with a different type)
-      if (amount == sourceSlot.amount && sourceSlot.objectType != destSlot.objectType && !destSlot.objectType.isNull())
-      {
+      // Can only stack if the two slots hold the same objectType and don't go over the limit
+      bool isSameType = sourceSlot.objectType == destSlot.objectType;
+      bool canStack = isSameType && sourceSlot.amount + destSlot.amount <= sourceSlot.objectType.getStackable();
+
+      // Handle slot swaps (transferring all to an existing slot)
+      if (amount == sourceSlot.amount && !destSlot.objectType.isNull() && !canStack) {
         toSlotData[toSlotDataLength++] = SlotData(destSlot.entityId, destSlot.objectType, destSlot.amount);
 
         _replaceSlot(from, slotFrom, sourceSlot.objectType, destSlot.entityId, destSlot.objectType, destSlot.amount);
@@ -418,7 +421,7 @@ library InventoryUtils {
     } else {
       slot = Inventory._getNextSlot(owner);
       uint16 maxSlots = EntityObjectType._get(owner).getMaxInventorySlots();
-      require(slot < maxSlots, "All slots used");
+      require(slot < maxSlots, "Inventory is full");
       Inventory._setNextSlot(owner, slot + 1);
     }
 

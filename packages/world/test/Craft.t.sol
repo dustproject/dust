@@ -51,7 +51,7 @@ contract CraftTest is DustTest {
   }
 
   function testCraftSingleInputSingleOutput() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
     ObjectType[] memory inputTypes = new ObjectType[](1);
     inputTypes[0] = ObjectTypes.OakLog;
@@ -68,7 +68,7 @@ contract CraftTest is DustTest {
       assertInventoryHasObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
     }
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     SlotAmount[] memory inputs = new SlotAmount[](1);
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
@@ -85,8 +85,7 @@ contract CraftTest is DustTest {
       assertInventoryHasObject(aliceEntityId, outputTypes[i], outputAmounts[i]);
     }
 
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testCraftMultipleInputsSingleOutput() public {
@@ -112,7 +111,7 @@ contract CraftTest is DustTest {
     Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
     EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     SlotAmount[] memory inputs = new SlotAmount[](2);
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
@@ -130,8 +129,7 @@ contract CraftTest is DustTest {
       assertInventoryHasObject(aliceEntityId, outputTypes[i], outputAmounts[i]);
     }
 
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testCraftWithStation() public {
@@ -157,7 +155,7 @@ contract CraftTest is DustTest {
     Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
     EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     SlotAmount[] memory inputs = new SlotAmount[](2);
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
@@ -175,8 +173,7 @@ contract CraftTest is DustTest {
       assertInventoryHasObject(aliceEntityId, outputTypes[i], outputAmounts[i]);
     }
 
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testCraftAnyInput() public {
@@ -209,7 +206,7 @@ contract CraftTest is DustTest {
       Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
       EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
 
-      EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+      EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
       SlotAmount[] memory inputs = new SlotAmount[](3);
       inputs[0] = SlotAmount({ slot: 0, amount: 2 });
@@ -221,8 +218,7 @@ contract CraftTest is DustTest {
       world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
       endGasReport();
 
-      EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-      assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+      assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     }
 
     assertInventoryHasObject(aliceEntityId, inputObjectType1, 0);
@@ -236,7 +232,7 @@ contract CraftTest is DustTest {
   }
 
   function testCraftTool() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
     ObjectType[] memory inputTypes = new ObjectType[](1);
     inputTypes[0] = ObjectTypes.AnyPlank;
@@ -252,7 +248,7 @@ contract CraftTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, inputObjectType, 5);
     assertInventoryHasObject(aliceEntityId, inputObjectType, 5);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     SlotAmount[] memory inputs = new SlotAmount[](1);
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
@@ -270,11 +266,10 @@ contract CraftTest is DustTest {
     assertTrue(toolEntityId.exists(), "tool entity id should exist");
     ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
-    assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
     assertEq(Mass.get(toolEntityId), ObjectPhysics.getMass(outputTypes[0]), "mass should be equal to tool mass");
 
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testCraftWoodenPick() public {
@@ -288,13 +283,13 @@ contract CraftTest is DustTest {
     outputAmounts[0] = 1;
     bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
     ObjectType inputObjectType = ObjectTypes.OakPlanks;
     TestInventoryUtils.addObject(aliceEntityId, inputObjectType, 10);
     assertInventoryHasObject(aliceEntityId, inputObjectType, 10);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     SlotAmount[] memory inputs = new SlotAmount[](1);
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
@@ -309,11 +304,10 @@ contract CraftTest is DustTest {
     assertTrue(toolEntityId.exists(), "tool entity id should exist");
     ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
-    assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
     assertEq(Mass.get(toolEntityId), ObjectPhysics.getMass(outputTypes[0]), "mass should be equal to tool mass");
 
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testCraftWoodenAxe() public {
@@ -327,13 +321,13 @@ contract CraftTest is DustTest {
     outputAmounts[0] = 1;
     bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
     ObjectType inputObjectType = ObjectTypes.OakPlanks;
     TestInventoryUtils.addObject(aliceEntityId, inputObjectType, 10);
     assertInventoryHasObject(aliceEntityId, inputObjectType, 10);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     SlotAmount[] memory inputs = new SlotAmount[](1);
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
@@ -348,11 +342,10 @@ contract CraftTest is DustTest {
     assertTrue(toolEntityId.exists(), "tool entity id should exist");
     ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
-    assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
     assertEq(Mass.get(toolEntityId), ObjectPhysics.getMass(outputTypes[0]), "mass should be equal to tool mass");
 
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testCraftMultipleOutputs() public {
@@ -501,7 +494,7 @@ contract CraftTest is DustTest {
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
 
     vm.prank(alice);
-    vm.expectRevert("All slots used");
+    vm.expectRevert("Inventory is full");
     world.craft(aliceEntityId, recipeId, inputs);
   }
 
@@ -584,5 +577,147 @@ contract CraftTest is DustTest {
     vm.prank(alice);
     vm.expectRevert("Player is sleeping");
     world.craft(aliceEntityId, recipeId, inputs);
+  }
+
+  function testCraftInsufficientEnergyHandling() public {
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+
+    // Setup a recipe
+    ObjectType[] memory inputTypes = new ObjectType[](1);
+    inputTypes[0] = ObjectTypes.OakLog;
+    uint16[] memory inputAmounts = new uint16[](1);
+    inputAmounts[0] = 1;
+    ObjectType[] memory outputTypes = new ObjectType[](1);
+    outputTypes[0] = ObjectTypes.OakPlanks;
+    uint16[] memory outputAmounts = new uint16[](1);
+    outputAmounts[0] = 4;
+    bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
+
+    // Add the recipe ingredients to inventory
+    TestInventoryUtils.addObject(aliceEntityId, inputTypes[0], inputAmounts[0]);
+
+    // Drain almost all player energy
+    Energy.setEnergy(aliceEntityId, 1);
+
+    // Try to craft with no energy
+    SlotAmount[] memory inputs = new SlotAmount[](1);
+    inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
+
+    vm.prank(alice);
+    vm.expectRevert("Not enough energy");
+    world.craft(aliceEntityId, recipeId, inputs);
+
+    // Verify inventory is unchanged
+    assertInventoryHasObject(aliceEntityId, inputTypes[0], inputAmounts[0]);
+    assertInventoryHasObject(aliceEntityId, outputTypes[0], 0);
+  }
+
+  function testCraftPartialInputConsumption() public {
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+
+    // Setup a recipe that requires multiple of the same input
+    ObjectType[] memory inputTypes = new ObjectType[](1);
+    inputTypes[0] = ObjectTypes.Stone;
+    uint16[] memory inputAmounts = new uint16[](1);
+    inputAmounts[0] = 9;
+    ObjectType[] memory outputTypes = new ObjectType[](1);
+    outputTypes[0] = ObjectTypes.Furnace;
+    uint16[] memory outputAmounts = new uint16[](1);
+    outputAmounts[0] = 1;
+    bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
+
+    // Add more than needed to inventory
+    uint16 extraAmount = 5;
+    TestInventoryUtils.addObject(aliceEntityId, inputTypes[0], inputAmounts[0] + extraAmount);
+    assertInventoryHasObject(aliceEntityId, inputTypes[0], inputAmounts[0] + extraAmount);
+
+    // Craft with multiple inputs from same slot
+    SlotAmount[] memory inputs = new SlotAmount[](1);
+    inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
+
+    vm.prank(alice);
+    world.craft(aliceEntityId, recipeId, inputs);
+
+    // Verify correct resources were consumed
+    assertInventoryHasObject(aliceEntityId, inputTypes[0], extraAmount);
+    assertInventoryHasObject(aliceEntityId, outputTypes[0], outputAmounts[0]);
+  }
+
+  function testCraftInputTypeMatching() public {
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+
+    ObjectType[] memory inputTypes = new ObjectType[](1);
+    inputTypes[0] = ObjectTypes.AnyPlank;
+    uint16[] memory inputAmounts = new uint16[](1);
+    inputAmounts[0] = 5;
+    ObjectType[] memory outputTypes = new ObjectType[](1);
+    outputTypes[0] = ObjectTypes.WoodenAxe;
+    uint16[] memory outputAmounts = new uint16[](1);
+    outputAmounts[0] = 1;
+    bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
+
+    // Add different log types
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.OakPlanks, 5);
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.BirchPlanks, 5);
+
+    // Craft with oak log
+    SlotAmount[] memory inputs = new SlotAmount[](1);
+    inputs[0] = SlotAmount({ slot: 0, amount: 5 });
+
+    vm.prank(alice);
+    world.craft(aliceEntityId, recipeId, inputs);
+
+    // Verify oak log was consumed
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.OakPlanks, 0);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.BirchPlanks, 5);
+    assertInventoryHasObject(aliceEntityId, outputTypes[0], outputAmounts[0]);
+
+    // Add more oak logs for next test
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.OakPlanks, 5);
+
+    // Try to craft with birch log
+    inputs[0] = SlotAmount({ slot: 1, amount: 5 });
+
+    vm.prank(alice);
+    world.craft(aliceEntityId, recipeId, inputs);
+
+    // Verify birch log was consumed
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.OakPlanks, 5);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.BirchPlanks, 0);
+    assertInventoryHasObject(aliceEntityId, outputTypes[0], outputAmounts[0] * 2);
+  }
+
+  function testCraftInventoryFullReplacesInputs() public {
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+
+    // Setup a recipe
+    ObjectType[] memory inputTypes = new ObjectType[](1);
+    inputTypes[0] = ObjectTypes.OakLog;
+    uint16[] memory inputAmounts = new uint16[](1);
+    inputAmounts[0] = 1;
+    ObjectType[] memory outputTypes = new ObjectType[](1);
+    outputTypes[0] = ObjectTypes.OakPlanks;
+    uint16[] memory outputAmounts = new uint16[](1);
+    outputAmounts[0] = 4;
+    bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
+
+    // Add the recipe ingredient
+    TestInventoryUtils.addObject(aliceEntityId, inputTypes[0], inputAmounts[0]);
+
+    // Fill all inventory slots except the input slot with different items
+    for (uint8 slot = 1; slot < ObjectTypes.Player.getMaxInventorySlots(); slot++) {
+      TestInventoryUtils.addObjectToSlot(aliceEntityId, ObjectTypes.Grass, 1, slot);
+    }
+
+    // Craft should still work because output type can stack with like items
+    SlotAmount[] memory inputs = new SlotAmount[](1);
+    inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
+
+    vm.prank(alice);
+    world.craft(aliceEntityId, recipeId, inputs);
+
+    // Verify the output was created in the same slot as the input
+    assertInventoryHasObject(aliceEntityId, outputTypes[0], outputAmounts[0]);
+    assertInventoryHasObject(aliceEntityId, inputTypes[0], 0);
   }
 }

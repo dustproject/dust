@@ -142,10 +142,12 @@ contract SpawnSystem is System {
     (EntityId forceField,) = ForceFieldUtils.getForceField(spawnCoord);
     require(!forceField.exists(), "Cannot spawn in force field");
 
-    // Extract energy from local pool (half of max player energy)
-    removeEnergyFromLocalPool(spawnCoord, MAX_PLAYER_ENERGY / 2);
+    uint128 spawnEnergy = MAX_PLAYER_ENERGY / 2;
 
-    return _spawnPlayer(spawnCoord);
+    // Extract energy from local pool (half of max player energy)
+    removeEnergyFromLocalPool(spawnCoord, spawnEnergy);
+
+    return _spawnPlayer(spawnCoord, spawnEnergy);
   }
 
   function spawn(EntityId spawnTile, Vec3 spawnCoord, uint128 spawnEnergy, bytes memory extraData)
@@ -164,9 +166,9 @@ contract SpawnSystem is System {
     require(forceField.exists(), "Spawn tile is not inside a forcefield");
     (EnergyData memory machineData,) = updateMachineEnergy(forceField);
     require(machineData.energy >= spawnEnergy, "Not enough energy in spawn tile forcefield");
-    Energy._setEnergy(forceField, machineData.energy - MAX_PLAYER_ENERGY);
+    Energy._setEnergy(forceField, machineData.energy - spawnEnergy);
 
-    EntityId player = _spawnPlayer(spawnCoord);
+    EntityId player = _spawnPlayer(spawnCoord, spawnEnergy);
 
     bytes memory onSpawn = abi.encodeCall(ISpawnHook.onSpawn, (player, spawnTile, spawnEnergy, extraData));
     spawnTile.getProgram().callOrRevert(onSpawn);
@@ -174,7 +176,7 @@ contract SpawnSystem is System {
     return player;
   }
 
-  function _spawnPlayer(Vec3 spawnCoord) internal returns (EntityId) {
+  function _spawnPlayer(Vec3 spawnCoord, uint128 spawnEnergy) internal returns (EntityId) {
     require(!MoveLib._gravityApplies(spawnCoord), "Cannot spawn player here as gravity applies");
 
     EntityId player = PlayerUtils.getOrCreatePlayer();
@@ -185,11 +187,7 @@ contract SpawnSystem is System {
 
     Energy._set(
       player,
-      EnergyData({
-        energy: MAX_PLAYER_ENERGY,
-        lastUpdatedTime: uint128(block.timestamp),
-        drainRate: PLAYER_ENERGY_DRAIN_RATE
-      })
+      EnergyData({ energy: spawnEnergy, lastUpdatedTime: uint128(block.timestamp), drainRate: PLAYER_ENERGY_DRAIN_RATE })
     );
 
     notify(player, SpawnNotification({ spawnCoord: spawnCoord }));

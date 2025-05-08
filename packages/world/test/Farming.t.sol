@@ -61,7 +61,7 @@ contract FarmingTest is DustTest {
 
     TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenHoe);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     startGasReport("till dirt");
@@ -72,8 +72,7 @@ contract FarmingTest is DustTest {
     assertTrue(dirtEntityId.exists(), "Dirt entity doesn't exist after tilling");
     assertEq(EntityObjectType.get(dirtEntityId), ObjectTypes.Farmland, "Dirt was not converted to farmland");
 
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testTillGrass() public {
@@ -86,7 +85,7 @@ contract FarmingTest is DustTest {
 
     TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenHoe);
 
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
     startGasReport("till grass");
@@ -97,8 +96,7 @@ contract FarmingTest is DustTest {
     assertTrue(grassEntityId.exists(), "Grass entity doesn't exist after tilling");
     assertEq(EntityObjectType.get(grassEntityId), ObjectTypes.Farmland, "Grass was not converted to farmland");
 
-    EnergyDataSnapshot memory afterEnergyDataSnapshot = getEnergyDataSnapshot(aliceEntityId, playerCoord);
-    assertEnergyFlowedFromPlayerToLocalPool(beforeEnergyDataSnapshot, afterEnergyDataSnapshot);
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
   function testTillWithDifferentHoes() public {
