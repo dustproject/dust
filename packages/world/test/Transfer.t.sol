@@ -162,8 +162,8 @@ contract TransferTest is DustTest {
     world.transfer(aliceEntityId, aliceEntityId, chestEntityId, slotsToTransfer, "");
     endGasReport();
 
-    assertInventoryHasTool(chestEntityId, toolEntityId, 1);
-    assertInventoryHasTool(aliceEntityId, toolEntityId, 0);
+    assertInventoryHasEntity(chestEntityId, toolEntityId, 1);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId, 0);
     assertEq(Inventory.lengthOccupiedSlots(chestEntityId), 1, "Wrong number of occupied inventory slots");
     assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Wrong number of occupied inventory slots");
   }
@@ -214,10 +214,10 @@ contract TransferTest is DustTest {
     world.transfer(aliceEntityId, chestEntityId, aliceEntityId, slotsToTransfer, "");
     endGasReport();
 
-    assertInventoryHasTool(aliceEntityId, toolEntityId1, 1);
-    assertInventoryHasTool(aliceEntityId, toolEntityId2, 1);
-    assertInventoryHasTool(chestEntityId, toolEntityId1, 0);
-    assertInventoryHasTool(chestEntityId, toolEntityId2, 0);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId1, 1);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId2, 1);
+    assertInventoryHasEntity(chestEntityId, toolEntityId1, 0);
+    assertInventoryHasEntity(chestEntityId, toolEntityId2, 0);
     assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 2, "Wrong number of occupied inventory slots");
     assertEq(Inventory.lengthOccupiedSlots(chestEntityId), 0, "Wrong number of occupied inventory slots");
   }

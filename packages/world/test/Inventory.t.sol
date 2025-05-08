@@ -111,8 +111,8 @@ contract InventoryTest is DustTest {
 
     airEntityId = ReversePosition.get(dropCoord);
     assertTrue(airEntityId.exists(), "Drop entity does not exist");
-    assertInventoryHasTool(aliceEntityId, toolEntityId, 0);
-    assertInventoryHasTool(airEntityId, toolEntityId, 1);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId, 0);
+    assertInventoryHasEntity(airEntityId, toolEntityId, 1);
     assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Wrong number of occupied inventory slots");
     assertEq(Inventory.lengthOccupiedSlots(airEntityId), 1, "Wrong number of occupied inventory slots");
   }
@@ -136,8 +136,8 @@ contract InventoryTest is DustTest {
     world.drop(aliceEntityId, drops, dropCoord);
     endGasReport();
 
-    assertInventoryHasTool(aliceEntityId, toolEntityId, 0);
-    assertInventoryHasTool(airEntityId, toolEntityId, 1);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId, 0);
+    assertInventoryHasEntity(airEntityId, toolEntityId, 1);
     assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Wrong number of occupied inventory slots");
     assertEq(Inventory.lengthOccupiedSlots(airEntityId), 1, "Wrong number of occupied inventory slots");
   }
@@ -209,8 +209,8 @@ contract InventoryTest is DustTest {
     world.pickup(aliceEntityId, pickup, pickupCoord);
     endGasReport();
 
-    assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
-    assertInventoryHasTool(airEntityId, toolEntityId, 0);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
+    assertInventoryHasEntity(airEntityId, toolEntityId, 0);
     assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 1, "Wrong number of occupied inventory slots");
     assertEq(Inventory.lengthOccupiedSlots(airEntityId), 0, "Wrong number of occupied inventory slots");
   }
@@ -225,7 +225,7 @@ contract InventoryTest is DustTest {
     ObjectType toolObjectType = ObjectTypes.WoodenPick;
     TestInventoryUtils.addObject(airEntityId, objectObjectType, numToPickup);
     EntityId toolEntityId = TestInventoryUtils.addEntity(airEntityId, toolObjectType);
-    assertInventoryHasTool(airEntityId, toolEntityId, 1);
+    assertInventoryHasEntity(airEntityId, toolEntityId, 1);
     assertInventoryHasObject(aliceEntityId, toolObjectType, 0);
     assertInventoryHasObject(airEntityId, objectObjectType, numToPickup);
 
@@ -241,7 +241,7 @@ contract InventoryTest is DustTest {
 
     assertInventoryHasObject(aliceEntityId, objectObjectType, numToPickup);
     assertInventoryHasObject(airEntityId, objectObjectType, 0);
-    assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
     assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 2, "Wrong number of occupied inventory slots");
     assertEq(Inventory.lengthOccupiedSlots(airEntityId), 0, "Wrong number of occupied inventory slots");
   }
@@ -258,8 +258,8 @@ contract InventoryTest is DustTest {
     EntityId toolEntityId1 = TestInventoryUtils.addEntity(airEntityId, toolObjectType1);
     ObjectType toolObjectType2 = ObjectTypes.WoodenAxe;
     EntityId toolEntityId2 = TestInventoryUtils.addEntity(airEntityId, toolObjectType2);
-    assertInventoryHasTool(airEntityId, toolEntityId1, 1);
-    assertInventoryHasTool(airEntityId, toolEntityId2, 1);
+    assertInventoryHasEntity(airEntityId, toolEntityId1, 1);
+    assertInventoryHasEntity(airEntityId, toolEntityId2, 1);
     assertInventoryHasObject(airEntityId, objectObjectType, numToPickup);
 
     vm.prank(alice);
@@ -269,10 +269,10 @@ contract InventoryTest is DustTest {
 
     assertInventoryHasObject(aliceEntityId, objectObjectType, numToPickup);
     assertInventoryHasObject(airEntityId, objectObjectType, 0);
-    assertInventoryHasTool(aliceEntityId, toolEntityId1, 1);
-    assertInventoryHasTool(airEntityId, toolEntityId1, 0);
-    assertInventoryHasTool(aliceEntityId, toolEntityId2, 1);
-    assertInventoryHasTool(airEntityId, toolEntityId2, 0);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId1, 1);
+    assertInventoryHasEntity(airEntityId, toolEntityId1, 0);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId2, 1);
+    assertInventoryHasEntity(airEntityId, toolEntityId2, 0);
     assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 3, "Wrong number of occupied inventory slots");
     assertEq(Inventory.lengthOccupiedSlots(airEntityId), 0, "Wrong number of occupied inventory slots");
   }
@@ -671,5 +671,29 @@ contract InventoryTest is DustTest {
     assertInventoryHasObject(aliceEntityId, itemType, totalAmount);
     assertEq(InventorySlot.get(aliceEntityId, 0).amount, totalAmount - transferAmount, "Wrong amount in source slot");
     assertEq(InventorySlot.get(aliceEntityId, 1).amount, transferAmount, "Wrong amount in destination slot");
+  }
+
+  function testInventoryStackingLimits() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    // Test stacking up to the limit (99 for most items)
+    ObjectType stackableType = ObjectTypes.Dirt;
+    uint16 maxStack = stackableType.getStackable();
+
+    // First add max stack amount
+    TestInventoryUtils.addObject(aliceEntityId, stackableType, maxStack);
+    assertInventoryHasObject(aliceEntityId, stackableType, maxStack);
+    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 1, "Should only have one occupied slot");
+
+    // Try to add one more - should go to a new slot
+    TestInventoryUtils.addObject(aliceEntityId, stackableType, 1);
+    assertInventoryHasObject(aliceEntityId, stackableType, maxStack + 1);
+    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 2, "Should now have two occupied slots");
+
+    // Check slot distribution
+    assertEq(InventorySlot.getObjectType(aliceEntityId, 0), stackableType, "First slot type mismatch");
+    assertEq(InventorySlot.getAmount(aliceEntityId, 0), maxStack, "First slot amount mismatch");
+    assertEq(InventorySlot.getObjectType(aliceEntityId, 1), stackableType, "Second slot type mismatch");
+    assertEq(InventorySlot.getAmount(aliceEntityId, 1), 1, "Second slot amount mismatch");
   }
 }

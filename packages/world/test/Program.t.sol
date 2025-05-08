@@ -40,7 +40,7 @@ contract TestProgram is System {
   }
 
   fallback() external {
-    require(!shouldRevert, "Mining not allowed by program");
+    require(!shouldRevert, "Not allowed by program");
   }
 }
 
@@ -141,5 +141,74 @@ contract ProgramTest is DustTest {
     // Verify first program is still attached
     ProgramId attachedProgram = EntityProgram.getProgram(chestEntityId);
     assertEq(attachedProgram.unwrap(), programId1.unwrap(), "Original program was changed");
+  }
+
+  function testProgram_AttachToNonSmartEntity() public {
+    // Setup player and non-smart entity (Grass)
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    Vec3 grassCoord = playerCoord + vec3(0, 0, 1);
+    EntityId grassEntityId = setObjectAtCoord(grassCoord, ObjectTypes.Grass);
+
+    // Create program
+    TestProgram program = new TestProgram();
+    ResourceId namespaceId = WorldResourceIdLib.encodeNamespace("nonSmartTest");
+    ResourceId programSystemId = WorldResourceIdLib.encode(RESOURCE_SYSTEM, "nonSmartTest", "programName");
+    world.registerNamespace(namespaceId);
+    world.registerSystem(programSystemId, program, false);
+    world.transferOwnership(namespaceId, address(0));
+    ProgramId programId = ProgramId.wrap(programSystemId.unwrap());
+
+    // Try to attach program to non-smart entity - should fail
+    vm.prank(alice);
+    vm.expectRevert("Can only attach programs to smart entities");
+    world.attachProgram(aliceEntityId, grassEntityId, programId, "");
+  }
+
+  function testProgramCallbackHookFails() public {
+    // Setup player and chest
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
+    EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
+
+    // Create failing program
+    TestProgram program = new TestProgram();
+    program.setShouldRevert(true); // Set the program to revert
+    ResourceId namespaceId = WorldResourceIdLib.encodeNamespace("hookFailTest");
+    ResourceId programSystemId = WorldResourceIdLib.encode(RESOURCE_SYSTEM, "hookFailTest", "programName");
+    world.registerNamespace(namespaceId);
+    world.registerSystem(programSystemId, program, false);
+    world.transferOwnership(namespaceId, address(0));
+    ProgramId programId = ProgramId.wrap(programSystemId.unwrap());
+
+    // Try to attach program that will fail in onAttachProgram hook
+    vm.prank(alice);
+    vm.expectRevert("Not allowed by program");
+    world.attachProgram(aliceEntityId, chestEntityId, programId, "");
+  }
+
+  function testProgramDetachWorksIfNoEnergy() public {
+    // Setup player and chest
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
+    EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
+
+    // Create a force field with no energy
+    Vec3 forceFieldCoord = playerCoord + vec3(2, 0, 0);
+    setupForceField(forceFieldCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 0, drainRate: 0 }));
+
+    // Create and attach a program to the chest
+    TestProgram program = new TestProgram();
+    attachTestProgram(chestEntityId, program, "gasLimitTest");
+
+    program.setShouldRevert(true); // Program would revert normally
+
+    // Detach program from within force field with no energy
+    // Should succeed despite reverting program because it uses safe gas limit and regular call
+    vm.prank(alice);
+    world.detachProgram(aliceEntityId, chestEntityId, "");
+
+    // Verify program is detached
+    ProgramId attachedProgram = EntityProgram.getProgram(chestEntityId);
+    assertEq(attachedProgram.unwrap(), bytes32(0), "Program was not detached");
   }
 }

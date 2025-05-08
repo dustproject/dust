@@ -14,6 +14,9 @@ import { EntityId } from "../src/EntityId.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
+
+import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
+import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest, console } from "./DustTest.sol";
 
@@ -37,7 +40,7 @@ contract TestSpawnProgram is System {
 
 contract SpawnTest is DustTest {
   function testRandomSpawn() public {
-    uint256 blockNumber = block.number - 5;
+    uint256 blockNumber = vm.getBlockNumber() - 5;
     address alice = vm.randomAddress();
 
     // Explore chunk at (0, 0, 0)
@@ -46,10 +49,7 @@ contract SpawnTest is DustTest {
     Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice);
 
     // Set below entity to dirt so gravity doesn't apply
-    EntityId belowEntityId = randomEntityId();
-    Vec3 belowCoord = spawnCoord - vec3(0, 1, 0);
-    ReversePosition.set(belowCoord, belowEntityId);
-    EntityObjectType.set(belowEntityId, ObjectTypes.Dirt);
+    EntityId belowEntityId = setObjectAtCoord(spawnCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
@@ -58,16 +58,18 @@ contract SpawnTest is DustTest {
     vm.prank(alice);
     EntityId playerEntityId = world.randomSpawn(blockNumber, 0);
     assertTrue(playerEntityId.exists());
+
+    assertEq(Energy.getEnergy(playerEntityId), MAX_PLAYER_ENERGY / 2, "Player energy is not correct after random spawn");
   }
 
   function testRandomSpawnInMaintainance() public {
     WorldStatus.setInMaintenance(true);
     vm.expectRevert("DUST is in maintenance mode. Try again later");
-    world.randomSpawn(block.number, 0);
+    world.randomSpawn(vm.getBlockNumber(), 0);
   }
 
   function testRandomSpawnFailsDueToOldBlock() public {
-    uint256 pastBlock = block.number - 11;
+    uint256 pastBlock = vm.getBlockNumber() - 11;
     int32 y = 1;
     vm.expectRevert("Can only choose past 10 blocks");
     world.randomSpawn(pastBlock, y);
@@ -81,9 +83,8 @@ contract SpawnTest is DustTest {
     setupAirChunk(spawnCoord);
 
     // Set forcefield
-    EntityId forceFieldEntityId = setupForceField(spawnTileCoord);
-    Energy.set(
-      forceFieldEntityId,
+    EntityId forceFieldEntityId = setupForceField(
+      spawnTileCoord,
       EnergyData({
         energy: MAX_PLAYER_ENERGY,
         lastUpdatedTime: uint128(block.timestamp),
@@ -92,10 +93,7 @@ contract SpawnTest is DustTest {
     );
 
     // Set below entity to spawn tile
-    EntityId spawnTileEntityId = randomEntityId();
-    Position.set(spawnTileEntityId, spawnTileCoord);
-    ReversePosition.set(spawnTileCoord, spawnTileEntityId);
-    EntityObjectType.set(spawnTileEntityId, ObjectTypes.SpawnTile);
+    EntityId spawnTileEntityId = setObjectAtCoord(spawnTileCoord, ObjectTypes.SpawnTile);
 
     TestSpawnProgram program = new TestSpawnProgram();
     bytes14 namespace = "programNS";
@@ -139,10 +137,7 @@ contract SpawnTest is DustTest {
     setupForceField(spawnTileCoord);
 
     // Set Far away entity to spawn tile
-    EntityId spawnTileEntityId = randomEntityId();
-    Position.set(spawnTileEntityId, spawnTileCoord);
-    ReversePosition.set(spawnTileCoord, spawnTileEntityId);
-    EntityObjectType.set(spawnTileEntityId, ObjectTypes.SpawnTile);
+    EntityId spawnTileEntityId = setObjectAtCoord(spawnTileCoord, ObjectTypes.SpawnTile);
 
     vm.prank(alice);
     vm.expectRevert("Spawn tile is too far away");
@@ -157,10 +152,7 @@ contract SpawnTest is DustTest {
     setupAirChunk(spawnCoord);
 
     // Set below entity to spawn tile (no forcefield)
-    EntityId spawnTileEntityId = randomEntityId();
-    Position.set(spawnTileEntityId, spawnTileCoord);
-    ReversePosition.set(spawnTileCoord, spawnTileEntityId);
-    EntityObjectType.set(spawnTileEntityId, ObjectTypes.SpawnTile);
+    EntityId spawnTileEntityId = setObjectAtCoord(spawnTileCoord, ObjectTypes.SpawnTile);
 
     vm.prank(alice);
     vm.expectRevert("Spawn tile is not inside a forcefield");
@@ -178,10 +170,7 @@ contract SpawnTest is DustTest {
     setupForceField(spawnTileCoord);
 
     // Set below entity to spawn tile
-    EntityId spawnTileEntityId = randomEntityId();
-    Position.set(spawnTileEntityId, spawnTileCoord);
-    ReversePosition.set(spawnTileCoord, spawnTileEntityId);
-    EntityObjectType.set(spawnTileEntityId, ObjectTypes.SpawnTile);
+    EntityId spawnTileEntityId = setObjectAtCoord(spawnTileCoord, ObjectTypes.SpawnTile);
 
     vm.prank(alice);
     vm.expectRevert("Not enough energy in spawn tile forcefield");
@@ -210,10 +199,7 @@ contract SpawnTest is DustTest {
     );
 
     // Set below entity to spawn tile
-    EntityId spawnTileEntityId = randomEntityId();
-    Position.set(spawnTileEntityId, spawnTileCoord);
-    ReversePosition.set(spawnTileCoord, spawnTileEntityId);
-    EntityObjectType.set(spawnTileEntityId, ObjectTypes.SpawnTile);
+    EntityId spawnTileEntityId = setObjectAtCoord(spawnTileCoord, ObjectTypes.SpawnTile);
 
     // Spawn player
     vm.prank(alice);
@@ -241,10 +227,7 @@ contract SpawnTest is DustTest {
     );
 
     // Set below entity to spawn tile
-    EntityId spawnTileEntityId = randomEntityId();
-    Position.set(spawnTileEntityId, spawnTileCoord);
-    ReversePosition.set(spawnTileCoord, spawnTileEntityId);
-    EntityObjectType.set(spawnTileEntityId, ObjectTypes.SpawnTile);
+    EntityId spawnTileEntityId = setObjectAtCoord(spawnTileCoord, ObjectTypes.SpawnTile);
 
     // Spawn player should fail as the player has energy
     vm.prank(alice);
@@ -259,15 +242,12 @@ contract SpawnTest is DustTest {
     // Drain energy from player
     vm.warp(vm.getBlockTimestamp() + (MAX_PLAYER_ENERGY / PLAYER_ENERGY_DRAIN_RATE) + 1);
 
-    uint256 blockNumber = block.number - 5;
+    uint256 blockNumber = vm.getBlockNumber() - 5;
 
     Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice);
 
     // Set below entity to dirt so gravity doesn't apply
-    EntityId belowEntityId = randomEntityId();
-    Vec3 belowCoord = spawnCoord - vec3(0, 1, 0);
-    ReversePosition.set(belowCoord, belowEntityId);
-    EntityObjectType.set(belowEntityId, ObjectTypes.Dirt);
+    EntityId belowEntityId = setObjectAtCoord(spawnCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
@@ -282,15 +262,12 @@ contract SpawnTest is DustTest {
     // This should setup a player with energy
     (address alice,,) = setupAirChunkWithPlayer();
 
-    uint256 blockNumber = block.number - 5;
+    uint256 blockNumber = vm.getBlockNumber() - 5;
 
     Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice);
 
     // Set below entity to dirt so gravity doesn't apply
-    EntityId belowEntityId = randomEntityId();
-    Vec3 belowCoord = spawnCoord - vec3(0, 1, 0);
-    ReversePosition.set(belowCoord, belowEntityId);
-    EntityObjectType.set(belowEntityId, ObjectTypes.Dirt);
+    setObjectAtCoord(spawnCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
@@ -300,5 +277,71 @@ contract SpawnTest is DustTest {
     vm.prank(alice);
     vm.expectRevert("Player already spawned");
     world.randomSpawn(blockNumber, 0);
+  }
+
+  function testSpawnRespawn() public {
+    // Set up player and spawn tile
+    address alice = vm.randomAddress();
+    Vec3 spawnCoord = vec3(0, 1, 0);
+    Vec3 spawnTileCoord = spawnCoord - vec3(0, 1, 0);
+
+    setupAirChunk(spawnCoord);
+
+    // Set below entity to spawn tile
+    EntityId spawnTileEntityId = setObjectAtCoord(spawnTileCoord, ObjectTypes.SpawnTile);
+
+    // Set forcefield with energy
+    EntityId forceFieldEntityId = setupForceField(spawnTileCoord);
+    Energy.set(
+      forceFieldEntityId,
+      EnergyData({
+        energy: MAX_PLAYER_ENERGY,
+        lastUpdatedTime: uint128(block.timestamp),
+        drainRate: MACHINE_ENERGY_DRAIN_RATE
+      })
+    );
+
+    // Create original player
+    vm.prank(alice);
+    EntityId playerEntityId = world.spawn(spawnTileEntityId, spawnCoord, 1, "");
+    assertTrue(playerEntityId.exists());
+
+    // Kill player by depleting energy
+    vm.warp(vm.getBlockTimestamp() + 1);
+
+    // Player should be able to respawn
+    vm.prank(alice);
+    EntityId respawnedPlayerId = world.spawn(spawnTileEntityId, spawnCoord, 1, "");
+    assertEq(respawnedPlayerId, playerEntityId, "Player's entity Id is different after respawn");
+  }
+
+  function testSpawnOccupiedCoordinateFromSpawnTile() public {
+    address alice = vm.randomAddress();
+    address bob = vm.randomAddress();
+
+    Vec3 spawnCoord = vec3(0, 2, 0);
+    Vec3 spawnTileCoord = spawnCoord - vec3(0, 1, 0);
+    Vec3 forceFieldCoord = spawnTileCoord - vec3(0, 1, 0);
+
+    setupAirChunk(spawnCoord);
+
+    // Set forcefield with energy
+    setupForceField(
+      forceFieldCoord,
+      EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: MAX_PLAYER_ENERGY, drainRate: 0 })
+    );
+
+    // Set spawn tile
+    EntityId spawnTileEntityId = setObjectAtCoord(spawnTileCoord, ObjectTypes.SpawnTile);
+
+    // First player spawns
+    vm.prank(alice);
+    EntityId aliceEntityId = world.spawn(spawnTileEntityId, spawnCoord, 1, "");
+    assertTrue(aliceEntityId.exists());
+
+    // Second player tries to spawn at the same coordinates
+    vm.prank(bob);
+    vm.expectRevert("Cannot spawn on a non-passable block");
+    world.spawn(spawnTileEntityId, spawnCoord, 1, "");
   }
 }

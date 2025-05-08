@@ -85,6 +85,16 @@ library TestInventoryUtils {
     return entityId;
   }
 
+  function addEntityToSlot(EntityId ownerEntityId, ObjectType toolObjectType, uint16 slot)
+    public
+    asWorld
+    returns (EntityId)
+  {
+    EntityId entityId = createEntity(toolObjectType);
+    InventoryUtils.addEntityToSlot(ownerEntityId, entityId, slot);
+    return entityId;
+  }
+
   function removeFromInventory(EntityId ownerEntityId, ObjectType objectType, uint16 numObjectsToRemove) public asWorld {
     InventoryUtils.removeObject(ownerEntityId, objectType, numObjectsToRemove);
   }
