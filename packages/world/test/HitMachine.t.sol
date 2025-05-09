@@ -3,7 +3,7 @@ pragma solidity >=0.8.24;
 
 import { console } from "forge-std/console.sol";
 
-import { HIT_ENERGY_COST, WHACKER_MULTIPLIER } from "../src/Constants.sol";
+import { HIT_ENERGY_COST, SPECIALIZED_ORE_TOOL_MULTIPLIER } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../src/ObjectType.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
@@ -90,7 +90,7 @@ contract HitMachineTest is DustTest {
 
     // Check energy reduction with whacker multiplier
     uint128 massReduction = whackerMass / 10;
-    uint128 energyReduction = HIT_ENERGY_COST + massReduction * WHACKER_MULTIPLIER;
+    uint128 energyReduction = HIT_ENERGY_COST + massReduction * SPECIALIZED_ORE_TOOL_MULTIPLIER;
     assertEq(Energy.getEnergy(forceField), forceFieldEnergy - energyReduction);
     assertEq(Energy.getEnergy(aliceEntityId), aliceEnergy - HIT_ENERGY_COST);
 

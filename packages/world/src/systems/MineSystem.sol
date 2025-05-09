@@ -44,12 +44,13 @@ import { DeathNotification, MineNotification, notify } from "../utils/NotifUtils
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import {
-  AXE_MULTIPLIER,
-  DEFAULT_TOOL_MULTIPLIER,
+  DEFAULT_ORE_TOOL_MULTIPLIER,
+  DEFAULT_WOODEN_TOOL_MULTIPLIER,
   MINE_ENERGY_COST,
-  PICK_MULTIPLIER,
   PLAYER_ENERGY_DRAIN_RATE,
-  SAFE_PROGRAM_GAS
+  SAFE_PROGRAM_GAS,
+  SPECIALIZED_ORE_TOOL_MULTIPLIER,
+  SPECIALIZED_WOODEN_TOOL_MULTIPLIER
 } from "../Constants.sol";
 
 import { EntityId } from "../EntityId.sol";
@@ -272,15 +273,13 @@ contract MineSystem is System {
       return 1;
     }
 
-    if (toolType.isAxe() && minedType.hasAxeMultiplier()) {
-      return AXE_MULTIPLIER;
+    bool isWoodenTool = toolType == ObjectTypes.WoodenAxe || toolType == ObjectTypes.WoodenPick;
+
+    if ((toolType.isAxe() && minedType.hasAxeMultiplier()) || (toolType.isPick() && minedType.hasPickMultiplier())) {
+      return isWoodenTool ? SPECIALIZED_WOODEN_TOOL_MULTIPLIER : SPECIALIZED_ORE_TOOL_MULTIPLIER;
     }
 
-    if (toolType.isPick() && minedType.hasPickMultiplier()) {
-      return PICK_MULTIPLIER;
-    }
-
-    return DEFAULT_TOOL_MULTIPLIER;
+    return isWoodenTool ? DEFAULT_WOODEN_TOOL_MULTIPLIER : DEFAULT_ORE_TOOL_MULTIPLIER;
   }
 
   function _getCallerEnergyReduction(uint128 currentEnergy, uint128 mineMassReduction, uint128 massLeft)

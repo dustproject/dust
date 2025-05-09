@@ -26,9 +26,16 @@ import { Math } from "../utils/Math.sol";
 import { HitMachineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
-import { DEFAULT_TOOL_MULTIPLIER, HIT_ENERGY_COST, SAFE_PROGRAM_GAS, WHACKER_MULTIPLIER } from "../Constants.sol";
+import {
+  DEFAULT_ORE_TOOL_MULTIPLIER,
+  DEFAULT_WOODEN_TOOL_MULTIPLIER,
+  HIT_ENERGY_COST,
+  SAFE_PROGRAM_GAS,
+  SPECIALIZED_ORE_TOOL_MULTIPLIER,
+  SPECIALIZED_WOODEN_TOOL_MULTIPLIER
+} from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
-import { ObjectType } from "../ObjectType.sol";
+import { ObjectType, ObjectTypes } from "../ObjectType.sol";
 import { ProgramId } from "../ProgramId.sol";
 import { IHitHook } from "../ProgramInterfaces.sol";
 import { Vec3 } from "../Vec3.sol";
@@ -99,10 +106,12 @@ contract HitMachineSystem is System {
       return 1;
     }
 
+    bool isWoodenTool = toolType == ObjectTypes.WoodenWhacker;
+
     if (toolType.isWhacker()) {
-      return WHACKER_MULTIPLIER;
+      return isWoodenTool ? SPECIALIZED_WOODEN_TOOL_MULTIPLIER : SPECIALIZED_ORE_TOOL_MULTIPLIER;
     }
 
-    return DEFAULT_TOOL_MULTIPLIER;
+    return isWoodenTool ? DEFAULT_WOODEN_TOOL_MULTIPLIER : DEFAULT_ORE_TOOL_MULTIPLIER;
   }
 }
