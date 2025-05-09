@@ -140,7 +140,7 @@ contract CraftTest is DustTest {
     inputTypes[1] = ObjectTypes.IronBar;
     uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 30;
-    inputAmounts[1] = 5;
+    inputAmounts[1] = 1;
     ObjectType[] memory outputTypes = new ObjectType[](1);
     outputTypes[0] = ObjectTypes.ForceField;
     uint16[] memory outputAmounts = new uint16[](1);
@@ -433,7 +433,7 @@ contract CraftTest is DustTest {
     inputTypes[1] = ObjectTypes.IronBar;
     uint16[] memory inputAmounts = new uint16[](2);
     inputAmounts[0] = 30;
-    inputAmounts[1] = 5;
+    inputAmounts[1] = 1;
     ObjectType[] memory outputTypes = new ObjectType[](1);
     outputTypes[0] = ObjectTypes.ForceField;
     uint16[] memory outputAmounts = new uint16[](1);
