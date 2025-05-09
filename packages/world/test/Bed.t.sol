@@ -8,9 +8,10 @@ import { WorldContextConsumer } from "@latticexyz/world/src/WorldContext.sol";
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
-import { TestEnergyUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestEnergyUtils, TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 import { BedPlayer, BedPlayerData } from "../src/codegen/tables/BedPlayer.sol";
+import { Fragment } from "../src/codegen/tables/Fragment.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
@@ -72,9 +73,9 @@ contract BedTest is DustTest {
       bedCoord, EnergyData({ energy: 1000, lastUpdatedTime: initialTimestamp, drainRate: MACHINE_ENERGY_DRAIN_RATE })
     );
 
-    EntityId bedEntityId = createBed(bedCoord);
+    (EntityId forceField, EntityId fragment) = TestForceFieldUtils.getForceField(bedCoord);
 
-    attachTestProgram(bedEntityId);
+    EntityId bedEntityId = createBed(bedCoord);
 
     vm.prank(alice);
     world.sleep(aliceEntityId, bedEntityId, "");
@@ -86,6 +87,8 @@ contract BedTest is DustTest {
     assertEq(
       PlayerBed.getBedEntityId(aliceEntityId).unwrap(), bedEntityId.unwrap(), "Player's bed entity is not the bed"
     );
+    assertEq(Fragment.getExtraDrainRate(fragment), PLAYER_ENERGY_DRAIN_RATE);
+    assertEq(Energy.getDrainRate(forceField), MACHINE_ENERGY_DRAIN_RATE + PLAYER_ENERGY_DRAIN_RATE);
   }
 
   function testSleepFailsIfNoBed() public {
@@ -146,12 +149,21 @@ contract BedTest is DustTest {
       })
     );
 
+    EntityId fragment = TestForceFieldUtils.getFragmentAt(bedCoord.toFragmentCoord());
+
+    assertEq(Fragment.getExtraDrainRate(fragment), 0);
+
     EntityId bedEntityId = createBed(bedCoord);
+
+    // Building a bed does not increase the drain rate
+    assertEq(Fragment.getExtraDrainRate(fragment), 0);
 
     attachTestProgram(bedEntityId);
 
     vm.prank(alice);
     world.sleep(aliceEntityId, bedEntityId, "");
+
+    assertEq(Fragment.getExtraDrainRate(fragment), PLAYER_ENERGY_DRAIN_RATE);
 
     uint128 timeDelta = 1000 seconds;
     vm.warp(vm.getBlockTimestamp() + timeDelta);
@@ -170,6 +182,7 @@ contract BedTest is DustTest {
     assertEq(ffEnergyData.drainRate, MACHINE_ENERGY_DRAIN_RATE, "Forcefield drain rate was not restored");
 
     assertEq(Energy.getEnergy(aliceEntityId), initialPlayerEnergy, "Player energy was drained while sleeping");
+    assertEq(Fragment.getExtraDrainRate(fragment), 0);
   }
 
   function testWakeupWithDepletedForcefield() public {

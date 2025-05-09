@@ -15,12 +15,14 @@ import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { EntityProgram } from "../src/codegen/tables/EntityProgram.sol";
+
+import { Fragment } from "../src/codegen/tables/Fragment.sol";
 import { Machine } from "../src/codegen/tables/Machine.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 import { DustTest, console } from "./DustTest.sol";
 
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
-import { EntityPosition, ReverseTerrainPosition } from "../src/utils/Vec3Storage.sol";
+import { EntityPosition, ReverseFragmentPosition, ReverseTerrainPosition } from "../src/utils/Vec3Storage.sol";
 
 import { FRAGMENT_SIZE, MACHINE_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
@@ -38,7 +40,6 @@ contract TestForceFieldProgram is System {
 
   function validateProgram(EntityId, EntityId, EntityId, ProgramId, bytes memory) external view {
     require(!revertOnValidateProgram, "Not allowed by forcefield");
-    // Function is now empty since we use vm.expectCall to verify it was called with correct parameters
   }
 
   function onBuild(EntityId, EntityId, ObjectType, Vec3, bytes memory) external view {
@@ -80,7 +81,6 @@ contract TestFragmentProgram is System {
 
   function validateProgram(EntityId, EntityId, EntityId, ProgramId, bytes memory) external view {
     require(!revertOnValidateProgram, "Not allowed by forcefield fragment");
-    // Function is now empty since we use vm.expectCall to verify it was called with correct parameters
   }
 
   function onBuild(EntityId, EntityId, ObjectType, Vec3, bytes memory) external view {
@@ -435,6 +435,8 @@ contract ForceFieldTest is DustTest {
     world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, newFragmentCoord, "");
     endGasReport();
 
+    EntityId fragment = TestForceFieldUtils.getFragmentAt(newFragmentCoord);
+
     // Verify that the energy drain rate has increased
     EnergyData memory afterEnergyData = Energy.get(forceFieldEntityId);
     assertEq(
@@ -448,6 +450,8 @@ contract ForceFieldTest is DustTest {
       TestForceFieldUtils.isFragment(forceFieldEntityId, newFragmentCoord),
       "Force field fragment not found at coordinate"
     );
+    assertEq(Fragment.getForceField(fragment), forceFieldEntityId, "Fragment does not belong to the force field");
+    assertEq(Fragment.getForceFieldCreatedAt(fragment), vm.getBlockTimestamp(), "Fragment created at wrong time");
   }
 
   function testRemoveFragment() public {
@@ -1637,5 +1641,135 @@ contract ForceFieldTest is DustTest {
     vm.prank(alice);
     vm.expectRevert("Not allowed by forcefield");
     world.attachProgram(aliceEntityId, chestEntityId, ProgramId.wrap(programSystemId.unwrap()), "");
+  }
+
+  function testAddFragmentWithExtraDrainRate() public {
+    // Set up a flat chunk with a player
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    EnergyData memory initialEnergyData =
+      EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 });
+
+    // Set up a force field with energy
+    Vec3 forceFieldCoord = playerCoord + vec3(2, 0, 0);
+    EntityId forceFieldEntityId = setupForceField(forceFieldCoord, initialEnergyData);
+
+    // Define expansion area
+    Vec3 refFragmentCoord = forceFieldCoord.toFragmentCoord();
+    Vec3 newFragmentCoord = refFragmentCoord + vec3(1, 0, 0);
+
+    EntityId fragment = TestForceFieldUtils.getOrCreateFragmentAt(newFragmentCoord);
+
+    // Set extraDrainRate
+    uint128 extraDrainRate = 1;
+    Fragment.setExtraDrainRate(fragment, extraDrainRate);
+
+    // Expand the force field
+    vm.prank(alice);
+    world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, newFragmentCoord, "");
+
+    // Verify that the energy drain rate has increased
+    EnergyData memory afterEnergyData = Energy.get(forceFieldEntityId);
+    assertEq(
+      afterEnergyData.drainRate,
+      initialEnergyData.drainRate + MACHINE_ENERGY_DRAIN_RATE + extraDrainRate,
+      "Energy drain rate did not increase correctly"
+    );
+
+    // Verify that each new fragment exists
+    assertTrue(
+      TestForceFieldUtils.isFragment(forceFieldEntityId, newFragmentCoord),
+      "Force field fragment not found at coordinate"
+    );
+  }
+
+  function testRemoveFragmentWithExtraDrainRate() public {
+    // Set up a flat chunk with a player
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    EnergyData memory initialEnergyData =
+      EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 });
+
+    // Set up a force field with energy
+    Vec3 forceFieldCoord = playerCoord + vec3(2, 0, 0);
+    EntityId forceFieldEntityId = setupForceField(forceFieldCoord, initialEnergyData);
+
+    // Define expansion area
+    Vec3 refFragmentCoord = forceFieldCoord.toFragmentCoord();
+    Vec3 newFragmentCoord = refFragmentCoord + vec3(1, 0, 0);
+
+    EntityId fragment = TestForceFieldUtils.getOrCreateFragmentAt(newFragmentCoord);
+
+    // Set extraDrainRate
+    uint128 extraDrainRate = 1;
+    Fragment.setExtraDrainRate(fragment, extraDrainRate);
+
+    // Expand the force field
+    vm.startPrank(alice);
+    world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, newFragmentCoord, "");
+
+    uint8[] memory boundaryIdx = new uint8[](1);
+    boundaryIdx[0] = 0;
+    uint8[] memory parents = new uint8[](1);
+    parents[0] = 0;
+
+    world.removeFragment(aliceEntityId, forceFieldEntityId, newFragmentCoord, boundaryIdx, parents, "");
+    vm.stopPrank();
+
+    // Verify that the energy drain rate has increased
+    EnergyData memory afterEnergyData = Energy.get(forceFieldEntityId);
+    assertEq(afterEnergyData.drainRate, initialEnergyData.drainRate, "Energy drain rate did not reset correctly");
+
+    assertFalse(
+      TestForceFieldUtils.isFragment(forceFieldEntityId, newFragmentCoord),
+      "Force field fragment is still part of the forceField"
+    );
+  }
+
+  function testFragmentOnMineNotExecutedIfNotInForceField() public {
+    // Set up a flat chunk with a player
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    EntityId fragment = TestForceFieldUtils.getOrCreateFragmentAt(playerCoord.toFragmentCoord());
+
+    TestFragmentProgram program = new TestFragmentProgram();
+    attachTestProgram(fragment, program);
+    program.setRevertOnMine(true);
+
+    // Mine a block within the fragment's area
+    Vec3 mineCoord = playerCoord + vec3(1, 0, 0);
+
+    ObjectType mineObjectType = ObjectTypes.Grass;
+    ObjectPhysics.setMass(mineObjectType, playerHandMassReduction - 1);
+    EntityId mineEntityId = setObjectAtCoord(mineCoord, mineObjectType);
+
+    vm.prank(alice);
+    world.mine(aliceEntityId, mineCoord, "");
+    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
+  }
+
+  function testFragmentOnBuildNotExecutedIfNotInForceField() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    EntityId fragment = TestForceFieldUtils.getOrCreateFragmentAt(playerCoord.toFragmentCoord());
+
+    TestFragmentProgram program = new TestFragmentProgram();
+    attachTestProgram(fragment, program);
+    program.setRevertOnBuild(true);
+
+    // Build a block within the fragment's area
+    Vec3 buildCoord = playerCoord + vec3(1, 0, 0);
+
+    ObjectType buildObjectType = ObjectTypes.Grass;
+    TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
+
+    uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+
+    vm.prank(alice);
+    world.build(aliceEntityId, buildCoord, inventorySlot, "");
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
+    EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Built type is not correct");
   }
 }
