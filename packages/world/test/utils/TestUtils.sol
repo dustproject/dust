@@ -184,6 +184,14 @@ library TestForceFieldUtils {
     return ForceFieldUtils.getForceField(coord);
   }
 
+  function getOrCreateFragmentAt(Vec3 fragmentCoord) public asWorld returns (EntityId) {
+    return ForceFieldUtils.getOrCreateFragmentAt(fragmentCoord);
+  }
+
+  function getFragmentAt(Vec3 fragmentCoord) public asWorld returns (EntityId) {
+    return ForceFieldUtils.getFragmentAt(fragmentCoord);
+  }
+
   function setupForceField(EntityId forceField, Vec3 coord) public asWorld {
     ForceFieldUtils.setupForceField(forceField, coord);
   }
