@@ -199,6 +199,26 @@ contract InventoryUtilsTest is DustTest {
     }
   }
 
+  function testSwapEntities() public {
+    (, EntityId alice) = createTestPlayer(vec3(1, 1, 1));
+
+    TestInventoryUtils.addEntity(alice, ObjectTypes.CopperAxe);
+    TestInventoryUtils.addEntity(alice, ObjectTypes.CopperAxe);
+
+    SlotTransfer[] memory transfers = new SlotTransfer[](1);
+    transfers[0] = SlotTransfer({ slotFrom: 0, slotTo: 1, amount: 1 });
+
+    TestInventoryUtils.transfer(alice, alice, transfers);
+
+    uint16[] memory slots = Inventory.getOccupiedSlots(alice);
+    assertEq(slots.length, 2);
+    // verify indexes were updated by _replaceSlot
+    for (uint256 i; i < slots.length; ++i) {
+      InventorySlotData memory sd = InventorySlot.get(alice, slots[i]);
+      assertEq(i, sd.occupiedIndex, "index mismatch after swap");
+    }
+  }
+
   function testPartialStackAddsOneSlot() public {
     (, EntityId alice) = createTestPlayer(vec3(2, 0, 0));
 
@@ -296,7 +316,7 @@ contract InventoryUtilsTest is DustTest {
     Mass.setMass(entityId, 1);
 
     // Use tool with mass reduction ≥ 1
-    TestInventoryUtils.useTool(alice, vec3(0, 0, 0), 0, 5);
+    TestInventoryUtils.useTool(alice, 0, 5);
 
     assertEq(Inventory.lengthOccupiedSlots(alice), 0, "slot not recycled");
     assertEq(InventoryTypeSlots.length(alice, ObjectTypes.Null), 1, "slot not in Null list");

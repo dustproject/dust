@@ -9,12 +9,12 @@ import { InventoryTypeSlots } from "../codegen/tables/InventoryTypeSlots.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 
-import { ObjectAmount, ObjectType, ObjectTypes } from "../ObjectType.sol";
+import { burnToolEnergy } from "../utils/EnergyUtils.sol";
+import { Math } from "../utils/Math.sol";
 
 import { EntityId } from "../EntityId.sol";
 import { NatureLib } from "../NatureLib.sol";
-import { burnToolEnergy } from "../utils/EnergyUtils.sol";
-
+import { ObjectAmount, ObjectType, ObjectTypes } from "../ObjectType.sol";
 import { Vec3 } from "../Vec3.sol";
 
 struct SlotTransfer {
@@ -40,46 +40,52 @@ struct ToolData {
   ObjectType toolType;
   uint16 slot;
   uint128 massLeft;
-  uint128 maxUseMass;
 }
 
 library InventoryUtils {
   function getToolData(EntityId owner, uint16 slot) public view returns (ToolData memory) {
     EntityId tool = InventorySlot._getEntityId(owner, slot);
     if (!tool.exists()) {
-      return ToolData(owner, tool, ObjectTypes.Null, slot, 0, 0);
+      return ToolData(owner, tool, ObjectTypes.Null, slot, 0);
     }
 
     ObjectType toolType = EntityObjectType._get(tool);
     require(toolType.isTool(), "Inventory item is not a tool");
 
-    uint128 maxMass = ObjectPhysics._getMass(toolType);
-    uint128 maxUsePerCall = maxMass / 10; // Limit to 10% of max mass per use
-
-    return ToolData(owner, tool, toolType, slot, Mass._getMass(tool), maxUsePerCall);
+    return ToolData(owner, tool, toolType, slot, Mass._getMass(tool));
   }
 
-  function useTool(EntityId owner, Vec3 ownerCoord, uint16 slot, uint128 useMassMax)
-    public
-    returns (ObjectType toolType)
-  {
+  function useTool(EntityId owner, uint16 slot, uint128 useMassMax) public returns (ObjectType toolType) {
     ToolData memory toolData = getToolData(owner, slot);
 
-    uint128 massReduction = toolData.getMassReduction(useMassMax);
-    applyMassReduction(toolData, ownerCoord, massReduction);
+    (, uint128 toolMassReduction) = toolData.getMassReduction(useMassMax, 1);
+    reduceMass(toolData, toolMassReduction);
     return toolData.toolType;
   }
 
-  function getMassReduction(ToolData memory toolData, uint128 useMassMax) internal pure returns (uint128) {
-    uint128 massReduction = useMassMax > toolData.maxUseMass ? toolData.maxUseMass : useMassMax;
-    if (toolData.massLeft <= massReduction) {
-      return toolData.massLeft;
+  function getMassReduction(ToolData memory toolData, uint128 massLeft, uint128 multiplier)
+    internal
+    view
+    returns (uint128, uint128)
+  {
+    if (toolData.toolType.isNull()) {
+      return (0, 0);
     }
 
-    return massReduction;
+    uint128 toolMass = ObjectPhysics._getMass(toolData.toolType);
+
+    // Limit to 10% of max mass per use
+    uint128 maxToolMassReduction = Math.min(toolMass / 10, toolData.massLeft);
+
+    uint128 massReduction = Math.min(maxToolMassReduction * multiplier, massLeft);
+
+    // Reverse operation to get the proportional tool mass reduction
+    uint128 toolMassReduction = massReduction / multiplier;
+
+    return (massReduction, toolMassReduction);
   }
 
-  function applyMassReduction(ToolData memory toolData, Vec3 ownerCoord, uint128 massReduction) public {
+  function reduceMass(ToolData memory toolData, uint128 massReduction) public {
     if (!toolData.tool.exists()) {
       return;
     }
@@ -90,7 +96,7 @@ library InventoryUtils {
       // Destroy tool
       removeEntityFromSlot(toolData.owner, toolData.slot);
       NatureLib.burnOres(toolData.toolType);
-      burnToolEnergy(toolData.toolType, ownerCoord);
+      burnToolEnergy(toolData.toolType, toolData.owner.getPosition());
     } else {
       Mass._setMass(toolData.tool, toolData.massLeft - massReduction);
     }
@@ -272,9 +278,12 @@ library InventoryUtils {
 
       InventorySlotData memory destSlot = InventorySlot._get(to, slotTo);
 
-      // Handle slot swaps (transferring all to an existing slot with a different type)
-      if (amount == sourceSlot.amount && sourceSlot.objectType != destSlot.objectType && !destSlot.objectType.isNull())
-      {
+      // Can only stack if the two slots hold the same objectType and don't go over the limit
+      bool isSameType = sourceSlot.objectType == destSlot.objectType;
+      bool canStack = isSameType && sourceSlot.amount + destSlot.amount <= sourceSlot.objectType.getStackable();
+
+      // Handle slot swaps (transferring all to an existing slot)
+      if (amount == sourceSlot.amount && !destSlot.objectType.isNull() && !canStack) {
         toSlotData[toSlotDataLength++] = SlotData(destSlot.entityId, destSlot.objectType, destSlot.amount);
 
         _replaceSlot(from, slotFrom, sourceSlot.objectType, destSlot.entityId, destSlot.objectType, destSlot.amount);
@@ -283,10 +292,7 @@ library InventoryUtils {
         continue;
       }
 
-      require(
-        destSlot.objectType.isNull() || destSlot.objectType == sourceSlot.objectType,
-        "Cannot store different object types in the same slot"
-      );
+      require(destSlot.objectType.isNull() || isSameType, "Cannot store different object types in the same slot");
 
       // If transferring within the same inventory, create the corresponding withdrawal
       if (from == to) {
@@ -412,7 +418,7 @@ library InventoryUtils {
     } else {
       slot = Inventory._getNextSlot(owner);
       uint16 maxSlots = EntityObjectType._get(owner).getMaxInventorySlots();
-      require(slot < maxSlots, "All slots used");
+      require(slot < maxSlots, "Inventory is full");
       Inventory._setNextSlot(owner, slot + 1);
     }
 

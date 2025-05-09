@@ -85,6 +85,16 @@ library TestInventoryUtils {
     return entityId;
   }
 
+  function addEntityToSlot(EntityId ownerEntityId, ObjectType toolObjectType, uint16 slot)
+    public
+    asWorld
+    returns (EntityId)
+  {
+    EntityId entityId = createEntity(toolObjectType);
+    InventoryUtils.addEntityToSlot(ownerEntityId, entityId, slot);
+    return entityId;
+  }
+
   function removeFromInventory(EntityId ownerEntityId, ObjectType objectType, uint16 numObjectsToRemove) public asWorld {
     InventoryUtils.removeObject(ownerEntityId, objectType, numObjectsToRemove);
   }
@@ -109,8 +119,8 @@ library TestInventoryUtils {
     InventoryUtils.removeObjectFromSlot(ownerEntityId, slot, numObjectsToRemove);
   }
 
-  function useTool(EntityId owner, Vec3 ownerCoord, uint16 slot, uint128 useMassMax) public asWorld {
-    InventoryUtils.useTool(owner, ownerCoord, slot, useMassMax);
+  function useTool(EntityId owner, uint16 slot, uint128 useMassMax) public asWorld {
+    InventoryUtils.useTool(owner, slot, useMassMax);
   }
 
   function getEntitySlot(EntityId owner, EntityId entityId) public asWorld returns (uint16) {

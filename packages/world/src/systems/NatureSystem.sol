@@ -32,7 +32,7 @@ contract NatureSystem is System {
     caller.activate();
 
     Vec3 callerChunkCoord = caller.getPosition().toChunkCoord();
-    require(callerChunkCoord.inSurroundingCube(chunkCoord, CHUNK_COMMIT_HALF_WIDTH), "Not in commit range");
+    require(callerChunkCoord.inSurroundingCube(chunkCoord, CHUNK_COMMIT_HALF_WIDTH), "Entity is too far to commit");
 
     // Check existing commitment
     uint256 commitment = ChunkCommitment._get(chunkCoord);

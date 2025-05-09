@@ -11,6 +11,7 @@ import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
+import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 import { Player } from "../src/codegen/tables/Player.sol";
 
@@ -19,7 +20,7 @@ import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 
-import { MovablePosition, Position, ReverseMovablePosition, ReversePosition } from "../src/utils/Vec3Storage.sol";
+import { Position, ReversePosition } from "../src/utils/Vec3Storage.sol";
 
 import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
@@ -110,8 +111,8 @@ contract InventoryTest is DustTest {
 
     airEntityId = ReversePosition.get(dropCoord);
     assertTrue(airEntityId.exists(), "Drop entity does not exist");
-    assertInventoryHasTool(aliceEntityId, toolEntityId, 0);
-    assertInventoryHasTool(airEntityId, toolEntityId, 1);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId, 0);
+    assertInventoryHasEntity(airEntityId, toolEntityId, 1);
     assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Wrong number of occupied inventory slots");
     assertEq(Inventory.lengthOccupiedSlots(airEntityId), 1, "Wrong number of occupied inventory slots");
   }
@@ -135,8 +136,8 @@ contract InventoryTest is DustTest {
     world.drop(aliceEntityId, drops, dropCoord);
     endGasReport();
 
-    assertInventoryHasTool(aliceEntityId, toolEntityId, 0);
-    assertInventoryHasTool(airEntityId, toolEntityId, 1);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId, 0);
+    assertInventoryHasEntity(airEntityId, toolEntityId, 1);
     assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Wrong number of occupied inventory slots");
     assertEq(Inventory.lengthOccupiedSlots(airEntityId), 1, "Wrong number of occupied inventory slots");
   }
@@ -208,8 +209,8 @@ contract InventoryTest is DustTest {
     world.pickup(aliceEntityId, pickup, pickupCoord);
     endGasReport();
 
-    assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
-    assertInventoryHasTool(airEntityId, toolEntityId, 0);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
+    assertInventoryHasEntity(airEntityId, toolEntityId, 0);
     assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 1, "Wrong number of occupied inventory slots");
     assertEq(Inventory.lengthOccupiedSlots(airEntityId), 0, "Wrong number of occupied inventory slots");
   }
@@ -224,7 +225,7 @@ contract InventoryTest is DustTest {
     ObjectType toolObjectType = ObjectTypes.WoodenPick;
     TestInventoryUtils.addObject(airEntityId, objectObjectType, numToPickup);
     EntityId toolEntityId = TestInventoryUtils.addEntity(airEntityId, toolObjectType);
-    assertInventoryHasTool(airEntityId, toolEntityId, 1);
+    assertInventoryHasEntity(airEntityId, toolEntityId, 1);
     assertInventoryHasObject(aliceEntityId, toolObjectType, 0);
     assertInventoryHasObject(airEntityId, objectObjectType, numToPickup);
 
@@ -240,7 +241,7 @@ contract InventoryTest is DustTest {
 
     assertInventoryHasObject(aliceEntityId, objectObjectType, numToPickup);
     assertInventoryHasObject(airEntityId, objectObjectType, 0);
-    assertInventoryHasTool(aliceEntityId, toolEntityId, 1);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
     assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 2, "Wrong number of occupied inventory slots");
     assertEq(Inventory.lengthOccupiedSlots(airEntityId), 0, "Wrong number of occupied inventory slots");
   }
@@ -257,8 +258,8 @@ contract InventoryTest is DustTest {
     EntityId toolEntityId1 = TestInventoryUtils.addEntity(airEntityId, toolObjectType1);
     ObjectType toolObjectType2 = ObjectTypes.WoodenAxe;
     EntityId toolEntityId2 = TestInventoryUtils.addEntity(airEntityId, toolObjectType2);
-    assertInventoryHasTool(airEntityId, toolEntityId1, 1);
-    assertInventoryHasTool(airEntityId, toolEntityId2, 1);
+    assertInventoryHasEntity(airEntityId, toolEntityId1, 1);
+    assertInventoryHasEntity(airEntityId, toolEntityId2, 1);
     assertInventoryHasObject(airEntityId, objectObjectType, numToPickup);
 
     vm.prank(alice);
@@ -268,10 +269,10 @@ contract InventoryTest is DustTest {
 
     assertInventoryHasObject(aliceEntityId, objectObjectType, numToPickup);
     assertInventoryHasObject(airEntityId, objectObjectType, 0);
-    assertInventoryHasTool(aliceEntityId, toolEntityId1, 1);
-    assertInventoryHasTool(airEntityId, toolEntityId1, 0);
-    assertInventoryHasTool(aliceEntityId, toolEntityId2, 1);
-    assertInventoryHasTool(airEntityId, toolEntityId2, 0);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId1, 1);
+    assertInventoryHasEntity(airEntityId, toolEntityId1, 0);
+    assertInventoryHasEntity(aliceEntityId, toolEntityId2, 1);
+    assertInventoryHasEntity(airEntityId, toolEntityId2, 0);
     assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 3, "Wrong number of occupied inventory slots");
     assertEq(Inventory.lengthOccupiedSlots(airEntityId), 0, "Wrong number of occupied inventory slots");
   }
@@ -348,7 +349,7 @@ contract InventoryTest is DustTest {
     );
 
     vm.prank(alice);
-    vm.expectRevert("All slots used");
+    vm.expectRevert("Inventory is full");
     world.pickupAll(aliceEntityId, pickupCoord);
   }
 
@@ -572,5 +573,127 @@ contract InventoryTest is DustTest {
     vm.prank(alice);
     vm.expectRevert("Player is sleeping");
     world.drop(aliceEntityId, drops, dropCoord);
+  }
+
+  function testInventorySlotManagement() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    // Add different types of items to test slot management
+    ObjectType[] memory itemTypes = new ObjectType[](3);
+    itemTypes[0] = ObjectTypes.Grass;
+    itemTypes[1] = ObjectTypes.Dirt;
+    itemTypes[2] = ObjectTypes.Stone;
+
+    // Add items to inventory
+    for (uint256 i = 0; i < itemTypes.length; i++) {
+      TestInventoryUtils.addObject(aliceEntityId, itemTypes[i], 10);
+    }
+
+    // Check that each item is in its own slot
+    for (uint256 i = 0; i < itemTypes.length; i++) {
+      assertInventoryHasObject(aliceEntityId, itemTypes[i], 10);
+    }
+
+    // Check total occupied slots
+    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), itemTypes.length, "Wrong number of occupied slots");
+
+    // Remove items and check slot cleanup
+    for (uint256 i = 0; i < itemTypes.length; i++) {
+      TestInventoryUtils.removeObject(aliceEntityId, itemTypes[i], 10);
+      assertInventoryHasObject(aliceEntityId, itemTypes[i], 0);
+    }
+
+    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Slots should be empty after removal");
+  }
+
+  function testItemStacking() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    // Add same item type multiple times
+    ObjectType itemType = ObjectTypes.Grass;
+    uint16 amount1 = 5;
+    uint16 amount2 = 7;
+
+    TestInventoryUtils.addObject(aliceEntityId, itemType, amount1);
+    TestInventoryUtils.addObject(aliceEntityId, itemType, amount2);
+
+    // Check that items are stacked
+    assertInventoryHasObject(aliceEntityId, itemType, amount1 + amount2);
+    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 1, "Items should be in same slot");
+
+    // Remove partial stack
+    uint16 removeAmount = 3;
+    TestInventoryUtils.removeObject(aliceEntityId, itemType, removeAmount);
+    assertInventoryHasObject(aliceEntityId, itemType, amount1 + amount2 - removeAmount);
+  }
+
+  function testInventoryLimits() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    // Get max slots from player inventory type
+    uint16 maxSlots = ObjectTypes.Player.getMaxInventorySlots();
+
+    // Add full stacks of same item type to fill inventory
+    // Each stack of 99 will go into a new slot
+    for (uint256 i = 0; i < maxSlots; i++) {
+      TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Grass, 99);
+      assertInventoryHasObject(aliceEntityId, ObjectTypes.Grass, 99 * uint16(i + 1));
+    }
+
+    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), maxSlots, "Should have filled all slots");
+
+    // Try to add one more item
+    vm.expectRevert("Inventory is full");
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Diamond, 1);
+
+    // Remove a stack and verify we can add a new item
+    TestInventoryUtils.removeObject(aliceEntityId, ObjectTypes.Grass, 99);
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Diamond, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Diamond, 1);
+  }
+
+  function testTransferPartialStack() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    // Add items to Alice's inventory
+    ObjectType itemType = ObjectTypes.Grass;
+    uint16 totalAmount = 10;
+    uint16 transferAmount = 4;
+    TestInventoryUtils.addObject(aliceEntityId, itemType, totalAmount);
+
+    SlotTransfer[] memory transfers = new SlotTransfer[](1);
+    transfers[0] = SlotTransfer({ slotFrom: 0, slotTo: 1, amount: transferAmount });
+
+    vm.prank(alice);
+    world.transfer(aliceEntityId, aliceEntityId, aliceEntityId, transfers, "");
+
+    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 2, "Wrong number of occupied slots after transfer");
+    assertInventoryHasObject(aliceEntityId, itemType, totalAmount);
+    assertEq(InventorySlot.get(aliceEntityId, 0).amount, totalAmount - transferAmount, "Wrong amount in source slot");
+    assertEq(InventorySlot.get(aliceEntityId, 1).amount, transferAmount, "Wrong amount in destination slot");
+  }
+
+  function testInventoryStackingLimits() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    // Test stacking up to the limit (99 for most items)
+    ObjectType stackableType = ObjectTypes.Dirt;
+    uint16 maxStack = stackableType.getStackable();
+
+    // First add max stack amount
+    TestInventoryUtils.addObject(aliceEntityId, stackableType, maxStack);
+    assertInventoryHasObject(aliceEntityId, stackableType, maxStack);
+    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 1, "Should only have one occupied slot");
+
+    // Try to add one more - should go to a new slot
+    TestInventoryUtils.addObject(aliceEntityId, stackableType, 1);
+    assertInventoryHasObject(aliceEntityId, stackableType, maxStack + 1);
+    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 2, "Should now have two occupied slots");
+
+    // Check slot distribution
+    assertEq(InventorySlot.getObjectType(aliceEntityId, 0), stackableType, "First slot type mismatch");
+    assertEq(InventorySlot.getAmount(aliceEntityId, 0), maxStack, "First slot amount mismatch");
+    assertEq(InventorySlot.getObjectType(aliceEntityId, 1), stackableType, "Second slot type mismatch");
+    assertEq(InventorySlot.getAmount(aliceEntityId, 1), 1, "Second slot amount mismatch");
   }
 }

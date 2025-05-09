@@ -16,9 +16,12 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { Position } from "../utils/Vec3Storage.sol";
 
+import { SAFE_PROGRAM_GAS } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
+
 import { ObjectType } from "../ObjectType.sol";
 import { ObjectTypes } from "../ObjectType.sol";
+import { ProgramId } from "../ProgramId.sol";
 import { IAddFragmentHook, IRemoveFragmentHook } from "../ProgramInterfaces.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
 
@@ -118,7 +121,7 @@ contract ForceFieldSystem is System {
     bytes memory onAddFragment =
       abi.encodeCall(IAddFragmentHook.onAddFragment, (caller, forceField, fragment, extraData));
 
-    forceField.getProgram().callOrRevert(onAddFragment);
+    _callForceFieldHook(forceField, onAddFragment);
 
     notify(caller, AddFragmentNotification({ forceField: forceField }));
   }
@@ -164,8 +167,22 @@ contract ForceFieldSystem is System {
     bytes memory onRemoveFragment =
       abi.encodeCall(IRemoveFragmentHook.onRemoveFragment, (caller, forceField, fragment, extraData));
 
-    forceField.getProgram().callOrRevert(onRemoveFragment);
+    _callForceFieldHook(forceField, onRemoveFragment);
 
     notify(caller, RemoveFragmentNotification({ forceField: forceField }));
+  }
+
+  function _callForceFieldHook(EntityId forceField, bytes memory hook) private {
+    ProgramId program = forceField.getProgram();
+    if (!program.exists()) {
+      return;
+    }
+
+    (EnergyData memory machineData,) = updateMachineEnergy(forceField);
+    if (machineData.energy > 0) {
+      program.callOrRevert(hook);
+    } else {
+      program.call({ gas: SAFE_PROGRAM_GAS, hook: hook });
+    }
   }
 }

@@ -43,6 +43,7 @@ import { IWorld } from "../src/codegen/world/IWorld.sol";
 
 abstract contract DustAssertions is MudTest, GasReporter {
   struct EnergyDataSnapshot {
+    EntityId playerEntityId;
     uint128 playerEnergy;
     uint128 localPoolEnergy;
     uint128 forceFieldEnergy;
@@ -100,12 +101,12 @@ abstract contract DustAssertions is MudTest, GasReporter {
     assertEq(actualAmount, amount, "Inventory object amount is not correct");
   }
 
-  function assertInventoryHasTool(EntityId owner, EntityId toolEntityId, uint16 amount) internal view {
-    uint16[] memory slots = InventoryTypeSlots.get(owner, EntityObjectType.get(toolEntityId));
+  function assertInventoryHasEntity(EntityId owner, EntityId entityId, uint16 amount) internal view {
+    uint16[] memory slots = InventoryTypeSlots.get(owner, EntityObjectType.get(entityId));
     bool found;
     if (slots.length > 0) {
       for (uint256 i; i < slots.length; i++) {
-        if (toolEntityId == InventorySlot.getEntityId(owner, slots[i])) {
+        if (entityId == InventorySlot.getEntityId(owner, slots[i])) {
           found = true;
           break;
         }
@@ -115,12 +116,11 @@ abstract contract DustAssertions is MudTest, GasReporter {
     assertEq(found ? 1 : 0, amount, "Inventory entity doesn't match");
   }
 
-  function getEnergyDataSnapshot(EntityId playerEntityId, Vec3 snapshotCoord)
-    internal
-    returns (EnergyDataSnapshot memory)
-  {
+  function getEnergyDataSnapshot(EntityId playerEntityId) internal returns (EnergyDataSnapshot memory) {
     EnergyDataSnapshot memory snapshot;
+    snapshot.playerEntityId = playerEntityId;
     snapshot.playerEnergy = Energy.getEnergy(playerEntityId);
+    Vec3 snapshotCoord = MovablePosition.get(playerEntityId);
     Vec3 shardCoord = snapshotCoord.toLocalEnergyPoolShardCoord();
     snapshot.localPoolEnergy = LocalEnergyPool.get(shardCoord);
     (EntityId forceFieldEntityId,) = TestForceFieldUtils.getForceField(snapshotCoord);
@@ -128,14 +128,15 @@ abstract contract DustAssertions is MudTest, GasReporter {
     return snapshot;
   }
 
-  function assertEnergyFlowedFromPlayerToLocalPool(
-    EnergyDataSnapshot memory beforeEnergyDataSnapshot,
-    EnergyDataSnapshot memory afterEnergyDataSnapshot
-  ) internal pure returns (uint128 playerEnergyLost) {
-    playerEnergyLost = beforeEnergyDataSnapshot.playerEnergy - afterEnergyDataSnapshot.playerEnergy;
+  function assertEnergyFlowedFromPlayerToLocalPool(EnergyDataSnapshot memory previousSnapshot)
+    internal
+    returns (uint128 playerEnergyLost)
+  {
+    EnergyDataSnapshot memory currentSnapshot = getEnergyDataSnapshot(previousSnapshot.playerEntityId);
+    playerEnergyLost = previousSnapshot.playerEnergy - currentSnapshot.playerEnergy;
     assertGt(playerEnergyLost, 0, "Player energy did not decrease");
-    uint128 localPoolEnergyGained = afterEnergyDataSnapshot.localPoolEnergy - beforeEnergyDataSnapshot.localPoolEnergy;
-    assertEq(localPoolEnergyGained, playerEnergyLost, "Local pool energy did not gain energy");
+    uint128 localPoolEnergyGained = currentSnapshot.localPoolEnergy - previousSnapshot.localPoolEnergy;
+    assertEq(localPoolEnergyGained, playerEnergyLost, "Local pool energy did not gain all the player's energy");
   }
 
   function assertPlayerIsDead(EntityId player, Vec3 playerCoord) internal view {

@@ -34,6 +34,7 @@ contract TestForceFieldProgram is System {
   bool revertOnValidateProgram;
   bool revertOnBuild;
   bool revertOnMine;
+  bool revertOnRemoveFragment;
 
   function validateProgram(EntityId, EntityId, EntityId, ProgramId, bytes memory) external view {
     require(!revertOnValidateProgram, "Not allowed by forcefield");
@@ -48,6 +49,10 @@ contract TestForceFieldProgram is System {
     require(!revertOnMine, "Not allowed by forcefield");
   }
 
+  function onRemoveFragment(EntityId, EntityId, EntityId, bytes memory) external {
+    require(!revertOnRemoveFragment, "Not allowed by forcefield");
+  }
+
   function setRevertOnBuild(bool _revertOnBuild) external {
     revertOnBuild = _revertOnBuild;
   }
@@ -58,6 +63,10 @@ contract TestForceFieldProgram is System {
 
   function setRevertOnValidateProgram(bool _revert) external {
     revertOnValidateProgram = _revert;
+  }
+
+  function setRevertOnRemoveFragment(bool _revert) external {
+    revertOnRemoveFragment = _revert;
   }
 
   fallback() external { }
@@ -1460,5 +1469,174 @@ contract ForceFieldTest is DustTest {
         "Non-identity permutation with valid parents should be valid"
       );
     }
+  }
+
+  function testForceFieldProgramCallbackInteractions() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Setup force field
+    Vec3 forceFieldCoord = playerCoord + vec3(2, 0, 0);
+    Vec3 refFragmentCoord = forceFieldCoord.toFragmentCoord();
+    EntityId forceFieldEntityId = setupForceField(
+      forceFieldCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 0 })
+    );
+
+    // Create and attach a program to the force field
+    TestForceFieldProgram program = new TestForceFieldProgram();
+    attachTestProgram(forceFieldEntityId, program);
+
+    // Add fragment normally
+    Vec3 fragment1Coord = refFragmentCoord + vec3(1, 0, 0);
+    vm.prank(alice);
+    world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, fragment1Coord, "");
+
+    // Create another fragment for testing
+    Vec3 fragment2Coord = refFragmentCoord + vec3(0, 1, 0);
+    vm.prank(alice);
+    world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, fragment2Coord, "");
+
+    // Create a third fragment
+    Vec3 fragment3Coord = refFragmentCoord + vec3(0, 0, 1);
+    vm.prank(alice);
+    world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, fragment3Coord, "");
+
+    // Prepare spanning tree for fragment2 removal
+    uint8[] memory boundaryIdx = new uint8[](3);
+    boundaryIdx[0] = 1;
+    boundaryIdx[1] = 0;
+    boundaryIdx[2] = 2;
+
+    uint8[] memory parents = new uint8[](3);
+    parents[0] = 0;
+    parents[1] = 0;
+    parents[2] = 1;
+
+    // Set the program to revert on removal
+    program.setRevertOnRemoveFragment(true);
+
+    // Try to remove fragment2 - should fail due to program
+    vm.prank(alice);
+    vm.expectRevert("Not allowed by forcefield");
+    world.removeFragment(aliceEntityId, forceFieldEntityId, fragment2Coord, boundaryIdx, parents, "");
+
+    // Turn off the forcefield energy
+    Energy.setEnergy(forceFieldEntityId, 0);
+
+    // Should now be able to remove fragment even with the program set to revert
+    vm.prank(alice);
+    world.removeFragment(aliceEntityId, forceFieldEntityId, fragment2Coord, boundaryIdx, parents, "");
+
+    // Verify fragment was removed
+    // Check if fragment is no longer part of the forcefield
+    bool isFragment = TestForceFieldUtils.isFragment(forceFieldEntityId, fragment2Coord);
+    assertFalse(isFragment, "Fragment should be removed");
+  }
+
+  function testForceFieldRemoveFragmentWithFragmentedBoundary() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Setup force field
+    Vec3 forceFieldCoord = playerCoord + vec3(2, 0, 0);
+    Vec3 refFragmentCoord = forceFieldCoord.toFragmentCoord();
+    EntityId forceField = setupForceField(
+      forceFieldCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 0 })
+    );
+
+    // Create a line of fragments (forceField - frag1 - frag2)
+    Vec3 fragment1Coord = refFragmentCoord + vec3(1, 0, 0);
+    Vec3 fragment2Coord = refFragmentCoord + vec3(1, 0, 1);
+
+    vm.startPrank(alice);
+    world.addFragment(aliceEntityId, forceField, refFragmentCoord, fragment1Coord, "");
+    world.addFragment(aliceEntityId, forceField, fragment1Coord, fragment2Coord, "");
+    vm.stopPrank();
+
+    // Try to remove the middle fragment (fragment1)
+    // This would disconnect fragment2 from the forcefield
+    uint8[] memory boundaryIdx = new uint8[](2);
+    boundaryIdx[0] = 0; // forceField
+    boundaryIdx[1] = 1; // fragment2
+
+    uint8[] memory parents = new uint8[](2);
+    parents[0] = 0;
+    parents[1] = 0;
+
+    // This should fail because fragment2 is not actually a boundary of fragment1
+    vm.prank(alice);
+    vm.expectRevert("Invalid spanning tree");
+    world.removeFragment(aliceEntityId, forceField, fragment1Coord, boundaryIdx, parents, "");
+
+    // But we should be able to remove the last fragment (fragment2)
+    uint8[] memory boundaryIdx2 = new uint8[](2);
+    boundaryIdx2[0] = 0; // fragment1
+    boundaryIdx2[1] = 1; // forceField
+
+    uint8[] memory parents2 = new uint8[](2);
+    parents2[0] = 0;
+    parents2[0] = 0;
+
+    Vec3[] memory boundary = world.computeBoundaryFragments(forceField, fragment2Coord);
+    assertEq(boundary.length, 2, "Wrong number of fragments in boundary");
+    for (uint8 i = 0; i < boundary.length; i++) {
+      assertTrue(TestForceFieldUtils.isFragment(forceField, boundary[i]), "Boundary should be a fragment");
+    }
+    assertEq(boundary[0], fragment1Coord, "Wrong boundary");
+    assertEq(boundary[1], refFragmentCoord, "Wrong boundary");
+
+    vm.prank(alice);
+    world.removeFragment(aliceEntityId, forceField, fragment2Coord, boundaryIdx2, parents2, "");
+
+    // Verify fragment2 was removed
+    assertFalse(TestForceFieldUtils.isFragment(forceField, fragment2Coord), "Fragment should be removed");
+  }
+
+  function testProgramValidatorHierarchySelection() public {
+    // Setup player
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    // Create force field
+    Vec3 forceFieldCoord = playerCoord + vec3(2, 0, 0);
+    setupForceField(
+      forceFieldCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 0 })
+    );
+
+    // Get the fragment
+    (EntityId forceField, EntityId fragment) = TestForceFieldUtils.getForceField(forceFieldCoord);
+
+    // Create chest in force field area
+    Vec3 chestCoord = forceFieldCoord + vec3(1, 0, 0);
+    EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
+
+    // Create and attach validator program to fragment
+    TestFragmentProgram fragmentProgram = new TestFragmentProgram();
+    fragmentProgram.setRevertOnValidateProgram(true); // Fragment will reject programs
+    attachTestProgram(fragment, fragmentProgram);
+
+    // Create the chest program
+    TestChestProgram chestProgram = new TestChestProgram();
+    bytes14 namespace = bytes14(vm.randomBytes(14));
+    ResourceId namespaceId = WorldResourceIdLib.encodeNamespace(namespace);
+    ResourceId programSystemId = WorldResourceIdLib.encode(RESOURCE_SYSTEM, namespace, "programName");
+    world.registerNamespace(namespaceId);
+    world.registerSystem(programSystemId, chestProgram, false);
+
+    // Try to attach program - should be rejected by fragment validator
+    vm.prank(alice);
+    vm.expectRevert("Not allowed by forcefield fragment");
+    world.attachProgram(aliceEntityId, chestEntityId, ProgramId.wrap(programSystemId.unwrap()), "");
+
+    // Detach fragment program
+    vm.prank(alice);
+    world.detachProgram(aliceEntityId, fragment, "");
+
+    // Create and attach validator program to main force field
+    TestForceFieldProgram forceFieldProgram = new TestForceFieldProgram();
+    forceFieldProgram.setRevertOnValidateProgram(true); // Force field will reject programs too
+    attachTestProgram(forceField, forceFieldProgram);
+
+    // Try to attach program again - should be rejected by force field validator
+    vm.prank(alice);
+    vm.expectRevert("Not allowed by forcefield");
+    world.attachProgram(aliceEntityId, chestEntityId, ProgramId.wrap(programSystemId.unwrap()), "");
   }
 }
