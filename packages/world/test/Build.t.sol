@@ -20,11 +20,7 @@ import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 
 import {
-  EntityPosition,
-  EntityPosition,
-  LocalEnergyPool,
-  ReverseMovablePosition,
-  ReverseTerrainPosition
+  EntityPosition, LocalEnergyPool, ReverseMovablePosition, ReverseTerrainPosition
 } from "../src/utils/Vec3Storage.sol";
 
 import { BUILD_ENERGY_COST, CHUNK_SIZE, MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "../src/Constants.sol";

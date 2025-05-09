@@ -25,11 +25,7 @@ import { ReversePlayer } from "../src/codegen/tables/ReversePlayer.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 
 import {
-  EntityPosition,
-  EntityPosition,
-  LocalEnergyPool,
-  ReverseMovablePosition,
-  ReverseTerrainPosition
+  EntityPosition, LocalEnergyPool, ReverseMovablePosition, ReverseTerrainPosition
 } from "../src/utils/Vec3Storage.sol";
 
 import { EntityId } from "../src/EntityId.sol";

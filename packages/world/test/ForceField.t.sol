@@ -121,7 +121,6 @@ contract ForceFieldTest is DustTest {
     Vec3 coord;
     // Handle force field fragments differently than regular entities
     if (EntityObjectType.get(entityId) == ObjectTypes.Fragment) {
-      // For fragments, we need to use EntityPosition instead of EntityPosition
       coord = EntityPosition.get(entityId).fromFragmentCoord();
     } else {
       coord = EntityPosition.get(entityId) - vec3(1, 0, 0);
