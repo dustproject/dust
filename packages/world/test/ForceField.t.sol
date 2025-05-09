@@ -1675,9 +1675,7 @@ contract ForceFieldTest is DustTest {
 
     // Expand the force field
     vm.prank(alice);
-    startGasReport("Add single fragment");
     world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, newFragmentCoord, "");
-    endGasReport();
 
     // Verify that the energy drain rate has increased
     EnergyData memory afterEnergyData = Energy.get(forceFieldEntityId);
@@ -1691,6 +1689,49 @@ contract ForceFieldTest is DustTest {
     assertTrue(
       TestForceFieldUtils.isFragment(forceFieldEntityId, newFragmentCoord),
       "Force field fragment not found at coordinate"
+    );
+  }
+
+  function testRemoveFragmentWithExtraDrainRate() public {
+    // Set up a flat chunk with a player
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    EnergyData memory initialEnergyData =
+      EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 });
+
+    // Set up a force field with energy
+    Vec3 forceFieldCoord = playerCoord + vec3(2, 0, 0);
+    EntityId forceFieldEntityId = setupForceField(forceFieldCoord, initialEnergyData);
+
+    // Define expansion area
+    Vec3 refFragmentCoord = forceFieldCoord.toFragmentCoord();
+    Vec3 newFragmentCoord = refFragmentCoord + vec3(1, 0, 0);
+
+    EntityId fragment = TestForceFieldUtils.getOrCreateFragmentAt(newFragmentCoord);
+
+    // Set extraDrainRate
+    uint128 extraDrainRate = 1;
+    Fragment.setExtraDrainRate(fragment, extraDrainRate);
+
+    // Expand the force field
+    vm.startPrank(alice);
+    world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, newFragmentCoord, "");
+
+    uint8[] memory boundaryIdx = new uint8[](1);
+    boundaryIdx[0] = 0;
+    uint8[] memory parents = new uint8[](1);
+    parents[0] = 0;
+
+    world.removeFragment(aliceEntityId, forceFieldEntityId, newFragmentCoord, boundaryIdx, parents, "");
+    vm.stopPrank();
+
+    // Verify that the energy drain rate has increased
+    EnergyData memory afterEnergyData = Energy.get(forceFieldEntityId);
+    assertEq(afterEnergyData.drainRate, initialEnergyData.drainRate, "Energy drain rate did not reset correctly");
+
+    assertFalse(
+      TestForceFieldUtils.isFragment(forceFieldEntityId, newFragmentCoord),
+      "Force field fragment is still part of the forceField"
     );
   }
 }
