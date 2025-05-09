@@ -291,10 +291,7 @@ library InventoryUtils {
         continue;
       }
 
-      require(
-        destSlot.objectType.isNull() || destSlot.objectType == sourceSlot.objectType,
-        "Cannot store different object types in the same slot"
-      );
+      require(destSlot.objectType.isNull() || isSameType, "Cannot store different object types in the same slot");
 
       // If transferring within the same inventory, create the corresponding withdrawal
       if (from == to) {
