@@ -40,7 +40,6 @@ contract TestForceFieldProgram is System {
 
   function validateProgram(EntityId, EntityId, EntityId, ProgramId, bytes memory) external view {
     require(!revertOnValidateProgram, "Not allowed by forcefield");
-    // Function is now empty since we use vm.expectCall to verify it was called with correct parameters
   }
 
   function onBuild(EntityId, EntityId, ObjectType, Vec3, bytes memory) external view {
@@ -82,7 +81,6 @@ contract TestFragmentProgram is System {
 
   function validateProgram(EntityId, EntityId, EntityId, ProgramId, bytes memory) external view {
     require(!revertOnValidateProgram, "Not allowed by forcefield fragment");
-    // Function is now empty since we use vm.expectCall to verify it was called with correct parameters
   }
 
   function onBuild(EntityId, EntityId, ObjectType, Vec3, bytes memory) external view {
@@ -1726,5 +1724,52 @@ contract ForceFieldTest is DustTest {
       TestForceFieldUtils.isFragment(forceFieldEntityId, newFragmentCoord),
       "Force field fragment is still part of the forceField"
     );
+  }
+
+  function testFragmentOnMineNotExecutedIfNotInForceField() public {
+    // Set up a flat chunk with a player
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    EntityId fragment = TestForceFieldUtils.getOrCreateFragmentAt(playerCoord.toFragmentCoord());
+
+    TestFragmentProgram program = new TestFragmentProgram();
+    attachTestProgram(fragment, program);
+    program.setRevertOnMine(true);
+
+    // Mine a block within the fragment's area
+    Vec3 mineCoord = playerCoord + vec3(1, 0, 0);
+
+    ObjectType mineObjectType = ObjectTypes.Grass;
+    ObjectPhysics.setMass(mineObjectType, playerHandMassReduction - 1);
+    EntityId mineEntityId = setObjectAtCoord(mineCoord, mineObjectType);
+
+    vm.prank(alice);
+    world.mine(aliceEntityId, mineCoord, "");
+    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
+  }
+
+  function testFragmentOnBuildNotExecutedIfNotInForceField() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    EntityId fragment = TestForceFieldUtils.getOrCreateFragmentAt(playerCoord.toFragmentCoord());
+
+    TestFragmentProgram program = new TestFragmentProgram();
+    attachTestProgram(fragment, program);
+    program.setRevertOnBuild(true);
+
+    // Build a block within the fragment's area
+    Vec3 buildCoord = playerCoord + vec3(1, 0, 0);
+
+    ObjectType buildObjectType = ObjectTypes.Grass;
+    TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
+
+    uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+
+    vm.prank(alice);
+    world.build(aliceEntityId, buildCoord, inventorySlot, "");
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
+    EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Built type is not correct");
   }
 }
