@@ -4,7 +4,6 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 
 import { Action } from "../codegen/common.sol";
-import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { ReverseTerrainPosition } from "../utils/Vec3Storage.sol";
 
 import { EntityId } from "../EntityId.sol";
@@ -52,7 +51,7 @@ contract InventorySystem is System {
     EntityId entityId = ReverseTerrainPosition._get(coord);
     require(entityId.exists(), "No entity at pickup location");
 
-    ObjectType objectType = EntityObjectType._get(entityId);
+    ObjectType objectType = entityId.getObjectType();
     require(objectType.isPassThrough(), "Cannot pickup from a non-passable block");
 
     InventoryUtils.transfer(entityId, caller, slotTransfers);
@@ -65,7 +64,7 @@ contract InventorySystem is System {
     EntityId entityId = ReverseTerrainPosition._get(coord);
     require(entityId.exists(), "No entity at pickup location");
 
-    ObjectType objectType = EntityObjectType._get(entityId);
+    ObjectType objectType = entityId.getObjectType();
     require(objectType.isPassThrough(), "Cannot pickup from a non-passable block");
 
     InventoryUtils.transferAll(entityId, caller);

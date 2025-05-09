@@ -11,7 +11,6 @@ import { EntityId } from "../src/EntityId.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { LocalEnergyPool } from "../src/codegen/tables/LocalEnergyPool.sol";
 
-import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { EntityProgram } from "../src/codegen/tables/EntityProgram.sol";
 import { Player } from "../src/codegen/tables/Player.sol";
 

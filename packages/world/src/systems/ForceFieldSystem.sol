@@ -6,7 +6,6 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
-import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 
 import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
 
@@ -103,7 +102,7 @@ contract ForceFieldSystem is System {
     caller.activate();
     caller.requireAdjacentToFragment(fragmentCoord);
 
-    ObjectType objectType = EntityObjectType._get(forceField);
+    ObjectType objectType = forceField.getObjectType();
     require(objectType == ObjectTypes.ForceField, "Invalid object type");
 
     require(

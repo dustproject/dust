@@ -5,8 +5,6 @@ import { System } from "@latticexyz/world/src/System.sol";
 
 import { EnergyData } from "../codegen/tables/Energy.sol";
 
-import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
-
 import { InventoryUtils, SlotData, SlotTransfer } from "../utils/InventoryUtils.sol";
 import { TransferNotification, notify } from "../utils/NotifUtils.sol";
 
@@ -47,7 +45,7 @@ contract TransferSystem is System {
 
     if (target.exists()) {
       caller.requireConnected(target);
-      require(EntityObjectType._get(target) != ObjectTypes.Player, "Cannot access another player's inventory");
+      require(target.getObjectType() != ObjectTypes.Player, "Cannot access another player's inventory");
     }
 
     (SlotData[] memory fromSlotData, SlotData[] memory toSlotData) = InventoryUtils.transfer(from, to, transfers);

@@ -58,7 +58,7 @@ contract NatureSystem is System {
 
     // Check existing entity
     EntityId entityId = ReverseTerrainPosition._get(resourceCoord);
-    ObjectType objectType = EntityObjectType._get(entityId);
+    ObjectType objectType = entityId.getObjectType();
     require(objectType == ObjectTypes.Air, "Resource coordinate is not air");
     require(Inventory._lengthOccupiedSlots(entityId) == 0, "Cannot respawn where there are dropped objects");
 

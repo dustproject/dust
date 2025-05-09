@@ -4,7 +4,6 @@ pragma solidity >=0.8.24;
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
-import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Fragment } from "../codegen/tables/Fragment.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
@@ -139,7 +138,7 @@ function addEnergyToLocalPool(Vec3 coord, uint128 numToAdd) returns (uint128) {
 
 function transferEnergyToPool(EntityId entityId, uint128 amount) returns (uint128, uint128) {
   Vec3 coord = entityId.getPosition();
-  ObjectType objectType = EntityObjectType._get(entityId);
+  ObjectType objectType = entityId.getObjectType();
 
   uint128 newEntityEnergy;
   if (objectType == ObjectTypes.Player) {

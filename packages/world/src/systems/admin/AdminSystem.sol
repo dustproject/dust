@@ -6,7 +6,6 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { ROOT_NAMESPACE_ID } from "@latticexyz/world/src/constants.sol";
 
 import { Vec3, vec3 } from "../../Vec3.sol";
-import { EntityObjectType } from "../../codegen/tables/EntityObjectType.sol";
 import { Player } from "../../codegen/tables/Player.sol";
 import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
 

@@ -4,7 +4,6 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
-import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Player } from "../codegen/tables/Player.sol";
 
 import { ObjectType } from "../ObjectType.sol";
@@ -22,7 +21,7 @@ contract ActivateSystem is System {
 
     require(entityId.exists(), "Entity does not exist");
     EntityId base = entityId.baseEntityId();
-    ObjectType objectType = EntityObjectType._get(base);
+    ObjectType objectType = base.getObjectType();
     require(!objectType.isNull(), "Entity has no object type");
 
     if (objectType == ObjectTypes.Player) {
@@ -37,7 +36,7 @@ contract ActivateSystem is System {
     EntityId player = Player._get(playerAddress);
     player = player.baseEntityId();
     require(player.exists(), "Entity does not exist");
-    ObjectType objectType = EntityObjectType._get(player);
+    ObjectType objectType = player.getObjectType();
     require(objectType == ObjectTypes.Player, "Entity is not player");
     updatePlayerEnergy(player);
   }

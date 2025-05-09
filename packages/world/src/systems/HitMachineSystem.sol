@@ -6,7 +6,6 @@ import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { console } from "forge-std/console.sol";
 
-import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { LocalEnergyPool } from "../codegen/tables/LocalEnergyPool.sol";
 import { ERC165Checker } from "@latticexyz/world/src/ERC165Checker.sol";
 import { System } from "@latticexyz/world/src/System.sol";

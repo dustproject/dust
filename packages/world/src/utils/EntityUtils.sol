@@ -24,7 +24,7 @@ function getUniqueEntity() returns (EntityId) {
 /// @dev Returns ObjectTypes.Null if the chunk is not explored yet.
 function getObjectTypeAt(Vec3 coord) view returns (ObjectType) {
   EntityId entityId = ReverseTerrainPosition._get(coord);
-  return entityId.exists() ? EntityObjectType._get(entityId) : TerrainLib._getBlockType(coord);
+  return entityId.exists() ? entityId.getObjectType() : TerrainLib._getBlockType(coord);
 }
 
 /// @notice Get the object type id at a given coordinate.
@@ -42,7 +42,7 @@ function getEntityAt(Vec3 coord) view returns (EntityId, ObjectType) {
     objectType = TerrainLib._getBlockType(coord);
     require(!objectType.isNull(), "Chunk not explored yet");
   } else {
-    objectType = EntityObjectType._get(entityId);
+    objectType = entityId.getObjectType();
   }
 
   return (entityId, objectType);

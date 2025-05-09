@@ -7,7 +7,6 @@ import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
-import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Fragment } from "../codegen/tables/Fragment.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
 import { Player } from "../codegen/tables/Player.sol";
@@ -44,7 +43,7 @@ contract BedSystem is System {
 
     (Vec3 callerCoord,) = caller.requireConnected(bed);
 
-    require(EntityObjectType._get(bed) == ObjectTypes.Bed, "Not a bed");
+    require(bed.getObjectType() == ObjectTypes.Bed, "Not a bed");
 
     bed = bed.baseEntityId();
     Vec3 bedCoord = bed.getPosition();

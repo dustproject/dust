@@ -45,8 +45,7 @@ library EntityIdLib {
   }
 
   function requireCallerAllowed(EntityId self, address sender) internal view {
-    ObjectType objectType = EntityObjectType._get(self);
-    requireCallerAllowed(self, sender, objectType);
+    requireCallerAllowed(self, sender, self.getObjectType());
   }
 
   function baseEntityId(EntityId self) internal view returns (EntityId) {
@@ -110,7 +109,7 @@ library ActivateLib {
   function _activate(EntityId self, address caller, bytes4 sig) public returns (EnergyData memory) {
     checkWorldStatus();
 
-    ObjectType objectType = EntityObjectType._get(self);
+    ObjectType objectType = self.getObjectType();
     require(objectType.isActionAllowed(sig), "Action not allowed");
 
     self.requireCallerAllowed(caller, objectType);

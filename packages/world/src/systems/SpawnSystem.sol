@@ -8,7 +8,6 @@ import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
-import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { Player } from "../codegen/tables/Player.sol";
 import { ReversePlayer } from "../codegen/tables/ReversePlayer.sol";
@@ -151,7 +150,7 @@ contract SpawnSystem is System {
   {
     checkWorldStatus();
     require(spawnEnergy <= MAX_PLAYER_ENERGY, "Cannot spawn with more than max player energy");
-    ObjectType objectType = EntityObjectType._get(spawnTile);
+    ObjectType objectType = spawnTile.getObjectType();
     require(objectType == ObjectTypes.SpawnTile, "Not a spawn tile");
 
     Vec3 spawnTileCoord = spawnTile.getPosition();
