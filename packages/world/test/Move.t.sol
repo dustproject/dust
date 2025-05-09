@@ -21,11 +21,7 @@ import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 
 import {
-  LocalEnergyPool,
-  MovablePosition,
-  Position,
-  ReverseMovablePosition,
-  ReversePosition
+  EntityPosition, LocalEnergyPool, ReverseMovablePosition, ReverseTerrainPosition
 } from "../src/utils/Vec3Storage.sol";
 
 import {
@@ -48,7 +44,7 @@ import { TestInventoryUtils } from "./utils/TestUtils.sol";
 contract MoveTest is DustTest {
   function _testMoveMultipleBlocks(address player, uint8 numBlocksToMove, bool overTerrain) internal {
     EntityId playerEntityId = Player.get(player);
-    Vec3 startingCoord = MovablePosition.get(playerEntityId);
+    Vec3 startingCoord = EntityPosition.get(playerEntityId);
     Vec3[] memory newCoords = new Vec3[](numBlocksToMove);
     for (uint32 i = 0; i < numBlocksToMove; i++) {
       newCoords[i] = startingCoord + vec3(0, 0, int32(i) + 1);
@@ -75,7 +71,7 @@ contract MoveTest is DustTest {
     world.move(playerEntityId, newCoords);
     endGasReport();
 
-    Vec3 finalCoord = MovablePosition.get(playerEntityId);
+    Vec3 finalCoord = EntityPosition.get(playerEntityId);
     Vec3 aboveFinalCoord = finalCoord + vec3(0, 1, 0);
     assertEq(finalCoord, newCoords[numBlocksToMove - 1], "Player did not move to the correct coord");
     assertEq(
@@ -158,7 +154,7 @@ contract MoveTest is DustTest {
     endGasReport();
 
     // Expect the player to fall down back to the original coord
-    Vec3 finalCoord = MovablePosition.get(aliceEntityId);
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
     assertEq(finalCoord, playerCoord, "Player did not fall back to the original coord");
     Vec3 aboveFinalCoord = finalCoord + vec3(0, 1, 0);
     assertEq(
@@ -186,7 +182,7 @@ contract MoveTest is DustTest {
     world.move(aliceEntityId, newCoords);
 
     // Expect the player to fall down back after the last block
-    Vec3 finalCoord = MovablePosition.get(aliceEntityId);
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
     assertEq(finalCoord, expectedFinalCoord, "Player did not move to new coords");
     Vec3 aboveFinalCoord = finalCoord + vec3(0, 1, 0);
     assertEq(
@@ -215,7 +211,7 @@ contract MoveTest is DustTest {
     world.move(aliceEntityId, newCoords);
 
     // Expect the player to be above the grass
-    Vec3 finalCoord = MovablePosition.get(aliceEntityId);
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
     assertEq(finalCoord, grassCoord + vec3(0, 1, 0), "Player did not move to the grass coord");
     Vec3 aboveFinalCoord = finalCoord + vec3(0, 1, 0);
     assertEq(
@@ -251,7 +247,7 @@ contract MoveTest is DustTest {
     world.move(aliceEntityId, newCoords);
 
     // Expect the player to be above the grass
-    Vec3 finalCoord = MovablePosition.get(aliceEntityId);
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
     assertEq(finalCoord, grassCoord + vec3(0, 1, 0), "Player did not move to the grass coord");
     Vec3 aboveFinalCoord = finalCoord + vec3(0, 1, 0);
     assertEq(
@@ -280,7 +276,7 @@ contract MoveTest is DustTest {
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);
 
-    Vec3 finalCoord = MovablePosition.get(aliceEntityId);
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
     assertEq(finalCoord, newCoords[newCoords.length - 1], "Player did not move to new coords");
     Vec3 aboveFinalCoord = finalCoord + vec3(0, 1, 0);
     assertEq(
@@ -307,7 +303,7 @@ contract MoveTest is DustTest {
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);
 
-    Vec3 finalCoord = MovablePosition.get(aliceEntityId);
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
     assertEq(finalCoord, playerCoord, "Player did not move to new coords");
     Vec3 aboveFinalCoord = finalCoord + vec3(0, 1, 0);
     assertEq(
@@ -338,7 +334,7 @@ contract MoveTest is DustTest {
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);
 
-    Vec3 finalCoord = MovablePosition.get(aliceEntityId);
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
     assertEq(finalCoord, expectedFinalCoord, "Player did not move to new coords");
     Vec3 aboveFinalCoord = finalCoord + vec3(0, 1, 0);
     assertEq(
@@ -475,7 +471,7 @@ contract MoveTest is DustTest {
 
     // Verify the player entity is still registered to the address, but removed from the grid
     assertEq(Player.get(alice), aliceEntityId, "Player entity was deleted");
-    assertEq(MovablePosition.get(aliceEntityId), vec3(0, 0, 0), "Player position was not deleted");
+    assertEq(EntityPosition.get(aliceEntityId), vec3(0, 0, 0), "Player position was not deleted");
     assertEq(ReverseMovablePosition.get(playerCoord), EntityId.wrap(0), "Player reverse position was not deleted");
     assertEq(
       ReverseMovablePosition.get(playerCoord + vec3(0, 1, 0)),
@@ -524,7 +520,7 @@ contract MoveTest is DustTest {
     assertInventoryHasObject(aliceEntityId, ObjectTypes.IronOre, 5);
 
     // Get entity at the expected death location
-    EntityId entityAtDeathLocation = ReversePosition.get(newCoords[fallHeight]);
+    EntityId entityAtDeathLocation = ReverseTerrainPosition.get(newCoords[fallHeight]);
 
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);
@@ -533,7 +529,7 @@ contract MoveTest is DustTest {
     assertEq(Energy.getEnergy(aliceEntityId), 0, "Player energy should be 0 after fatal fall");
 
     // Verify player position was cleared
-    assertEq(MovablePosition.get(aliceEntityId), vec3(0, 0, 0), "Player position should be cleared after death");
+    assertEq(EntityPosition.get(aliceEntityId), vec3(0, 0, 0), "Player position should be cleared after death");
 
     // Verify inventory was transferred to the entity at death location
     assertInventoryHasObject(entityAtDeathLocation, ObjectTypes.Stone, 10);
@@ -573,7 +569,7 @@ contract MoveTest is DustTest {
     Vec3 expectedDeathCoord = newCoords[deathIndex];
 
     // Get or create entity at the expected death location
-    EntityId entityAtDeathLocation = ReversePosition.get(expectedDeathCoord);
+    EntityId entityAtDeathLocation = ReverseTerrainPosition.get(expectedDeathCoord);
 
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);
@@ -582,7 +578,7 @@ contract MoveTest is DustTest {
     assertEq(Energy.getEnergy(aliceEntityId), 0, "Player energy should be 0 after energy depletion");
 
     // Verify player position was cleared
-    assertEq(MovablePosition.get(aliceEntityId), vec3(0, 0, 0), "Player position should be cleared after death");
+    assertEq(EntityPosition.get(aliceEntityId), vec3(0, 0, 0), "Player position should be cleared after death");
 
     // Verify inventory was transferred to the entity at death location
     assertInventoryHasObject(entityAtDeathLocation, ObjectTypes.IronOre, 8);
@@ -660,7 +656,7 @@ contract MoveTest is DustTest {
     vm.prank(alice);
     world.move(aliceEntityId, path);
 
-    Vec3 finalCoord = MovablePosition.get(aliceEntityId);
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
     assertEq(finalCoord, path[path.length - 1], "Player did not move to new coords");
   }
 

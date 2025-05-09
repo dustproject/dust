@@ -19,9 +19,9 @@ import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 // Import user types
 import { EntityId } from "../../EntityId.sol";
 
-library ReversePosition {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "ReversePosition", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x7462000000000000000000000000000052657665727365506f736974696f6e00);
+library ReverseTerrainPosition {
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "ReverseTerrainPo", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x74620000000000000000000000000000526576657273655465727261696e506f);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0020010020000000000000000000000000000000000000000000000000000000);

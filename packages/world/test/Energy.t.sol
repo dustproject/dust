@@ -15,7 +15,7 @@ import { Player } from "../src/codegen/tables/Player.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 
-import { LocalEnergyPool, MovablePosition, Position, ReversePosition } from "../src/utils/Vec3Storage.sol";
+import { EntityPosition, EntityPosition, LocalEnergyPool, ReverseTerrainPosition } from "../src/utils/Vec3Storage.sol";
 
 import {
   CHUNK_SIZE, MACHINE_ENERGY_DRAIN_RATE, MAX_PLAYER_ENERGY, PLAYER_ENERGY_DRAIN_RATE

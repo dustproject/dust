@@ -15,7 +15,7 @@ import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 import { addEnergyToLocalPool } from "../utils/EnergyUtils.sol";
 
 import { getObjectTypeAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
-import { ChunkCommitment, Position, ResourcePosition, ReversePosition } from "../utils/Vec3Storage.sol";
+import { ChunkCommitment, EntityPosition, ResourcePosition, ReverseTerrainPosition } from "../utils/Vec3Storage.sol";
 
 import { CHUNK_COMMIT_EXPIRY_BLOCKS, CHUNK_COMMIT_HALF_WIDTH, RESPAWN_ORE_BLOCK_RANGE } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
@@ -57,7 +57,7 @@ contract NatureSystem is System {
     Vec3 resourceCoord = ResourcePosition._get(resourceType, resourceIdx);
 
     // Check existing entity
-    EntityId entityId = ReversePosition._get(resourceCoord);
+    EntityId entityId = ReverseTerrainPosition._get(resourceCoord);
     ObjectType objectType = EntityObjectType._get(entityId);
     require(objectType == ObjectTypes.Air, "Resource coordinate is not air");
     require(Inventory._lengthOccupiedSlots(entityId) == 0, "Cannot respawn where there are dropped objects");
@@ -75,8 +75,8 @@ contract NatureSystem is System {
 
     // This is enough to respawn the resource block, as it will be read from the original terrain next time
     EntityObjectType._deleteRecord(entityId);
-    Position._deleteRecord(entityId);
-    ReversePosition._deleteRecord(resourceCoord);
+    EntityPosition._deleteRecord(entityId);
+    ReverseTerrainPosition._deleteRecord(resourceCoord);
   }
 
   function growSeed(EntityId caller, Vec3 coord) external {

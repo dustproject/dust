@@ -13,8 +13,6 @@ import { Machine } from "../codegen/tables/Machine.sol";
 import { Player } from "../codegen/tables/Player.sol";
 import { PlayerBed } from "../codegen/tables/PlayerBed.sol";
 
-import { Position } from "../utils/Vec3Storage.sol";
-
 import { MAX_RESPAWN_HALF_WIDTH, PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
 import { ObjectType, ObjectTypes } from "../ObjectType.sol";
 import { checkWorldStatus } from "../Utils.sol";
@@ -49,7 +47,7 @@ contract BedSystem is System {
     require(EntityObjectType._get(bed) == ObjectTypes.Bed, "Not a bed");
 
     bed = bed.baseEntityId();
-    Vec3 bedCoord = Position._get(bed);
+    Vec3 bedCoord = bed.getPosition();
 
     require(!BedPlayer._getPlayerEntityId(bed).exists(), "Bed full");
 
@@ -77,7 +75,7 @@ contract BedSystem is System {
     EntityId bed = PlayerBed._getBedEntityId(caller);
     require(bed.exists(), "Player is not sleeping");
 
-    Vec3 bedCoord = Position._get(bed);
+    Vec3 bedCoord = bed.getPosition();
     require(bedCoord.inSurroundingCube(spawnCoord, MAX_RESPAWN_HALF_WIDTH), "Bed is too far away");
 
     require(!MoveLib._gravityApplies(spawnCoord), "Cannot spawn player here as gravity applies");
@@ -104,7 +102,7 @@ contract BedSystem is System {
     EntityId bed = PlayerBed._getBedEntityId(player);
     require(bed.exists(), "Player is not in a bed");
 
-    Vec3 bedCoord = Position._get(bed);
+    Vec3 bedCoord = bed.getPosition();
 
     // TODO: use a different constant?
     require(bedCoord.inSurroundingCube(dropCoord, MAX_RESPAWN_HALF_WIDTH), "Drop location is too far from bed");

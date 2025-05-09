@@ -16,7 +16,7 @@ import { ReversePlayer } from "./codegen/tables/ReversePlayer.sol";
 
 import { updateMachineEnergy, updatePlayerEnergy } from "./utils/EnergyUtils.sol";
 import { ForceFieldUtils } from "./utils/ForceFieldUtils.sol";
-import { FragmentPosition, MovablePosition, Position } from "./utils/Vec3Storage.sol";
+import { EntityPosition } from "./utils/Vec3Storage.sol";
 
 import { MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "./Constants.sol";
 import { ObjectType } from "./ObjectType.sol";
@@ -68,8 +68,7 @@ library EntityIdLib {
   }
 
   function requireAdjacentToFragment(EntityId self, EntityId fragment) internal view returns (Vec3, Vec3) {
-    Vec3 fragmentCoord = FragmentPosition.get(fragment);
-    return requireAdjacentToFragment(self, fragmentCoord);
+    return requireAdjacentToFragment(self, fragment.getPosition());
   }
 
   function requireAdjacentToFragment(EntityId self, Vec3 fragmentCoord) internal view returns (Vec3, Vec3) {
@@ -79,11 +78,15 @@ library EntityIdLib {
   }
 
   function getPosition(EntityId self) internal view returns (Vec3) {
-    return EntityObjectType._get(self).isPlayer() ? MovablePosition._get(self) : Position._get(self);
+    return EntityPosition._get(self);
   }
 
   function getProgram(EntityId self) internal view returns (ProgramId) {
     return EntityProgram._get(self);
+  }
+
+  function getObjectType(EntityId self) internal view returns (ObjectType) {
+    return EntityObjectType._get(self);
   }
 
   function exists(EntityId self) internal pure returns (bool) {

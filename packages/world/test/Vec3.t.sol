@@ -3,7 +3,7 @@ pragma solidity >=0.8.24;
 
 import { DustTest, console } from "./DustTest.sol";
 
-import { LocalEnergyPool, Position, ReversePosition } from "../src/utils/Vec3Storage.sol";
+import { EntityPosition, LocalEnergyPool, ReverseTerrainPosition } from "../src/utils/Vec3Storage.sol";
 
 import { EntityId } from "../src/EntityId.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
@@ -25,13 +25,13 @@ contract Vec3Test is DustTest {
     EntityId entityId = randomEntityId();
 
     Vec3 vec = vec3(1, 2, 3);
-    Position.set(entityId, vec);
-    Vec3 stored = Position.get(entityId);
+    EntityPosition.set(entityId, vec);
+    Vec3 stored = EntityPosition.get(entityId);
     assertEq(vec, stored, "Vec3s do not match");
 
     vec = vec3(-1, -2, -3);
-    Position.set(entityId, vec);
-    stored = Position.get(entityId);
+    EntityPosition.set(entityId, vec);
+    stored = EntityPosition.get(entityId);
     assertEq(vec, stored, "Vec3s do not match");
   }
 

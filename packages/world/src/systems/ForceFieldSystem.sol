@@ -14,8 +14,6 @@ import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { AddFragmentNotification, RemoveFragmentNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
-import { Position } from "../utils/Vec3Storage.sol";
-
 import { SAFE_PROGRAM_GAS } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 
@@ -143,10 +141,10 @@ contract ForceFieldSystem is System {
     caller.activate();
     caller.requireAdjacentToFragment(fragmentCoord);
 
-    ObjectType objectType = EntityObjectType._get(forceField);
+    ObjectType objectType = forceField.getObjectType();
     require(objectType == ObjectTypes.ForceField, "Invalid object type");
 
-    Vec3 forceFieldFragmentCoord = Position._get(forceField).toFragmentCoord();
+    Vec3 forceFieldFragmentCoord = forceField.getPosition().toFragmentCoord();
     require(forceFieldFragmentCoord != fragmentCoord, "Can't remove forcefield's fragment");
 
     EntityId fragment = ForceFieldUtils.getFragmentAt(fragmentCoord);

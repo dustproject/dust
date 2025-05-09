@@ -16,12 +16,7 @@ import { ReversePlayer } from "../codegen/tables/ReversePlayer.sol";
 import { SurfaceChunkCount } from "../codegen/tables/SurfaceChunkCount.sol";
 
 import {
-  ExploredChunk,
-  MovablePosition,
-  Position,
-  ReverseMovablePosition,
-  ReversePosition,
-  SurfaceChunkByIndex
+  ExploredChunk, ReverseMovablePosition, ReverseTerrainPosition, SurfaceChunkByIndex
 } from "../utils/Vec3Storage.sol";
 
 import {
@@ -159,7 +154,7 @@ contract SpawnSystem is System {
     ObjectType objectType = EntityObjectType._get(spawnTile);
     require(objectType == ObjectTypes.SpawnTile, "Not a spawn tile");
 
-    Vec3 spawnTileCoord = Position._get(spawnTile);
+    Vec3 spawnTileCoord = spawnTile.getPosition();
     require(spawnTileCoord.inSurroundingCube(spawnCoord, MAX_RESPAWN_HALF_WIDTH), "Spawn tile is too far away");
 
     (EntityId forceField,) = ForceFieldUtils.getForceField(spawnTileCoord);

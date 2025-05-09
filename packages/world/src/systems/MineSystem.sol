@@ -19,7 +19,6 @@ import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
 import { Math } from "../utils/Math.sol";
-import { Position } from "../utils/Vec3Storage.sol";
 import { ResourcePosition } from "../utils/Vec3Storage.sol";
 
 import {
@@ -104,7 +103,7 @@ contract MineSystem is System {
     require(minedType.isMineable(), "Object is not mineable");
 
     mined = mined.baseEntityId();
-    Vec3 baseCoord = Position._get(mined);
+    Vec3 baseCoord = mined.getPosition();
 
     if (minedType.isMachine()) {
       (EnergyData memory machineData,) = updateMachineEnergy(mined);

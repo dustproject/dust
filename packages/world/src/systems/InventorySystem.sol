@@ -5,8 +5,7 @@ import { System } from "@latticexyz/world/src/System.sol";
 
 import { Action } from "../codegen/common.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
-import { Position } from "../codegen/tables/Position.sol";
-import { ReversePosition } from "../utils/Vec3Storage.sol";
+import { ReverseTerrainPosition } from "../utils/Vec3Storage.sol";
 
 import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
@@ -50,7 +49,7 @@ contract InventorySystem is System {
     caller.activate();
     caller.requireConnected(coord);
 
-    EntityId entityId = ReversePosition._get(coord);
+    EntityId entityId = ReverseTerrainPosition._get(coord);
     require(entityId.exists(), "No entity at pickup location");
 
     ObjectType objectType = EntityObjectType._get(entityId);
@@ -63,7 +62,7 @@ contract InventorySystem is System {
     caller.activate();
     caller.requireConnected(coord);
 
-    EntityId entityId = ReversePosition._get(coord);
+    EntityId entityId = ReverseTerrainPosition._get(coord);
     require(entityId.exists(), "No entity at pickup location");
 
     ObjectType objectType = EntityObjectType._get(entityId);

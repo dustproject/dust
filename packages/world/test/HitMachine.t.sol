@@ -11,7 +11,7 @@ import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 import { ForceFieldUtils } from "../src/utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../src/utils/InventoryUtils.sol";
-import { Position } from "../src/utils/Vec3Storage.sol";
+import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 import { DustTest } from "./DustTest.sol";
 
 import { TestEnergyUtils, TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";

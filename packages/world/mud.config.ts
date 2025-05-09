@@ -114,7 +114,7 @@ export default defineWorld({
       },
       key: ["entityId"],
     },
-    Position: {
+    EntityPosition: {
       schema: {
         entityId: "EntityId",
         x: "int32",
@@ -123,7 +123,7 @@ export default defineWorld({
       },
       key: ["entityId"],
     },
-    ReversePosition: {
+    ReverseTerrainPosition: {
       schema: {
         x: "int32",
         y: "int32",
@@ -228,17 +228,8 @@ export default defineWorld({
       key: ["owner", "objectType"],
     },
     // ------------------------------------------------------------
-    // Movable positions
+    // Movable entities
     // ------------------------------------------------------------
-    MovablePosition: {
-      schema: {
-        entityId: "EntityId",
-        x: "int32",
-        y: "int32",
-        z: "int32",
-      },
-      key: ["entityId"],
-    },
     ReverseMovablePosition: {
       schema: {
         x: "int32",
@@ -298,15 +289,6 @@ export default defineWorld({
         // Comes from beds with sleeping players or
         // other entities that might continuously drain energy
         extraDrainRate: "uint128",
-      },
-      key: ["entityId"],
-    },
-    FragmentPosition: {
-      schema: {
-        entityId: "EntityId",
-        x: "int32",
-        y: "int32",
-        z: "int32",
       },
       key: ["entityId"],
     },

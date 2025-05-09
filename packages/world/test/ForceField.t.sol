@@ -20,7 +20,7 @@ import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 import { DustTest, console } from "./DustTest.sol";
 
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
-import { FragmentPosition, MovablePosition, Position, ReversePosition } from "../src/utils/Vec3Storage.sol";
+import { EntityPosition, ReverseTerrainPosition } from "../src/utils/Vec3Storage.sol";
 
 import { FRAGMENT_SIZE, MACHINE_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
@@ -121,10 +121,10 @@ contract ForceFieldTest is DustTest {
     Vec3 coord;
     // Handle force field fragments differently than regular entities
     if (EntityObjectType.get(entityId) == ObjectTypes.Fragment) {
-      // For fragments, we need to use FragmentPosition instead of Position
-      coord = FragmentPosition.get(entityId).fromFragmentCoord();
+      // For fragments, we need to use EntityPosition instead of EntityPosition
+      coord = EntityPosition.get(entityId).fromFragmentCoord();
     } else {
-      coord = Position.get(entityId) - vec3(1, 0, 0);
+      coord = EntityPosition.get(entityId) - vec3(1, 0, 0);
     }
 
     ProgramId program = ProgramId.wrap(programSystemId.unwrap());
@@ -161,7 +161,7 @@ contract ForceFieldTest is DustTest {
     world.mine(aliceEntityId, mineCoord, "");
 
     // Verify that the block was successfully mined (should be replaced with Air)
-    EntityId mineEntityId = ReversePosition.get(mineCoord);
+    EntityId mineEntityId = ReverseTerrainPosition.get(mineCoord);
     assertTrue(EntityObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
   }
 
@@ -253,7 +253,7 @@ contract ForceFieldTest is DustTest {
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
     // Verify that the block was successfully built
-    EntityId buildEntityId = ReversePosition.get(buildCoord);
+    EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
     assertTrue(EntityObjectType.get(buildEntityId) == buildObjectType, "Block was not built correctly");
   }
 
@@ -374,7 +374,7 @@ contract ForceFieldTest is DustTest {
     world.mine(aliceEntityId, mineCoord, "");
 
     // Verify that the block was successfully mined (should be replaced with Air)
-    EntityId mineEntityId = ReversePosition.get(mineCoord);
+    EntityId mineEntityId = ReverseTerrainPosition.get(mineCoord);
     assertTrue(EntityObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
   }
 
@@ -411,7 +411,7 @@ contract ForceFieldTest is DustTest {
     world.mine(aliceEntityId, mineCoord, "");
 
     // Verify that the block was successfully mined (should be replaced with Air)
-    EntityId mineEntityId = ReversePosition.get(mineCoord);
+    EntityId mineEntityId = ReverseTerrainPosition.get(mineCoord);
     assertTrue(EntityObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
   }
 
@@ -760,7 +760,7 @@ contract ForceFieldTest is DustTest {
       world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
       // Verify build succeeded
-      EntityId buildEntityId = ReversePosition.get(buildCoord);
+      EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
       assertTrue(EntityObjectType.get(buildEntityId) == buildObjectType, "Block was not built correctly");
 
       // Now set the program to disallow building
@@ -801,7 +801,7 @@ contract ForceFieldTest is DustTest {
       world.mine(aliceEntityId, mineCoord, "");
 
       // Verify mining succeeded
-      EntityId mineEntityId = ReversePosition.get(mineCoord);
+      EntityId mineEntityId = ReverseTerrainPosition.get(mineCoord);
       assertTrue(EntityObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
 
       // Now set the program to disallow mining
