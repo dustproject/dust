@@ -41,11 +41,7 @@ import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { encodeChunk } from "./utils/encodeChunk.sol";
 
 import {
-  LocalEnergyPool,
-  MovablePosition,
-  Position,
-  ReverseMovablePosition,
-  ReversePosition
+  EntityPosition, LocalEnergyPool, ReverseMovablePosition, ReverseTerrainPosition
 } from "../src/utils/Vec3Storage.sol";
 
 import { DustAssertions } from "./DustAssertions.sol";
@@ -82,7 +78,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     address playerAddress = vm.randomAddress();
     EntityId playerEntityId = randomEntityId();
     EntityObjectType.set(playerEntityId, ObjectTypes.Player);
-    MovablePosition.set(playerEntityId, coord);
+    EntityPosition.set(playerEntityId, coord);
     ReverseMovablePosition.set(coord, playerEntityId);
 
     Vec3[] memory relativePositions = ObjectTypes.Player.getObjectTypeSchema();
@@ -90,7 +86,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
       Vec3 relativeCoord = coord + relativePositions[i];
       EntityId relativePlayerEntityId = randomEntityId();
       EntityObjectType.set(relativePlayerEntityId, ObjectTypes.Player);
-      MovablePosition.set(relativePlayerEntityId, relativeCoord);
+      EntityPosition.set(relativePlayerEntityId, relativeCoord);
       ReverseMovablePosition.set(relativeCoord, relativePlayerEntityId);
       BaseEntity.set(relativePlayerEntityId, playerEntityId);
     }
@@ -159,7 +155,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     vm.prank(alice);
     EntityId aliceEntityId = world.randomSpawn(blockNumber, y);
 
-    Vec3 playerCoord = MovablePosition.get(aliceEntityId);
+    Vec3 playerCoord = EntityPosition.get(aliceEntityId);
 
     return (alice, aliceEntityId, playerCoord);
   }
@@ -248,8 +244,8 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
 
     EntityId entityId = randomEntityId();
     EntityObjectType.set(entityId, objectType);
-    Position.set(entityId, coord);
-    ReversePosition.set(coord, entityId);
+    EntityPosition.set(entityId, coord);
+    ReverseTerrainPosition.set(coord, entityId);
     Mass.set(entityId, ObjectPhysics.getMass(objectType));
 
     Vec3[] memory coords = objectType.getRelativeCoords(coord);
@@ -258,8 +254,8 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
       Vec3 relativeCoord = coords[i];
       EntityId relativeEntityId = randomEntityId();
       EntityObjectType.set(relativeEntityId, objectType);
-      Position.set(relativeEntityId, relativeCoord);
-      ReversePosition.set(relativeCoord, relativeEntityId);
+      EntityPosition.set(relativeEntityId, relativeCoord);
+      ReverseTerrainPosition.set(relativeCoord, relativeEntityId);
       BaseEntity.set(relativeEntityId, entityId);
     }
     return entityId;
@@ -282,7 +278,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     setTerrainAtCoord(belowCoord, ObjectTypes.Dirt);
 
     (address alice, EntityId aliceEntityId) = createTestPlayer(spawnCoord);
-    Vec3 playerCoord = MovablePosition.get(aliceEntityId);
+    Vec3 playerCoord = EntityPosition.get(aliceEntityId);
 
     return (alice, aliceEntityId, playerCoord);
   }

@@ -6,7 +6,6 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
-import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { Recipes, RecipesData } from "../codegen/tables/Recipes.sol";
@@ -31,7 +30,7 @@ contract CraftSystem is System {
 
     if (!recipe.stationTypeId.isNull()) {
       require(station.exists(), "This recipe requires a station");
-      require(EntityObjectType._get(station) == recipe.stationTypeId, "Invalid station");
+      require(station.getObjectType() == recipe.stationTypeId, "Invalid station");
       caller.requireConnected(station);
     }
 

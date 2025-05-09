@@ -21,11 +21,7 @@ import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 
 import {
-  LocalEnergyPool,
-  MovablePosition,
-  Position,
-  ReverseMovablePosition,
-  ReversePosition
+  EntityPosition, LocalEnergyPool, ReverseMovablePosition, ReverseTerrainPosition
 } from "../src/utils/Vec3Storage.sol";
 
 import { CHUNK_SIZE, MINE_ENERGY_COST, MOVE_ENERGY_COST, PLAYER_FALL_ENERGY_COST } from "../src/Constants.sol";
@@ -44,7 +40,7 @@ contract GravityTest is DustTest {
     Vec3 mineCoord = playerCoord - vec3(0, 1, 0);
     ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
     ObjectPhysics.setMass(mineObjectType, playerHandMassReduction);
-    EntityId mineEntityId = ReversePosition.get(mineCoord);
+    EntityId mineEntityId = ReverseTerrainPosition.get(mineCoord);
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
@@ -55,14 +51,14 @@ contract GravityTest is DustTest {
     world.mine(aliceEntityId, mineCoord, "");
     endGasReport();
 
-    Vec3 finalCoord = MovablePosition.get(aliceEntityId);
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
     assertEq(finalCoord, mineCoord, "Player did not move to new coords");
     Vec3 aboveFinalCoord = finalCoord + vec3(0, 1, 0);
     assertEq(
       BaseEntity.get(ReverseMovablePosition.get(aboveFinalCoord)), aliceEntityId, "Above coord is not the player"
     );
 
-    mineEntityId = ReversePosition.get(mineCoord);
+    mineEntityId = ReverseTerrainPosition.get(mineCoord);
     assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
 
@@ -78,7 +74,7 @@ contract GravityTest is DustTest {
     Vec3 mineCoord = playerCoord - vec3(0, 1, 0);
     ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
     ObjectPhysics.setMass(mineObjectType, playerHandMassReduction);
-    EntityId mineEntityId = ReversePosition.get(mineCoord);
+    EntityId mineEntityId = ReverseTerrainPosition.get(mineCoord);
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
@@ -92,14 +88,14 @@ contract GravityTest is DustTest {
     world.mine(aliceEntityId, mineCoord, "");
     endGasReport();
 
-    Vec3 finalCoord = MovablePosition.get(aliceEntityId);
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
     assertEq(finalCoord, mineCoord - vec3(0, 2, 0), "Player did not move to new coords");
     Vec3 aboveFinalCoord = finalCoord + vec3(0, 1, 0);
     assertEq(
       BaseEntity.get(ReverseMovablePosition.get(aboveFinalCoord)), aliceEntityId, "Above coord is not the player"
     );
 
-    mineEntityId = ReversePosition.get(mineCoord);
+    mineEntityId = ReverseTerrainPosition.get(mineCoord);
     assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
 
@@ -154,7 +150,7 @@ contract GravityTest is DustTest {
     Vec3 mineCoord = aliceCoord - vec3(0, 1, 0);
     ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
     ObjectPhysics.setMass(mineObjectType, playerHandMassReduction);
-    EntityId mineEntityId = ReversePosition.get(mineCoord);
+    EntityId mineEntityId = ReverseTerrainPosition.get(mineCoord);
     assertFalse(mineEntityId.exists(), "Mine entity already exists");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
@@ -171,8 +167,8 @@ contract GravityTest is DustTest {
     world.mine(aliceEntityId, mineCoord, "");
     endGasReport();
 
-    Vec3 finalAliceCoord = MovablePosition.get(aliceEntityId);
-    Vec3 finalBobCoord = MovablePosition.get(bobEntityId);
+    Vec3 finalAliceCoord = EntityPosition.get(aliceEntityId);
+    Vec3 finalBobCoord = EntityPosition.get(bobEntityId);
     assertEq(finalAliceCoord, mineCoord - vec3(0, 2, 0), "Player alice did not move to new coords");
     assertEq(finalBobCoord, mineCoord, "Player bob did not move to new coords");
     {
@@ -188,7 +184,7 @@ contract GravityTest is DustTest {
       );
     }
 
-    mineEntityId = ReversePosition.get(mineCoord);
+    mineEntityId = ReverseTerrainPosition.get(mineCoord);
     assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
     uint128 energyGainedInPool = LocalEnergyPool.get(shardCoord) - localEnergyPoolBefore;
@@ -228,7 +224,7 @@ contract GravityTest is DustTest {
     world.move(aliceEntityId, newCoords);
     endGasReport();
 
-    Vec3 finalCoord = MovablePosition.get(aliceEntityId);
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
     assertEq(finalCoord, expectedFinalCoord, "Player did not fall back to the original coord");
     Vec3 aboveFinalCoord = finalCoord + vec3(0, 1, 0);
     assertEq(
@@ -261,7 +257,7 @@ contract GravityTest is DustTest {
     world.move(aliceEntityId, newCoords);
     endGasReport();
 
-    Vec3 finalCoord = MovablePosition.get(aliceEntityId);
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
     assertEq(finalCoord, expectedFinalCoord, "Player did not fall back to the original coord");
     Vec3 aboveFinalCoord = finalCoord + vec3(0, 1, 0);
     assertEq(
@@ -309,8 +305,8 @@ contract GravityTest is DustTest {
     world.move(aliceEntityId, newCoords);
     endGasReport();
 
-    Vec3 finalAliceCoord = MovablePosition.get(aliceEntityId);
-    Vec3 finalBobCoord = MovablePosition.get(bobEntityId);
+    Vec3 finalAliceCoord = EntityPosition.get(aliceEntityId);
+    Vec3 finalBobCoord = EntityPosition.get(bobEntityId);
     assertEq(finalAliceCoord, expectedFinalAliceCoord, "Player alice did not move to new coords");
     assertEq(finalBobCoord, aliceCoord, "Player bob did not move to new coords");
     Vec3 aboveFinalAliceCoord = finalAliceCoord + vec3(0, 1, 0);

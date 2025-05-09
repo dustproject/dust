@@ -18,13 +18,11 @@ import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
-import { MovablePosition } from "../src/codegen/tables/MovablePosition.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 import { Player } from "../src/codegen/tables/Player.sol";
 
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
-import { Position } from "../src/codegen/tables/Position.sol";
-import { ReversePosition } from "../src/codegen/tables/ReversePosition.sol";
+import { ReverseTerrainPosition } from "../src/codegen/tables/ReverseTerrainPosition.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 

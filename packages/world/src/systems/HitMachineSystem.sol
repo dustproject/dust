@@ -6,12 +6,9 @@ import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { console } from "forge-std/console.sol";
 
-import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { LocalEnergyPool } from "../codegen/tables/LocalEnergyPool.sol";
 import { ERC165Checker } from "@latticexyz/world/src/ERC165Checker.sol";
 import { System } from "@latticexyz/world/src/System.sol";
-
-import { Position } from "../utils/Vec3Storage.sol";
 
 import {
   addEnergyToLocalPool,
@@ -54,7 +51,6 @@ contract HitMachineSystem is System {
     (Vec3 callerCoord,) = caller.requireConnected(coord);
     (EntityId forceField,) = ForceFieldUtils.getForceField(coord);
     require(forceField.exists(), "No force field at this location");
-    Vec3 forceFieldCoord = Position._get(forceField);
 
     (EnergyData memory machineData,) = updateMachineEnergy(forceField);
     require(machineData.energy > 0, "Cannot hit depleted forcefield");
@@ -65,6 +61,8 @@ contract HitMachineSystem is System {
       toolData.getMassReduction(machineData.energy, _getToolMultiplier(toolData.toolType));
 
     uint128 playerEnergyReduction = _getCallerEnergyReduction(callerEnergy, massReduction, machineData.energy);
+
+    Vec3 forceFieldCoord = forceField.getPosition();
 
     // Return early if player died
     if (playerEnergyReduction > 0 && decreasePlayerEnergy(caller, callerCoord, playerEnergyReduction) == 0) {

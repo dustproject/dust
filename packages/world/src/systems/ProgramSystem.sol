@@ -10,7 +10,6 @@ import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { EnergyData } from "../codegen/tables/Energy.sol";
 
-import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
 
 import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
@@ -32,7 +31,7 @@ contract ProgramSystem is System {
   function attachProgram(EntityId caller, EntityId target, ProgramId program, bytes calldata extraData) public {
     caller.activate();
 
-    ObjectType targetType = EntityObjectType._get(target);
+    ObjectType targetType = target.getObjectType();
     require(targetType.isSmartEntity(), "Can only attach programs to smart entities");
 
     Vec3 validatorCoord;
@@ -70,7 +69,7 @@ contract ProgramSystem is System {
     caller.activate();
 
     Vec3 forceFieldCoord;
-    if (EntityObjectType._get(target) == ObjectTypes.Fragment) {
+    if (target.getObjectType() == ObjectTypes.Fragment) {
       (, Vec3 fragmentCoord) = caller.requireAdjacentToFragment(target);
       forceFieldCoord = fragmentCoord.fromFragmentCoord();
     } else {

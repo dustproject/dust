@@ -25,11 +25,7 @@ import { ReversePlayer } from "../src/codegen/tables/ReversePlayer.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 
 import {
-  LocalEnergyPool,
-  MovablePosition,
-  Position,
-  ReverseMovablePosition,
-  ReversePosition
+  EntityPosition, LocalEnergyPool, ReverseMovablePosition, ReverseTerrainPosition
 } from "../src/utils/Vec3Storage.sol";
 
 import { EntityId } from "../src/EntityId.sol";
@@ -120,7 +116,7 @@ abstract contract DustAssertions is MudTest, GasReporter {
     EnergyDataSnapshot memory snapshot;
     snapshot.playerEntityId = playerEntityId;
     snapshot.playerEnergy = Energy.getEnergy(playerEntityId);
-    Vec3 snapshotCoord = MovablePosition.get(playerEntityId);
+    Vec3 snapshotCoord = EntityPosition.get(playerEntityId);
     Vec3 shardCoord = snapshotCoord.toLocalEnergyPoolShardCoord();
     snapshot.localPoolEnergy = LocalEnergyPool.get(shardCoord);
     (EntityId forceFieldEntityId,) = TestForceFieldUtils.getForceField(snapshotCoord);
@@ -146,7 +142,7 @@ abstract contract DustAssertions is MudTest, GasReporter {
     // Verify the player entity is still registered to the address, but removed from the grid
     assertNotEq(ReversePlayer.get(player), address(0), "Player entity was deleted");
     assertNotEq(Player.get(ReversePlayer.get(player)), EntityId.wrap(0), "Player entity was deleted");
-    assertEq(MovablePosition.get(player), vec3(0, 0, 0), "Player position was not deleted");
+    assertEq(EntityPosition.get(player), vec3(0, 0, 0), "Player position was not deleted");
     assertEq(ReverseMovablePosition.get(playerCoord), EntityId.wrap(0), "Player reverse position was not deleted");
     assertEq(
       ReverseMovablePosition.get(playerCoord + vec3(0, 1, 0)),

@@ -7,7 +7,6 @@ import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
-import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 
@@ -34,7 +33,7 @@ contract MachineSystem is System {
 
     machine = machine.baseEntityId();
 
-    ObjectType objectType = EntityObjectType._get(machine);
+    ObjectType objectType = machine.getObjectType();
     require(objectType.isMachine(), "Can only fuel machines");
 
     uint16 fuelAmount = 0;

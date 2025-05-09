@@ -14,7 +14,7 @@ import { Player } from "../codegen/tables/Player.sol";
 import { PlayerBed } from "../codegen/tables/PlayerBed.sol";
 import { ReversePlayer } from "../codegen/tables/ReversePlayer.sol";
 
-import { FragmentPosition, MovablePosition, Position, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
+import { EntityPosition, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
 
 import { ObjectType } from "../ObjectType.sol";
 import { ObjectTypes } from "../ObjectType.sol";
@@ -82,7 +82,7 @@ library PlayerUtils {
   }
 
   function removePlayerFromGrid(EntityId player, Vec3 playerCoord) internal {
-    MovablePosition._deleteRecord(player);
+    EntityPosition._deleteRecord(player);
     ReverseMovablePosition._deleteRecord(playerCoord);
 
     Vec3[] memory coords = ObjectTypes.Player.getRelativeCoords(playerCoord);
@@ -90,7 +90,7 @@ library PlayerUtils {
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];
       EntityId relativePlayer = getMovableEntityAt(relativeCoord);
-      MovablePosition._deleteRecord(relativePlayer);
+      EntityPosition._deleteRecord(relativePlayer);
       ReverseMovablePosition._deleteRecord(relativeCoord);
       EntityObjectType._deleteRecord(relativePlayer);
       BaseEntity._deleteRecord(relativePlayer);

@@ -8,7 +8,6 @@ import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
-import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { Player } from "../codegen/tables/Player.sol";
 import { ReversePlayer } from "../codegen/tables/ReversePlayer.sol";
@@ -16,12 +15,7 @@ import { ReversePlayer } from "../codegen/tables/ReversePlayer.sol";
 import { SurfaceChunkCount } from "../codegen/tables/SurfaceChunkCount.sol";
 
 import {
-  ExploredChunk,
-  MovablePosition,
-  Position,
-  ReverseMovablePosition,
-  ReversePosition,
-  SurfaceChunkByIndex
+  ExploredChunk, ReverseMovablePosition, ReverseTerrainPosition, SurfaceChunkByIndex
 } from "../utils/Vec3Storage.sol";
 
 import {
@@ -156,10 +150,10 @@ contract SpawnSystem is System {
   {
     checkWorldStatus();
     require(spawnEnergy <= MAX_PLAYER_ENERGY, "Cannot spawn with more than max player energy");
-    ObjectType objectType = EntityObjectType._get(spawnTile);
+    ObjectType objectType = spawnTile.getObjectType();
     require(objectType == ObjectTypes.SpawnTile, "Not a spawn tile");
 
-    Vec3 spawnTileCoord = Position._get(spawnTile);
+    Vec3 spawnTileCoord = spawnTile.getPosition();
     require(spawnTileCoord.inSurroundingCube(spawnCoord, MAX_RESPAWN_HALF_WIDTH), "Spawn tile is too far away");
 
     (EntityId forceField,) = ForceFieldUtils.getForceField(spawnTileCoord);

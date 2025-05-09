@@ -4,7 +4,6 @@ pragma solidity >=0.8.24;
 import { Inventory } from "../codegen/tables/Inventory.sol";
 import { InventorySlot, InventorySlotData } from "../codegen/tables/InventorySlot.sol";
 
-import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { InventoryTypeSlots } from "../codegen/tables/InventoryTypeSlots.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
@@ -49,7 +48,7 @@ library InventoryUtils {
       return ToolData(owner, tool, ObjectTypes.Null, slot, 0);
     }
 
-    ObjectType toolType = EntityObjectType._get(tool);
+    ObjectType toolType = tool.getObjectType();
     require(toolType.isTool(), "Inventory item is not a tool");
 
     return ToolData(owner, tool, toolType, slot, Mass._getMass(tool));
@@ -103,7 +102,7 @@ library InventoryUtils {
   }
 
   function addEntity(EntityId owner, EntityId entityId) internal returns (uint16 slot) {
-    ObjectType objectType = EntityObjectType._get(entityId);
+    ObjectType objectType = entityId.getObjectType();
     require(!objectType.isNull(), "Entity must exist");
 
     slot = _useEmptySlot(owner);
@@ -115,7 +114,7 @@ library InventoryUtils {
   }
 
   function addEntityToSlot(EntityId owner, EntityId entityId, uint16 slot) internal {
-    ObjectType objectType = EntityObjectType._get(entityId);
+    ObjectType objectType = entityId.getObjectType();
     require(!objectType.isNull(), "Entity must exist");
 
     _useEmptySlot(owner, slot);
@@ -417,7 +416,7 @@ library InventoryUtils {
       _removeFromTypeSlots(owner, ObjectTypes.Null, slot);
     } else {
       slot = Inventory._getNextSlot(owner);
-      uint16 maxSlots = EntityObjectType._get(owner).getMaxInventorySlots();
+      uint16 maxSlots = owner.getObjectType().getMaxInventorySlots();
       require(slot < maxSlots, "Inventory is full");
       Inventory._setNextSlot(owner, slot + 1);
     }
@@ -426,7 +425,7 @@ library InventoryUtils {
   }
 
   function _useEmptySlot(EntityId owner, uint16 slot) private {
-    uint16 maxSlots = EntityObjectType._get(owner).getMaxInventorySlots();
+    uint16 maxSlots = owner.getObjectType().getMaxInventorySlots();
     require(slot < maxSlots, "Invalid slot");
 
     InventorySlotData memory slotData = InventorySlot._get(owner, slot);
