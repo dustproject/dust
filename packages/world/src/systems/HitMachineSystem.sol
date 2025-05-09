@@ -30,9 +30,9 @@ import {
   DEFAULT_ORE_TOOL_MULTIPLIER,
   DEFAULT_WOODEN_TOOL_MULTIPLIER,
   HIT_ENERGY_COST,
-  ORE_TOOL_MULTIPLIER,
   SAFE_PROGRAM_GAS,
-  WOODEN_TOOL_MULTIPLIER
+  SPECIALIZED_ORE_TOOL_MULTIPLIER,
+  SPECIALIZED_WOODEN_TOOL_MULTIPLIER
 } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectType, ObjectTypes } from "../ObjectType.sol";
@@ -109,7 +109,7 @@ contract HitMachineSystem is System {
     bool isWoodenTool = toolType == ObjectTypes.WoodenWhacker;
 
     if (toolType.isWhacker()) {
-      return isWoodenTool ? WOODEN_TOOL_MULTIPLIER : ORE_TOOL_MULTIPLIER;
+      return isWoodenTool ? SPECIALIZED_WOODEN_TOOL_MULTIPLIER : SPECIALIZED_ORE_TOOL_MULTIPLIER;
     }
 
     return isWoodenTool ? DEFAULT_WOODEN_TOOL_MULTIPLIER : DEFAULT_ORE_TOOL_MULTIPLIER;

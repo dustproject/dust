@@ -40,7 +40,7 @@ import {
   MAX_ENTITY_INFLUENCE_HALF_WIDTH,
   MINE_ENERGY_COST,
   PLAYER_ENERGY_DRAIN_RATE,
-  WOODEN_TOOL_MULTIPLIER
+  SPECIALIZED_WOODEN_TOOL_MULTIPLIER
 } from "../src/Constants.sol";
 import { ObjectAmount, ObjectType, ObjectTypes } from "../src/ObjectType.sol";
 
@@ -590,7 +590,7 @@ contract MineTest is DustTest {
       world.mine(aliceEntityId, stoneCoord, slot, "");
 
       EntityId mineEntityId = ReversePosition.get(stoneCoord);
-      uint128 massReduction = playerHandMassReduction + pickMass / 10 * WOODEN_TOOL_MULTIPLIER;
+      uint128 massReduction = playerHandMassReduction + pickMass / 10 * SPECIALIZED_WOODEN_TOOL_MULTIPLIER;
       uint128 expectedMass = stoneMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden pick on stone");
     }
@@ -612,7 +612,7 @@ contract MineTest is DustTest {
       world.mine(aliceEntityId, logCoord, slot, "");
 
       EntityId mineEntityId = ReversePosition.get(logCoord);
-      uint128 massReduction = playerHandMassReduction + axeMass / 10 * WOODEN_TOOL_MULTIPLIER;
+      uint128 massReduction = playerHandMassReduction + axeMass / 10 * SPECIALIZED_WOODEN_TOOL_MULTIPLIER;
       uint128 expectedMass = logMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden axe on log");
     }

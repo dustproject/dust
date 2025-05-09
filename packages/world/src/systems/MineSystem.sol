@@ -47,10 +47,10 @@ import {
   DEFAULT_ORE_TOOL_MULTIPLIER,
   DEFAULT_WOODEN_TOOL_MULTIPLIER,
   MINE_ENERGY_COST,
-  ORE_TOOL_MULTIPLIER,
   PLAYER_ENERGY_DRAIN_RATE,
   SAFE_PROGRAM_GAS,
-  WOODEN_TOOL_MULTIPLIER
+  SPECIALIZED_ORE_TOOL_MULTIPLIER,
+  SPECIALIZED_WOODEN_TOOL_MULTIPLIER
 } from "../Constants.sol";
 
 import { EntityId } from "../EntityId.sol";
@@ -276,7 +276,7 @@ contract MineSystem is System {
     bool isWoodenTool = toolType == ObjectTypes.WoodenAxe || toolType == ObjectTypes.WoodenPick;
 
     if ((toolType.isAxe() && minedType.hasAxeMultiplier()) || (toolType.isPick() && minedType.hasPickMultiplier())) {
-      return isWoodenTool ? WOODEN_TOOL_MULTIPLIER : ORE_TOOL_MULTIPLIER;
+      return isWoodenTool ? SPECIALIZED_WOODEN_TOOL_MULTIPLIER : SPECIALIZED_ORE_TOOL_MULTIPLIER;
     }
 
     return isWoodenTool ? DEFAULT_WOODEN_TOOL_MULTIPLIER : DEFAULT_ORE_TOOL_MULTIPLIER;
