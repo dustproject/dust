@@ -123,7 +123,7 @@ export const recipes: Recipe[] = [
     station: "Workbench",
     inputs: [
       ["Stone", 30],
-      ["IronBar", 5],
+      ["IronBar", 1],
     ],
     outputs: [["ForceField", 1]],
   },
@@ -140,8 +140,8 @@ export const recipes: Recipe[] = [
   {
     station: "Workbench",
     inputs: [
-      ["ForceField", 1],
-      ["IronBar", 8],
+      ["Stone", 10],
+      ["IronBar", 1],
     ],
     outputs: [["SpawnTile", 1]],
   },
@@ -263,7 +263,7 @@ export const recipes: Recipe[] = [
     outputs: [["NeptuniumAxe", 1]],
   },
   {
-    inputs: [["IronBar", 3]],
+    inputs: [["AnyPlank", 3]],
     outputs: [["Bucket", 1]],
   },
   {
