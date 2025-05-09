@@ -444,6 +444,8 @@ contract ForceFieldTest is DustTest {
     world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, newFragmentCoord, "");
     endGasReport();
 
+    EntityId fragment = TestForceFieldUtils.getFragmentAt(newFragmentCoord);
+
     // Verify that the energy drain rate has increased
     EnergyData memory afterEnergyData = Energy.get(forceFieldEntityId);
     assertEq(
@@ -457,6 +459,8 @@ contract ForceFieldTest is DustTest {
       TestForceFieldUtils.isFragment(forceFieldEntityId, newFragmentCoord),
       "Force field fragment not found at coordinate"
     );
+    assertEq(Fragment.getForceField(fragment), forceFieldEntityId, "Fragment does not belong to the force field");
+    assertEq(Fragment.getForceFieldCreatedAt(fragment), vm.getBlockTimestamp(), "Fragment created at wrong time");
   }
 
   function testRemoveFragment() public {
