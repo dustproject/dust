@@ -21,7 +21,6 @@ import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-import { MovablePosition } from "../src/codegen/tables/MovablePosition.sol";
 import { Player } from "../src/codegen/tables/Player.sol";
 
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
@@ -40,7 +39,7 @@ import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 
 import { SlotData, SlotTransfer } from "../src/utils/InventoryUtils.sol";
-import { Position } from "../src/utils/Vec3Storage.sol";
+import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
@@ -111,7 +110,7 @@ contract TransferTest is DustTest {
     world.registerSystem(programSystemId, program, false);
     world.transferOwnership(namespaceId, address(0));
 
-    Vec3 coord = Position.get(entityId);
+    Vec3 coord = EntityPosition.get(entityId);
 
     // Attach program with test player
     (address bob, EntityId bobEntityId) = createTestPlayer(coord - vec3(1, 0, 0));

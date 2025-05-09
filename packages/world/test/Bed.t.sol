@@ -23,7 +23,7 @@ import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest, console } from "./DustTest.sol";
 
-import { LocalEnergyPool, Position, ReversePosition } from "../src/utils/Vec3Storage.sol";
+import { EntityPosition, LocalEnergyPool, ReverseTerrainPosition } from "../src/utils/Vec3Storage.sol";
 
 import { CHUNK_SIZE, MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
@@ -40,8 +40,8 @@ contract BedTest is DustTest {
   function createBed(Vec3 bedCoord) internal returns (EntityId) {
     // Set entity to bed
     EntityId bedEntityId = randomEntityId();
-    Position.set(bedEntityId, bedCoord);
-    ReversePosition.set(bedCoord, bedEntityId);
+    EntityPosition.set(bedEntityId, bedCoord);
+    ReverseTerrainPosition.set(bedCoord, bedEntityId);
     EntityObjectType.set(bedEntityId, ObjectTypes.Bed);
     return bedEntityId;
   }
@@ -54,7 +54,7 @@ contract BedTest is DustTest {
     world.registerNamespace(namespaceId);
     world.registerSystem(programSystemId, program, false);
 
-    Vec3 bedCoord = Position.get(bedEntityId);
+    Vec3 bedCoord = EntityPosition.get(bedEntityId);
 
     // Attach program with test player
     (address bob, EntityId bobEntityId) = createTestPlayer(bedCoord - vec3(1, 0, 0));

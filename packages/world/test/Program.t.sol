@@ -11,9 +11,7 @@ import { EntityId } from "../src/EntityId.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { LocalEnergyPool } from "../src/codegen/tables/LocalEnergyPool.sol";
 
-import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { EntityProgram } from "../src/codegen/tables/EntityProgram.sol";
-import { MovablePosition } from "../src/codegen/tables/MovablePosition.sol";
 import { Player } from "../src/codegen/tables/Player.sol";
 
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
@@ -27,7 +25,7 @@ import { ObjectTypes } from "../src/ObjectType.sol";
 import { ProgramId } from "../src/ProgramId.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
-import { Position } from "../src/utils/Vec3Storage.sol";
+import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
 import { SlotData, SlotTransfer } from "../src/utils/InventoryUtils.sol";
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
@@ -51,7 +49,7 @@ contract ProgramTest is DustTest {
     world.registerNamespace(namespaceId);
     world.registerSystem(programSystemId, program, false);
 
-    Vec3 coord = Position.get(entityId);
+    Vec3 coord = EntityPosition.get(entityId);
 
     // Attach program with test player
     (address bob, EntityId bobEntityId) = createTestPlayer(coord - vec3(1, 0, 0));

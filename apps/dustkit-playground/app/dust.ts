@@ -1,5 +1,6 @@
 import { type ClientRpcSchema, messagePort } from "dustkit/internal";
+import { getMessagePortRpcClient } from "dustkit/internal";
 
 export const dustClient = messagePort<ClientRpcSchema>(
-  window.opener ?? window.parent,
+  await getMessagePortRpcClient(window.opener ?? window.parent),
 );

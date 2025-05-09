@@ -1,12 +1,27 @@
 import { AccountButton, useSessionClient } from "@latticexyz/entrykit/internal";
-import { type AppRpcSchema, messagePort } from "dustkit/internal";
-import { useEffect } from "react";
+import {
+  type AppRpcSchema,
+  getMessagePortRpcClient,
+  messagePort,
+} from "dustkit/internal";
+import { useEffect, useRef } from "react";
+import type { SocketRpcClient } from "viem/utils";
 import { getWorldAddress } from "./common";
 import { createClientRpcServer } from "./createClientRpcServer";
 
 export function App() {
   const { data: sessionClient, status: sessionClientStatus } =
     useSessionClient();
+  const rpcClientRef = useRef<SocketRpcClient<MessagePort> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (rpcClientRef.current) {
+        console.info("closing rpc client");
+        rpcClientRef.current.close();
+      }
+    };
+  }, []);
 
   useEffect(
     () =>
@@ -27,9 +42,11 @@ export function App() {
         src={import.meta.env.VITE_DUSTKIT_APP_URL}
         onLoad={async (event) => {
           console.info("setting up app transport");
-          const appTransport = messagePort<AppRpcSchema>(
+          const rpcClient = await getMessagePortRpcClient(
             event.currentTarget.contentWindow!,
           );
+          rpcClientRef.current = rpcClient;
+          const appTransport = messagePort<AppRpcSchema>(rpcClient);
           console.info("rpc client ready, sending hello");
           const res = await appTransport({}).request({
             method: "dustApp_init",

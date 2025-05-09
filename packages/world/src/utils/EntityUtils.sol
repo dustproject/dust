@@ -6,7 +6,7 @@ import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { UniqueEntity } from "../codegen/tables/UniqueEntity.sol";
 import { TerrainLib } from "../systems/libraries/TerrainLib.sol";
-import { MovablePosition, Position, ReverseMovablePosition, ReversePosition } from "../utils/Vec3Storage.sol";
+import { EntityPosition, ReverseMovablePosition, ReverseTerrainPosition } from "../utils/Vec3Storage.sol";
 
 import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
@@ -23,8 +23,8 @@ function getUniqueEntity() returns (EntityId) {
 /// @notice Get the object type id at a given coordinate.
 /// @dev Returns ObjectTypes.Null if the chunk is not explored yet.
 function getObjectTypeAt(Vec3 coord) view returns (ObjectType) {
-  EntityId entityId = ReversePosition._get(coord);
-  return entityId.exists() ? EntityObjectType._get(entityId) : TerrainLib._getBlockType(coord);
+  EntityId entityId = ReverseTerrainPosition._get(coord);
+  return entityId.exists() ? entityId.getObjectType() : TerrainLib._getBlockType(coord);
 }
 
 /// @notice Get the object type id at a given coordinate.
@@ -36,13 +36,13 @@ function safeGetObjectTypeAt(Vec3 coord) view returns (ObjectType) {
 }
 
 function getEntityAt(Vec3 coord) view returns (EntityId, ObjectType) {
-  EntityId entityId = ReversePosition._get(coord);
+  EntityId entityId = ReverseTerrainPosition._get(coord);
   ObjectType objectType;
   if (!entityId.exists()) {
     objectType = TerrainLib._getBlockType(coord);
     require(!objectType.isNull(), "Chunk not explored yet");
   } else {
-    objectType = EntityObjectType._get(entityId);
+    objectType = entityId.getObjectType();
   }
 
   return (entityId, objectType);
@@ -59,8 +59,8 @@ function getOrCreateEntityAt(Vec3 coord) returns (EntityId, ObjectType) {
 
 function createEntityAt(Vec3 coord, ObjectType objectType) returns (EntityId) {
   EntityId entityId = createEntity(objectType);
-  Position._set(entityId, coord);
-  ReversePosition._set(coord, entityId);
+  EntityPosition._set(entityId, coord);
+  ReverseTerrainPosition._set(coord, entityId);
   return entityId;
 }
 
@@ -80,6 +80,6 @@ function getMovableEntityAt(Vec3 coord) view returns (EntityId) {
 }
 
 function setMovableEntityAt(Vec3 coord, EntityId entityId) {
-  MovablePosition._set(entityId, coord);
+  EntityPosition._set(entityId, coord);
   ReverseMovablePosition._set(coord, entityId);
 }

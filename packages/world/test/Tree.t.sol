@@ -16,7 +16,7 @@ import { SeedGrowth } from "../src/codegen/tables/SeedGrowth.sol";
 
 import { LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
-import { MovablePosition, ReversePosition } from "../src/utils/Vec3Storage.sol";
+import { EntityPosition, ReverseTerrainPosition } from "../src/utils/Vec3Storage.sol";
 
 import {
   BUILD_ENERGY_COST,
@@ -74,7 +74,7 @@ contract TreeTest is DustTest {
     endGasReport();
 
     // Verify seeds were planted
-    EntityId seedEntityId = ReversePosition.get(seedCoord);
+    EntityId seedEntityId = ReverseTerrainPosition.get(seedCoord);
     assertTrue(seedEntityId.exists(), "Seed entity doesn't exist after planting");
     assertEq(EntityObjectType.get(seedEntityId), ObjectTypes.OakSapling, "Oak seed was not planted correctly");
 
@@ -135,7 +135,7 @@ contract TreeTest is DustTest {
     world.build(aliceEntityId, seedCoord, 0, "");
 
     // Verify seed was planted
-    EntityId seedEntityId = ReversePosition.get(seedCoord);
+    EntityId seedEntityId = ReverseTerrainPosition.get(seedCoord);
     assertTrue(seedEntityId.exists(), "Seed entity doesn't exist after planting");
 
     // Get full grown time
@@ -160,7 +160,7 @@ contract TreeTest is DustTest {
     // Verify trunk exists
     for (int32 i = 0; i < height; i++) {
       Vec3 checkCoord = seedCoord + vec3(0, i, 0);
-      EntityId logEntityId = ReversePosition.get(checkCoord);
+      EntityId logEntityId = ReverseTerrainPosition.get(checkCoord);
       assertTrue(logEntityId.exists(), "Log entity doesn't exist");
       assertEq(EntityObjectType.get(logEntityId), ObjectTypes.OakLog, "Entity is not oak log");
     }
@@ -178,7 +178,7 @@ contract TreeTest is DustTest {
     leafPositions[4] = seedCoord + vec3(0, height, 0); // Top leaf
 
     for (uint256 i = 0; i < leafPositions.length; i++) {
-      EntityId leafEntityId = ReversePosition.get(leafPositions[i]);
+      EntityId leafEntityId = ReverseTerrainPosition.get(leafPositions[i]);
       assertTrue(leafEntityId.exists(), "Leaf entity doesn't exist");
       assertEq(EntityObjectType.get(leafEntityId), ObjectTypes.OakLeaf, "Entity is not oak leaf");
     }
@@ -204,7 +204,7 @@ contract TreeTest is DustTest {
     world.build(aliceEntityId, seedCoord, 0, "");
 
     // Verify seed was planted
-    EntityId seedEntityId = ReversePosition.get(seedCoord);
+    EntityId seedEntityId = ReverseTerrainPosition.get(seedCoord);
     assertTrue(seedEntityId.exists(), "Seed entity doesn't exist after planting");
 
     // Get full grown time
@@ -224,7 +224,7 @@ contract TreeTest is DustTest {
 
     // Verify no other logs or leaves were created
     Vec3 aboveObstruction = obstructionCoord + vec3(0, 1, 0);
-    EntityId aboveEntity = ReversePosition.get(aboveObstruction);
+    EntityId aboveEntity = ReverseTerrainPosition.get(aboveObstruction);
     assertFalse(
       aboveEntity.exists() && EntityObjectType.get(aboveEntity) == ObjectTypes.OakLog, "Tree grew beyond obstruction"
     );
@@ -246,7 +246,7 @@ contract TreeTest is DustTest {
     world.build(aliceEntityId, seedCoord, 0, "");
 
     // Verify seed was planted
-    EntityId seedEntityId = ReversePosition.get(seedCoord);
+    EntityId seedEntityId = ReverseTerrainPosition.get(seedCoord);
     assertTrue(seedEntityId.exists(), "Seed entity doesn't exist after planting");
 
     // Get full grown time
@@ -289,7 +289,7 @@ contract TreeTest is DustTest {
     world.build(aliceEntityId, seedCoord, 0, "");
 
     // Verify seed was planted
-    EntityId seedEntityId = ReversePosition.get(seedCoord);
+    EntityId seedEntityId = ReverseTerrainPosition.get(seedCoord);
     assertTrue(seedEntityId.exists(), "Seed entity doesn't exist after planting");
 
     // Get initial energy
@@ -341,7 +341,7 @@ contract TreeTest is DustTest {
     Vec3 leafCoord = vec3(playerCoord.x() + 1, playerCoord.y() + 1, playerCoord.z());
     setObjectAtCoord(leafCoord, ObjectTypes.OakLeaf);
 
-    EntityId leafEntityId = ReversePosition.get(leafCoord);
+    EntityId leafEntityId = ReverseTerrainPosition.get(leafCoord);
     assertTrue(leafEntityId.exists(), "Leaf entity doesn't exist");
 
     // Set up chunk commitment for randomness when mining
@@ -391,7 +391,7 @@ contract TreeTest is DustTest {
       world.build(aliceEntityId, seedCoord, 0, "");
 
       // Verify seed was planted
-      EntityId seedEntityId = ReversePosition.get(seedCoord);
+      EntityId seedEntityId = ReverseTerrainPosition.get(seedCoord);
       assertTrue(seedEntityId.exists(), "Seed entity doesn't exist after planting");
       assertEq(EntityObjectType.get(seedEntityId), seedTypes[i], "Seed was not planted correctly");
 
@@ -411,7 +411,7 @@ contract TreeTest is DustTest {
 
       // Verify some leaves exist
       Vec3 leafPos = seedCoord + vec3(1, 3, 0);
-      EntityId leafEntityId = ReversePosition.get(leafPos);
+      EntityId leafEntityId = ReverseTerrainPosition.get(leafPos);
       if (leafEntityId.exists()) {
         assertEq(EntityObjectType.get(leafEntityId), treeData.leafType, "Leaf is not the correct type");
       }
@@ -434,7 +434,7 @@ contract TreeTest is DustTest {
     world.build(aliceEntityId, seedCoord, 0, "");
 
     // Verify seed was planted
-    EntityId seedEntityId = ReversePosition.get(seedCoord);
+    EntityId seedEntityId = ReverseTerrainPosition.get(seedCoord);
     uint128 fullyGrownAt = SeedGrowth.getFullyGrownAt(seedEntityId);
 
     // Try to grow before it's ready

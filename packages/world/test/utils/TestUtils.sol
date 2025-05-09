@@ -124,7 +124,7 @@ library TestInventoryUtils {
   }
 
   function getEntitySlot(EntityId owner, EntityId entityId) public asWorld returns (uint16) {
-    ObjectType objectType = EntityObjectType._get(entityId);
+    ObjectType objectType = entityId.getObjectType();
     uint16[] memory slots = InventoryTypeSlots._get(owner, objectType);
     for (uint256 i = 0; i < slots.length; i++) {
       EntityId slotEntityId = InventorySlot._getEntityId(owner, slots[i]);

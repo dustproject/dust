@@ -4,7 +4,6 @@ pragma solidity >=0.8.24;
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
-import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Fragment } from "../codegen/tables/Fragment.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
@@ -15,7 +14,7 @@ import { getEntityAt } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
-import { LocalEnergyPool, MovablePosition, Position } from "../utils/Vec3Storage.sol";
+import { LocalEnergyPool } from "../utils/Vec3Storage.sol";
 
 import { PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
@@ -61,7 +60,7 @@ function updateMachineEnergy(EntityId entityId) returns (EnergyData memory, uint
   (EnergyData memory energyData, uint128 energyDrained, uint128 depletedTime) = getLatestEnergyData(entityId);
 
   if (energyDrained > 0) {
-    addEnergyToLocalPool(Position._get(entityId), energyDrained);
+    addEnergyToLocalPool(entityId.getPosition(), energyDrained);
   }
 
   uint128 currentDepletedTime = Machine._getDepletedTime(entityId);
@@ -77,7 +76,7 @@ function updateMachineEnergy(EntityId entityId) returns (EnergyData memory, uint
 /// @dev Used within systems before performing an action
 function updatePlayerEnergy(EntityId player) returns (EnergyData memory) {
   (EnergyData memory energyData, uint128 energyDrained,) = getLatestEnergyData(player);
-  Vec3 coord = MovablePosition._get(player);
+  Vec3 coord = player.getPosition();
 
   if (energyDrained > 0) {
     addEnergyToLocalPool(coord, energyDrained);
@@ -139,7 +138,7 @@ function addEnergyToLocalPool(Vec3 coord, uint128 numToAdd) returns (uint128) {
 
 function transferEnergyToPool(EntityId entityId, uint128 amount) returns (uint128, uint128) {
   Vec3 coord = entityId.getPosition();
-  ObjectType objectType = EntityObjectType._get(entityId);
+  ObjectType objectType = entityId.getObjectType();
 
   uint128 newEntityEnergy;
   if (objectType == ObjectTypes.Player) {

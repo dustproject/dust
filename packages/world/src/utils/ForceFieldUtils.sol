@@ -10,7 +10,7 @@ import { Machine } from "../codegen/tables/Machine.sol";
 
 import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
 import { getUniqueEntity } from "../utils/EntityUtils.sol";
-import { FragmentPosition, Position, ReverseFragmentPosition } from "../utils/Vec3Storage.sol";
+import { EntityPosition, ReverseFragmentPosition } from "../utils/Vec3Storage.sol";
 
 import { MACHINE_ENERGY_DRAIN_RATE } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
@@ -42,7 +42,7 @@ library ForceFieldUtils {
     // Create a new fragment entity if needed
     if (!fragment.exists()) {
       fragment = getUniqueEntity();
-      FragmentPosition._set(fragment, fragmentCoord);
+      EntityPosition._set(fragment, fragmentCoord);
       ReverseFragmentPosition._set(fragmentCoord, fragment);
       EntityObjectType._set(fragment, ObjectTypes.Fragment);
     }
