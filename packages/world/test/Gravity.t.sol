@@ -136,6 +136,36 @@ contract GravityTest is DustTest {
     assertPlayerIsDead(aliceEntityId, playerCoord);
   }
 
+  function testMineFallOnWater() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Set player energy to exactly enough for a mine, but not for a fall
+    uint128 exactEnergy = MINE_ENERGY_COST + 1;
+    Energy.set(
+      aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: exactEnergy, drainRate: 0 })
+    );
+
+    // Create a scenario where after mining, player will fall and the fall energy cost will kill them
+    Vec3 mineCoord = playerCoord - vec3(0, 1, 0);
+    ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
+    ObjectPhysics.setMass(mineObjectType, MINE_ENERGY_COST);
+
+    // Set up a deep pit underneath
+    setTerrainAtCoord(mineCoord - vec3(0, 1, 0), ObjectTypes.Air);
+    setTerrainAtCoord(mineCoord - vec3(0, 2, 0), ObjectTypes.Air);
+    setTerrainAtCoord(mineCoord - vec3(0, 3, 0), ObjectTypes.Air);
+    setTerrainAtCoord(mineCoord - vec3(0, 4, 0), ObjectTypes.Water);
+    setTerrainAtCoord(mineCoord - vec3(0, 5, 0), ObjectTypes.Dirt);
+
+    // Mining should use MINE_ENERGY_COST, and falling should require PLAYER_FALL_ENERGY_COST,
+    // which the player doesn't have enough for, resulting in death
+    vm.prank(alice);
+    world.mine(aliceEntityId, mineCoord, "");
+
+    // Verify player is dead
+    assertGt(Energy.getEnergy(aliceEntityId), 0, "Player shouldn't have died");
+  }
+
   function testMineStackedPlayers() public {
     (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupFlatChunkWithPlayer();
 

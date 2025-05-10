@@ -19,7 +19,9 @@ import { ObjectTypes } from "../../ObjectType.sol";
 
 import { Vec3, vec3 } from "../../Vec3.sol";
 import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../../utils/EnergyUtils.sol";
-import { getMovableEntityAt, safeGetObjectTypeAt, setMovableEntityAt } from "../../utils/EntityUtils.sol";
+import {
+  getMovableEntityAt, getObjectTypeAt, safeGetObjectTypeAt, setMovableEntityAt
+} from "../../utils/EntityUtils.sol";
 
 library MoveLib {
   function _requireValidMove(Vec3 baseOldCoord, Vec3 baseNewCoord) internal view {
@@ -49,14 +51,8 @@ library MoveLib {
 
   function _gravityApplies(Vec3 playerCoord) internal view returns (bool) {
     Vec3 belowCoord = playerCoord - vec3(0, 1, 0);
-
-    ObjectType belowObjectType = safeGetObjectTypeAt(belowCoord);
-    // Players can swim in water so we don't want to apply gravity to them
-    if (belowObjectType == ObjectTypes.Water || !belowObjectType.isPassThrough()) {
-      return false;
-    }
-
-    return !getMovableEntityAt(belowCoord).exists();
+    bool onSolidBlock = !safeGetObjectTypeAt(belowCoord).isPassThrough() || getMovableEntityAt(belowCoord).exists();
+    return !onSolidBlock && getObjectTypeAt(playerCoord) != ObjectTypes.Water;
   }
 
   function _computeGravityResult(Vec3 coord, uint16 initialFallHeight) private view returns (Vec3, uint128) {
@@ -65,6 +61,11 @@ library MoveLib {
     while (_gravityApplies(current)) {
       current = current - vec3(0, 1, 0);
       currentFallHeight++;
+    }
+
+    // If currently on water, don't apply fall damage
+    if (getObjectTypeAt(current) == ObjectTypes.Water) {
+      return (current, 0);
     }
 
     uint16 totalFallHeight = initialFallHeight + currentFallHeight;
@@ -104,6 +105,7 @@ library MoveLib {
       uint128 stepCost = MOVE_ENERGY_COST;
 
       gravityApplies = _gravityApplies(nextBaseCoord);
+      // TODO: don't apply damage if landing on water
       if (gravityApplies) {
         if (nextBaseCoord.y() > oldBaseCoord.y()) {
           numJumps++;

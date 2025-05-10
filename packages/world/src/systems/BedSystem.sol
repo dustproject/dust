@@ -7,8 +7,6 @@ import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
-import { Fragment } from "../codegen/tables/Fragment.sol";
-import { Machine } from "../codegen/tables/Machine.sol";
 import { Player } from "../codegen/tables/Player.sol";
 import { PlayerBed } from "../codegen/tables/PlayerBed.sol";
 
@@ -30,10 +28,8 @@ import { SleepNotification, WakeupNotification, notify } from "../utils/NotifUti
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { MoveLib } from "./libraries/MoveLib.sol";
-import { TerrainLib } from "./libraries/TerrainLib.sol";
 
 import { EntityId } from "../EntityId.sol";
-import { ProgramId } from "../ProgramId.sol";
 import { ISleepHook, IWakeupHook } from "../ProgramInterfaces.sol";
 import { Vec3 } from "../Vec3.sol";
 
@@ -103,7 +99,6 @@ contract BedSystem is System {
 
     Vec3 bedCoord = bed.getPosition();
 
-    // TODO: use a different constant?
     require(bedCoord.inSurroundingCube(dropCoord, MAX_RESPAWN_HALF_WIDTH), "Drop location is too far from bed");
 
     (EntityId drop, ObjectType objectType) = getOrCreateEntityAt(dropCoord);
@@ -118,7 +113,6 @@ contract BedSystem is System {
     BedLib.transferInventory(player, drop);
 
     PlayerUtils.removePlayerFromBed(player, bed);
-    // TODO: Should we safecall the program?
   }
 }
 
