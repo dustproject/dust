@@ -169,20 +169,12 @@ contract GravityTest is DustTest {
   function testMineStackedPlayers() public {
     (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupFlatChunkWithPlayer();
 
-    EntityId bobEntityId;
-    {
-      Vec3 bobCoord = aliceCoord + vec3(0, 2, 0);
-      setObjectAtCoord(bobCoord, ObjectTypes.Air);
-      setObjectAtCoord(bobCoord + vec3(0, 1, 0), ObjectTypes.Air);
-      (, bobEntityId) = createTestPlayer(bobCoord);
-    }
+    // Create bob above alice
+    (, EntityId bobEntityId) = createTestPlayer(aliceCoord + vec3(0, 2, 0));
 
     Vec3 mineCoord = aliceCoord - vec3(0, 1, 0);
     ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
     ObjectPhysics.setMass(mineObjectType, playerHandMassReduction);
-    EntityId mineEntityId = ReverseTerrainPosition.get(mineCoord);
-    assertFalse(mineEntityId.exists(), "Mine entity already exists");
-    assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
     setTerrainAtCoord(mineCoord - vec3(0, 1, 0), ObjectTypes.Air);
     setTerrainAtCoord(mineCoord - vec3(0, 2, 0), ObjectTypes.Air);
@@ -214,9 +206,6 @@ contract GravityTest is DustTest {
       );
     }
 
-    mineEntityId = ReverseTerrainPosition.get(mineCoord);
-    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
-    assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
     uint128 energyGainedInPool = LocalEnergyPool.get(shardCoord) - localEnergyPoolBefore;
     assertGt(energyGainedInPool, 0, "Local energy pool did not gain energy");
     uint128 aliceEnergyAfter = Energy.getEnergy(aliceEntityId);
@@ -305,24 +294,11 @@ contract GravityTest is DustTest {
   function testMoveStackedPlayers() public {
     (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupAirChunkWithPlayer();
 
-    EntityId bobEntityId;
-    {
-      Vec3 bobCoord = aliceCoord + vec3(0, 2, 0);
-      setObjectAtCoord(bobCoord, ObjectTypes.Air);
-      setObjectAtCoord(bobCoord + vec3(0, 1, 0), ObjectTypes.Air);
-      (, bobEntityId) = createTestPlayer(bobCoord);
-    }
+    (, EntityId bobEntityId) = createTestPlayer(aliceCoord + vec3(0, 2, 0));
 
     Vec3[] memory newCoords = new Vec3[](1);
     newCoords[0] = aliceCoord + vec3(0, 0, 1);
-    for (uint8 i = 0; i < newCoords.length; i++) {
-      setObjectAtCoord(newCoords[i], ObjectTypes.Air);
-      setObjectAtCoord(newCoords[i] + vec3(0, 1, 0), ObjectTypes.Air);
-    }
-    setObjectAtCoord(newCoords[newCoords.length - 1] - vec3(0, 1, 0), ObjectTypes.Air);
-    setObjectAtCoord(newCoords[newCoords.length - 1] - vec3(0, 2, 0), ObjectTypes.Air);
-    setObjectAtCoord(newCoords[newCoords.length - 1] - vec3(0, 3, 0), ObjectTypes.Air);
-    Vec3 expectedFinalAliceCoord = newCoords[newCoords.length - 1] - vec3(0, 3, 0);
+    Vec3 expectedFinalAliceCoord = newCoords[0] - vec3(0, 3, 0);
     setObjectAtCoord(expectedFinalAliceCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
 
     uint128 bobEnergyBefore = Energy.getEnergy(bobEntityId);

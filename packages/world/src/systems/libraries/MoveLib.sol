@@ -70,7 +70,7 @@ library MoveLib {
       addEnergyToLocalPool(finalCoord, totalCost);
     }
 
-    _handleAbove(finalCoord);
+    _handleAbove(playerCoord);
   }
 
   function runGravity(Vec3 playerCoord) public {
@@ -96,7 +96,7 @@ library MoveLib {
       addEnergyToLocalPool(finalCoord, totalCost);
     }
 
-    _handleAbove(finalCoord);
+    _handleAbove(playerCoord);
   }
 
   function _requireValidMove(Vec3 baseOldCoord, Vec3 baseNewCoord) internal view {
@@ -109,7 +109,6 @@ library MoveLib {
 
       ObjectType newObjectType = safeGetObjectTypeAt(newCoord);
       require(newObjectType.isPassThrough(), "Cannot move through a non-passable block");
-
       require(!getMovableEntityAt(newCoord).exists(), "Cannot move through a player");
     }
   }
