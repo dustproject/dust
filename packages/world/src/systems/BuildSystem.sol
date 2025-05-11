@@ -84,7 +84,7 @@ contract BuildSystem is System {
 
     Vec3[] memory moveCoords = new Vec3[](1);
     moveCoords[0] = coord + vec3(0, 1, 0);
-    MoveLib.moveWithoutGravity(caller, coord, moveCoords);
+    MoveLib.moveWithoutGravity(coord, moveCoords);
 
     notify(caller, MoveNotification({ moveCoords: moveCoords }));
 

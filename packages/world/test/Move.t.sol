@@ -195,14 +195,11 @@ contract MoveTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     uint32 numFalls = PLAYER_FALL_DAMAGE_THRESHOLD - 1;
-    Vec3[] memory newCoords = new Vec3[](numFalls + 1);
-    for (uint32 i = 0; i < numFalls; i++) {
-      Vec3 airCoord = playerCoord + vec3(0, -int32(i + 1), 1);
-      setObjectAtCoord(airCoord, ObjectTypes.Air);
-      newCoords[i] = airCoord + vec3(0, 1, 0);
-    }
-    Vec3 grassCoord = playerCoord + vec3(0, -int32(numFalls + 1), 1);
-    newCoords[numFalls] = grassCoord + vec3(0, 1, 0);
+    Vec3[] memory newCoords = new Vec3[](1);
+    newCoords[0] = playerCoord + vec3(1, 0, 0);
+
+    Vec3 grassCoord = newCoords[0] - vec3(0, 1, 0).mul(int32(numFalls));
+    // Set grass below the new path
     setObjectAtCoord(grassCoord, ObjectTypes.Grass);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
@@ -220,11 +217,7 @@ contract MoveTest is DustTest {
     uint128 playerEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     // Fall damage is greater than the move energy cost
     assertGt(PLAYER_FALL_ENERGY_COST, MOVE_ENERGY_COST, "Fall energy cost is not greater than the move energy cost");
-    assertEq(
-      playerEnergyLost,
-      MOVE_ENERGY_COST * newCoords.length,
-      "Player energy lost is not greater than the move energy cost"
-    );
+    assertEq(playerEnergyLost, MOVE_ENERGY_COST, "Player energy lost is not greater than the move energy cost");
   }
 
   function testMoveFallDamage() public {

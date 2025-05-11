@@ -362,7 +362,7 @@ contract GravityTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     // Set player energy to exactly enough for a move, but not for a fall
-    uint128 exactEnergy = MOVE_ENERGY_COST + 1;
+    uint128 exactEnergy = PLAYER_FALL_ENERGY_COST + MOVE_ENERGY_COST;
     Energy.set(
       aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: exactEnergy, drainRate: 0 })
     );
@@ -378,8 +378,7 @@ contract GravityTest is DustTest {
     setObjectAtCoord(newCoords[0] - vec3(0, 1, 0), ObjectTypes.Air);
     setObjectAtCoord(newCoords[0] - vec3(0, 2, 0), ObjectTypes.Air);
     setObjectAtCoord(newCoords[0] - vec3(0, 3, 0), ObjectTypes.Air);
-    setObjectAtCoord(newCoords[0] - vec3(0, 4, 0), ObjectTypes.Air);
-    setObjectAtCoord(newCoords[0] - vec3(0, 5, 0), ObjectTypes.Dirt);
+    setObjectAtCoord(newCoords[0] - vec3(0, 4, 0), ObjectTypes.Dirt);
 
     // Move to destination which should trigger fatal fall
     vm.prank(alice);
