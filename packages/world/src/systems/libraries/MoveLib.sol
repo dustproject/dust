@@ -2,15 +2,14 @@
 pragma solidity >=0.8.24;
 
 import { Energy } from "../../codegen/tables/Energy.sol";
-
 import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
 
 import {
   MAX_PLAYER_GLIDES,
   MAX_PLAYER_JUMPS,
   MOVE_ENERGY_COST,
-  PLAYER_FALL_DAMAGE_THRESHOLD,
-  PLAYER_FALL_ENERGY_COST
+  PLAYER_FALL_ENERGY_COST,
+  PLAYER_SAFE_FALL_DISTANCE
 } from "../../Constants.sol";
 import { EntityId } from "../../EntityId.sol";
 import { ObjectType } from "../../ObjectType.sol";
@@ -19,213 +18,74 @@ import { ObjectTypes } from "../../ObjectType.sol";
 
 import { Vec3, vec3 } from "../../Vec3.sol";
 import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../../utils/EnergyUtils.sol";
-import { getMovableEntityAt, safeGetObjectTypeAt, setMovableEntityAt } from "../../utils/EntityUtils.sol";
+import {
+  getMovableEntityAt, getObjectTypeAt, safeGetObjectTypeAt, setMovableEntityAt
+} from "../../utils/EntityUtils.sol";
 
 library MoveLib {
-  function _requireValidMove(Vec3 baseOldCoord, Vec3 baseNewCoord) internal view {
-    require(baseOldCoord.inSurroundingCube(baseNewCoord, 1), "New coord is too far from old coord");
+  function moveWithoutGravity(Vec3 playerCoord, Vec3[] memory newBaseCoords) public {
+    EntityId[] memory playerEntityIds = _removePlayerPosition(playerCoord);
+    EntityId player = playerEntityIds[0];
 
-    Vec3[] memory newPlayerCoords = ObjectTypes.Player.getRelativeCoords(baseNewCoord);
+    uint128 currentEnergy = Energy._getEnergy(player);
 
-    for (uint256 i = 0; i < newPlayerCoords.length; i++) {
-      Vec3 newCoord = newPlayerCoords[i];
-
-      ObjectType newObjectType = safeGetObjectTypeAt(newCoord);
-      require(newObjectType.isPassThrough(), "Cannot move through a non-passable block");
-
-      require(!getMovableEntityAt(newCoord).exists(), "Cannot move through a player");
-    }
-  }
-
-  function _getPlayers(EntityId basePlayer, Vec3[] memory playerCoords) internal view returns (EntityId[] memory) {
-    EntityId[] memory players = new EntityId[](playerCoords.length);
-    players[0] = basePlayer;
-    // Only iterate through relative schema coords
-    for (uint256 i = 1; i < playerCoords.length; i++) {
-      players[i] = getMovableEntityAt(playerCoords[i]);
-    }
-    return players;
-  }
-
-  function _gravityApplies(Vec3 playerCoord) internal view returns (bool) {
-    Vec3 belowCoord = playerCoord - vec3(0, 1, 0);
-
-    ObjectType belowObjectType = safeGetObjectTypeAt(belowCoord);
-    // Players can swim in water so we don't want to apply gravity to them
-    if (belowObjectType == ObjectTypes.Water || !belowObjectType.isPassThrough()) {
-      return false;
-    }
-
-    return !getMovableEntityAt(belowCoord).exists();
-  }
-
-  function _computeGravityResult(Vec3 coord, uint16 initialFallHeight) private view returns (Vec3, uint128) {
-    uint16 currentFallHeight = 0;
-    Vec3 current = coord;
-    while (_gravityApplies(current)) {
-      current = current - vec3(0, 1, 0);
-      currentFallHeight++;
-    }
-
-    uint16 totalFallHeight = initialFallHeight + currentFallHeight;
-
-    uint128 cost = 0;
-    if (totalFallHeight >= PLAYER_FALL_DAMAGE_THRESHOLD) {
-      // If the player was already over the threshold, apply cost for each new fall
-      if (initialFallHeight >= PLAYER_FALL_DAMAGE_THRESHOLD) {
-        cost = PLAYER_FALL_ENERGY_COST * currentFallHeight;
-      } else {
-        cost = PLAYER_FALL_ENERGY_COST * (totalFallHeight - PLAYER_FALL_DAMAGE_THRESHOLD + 1);
-      }
-    }
-
-    return (current, cost);
-  }
-
-  /**
-   * Calculate total energy cost and final path coordinate
-   */
-  function _computePathResult(Vec3 currentBaseCoord, Vec3[] memory newBaseCoords, uint128 currentEnergy)
-    internal
-    view
-    returns (Vec3, uint128, uint16, bool)
-  {
-    uint128 totalCost = 0;
-    uint16 numJumps = 0;
-    uint16 numGlides = 0;
-    uint16 currentFallHeight = 0;
-    bool gravityApplies = false;
-
-    Vec3 oldBaseCoord = currentBaseCoord;
+    uint128 totalCost;
+    Vec3 current = playerCoord;
     for (uint256 i = 0; i < newBaseCoords.length; i++) {
-      Vec3 nextBaseCoord = newBaseCoords[i];
-      _requireValidMove(oldBaseCoord, nextBaseCoord);
-
-      uint128 stepCost = MOVE_ENERGY_COST;
-
-      gravityApplies = _gravityApplies(nextBaseCoord);
-      if (gravityApplies) {
-        if (nextBaseCoord.y() > oldBaseCoord.y()) {
-          numJumps++;
-          require(numJumps <= MAX_PLAYER_JUMPS, "Cannot jump more than 3 blocks");
-        } else if (nextBaseCoord.y() < oldBaseCoord.y()) {
-          currentFallHeight++;
-          if (currentFallHeight >= PLAYER_FALL_DAMAGE_THRESHOLD) {
-            stepCost = PLAYER_FALL_ENERGY_COST;
-          }
-          numGlides = 0;
-        } else {
-          numGlides++;
-          require(numGlides <= MAX_PLAYER_GLIDES, "Cannot glide more than 10 blocks");
-        }
-      } else {
-        numJumps = 0;
-        numGlides = 0;
-        currentFallHeight = 0;
-      }
-
-      totalCost += stepCost;
-
-      oldBaseCoord = nextBaseCoord;
+      Vec3 next = newBaseCoords[i];
+      _requireValidMove(current, next);
+      current = next;
+      totalCost += MOVE_ENERGY_COST;
 
       if (totalCost >= currentEnergy) {
+        totalCost = currentEnergy;
         break;
       }
     }
 
-    return (oldBaseCoord, totalCost, currentFallHeight, gravityApplies);
-  }
-
-  function moveWithoutGravity(EntityId player, Vec3 playerCoord, Vec3[] memory newBaseCoords) public {
-    Vec3[] memory playerCoords = ObjectTypes.Player.getRelativeCoords(playerCoord);
-    EntityId[] memory players = _getPlayers(player, playerCoords);
-
-    // Remove the current player from the grid
-    for (uint256 i = 0; i < playerCoords.length; i++) {
-      ReverseMovablePosition._deleteRecord(playerCoords[i]);
-    }
-
-    uint128 currentEnergy = Energy._getEnergy(player);
-
-    (Vec3 finalCoord, uint128 totalCost,,) = _computePathResult(playerCoord, newBaseCoords, currentEnergy);
-
-    if (totalCost > currentEnergy) {
-      totalCost = currentEnergy;
-    }
-
-    Vec3[] memory newPlayerCoords = ObjectTypes.Player.getRelativeCoords(finalCoord);
-    for (uint256 i = 0; i < newPlayerCoords.length; i++) {
-      setMovableEntityAt(newPlayerCoords[i], players[i]);
-    }
+    _setPlayerPosition(playerEntityIds, current);
 
     if (totalCost > 0) {
-      decreasePlayerEnergy(player, finalCoord, totalCost);
-      addEnergyToLocalPool(finalCoord, totalCost);
+      decreasePlayerEnergy(player, current, totalCost);
+      addEnergyToLocalPool(current, totalCost);
     }
+
+    _handleAbove(player, playerCoord);
   }
 
-  function move(EntityId player, Vec3 playerCoord, Vec3[] memory newBaseCoords) public {
-    Vec3[] memory playerCoords = ObjectTypes.Player.getRelativeCoords(playerCoord);
-    EntityId[] memory players = _getPlayers(player, playerCoords);
-
-    // Remove the current player from the grid
-    for (uint256 i = 0; i < playerCoords.length; i++) {
-      ReverseMovablePosition._deleteRecord(playerCoords[i]);
-    }
+  function move(Vec3 playerCoord, Vec3[] memory newBaseCoords) public {
+    EntityId[] memory playerEntityIds = _removePlayerPosition(playerCoord);
+    EntityId player = playerEntityIds[0];
 
     uint128 currentEnergy = Energy._getEnergy(player);
 
-    (Vec3 finalCoord, uint128 cost, uint16 currentFallHeight, bool gravityApplies) =
-      _computePathResult(playerCoord, newBaseCoords, currentEnergy);
-
-    uint128 totalCost = cost;
-    if (gravityApplies) {
-      (finalCoord, cost) = _computeGravityResult(finalCoord, currentFallHeight);
-      totalCost += cost;
-    }
-
-    Vec3[] memory newPlayerCoords = ObjectTypes.Player.getRelativeCoords(finalCoord);
-    for (uint256 i = 0; i < newPlayerCoords.length; i++) {
-      setMovableEntityAt(newPlayerCoords[i], players[i]);
-    }
+    (Vec3 finalCoord, uint128 totalCost) = _computePathResult(playerCoord, newBaseCoords, currentEnergy);
 
     if (totalCost > currentEnergy) {
       totalCost = currentEnergy;
     }
+
+    _setPlayerPosition(playerEntityIds, finalCoord);
 
     if (totalCost > 0) {
       decreasePlayerEnergy(player, finalCoord, totalCost);
       addEnergyToLocalPool(finalCoord, totalCost);
     }
 
-    Vec3 aboveCoord = playerCoord + vec3(0, 2, 0);
-    EntityId above = getMovableEntityAt(aboveCoord);
-    // Note: currently it is not possible for the above player to not be the base entity,
-    // but if we add other types of movable entities we should check that it is a base entity
-    if (above.exists()) {
-      runGravity(above, aboveCoord);
-    }
+    _handleAbove(player, playerCoord);
   }
 
-  function runGravity(EntityId player, Vec3 playerCoord) public {
+  function runGravity(Vec3 playerCoord) public {
     if (!_gravityApplies(playerCoord)) {
       return;
     }
 
-    Vec3[] memory playerCoords = ObjectTypes.Player.getRelativeCoords(playerCoord);
-    EntityId[] memory players = _getPlayers(player, playerCoords);
-
-    // Remove the current player from the grid
-    for (uint256 i = 0; i < playerCoords.length; i++) {
-      ReverseMovablePosition._deleteRecord(playerCoords[i]);
-    }
+    EntityId[] memory playerEntityIds = _removePlayerPosition(playerCoord);
+    EntityId player = playerEntityIds[0];
 
     (Vec3 finalCoord, uint128 totalCost) = _computeGravityResult(playerCoord, 0);
 
-    Vec3[] memory newPlayerCoords = ObjectTypes.Player.getRelativeCoords(finalCoord);
-    for (uint256 i = 0; i < newPlayerCoords.length; i++) {
-      setMovableEntityAt(newPlayerCoords[i], players[i]);
-    }
+    _setPlayerPosition(playerEntityIds, finalCoord);
 
     uint128 currentEnergy = updatePlayerEnergy(player).energy;
 
@@ -238,12 +98,150 @@ library MoveLib {
       addEnergyToLocalPool(finalCoord, totalCost);
     }
 
+    _handleAbove(player, playerCoord);
+  }
+
+  function _requireValidMove(Vec3 baseOldCoord, Vec3 baseNewCoord) internal view {
+    require(baseOldCoord.inSurroundingCube(baseNewCoord, 1), "New coord is too far from old coord");
+
+    Vec3[] memory newPlayerCoords = ObjectTypes.Player.getRelativeCoords(baseNewCoord);
+
+    for (uint256 i = 0; i < newPlayerCoords.length; i++) {
+      Vec3 newCoord = newPlayerCoords[i];
+
+      ObjectType newObjectType = safeGetObjectTypeAt(newCoord);
+      require(newObjectType.isPassThrough(), "Cannot move through a non-passable block");
+      require(!getMovableEntityAt(newCoord).exists(), "Cannot move through a player");
+    }
+  }
+
+  function _gravityApplies(Vec3 playerCoord) internal view returns (bool) {
+    Vec3 belowCoord = playerCoord - vec3(0, 1, 0);
+    bool onSolidBlock = !safeGetObjectTypeAt(belowCoord).isPassThrough() || getMovableEntityAt(belowCoord).exists();
+    return !onSolidBlock && getObjectTypeAt(playerCoord) != ObjectTypes.Water;
+  }
+
+  function _computeGravityResult(Vec3 coord, uint16 initialFallHeight) private view returns (Vec3, uint128) {
+    uint16 currentFallHeight = initialFallHeight;
+    Vec3 current = coord;
+    while (_gravityApplies(current)) {
+      current = current - vec3(0, 1, 0);
+      currentFallHeight++;
+    }
+
+    // If currently on water, don't apply fall damage
+    if (getObjectTypeAt(current) == ObjectTypes.Water) {
+      return (current, 0);
+    }
+
+    uint128 cost = 0;
+    if (currentFallHeight > PLAYER_SAFE_FALL_DISTANCE) {
+      cost = PLAYER_FALL_ENERGY_COST * (currentFallHeight - PLAYER_SAFE_FALL_DISTANCE);
+    }
+
+    return (current, cost);
+  }
+
+  /**
+   * Calculate total energy cost and final path coordinate
+   */
+  function _computePathResult(Vec3 current, Vec3[] memory newBaseCoords, uint128 currentEnergy)
+    internal
+    view
+    returns (Vec3, uint128)
+  {
+    uint128 cost = 0;
+    uint16 jumps = 0;
+    uint16 glides = 0;
+    uint16 fallHeight = 0;
+
+    bool gravityApplies = false;
+    uint128 fallDamage = 0;
+
+    for (uint256 i = 0; i < newBaseCoords.length && cost < currentEnergy; i++) {
+      Vec3 next = newBaseCoords[i];
+      _requireValidMove(current, next);
+
+      gravityApplies = _gravityApplies(next);
+
+      int32 dy = next.y() - current.y();
+
+      // Only count as fall when gravity doesn't apply in current coord
+      if (dy < 0 && _gravityApplies(current)) {
+        // For falls, cost will be computed upon landing
+        ++fallHeight;
+        glides = 0;
+      } else {
+        // For all other moves, apply regular move cost
+        if (dy > 0) {
+          ++jumps;
+          require(jumps <= MAX_PLAYER_JUMPS, "Cannot jump more than 3 blocks");
+        } else if (gravityApplies) {
+          ++glides;
+          require(glides <= MAX_PLAYER_GLIDES, "Cannot glide more than 10 blocks");
+        }
+
+        cost += MOVE_ENERGY_COST;
+      }
+
+      if (!gravityApplies) {
+        if (fallHeight > PLAYER_SAFE_FALL_DISTANCE && getObjectTypeAt(current) != ObjectTypes.Water) {
+          cost += PLAYER_FALL_ENERGY_COST * (fallHeight - PLAYER_SAFE_FALL_DISTANCE);
+        }
+        fallDamage = 0;
+        fallHeight = 0;
+        jumps = 0;
+        glides = 0;
+      }
+
+      current = next;
+    }
+
+    // If gravity still applies after last path move, run gravity all the way down,
+    // taking into account the current fallHeight
+    if (gravityApplies) {
+      (current, fallDamage) = _computeGravityResult(current, fallHeight);
+      cost += fallDamage;
+    }
+
+    return (current, cost);
+  }
+
+  function _removePlayerPosition(Vec3 playerCoord) private returns (EntityId[] memory) {
+    Vec3[] memory playerCoords = ObjectTypes.Player.getRelativeCoords(playerCoord);
+    EntityId[] memory playerEntityIds = _getEntityIds(playerCoords);
+    for (uint256 i = 0; i < playerCoords.length; i++) {
+      ReverseMovablePosition._deleteRecord(playerCoords[i]);
+    }
+    return playerEntityIds;
+  }
+
+  function _setPlayerPosition(EntityId[] memory playerEntityIds, Vec3 playerCoord) private {
+    Vec3[] memory playerCoords = ObjectTypes.Player.getRelativeCoords(playerCoord);
+    for (uint256 i = 0; i < playerCoords.length; i++) {
+      setMovableEntityAt(playerCoords[i], playerEntityIds[i]);
+    }
+  }
+
+  function _getEntityIds(Vec3[] memory playerCoords) private view returns (EntityId[] memory) {
+    EntityId[] memory entityIds = new EntityId[](playerCoords.length);
+    for (uint256 i = 0; i < playerCoords.length; i++) {
+      entityIds[i] = getMovableEntityAt(playerCoords[i]);
+    }
+    return entityIds;
+  }
+
+  function _handleAbove(EntityId player, Vec3 playerCoord) private {
     Vec3 aboveCoord = playerCoord + vec3(0, 2, 0);
     EntityId above = getMovableEntityAt(aboveCoord);
-    // Note: currently it is not possible for the above player to not be the base entity,
-    // but if we add other types of movable entities we should check that it is a base entity
-    if (above.exists()) {
-      runGravity(above, aboveCoord);
+    if (!above.exists()) {
+      return;
+    }
+
+    above = above.baseEntityId();
+
+    if (above != player) {
+      runGravity(aboveCoord);
     }
   }
 }

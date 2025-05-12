@@ -175,7 +175,7 @@ contract MineSystem is System {
     // Note: currently it is not possible for the above player to not be the base entity,
     // but if we add other types of movable entities we should check that it is a base entity
     if (above.exists()) {
-      MoveLib.runGravity(above, aboveCoord);
+      MoveLib.runGravity(aboveCoord);
     }
   }
 

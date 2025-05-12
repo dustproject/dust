@@ -221,10 +221,9 @@ contract ForceFieldTest is DustTest {
   }
 
   function testBuildWithForceFieldWithNoEnergy() public {
-    // Set up a flat chunk with a player
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
-    // Set up a force field with energy
+    // Set up a force field with no energy
     Vec3 forceFieldCoord = playerCoord + vec3(2, 0, 0);
     EntityId forceFieldEntityId = setupForceField(
       forceFieldCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 0, drainRate: 1 })
@@ -234,13 +233,10 @@ contract ForceFieldTest is DustTest {
     attachTestProgram(forceFieldEntityId, program);
     program.setRevertOnBuild(true);
 
-    // Define build coordinates within force field
     Vec3 buildCoord = forceFieldCoord + vec3(1, 0, 1);
 
-    // Set terrain at build coord to air
     setTerrainAtCoord(buildCoord, ObjectTypes.Air);
 
-    // Add block to player's inventory
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
@@ -251,7 +247,6 @@ contract ForceFieldTest is DustTest {
     vm.prank(alice);
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
-    // Verify that the block was successfully built
     EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
     assertTrue(EntityObjectType.get(buildEntityId) == buildObjectType, "Block was not built correctly");
   }
@@ -260,7 +255,6 @@ contract ForceFieldTest is DustTest {
     // Set up a flat chunk with a player
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
-    // Set up a force field with NO energy (depleted)
     Vec3 forceFieldCoord = playerCoord + vec3(2, 0, 0);
     EntityId forceFieldEntityId = setupForceField(
       forceFieldCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 0 })

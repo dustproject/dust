@@ -49,7 +49,7 @@ contract AdminSystem is System {
     player.activate();
 
     Vec3[] memory playerCoords = ObjectTypes.Player.getRelativeCoords(player.getPosition());
-    EntityId[] memory players = MoveLib._getPlayers(player, playerCoords);
+    EntityId[] memory players = _getPlayerEntityIds(player, playerCoords);
     require(!MoveLib._gravityApplies(finalCoord), "Cannot teleport here as gravity applies");
 
     for (uint256 i = 0; i < playerCoords.length; i++) {
@@ -66,5 +66,19 @@ contract AdminSystem is System {
 
       setMovableEntityAt(newCoord, players[i]);
     }
+  }
+
+  function _getPlayerEntityIds(EntityId basePlayer, Vec3[] memory playerCoords)
+    private
+    view
+    returns (EntityId[] memory)
+  {
+    EntityId[] memory players = new EntityId[](playerCoords.length);
+    players[0] = basePlayer;
+    // Only iterate through relative schema coords
+    for (uint256 i = 1; i < playerCoords.length; i++) {
+      players[i] = getMovableEntityAt(playerCoords[i]);
+    }
+    return players;
   }
 }
