@@ -898,4 +898,23 @@ function initRecipes() {
       outputAmounts
     );
   }
+  {
+    uint16[] memory inputTypes = new uint16[](1);
+    uint16[] memory inputAmounts = new uint16[](1);
+    (inputTypes[0], inputAmounts[0]) = (ObjectTypes.AnyPlank.unwrap(), 1);
+
+    uint16[] memory outputTypes = new uint16[](1);
+    uint16[] memory outputAmounts = new uint16[](1);
+    (outputTypes[0], outputAmounts[0]) = (ObjectTypes.Torch.unwrap(), 4);
+
+    Recipes.set(
+      keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      ObjectTypes.Null,
+      0,
+      inputTypes,
+      inputAmounts,
+      outputTypes,
+      outputAmounts
+    );
+  }
 }

@@ -98,7 +98,7 @@ export const metaCategories: MetaCategory[] = [
   {
     name: "hasAxeMultiplier",
     categories: ["Log", "Leaf", "Plank", "CropBlock"],
-    objects: ["Chest", "Workbench", "SpawnTile", "Bed", "TextSign"],
+    objects: ["Chest", "Workbench", "SpawnTile", "Bed", "TextSign", "Torch"],
   },
   {
     name: "hasPickMultiplier",
@@ -317,6 +317,7 @@ export const objectNames = [
   "Battery",
   "Player",
   "Fragment",
+  "Torch",
 ] as const;
 
 export type ObjectName = (typeof objectNames)[number];
@@ -538,6 +539,7 @@ export const categoryObjects: {
     { name: "SpiderWeb", mass: 300000000000000n },
     { name: "Bone", mass: 37500000000000000n },
     { name: "TextSign", mass: 18000000000000000n },
+    { name: "Torch", mass: 1125000000000000n },
   ],
 
   // NON-TERRAIN CATEGORIES

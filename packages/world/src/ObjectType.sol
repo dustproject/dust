@@ -213,6 +213,7 @@ library ObjectTypes {
   ObjectType constant SpiderWeb = ObjectType.wrap(Category.MiscBlock | 3);
   ObjectType constant Bone = ObjectType.wrap(Category.MiscBlock | 4);
   ObjectType constant TextSign = ObjectType.wrap(Category.MiscBlock | 5);
+  ObjectType constant Torch = ObjectType.wrap(Category.MiscBlock | 6);
   ObjectType constant AnyPlank = ObjectType.wrap(Category.Plank | 0);
   ObjectType constant OakPlanks = ObjectType.wrap(Category.Plank | 1);
   ObjectType constant BirchPlanks = ObjectType.wrap(Category.Plank | 2);
@@ -613,14 +614,15 @@ library ObjectTypeLib {
     ];
   }
 
-  function getMiscBlockTypes() internal pure returns (ObjectType[6] memory) {
+  function getMiscBlockTypes() internal pure returns (ObjectType[7] memory) {
     return [
       ObjectTypes.Snow,
       ObjectTypes.Ice,
       ObjectTypes.Magma,
       ObjectTypes.SpiderWeb,
       ObjectTypes.Bone,
-      ObjectTypes.TextSign
+      ObjectTypes.TextSign,
+      ObjectTypes.Torch
     ];
   }
 
@@ -911,7 +913,7 @@ library ObjectTypeLib {
   function hasAxeMultiplier(ObjectType self) internal pure returns (bool) {
     return applyCategoryMask(self, Category.HAS_AXE_MULTIPLIER_MASK) || self == ObjectTypes.Chest
       || self == ObjectTypes.Workbench || self == ObjectTypes.SpawnTile || self == ObjectTypes.Bed
-      || self == ObjectTypes.TextSign;
+      || self == ObjectTypes.TextSign || self == ObjectTypes.Torch;
   }
 
   function hasPickMultiplier(ObjectType self) internal pure returns (bool) {
