@@ -599,9 +599,9 @@ export const categoryObjects: {
     },
   ],
   SmartEntityBlock: [
-    { name: "ForceField", mass: 3735000000000000000n },
+    { name: "ForceField", mass: 1035000000000000000n },
     { name: "Chest", mass: 36000000000000000n },
-    { name: "SpawnTile", mass: 9135000000000000000n },
+    { name: "SpawnTile", mass: 6435000000000000000n },
     { name: "Bed", mass: 13500000000000000n },
   ],
   Station: [
@@ -701,8 +701,8 @@ export const categoryObjects: {
     { name: "NeptuniumBar", mass: 5000000000000000000n },
   ],
   Bucket: [
-    { name: "Bucket", mass: 2025000000000000000n },
-    { name: "WaterBucket", mass: 2025000000000000000n },
+    { name: "Bucket", mass: 13500000000000000n },
+    { name: "WaterBucket", mass: 13500000000000000n },
   ],
   Food: [
     { name: "WheatSlop", energy: 12800000000000000n },
