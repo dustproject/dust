@@ -191,6 +191,37 @@ contract MoveTest is DustTest {
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
+  function testMoveDiagonalDownIsNotFall() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    // 4 diagonal moves down
+    Vec3[] memory newCoords = new Vec3[](4);
+    newCoords[0] = playerCoord + vec3(1, -1, 0);
+    newCoords[1] = newCoords[0] + vec3(1, -1, 0);
+    newCoords[2] = newCoords[1] + vec3(1, -1, 0);
+    newCoords[3] = newCoords[2] + vec3(1, -1, 0);
+
+    // Set grass below the new path
+    for (uint8 i = 0; i < newCoords.length; i++) {
+      setObjectAtCoord(newCoords[i] - vec3(0, 1, 0), ObjectTypes.Grass);
+    }
+
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
+
+    vm.prank(alice);
+    world.move(aliceEntityId, newCoords);
+
+    // Expect the player to be above the grass
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
+    assertEq(finalCoord, newCoords[3], "Player did not move to the grass coord");
+    Vec3 aboveFinalCoord = finalCoord + vec3(0, 1, 0);
+    assertEq(
+      BaseEntity.get(ReverseMovablePosition.get(aboveFinalCoord)), aliceEntityId, "Above coord is not the player"
+    );
+    uint128 playerEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+    assertEq(playerEnergyLost, MOVE_ENERGY_COST * newCoords.length, "Player energy lost is not equal to path length");
+  }
+
   function testMoveFallWithoutDamage() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 

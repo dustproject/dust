@@ -166,7 +166,8 @@ library MoveLib {
 
       int32 dy = next.y() - current.y();
 
-      if (dy < 0) {
+      // Only count as fall when gravity doesn't apply in current coord
+      if (dy < 0 && _gravityApplies(current)) {
         // For falls, cost will be computed upon landing
         ++fallHeight;
         glides = 0;
