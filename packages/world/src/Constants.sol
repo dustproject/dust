@@ -6,7 +6,7 @@ uint32 constant MAX_RESPAWN_HALF_WIDTH = 10;
 
 uint16 constant MAX_PLAYER_JUMPS = 3;
 uint16 constant MAX_PLAYER_GLIDES = 10;
-uint16 constant PLAYER_FALL_DAMAGE_THRESHOLD = 3;
+uint16 constant PLAYER_SAFE_FALL_DISTANCE = 3;
 
 uint256 constant SPAWN_BLOCK_RANGE = 10;
 

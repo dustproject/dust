@@ -30,8 +30,8 @@ import {
   MAX_PLAYER_JUMPS,
   MOVE_ENERGY_COST,
   PLAYER_ENERGY_DRAIN_RATE,
-  PLAYER_FALL_DAMAGE_THRESHOLD,
-  PLAYER_FALL_ENERGY_COST
+  PLAYER_FALL_ENERGY_COST,
+  PLAYER_SAFE_FALL_DISTANCE
 } from "../src/Constants.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
@@ -194,7 +194,7 @@ contract MoveTest is DustTest {
   function testMoveFallWithoutDamage() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    uint32 numFalls = PLAYER_FALL_DAMAGE_THRESHOLD - 1;
+    uint32 numFalls = PLAYER_SAFE_FALL_DISTANCE - 1;
     Vec3[] memory newCoords = new Vec3[](1);
     newCoords[0] = playerCoord + vec3(1, 0, 0);
 
@@ -223,15 +223,14 @@ contract MoveTest is DustTest {
   function testMoveFallDamage() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    uint32 numFalls = PLAYER_FALL_DAMAGE_THRESHOLD + 1;
-    Vec3[] memory newCoords = new Vec3[](numFalls + 1);
-    for (uint32 i = 0; i < numFalls; i++) {
-      Vec3 airCoord = playerCoord + vec3(0, -int32(i + 1), 1);
-      setObjectAtCoord(airCoord, ObjectTypes.Air);
-      newCoords[i] = airCoord + vec3(0, 1, 0);
-    }
-    Vec3 grassCoord = playerCoord + vec3(0, -int32(numFalls + 1), 1);
-    newCoords[numFalls] = grassCoord + vec3(0, 1, 0);
+    Vec3[] memory newCoords = new Vec3[](PLAYER_SAFE_FALL_DISTANCE + 2);
+    newCoords[0] = playerCoord + vec3(1, 0, 0); // move to the hole
+    newCoords[1] = playerCoord + vec3(1, -1, 0);
+    newCoords[2] = playerCoord + vec3(1, -2, 0);
+    newCoords[3] = playerCoord + vec3(1, -3, 0);
+    newCoords[4] = playerCoord + vec3(1, -4, 0);
+
+    Vec3 grassCoord = playerCoord + vec3(1, -5, 0);
     setObjectAtCoord(grassCoord, ObjectTypes.Grass);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
@@ -246,14 +245,9 @@ contract MoveTest is DustTest {
     assertEq(
       BaseEntity.get(ReverseMovablePosition.get(aboveFinalCoord)), aliceEntityId, "Above coord is not the player"
     );
+
     uint128 playerEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
-    // Fall damage is greater than the move energy cost
-    assertGt(PLAYER_FALL_ENERGY_COST, MOVE_ENERGY_COST, "Fall energy cost is not greater than the move energy cost");
-    assertGt(
-      playerEnergyLost,
-      MOVE_ENERGY_COST * newCoords.length,
-      "Player energy lost is not greater than the move energy cost"
-    );
+    assertEq(playerEnergyLost, MOVE_ENERGY_COST + PLAYER_FALL_ENERGY_COST, "Player energy lost is incorrect");
   }
 
   function testMoveThroughWater() public {
@@ -481,7 +475,7 @@ contract MoveTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.IronOre, 5);
 
     // Setup a fall path with a specific death point
-    uint32 fallHeight = 10; // Well above the PLAYER_FALL_DAMAGE_THRESHOLD
+    uint32 fallHeight = 10; // Well above the PLAYER_SAFE_FALL_DISTANCE
     Vec3[] memory newCoords = new Vec3[](fallHeight + 1);
 
     // Create a high column of air blocks
@@ -501,7 +495,7 @@ contract MoveTest is DustTest {
     uint32 deathIndex = 5; // We want the player to die at the 5th step (index 4)
 
     // Calculate energy needed to die exactly at deathIndex
-    uint128 energyForFallsBeforeDeath = PLAYER_FALL_ENERGY_COST * (deathIndex - PLAYER_FALL_DAMAGE_THRESHOLD);
+    uint128 energyForFallsBeforeDeath = PLAYER_FALL_ENERGY_COST * (deathIndex - PLAYER_SAFE_FALL_DISTANCE);
 
     Energy.set(
       aliceEntityId,

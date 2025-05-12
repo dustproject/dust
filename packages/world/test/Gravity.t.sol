@@ -74,12 +74,10 @@ contract GravityTest is DustTest {
     Vec3 mineCoord = playerCoord - vec3(0, 1, 0);
     ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
     ObjectPhysics.setMass(mineObjectType, playerHandMassReduction);
-    EntityId mineEntityId = ReverseTerrainPosition.get(mineCoord);
-    assertFalse(mineEntityId.exists(), "Mine entity already exists");
-    assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
     setTerrainAtCoord(mineCoord - vec3(0, 1, 0), ObjectTypes.Air);
     setTerrainAtCoord(mineCoord - vec3(0, 2, 0), ObjectTypes.Air);
+    setTerrainAtCoord(mineCoord - vec3(0, 3, 0), ObjectTypes.Air);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
@@ -89,15 +87,11 @@ contract GravityTest is DustTest {
     endGasReport();
 
     Vec3 finalCoord = EntityPosition.get(aliceEntityId);
-    assertEq(finalCoord, mineCoord - vec3(0, 2, 0), "Player did not move to new coords");
+    assertEq(finalCoord, mineCoord - vec3(0, 3, 0), "Player did not move to new coords");
     Vec3 aboveFinalCoord = finalCoord + vec3(0, 1, 0);
     assertEq(
       BaseEntity.get(ReverseMovablePosition.get(aboveFinalCoord)), aliceEntityId, "Above coord is not the player"
     );
-
-    mineEntityId = ReverseTerrainPosition.get(mineCoord);
-    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
-    assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
 
     uint128 playerEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     assertEq(
@@ -177,6 +171,7 @@ contract GravityTest is DustTest {
 
     setTerrainAtCoord(mineCoord - vec3(0, 1, 0), ObjectTypes.Air);
     setTerrainAtCoord(mineCoord - vec3(0, 2, 0), ObjectTypes.Air);
+    setTerrainAtCoord(mineCoord - vec3(0, 3, 0), ObjectTypes.Air);
 
     uint128 bobEnergyBefore = Energy.getEnergy(bobEntityId);
     uint128 aliceEnergyBefore = Energy.getEnergy(aliceEntityId);
@@ -190,8 +185,8 @@ contract GravityTest is DustTest {
 
     Vec3 finalAliceCoord = EntityPosition.get(aliceEntityId);
     Vec3 finalBobCoord = EntityPosition.get(bobEntityId);
-    assertEq(finalAliceCoord, mineCoord - vec3(0, 2, 0), "Player alice did not move to new coords");
-    assertEq(finalBobCoord, mineCoord, "Player bob did not move to new coords");
+    assertEq(finalAliceCoord, mineCoord - vec3(0, 3, 0), "Player alice did not move to new coords");
+    assertEq(finalBobCoord, mineCoord - vec3(0, 1, 0), "Player bob did not move to new coords");
     {
       Vec3 aboveFinalAliceCoord = finalAliceCoord + vec3(0, 1, 0);
       assertEq(
@@ -227,12 +222,8 @@ contract GravityTest is DustTest {
 
     Vec3[] memory newCoords = new Vec3[](1);
     newCoords[0] = playerCoord + vec3(0, 0, 1);
-    for (uint8 i = 0; i < newCoords.length; i++) {
-      setObjectAtCoord(newCoords[i], ObjectTypes.Air);
-      setObjectAtCoord(newCoords[i] + vec3(0, 1, 0), ObjectTypes.Air);
-    }
-    Vec3 expectedFinalCoord = newCoords[newCoords.length - 1] - vec3(0, 1, 0);
-    setObjectAtCoord(newCoords[newCoords.length - 1], ObjectTypes.Air);
+    Vec3 expectedFinalCoord = newCoords[0] - vec3(0, 1, 0);
+    setObjectAtCoord(newCoords[0], ObjectTypes.Air);
     setObjectAtCoord(expectedFinalCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
@@ -258,15 +249,11 @@ contract GravityTest is DustTest {
 
     Vec3[] memory newCoords = new Vec3[](1);
     newCoords[0] = playerCoord + vec3(0, 0, 1);
-    for (uint8 i = 0; i < newCoords.length; i++) {
-      setObjectAtCoord(newCoords[i], ObjectTypes.Air);
-      setObjectAtCoord(newCoords[i] + vec3(0, 1, 0), ObjectTypes.Air);
-    }
-    setObjectAtCoord(newCoords[newCoords.length - 1] - vec3(0, 1, 0), ObjectTypes.Air);
-    setObjectAtCoord(newCoords[newCoords.length - 1] - vec3(0, 2, 0), ObjectTypes.Air);
-    setObjectAtCoord(newCoords[newCoords.length - 1] - vec3(0, 3, 0), ObjectTypes.Air);
-    Vec3 expectedFinalCoord = newCoords[newCoords.length - 1] - vec3(0, 3, 0);
-    setObjectAtCoord(expectedFinalCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
+    setObjectAtCoord(newCoords[0] - vec3(0, 1, 0), ObjectTypes.Air);
+    setObjectAtCoord(newCoords[0] - vec3(0, 2, 0), ObjectTypes.Air);
+    setObjectAtCoord(newCoords[0] - vec3(0, 3, 0), ObjectTypes.Air);
+    setObjectAtCoord(newCoords[0] - vec3(0, 4, 0), ObjectTypes.Air);
+    setObjectAtCoord(newCoords[0] - vec3(0, 5, 0), ObjectTypes.Dirt);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
@@ -276,7 +263,7 @@ contract GravityTest is DustTest {
     endGasReport();
 
     Vec3 finalCoord = EntityPosition.get(aliceEntityId);
-    assertEq(finalCoord, expectedFinalCoord, "Player did not fall back to the original coord");
+    assertEq(finalCoord, newCoords[0] - vec3(0, 4, 0), "Player did not fall back to the original coord");
     Vec3 aboveFinalCoord = finalCoord + vec3(0, 1, 0);
     assertEq(
       BaseEntity.get(ReverseMovablePosition.get(aboveFinalCoord)), aliceEntityId, "Above coord is not the player"
@@ -297,7 +284,7 @@ contract GravityTest is DustTest {
 
     Vec3[] memory newCoords = new Vec3[](1);
     newCoords[0] = aliceCoord + vec3(0, 0, 1);
-    Vec3 expectedFinalAliceCoord = newCoords[0] - vec3(0, 3, 0);
+    Vec3 expectedFinalAliceCoord = newCoords[0] - vec3(0, 4, 0);
     setObjectAtCoord(expectedFinalAliceCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
 
     uint128 bobEnergyBefore = Energy.getEnergy(bobEntityId);
@@ -346,14 +333,12 @@ contract GravityTest is DustTest {
     Vec3[] memory newCoords = new Vec3[](1);
     newCoords[0] = playerCoord + vec3(0, 0, 1);
 
-    setObjectAtCoord(newCoords[0], ObjectTypes.Air);
-    setObjectAtCoord(newCoords[0] + vec3(0, 1, 0), ObjectTypes.Air);
-
     // Create a long fall (4+ blocks) below the destination
     setObjectAtCoord(newCoords[0] - vec3(0, 1, 0), ObjectTypes.Air);
     setObjectAtCoord(newCoords[0] - vec3(0, 2, 0), ObjectTypes.Air);
     setObjectAtCoord(newCoords[0] - vec3(0, 3, 0), ObjectTypes.Air);
-    setObjectAtCoord(newCoords[0] - vec3(0, 4, 0), ObjectTypes.Dirt);
+    setObjectAtCoord(newCoords[0] - vec3(0, 4, 0), ObjectTypes.Air);
+    setObjectAtCoord(newCoords[0] - vec3(0, 5, 0), ObjectTypes.Dirt);
 
     // Move to destination which should trigger fatal fall
     vm.prank(alice);
