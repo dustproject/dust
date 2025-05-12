@@ -123,7 +123,7 @@ export const recipes: Recipe[] = [
     station: "Workbench",
     inputs: [
       ["Stone", 30],
-      ["IronBar", 5],
+      ["IronBar", 1],
     ],
     outputs: [["ForceField", 1]],
   },
@@ -263,7 +263,7 @@ export const recipes: Recipe[] = [
     outputs: [["NeptuniumAxe", 1]],
   },
   {
-    inputs: [["IronBar", 3]],
+    inputs: [["AnyPlank", 3]],
     outputs: [["Bucket", 1]],
   },
   {
@@ -296,6 +296,7 @@ export function getRecipesByOutput(objectType: ObjectName): Recipe[] {
 
 // Validate that a recipe maintains mass+energy balance
 export function validateRecipe(recipe: Recipe) {
+  // Filter out coal inputs as they should not be added to the output's mass
   const inputs =
     recipe.station !== "Furnace"
       ? recipe.inputs
@@ -303,13 +304,8 @@ export function validateRecipe(recipe: Recipe) {
   const totalInputMassEnergy = getTotalMassEnergy(inputs);
   const totalOutputMassEnergy = getTotalMassEnergy(recipe.outputs);
   if (totalInputMassEnergy !== totalOutputMassEnergy) {
-    // throw new Error(
-    //   `Recipe does not maintain mass+energy balance\n${JSON.stringify(recipe)}\nmass: ${totalInputMassEnergy} != ${totalOutputMassEnergy}`,
-    // );
-
-    // TODO: throw an error once coal based recipes are fixed
-    console.warn(
-      `Recipe does not maintain mass+energy balance\n${JSON.stringify(recipe)}\ninput: ${totalInputMassEnergy} != output: ${totalOutputMassEnergy}`,
+    throw new Error(
+      `Recipe does not maintain mass+energy balance\n${JSON.stringify(recipe)}\nmass: ${totalInputMassEnergy} != ${totalOutputMassEnergy}`,
     );
   }
 }
