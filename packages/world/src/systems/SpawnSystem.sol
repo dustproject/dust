@@ -136,7 +136,8 @@ contract SpawnSystem is System {
     (EntityId forceField,) = ForceFieldUtils.getForceField(spawnCoord);
     require(!forceField.exists(), "Cannot spawn in force field");
 
-    uint128 spawnEnergy = MAX_PLAYER_ENERGY / 2;
+    // 30% of max player energy
+    uint128 spawnEnergy = MAX_PLAYER_ENERGY * 3 / 10;
 
     // Extract energy from local pool (half of max player energy)
     removeEnergyFromLocalPool(spawnCoord, spawnEnergy);
@@ -149,7 +150,7 @@ contract SpawnSystem is System {
     returns (EntityId)
   {
     checkWorldStatus();
-    require(spawnEnergy <= MAX_PLAYER_ENERGY, "Cannot spawn with more than max player energy");
+    require(spawnEnergy <= MAX_PLAYER_ENERGY * 3 / 10, "Cannot spawn with more than 30% of max player energy");
     ObjectType objectType = spawnTile.getObjectType();
     require(objectType == ObjectTypes.SpawnTile, "Not a spawn tile");
 

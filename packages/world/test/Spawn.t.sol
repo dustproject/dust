@@ -60,7 +60,9 @@ contract SpawnTest is DustTest {
     EntityId playerEntityId = world.randomSpawn(blockNumber, spawnCoord.y());
     assertTrue(playerEntityId.exists());
 
-    assertEq(Energy.getEnergy(playerEntityId), MAX_PLAYER_ENERGY / 2, "Player energy is not correct after random spawn");
+    assertEq(
+      Energy.getEnergy(playerEntityId), MAX_PLAYER_ENERGY * 3 / 10, "Player energy is not correct after random spawn"
+    );
   }
 
   function testRandomSpawnInMaintainance() public {
