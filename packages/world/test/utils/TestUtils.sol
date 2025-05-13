@@ -24,6 +24,7 @@ import {
 import { EntityUtils } from "../../src/utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../../src/utils/ForceFieldUtils.sol";
 import { InventoryUtils, SlotTransfer } from "../../src/utils/InventoryUtils.sol";
+import { PlayerUtils } from "../../src/utils/PlayerUtils.sol";
 
 Vm constant vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
@@ -86,6 +87,24 @@ library TestEntityUtils {
 
   function exists(EntityId self) public asWorld returns (bool) {
     return self.exists();
+  }
+}
+
+library TestPlayerUtils {
+  bytes32 constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestPlayerUtils");
+
+  modifier asWorld() {
+    TestUtils.asWorld(LIB_ADDRESS_SLOT);
+    _;
+  }
+
+  // Hack to be able to access the library address until we figure out why mud doesn't allow it
+  function init(address libAddress) public {
+    TestUtils.init(LIB_ADDRESS_SLOT, libAddress);
+  }
+
+  function addPlayerToGrid(EntityId player, Vec3 playerCoord) public asWorld {
+    PlayerUtils.addPlayerToGrid(player, playerCoord);
   }
 }
 

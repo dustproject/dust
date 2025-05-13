@@ -262,8 +262,7 @@ contract MineTest is DustTest {
     );
 
     // Create bed
-    EntityId bedEntityId = setObjectAtCoord(bedCoord, ObjectTypes.Bed);
-    Orientation.set(bedEntityId, Direction.NegativeZ);
+    EntityId bedEntityId = setObjectAtCoord(bedCoord, ObjectTypes.Bed, Direction.NegativeZ);
 
     vm.prank(alice);
     world.sleep(aliceEntityId, bedEntityId, "");
@@ -458,7 +457,8 @@ contract MineTest is DustTest {
     ObjectType mineObjectType = ObjectTypes.Dirt;
     setObjectAtCoord(mineCoord, mineObjectType);
 
-    PlayerBed.setBedEntityId(aliceEntityId, randomEntityId());
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     vm.prank(alice);
     vm.expectRevert("Player is sleeping");

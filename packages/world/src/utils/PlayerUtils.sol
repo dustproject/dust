@@ -32,7 +32,7 @@ library PlayerUtils {
   function getOrCreatePlayer() internal returns (EntityId) {
     address playerAddress = WorldContextConsumerLib._msgSender();
     EntityId player = EntityIdLib.encodePlayer(playerAddress);
-    if (player.getObjectType().isNull()) {
+    if (!player.exists()) {
       EntityObjectType._set(player, ObjectTypes.Player);
     }
 

@@ -43,7 +43,13 @@ import { encodeChunk } from "./utils/encodeChunk.sol";
 import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
 import { DustAssertions } from "./DustAssertions.sol";
-import { TestEnergyUtils, TestEntityUtils, TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
+import {
+  TestEnergyUtils,
+  TestEntityUtils,
+  TestForceFieldUtils,
+  TestInventoryUtils,
+  TestPlayerUtils
+} from "./utils/TestUtils.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 
@@ -63,6 +69,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     vm.prank(owner);
     world.transferOwnership(rootNamespace, address(this));
     TestEntityUtils.init(address(TestEntityUtils));
+    TestPlayerUtils.init(address(TestPlayerUtils));
     TestInventoryUtils.init(address(TestInventoryUtils));
     TestForceFieldUtils.init(address(TestForceFieldUtils));
     TestEnergyUtils.init(address(TestEnergyUtils));
@@ -75,20 +82,17 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
   // Create a valid player that can perform actions
   function createTestPlayer(Vec3 coord) internal returns (address, EntityId) {
     address playerAddress = vm.randomAddress();
-    EntityId playerEntityId = EntityIdLib.encodePlayer(playerAddress);
-    EntityObjectType.set(playerEntityId, ObjectTypes.Player);
-    EntityPosition.set(playerEntityId, coord);
-    ReverseMovablePosition.set(coord, playerEntityId);
+    EntityId player = EntityIdLib.encodePlayer(playerAddress);
+    EntityObjectType.set(player, ObjectTypes.Player);
 
-    Vec3[] memory relativePositions = ObjectTypes.Player.getObjectTypeSchema();
-    for (uint256 i = 0; i < relativePositions.length; i++) {
-      Vec3 relativeCoord = coord + relativePositions[i];
-      EntityObjectType.set(playerEntityId, ObjectTypes.Player);
-      ReverseMovablePosition.set(relativeCoord, playerEntityId);
+    if (!TerrainLib._isChunkExplored(coord.toChunkCoord(), worldAddress)) {
+      setupAirChunk(coord);
     }
 
+    TestPlayerUtils.addPlayerToGrid(player, coord);
+
     Energy.set(
-      playerEntityId,
+      player,
       EnergyData({
         lastUpdatedTime: uint128(block.timestamp),
         energy: MAX_PLAYER_ENERGY,
@@ -96,7 +100,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
       })
     );
 
-    return (playerAddress, playerEntityId);
+    return (playerAddress, player);
   }
 
   function _getFlatChunk() internal pure returns (uint8[][][] memory chunk) {
@@ -274,9 +278,8 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     setTerrainAtCoord(belowCoord, ObjectTypes.Dirt);
 
     (address alice, EntityId aliceEntityId) = createTestPlayer(spawnCoord);
-    Vec3 playerCoord = EntityPosition.get(aliceEntityId);
 
-    return (alice, aliceEntityId, playerCoord);
+    return (alice, aliceEntityId, spawnCoord);
   }
 
   function setupForceField(Vec3 coord) internal returns (EntityId) {

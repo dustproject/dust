@@ -121,14 +121,14 @@ contract ForceFieldTest is DustTest {
     Vec3 coord;
     // Handle force field fragments differently than regular entities
     if (EntityObjectType.get(entityId) == ObjectTypes.Fragment) {
-      coord = EntityPosition.get(entityId).fromFragmentCoord();
+      coord = EntityPosition.get(entityId).fromFragmentCoord() + vec3(0, 5, 0);
     } else {
-      coord = EntityPosition.get(entityId) - vec3(1, 0, 0);
+      coord = EntityPosition.get(entityId);
     }
 
     ProgramId program = ProgramId.wrap(programSystemId.unwrap());
     // Attach program with test player
-    (address bob, EntityId bobEntityId) = createTestPlayer(coord);
+    (address bob, EntityId bobEntityId) = createTestPlayer(coord + vec3(0, 0, 1));
     vm.prank(bob);
     world.attachProgram(bobEntityId, entityId, program, "");
     return program;
