@@ -54,7 +54,7 @@ library EntityUtils {
     return (entityId, objectType);
   }
 
-  function getFragmentAt(Vec3 fragmentCoord) internal view returns (EntityId) {
+  function getFragmentAt(Vec3 fragmentCoord) internal pure returns (EntityId) {
     return EntityIdLib.encodeFragment(fragmentCoord);
   }
 
@@ -62,7 +62,7 @@ library EntityUtils {
     EntityId fragment = getFragmentAt(fragmentCoord);
 
     // Create a new fragment entity if needed
-    if (fragment.getObjectType().isNull()) {
+    if (!fragment.exists()) {
       EntityPosition._set(fragment, fragmentCoord);
       EntityObjectType._set(fragment, ObjectTypes.Fragment);
     }

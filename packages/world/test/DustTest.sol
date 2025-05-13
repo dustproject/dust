@@ -9,10 +9,12 @@ import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResou
 import { NamespaceOwner } from "@latticexyz/world/src/codegen/tables/NamespaceOwner.sol";
 import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 
+import { Direction } from "../src/codegen/common.sol";
+
 import {
   CHUNK_SIZE, MAX_PLAYER_ENERGY, MINE_ENERGY_COST, PLAYER_ENERGY_DRAIN_RATE, REGION_SIZE
 } from "../src/Constants.sol";
-import { EntityId } from "../src/EntityId.sol";
+import { EntityId, EntityIdLib } from "../src/EntityId.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
@@ -23,6 +25,7 @@ import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
+import { Orientation } from "../src/codegen/tables/Orientation.sol";
 
 import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 import { Machine } from "../src/codegen/tables/Machine.sol";
@@ -72,7 +75,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
   // Create a valid player that can perform actions
   function createTestPlayer(Vec3 coord) internal returns (address, EntityId) {
     address playerAddress = vm.randomAddress();
-    EntityId playerEntityId = randomEntityId();
+    EntityId playerEntityId = EntityIdLib.encodePlayer(playerAddress);
     EntityObjectType.set(playerEntityId, ObjectTypes.Player);
     EntityPosition.set(playerEntityId, coord);
     ReverseMovablePosition.set(coord, playerEntityId);
@@ -80,11 +83,8 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     Vec3[] memory relativePositions = ObjectTypes.Player.getObjectTypeSchema();
     for (uint256 i = 0; i < relativePositions.length; i++) {
       Vec3 relativeCoord = coord + relativePositions[i];
-      EntityId relativePlayerEntityId = randomEntityId();
-      EntityObjectType.set(relativePlayerEntityId, ObjectTypes.Player);
-      EntityPosition.set(relativePlayerEntityId, relativeCoord);
-      ReverseMovablePosition.set(relativeCoord, relativePlayerEntityId);
-      BaseEntity.set(relativePlayerEntityId, playerEntityId);
+      EntityObjectType.set(playerEntityId, ObjectTypes.Player);
+      ReverseMovablePosition.set(relativeCoord, playerEntityId);
     }
 
     Energy.set(
@@ -230,21 +230,27 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
   }
 
   function setObjectAtCoord(Vec3 coord, ObjectType objectType) internal returns (EntityId) {
+    return setObjectAtCoord(coord, objectType, Direction.PositiveZ);
+  }
+
+  function setObjectAtCoord(Vec3 coord, ObjectType objectType, Direction direction) internal returns (EntityId) {
     Vec3 chunkCoord = coord.toChunkCoord();
     if (!TerrainLib._isChunkExplored(chunkCoord, worldAddress)) {
       setupAirChunk(coord);
     }
 
-    EntityId entityId = randomEntityId();
+    EntityId entityId = EntityIdLib.encodeBlock(coord);
+    Orientation.set(entityId, direction);
+
     EntityObjectType.set(entityId, objectType);
     EntityPosition.set(entityId, coord);
     Mass.set(entityId, ObjectPhysics.getMass(objectType));
 
-    Vec3[] memory coords = objectType.getRelativeCoords(coord);
+    Vec3[] memory coords = objectType.getRelativeCoords(coord, direction);
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];
-      EntityId relativeEntityId = randomEntityId();
+      EntityId relativeEntityId = EntityIdLib.encodeBlock(relativeCoord);
       EntityObjectType.set(relativeEntityId, objectType);
       BaseEntity.set(relativeEntityId, entityId);
     }

@@ -36,7 +36,7 @@ contract BuildTest is DustTest {
     Vec3 buildCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
     assertEq(TerrainLib.getBlockType(buildCoord), ObjectTypes.Air, "Build coord is not air");
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertFalse(buildEntityId.exists(), "Build entity already exists");
+    assertFalse(TestEntityUtils.exists(buildEntityId), "Build entity already exists");
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
@@ -67,7 +67,7 @@ contract BuildTest is DustTest {
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertTrue(buildEntityId.exists(), "Build entity does not exist");
+    assertTrue(TestEntityUtils.exists(buildEntityId), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
@@ -98,7 +98,7 @@ contract BuildTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
     (EntityId topEntityId,) = TestEntityUtils.getBlockAt(topCoord);
-    assertTrue(topEntityId.exists(), "Top entity does not exist");
+    assertTrue(TestEntityUtils.exists(topEntityId), "Top entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the TextSign object
@@ -248,7 +248,7 @@ contract BuildTest is DustTest {
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertTrue(buildEntityId.exists(), "Build entity does not exist");
+    assertTrue(TestEntityUtils.exists(buildEntityId), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
@@ -304,7 +304,7 @@ contract BuildTest is DustTest {
     ObjectType buildObjectType = ObjectTypes.GoldBar;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertTrue(buildEntityId.exists(), "Build entity does not exist");
+    assertTrue(TestEntityUtils.exists(buildEntityId), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the GoldBar object
@@ -323,7 +323,7 @@ contract BuildTest is DustTest {
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertTrue(buildEntityId.exists(), "Build entity does not exist");
+    assertTrue(TestEntityUtils.exists(buildEntityId), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     TestInventoryUtils.addObject(airEntityId, buildObjectType, 1);
@@ -365,7 +365,7 @@ contract BuildTest is DustTest {
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertTrue(buildEntityId.exists(), "Build entity does not exist");
+    assertTrue(TestEntityUtils.exists(buildEntityId), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
@@ -390,7 +390,7 @@ contract BuildTest is DustTest {
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertTrue(buildEntityId.exists(), "Build entity does not exist");
+    assertTrue(TestEntityUtils.exists(buildEntityId), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
@@ -420,7 +420,7 @@ contract BuildTest is DustTest {
     setObjectAtCoord(buildCoord, ObjectTypes.Air);
     ObjectType buildObjectType = ObjectTypes.Grass;
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertTrue(buildEntityId.exists(), "Build entity does not exist");
+    assertTrue(TestEntityUtils.exists(buildEntityId), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
 
     // Use a slot that doesn't have the required object
@@ -438,7 +438,7 @@ contract BuildTest is DustTest {
     setObjectAtCoord(buildCoord, ObjectTypes.Air);
     ObjectType buildObjectType = ObjectTypes.Grass;
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertTrue(buildEntityId.exists(), "Build entity does not exist");
+    assertTrue(TestEntityUtils.exists(buildEntityId), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
 
     // Use any slot for this test
@@ -455,7 +455,7 @@ contract BuildTest is DustTest {
     setObjectAtCoord(buildCoord, ObjectTypes.Air);
     ObjectType buildObjectType = ObjectTypes.Grass;
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertTrue(buildEntityId.exists(), "Build entity does not exist");
+    assertTrue(TestEntityUtils.exists(buildEntityId), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
 
     // Use any slot for this test

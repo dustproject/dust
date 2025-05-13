@@ -262,9 +262,7 @@ contract MineTest is DustTest {
     );
 
     // Create bed
-    EntityId bedEntityId = randomEntityId();
-    EntityPosition.set(bedEntityId, bedCoord);
-    EntityObjectType.set(bedEntityId, ObjectTypes.Bed);
+    EntityId bedEntityId = setObjectAtCoord(bedCoord, ObjectTypes.Bed);
     Orientation.set(bedEntityId, Direction.NegativeZ);
 
     vm.prank(alice);
@@ -304,8 +302,8 @@ contract MineTest is DustTest {
     Vec3 topCoord = mineCoord + vec3(0, 1, 0);
     (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(mineCoord);
     (EntityId topEntityId,) = TestEntityUtils.getBlockAt(topCoord);
-    assertTrue(mineEntityId.exists(), "Mine entity does not exist");
-    assertTrue(topEntityId.exists(), "Top entity does not exist");
+    assertTrue(TestEntityUtils.exists(mineEntityId), "Mine entity does not exist");
+    assertTrue(TestEntityUtils.exists(topEntityId), "Top entity does not exist");
     assertEq(EntityObjectType.get(mineEntityId), mineObjectType, "Mine entity is not mine object type");
     assertEq(EntityObjectType.get(topEntityId), mineObjectType, "Top entity is not air");
     assertEq(Mass.getMass(mineEntityId), ObjectPhysics.getMass(mineObjectType), "Mine entity mass is not correct");
@@ -336,8 +334,8 @@ contract MineTest is DustTest {
 
     (mineEntityId,) = TestEntityUtils.getBlockAt(mineCoord);
     (topEntityId,) = TestEntityUtils.getBlockAt(topCoord);
-    assertTrue(mineEntityId.exists(), "Mine entity does not exist");
-    assertTrue(topEntityId.exists(), "Top entity does not exist");
+    assertTrue(TestEntityUtils.exists(mineEntityId), "Mine entity does not exist");
+    assertTrue(TestEntityUtils.exists(topEntityId), "Top entity does not exist");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
     vm.prank(alice);

@@ -33,7 +33,7 @@ import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { SlotAmount } from "../src/utils/InventoryUtils.sol";
 
-import { TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract CraftTest is DustTest {
   function hashRecipe(
@@ -259,7 +259,7 @@ contract CraftTest is DustTest {
     uint16[] memory toolSlots = InventoryTypeSlots.get(aliceEntityId, outputTypes[0]);
     assertEq(toolSlots.length, 1, "should have 1 tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
-    assertTrue(toolEntityId.exists(), "tool entity id should exist");
+    assertTrue(TestEntityUtils.exists(toolEntityId), "tool entity id should exist");
     ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
@@ -297,7 +297,7 @@ contract CraftTest is DustTest {
     uint16[] memory toolSlots = InventoryTypeSlots.get(aliceEntityId, outputTypes[0]);
     assertEq(toolSlots.length, 1, "should have 1 of the crafted tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
-    assertTrue(toolEntityId.exists(), "tool entity id should exist");
+    assertTrue(TestEntityUtils.exists(toolEntityId), "tool entity id should exist");
     ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
@@ -335,7 +335,7 @@ contract CraftTest is DustTest {
     uint16[] memory toolSlots = InventoryTypeSlots.get(aliceEntityId, outputTypes[0]);
     assertEq(toolSlots.length, 1, "should have 1 of the crafted tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
-    assertTrue(toolEntityId.exists(), "tool entity id should exist");
+    assertTrue(TestEntityUtils.exists(toolEntityId), "tool entity id should exist");
     ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);

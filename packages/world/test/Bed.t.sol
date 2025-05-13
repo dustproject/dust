@@ -8,6 +8,8 @@ import { WorldContextConsumer } from "@latticexyz/world/src/WorldContext.sol";
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
+import { Direction } from "../src/codegen/common.sol";
+
 import { TestEnergyUtils, TestEntityUtils, TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 import { BedPlayer, BedPlayerData } from "../src/codegen/tables/BedPlayer.sol";
@@ -39,9 +41,8 @@ contract TestBedProgram is System {
 contract BedTest is DustTest {
   function createBed(Vec3 bedCoord) internal returns (EntityId) {
     // Set entity to bed
-    EntityId bedEntityId = randomEntityId();
-    EntityObjectType.set(bedEntityId, ObjectTypes.Bed);
-    return bedEntityId;
+    EntityId bed = setObjectAtCoord(bedCoord, ObjectTypes.Bed, Direction.NegativeZ);
+    return bed;
   }
 
   function attachTestProgram(EntityId bedEntityId) internal {
@@ -364,7 +365,7 @@ contract BedTest is DustTest {
 
     // Set forcefield
     EntityId forcefieldEntityId = setupForceField(
-      bedCoord,
+      bedCoord + vec3(1, 0, 0),
       EnergyData({
         energy: initialForcefieldEnergy,
         lastUpdatedTime: initialTimestamp,

@@ -83,6 +83,10 @@ library TestEntityUtils {
   function getFragmentAt(Vec3 fragmentCoord) public asWorld returns (EntityId) {
     return EntityUtils.getFragmentAt(fragmentCoord);
   }
+
+  function exists(EntityId self) public asWorld returns (bool) {
+    return self.exists();
+  }
 }
 
 library TestInventoryUtils {

@@ -67,7 +67,7 @@ contract FarmingTest is DustTest {
     endGasReport();
 
     (EntityId dirtEntityId,) = TestEntityUtils.getBlockAt(dirtCoord);
-    assertTrue(dirtEntityId.exists(), "Dirt entity doesn't exist after tilling");
+    assertTrue(TestEntityUtils.exists(dirtEntityId), "Dirt entity doesn't exist after tilling");
     assertEq(EntityObjectType.get(dirtEntityId), ObjectTypes.Farmland, "Dirt was not converted to farmland");
 
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
@@ -79,7 +79,7 @@ contract FarmingTest is DustTest {
     Vec3 grassCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
     setTerrainAtCoord(grassCoord, ObjectTypes.Grass);
     (EntityId grassEntityId,) = TestEntityUtils.getBlockAt(grassCoord);
-    assertFalse(grassEntityId.exists(), "Grass entity already exists");
+    assertFalse(TestEntityUtils.exists(grassEntityId), "Grass entity already exists");
 
     TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenHoe);
 
@@ -90,7 +90,7 @@ contract FarmingTest is DustTest {
     world.till(aliceEntityId, grassCoord, 0);
     endGasReport();
 
-    assertTrue(grassEntityId.exists(), "Grass entity doesn't exist after tilling");
+    assertTrue(TestEntityUtils.exists(grassEntityId), "Grass entity doesn't exist after tilling");
     assertEq(EntityObjectType.get(grassEntityId), ObjectTypes.Farmland, "Grass was not converted to farmland");
 
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
@@ -115,7 +115,7 @@ contract FarmingTest is DustTest {
       world.till(aliceEntityId, testCoord, 0);
 
       (EntityId farmlandEntityId,) = TestEntityUtils.getBlockAt(testCoord);
-      assertTrue(farmlandEntityId.exists(), "Farmland entity doesn't exist after tilling");
+      assertTrue(TestEntityUtils.exists(farmlandEntityId), "Farmland entity doesn't exist after tilling");
       assertEq(EntityObjectType.get(farmlandEntityId), ObjectTypes.Farmland, "Dirt was not converted to farmland");
     }
   }
@@ -207,7 +207,7 @@ contract FarmingTest is DustTest {
 
     // Verify seeds were planted
     (EntityId cropEntityId,) = TestEntityUtils.getBlockAt(farmlandCoord + vec3(0, 1, 0));
-    assertTrue(cropEntityId.exists(), "Crop entity doesn't exist after planting");
+    assertTrue(TestEntityUtils.exists(cropEntityId), "Crop entity doesn't exist after planting");
     assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.WheatSeed, "Wheat seeds were not planted correctly");
 
     // Verify energy was taken from local pool
@@ -275,7 +275,7 @@ contract FarmingTest is DustTest {
 
     // Verify seeds were planted
     (EntityId cropEntityId,) = TestEntityUtils.getBlockAt(cropCoord);
-    assertTrue(cropEntityId.exists(), "Crop entity doesn't exist after planting");
+    assertTrue(TestEntityUtils.exists(cropEntityId), "Crop entity doesn't exist after planting");
 
     // Get growth time required for the crop
     uint128 fullyGrownAt = SeedGrowth.getFullyGrownAt(cropEntityId);
@@ -334,7 +334,7 @@ contract FarmingTest is DustTest {
 
     // Verify seeds were planted
     (EntityId cropEntityId,) = TestEntityUtils.getBlockAt(cropCoord);
-    assertTrue(cropEntityId.exists(), "Crop entity doesn't exist after planting");
+    assertTrue(TestEntityUtils.exists(cropEntityId), "Crop entity doesn't exist after planting");
 
     // Get growth time required for the crop
     uint128 fullyGrownAt = SeedGrowth.getFullyGrownAt(cropEntityId);

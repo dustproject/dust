@@ -102,7 +102,7 @@ library EntityIdLib {
   }
 
   function exists(EntityId self) internal view returns (bool) {
-    return self.getObjectType() != ObjectTypes.Null;
+    return !self.getObjectType().isNull();
   }
 
   function unwrap(EntityId self) internal pure returns (bytes32) {
@@ -124,10 +124,12 @@ library EntityIdLib {
   }
 
   function encodePlayer(address player) internal pure returns (EntityId) {
-    return EntityId.wrap((EntityTypes.Player.unwrap() << ENTITY_TYPE_OFFSET_BITS) | bytes32(uint256(uint160(player))));
+    return EntityId.wrap(
+      bytes32((uint256(uint8(EntityTypes.Player.unwrap())) << ENTITY_TYPE_OFFSET_BITS) | uint256(uint160(player)))
+    );
   }
 
-  function getPlayerAddress(EntityId self) internal pure returns (address) {
+  function getPlayerAddress(EntityId self) internal view returns (address) {
     require(self.getObjectType() == ObjectTypes.Player, "Entity is not a player");
     return address(uint160(uint256(EntityId.unwrap(self))));
   }
