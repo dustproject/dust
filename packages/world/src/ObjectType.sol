@@ -46,6 +46,7 @@ library Category {
   uint16 constant Sapling = uint16(19) << OFFSET_BITS;
   uint16 constant SmartEntityBlock = uint16(20) << OFFSET_BITS;
   uint16 constant Station = uint16(21) << OFFSET_BITS;
+  uint16 constant MiscPassThrough = uint16(22) << OFFSET_BITS;
   // Non-Block Categories
   uint16 constant Pick = uint16(128) << OFFSET_BITS;
   uint16 constant Axe = uint16(129) << OFFSET_BITS;
@@ -74,7 +75,8 @@ library Category {
   uint256 constant IS_PASS_THROUGH_MASK = (uint256(1) << (NonSolid >> OFFSET_BITS))
     | (uint256(1) << (Flower >> OFFSET_BITS)) | (uint256(1) << (Seed >> OFFSET_BITS))
     | (uint256(1) << (Sapling >> OFFSET_BITS)) | (uint256(1) << (Greenery >> OFFSET_BITS))
-    | (uint256(1) << (Crop >> OFFSET_BITS)) | (uint256(1) << (UnderwaterPlant >> OFFSET_BITS));
+    | (uint256(1) << (Crop >> OFFSET_BITS)) | (uint256(1) << (UnderwaterPlant >> OFFSET_BITS))
+    | (uint256(1) << (MiscPassThrough >> OFFSET_BITS));
   uint256 constant IS_GROWABLE_MASK = (uint256(1) << (Seed >> OFFSET_BITS)) | (uint256(1) << (Sapling >> OFFSET_BITS));
   uint256 constant IS_UNIQUE_OBJECT_MASK = (uint256(1) << (Pick >> OFFSET_BITS)) | (uint256(1) << (Axe >> OFFSET_BITS))
     | (uint256(1) << (Whacker >> OFFSET_BITS)) | (uint256(1) << (Hoe >> OFFSET_BITS))
@@ -213,7 +215,6 @@ library ObjectTypes {
   ObjectType constant SpiderWeb = ObjectType.wrap(Category.MiscBlock | 3);
   ObjectType constant Bone = ObjectType.wrap(Category.MiscBlock | 4);
   ObjectType constant TextSign = ObjectType.wrap(Category.MiscBlock | 5);
-  ObjectType constant Torch = ObjectType.wrap(Category.MiscBlock | 6);
   ObjectType constant AnyPlank = ObjectType.wrap(Category.Plank | 0);
   ObjectType constant OakPlanks = ObjectType.wrap(Category.Plank | 1);
   ObjectType constant BirchPlanks = ObjectType.wrap(Category.Plank | 2);
@@ -246,6 +247,7 @@ library ObjectTypes {
   ObjectType constant Workbench = ObjectType.wrap(Category.Station | 0);
   ObjectType constant Powerstone = ObjectType.wrap(Category.Station | 1);
   ObjectType constant Furnace = ObjectType.wrap(Category.Station | 2);
+  ObjectType constant Torch = ObjectType.wrap(Category.MiscPassThrough | 0);
   ObjectType constant WoodenPick = ObjectType.wrap(Category.Pick | 0);
   ObjectType constant CopperPick = ObjectType.wrap(Category.Pick | 1);
   ObjectType constant IronPick = ObjectType.wrap(Category.Pick | 2);
@@ -389,6 +391,10 @@ library ObjectTypeLib {
 
   function isStation(ObjectType self) internal pure returns (bool) {
     return category(self) == Category.Station;
+  }
+
+  function isMiscPassThrough(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.MiscPassThrough;
   }
 
   function isPick(ObjectType self) internal pure returns (bool) {
@@ -614,15 +620,14 @@ library ObjectTypeLib {
     ];
   }
 
-  function getMiscBlockTypes() internal pure returns (ObjectType[7] memory) {
+  function getMiscBlockTypes() internal pure returns (ObjectType[6] memory) {
     return [
       ObjectTypes.Snow,
       ObjectTypes.Ice,
       ObjectTypes.Magma,
       ObjectTypes.SpiderWeb,
       ObjectTypes.Bone,
-      ObjectTypes.TextSign,
-      ObjectTypes.Torch
+      ObjectTypes.TextSign
     ];
   }
 
@@ -673,6 +678,10 @@ library ObjectTypeLib {
 
   function getStationTypes() internal pure returns (ObjectType[3] memory) {
     return [ObjectTypes.Workbench, ObjectTypes.Powerstone, ObjectTypes.Furnace];
+  }
+
+  function getMiscPassThroughTypes() internal pure returns (ObjectType[1] memory) {
+    return [ObjectTypes.Torch];
   }
 
   function getPickTypes() internal pure returns (ObjectType[6] memory) {
@@ -922,7 +931,7 @@ library ObjectTypeLib {
   }
 
   function isPassThrough(ObjectType self) internal pure returns (bool) {
-    return applyCategoryMask(self, Category.IS_PASS_THROUGH_MASK) || self == ObjectTypes.Torch;
+    return applyCategoryMask(self, Category.IS_PASS_THROUGH_MASK);
   }
 
   function isGrowable(ObjectType self) internal pure returns (bool) {

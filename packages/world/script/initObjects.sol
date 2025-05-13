@@ -128,7 +128,6 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.SpiderWeb, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Bone, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.TextSign, ObjectPhysicsData({ mass: 18000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.Torch, ObjectPhysicsData({ mass: 1125000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.AnyPlank, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.OakPlanks, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.BirchPlanks, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));
@@ -161,6 +160,7 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.Workbench, ObjectPhysicsData({ mass: 18000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Powerstone, ObjectPhysicsData({ mass: 80000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Furnace, ObjectPhysicsData({ mass: 108000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Torch, ObjectPhysicsData({ mass: 1125000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.WoodenPick, ObjectPhysicsData({ mass: 22500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.CopperPick, ObjectPhysicsData({ mass: 2034000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.IronPick, ObjectPhysicsData({ mass: 2034000000000000000, energy: 0 }));

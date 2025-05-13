@@ -25,6 +25,7 @@ export const blockCategories = [
   "Sapling",
   "SmartEntityBlock",
   "Station",
+  "MiscPassThrough",
 ] as const;
 
 export const nonBlockCategories = [
@@ -115,8 +116,8 @@ export const metaCategories: MetaCategory[] = [
       "Greenery",
       "Crop",
       "UnderwaterPlant",
+      "MiscPassThrough",
     ],
-    objects: ["Torch"],
   },
   { name: "isGrowable", categories: ["Seed", "Sapling"] },
   {
@@ -540,7 +541,6 @@ export const categoryObjects: {
     { name: "SpiderWeb", mass: 300000000000000n },
     { name: "Bone", mass: 37500000000000000n },
     { name: "TextSign", mass: 18000000000000000n },
-    { name: "Torch", mass: 1125000000000000n },
   ],
 
   // NON-TERRAIN CATEGORIES
@@ -612,6 +612,7 @@ export const categoryObjects: {
     { name: "Powerstone", mass: 80000000000000000n },
     { name: "Furnace", mass: 108000000000000000n },
   ],
+  MiscPassThrough: [{ name: "Torch", mass: 1125000000000000n }],
 
   // NON BLOCKS
 
