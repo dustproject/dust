@@ -129,7 +129,8 @@ contract NatureSystem is System {
     }
 
     // Adjust if the tree is blocked
-    if (trunkHeight < treeData.trunkHeight) {
+    bool obstructed = trunkHeight < treeData.trunkHeight;
+    if (obstructed) {
       trunkHeight = trunkHeight + 1; // Still allow one layer above the trunk
     }
 
@@ -139,15 +140,14 @@ contract NatureSystem is System {
     uint256 rand = uint256(keccak256(abi.encodePacked(block.timestamp, baseCoord)));
 
     uint32 leafCount;
-    ObjectType leafType = treeData.leafType;
 
     for (uint256 i = 0; i < fixedLeaves.length; ++i) {
       Vec3 rel = fixedLeaves[i];
-      if (rel.y() > int32(trunkHeight)) {
+      if (obstructed && rel.y() > int32(trunkHeight)) {
         break;
       }
 
-      if (_tryCreateLeaf(leafType, baseCoord + rel)) {
+      if (_tryCreateLeaf(treeData.leafType, baseCoord + rel)) {
         ++leafCount;
       }
     }
@@ -162,7 +162,7 @@ contract NatureSystem is System {
 
       if (rand % 100 < 40) continue; // 40 % trimmed
 
-      if (_tryCreateLeaf(leafType, baseCoord + rel)) {
+      if (_tryCreateLeaf(treeData.leafType, baseCoord + rel)) {
         ++leafCount;
       }
     }

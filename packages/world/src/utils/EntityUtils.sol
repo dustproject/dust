@@ -47,7 +47,8 @@ library EntityUtils {
 
   function getOrCreateBlockAt(Vec3 coord) internal returns (EntityId, ObjectType) {
     (EntityId entityId, ObjectType objectType) = getBlockAt(coord);
-    if (objectType.isNull()) {
+    if (!entityId.exists()) {
+      initEntity(entityId, objectType);
       EntityPosition._set(entityId, coord);
     }
 
@@ -63,28 +64,16 @@ library EntityUtils {
 
     // Create a new fragment entity if needed
     if (!fragment.exists()) {
+      initEntity(fragment, ObjectTypes.Fragment);
       EntityPosition._set(fragment, fragmentCoord);
-      EntityObjectType._set(fragment, ObjectTypes.Fragment);
     }
 
     return fragment;
   }
 
-  function createBlockEntity(Vec3 coord, ObjectType objectType) internal returns (EntityId) {
-    EntityId entityId = EntityIdLib.encodeBlock(coord);
-    initEntity(entityId, objectType);
-    return entityId;
-  }
-
   function createPlayerEntity(address playerAddress) internal returns (EntityId) {
     EntityId entityId = EntityIdLib.encodePlayer(playerAddress);
     initEntity(entityId, ObjectTypes.Player);
-    return entityId;
-  }
-
-  function createFragmentEntity(Vec3 coord) internal returns (EntityId) {
-    EntityId entityId = getFragmentAt(coord);
-    initEntity(entityId, ObjectTypes.Fragment);
     return entityId;
   }
 

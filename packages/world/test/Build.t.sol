@@ -6,6 +6,8 @@ import { console } from "forge-std/console.sol";
 
 import { EntityId } from "../src/EntityId.sol";
 
+import { Direction } from "../src/codegen/common.sol";
+
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
@@ -461,7 +463,8 @@ contract BuildTest is DustTest {
     // Use any slot for this test
     uint8 inventorySlot = 0;
 
-    PlayerBed.setBedEntityId(aliceEntityId, randomEntityId());
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     vm.prank(alice);
     vm.expectRevert("Player is sleeping");

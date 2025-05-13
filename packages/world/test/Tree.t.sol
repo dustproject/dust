@@ -363,7 +363,7 @@ contract TreeTest is DustTest {
 
     // Define coordinates
     Vec3 dirtCoord1 = vec3(playerCoord.x() + 2, 0, playerCoord.z());
-    Vec3 dirtCoord2 = vec3(playerCoord.x() + 5, 0, playerCoord.z());
+    Vec3 dirtCoord2 = vec3(playerCoord.x() + 6, 0, playerCoord.z());
     setObjectAtCoord(dirtCoord1, ObjectTypes.Dirt);
     setObjectAtCoord(dirtCoord2, ObjectTypes.Dirt);
 
@@ -404,10 +404,12 @@ contract TreeTest is DustTest {
       TreeData memory treeData = TreeLib.getTreeData(seedTypes[i]);
       assertEq(EntityObjectType.get(seedEntityId), treeData.logType, "Seed did not grow into correct log type");
 
+      (Vec3[] memory fixedLeaves,) = TreeLib.getLeafCoords(seedTypes[i]);
       // Verify some leaves exist
-      Vec3 leafCoord = seedCoord + vec3(1, 3, 0);
-      (EntityId leafEntityId, ObjectType leafType) = TestEntityUtils.getBlockAt(leafCoord);
-      assertEq(EntityObjectType.get(leafEntityId), treeData.leafType, "Leaf is not the correct type");
+      for (uint256 j = 0; j < fixedLeaves.length; j++) {
+        Vec3 leafCoord = seedCoord + fixedLeaves[j];
+        assertEq(TestEntityUtils.getObjectTypeAt(leafCoord), treeData.leafType, "Leaf is not the correct type");
+      }
     }
   }
 

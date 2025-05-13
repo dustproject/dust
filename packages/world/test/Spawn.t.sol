@@ -294,7 +294,7 @@ contract SpawnTest is DustTest {
     EntityId spawnTileEntityId = setObjectAtCoord(spawnTileCoord, ObjectTypes.SpawnTile);
 
     // Set forcefield with energy
-    EntityId forceFieldEntityId = setupForceField(spawnTileCoord);
+    EntityId forceFieldEntityId = setupForceField(spawnTileCoord + vec3(0, 0, 1));
     Energy.set(
       forceFieldEntityId,
       EnergyData({

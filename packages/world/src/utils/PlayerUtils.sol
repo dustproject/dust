@@ -94,7 +94,7 @@ library PlayerUtils {
     if (ReverseMovablePosition._get(coord) != player) {
       return;
     }
-    (EntityId to,) = EntityUtils.getBlockAt(coord);
+    (EntityId to,) = EntityUtils.getOrCreateBlockAt(coord);
     InventoryUtils.transferAll(player, to);
     removePlayerFromGrid(player, coord);
     notify(player, DeathNotification({ deathCoord: coord }));

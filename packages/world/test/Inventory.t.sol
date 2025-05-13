@@ -432,14 +432,11 @@ contract InventoryTest is DustTest {
     Vec3 pickupCoord = playerCoord + vec3(0, 1, 1);
     setTerrainAtCoord(pickupCoord, ObjectTypes.Air);
 
-    SlotTransfer[] memory pickup = new SlotTransfer[](1);
-    pickup[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
-    vm.prank(alice);
-    vm.expectRevert("No entity at pickup location");
-    world.pickup(aliceEntityId, pickup, pickupCoord);
-
     EntityId chestEntityId = setObjectAtCoord(pickupCoord, ObjectTypes.Chest);
     TestInventoryUtils.addObject(chestEntityId, ObjectTypes.Grass, 1);
+
+    SlotTransfer[] memory pickup = new SlotTransfer[](1);
+    pickup[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
 
     vm.prank(alice);
     vm.expectRevert("Cannot pickup from a non-passable block");
@@ -532,7 +529,8 @@ contract InventoryTest is DustTest {
     assertInventoryHasObject(airEntityId, transferObjectType, 1);
     assertInventoryHasObject(aliceEntityId, transferObjectType, 0);
 
-    PlayerBed.setBedEntityId(aliceEntityId, randomEntityId());
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     SlotTransfer[] memory pickup = new SlotTransfer[](1);
     pickup[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
@@ -551,7 +549,8 @@ contract InventoryTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, transferObjectType, 1);
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
 
-    PlayerBed.setBedEntityId(aliceEntityId, randomEntityId());
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     SlotTransfer[] memory drops = new SlotTransfer[](1);
     drops[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });

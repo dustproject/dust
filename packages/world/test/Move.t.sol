@@ -5,20 +5,19 @@ import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { console } from "forge-std/console.sol";
 
-import { EntityId, EntityIdLib } from "../src/EntityId.sol";
+import { Direction } from "../src/codegen/common.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
-
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
+import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
-
-import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
+
 import { DustTest } from "./DustTest.sol";
 
+import { EntityId, EntityIdLib } from "../src/EntityId.sol";
 import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
 import {
@@ -503,18 +502,17 @@ contract MoveTest is DustTest {
 
     // Setup a fall path with a specific death point
     uint32 fallHeight = 10; // Well above the PLAYER_SAFE_FALL_DISTANCE
-    Vec3[] memory newCoords = new Vec3[](fallHeight + 1);
+    Vec3[] memory newCoords = new Vec3[](fallHeight);
 
     // Create a high column of air blocks
     for (uint32 i = 0; i < fallHeight; i++) {
       Vec3 airCoord = playerCoord + vec3(0, -int32(i + 1), 1);
       setObjectAtCoord(airCoord, ObjectTypes.Air);
-      newCoords[i] = airCoord + vec3(0, 1, 0);
+      newCoords[i] = airCoord;
     }
 
     // Set the last coordinate
-    Vec3 landingCoord = playerCoord + vec3(0, -int32(fallHeight + 1), 1);
-    newCoords[fallHeight] = landingCoord + vec3(0, 1, 0);
+    Vec3 landingCoord = newCoords[newCoords.length - 1] - vec3(0, 1, 0);
     setObjectAtCoord(landingCoord, ObjectTypes.Grass);
 
     // Calculate energy costs for the fall
@@ -534,7 +532,7 @@ contract MoveTest is DustTest {
     assertInventoryHasObject(aliceEntityId, ObjectTypes.IronOre, 5);
 
     // Get entity at the expected death location
-    (EntityId entityAtDeathLocation,) = TestEntityUtils.getBlockAt(landingCoord);
+    (EntityId entityAtDeathLocation,) = TestEntityUtils.getBlockAt(landingCoord + vec3(0, 1, 0));
 
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);
@@ -620,7 +618,8 @@ contract MoveTest is DustTest {
     newCoords[0] = playerCoord + vec3(0, 0, 1);
     newCoords[1] = playerCoord + vec3(0, 0, 2);
 
-    PlayerBed.setBedEntityId(aliceEntityId, randomEntityId());
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     vm.prank(alice);
     vm.expectRevert("Player is sleeping");
