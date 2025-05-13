@@ -34,12 +34,13 @@ import {
 
 import {
   CHUNK_SIZE,
+  DEFAULT_MINE_ENERGY_COST,
   DEFAULT_WOODEN_TOOL_MULTIPLIER,
   MACHINE_ENERGY_DRAIN_RATE,
   MAX_ENTITY_INFLUENCE_HALF_WIDTH,
-  MINE_ENERGY_COST,
   PLAYER_ENERGY_DRAIN_RATE,
-  SPECIALIZED_WOODEN_TOOL_MULTIPLIER
+  SPECIALIZED_WOODEN_TOOL_MULTIPLIER,
+  TOOL_MINE_ENERGY_COST
 } from "../src/Constants.sol";
 import { ObjectAmount, ObjectType, ObjectTypes } from "../src/ObjectType.sol";
 
@@ -200,7 +201,7 @@ contract MineTest is DustTest {
 
     // Verify mass has been set to the resource's
     uint128 mass = Mass.getMass(mineEntityId);
-    uint128 expectedMass = ObjectPhysics.getMass(resourceType) - MINE_ENERGY_COST;
+    uint128 expectedMass = ObjectPhysics.getMass(resourceType) - DEFAULT_MINE_ENERGY_COST;
     assertEq(mass, expectedMass, "Mass was not set correctly");
 
     // Roll forward many blocks to ensure the commitment expires
@@ -219,7 +220,7 @@ contract MineTest is DustTest {
 
     // Verify mass has been set to the resource's
     mass = Mass.getMass(mineEntityId);
-    expectedMass -= MINE_ENERGY_COST;
+    expectedMass -= DEFAULT_MINE_ENERGY_COST;
     assertEq(mass, expectedMass, "Mass should decrease after another mining attempt");
   }
 
@@ -423,7 +424,7 @@ contract MineTest is DustTest {
     setObjectAtCoord(mineCoord, mineObjectType);
 
     // Set player energy to exactly enough for one mine operation
-    uint128 exactEnergy = MINE_ENERGY_COST;
+    uint128 exactEnergy = DEFAULT_MINE_ENERGY_COST;
     Energy.set(
       aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: exactEnergy, drainRate: 0 })
     );
@@ -589,7 +590,7 @@ contract MineTest is DustTest {
       world.mine(aliceEntityId, stoneCoord, slot, "");
 
       EntityId mineEntityId = ReverseTerrainPosition.get(stoneCoord);
-      uint128 massReduction = playerHandMassReduction + pickMass / 10 * SPECIALIZED_WOODEN_TOOL_MULTIPLIER;
+      uint128 massReduction = TOOL_MINE_ENERGY_COST + pickMass / 10 * SPECIALIZED_WOODEN_TOOL_MULTIPLIER;
       uint128 expectedMass = stoneMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden pick on stone");
     }
@@ -611,7 +612,7 @@ contract MineTest is DustTest {
       world.mine(aliceEntityId, logCoord, slot, "");
 
       EntityId mineEntityId = ReverseTerrainPosition.get(logCoord);
-      uint128 massReduction = playerHandMassReduction + axeMass / 10 * SPECIALIZED_WOODEN_TOOL_MULTIPLIER;
+      uint128 massReduction = TOOL_MINE_ENERGY_COST + axeMass / 10 * SPECIALIZED_WOODEN_TOOL_MULTIPLIER;
       uint128 expectedMass = logMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden axe on log");
     }
@@ -630,7 +631,7 @@ contract MineTest is DustTest {
       world.mine(aliceEntityId, stoneCoord, slot, "");
 
       EntityId mineEntityId = ReverseTerrainPosition.get(stoneCoord);
-      uint128 massReduction = playerHandMassReduction + axeMass / 10 * DEFAULT_WOODEN_TOOL_MULTIPLIER;
+      uint128 massReduction = TOOL_MINE_ENERGY_COST + axeMass / 10 * DEFAULT_WOODEN_TOOL_MULTIPLIER;
       uint128 expectedMass = stoneMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden axe on stone");
     }

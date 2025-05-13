@@ -24,12 +24,13 @@ import { HitMachineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import {
+  DEFAULT_HIT_ENERGY_COST,
   DEFAULT_ORE_TOOL_MULTIPLIER,
   DEFAULT_WOODEN_TOOL_MULTIPLIER,
-  HIT_ENERGY_COST,
   SAFE_PROGRAM_GAS,
   SPECIALIZED_ORE_TOOL_MULTIPLIER,
-  SPECIALIZED_WOODEN_TOOL_MULTIPLIER
+  SPECIALIZED_WOODEN_TOOL_MULTIPLIER,
+  TOOL_HIT_ENERGY_COST
 } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectType, ObjectTypes } from "../ObjectType.sol";
@@ -57,10 +58,7 @@ contract HitMachineSystem is System {
 
     ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
 
-    (uint128 massReduction, uint128 toolMassReduction) =
-      toolData.getMassReduction(machineData.energy, _getToolMultiplier(toolData.toolType));
-
-    uint128 playerEnergyReduction = _getCallerEnergyReduction(callerEnergy, massReduction, machineData.energy);
+    uint128 playerEnergyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, machineData.energy);
 
     Vec3 forceFieldCoord = forceField.getPosition();
 
@@ -70,9 +68,13 @@ contract HitMachineSystem is System {
       return;
     }
 
+    (uint128 massReduction, uint128 toolMassReduction) =
+      toolData.getMassReduction(machineData.energy, _getToolMultiplier(toolData.toolType));
+
     toolData.reduceMass(toolMassReduction);
 
     uint128 machineEnergyReduction = playerEnergyReduction + massReduction;
+
     decreaseMachineEnergy(forceField, machineEnergyReduction);
 
     addEnergyToLocalPool(forceFieldCoord, machineEnergyReduction + playerEnergyReduction);
@@ -85,18 +87,14 @@ contract HitMachineSystem is System {
     notify(caller, HitMachineNotification({ machine: forceField, machineCoord: forceFieldCoord }));
   }
 
-  function _getCallerEnergyReduction(uint128 currentEnergy, uint128 massReduction, uint128 massLeft)
+  function _getCallerEnergyReduction(ObjectType toolType, uint128 currentEnergy, uint128 massLeft)
     internal
     pure
     returns (uint128)
   {
-    // if tool mass reduction is not enough, consume energy from player up to hit energy cost
-    if (massReduction < massLeft) {
-      uint128 remaining = massLeft - massReduction;
-      uint128 energyReduction = HIT_ENERGY_COST <= remaining ? HIT_ENERGY_COST : remaining;
-      return Math.min(currentEnergy, energyReduction);
-    }
-    return 0;
+    uint128 maxEnergyCost = toolType.isNull() ? DEFAULT_HIT_ENERGY_COST : TOOL_HIT_ENERGY_COST;
+    maxEnergyCost = Math.min(currentEnergy, maxEnergyCost);
+    return Math.min(massLeft, maxEnergyCost);
   }
 
   function _getToolMultiplier(ObjectType toolType) internal pure returns (uint128) {

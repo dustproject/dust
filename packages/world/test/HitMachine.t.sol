@@ -3,7 +3,7 @@ pragma solidity >=0.8.24;
 
 import { console } from "forge-std/console.sol";
 
-import { HIT_ENERGY_COST, SPECIALIZED_ORE_TOOL_MULTIPLIER } from "../src/Constants.sol";
+import { DEFAULT_HIT_ENERGY_COST, SPECIALIZED_ORE_TOOL_MULTIPLIER, TOOL_HIT_ENERGY_COST } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../src/ObjectType.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
@@ -24,8 +24,8 @@ contract HitMachineTest is DustTest {
     EntityId forceField = setupForceField(forceFieldCoord);
 
     // Set initial energy
-    Energy.setEnergy(aliceEntityId, HIT_ENERGY_COST + 1);
-    Energy.setEnergy(forceField, HIT_ENERGY_COST);
+    Energy.setEnergy(aliceEntityId, DEFAULT_HIT_ENERGY_COST + 1);
+    Energy.setEnergy(forceField, DEFAULT_HIT_ENERGY_COST);
 
     // Hit force field without tool
     vm.prank(alice);
@@ -45,8 +45,8 @@ contract HitMachineTest is DustTest {
     EntityId forceField = setupForceField(forceFieldCoord);
 
     // Set initial energy
-    Energy.setEnergy(aliceEntityId, HIT_ENERGY_COST);
-    Energy.setEnergy(forceField, HIT_ENERGY_COST);
+    Energy.setEnergy(aliceEntityId, DEFAULT_HIT_ENERGY_COST);
+    Energy.setEnergy(forceField, DEFAULT_HIT_ENERGY_COST);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
@@ -57,7 +57,7 @@ contract HitMachineTest is DustTest {
     endGasReport();
 
     // Check energy didn't change because player died
-    assertEq(Energy.getEnergy(forceField), HIT_ENERGY_COST);
+    assertEq(Energy.getEnergy(forceField), DEFAULT_HIT_ENERGY_COST);
 
     assertPlayerIsDead(aliceEntityId, playerCoord);
 
@@ -76,7 +76,7 @@ contract HitMachineTest is DustTest {
 
     uint128 whackerMass = Mass.getMass(whacker);
     uint128 forceFieldEnergy = whackerMass * 1000;
-    uint128 aliceEnergy = HIT_ENERGY_COST + 1;
+    uint128 aliceEnergy = TOOL_HIT_ENERGY_COST + 1;
 
     // Set a manual energy so that it is not fully depleted
     Energy.setEnergy(forceField, forceFieldEnergy);
@@ -90,9 +90,9 @@ contract HitMachineTest is DustTest {
 
     // Check energy reduction with whacker multiplier
     uint128 massReduction = whackerMass / 10;
-    uint128 energyReduction = HIT_ENERGY_COST + massReduction * SPECIALIZED_ORE_TOOL_MULTIPLIER;
+    uint128 energyReduction = TOOL_HIT_ENERGY_COST + massReduction * SPECIALIZED_ORE_TOOL_MULTIPLIER;
     assertEq(Energy.getEnergy(forceField), forceFieldEnergy - energyReduction);
-    assertEq(Energy.getEnergy(aliceEntityId), aliceEnergy - HIT_ENERGY_COST);
+    assertEq(Energy.getEnergy(aliceEntityId), aliceEnergy - TOOL_HIT_ENERGY_COST);
 
     // Check tool mass reduction
     assertEq(Mass.getMass(whacker), whackerMass - massReduction); // Assuming initial mass is 100
@@ -131,8 +131,8 @@ contract HitMachineTest is DustTest {
     EntityId forceField = setupForceField(forceFieldCoord);
 
     // Set player energy below hit cost
-    Energy.setEnergy(aliceEntityId, HIT_ENERGY_COST - 1);
-    Energy.setEnergy(forceField, HIT_ENERGY_COST);
+    Energy.setEnergy(aliceEntityId, DEFAULT_HIT_ENERGY_COST - 1);
+    Energy.setEnergy(forceField, DEFAULT_HIT_ENERGY_COST);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
@@ -143,7 +143,7 @@ contract HitMachineTest is DustTest {
     endGasReport();
 
     // ForceField energy didn't change
-    assertEq(Energy.getEnergy(forceField), HIT_ENERGY_COST);
+    assertEq(Energy.getEnergy(forceField), DEFAULT_HIT_ENERGY_COST);
 
     // Player died
     assertPlayerIsDead(aliceEntityId, playerCoord);
