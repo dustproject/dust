@@ -116,6 +116,7 @@ export const metaCategories: MetaCategory[] = [
       "Crop",
       "UnderwaterPlant",
     ],
+    objects: ["Torch"],
   },
   { name: "isGrowable", categories: ["Seed", "Sapling"] },
   {

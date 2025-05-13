@@ -922,7 +922,7 @@ library ObjectTypeLib {
   }
 
   function isPassThrough(ObjectType self) internal pure returns (bool) {
-    return applyCategoryMask(self, Category.IS_PASS_THROUGH_MASK);
+    return applyCategoryMask(self, Category.IS_PASS_THROUGH_MASK) || self == ObjectTypes.Torch;
   }
 
   function isGrowable(ObjectType self) internal pure returns (bool) {
