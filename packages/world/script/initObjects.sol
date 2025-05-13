@@ -105,10 +105,10 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.CoffeeBush, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.StrawberryBush, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.RaspberryBush, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.Wheat, ObjectPhysicsData({ mass: 300000000000000, energy: 500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.Wheat, ObjectPhysicsData({ mass: 300000000000000, energy: 4000000000000000 }));
   ObjectPhysics.set(ObjectTypes.CottonBush, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.Pumpkin, ObjectPhysicsData({ mass: 1300000000000000, energy: 16500000000000000 }));
-  ObjectPhysics.set(ObjectTypes.Melon, ObjectPhysicsData({ mass: 1300000000000000, energy: 16500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.Pumpkin, ObjectPhysicsData({ mass: 1300000000000000, energy: 33000000000000000 }));
+  ObjectPhysics.set(ObjectTypes.Melon, ObjectPhysicsData({ mass: 1300000000000000, energy: 33000000000000000 }));
   ObjectPhysics.set(ObjectTypes.RedMushroomBlock, ObjectPhysicsData({ mass: 12500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.BrownMushroomBlock, ObjectPhysicsData({ mass: 12500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.MushroomStem, ObjectPhysicsData({ mass: 12500000000000000, energy: 0 }));
@@ -182,8 +182,8 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.NeptuniumBar, ObjectPhysicsData({ mass: 5000000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Bucket, ObjectPhysicsData({ mass: 13500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.WaterBucket, ObjectPhysicsData({ mass: 13500000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.WheatSlop, ObjectPhysicsData({ mass: 0, energy: 12800000000000000 }));
-  ObjectPhysics.set(ObjectTypes.PumpkinSoup, ObjectPhysicsData({ mass: 0, energy: 17800000000000000 }));
-  ObjectPhysics.set(ObjectTypes.MelonSmoothie, ObjectPhysicsData({ mass: 0, energy: 17800000000000000 }));
+  ObjectPhysics.set(ObjectTypes.WheatSlop, ObjectPhysicsData({ mass: 0, energy: 68800000000000000 }));
+  ObjectPhysics.set(ObjectTypes.PumpkinSoup, ObjectPhysicsData({ mass: 0, energy: 34300000000000000 }));
+  ObjectPhysics.set(ObjectTypes.MelonSmoothie, ObjectPhysicsData({ mass: 0, energy: 34300000000000000 }));
   ObjectPhysics.set(ObjectTypes.Battery, ObjectPhysicsData({ mass: 0, energy: 90000000000000000 }));
 }
