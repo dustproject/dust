@@ -142,9 +142,9 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.GoldBlock, ObjectPhysicsData({ mass: 14400000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.DiamondBlock, ObjectPhysicsData({ mass: 45000000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.NeptuniumBlock, ObjectPhysicsData({ mass: 45000000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.WheatSeed, ObjectPhysicsData({ mass: 0, energy: 800000000000000 }));
-  ObjectPhysics.set(ObjectTypes.PumpkinSeed, ObjectPhysicsData({ mass: 0, energy: 17800000000000000 }));
-  ObjectPhysics.set(ObjectTypes.MelonSeed, ObjectPhysicsData({ mass: 0, energy: 17800000000000000 }));
+  ObjectPhysics.set(ObjectTypes.WheatSeed, ObjectPhysicsData({ mass: 0, energy: 4300000000000000 }));
+  ObjectPhysics.set(ObjectTypes.PumpkinSeed, ObjectPhysicsData({ mass: 0, energy: 34300000000000000 }));
+  ObjectPhysics.set(ObjectTypes.MelonSeed, ObjectPhysicsData({ mass: 0, energy: 34300000000000000 }));
   ObjectPhysics.set(ObjectTypes.OakSapling, ObjectPhysicsData({ mass: 0, energy: 148000000000000000 }));
   ObjectPhysics.set(ObjectTypes.BirchSapling, ObjectPhysicsData({ mass: 0, energy: 139000000000000000 }));
   ObjectPhysics.set(ObjectTypes.JungleSapling, ObjectPhysicsData({ mass: 0, energy: 300000000000000000 }));

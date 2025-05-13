@@ -563,19 +563,19 @@ export const categoryObjects: {
   Seed: [
     {
       name: "WheatSeed",
-      energy: 800000000000000n,
+      energy: 4300000000000000n,
       timeToGrow: 900n,
       crop: "Wheat",
     },
     {
       name: "PumpkinSeed",
-      energy: 17800000000000000n,
+      energy: 34300000000000000n,
       timeToGrow: 3600n,
       crop: "Pumpkin",
     },
     {
       name: "MelonSeed",
-      energy: 17800000000000000n,
+      energy: 34300000000000000n,
       timeToGrow: 3600n,
       crop: "Melon",
     },
