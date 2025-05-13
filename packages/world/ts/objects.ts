@@ -25,6 +25,7 @@ export const blockCategories = [
   "Sapling",
   "SmartEntityBlock",
   "Station",
+  "MiscPassThrough",
 ] as const;
 
 export const nonBlockCategories = [
@@ -98,7 +99,7 @@ export const metaCategories: MetaCategory[] = [
   {
     name: "hasAxeMultiplier",
     categories: ["Log", "Leaf", "Plank", "CropBlock"],
-    objects: ["Chest", "Workbench", "SpawnTile", "Bed", "TextSign"],
+    objects: ["Chest", "Workbench", "SpawnTile", "Bed", "TextSign", "Torch"],
   },
   {
     name: "hasPickMultiplier",
@@ -115,6 +116,7 @@ export const metaCategories: MetaCategory[] = [
       "Greenery",
       "Crop",
       "UnderwaterPlant",
+      "MiscPassThrough",
     ],
   },
   { name: "isGrowable", categories: ["Seed", "Sapling"] },
@@ -317,6 +319,7 @@ export const objectNames = [
   "Battery",
   "Player",
   "Fragment",
+  "Torch",
 ] as const;
 
 export type ObjectName = (typeof objectNames)[number];
@@ -609,6 +612,7 @@ export const categoryObjects: {
     { name: "Powerstone", mass: 80000000000000000n },
     { name: "Furnace", mass: 108000000000000000n },
   ],
+  MiscPassThrough: [{ name: "Torch", mass: 1125000000000000n }],
 
   // NON BLOCKS
 

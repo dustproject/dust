@@ -46,6 +46,7 @@ library Category {
   uint16 constant Sapling = uint16(19) << OFFSET_BITS;
   uint16 constant SmartEntityBlock = uint16(20) << OFFSET_BITS;
   uint16 constant Station = uint16(21) << OFFSET_BITS;
+  uint16 constant MiscPassThrough = uint16(22) << OFFSET_BITS;
   // Non-Block Categories
   uint16 constant Pick = uint16(128) << OFFSET_BITS;
   uint16 constant Axe = uint16(129) << OFFSET_BITS;
@@ -74,7 +75,8 @@ library Category {
   uint256 constant IS_PASS_THROUGH_MASK = (uint256(1) << (NonSolid >> OFFSET_BITS))
     | (uint256(1) << (Flower >> OFFSET_BITS)) | (uint256(1) << (Seed >> OFFSET_BITS))
     | (uint256(1) << (Sapling >> OFFSET_BITS)) | (uint256(1) << (Greenery >> OFFSET_BITS))
-    | (uint256(1) << (Crop >> OFFSET_BITS)) | (uint256(1) << (UnderwaterPlant >> OFFSET_BITS));
+    | (uint256(1) << (Crop >> OFFSET_BITS)) | (uint256(1) << (UnderwaterPlant >> OFFSET_BITS))
+    | (uint256(1) << (MiscPassThrough >> OFFSET_BITS));
   uint256 constant IS_GROWABLE_MASK = (uint256(1) << (Seed >> OFFSET_BITS)) | (uint256(1) << (Sapling >> OFFSET_BITS));
   uint256 constant IS_UNIQUE_OBJECT_MASK = (uint256(1) << (Pick >> OFFSET_BITS)) | (uint256(1) << (Axe >> OFFSET_BITS))
     | (uint256(1) << (Whacker >> OFFSET_BITS)) | (uint256(1) << (Hoe >> OFFSET_BITS))
@@ -245,6 +247,7 @@ library ObjectTypes {
   ObjectType constant Workbench = ObjectType.wrap(Category.Station | 0);
   ObjectType constant Powerstone = ObjectType.wrap(Category.Station | 1);
   ObjectType constant Furnace = ObjectType.wrap(Category.Station | 2);
+  ObjectType constant Torch = ObjectType.wrap(Category.MiscPassThrough | 0);
   ObjectType constant WoodenPick = ObjectType.wrap(Category.Pick | 0);
   ObjectType constant CopperPick = ObjectType.wrap(Category.Pick | 1);
   ObjectType constant IronPick = ObjectType.wrap(Category.Pick | 2);
@@ -388,6 +391,10 @@ library ObjectTypeLib {
 
   function isStation(ObjectType self) internal pure returns (bool) {
     return category(self) == Category.Station;
+  }
+
+  function isMiscPassThrough(ObjectType self) internal pure returns (bool) {
+    return category(self) == Category.MiscPassThrough;
   }
 
   function isPick(ObjectType self) internal pure returns (bool) {
@@ -673,6 +680,10 @@ library ObjectTypeLib {
     return [ObjectTypes.Workbench, ObjectTypes.Powerstone, ObjectTypes.Furnace];
   }
 
+  function getMiscPassThroughTypes() internal pure returns (ObjectType[1] memory) {
+    return [ObjectTypes.Torch];
+  }
+
   function getPickTypes() internal pure returns (ObjectType[6] memory) {
     return [
       ObjectTypes.WoodenPick,
@@ -911,7 +922,7 @@ library ObjectTypeLib {
   function hasAxeMultiplier(ObjectType self) internal pure returns (bool) {
     return applyCategoryMask(self, Category.HAS_AXE_MULTIPLIER_MASK) || self == ObjectTypes.Chest
       || self == ObjectTypes.Workbench || self == ObjectTypes.SpawnTile || self == ObjectTypes.Bed
-      || self == ObjectTypes.TextSign;
+      || self == ObjectTypes.TextSign || self == ObjectTypes.Torch;
   }
 
   function hasPickMultiplier(ObjectType self) internal pure returns (bool) {
