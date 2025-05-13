@@ -141,12 +141,12 @@ library NatureLib {
     }
 
     if (objectType == ObjectTypes.Melon) {
-      // Expected return 1.86
+      // Expected return 1.53
       uint256[] memory distribution = new uint256[](4);
-      distribution[0] = 10; // 0 seeds: 10%
-      distribution[1] = 20; // 1 seed:  20%
-      distribution[2] = 44; // 2 seeds: 44%
-      distribution[3] = 26; // 3 seeds: 26%
+      distribution[0] = 20; // 0 seeds: 20%
+      distribution[1] = 30; // 1 seed:  30%
+      distribution[2] = 27; // 2 seeds: 27%
+      distribution[3] = 23; // 3 seeds: 23%
 
       drops = new RandomDrop[](1);
       drops[0] = RandomDrop(ObjectTypes.MelonSeed, distribution);
@@ -154,12 +154,12 @@ library NatureLib {
     }
 
     if (objectType == ObjectTypes.Pumpkin) {
-      // Expected return 1.86
+      // Expected return 1.53
       uint256[] memory distribution = new uint256[](4);
-      distribution[0] = 10; // 0 seeds: 10%
-      distribution[1] = 20; // 1 seed:  20%
-      distribution[2] = 44; // 2 seeds: 44%
-      distribution[3] = 26; // 3 seeds: 26%
+      distribution[0] = 20; // 0 seeds: 20%
+      distribution[1] = 30; // 1 seed:  30%
+      distribution[2] = 27; // 2 seeds: 27%
+      distribution[3] = 23; // 3 seeds: 23%
 
       drops = new RandomDrop[](1);
       drops[0] = RandomDrop(ObjectTypes.PumpkinSeed, distribution);

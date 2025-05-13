@@ -44,9 +44,9 @@ uint128 constant SPECIALIZED_ORE_TOOL_MULTIPLIER = 9;
 uint128 constant SPECIALIZED_WOODEN_TOOL_MULTIPLIER = 30;
 
 // Resource caps
-uint256 constant MAX_WHEAT_SEED = 444_971;
-uint256 constant MAX_MELON_SEED = 9_122;
-uint256 constant MAX_PUMPKIN_SEED = 1_717;
+uint256 constant MAX_WHEAT_SEED = 29_659;
+uint256 constant MAX_MELON_SEED = 7_493;
+uint256 constant MAX_PUMPKIN_SEED = 1_410;
 
 uint256 constant MAX_OAK_SAPLING = 44_745;
 uint256 constant MAX_BIRCH_SAPLING = 35_656;
