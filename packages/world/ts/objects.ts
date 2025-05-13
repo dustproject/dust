@@ -25,6 +25,7 @@ export const blockCategories = [
   "Sapling",
   "SmartEntityBlock",
   "Station",
+  "MiscPassThrough",
 ] as const;
 
 export const nonBlockCategories = [
@@ -98,7 +99,7 @@ export const metaCategories: MetaCategory[] = [
   {
     name: "hasAxeMultiplier",
     categories: ["Log", "Leaf", "Plank", "CropBlock"],
-    objects: ["Chest", "Workbench", "SpawnTile", "Bed", "TextSign"],
+    objects: ["Chest", "Workbench", "SpawnTile", "Bed", "TextSign", "Torch"],
   },
   {
     name: "hasPickMultiplier",
@@ -115,6 +116,7 @@ export const metaCategories: MetaCategory[] = [
       "Greenery",
       "Crop",
       "UnderwaterPlant",
+      "MiscPassThrough",
     ],
   },
   { name: "isGrowable", categories: ["Seed", "Sapling"] },
@@ -317,6 +319,7 @@ export const objectNames = [
   "Battery",
   "Player",
   "Fragment",
+  "Torch",
 ] as const;
 
 export type ObjectName = (typeof objectNames)[number];
@@ -507,12 +510,12 @@ export const categoryObjects: {
     { name: "CoffeeBush", mass: 300000000000000n },
     { name: "StrawberryBush", mass: 300000000000000n },
     { name: "RaspberryBush", mass: 300000000000000n },
-    { name: "Wheat", mass: 300000000000000n, energy: 500000000000000n },
+    { name: "Wheat", mass: 300000000000000n, energy: 4000000000000000n },
     { name: "CottonBush", mass: 300000000000000n },
   ],
   CropBlock: [
-    { name: "Pumpkin", mass: 1300000000000000n, energy: 16500000000000000n },
-    { name: "Melon", mass: 1300000000000000n, energy: 16500000000000000n },
+    { name: "Pumpkin", mass: 1300000000000000n, energy: 33000000000000000n },
+    { name: "Melon", mass: 1300000000000000n, energy: 33000000000000000n },
     { name: "RedMushroomBlock", mass: 12500000000000000n },
     { name: "BrownMushroomBlock", mass: 12500000000000000n },
     { name: "MushroomStem", mass: 12500000000000000n },
@@ -563,19 +566,19 @@ export const categoryObjects: {
   Seed: [
     {
       name: "WheatSeed",
-      energy: 800000000000000n,
+      energy: 4300000000000000n,
       timeToGrow: 900n,
       crop: "Wheat",
     },
     {
       name: "PumpkinSeed",
-      energy: 17800000000000000n,
+      energy: 34300000000000000n,
       timeToGrow: 3600n,
       crop: "Pumpkin",
     },
     {
       name: "MelonSeed",
-      energy: 17800000000000000n,
+      energy: 34300000000000000n,
       timeToGrow: 3600n,
       crop: "Melon",
     },
@@ -609,6 +612,7 @@ export const categoryObjects: {
     { name: "Powerstone", mass: 80000000000000000n },
     { name: "Furnace", mass: 108000000000000000n },
   ],
+  MiscPassThrough: [{ name: "Torch", mass: 1125000000000000n }],
 
   // NON BLOCKS
 
@@ -705,9 +709,9 @@ export const categoryObjects: {
     { name: "WaterBucket", mass: 13500000000000000n },
   ],
   Food: [
-    { name: "WheatSlop", energy: 12800000000000000n },
-    { name: "PumpkinSoup", energy: 17800000000000000n },
-    { name: "MelonSmoothie", energy: 17800000000000000n },
+    { name: "WheatSlop", energy: 68800000000000000n },
+    { name: "PumpkinSoup", energy: 34300000000000000n },
+    { name: "MelonSmoothie", energy: 34300000000000000n },
   ],
   Fuel: [{ name: "Battery", energy: 90000000000000000n }],
   Player: [{ name: "Player" }],

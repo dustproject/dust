@@ -22,7 +22,6 @@ import {
   BUILD_ENERGY_COST,
   CHUNK_COMMIT_EXPIRY_BLOCKS,
   MAX_ENTITY_INFLUENCE_HALF_WIDTH,
-  MINE_ENERGY_COST,
   TILL_ENERGY_COST
 } from "../src/Constants.sol";
 
@@ -371,7 +370,6 @@ contract FarmingTest is DustTest {
     assertEq(
       LocalEnergyPool.get(farmlandCoord.toLocalEnergyPoolShardCoord()),
       beforeHarvestEnergy + seedEnergy,
-      // beforeHarvestEnergy + seedEnergy + MINE_ENERGY_COST,
       "Energy not correctly returned to local pool"
     );
   }

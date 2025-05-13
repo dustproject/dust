@@ -37,13 +37,14 @@ import { DeathNotification, MineNotification, notify } from "../utils/NotifUtils
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import {
+  DEFAULT_MINE_ENERGY_COST,
   DEFAULT_ORE_TOOL_MULTIPLIER,
   DEFAULT_WOODEN_TOOL_MULTIPLIER,
-  MINE_ENERGY_COST,
   PLAYER_ENERGY_DRAIN_RATE,
   SAFE_PROGRAM_GAS,
   SPECIALIZED_ORE_TOOL_MULTIPLIER,
-  SPECIALIZED_WOODEN_TOOL_MULTIPLIER
+  SPECIALIZED_WOODEN_TOOL_MULTIPLIER,
+  TOOL_MINE_ENERGY_COST
 } from "../Constants.sol";
 
 import { EntityId } from "../EntityId.sol";
@@ -78,7 +79,9 @@ contract MineSystem is System {
       // TODO: factor out the mass reduction logic so it's cheaper to call
       EntityId entityId = _mine(caller, coord, toolSlot, extraData);
       massLeft = Mass._getMass(entityId);
-    } while (massLeft > 0 && Energy._getEnergy(caller) > 0);
+    } while (
+      massLeft > 0 && Energy._getEnergy(caller) > 0 && InventoryUtils.getToolData(caller, toolSlot).massLeft > 0
+    );
   }
 
   function mineUntilDestroyed(EntityId caller, Vec3 coord, bytes calldata extraData) public {
@@ -237,11 +240,8 @@ contract MineSystem is System {
     }
 
     ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
-    uint128 toolMultiplier = _getToolMultiplier(toolData.toolType, minedType);
 
-    (uint128 mineMassReduction, uint128 toolMassReduction) = toolData.getMassReduction(massLeft, toolMultiplier);
-
-    uint128 energyReduction = _getCallerEnergyReduction(callerEnergy, mineMassReduction, massLeft);
+    uint128 energyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, massLeft);
 
     if (energyReduction > 0) {
       // If player died, return early
@@ -253,7 +253,8 @@ contract MineSystem is System {
       massLeft -= energyReduction;
     }
 
-    // Apply tool usage after decreasing player energy so we make sure the player is alive
+    uint128 toolMultiplier = _getToolMultiplier(toolData.toolType, minedType);
+    (uint128 mineMassReduction, uint128 toolMassReduction) = toolData.getMassReduction(massLeft, toolMultiplier);
     toolData.reduceMass(toolMassReduction);
 
     massLeft -= mineMassReduction;
@@ -275,18 +276,15 @@ contract MineSystem is System {
     return isWoodenTool ? DEFAULT_WOODEN_TOOL_MULTIPLIER : DEFAULT_ORE_TOOL_MULTIPLIER;
   }
 
-  function _getCallerEnergyReduction(uint128 currentEnergy, uint128 mineMassReduction, uint128 massLeft)
+  function _getCallerEnergyReduction(ObjectType toolType, uint128 currentEnergy, uint128 massLeft)
     internal
     pure
     returns (uint128)
   {
     // if tool mass reduction is not enough, consume energy from player up to mine energy cost
-    if (mineMassReduction < massLeft) {
-      uint128 remaining = massLeft - mineMassReduction;
-      uint128 energyReduction = MINE_ENERGY_COST <= remaining ? MINE_ENERGY_COST : remaining;
-      return Math.min(currentEnergy, energyReduction);
-    }
-    return 0;
+    uint128 maxEnergyCost = toolType.isNull() ? DEFAULT_MINE_ENERGY_COST : TOOL_MINE_ENERGY_COST;
+    maxEnergyCost = Math.min(currentEnergy, maxEnergyCost);
+    return Math.min(massLeft, maxEnergyCost);
   }
 }
 

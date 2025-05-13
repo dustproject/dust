@@ -1,4 +1,4 @@
-import { objects } from "../objects";
+import { objects, objectsByName } from "../objects";
 
 // Template for the Solidity file
 function generateInitObjectsSol(): string {
@@ -18,5 +18,37 @@ ${objects
 }
 `;
 }
+
+function validateSeeds() {
+  const seeds = objects.filter((obj) => obj.category === "Seed");
+  for (const seed of seeds) {
+    if (!seed.crop) {
+      throw new Error(`Seed ${seed.name} has no crop`);
+    }
+
+    const growsInto = objectsByName[seed.crop];
+    if (!growsInto) {
+      throw new Error(
+        `Seed ${seed.name} grows into ${seed.crop} but object does not exist`,
+      );
+    }
+    const totalInputMassEnergy =
+      (growsInto.mass ?? 0n) + (growsInto.energy ?? 0n);
+    if (seed.mass !== undefined) {
+      throw new Error(`Seed ${seed.name} has mass`);
+    }
+    if (seed.energy === undefined) {
+      throw new Error(`Seed ${seed.name} has no energy`);
+    }
+    const totalOutputMassEnergy = seed.energy;
+    if (totalInputMassEnergy !== totalOutputMassEnergy) {
+      throw new Error(
+        `Seed ${seed.name} does not maintain mass+energy balance ${totalInputMassEnergy} != ${totalOutputMassEnergy}`,
+      );
+    }
+  }
+}
+
+validateSeeds();
 
 console.info(generateInitObjectsSol());
