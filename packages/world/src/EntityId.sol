@@ -31,17 +31,6 @@ type EntityType is bytes1;
 
 uint256 constant ENTITY_TYPE_OFFSET_BITS = 248;
 
-library EntityTypes {
-  EntityType constant Incremental = EntityType.wrap(0x00);
-  EntityType constant Player = EntityType.wrap(0x01);
-  EntityType constant Fragment = EntityType.wrap(0x02);
-  EntityType constant Block = EntityType.wrap(0x03);
-
-  function unwrap(EntityType self) internal pure returns (bytes1) {
-    return EntityType.unwrap(self);
-  }
-}
-
 library EntityIdLib {
   // We need to use this internal library function in order to obtain the msg.sig and msg.sender
   function activate(EntityId self) internal returns (EnergyData memory) {
@@ -90,6 +79,10 @@ library EntityIdLib {
   }
 
   function getPosition(EntityId self) internal view returns (Vec3) {
+    (EntityType entityType, bytes31 data) = EntityTypeLib.decode(self);
+    if (entityType == EntityTypes.Block || entityType == EntityTypes.Fragment) {
+      return Vec3.wrap(uint96(bytes12(data)));
+    }
     return EntityPosition._get(self);
   }
 
@@ -109,29 +102,25 @@ library EntityIdLib {
     return EntityId.unwrap(self);
   }
 
-  function encodeCoord(EntityType entityType, Vec3 coord) internal pure returns (EntityId) {
-    return EntityId.wrap(
-      bytes32((uint256(uint8(entityType.unwrap())) << ENTITY_TYPE_OFFSET_BITS) | uint256(uint96(coord.unwrap())))
-    );
-  }
-
   function encodeBlock(Vec3 coord) internal pure returns (EntityId) {
-    return encodeCoord(EntityTypes.Block, coord);
+    return _encodeCoord(EntityTypes.Block, coord);
   }
 
   function encodeFragment(Vec3 coord) internal pure returns (EntityId) {
-    return encodeCoord(EntityTypes.Fragment, coord);
+    return _encodeCoord(EntityTypes.Fragment, coord);
   }
 
   function encodePlayer(address player) internal pure returns (EntityId) {
-    return EntityId.wrap(
-      bytes32((uint256(uint8(EntityTypes.Player.unwrap())) << ENTITY_TYPE_OFFSET_BITS) | uint256(uint160(player)))
-    );
+    return EntityTypes.Player.encode(bytes20(uint160(player)));
   }
 
   function getPlayerAddress(EntityId self) internal view returns (address) {
     require(self.getObjectType() == ObjectTypes.Player, "Entity is not a player");
     return address(uint160(uint256(EntityId.unwrap(self))));
+  }
+
+  function _encodeCoord(EntityType entityType, Vec3 coord) private pure returns (EntityId) {
+    return entityType.encode(bytes12(uint96(coord.unwrap())));
   }
 }
 
@@ -173,6 +162,35 @@ library ActivateLib {
   }
 }
 
+library EntityTypes {
+  EntityType constant Incremental = EntityType.wrap(0x00);
+  EntityType constant Player = EntityType.wrap(0x01);
+  EntityType constant Fragment = EntityType.wrap(0x02);
+  EntityType constant Block = EntityType.wrap(0x03);
+}
+
+library EntityTypeLib {
+  function unwrap(EntityType self) internal pure returns (bytes1) {
+    return EntityType.unwrap(self);
+  }
+
+  function encode(EntityType self, bytes31 data) internal pure returns (EntityId) {
+    return EntityId.wrap((bytes32(EntityType.unwrap(self)) << ENTITY_TYPE_OFFSET_BITS) | bytes32(data));
+  }
+
+  function decode(EntityId self) internal pure returns (EntityType, bytes31) {
+    bytes32 _self = self.unwrap();
+    EntityType entityType = EntityType.wrap(bytes1(_self >> ENTITY_TYPE_OFFSET_BITS));
+    return (entityType, bytes31(_self));
+  }
+}
+
+function typeEq(EntityType self, EntityType other) pure returns (bool) {
+  return EntityType.unwrap(self) == EntityType.unwrap(other);
+}
+
 using EntityIdLib for EntityId global;
-using EntityTypes for EntityType global;
 using { eq as ==, neq as != } for EntityId global;
+
+using EntityTypeLib for EntityType global;
+using { typeEq as == } for EntityType global;

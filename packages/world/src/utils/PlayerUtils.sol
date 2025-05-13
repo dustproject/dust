@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { WorldContextConsumerLib } from "@latticexyz/world/src/WorldContext.sol";
-
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
@@ -29,16 +27,6 @@ import { Vec3, vec3 } from "../Vec3.sol";
 import { DeathNotification, notify } from "./NotifUtils.sol";
 
 library PlayerUtils {
-  function getOrCreatePlayer() internal returns (EntityId) {
-    address playerAddress = WorldContextConsumerLib._msgSender();
-    EntityId player = EntityIdLib.encodePlayer(playerAddress);
-    if (!player.exists()) {
-      EntityObjectType._set(player, ObjectTypes.Player);
-    }
-
-    return player;
-  }
-
   function addPlayerToGrid(EntityId player, Vec3 playerCoord) internal {
     // Check if the spawn location is valid
     ObjectType terrainObjectType = EntityUtils.safeGetObjectTypeAt(playerCoord);
@@ -60,8 +48,7 @@ library PlayerUtils {
         relativeTerrainObjectType.isPassThrough() && !EntityUtils.getMovableEntityAt(relativeCoord).exists(),
         "Cannot spawn on a non-passable block"
       );
-      EntityId relativePlayer = EntityUtils.getUniqueEntity();
-      EntityObjectType._set(relativePlayer, ObjectTypes.Player);
+      EntityId relativePlayer = EntityUtils.createUniqueEntity(ObjectTypes.Player);
       EntityUtils.setMovableEntityAt(relativeCoord, relativePlayer);
       BaseEntity._set(relativePlayer, player);
     }

@@ -42,7 +42,7 @@ struct ToolData {
 }
 
 library InventoryUtils {
-  function getToolData(EntityId owner, uint16 slot) public view returns (ToolData memory) {
+  function getToolData(EntityId owner, uint16 slot) internal view returns (ToolData memory) {
     EntityId tool = InventorySlot._getEntityId(owner, slot);
     if (!tool.exists()) {
       return ToolData(owner, tool, ObjectTypes.Null, slot, 0);

@@ -173,7 +173,7 @@ contract SpawnSystem is System {
   function _spawnPlayer(Vec3 spawnCoord, uint128 spawnEnergy) internal returns (EntityId) {
     require(!MoveLib._gravityApplies(spawnCoord), "Cannot spawn player here as gravity applies");
 
-    EntityId player = PlayerUtils.getOrCreatePlayer();
+    EntityId player = EntityUtils.getOrCreatePlayer();
     SpawnLib._requirePlayerDead(player);
 
     // Position the player at the given coordinates
