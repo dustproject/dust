@@ -5,7 +5,6 @@ import { BurnedResourceCount } from "./codegen/tables/BurnedResourceCount.sol";
 import { DisabledExtraDrops } from "./codegen/tables/DisabledExtraDrops.sol";
 import { ResourceCount } from "./codegen/tables/ResourceCount.sol";
 
-import { getObjectTypeAt, getOrCreateEntityAt } from "./utils/EntityUtils.sol";
 import { ChunkCommitment } from "./utils/Vec3Storage.sol";
 
 import {

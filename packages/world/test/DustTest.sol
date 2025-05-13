@@ -31,21 +31,16 @@ import { Mass } from "../src/codegen/tables/Mass.sol";
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
-import { Player } from "../src/codegen/tables/Player.sol";
-
 import { RegionMerkleRoot } from "../src/codegen/tables/RegionMerkleRoot.sol";
-import { ReversePlayer } from "../src/codegen/tables/ReversePlayer.sol";
 
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 
 import { encodeChunk } from "./utils/encodeChunk.sol";
 
-import {
-  EntityPosition, LocalEnergyPool, ReverseMovablePosition, ReverseTerrainPosition
-} from "../src/utils/Vec3Storage.sol";
+import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
 import { DustAssertions } from "./DustAssertions.sol";
-import { TestEnergyUtils, TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestEnergyUtils, TestEntityUtils, TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 
@@ -64,6 +59,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     address owner = NamespaceOwner.get(rootNamespace);
     vm.prank(owner);
     world.transferOwnership(rootNamespace, address(this));
+    TestEntityUtils.init(address(TestEntityUtils));
     TestInventoryUtils.init(address(TestInventoryUtils));
     TestForceFieldUtils.init(address(TestForceFieldUtils));
     TestEnergyUtils.init(address(TestEnergyUtils));
@@ -90,9 +86,6 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
       ReverseMovablePosition.set(relativeCoord, relativePlayerEntityId);
       BaseEntity.set(relativePlayerEntityId, playerEntityId);
     }
-
-    Player.set(playerAddress, playerEntityId);
-    ReversePlayer.set(playerEntityId, playerAddress);
 
     Energy.set(
       playerEntityId,
@@ -245,7 +238,6 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     EntityId entityId = randomEntityId();
     EntityObjectType.set(entityId, objectType);
     EntityPosition.set(entityId, coord);
-    ReverseTerrainPosition.set(coord, entityId);
     Mass.set(entityId, ObjectPhysics.getMass(objectType));
 
     Vec3[] memory coords = objectType.getRelativeCoords(coord);
@@ -254,8 +246,6 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
       Vec3 relativeCoord = coords[i];
       EntityId relativeEntityId = randomEntityId();
       EntityObjectType.set(relativeEntityId, objectType);
-      EntityPosition.set(relativeEntityId, relativeCoord);
-      ReverseTerrainPosition.set(relativeCoord, relativeEntityId);
       BaseEntity.set(relativeEntityId, entityId);
     }
     return entityId;

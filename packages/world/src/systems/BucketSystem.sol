@@ -6,7 +6,7 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 
-import { getOrCreateEntityAt, safeGetObjectTypeAt } from "../utils/EntityUtils.sol";
+import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 
 import { EntityId } from "../EntityId.sol";
@@ -20,7 +20,7 @@ contract BucketSystem is System {
     caller.activate();
     caller.requireConnected(waterCoord);
 
-    require(safeGetObjectTypeAt(waterCoord) == ObjectTypes.Water, "Not water");
+    require(EntityUtils.safeGetObjectTypeAt(waterCoord) == ObjectTypes.Water, "Not water");
 
     require(InventorySlot._getObjectType(caller, bucketSlot) == ObjectTypes.Bucket, "Must use an empty Bucket");
 
@@ -33,7 +33,7 @@ contract BucketSystem is System {
     caller.activate();
     caller.requireConnected(coord);
 
-    (EntityId farmland, ObjectType objectType) = getOrCreateEntityAt(coord);
+    (EntityId farmland, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(coord);
     require(objectType == ObjectTypes.Farmland, "Not farmland");
 
     require(InventorySlot._getObjectType(caller, bucketSlot) == ObjectTypes.WaterBucket, "Must use a Water Bucket");

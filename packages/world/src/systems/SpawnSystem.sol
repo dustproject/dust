@@ -9,14 +9,10 @@ import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
 import { Mass } from "../codegen/tables/Mass.sol";
-import { Player } from "../codegen/tables/Player.sol";
-import { ReversePlayer } from "../codegen/tables/ReversePlayer.sol";
 
 import { SurfaceChunkCount } from "../codegen/tables/SurfaceChunkCount.sol";
 
-import {
-  ExploredChunk, ReverseMovablePosition, ReverseTerrainPosition, SurfaceChunkByIndex
-} from "../utils/Vec3Storage.sol";
+import { ExploredChunk, ReverseMovablePosition, SurfaceChunkByIndex } from "../utils/Vec3Storage.sol";
 
 import {
   CHUNK_SIZE,
@@ -32,7 +28,7 @@ import { checkWorldStatus } from "../Utils.sol";
 
 import { Vec3, vec3 } from "../Vec3.sol";
 import { removeEnergyFromLocalPool, updateMachineEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
-import { getMovableEntityAt, getObjectTypeAt } from "../utils/EntityUtils.sol";
+import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { SpawnNotification, notify } from "../utils/NotifUtils.sol";
 
@@ -88,20 +84,23 @@ contract SpawnSystem is System {
     Vec3 belowCoord = spawnCoord - vec3(0, 1, 0);
     Vec3 aboveCoord = spawnCoord + vec3(0, 1, 0);
 
-    ObjectType spawnType = getObjectTypeAt(spawnCoord);
-    if (spawnType.isNull() || !spawnType.isPassThrough() || getMovableEntityAt(spawnCoord).exists()) {
+    ObjectType spawnType = EntityUtils.getObjectTypeAt(spawnCoord);
+    if (spawnType.isNull() || !spawnType.isPassThrough() || EntityUtils.getMovableEntityAt(spawnCoord).exists()) {
       return false;
     }
 
-    ObjectType aboveType = getObjectTypeAt(aboveCoord);
-    if (aboveType.isNull() || !aboveType.isPassThrough() || getMovableEntityAt(aboveCoord).exists()) {
+    ObjectType aboveType = EntityUtils.getObjectTypeAt(aboveCoord);
+    if (aboveType.isNull() || !aboveType.isPassThrough() || EntityUtils.getMovableEntityAt(aboveCoord).exists()) {
       return false;
     }
 
-    ObjectType belowType = getObjectTypeAt(belowCoord);
+    ObjectType belowType = EntityUtils.getObjectTypeAt(belowCoord);
     if (
       belowType.isNull()
-        || (belowType != ObjectTypes.Water && belowType.isPassThrough() && !getMovableEntityAt(belowCoord).exists())
+        || (
+          belowType != ObjectTypes.Water && belowType.isPassThrough()
+            && !EntityUtils.getMovableEntityAt(belowCoord).exists()
+        )
     ) {
       return false;
     }

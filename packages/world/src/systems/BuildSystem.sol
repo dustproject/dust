@@ -20,7 +20,7 @@ import { Orientation } from "../codegen/tables/Orientation.sol";
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
 import { removeEnergyFromLocalPool, transferEnergyToPool, updateMachineEnergy } from "../utils/EnergyUtils.sol";
-import { getMovableEntityAt, getObjectTypeAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
+import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { Math } from "../utils/Math.sol";
@@ -106,11 +106,11 @@ library BuildLib {
   }
 
   function _addBlock(ObjectType buildType, Vec3 coord) internal returns (EntityId) {
-    (EntityId terrain, ObjectType terrainObjectType) = getOrCreateEntityAt(coord);
+    (EntityId terrain, ObjectType terrainObjectType) = EntityUtils.getOrCreateBlockAt(coord);
     require(terrainObjectType == ObjectTypes.Air, "Cannot build on a non-air block");
     require(Inventory._lengthOccupiedSlots(terrain) == 0, "Cannot build where there are dropped objects");
     if (!buildType.isPassThrough()) {
-      require(!getMovableEntityAt(coord).exists(), "Cannot build on a movable entity");
+      require(!EntityUtils.getMovableEntityAt(coord).exists(), "Cannot build on a movable entity");
     }
 
     EntityObjectType._set(terrain, buildType);
@@ -137,7 +137,7 @@ library BuildLib {
   }
 
   function _handleGrowable(EntityId base, ObjectType buildType, Vec3 baseCoord) public {
-    ObjectType belowType = getObjectTypeAt(baseCoord - vec3(0, 1, 0));
+    ObjectType belowType = EntityUtils.getObjectTypeAt(baseCoord - vec3(0, 1, 0));
     require(buildType.isPlantableOn(belowType), "Cannot plant on this block");
 
     removeEnergyFromLocalPool(baseCoord, ObjectPhysics._getEnergy(buildType));

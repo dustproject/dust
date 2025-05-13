@@ -30,13 +30,7 @@ import {
   updateSleepingPlayerEnergy
 } from "../utils/EnergyUtils.sol";
 
-import {
-  createEntityAt,
-  getEntityAt,
-  getMovableEntityAt,
-  getObjectTypeAt,
-  getOrCreateEntityAt
-} from "../utils/EntityUtils.sol";
+import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils, ToolData } from "../utils/InventoryUtils.sol";
 import { DeathNotification, MineNotification, notify } from "../utils/NotifUtils.sol";
@@ -100,7 +94,7 @@ contract MineSystem is System {
     uint128 callerEnergy = caller.activate().energy;
     caller.requireConnected(coord);
 
-    (EntityId mined, ObjectType minedType) = getOrCreateEntityAt(coord);
+    (EntityId mined, ObjectType minedType) = EntityUtils.getOrCreateBlockAt(coord);
     require(minedType.isMineable(), "Object is not mineable");
 
     mined = mined.baseEntityId();
@@ -145,10 +139,10 @@ contract MineSystem is System {
     // Remove growables on top of this block
     Vec3 aboveCoord = coord + vec3(0, 1, 0);
     // If above is growable, the entity must exist as there are not growables in the base terrain
-    (EntityId above, ObjectType aboveType) = getEntityAt(aboveCoord);
+    (EntityId above, ObjectType aboveType) = EntityUtils.getBlockAt(aboveCoord);
     if (aboveType.isGrowable()) {
       if (!above.exists()) {
-        above = createEntityAt(aboveCoord, aboveType);
+        EntityUtils.getOrCreateBlockAt(aboveCoord);
       }
       _removeGrowable(above, aboveType, aboveCoord);
       _handleDrop(caller, above, aboveType, aboveCoord);
@@ -171,7 +165,7 @@ contract MineSystem is System {
     EntityObjectType._set(entityId, ObjectTypes.Air);
 
     Vec3 aboveCoord = coord + vec3(0, 1, 0);
-    EntityId above = getMovableEntityAt(aboveCoord);
+    EntityId above = EntityUtils.getMovableEntityAt(aboveCoord);
     // Note: currently it is not possible for the above player to not be the base entity,
     // but if we add other types of movable entities we should check that it is a base entity
     if (above.exists()) {
@@ -186,7 +180,7 @@ contract MineSystem is System {
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];
-      (EntityId relative, ObjectType relativeType) = getEntityAt(relativeCoord);
+      (EntityId relative, ObjectType relativeType) = EntityUtils.getBlockAt(relativeCoord);
       BaseEntity._deleteRecord(relative);
 
       _removeBlock(relative, relativeType, relativeCoord);

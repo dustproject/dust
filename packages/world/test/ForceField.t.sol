@@ -9,7 +9,7 @@ import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResou
 import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
-import { TestEnergyUtils, TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestEnergyUtils, TestEntityUtils, TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
@@ -22,7 +22,7 @@ import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 import { DustTest, console } from "./DustTest.sol";
 
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
-import { EntityPosition, ReverseFragmentPosition, ReverseTerrainPosition } from "../src/utils/Vec3Storage.sol";
+import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
 import { FRAGMENT_SIZE, MACHINE_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
@@ -160,8 +160,7 @@ contract ForceFieldTest is DustTest {
     world.mine(aliceEntityId, mineCoord, "");
 
     // Verify that the block was successfully mined (should be replaced with Air)
-    EntityId mineEntityId = ReverseTerrainPosition.get(mineCoord);
-    assertTrue(EntityObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
+    assertTrue(TestEntityUtils.getObjectTypeAt(mineCoord) == ObjectTypes.Air, "Block was not mined");
   }
 
   function testMineFailsIfNotAllowedByForceField() public {
@@ -247,8 +246,7 @@ contract ForceFieldTest is DustTest {
     vm.prank(alice);
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
-    EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
-    assertTrue(EntityObjectType.get(buildEntityId) == buildObjectType, "Block was not built correctly");
+    assertTrue(TestEntityUtils.getObjectTypeAt(buildCoord) == buildObjectType, "Block was not built correctly");
   }
 
   function testBuildFailsIfNotAllowedByForceField() public {
@@ -367,8 +365,7 @@ contract ForceFieldTest is DustTest {
     world.mine(aliceEntityId, mineCoord, "");
 
     // Verify that the block was successfully mined (should be replaced with Air)
-    EntityId mineEntityId = ReverseTerrainPosition.get(mineCoord);
-    assertTrue(EntityObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
+    assertTrue(TestEntityUtils.getObjectTypeAt(mineCoord) == ObjectTypes.Air, "Block was not mined");
   }
 
   function testFragmentProgramIsNotUsedIfNotActive() public {
@@ -404,8 +401,7 @@ contract ForceFieldTest is DustTest {
     world.mine(aliceEntityId, mineCoord, "");
 
     // Verify that the block was successfully mined (should be replaced with Air)
-    EntityId mineEntityId = ReverseTerrainPosition.get(mineCoord);
-    assertTrue(EntityObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
+    assertTrue(TestEntityUtils.getObjectTypeAt(mineCoord) == ObjectTypes.Air, "Block was not mined");
   }
 
   function testAddFragment() public {
@@ -429,7 +425,7 @@ contract ForceFieldTest is DustTest {
     world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, newFragmentCoord, "");
     endGasReport();
 
-    EntityId fragment = TestForceFieldUtils.getFragmentAt(newFragmentCoord);
+    EntityId fragment = TestEntityUtils.getFragmentAt(newFragmentCoord);
 
     // Verify that the energy drain rate has increased
     EnergyData memory afterEnergyData = Energy.get(forceFieldEntityId);
@@ -757,8 +753,7 @@ contract ForceFieldTest is DustTest {
       world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
       // Verify build succeeded
-      EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
-      assertTrue(EntityObjectType.get(buildEntityId) == buildObjectType, "Block was not built correctly");
+      assertTrue(TestEntityUtils.getObjectTypeAt(buildCoord) == buildObjectType, "Block was not built correctly");
 
       // Now set the program to disallow building
       program.setRevertOnBuild(true);
@@ -798,8 +793,7 @@ contract ForceFieldTest is DustTest {
       world.mine(aliceEntityId, mineCoord, "");
 
       // Verify mining succeeded
-      EntityId mineEntityId = ReverseTerrainPosition.get(mineCoord);
-      assertTrue(EntityObjectType.get(mineEntityId) == ObjectTypes.Air, "Block was not mined");
+      assertTrue(TestEntityUtils.getObjectTypeAt(mineCoord) == ObjectTypes.Air, "Block was not mined");
 
       // Now set the program to disallow mining
       program.setRevertOnMine(true);
@@ -1652,7 +1646,7 @@ contract ForceFieldTest is DustTest {
     Vec3 refFragmentCoord = forceFieldCoord.toFragmentCoord();
     Vec3 newFragmentCoord = refFragmentCoord + vec3(1, 0, 0);
 
-    EntityId fragment = TestForceFieldUtils.getOrCreateFragmentAt(newFragmentCoord);
+    EntityId fragment = TestEntityUtils.getOrCreateFragmentAt(newFragmentCoord);
 
     // Set extraDrainRate
     uint128 extraDrainRate = 1;
@@ -1692,7 +1686,7 @@ contract ForceFieldTest is DustTest {
     Vec3 refFragmentCoord = forceFieldCoord.toFragmentCoord();
     Vec3 newFragmentCoord = refFragmentCoord + vec3(1, 0, 0);
 
-    EntityId fragment = TestForceFieldUtils.getOrCreateFragmentAt(newFragmentCoord);
+    EntityId fragment = TestEntityUtils.getOrCreateFragmentAt(newFragmentCoord);
 
     // Set extraDrainRate
     uint128 extraDrainRate = 1;
@@ -1724,7 +1718,7 @@ contract ForceFieldTest is DustTest {
     // Set up a flat chunk with a player
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
-    EntityId fragment = TestForceFieldUtils.getOrCreateFragmentAt(playerCoord.toFragmentCoord());
+    EntityId fragment = TestEntityUtils.getOrCreateFragmentAt(playerCoord.toFragmentCoord());
 
     TestFragmentProgram program = new TestFragmentProgram();
     attachTestProgram(fragment, program);
@@ -1745,7 +1739,7 @@ contract ForceFieldTest is DustTest {
   function testFragmentOnBuildNotExecutedIfNotInForceField() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
-    EntityId fragment = TestForceFieldUtils.getOrCreateFragmentAt(playerCoord.toFragmentCoord());
+    EntityId fragment = TestEntityUtils.getOrCreateFragmentAt(playerCoord.toFragmentCoord());
 
     TestFragmentProgram program = new TestFragmentProgram();
     attachTestProgram(fragment, program);
@@ -1763,7 +1757,6 @@ contract ForceFieldTest is DustTest {
     vm.prank(alice);
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
-    EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
-    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Built type is not correct");
+    assertEq(TestEntityUtils.getObjectTypeAt(buildCoord), buildObjectType, "Built type is not correct");
   }
 }

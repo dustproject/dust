@@ -10,9 +10,7 @@ import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 
-import { Player } from "../codegen/tables/Player.sol";
 import { PlayerBed } from "../codegen/tables/PlayerBed.sol";
-import { ReversePlayer } from "../codegen/tables/ReversePlayer.sol";
 
 import { EntityPosition, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
 
@@ -21,17 +19,11 @@ import { ObjectTypes } from "../ObjectType.sol";
 import { checkWorldStatus } from "../Utils.sol";
 import { updatePlayerEnergy } from "./EnergyUtils.sol";
 
-import {
-  getMovableEntityAt,
-  getOrCreateEntityAt,
-  getUniqueEntity,
-  safeGetObjectTypeAt,
-  setMovableEntityAt
-} from "./EntityUtils.sol";
+import { EntityUtils } from "./EntityUtils.sol";
 import { InventoryUtils } from "./InventoryUtils.sol";
 
 import { FRAGMENT_SIZE, PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
-import { EntityId } from "../EntityId.sol";
+import { EntityId, EntityIdLib } from "../EntityId.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
 
 import { DeathNotification, notify } from "./NotifUtils.sol";
@@ -39,14 +31,8 @@ import { DeathNotification, notify } from "./NotifUtils.sol";
 library PlayerUtils {
   function getOrCreatePlayer() internal returns (EntityId) {
     address playerAddress = WorldContextConsumerLib._msgSender();
-    EntityId player = Player._get(playerAddress);
-    if (!player.exists()) {
-      player = getUniqueEntity();
-
-      Player._set(playerAddress, player);
-      ReversePlayer._set(player, playerAddress);
-
-      // Set the player object type first
+    EntityId player = EntityIdLib.encodePlayer(playerAddress);
+    if (player.getObjectType().isNull()) {
       EntityObjectType._set(player, ObjectTypes.Player);
     }
 
@@ -55,28 +41,28 @@ library PlayerUtils {
 
   function addPlayerToGrid(EntityId player, Vec3 playerCoord) internal {
     // Check if the spawn location is valid
-    ObjectType terrainObjectType = safeGetObjectTypeAt(playerCoord);
+    ObjectType terrainObjectType = EntityUtils.safeGetObjectTypeAt(playerCoord);
     require(
-      terrainObjectType.isPassThrough() && !getMovableEntityAt(playerCoord).exists(),
+      terrainObjectType.isPassThrough() && !EntityUtils.getMovableEntityAt(playerCoord).exists(),
       "Cannot spawn on a non-passable block"
     );
 
     // Set the player at the base coordinate
-    setMovableEntityAt(playerCoord, player);
+    EntityUtils.setMovableEntityAt(playerCoord, player);
 
     // Handle the player's body parts
     Vec3[] memory coords = ObjectTypes.Player.getRelativeCoords(playerCoord);
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];
-      ObjectType relativeTerrainObjectType = safeGetObjectTypeAt(relativeCoord);
+      ObjectType relativeTerrainObjectType = EntityUtils.safeGetObjectTypeAt(relativeCoord);
       require(
-        relativeTerrainObjectType.isPassThrough() && !getMovableEntityAt(relativeCoord).exists(),
+        relativeTerrainObjectType.isPassThrough() && !EntityUtils.getMovableEntityAt(relativeCoord).exists(),
         "Cannot spawn on a non-passable block"
       );
-      EntityId relativePlayer = getUniqueEntity();
+      EntityId relativePlayer = EntityUtils.getUniqueEntity();
       EntityObjectType._set(relativePlayer, ObjectTypes.Player);
-      setMovableEntityAt(relativeCoord, relativePlayer);
+      EntityUtils.setMovableEntityAt(relativeCoord, relativePlayer);
       BaseEntity._set(relativePlayer, player);
     }
   }
@@ -89,7 +75,7 @@ library PlayerUtils {
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];
-      EntityId relativePlayer = getMovableEntityAt(relativeCoord);
+      EntityId relativePlayer = EntityUtils.getMovableEntityAt(relativeCoord);
       EntityPosition._deleteRecord(relativePlayer);
       ReverseMovablePosition._deleteRecord(relativeCoord);
       EntityObjectType._deleteRecord(relativePlayer);
@@ -108,7 +94,7 @@ library PlayerUtils {
     if (ReverseMovablePosition._get(coord) != player) {
       return;
     }
-    (EntityId to,) = getOrCreateEntityAt(coord);
+    (EntityId to,) = EntityUtils.getBlockAt(coord);
     InventoryUtils.transferAll(player, to);
     removePlayerFromGrid(player, coord);
     notify(player, DeathNotification({ deathCoord: coord }));

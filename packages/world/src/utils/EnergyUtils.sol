@@ -7,9 +7,6 @@ import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { Fragment } from "../codegen/tables/Fragment.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
-import { ReversePlayer } from "../codegen/tables/ReversePlayer.sol";
-
-import { getEntityAt } from "../utils/EntityUtils.sol";
 
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";

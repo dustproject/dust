@@ -7,13 +7,12 @@ import { console } from "forge-std/console.sol";
 
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
 
-import { EntityId } from "../../src/EntityId.sol";
+import { EntityId, EntityIdLib } from "../../src/EntityId.sol";
 
 import { ObjectTypes } from "../../src/ObjectType.sol";
 import { ProgramId } from "../../src/ProgramId.sol";
 
 import { EntityProgram } from "../../src/codegen/tables/EntityProgram.sol";
-import { Player } from "../../src/codegen/tables/Player.sol";
 
 contract AttachProgramScript is Script {
   function run(address worldAddress, address playerAddress, EntityId target, ProgramId program, bytes memory extraData)
@@ -30,8 +29,7 @@ contract AttachProgramScript is Script {
     // Start broadcasting transactions from the deployer account
     vm.startBroadcast(deployerPrivateKey);
 
-    EntityId playerEntityId = Player.get(playerAddress);
-    require(playerEntityId.exists(), "Player entity not found");
+    EntityId playerEntityId = EntityIdLib.encodePlayer(playerAddress);
 
     if (EntityProgram.get(target).exists()) {
       world.detachProgram(playerEntityId, target, "");

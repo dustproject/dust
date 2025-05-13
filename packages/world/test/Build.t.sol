@@ -13,15 +13,12 @@ import { Mass } from "../src/codegen/tables/Mass.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
-import { Player } from "../src/codegen/tables/Player.sol";
 
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 
-import {
-  EntityPosition, LocalEnergyPool, ReverseMovablePosition, ReverseTerrainPosition
-} from "../src/utils/Vec3Storage.sol";
+import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
 import { BUILD_ENERGY_COST, CHUNK_SIZE, MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "../src/Constants.sol";
 import { ObjectType } from "../src/ObjectType.sol";
@@ -30,7 +27,7 @@ import { ObjectTypes } from "../src/ObjectType.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
-import { TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract BuildTest is DustTest {
   function testBuildTerrain() public {
@@ -38,7 +35,7 @@ contract BuildTest is DustTest {
 
     Vec3 buildCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
     assertEq(TerrainLib.getBlockType(buildCoord), ObjectTypes.Air, "Build coord is not air");
-    EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
     assertFalse(buildEntityId.exists(), "Build entity already exists");
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
@@ -54,7 +51,6 @@ contract BuildTest is DustTest {
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
     endGasReport();
 
-    buildEntityId = ReverseTerrainPosition.get(buildCoord);
     assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
 
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
@@ -70,7 +66,7 @@ contract BuildTest is DustTest {
     setObjectAtCoord(buildCoord, ObjectTypes.Air);
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
-    EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
     assertTrue(buildEntityId.exists(), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
@@ -100,9 +96,8 @@ contract BuildTest is DustTest {
     setObjectAtCoord(topCoord, ObjectTypes.Air);
     ObjectType buildObjectType = ObjectTypes.TextSign;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
-    EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
-    EntityId topEntityId = ReverseTerrainPosition.get(topCoord);
-    assertTrue(buildEntityId.exists(), "Build entity does not exist");
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
+    (EntityId topEntityId,) = TestEntityUtils.getBlockAt(topCoord);
     assertTrue(topEntityId.exists(), "Top entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
@@ -145,7 +140,7 @@ contract BuildTest is DustTest {
     Vec3 playerCoordAfter = EntityPosition.get(aliceEntityId);
     assertEq(playerCoordAfter, playerCoord + vec3(0, 1, 0), "Player coord is not correct");
 
-    EntityId buildEntityId = ReverseTerrainPosition.get(playerCoord);
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(playerCoord);
     assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
 
@@ -168,27 +163,27 @@ contract BuildTest is DustTest {
     vm.prank(alice);
     world.build(aliceEntityId, bobCoord, inventorySlot, "");
 
-    EntityId buildEntityId = ReverseTerrainPosition.get(bobCoord);
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(bobCoord);
     assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
     assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
 
     Vec3 aboveBobCoord = bobCoord + vec3(0, 1, 0);
     vm.prank(alice);
     world.build(aliceEntityId, aboveBobCoord, inventorySlot, "");
-    buildEntityId = ReverseTerrainPosition.get(aboveBobCoord);
+    (buildEntityId,) = TestEntityUtils.getBlockAt(aboveBobCoord);
     assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Top entity is not build object type");
     assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Top entity mass is not correct");
 
     vm.prank(alice);
     world.build(aliceEntityId, aliceCoord, inventorySlot, "");
-    buildEntityId = ReverseTerrainPosition.get(aliceCoord);
+    (buildEntityId,) = TestEntityUtils.getBlockAt(aliceCoord);
     assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Top entity is not build object type");
     assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Top entity mass is not correct");
 
     Vec3 aboveAliceCoord = aliceCoord + vec3(0, 1, 0);
     vm.prank(alice);
     world.build(aliceEntityId, aboveAliceCoord, inventorySlot, "");
-    buildEntityId = ReverseTerrainPosition.get(aboveAliceCoord);
+    (buildEntityId,) = TestEntityUtils.getBlockAt(aboveAliceCoord);
     assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Top entity is not build object type");
     assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Top entity mass is not correct");
   }
@@ -252,7 +247,7 @@ contract BuildTest is DustTest {
     setObjectAtCoord(buildCoord, ObjectTypes.Grass);
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
-    EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
     assertTrue(buildEntityId.exists(), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
@@ -308,7 +303,7 @@ contract BuildTest is DustTest {
     setObjectAtCoord(buildCoord, ObjectTypes.Air);
     ObjectType buildObjectType = ObjectTypes.GoldBar;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
-    EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
     assertTrue(buildEntityId.exists(), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
@@ -327,7 +322,7 @@ contract BuildTest is DustTest {
     EntityId airEntityId = setObjectAtCoord(buildCoord, ObjectTypes.Air);
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
-    EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
     assertTrue(buildEntityId.exists(), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
@@ -369,7 +364,7 @@ contract BuildTest is DustTest {
     setObjectAtCoord(buildCoord, ObjectTypes.Air);
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
-    EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
     assertTrue(buildEntityId.exists(), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
@@ -394,7 +389,7 @@ contract BuildTest is DustTest {
     setObjectAtCoord(buildCoord, ObjectTypes.Air);
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
-    EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
     assertTrue(buildEntityId.exists(), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
@@ -424,7 +419,7 @@ contract BuildTest is DustTest {
     Vec3 buildCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
     setObjectAtCoord(buildCoord, ObjectTypes.Air);
     ObjectType buildObjectType = ObjectTypes.Grass;
-    EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
     assertTrue(buildEntityId.exists(), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
 
@@ -442,7 +437,7 @@ contract BuildTest is DustTest {
     Vec3 buildCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
     setObjectAtCoord(buildCoord, ObjectTypes.Air);
     ObjectType buildObjectType = ObjectTypes.Grass;
-    EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
     assertTrue(buildEntityId.exists(), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
 
@@ -459,7 +454,7 @@ contract BuildTest is DustTest {
     Vec3 buildCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
     setObjectAtCoord(buildCoord, ObjectTypes.Air);
     ObjectType buildObjectType = ObjectTypes.Grass;
-    EntityId buildEntityId = ReverseTerrainPosition.get(buildCoord);
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
     assertTrue(buildEntityId.exists(), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
 

@@ -11,7 +11,7 @@ import { Mass } from "../codegen/tables/Mass.sol";
 import { Recipes, RecipesData } from "../codegen/tables/Recipes.sol";
 
 import { transferEnergyToPool } from "../utils/EnergyUtils.sol";
-import { createEntity } from "../utils/EntityUtils.sol";
+import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils, SlotAmount, SlotData } from "../utils/InventoryUtils.sol";
 import { CraftNotification, notify } from "../utils/NotifUtils.sol";
 
@@ -95,7 +95,7 @@ library CraftLib {
 
       if (outputType.isTool()) {
         for (uint256 j = 0; j < outputAmount; j++) {
-          EntityId tool = createEntity(outputType);
+          EntityId tool = EntityUtils.createUniqueEntity(outputType);
           withdrawals[withdrawalIndex++] = SlotData({ entityId: tool, objectType: outputType, amount: 1 });
           InventoryUtils.addEntity(caller, tool);
         }

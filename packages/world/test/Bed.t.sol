@@ -8,7 +8,7 @@ import { WorldContextConsumer } from "@latticexyz/world/src/WorldContext.sol";
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
-import { TestEnergyUtils, TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestEnergyUtils, TestEntityUtils, TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 import { BedPlayer, BedPlayerData } from "../src/codegen/tables/BedPlayer.sol";
 import { Fragment } from "../src/codegen/tables/Fragment.sol";
@@ -23,7 +23,7 @@ import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest, console } from "./DustTest.sol";
 
-import { EntityPosition, LocalEnergyPool, ReverseTerrainPosition } from "../src/utils/Vec3Storage.sol";
+import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import { CHUNK_SIZE, MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
@@ -40,8 +40,6 @@ contract BedTest is DustTest {
   function createBed(Vec3 bedCoord) internal returns (EntityId) {
     // Set entity to bed
     EntityId bedEntityId = randomEntityId();
-    EntityPosition.set(bedEntityId, bedCoord);
-    ReverseTerrainPosition.set(bedCoord, bedEntityId);
     EntityObjectType.set(bedEntityId, ObjectTypes.Bed);
     return bedEntityId;
   }
@@ -149,7 +147,7 @@ contract BedTest is DustTest {
       })
     );
 
-    EntityId fragment = TestForceFieldUtils.getFragmentAt(bedCoord.toFragmentCoord());
+    EntityId fragment = TestEntityUtils.getFragmentAt(bedCoord.toFragmentCoord());
 
     assertEq(Fragment.getExtraDrainRate(fragment), 0);
 

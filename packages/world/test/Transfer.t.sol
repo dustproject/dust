@@ -21,7 +21,6 @@ import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-import { Player } from "../src/codegen/tables/Player.sol";
 
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 import { ReverseMovablePosition } from "../src/codegen/tables/ReverseMovablePosition.sol";

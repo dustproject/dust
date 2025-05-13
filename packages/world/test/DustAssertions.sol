@@ -19,14 +19,9 @@ import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
-import { Player } from "../src/codegen/tables/Player.sol";
-import { ReversePlayer } from "../src/codegen/tables/ReversePlayer.sol";
-
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 
-import {
-  EntityPosition, LocalEnergyPool, ReverseMovablePosition, ReverseTerrainPosition
-} from "../src/utils/Vec3Storage.sol";
+import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
 import { EntityId } from "../src/EntityId.sol";
 
@@ -140,8 +135,6 @@ abstract contract DustAssertions is MudTest, GasReporter {
     assertEq(Energy.getEnergy(player), 0, "Player energy is not 0");
 
     // Verify the player entity is still registered to the address, but removed from the grid
-    assertNotEq(ReversePlayer.get(player), address(0), "Player entity was deleted");
-    assertNotEq(Player.get(ReversePlayer.get(player)), EntityId.wrap(0), "Player entity was deleted");
     assertEq(EntityPosition.get(player), vec3(0, 0, 0), "Player position was not deleted");
     assertEq(ReverseMovablePosition.get(playerCoord), EntityId.wrap(0), "Player reverse position was not deleted");
     assertEq(

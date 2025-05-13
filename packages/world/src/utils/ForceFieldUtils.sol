@@ -9,8 +9,8 @@ import { Fragment, FragmentData } from "../codegen/tables/Fragment.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
 
 import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
-import { getUniqueEntity } from "../utils/EntityUtils.sol";
-import { EntityPosition, ReverseFragmentPosition } from "../utils/Vec3Storage.sol";
+import { EntityUtils } from "../utils/EntityUtils.sol";
+import { EntityPosition } from "../utils/Vec3Storage.sol";
 
 import { MACHINE_ENERGY_DRAIN_RATE } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
@@ -23,7 +23,7 @@ library ForceFieldUtils {
    */
   function getForceField(Vec3 coord) internal view returns (EntityId, EntityId) {
     Vec3 fragmentCoord = coord.toFragmentCoord();
-    EntityId fragment = getFragmentAt(fragmentCoord);
+    EntityId fragment = EntityUtils.getFragmentAt(fragmentCoord);
     if (!fragment.exists()) return (EntityId.wrap(0), fragment);
 
     FragmentData memory fragmentData = Fragment._get(fragment);
@@ -32,29 +32,11 @@ library ForceFieldUtils {
       : (EntityId.wrap(0), fragment);
   }
 
-  function getFragmentAt(Vec3 fragmentCoord) internal view returns (EntityId) {
-    return ReverseFragmentPosition._get(fragmentCoord);
-  }
-
-  function getOrCreateFragmentAt(Vec3 fragmentCoord) internal returns (EntityId) {
-    EntityId fragment = getFragmentAt(fragmentCoord);
-
-    // Create a new fragment entity if needed
-    if (!fragment.exists()) {
-      fragment = getUniqueEntity();
-      EntityPosition._set(fragment, fragmentCoord);
-      ReverseFragmentPosition._set(fragmentCoord, fragment);
-      EntityObjectType._set(fragment, ObjectTypes.Fragment);
-    }
-
-    return fragment;
-  }
-
   /**
    * @dev Check if the fragment at coord belongs to a forcefield
    */
   function isFragment(EntityId forceField, Vec3 fragmentCoord) internal view returns (bool) {
-    return isFragment(forceField, getFragmentAt(fragmentCoord));
+    return isFragment(forceField, EntityUtils.getFragmentAt(fragmentCoord));
   }
 
   /**
@@ -84,7 +66,7 @@ library ForceFieldUtils {
    */
   function setupForceField(EntityId forceField, Vec3 coord) internal {
     Machine._setCreatedAt(forceField, uint128(block.timestamp));
-    addFragment(forceField, getOrCreateFragmentAt(coord.toFragmentCoord()));
+    addFragment(forceField, EntityUtils.getOrCreateFragmentAt(coord.toFragmentCoord()));
   }
 
   /**

@@ -4,13 +4,12 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 
 import { Action } from "../codegen/common.sol";
-import { ReverseTerrainPosition } from "../utils/Vec3Storage.sol";
 
 import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
 import { ObjectTypes } from "../ObjectType.sol";
 import { Vec3 } from "../Vec3.sol";
-import { getOrCreateEntityAt } from "../utils/EntityUtils.sol";
+import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils, SlotAmount, SlotTransfer } from "../utils/InventoryUtils.sol";
 import { DropNotification, PickupNotification, notify } from "../utils/NotifUtils.sol";
 import { TerrainLib } from "./libraries/TerrainLib.sol";
@@ -21,7 +20,7 @@ contract InventorySystem is System {
     caller.activate();
     caller.requireConnected(coord);
 
-    (EntityId entityId, ObjectType objectType) = getOrCreateEntityAt(coord);
+    (EntityId entityId, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(coord);
     require(objectType.isPassThrough(), "Cannot drop on a non-passable block");
 
     InventoryUtils.transfer(caller, entityId, slotTransfers);
@@ -33,7 +32,7 @@ contract InventorySystem is System {
     caller.activate();
     caller.requireConnected(coord);
 
-    (EntityId entityId, ObjectType objectType) = getOrCreateEntityAt(coord);
+    (EntityId entityId, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(coord);
     require(objectType.isPassThrough(), "Cannot drop on a non-passable block");
 
     for (uint256 i = 0; i < slots.length; i++) {
@@ -48,10 +47,7 @@ contract InventorySystem is System {
     caller.activate();
     caller.requireConnected(coord);
 
-    EntityId entityId = ReverseTerrainPosition._get(coord);
-    require(entityId.exists(), "No entity at pickup location");
-
-    ObjectType objectType = entityId.getObjectType();
+    (EntityId entityId, ObjectType objectType) = EntityUtils.getBlockAt(coord);
     require(objectType.isPassThrough(), "Cannot pickup from a non-passable block");
 
     InventoryUtils.transfer(entityId, caller, slotTransfers);
@@ -61,10 +57,7 @@ contract InventorySystem is System {
     caller.activate();
     caller.requireConnected(coord);
 
-    EntityId entityId = ReverseTerrainPosition._get(coord);
-    require(entityId.exists(), "No entity at pickup location");
-
-    ObjectType objectType = entityId.getObjectType();
+    (EntityId entityId, ObjectType objectType) = EntityUtils.getBlockAt(coord);
     require(objectType.isPassThrough(), "Cannot pickup from a non-passable block");
 
     InventoryUtils.transferAll(entityId, caller);

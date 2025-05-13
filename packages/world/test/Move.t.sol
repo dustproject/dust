@@ -5,7 +5,7 @@ import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { console } from "forge-std/console.sol";
 
-import { EntityId } from "../src/EntityId.sol";
+import { EntityId, EntityIdLib } from "../src/EntityId.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
@@ -15,14 +15,11 @@ import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 
-import { Player } from "../src/codegen/tables/Player.sol";
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 
-import {
-  EntityPosition, LocalEnergyPool, ReverseMovablePosition, ReverseTerrainPosition
-} from "../src/utils/Vec3Storage.sol";
+import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
 import {
   CHUNK_SIZE,
@@ -39,11 +36,11 @@ import { ObjectTypes } from "../src/ObjectType.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
-import { TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract MoveTest is DustTest {
   function _testMoveMultipleBlocks(address player, uint8 numBlocksToMove, bool overTerrain) internal {
-    EntityId playerEntityId = Player.get(player);
+    EntityId playerEntityId = EntityIdLib.encodePlayer(player);
     Vec3 startingCoord = EntityPosition.get(playerEntityId);
     Vec3[] memory newCoords = new Vec3[](numBlocksToMove);
     for (uint32 i = 0; i < numBlocksToMove; i++) {
@@ -488,7 +485,6 @@ contract MoveTest is DustTest {
     world.activate(aliceEntityId);
 
     // Verify the player entity is still registered to the address, but removed from the grid
-    assertEq(Player.get(alice), aliceEntityId, "Player entity was deleted");
     assertEq(EntityPosition.get(aliceEntityId), vec3(0, 0, 0), "Player position was not deleted");
     assertEq(ReverseMovablePosition.get(playerCoord), EntityId.wrap(0), "Player reverse position was not deleted");
     assertEq(
@@ -538,7 +534,7 @@ contract MoveTest is DustTest {
     assertInventoryHasObject(aliceEntityId, ObjectTypes.IronOre, 5);
 
     // Get entity at the expected death location
-    EntityId entityAtDeathLocation = ReverseTerrainPosition.get(newCoords[fallHeight]);
+    (EntityId entityAtDeathLocation,) = TestEntityUtils.getBlockAt(landingCoord);
 
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);
@@ -587,7 +583,7 @@ contract MoveTest is DustTest {
     Vec3 expectedDeathCoord = newCoords[deathIndex];
 
     // Get or create entity at the expected death location
-    EntityId entityAtDeathLocation = ReverseTerrainPosition.get(expectedDeathCoord);
+    (EntityId entityAtDeathLocation,) = TestEntityUtils.getBlockAt(expectedDeathCoord);
 
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);

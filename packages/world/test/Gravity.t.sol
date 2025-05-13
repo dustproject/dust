@@ -15,14 +15,11 @@ import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
-import { Player } from "../src/codegen/tables/Player.sol";
 
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 
-import {
-  EntityPosition, LocalEnergyPool, ReverseMovablePosition, ReverseTerrainPosition
-} from "../src/utils/Vec3Storage.sol";
+import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
 import { CHUNK_SIZE, MINE_ENERGY_COST, MOVE_ENERGY_COST, PLAYER_FALL_ENERGY_COST } from "../src/Constants.sol";
 import { ObjectType } from "../src/ObjectType.sol";
@@ -31,7 +28,7 @@ import { ObjectTypes } from "../src/ObjectType.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
-import { TestUtils } from "./utils/TestUtils.sol";
+import { TestEntityUtils } from "./utils/TestUtils.sol";
 
 contract GravityTest is DustTest {
   function testMineFallSingleBlock() public {
@@ -40,8 +37,6 @@ contract GravityTest is DustTest {
     Vec3 mineCoord = playerCoord - vec3(0, 1, 0);
     ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
     ObjectPhysics.setMass(mineObjectType, playerHandMassReduction);
-    EntityId mineEntityId = ReverseTerrainPosition.get(mineCoord);
-    assertFalse(mineEntityId.exists(), "Mine entity already exists");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
@@ -58,8 +53,7 @@ contract GravityTest is DustTest {
       BaseEntity.get(ReverseMovablePosition.get(aboveFinalCoord)), aliceEntityId, "Above coord is not the player"
     );
 
-    mineEntityId = ReverseTerrainPosition.get(mineCoord);
-    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
+    assertEq(TestEntityUtils.getObjectTypeAt(mineCoord), ObjectTypes.Air, "Mine entity is not air");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
 
     uint128 playerEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
