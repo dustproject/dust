@@ -3,8 +3,7 @@ pragma solidity >=0.8.24;
 
 import { IBaseWorld, WorldConsumer } from "@latticexyz/world-consumer/src/experimental/WorldConsumer.sol";
 
-import { EntityId } from "@dust/world/src/EntityId.sol";
-import { Player } from "@dust/world/src/codegen/tables/Player.sol";
+import { EntityId, EntityIdLib } from "@dust/world/src/EntityId.sol";
 
 import { IAttachProgramHook, IDetachProgramHook } from "@dust/world/src/ProgramInterfaces.sol";
 
@@ -46,7 +45,7 @@ contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, WorldConsumer
   }
 
   function _requireOwner(bytes32 smartItemId) internal view {
-    require(Owner.get(smartItemId) == Player.get(_msgSender()), "Only the owner can call this function");
+    require(Owner.get(smartItemId) == EntityIdLib.encodePlayer(_msgSender()), "Only the owner can call this function");
   }
 
   function _isAllowed(EntityId target, EntityId caller) internal view returns (bool) {

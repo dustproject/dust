@@ -154,7 +154,7 @@ contract NatureSystem is System {
 
     for (uint256 j = 0; j < randomLeaves.length; ++j) {
       Vec3 rel = randomLeaves[j];
-      if (rel.y() > int32(trunkHeight)) {
+      if (obstructed && rel.y() > int32(trunkHeight)) {
         break;
       }
 
