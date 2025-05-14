@@ -1,7 +1,6 @@
 import { type Bucket, buildBucket } from "../mphf";
 import {
   type Category,
-  type MetaCategory,
   type ObjectAmount,
   categories,
   objects,
@@ -29,10 +28,12 @@ function renderCategoryTable(name: string): string {
 }
 
 function renderCategoryCheck(name: string): string {
+  const { checkName } = categories[name]!;
+  const functionName = checkName ?? `is${name}`;
   const { S, A0, A1, A2, gpack } = buckets[name]!;
   const tableName = `${constName(name)}_TABLE`;
   return `
-  function is${name}(ObjectType self) internal pure returns (bool) {
+  function ${functionName}(ObjectType self) internal pure returns (bool) {
     uint8 slot = PerfectHashLib.slot(self.unwrap(), ${S}, ${A0}, ${A1}, ${A2}, ${gpack});
     uint16 ref =
         uint16(uint8(Category.${tableName}[slot * 2])) |
@@ -284,8 +285,8 @@ ${Object.entries(categories)
   }
 
   function matches(ObjectType self, ObjectType other) internal pure returns (bool) {
-    if (self.isAny()) {
-      return self.category() == other.category();
+    if (self == ObjectTypes.AnyLog && self.isLog() || self == ObjectTypes.AnyPlank && self.isPlank() || self == ObjectTypes.AnyLeaf && self.isLeaf()) {
+      return true;
     }
     return self == other;
   }

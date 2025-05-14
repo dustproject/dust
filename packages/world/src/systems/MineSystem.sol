@@ -117,7 +117,7 @@ contract MineSystem is System {
     }
 
     (uint128 massLeft, bool canMine) =
-      _applyMassReduction(caller, callerEnergy, toolSlot, minedType, Mass._getMass(mined));
+      MineLib._applyMassReduction(caller, callerEnergy, toolSlot, minedType, Mass._getMass(mined));
 
     if (!canMine) {
       // Player died, return early
@@ -233,14 +233,16 @@ contract MineSystem is System {
       }
     }
   }
+}
 
+library MineLib {
   function _applyMassReduction(
     EntityId caller,
     uint128 callerEnergy,
     uint16 toolSlot,
     ObjectType minedType,
     uint128 massLeft
-  ) internal returns (uint128, bool) {
+  ) public returns (uint128, bool) {
     if (massLeft == 0) {
       return (0, true);
     }
@@ -260,10 +262,10 @@ contract MineSystem is System {
     }
 
     uint128 toolMultiplier = _getToolMultiplier(toolData.toolType, minedType);
-    (uint128 mineMassReduction, uint128 toolMassReduction) = toolData.getMassReduction(massLeft, toolMultiplier);
-    toolData.reduceMass(toolMassReduction);
 
-    massLeft -= mineMassReduction;
+    uint128 massReduction = toolData.use(massLeft, toolMultiplier);
+
+    massLeft -= massReduction;
 
     return (massLeft, true);
   }
@@ -292,9 +294,7 @@ contract MineSystem is System {
     maxEnergyCost = Math.min(currentEnergy, maxEnergyCost);
     return Math.min(massLeft, maxEnergyCost);
   }
-}
 
-library MineLib {
   function _mineBed(EntityId bed, Vec3 bedCoord) public {
     // If there is a player sleeping in the mined bed, kill them
     EntityId sleepingPlayerId = BedPlayer._getPlayerEntityId(bed);

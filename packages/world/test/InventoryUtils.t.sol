@@ -12,7 +12,7 @@ import { InventorySlot, InventorySlotData } from "../src/codegen/tables/Inventor
 import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
-import { SlotTransfer, TestInventoryUtils } from "./utils/TestUtils.sol";
+import { SlotTransfer, TestInventoryUtils, ToolData } from "./utils/TestUtils.sol";
 
 contract InventoryUtilsTest is DustTest {
   function testMultipleTransferAll() public {
@@ -316,7 +316,8 @@ contract InventoryUtilsTest is DustTest {
     Mass.setMass(entityId, 1);
 
     // Use tool with mass reduction ≥ 1
-    TestInventoryUtils.useTool(alice, 0, 5);
+    ToolData memory toolData = TestInventoryUtils.getToolData(alice, 0);
+    TestInventoryUtils.use(toolData, 1, 5);
 
     assertEq(Inventory.lengthOccupiedSlots(alice), 0, "slot not recycled");
     assertEq(InventoryTypeSlots.length(alice, ObjectTypes.Null), 1, "slot not in Null list");
