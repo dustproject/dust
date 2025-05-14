@@ -333,6 +333,7 @@ export interface ObjectDefinition {
   terrainId?: number;
   mass?: bigint;
   energy?: bigint;
+  seedEnergy?: bigint;
   timeToGrow?: bigint;
   sapling?: ObjectName;
   crop?: ObjectName;
@@ -566,38 +567,62 @@ export const categoryObjects: {
   Seed: [
     {
       name: "WheatSeed",
-      energy: 4300000000000000n,
+      seedEnergy: 4300000000000000n,
       timeToGrow: 900n,
       crop: "Wheat",
     },
     {
       name: "PumpkinSeed",
-      energy: 34300000000000000n,
+      seedEnergy: 34300000000000000n,
       timeToGrow: 3600n,
       crop: "Pumpkin",
     },
     {
       name: "MelonSeed",
-      energy: 34300000000000000n,
+      seedEnergy: 34300000000000000n,
       timeToGrow: 3600n,
       crop: "Melon",
     },
   ],
   Sapling: [
-    { name: "OakSapling", energy: 148000000000000000n, timeToGrow: 345600n },
-    { name: "BirchSapling", energy: 139000000000000000n, timeToGrow: 345600n },
-    { name: "JungleSapling", energy: 300000000000000000n, timeToGrow: 345600n },
-    { name: "SakuraSapling", energy: 187000000000000000n, timeToGrow: 345600n },
-    { name: "AcaciaSapling", energy: 158000000000000000n, timeToGrow: 345600n },
-    { name: "SpruceSapling", energy: 256000000000000000n, timeToGrow: 345600n },
+    {
+      name: "OakSapling",
+      seedEnergy: 148000000000000000n,
+      timeToGrow: 345600n,
+    },
+    {
+      name: "BirchSapling",
+      seedEnergy: 139000000000000000n,
+      timeToGrow: 345600n,
+    },
+    {
+      name: "JungleSapling",
+      seedEnergy: 300000000000000000n,
+      timeToGrow: 345600n,
+    },
+    {
+      name: "SakuraSapling",
+      seedEnergy: 187000000000000000n,
+      timeToGrow: 345600n,
+    },
+    {
+      name: "AcaciaSapling",
+      seedEnergy: 158000000000000000n,
+      timeToGrow: 345600n,
+    },
+    {
+      name: "SpruceSapling",
+      seedEnergy: 256000000000000000n,
+      timeToGrow: 345600n,
+    },
     {
       name: "DarkOakSapling",
-      energy: 202000000000000000n,
+      seedEnergy: 202000000000000000n,
       timeToGrow: 345600n,
     },
     {
       name: "MangroveSapling",
-      energy: 232000000000000000n,
+      seedEnergy: 232000000000000000n,
       timeToGrow: 345600n,
     },
   ],

@@ -283,6 +283,17 @@ ${allCategoryMetadata
     return 0;
   }
 
+  function getSeedEnergy(ObjectType self) internal pure returns(uint128) {
+    ${objects
+      .filter((obj) => obj.seedEnergy)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ${obj.seedEnergy};`,
+      )
+      .join("\n    ")}
+    return 0;
+  }
+
   function isPlantableOn(ObjectType self, ObjectType on) internal pure returns (bool) {
     if(self.isSeed()) {
       return on == ObjectTypes.WetFarmland;
