@@ -1,12 +1,11 @@
+import { buildBucket } from "../mphf";
 import {
   type Category,
   type MetaCategory,
   type ObjectAmount,
-  allCategoryMetadata,
-  blockCategoryMetadata,
-  metaCategories,
-  nonBlockCategoryMetadata,
+  categories,
   objects,
+  objectsByName,
 } from "../objects";
 
 const constName = (str: string): string =>
@@ -77,15 +76,8 @@ uint16 constant BLOCK_CATEGORY_COUNT = 256 / 2; // 128
 // Object Categories
 // ------------------------------------------------------------
 library Category {
-  // Block Categories
-${blockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(${cat.index}) << OFFSET_BITS;`).join("\n")}
-  // Non-Block Categories
-${nonBlockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(${cat.index}) << OFFSET_BITS;`).join("\n")}
-  // ------------------------------------------------------------
   // Meta Category Masks (fits within uint256; mask bit k set if raw category ID k belongs)
   uint256 constant BLOCK_MASK = uint256(type(uint128).max);
-  uint256 constant MINEABLE_MASK = BLOCK_MASK & ~${renderMetaCategoryMask(["NonSolid"])};
-  ${metaCategories.map((metaCategory) => renderMetaCategoryMaskDefinition(metaCategory)).join("\n  ")}
 }
 
 // ------------------------------------------------------------
@@ -93,9 +85,8 @@ ${nonBlockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(
 // ------------------------------------------------------------
 library ObjectTypes {
 ${objects
-  .map((obj) => {
-    const categoryRef = `Category.${obj.category}`;
-    return `  ObjectType constant ${obj.name} = ObjectType.wrap(${categoryRef} | ${obj.index});`;
+  .map((obj, i) => {
+    return `  ObjectType constant ${obj.name} = ObjectType.wrap(${i});`;
   })
 
   .join("\n")}
@@ -127,20 +118,19 @@ library ObjectTypeLib {
   }
 
   // Direct Category Checks
-${allCategoryMetadata
+${Object.entries(categories)
   .map(
-    (cat) => `
-  function is${cat.name}(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.${cat.name};
+    ([name, data]) => `
+  function is${name}(ObjectType self) internal pure returns (bool) {
   }`,
   )
   .join("")}
 
 // Category getters
-${allCategoryMetadata
-  .map((cat) => {
-    const categoryObjects = objects.filter((obj) => obj.category === cat.name);
-    return `function get${cat.name}Types() internal pure returns (ObjectType[${categoryObjects.length}] memory) {
+${Object.entries(categories)
+  .map(([name, data]) => {
+    const categoryObjects = data.objects;
+    return `function get${name}Types() internal pure returns (ObjectType[${categoryObjects.length}] memory) {
     return [${categoryObjects.map((obj) => `ObjectTypes.${obj.name}`).join(", ")}];
   }`;
   })
@@ -316,13 +306,6 @@ ${allCategoryMetadata
     return applyCategoryMask(self, Category.MINEABLE_MASK);
   }
 
-  ${metaCategories.map(renderMetaCategoryCheck).join("\n  ")}
-
-  function applyCategoryMask(ObjectType self, uint256 mask) internal pure returns (bool) {
-    uint16 c = category(self);
-    return ((uint256(1) << (c >> OFFSET_BITS)) & mask) != 0;
-  }
-
   function matches(ObjectType self, ObjectType other) internal pure returns (bool) {
     if (self.isAny()) {
       return self.category() == other.category();
@@ -346,3 +329,22 @@ using ObjectTypeLib for ObjectType global;
 }
 
 console.info(generateObjectTypeSol());
+
+console.error(
+  Object.entries(categories)
+    .map(([name, data]) => renderCategoryLib(name, data))
+    .join("\n"),
+);
+
+function renderCategoryLib(name: string, category: Category): string {
+  const ids = category.objects.map((obj) => objectsByName[obj].id);
+
+  if (ids.length === 0) {
+    return "";
+  }
+  const bucket = buildBucket(ids);
+  return `
+  library ${name}Lib {
+
+  }`;
+}

@@ -46,42 +46,10 @@ export const allCategories = [
   ...nonBlockCategories,
 ] as const;
 
-export type Category = (typeof allCategories)[number];
-
-// Define categories that pass metadata for the template
-export interface CategoryMetadata {
-  name: Category;
-  index: number;
+export interface Category {
+  objects: ObjectName[];
+  checkName?: string;
 }
-
-// Transform block categories into metadata objects
-export const blockCategoryMetadata: CategoryMetadata[] = blockCategories.map(
-  (name, index) => ({
-    name,
-    index,
-  }),
-);
-
-// Transform non-block categories into metadata objects
-export const nonBlockCategoryMetadata: CategoryMetadata[] =
-  nonBlockCategories.map((name, index) => ({
-    name,
-    index: numBlockCategories + index, // Start after block categories
-  }));
-
-// All categories metadata for template generation
-export const allCategoryMetadata: CategoryMetadata[] = [
-  ...blockCategoryMetadata,
-  ...nonBlockCategoryMetadata,
-];
-
-const categoryIndex = allCategoryMetadata.reduce(
-  (acc, category) => {
-    acc[category.name] = category.index;
-    return acc;
-  },
-  {} as Record<Category, number>,
-);
 
 export interface MetaCategory {
   name: string;
@@ -90,49 +58,7 @@ export interface MetaCategory {
 }
 
 // Meta-categories
-export const metaCategories: MetaCategory[] = [
-  { name: "hasAny", categories: ["Log", "Leaf", "Plank"] },
-  {
-    name: "hasExtraDrops",
-    categories: ["Leaf", "Crop", "CropBlock", "Greenery"],
-  },
-  {
-    name: "hasAxeMultiplier",
-    categories: ["Log", "Leaf", "Plank", "CropBlock"],
-    objects: ["Chest", "Workbench", "SpawnTile", "Bed", "TextSign", "Torch"],
-  },
-  {
-    name: "hasPickMultiplier",
-    categories: ["Ore", "Gemstone", "Stone", "Terracotta", "OreBlock"],
-    objects: ["Powerstone", "Furnace", "ForceField"],
-  },
-  {
-    name: "isPassThrough",
-    categories: [
-      "NonSolid",
-      "Flower",
-      "Seed",
-      "Sapling",
-      "Greenery",
-      "Crop",
-      "UnderwaterPlant",
-      "MiscPassThrough",
-    ],
-  },
-  { name: "isGrowable", categories: ["Seed", "Sapling"] },
-  {
-    name: "isUniqueObject",
-    categories: ["Pick", "Axe", "Whacker", "Hoe", "Bucket"],
-    objects: ["ForceField", "Bed", "SpawnTile"],
-  },
-  {
-    name: "isSmartEntity",
-    categories: ["SmartEntityBlock", "SmartEntityNonBlock"],
-  },
-  { name: "isTool", categories: ["Pick", "Axe", "Whacker", "Hoe"] },
-  { name: "isTillable", objects: ["Dirt", "Grass"] },
-  { name: "isMachine", objects: ["ForceField"] },
-];
+export const metaCategories: MetaCategory[] = [];
 
 export const objectNames = [
   "Null",
@@ -327,10 +253,7 @@ export type ObjectName = (typeof objectNames)[number];
 // Define object type interface
 export interface ObjectDefinition {
   name: ObjectName;
-  category: Category;
-  index: number;
   id: number;
-  terrainId?: number;
   mass?: bigint;
   energy?: bigint;
   growableEnergy?: bigint;
@@ -342,420 +265,353 @@ export interface ObjectDefinition {
   oreAmount?: ObjectAmount;
 }
 
-export const categoryObjects: {
-  [key in Category]: Omit<
-    ObjectDefinition,
-    "id" | "category" | "index" | "terrainId"
-  >[];
-} = {
-  NonSolid: [{ name: "Null" }, { name: "Air" }, { name: "Water" }],
-  Stone: [
-    { name: "Stone", mass: 12000000000000000n },
-    { name: "Bedrock", mass: 50000000000000000000n },
-    { name: "Deepslate", mass: 40000000000000000n },
-    { name: "Granite", mass: 15000000000000000n },
-    { name: "Tuff", mass: 15000000000000000n },
-    { name: "Calcite", mass: 75000000000000000n },
-    { name: "Basalt", mass: 75000000000000000n },
-    { name: "SmoothBasalt", mass: 75000000000000000n },
-    { name: "Andesite", mass: 15000000000000000n },
-    { name: "Diorite", mass: 18000000000000000n },
-    { name: "Cobblestone", mass: 22500000000000000n },
-    { name: "MossyCobblestone", mass: 37500000000000000n },
-    { name: "Obsidian", mass: 9000000000000000000n },
-    { name: "Dripstone", mass: 75000000000000000n },
-    { name: "Blackstone", mass: 50000000000000000n },
-    { name: "CobbledDeepslate", mass: 100000000000000000n },
-  ],
-  Gemstone: [
-    { name: "Amethyst", mass: 100000000000000000n },
-    { name: "Glowstone", mass: 37500000000000000n },
-  ],
-  Soil: [
-    { name: "Grass", mass: 3000000000000000n },
-    { name: "Dirt", mass: 2400000000000000n },
-    { name: "Moss", mass: 200000000000000n },
-    { name: "Podzol", mass: 5000000000000000n },
-    { name: "DirtPath", mass: 5000000000000000n },
-    { name: "Mud", mass: 4000000000000000n },
-    { name: "PackedMud", mass: 5000000000000000n },
-    { name: "Farmland", mass: 3000000000000000n },
-    { name: "WetFarmland", mass: 3000000000000000n },
-  ],
-  Ore: [
-    { name: "UnrevealedOre", mass: 10000000000000000n },
-    { name: "CoalOre", mass: 540000000000000000n },
-    { name: "CopperOre", mass: 675000000000000000n },
-    { name: "IronOre", mass: 675000000000000000n },
-    { name: "GoldOre", mass: 1600000000000000000n },
-    { name: "DiamondOre", mass: 5000000000000000000n },
-    { name: "NeptuniumOre", mass: 5000000000000000000n },
-  ],
-  Sand: [
-    { name: "Gravel", mass: 2400000000000000n },
-    { name: "Sand", mass: 4000000000000000n },
-    { name: "RedSand", mass: 5000000000000000n },
-    { name: "Sandstone", mass: 30000000000000000n },
-    { name: "RedSandstone", mass: 37500000000000000n },
-    { name: "Clay", mass: 2400000000000000n },
-  ],
-  Terracotta: [
-    { name: "AnyTerracotta", mass: 37500000000000000n },
-    { name: "Terracotta", mass: 37500000000000000n },
-    { name: "BrownTerracotta", mass: 37500000000000000n },
-    { name: "OrangeTerracotta", mass: 37500000000000000n },
-    { name: "WhiteTerracotta", mass: 37500000000000000n },
-    { name: "LightGrayTerracotta", mass: 37500000000000000n },
-    { name: "YellowTerracotta", mass: 37500000000000000n },
-    { name: "RedTerracotta", mass: 37500000000000000n },
-    { name: "LightBlueTerracotta", mass: 37500000000000000n },
-    { name: "CyanTerracotta", mass: 37500000000000000n },
-    { name: "BlackTerracotta", mass: 37500000000000000n },
-    { name: "PurpleTerracotta", mass: 37500000000000000n },
-    { name: "BlueTerracotta", mass: 37500000000000000n },
-    { name: "MagentaTerracotta", mass: 37500000000000000n },
-  ],
-  Log: [
-    { name: "AnyLog", mass: 12500000000000000n, energy: 5500000000000000n },
-    { name: "OakLog", mass: 12500000000000000n, energy: 5500000000000000n },
-    { name: "BirchLog", mass: 12500000000000000n, energy: 5500000000000000n },
-    { name: "JungleLog", mass: 12500000000000000n, energy: 5500000000000000n },
-    { name: "SakuraLog", mass: 12500000000000000n, energy: 5500000000000000n },
-    { name: "AcaciaLog", mass: 12500000000000000n, energy: 5500000000000000n },
-    { name: "SpruceLog", mass: 12500000000000000n, energy: 5500000000000000n },
-    { name: "DarkOakLog", mass: 12500000000000000n, energy: 5500000000000000n },
-    {
-      name: "MangroveLog",
-      mass: 12500000000000000n,
-      energy: 5500000000000000n,
-    },
-  ],
-  Leaf: [
-    { name: "AnyLeaf", mass: 500000000000000n, energy: 500000000000000n },
-    {
-      name: "OakLeaf",
-      sapling: "OakSapling",
-      mass: 500000000000000n,
-      energy: 500000000000000n,
-    },
-    {
-      name: "BirchLeaf",
-      sapling: "BirchSapling",
-      mass: 500000000000000n,
-      energy: 500000000000000n,
-    },
-    {
-      name: "JungleLeaf",
-      sapling: "JungleSapling",
-      mass: 500000000000000n,
-      energy: 500000000000000n,
-    },
-    {
-      name: "SakuraLeaf",
-      sapling: "SakuraSapling",
-      mass: 500000000000000n,
-      energy: 500000000000000n,
-    },
-    {
-      name: "SpruceLeaf",
-      sapling: "SpruceSapling",
-      mass: 500000000000000n,
-      energy: 500000000000000n,
-    },
-    {
-      name: "AcaciaLeaf",
-      sapling: "AcaciaSapling",
-      mass: 500000000000000n,
-      energy: 500000000000000n,
-    },
-    {
-      name: "DarkOakLeaf",
-      sapling: "DarkOakSapling",
-      mass: 500000000000000n,
-      energy: 500000000000000n,
-    },
-    { name: "AzaleaLeaf", mass: 500000000000000n, energy: 500000000000000n },
-    {
-      name: "FloweringAzaleaLeaf",
-      mass: 500000000000000n,
-      energy: 500000000000000n,
-    },
-    { name: "MangroveLeaf", mass: 500000000000000n, energy: 500000000000000n },
-    { name: "MangroveRoots", mass: 400000000000000n },
-    { name: "MuddyMangroveRoots", mass: 400000000000000n },
-  ],
-  Flower: [
-    { name: "AzaleaFlower", mass: 300000000000000n },
-    { name: "BellFlower", mass: 300000000000000n },
-    { name: "DandelionFlower", mass: 300000000000000n },
-    { name: "DaylilyFlower", mass: 300000000000000n },
-    { name: "LilacFlower", mass: 300000000000000n },
-    { name: "RoseFlower", mass: 300000000000000n },
-    { name: "FireFlower", mass: 300000000000000n },
-    { name: "MorninggloryFlower", mass: 300000000000000n },
-    { name: "PeonyFlower", mass: 300000000000000n },
-    { name: "Ultraviolet", mass: 300000000000000n },
-    { name: "SunFlower", mass: 300000000000000n },
-    { name: "FlyTrap", mass: 300000000000000n },
-  ],
-  Greenery: [
-    { name: "FescueGrass", mass: 200000000000000n },
-    { name: "SwitchGrass", mass: 200000000000000n },
-    { name: "VinesBush", mass: 200000000000000n },
-    { name: "IvyVine", mass: 200000000000000n },
-    { name: "HempBush", mass: 200000000000000n },
-  ],
-  Crop: [
-    { name: "GoldenMushroom", mass: 300000000000000n },
-    { name: "RedMushroom", mass: 300000000000000n },
-    { name: "CoffeeBush", mass: 300000000000000n },
-    { name: "StrawberryBush", mass: 300000000000000n },
-    { name: "RaspberryBush", mass: 300000000000000n },
-    { name: "Wheat", mass: 300000000000000n, energy: 4000000000000000n },
-    { name: "CottonBush", mass: 300000000000000n },
-  ],
-  CropBlock: [
-    { name: "Pumpkin", mass: 1300000000000000n, energy: 33000000000000000n },
-    { name: "Melon", mass: 1300000000000000n, energy: 33000000000000000n },
-    { name: "RedMushroomBlock", mass: 12500000000000000n },
-    { name: "BrownMushroomBlock", mass: 12500000000000000n },
-    { name: "MushroomStem", mass: 12500000000000000n },
-    { name: "BambooBush", mass: 200000000000000n },
-    { name: "Cactus", mass: 1300000000000000n },
-  ],
-  UnderwaterPlant: [
-    { name: "Coral", mass: 400000000000000n },
-    { name: "SeaAnemone", mass: 400000000000000n },
-    { name: "Algae", mass: 200000000000000n },
-  ],
-  UnderwaterBlock: [
-    { name: "HornCoralBlock", mass: 37500000000000000n },
-    { name: "FireCoralBlock", mass: 37500000000000000n },
-    { name: "TubeCoralBlock", mass: 37500000000000000n },
-    { name: "BubbleCoralBlock", mass: 37500000000000000n },
-    { name: "BrainCoralBlock", mass: 37500000000000000n },
-  ],
-  MiscBlock: [
-    { name: "Snow", mass: 300000000000000n },
-    { name: "Ice", mass: 200000000000000n },
-    { name: "Magma", mass: 500000000000000n },
-    { name: "SpiderWeb", mass: 300000000000000n },
-    { name: "Bone", mass: 37500000000000000n },
-    { name: "TextSign", mass: 18000000000000000n },
-  ],
+type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
-  // NON-TERRAIN CATEGORIES
+export const objectDef: Optional<ObjectDefinition, "id">[] = [
+  { name: "Null" },
+  { name: "Air" },
+  { name: "Water" },
+  { name: "Stone", mass: 12000000000000000n },
+  { name: "Bedrock", mass: 50000000000000000000n },
+  { name: "Deepslate", mass: 40000000000000000n },
+  { name: "Granite", mass: 15000000000000000n },
+  { name: "Tuff", mass: 15000000000000000n },
+  { name: "Calcite", mass: 75000000000000000n },
+  { name: "Basalt", mass: 75000000000000000n },
+  { name: "SmoothBasalt", mass: 75000000000000000n },
+  { name: "Andesite", mass: 15000000000000000n },
+  { name: "Diorite", mass: 18000000000000000n },
+  { name: "Cobblestone", mass: 22500000000000000n },
+  { name: "MossyCobblestone", mass: 37500000000000000n },
+  { name: "Obsidian", mass: 9000000000000000000n },
+  { name: "Dripstone", mass: 75000000000000000n },
+  { name: "Blackstone", mass: 50000000000000000n },
+  { name: "CobbledDeepslate", mass: 100000000000000000n },
+  { name: "Amethyst", mass: 100000000000000000n },
+  { name: "Glowstone", mass: 37500000000000000n },
+  { name: "Grass", mass: 3000000000000000n },
+  { name: "Dirt", mass: 2400000000000000n },
+  { name: "Moss", mass: 200000000000000n },
+  { name: "Podzol", mass: 5000000000000000n },
+  { name: "DirtPath", mass: 5000000000000000n },
+  { name: "Mud", mass: 4000000000000000n },
+  { name: "PackedMud", mass: 5000000000000000n },
+  { name: "Farmland", mass: 3000000000000000n },
+  { name: "WetFarmland", mass: 3000000000000000n },
+  { name: "UnrevealedOre", mass: 10000000000000000n },
+  { name: "CoalOre", mass: 540000000000000000n },
+  { name: "CopperOre", mass: 675000000000000000n },
+  { name: "IronOre", mass: 675000000000000000n },
+  { name: "GoldOre", mass: 1600000000000000000n },
+  { name: "DiamondOre", mass: 5000000000000000000n },
+  { name: "NeptuniumOre", mass: 5000000000000000000n },
+  { name: "Gravel", mass: 2400000000000000n },
+  { name: "Sand", mass: 4000000000000000n },
+  { name: "RedSand", mass: 5000000000000000n },
+  { name: "Sandstone", mass: 30000000000000000n },
+  { name: "RedSandstone", mass: 37500000000000000n },
+  { name: "Clay", mass: 2400000000000000n },
+  { name: "AnyTerracotta", mass: 37500000000000000n },
+  { name: "Terracotta", mass: 37500000000000000n },
+  { name: "BrownTerracotta", mass: 37500000000000000n },
+  { name: "OrangeTerracotta", mass: 37500000000000000n },
+  { name: "WhiteTerracotta", mass: 37500000000000000n },
+  { name: "LightGrayTerracotta", mass: 37500000000000000n },
+  { name: "YellowTerracotta", mass: 37500000000000000n },
+  { name: "RedTerracotta", mass: 37500000000000000n },
+  { name: "LightBlueTerracotta", mass: 37500000000000000n },
+  { name: "CyanTerracotta", mass: 37500000000000000n },
+  { name: "BlackTerracotta", mass: 37500000000000000n },
+  { name: "PurpleTerracotta", mass: 37500000000000000n },
+  { name: "BlueTerracotta", mass: 37500000000000000n },
+  { name: "MagentaTerracotta", mass: 37500000000000000n },
+  { name: "AnyLog", mass: 12500000000000000n, energy: 5500000000000000n },
+  { name: "OakLog", mass: 12500000000000000n, energy: 5500000000000000n },
+  { name: "BirchLog", mass: 12500000000000000n, energy: 5500000000000000n },
+  { name: "JungleLog", mass: 12500000000000000n, energy: 5500000000000000n },
+  { name: "SakuraLog", mass: 12500000000000000n, energy: 5500000000000000n },
+  { name: "AcaciaLog", mass: 12500000000000000n, energy: 5500000000000000n },
+  { name: "SpruceLog", mass: 12500000000000000n, energy: 5500000000000000n },
+  { name: "DarkOakLog", mass: 12500000000000000n, energy: 5500000000000000n },
+  {
+    name: "MangroveLog",
+    mass: 12500000000000000n,
+    energy: 5500000000000000n,
+  },
+  { name: "AnyLeaf", mass: 500000000000000n, energy: 500000000000000n },
+  {
+    name: "OakLeaf",
+    sapling: "OakSapling",
+    mass: 500000000000000n,
+    energy: 500000000000000n,
+  },
+  {
+    name: "BirchLeaf",
+    sapling: "BirchSapling",
+    mass: 500000000000000n,
+    energy: 500000000000000n,
+  },
+  {
+    name: "JungleLeaf",
+    sapling: "JungleSapling",
+    mass: 500000000000000n,
+    energy: 500000000000000n,
+  },
+  {
+    name: "SakuraLeaf",
+    sapling: "SakuraSapling",
+    mass: 500000000000000n,
+    energy: 500000000000000n,
+  },
+  {
+    name: "SpruceLeaf",
+    sapling: "SpruceSapling",
+    mass: 500000000000000n,
+    energy: 500000000000000n,
+  },
+  {
+    name: "AcaciaLeaf",
+    sapling: "AcaciaSapling",
+    mass: 500000000000000n,
+    energy: 500000000000000n,
+  },
+  {
+    name: "DarkOakLeaf",
+    sapling: "DarkOakSapling",
+    mass: 500000000000000n,
+    energy: 500000000000000n,
+  },
+  { name: "AzaleaLeaf", mass: 500000000000000n, energy: 500000000000000n },
+  {
+    name: "FloweringAzaleaLeaf",
+    mass: 500000000000000n,
+    energy: 500000000000000n,
+  },
+  { name: "MangroveLeaf", mass: 500000000000000n, energy: 500000000000000n },
+  { name: "MangroveRoots", mass: 400000000000000n },
+  { name: "MuddyMangroveRoots", mass: 400000000000000n },
+  { name: "AzaleaFlower", mass: 300000000000000n },
+  { name: "BellFlower", mass: 300000000000000n },
+  { name: "DandelionFlower", mass: 300000000000000n },
+  { name: "DaylilyFlower", mass: 300000000000000n },
+  { name: "LilacFlower", mass: 300000000000000n },
+  { name: "RoseFlower", mass: 300000000000000n },
+  { name: "FireFlower", mass: 300000000000000n },
+  { name: "MorninggloryFlower", mass: 300000000000000n },
+  { name: "PeonyFlower", mass: 300000000000000n },
+  { name: "Ultraviolet", mass: 300000000000000n },
+  { name: "SunFlower", mass: 300000000000000n },
+  { name: "FlyTrap", mass: 300000000000000n },
+  { name: "FescueGrass", mass: 200000000000000n },
+  { name: "SwitchGrass", mass: 200000000000000n },
+  { name: "VinesBush", mass: 200000000000000n },
+  { name: "IvyVine", mass: 200000000000000n },
+  { name: "HempBush", mass: 200000000000000n },
+  { name: "GoldenMushroom", mass: 300000000000000n },
+  { name: "RedMushroom", mass: 300000000000000n },
+  { name: "CoffeeBush", mass: 300000000000000n },
+  { name: "StrawberryBush", mass: 300000000000000n },
+  { name: "RaspberryBush", mass: 300000000000000n },
+  { name: "Wheat", mass: 300000000000000n, energy: 4000000000000000n },
+  { name: "CottonBush", mass: 300000000000000n },
+  { name: "Pumpkin", mass: 1300000000000000n, energy: 33000000000000000n },
+  { name: "Melon", mass: 1300000000000000n, energy: 33000000000000000n },
+  { name: "RedMushroomBlock", mass: 12500000000000000n },
+  { name: "BrownMushroomBlock", mass: 12500000000000000n },
+  { name: "MushroomStem", mass: 12500000000000000n },
+  { name: "BambooBush", mass: 200000000000000n },
+  { name: "Cactus", mass: 1300000000000000n },
+  { name: "Coral", mass: 400000000000000n },
+  { name: "SeaAnemone", mass: 400000000000000n },
+  { name: "Algae", mass: 200000000000000n },
+  { name: "HornCoralBlock", mass: 37500000000000000n },
+  { name: "FireCoralBlock", mass: 37500000000000000n },
+  { name: "TubeCoralBlock", mass: 37500000000000000n },
+  { name: "BubbleCoralBlock", mass: 37500000000000000n },
+  { name: "BrainCoralBlock", mass: 37500000000000000n },
+  { name: "Snow", mass: 300000000000000n },
+  { name: "Ice", mass: 200000000000000n },
+  { name: "Magma", mass: 500000000000000n },
+  { name: "SpiderWeb", mass: 300000000000000n },
+  { name: "Bone", mass: 37500000000000000n },
 
-  Plank: [
-    { name: "AnyPlank", mass: 4500000000000000n },
-    { name: "OakPlanks", mass: 4500000000000000n },
-    { name: "BirchPlanks", mass: 4500000000000000n },
-    { name: "JunglePlanks", mass: 4500000000000000n },
-    { name: "SakuraPlanks", mass: 4500000000000000n },
-    { name: "SprucePlanks", mass: 4500000000000000n },
-    { name: "AcaciaPlanks", mass: 4500000000000000n },
-    { name: "DarkOakPlanks", mass: 4500000000000000n },
-    { name: "MangrovePlanks", mass: 4500000000000000n },
-  ],
-  OreBlock: [
-    { name: "CopperBlock", mass: 6075000000000000000n },
-    { name: "IronBlock", mass: 6075000000000000000n },
-    { name: "GoldBlock", mass: 14400000000000000000n },
-    { name: "DiamondBlock", mass: 45000000000000000000n },
-    { name: "NeptuniumBlock", mass: 45000000000000000000n },
-  ],
-  Seed: [
-    {
-      name: "WheatSeed",
-      growableEnergy: 4300000000000000n,
-      timeToGrow: 900n,
-      crop: "Wheat",
-    },
-    {
-      name: "PumpkinSeed",
-      growableEnergy: 34300000000000000n,
-      timeToGrow: 3600n,
-      crop: "Pumpkin",
-    },
-    {
-      name: "MelonSeed",
-      growableEnergy: 34300000000000000n,
-      timeToGrow: 3600n,
-      crop: "Melon",
-    },
-  ],
-  Sapling: [
-    {
-      name: "OakSapling",
-      growableEnergy: 148000000000000000n,
-      timeToGrow: 345600n,
-    },
-    {
-      name: "BirchSapling",
-      growableEnergy: 139000000000000000n,
-      timeToGrow: 345600n,
-    },
-    {
-      name: "JungleSapling",
-      growableEnergy: 300000000000000000n,
-      timeToGrow: 345600n,
-    },
-    {
-      name: "SakuraSapling",
-      growableEnergy: 187000000000000000n,
-      timeToGrow: 345600n,
-    },
-    {
-      name: "AcaciaSapling",
-      growableEnergy: 158000000000000000n,
-      timeToGrow: 345600n,
-    },
-    {
-      name: "SpruceSapling",
-      growableEnergy: 256000000000000000n,
-      timeToGrow: 345600n,
-    },
-    {
-      name: "DarkOakSapling",
-      growableEnergy: 202000000000000000n,
-      timeToGrow: 345600n,
-    },
-    {
-      name: "MangroveSapling",
-      growableEnergy: 232000000000000000n,
-      timeToGrow: 345600n,
-    },
-  ],
-  SmartEntityBlock: [
-    { name: "ForceField", mass: 1035000000000000000n },
-    { name: "Chest", mass: 36000000000000000n },
-    { name: "SpawnTile", mass: 6435000000000000000n },
-    { name: "Bed", mass: 13500000000000000n },
-  ],
-  Station: [
-    { name: "Workbench", mass: 18000000000000000n },
-    { name: "Powerstone", mass: 80000000000000000n },
-    { name: "Furnace", mass: 108000000000000000n },
-  ],
-  MiscPassThrough: [{ name: "Torch", mass: 1125000000000000n }],
+  { name: "TextSign", mass: 18000000000000000n },
+  { name: "AnyPlank", mass: 4500000000000000n },
+  { name: "OakPlanks", mass: 4500000000000000n },
+  { name: "BirchPlanks", mass: 4500000000000000n },
+  { name: "JunglePlanks", mass: 4500000000000000n },
+  { name: "SakuraPlanks", mass: 4500000000000000n },
+  { name: "SprucePlanks", mass: 4500000000000000n },
+  { name: "AcaciaPlanks", mass: 4500000000000000n },
+  { name: "DarkOakPlanks", mass: 4500000000000000n },
+  { name: "MangrovePlanks", mass: 4500000000000000n },
+  { name: "CopperBlock", mass: 6075000000000000000n },
+  { name: "IronBlock", mass: 6075000000000000000n },
+  { name: "GoldBlock", mass: 14400000000000000000n },
+  { name: "DiamondBlock", mass: 45000000000000000000n },
+  { name: "NeptuniumBlock", mass: 45000000000000000000n },
+  {
+    name: "WheatSeed",
+    growableEnergy: 4300000000000000n,
+    timeToGrow: 900n,
+    crop: "Wheat",
+  },
+  {
+    name: "PumpkinSeed",
+    growableEnergy: 34300000000000000n,
+    timeToGrow: 3600n,
+    crop: "Pumpkin",
+  },
+  {
+    name: "MelonSeed",
+    growableEnergy: 34300000000000000n,
+    timeToGrow: 3600n,
+    crop: "Melon",
+  },
+  {
+    name: "OakSapling",
+    growableEnergy: 148000000000000000n,
+    timeToGrow: 345600n,
+  },
+  {
+    name: "BirchSapling",
+    growableEnergy: 139000000000000000n,
+    timeToGrow: 345600n,
+  },
+  {
+    name: "JungleSapling",
+    growableEnergy: 300000000000000000n,
+    timeToGrow: 345600n,
+  },
+  {
+    name: "SakuraSapling",
+    growableEnergy: 187000000000000000n,
+    timeToGrow: 345600n,
+  },
+  {
+    name: "AcaciaSapling",
+    growableEnergy: 158000000000000000n,
+    timeToGrow: 345600n,
+  },
+  {
+    name: "SpruceSapling",
+    growableEnergy: 256000000000000000n,
+    timeToGrow: 345600n,
+  },
+  {
+    name: "DarkOakSapling",
+    growableEnergy: 202000000000000000n,
+    timeToGrow: 345600n,
+  },
+  {
+    name: "MangroveSapling",
+    growableEnergy: 232000000000000000n,
+    timeToGrow: 345600n,
+  },
+  { name: "ForceField", mass: 1035000000000000000n },
+  { name: "Chest", mass: 36000000000000000n },
+  { name: "SpawnTile", mass: 6435000000000000000n },
+  { name: "Bed", mass: 13500000000000000n },
+  { name: "Workbench", mass: 18000000000000000n },
+  { name: "Powerstone", mass: 80000000000000000n },
+  { name: "Furnace", mass: 108000000000000000n },
+  { name: "Torch", mass: 1125000000000000n },
 
-  // NON BLOCKS
+  { name: "WoodenPick", mass: 22500000000000000n, plankAmount: 5 },
+  {
+    name: "CopperPick",
+    mass: 2034000000000000000n,
+    plankAmount: 2,
+    oreAmount: ["CopperOre", 3],
+  },
+  {
+    name: "IronPick",
+    mass: 2034000000000000000n,
+    plankAmount: 2,
+    oreAmount: ["IronOre", 3],
+  },
+  {
+    name: "GoldPick",
+    mass: 4809000000000000000n,
+    plankAmount: 2,
+    oreAmount: ["GoldOre", 3],
+  },
+  {
+    name: "DiamondPick",
+    mass: 15009000000000000000n,
+    plankAmount: 2,
+    oreAmount: ["DiamondOre", 3],
+  },
+  {
+    name: "NeptuniumPick",
+    mass: 15009000000000000000n,
+    plankAmount: 2,
+    oreAmount: ["NeptuniumOre", 3],
+  },
+  { name: "WoodenAxe", mass: 22500000000000000n, plankAmount: 5 },
+  {
+    name: "CopperAxe",
+    mass: 2034000000000000000n,
+    plankAmount: 2,
+    oreAmount: ["CopperOre", 3],
+  },
+  {
+    name: "IronAxe",
+    mass: 2034000000000000000n,
+    plankAmount: 2,
+    oreAmount: ["IronOre", 3],
+  },
+  {
+    name: "GoldAxe",
+    mass: 4809000000000000000n,
+    plankAmount: 2,
+    oreAmount: ["GoldOre", 3],
+  },
+  {
+    name: "DiamondAxe",
+    mass: 15009000000000000000n,
+    plankAmount: 2,
+    oreAmount: ["DiamondOre", 3],
+  },
+  {
+    name: "NeptuniumAxe",
+    mass: 15009000000000000000n,
+    plankAmount: 2,
+    oreAmount: ["NeptuniumOre", 3],
+  },
+  { name: "WoodenWhacker", mass: 36000000000000000n, plankAmount: 8 },
+  {
+    name: "CopperWhacker",
+    mass: 4059000000000000000n,
+    plankAmount: 2,
+    oreAmount: ["CopperOre", 6],
+  },
+  {
+    name: "IronWhacker",
+    mass: 4059000000000000000n,
+    plankAmount: 2,
+    oreAmount: ["IronOre", 6],
+  },
+  { name: "WoodenHoe", mass: 18000000000000000n, plankAmount: 4 },
 
-  Pick: [
-    { name: "WoodenPick", mass: 22500000000000000n, plankAmount: 5 },
-    {
-      name: "CopperPick",
-      mass: 2034000000000000000n,
-      plankAmount: 2,
-      oreAmount: ["CopperOre", 3],
-    },
-    {
-      name: "IronPick",
-      mass: 2034000000000000000n,
-      plankAmount: 2,
-      oreAmount: ["IronOre", 3],
-    },
-    {
-      name: "GoldPick",
-      mass: 4809000000000000000n,
-      plankAmount: 2,
-      oreAmount: ["GoldOre", 3],
-    },
-    {
-      name: "DiamondPick",
-      mass: 15009000000000000000n,
-      plankAmount: 2,
-      oreAmount: ["DiamondOre", 3],
-    },
-    {
-      name: "NeptuniumPick",
-      mass: 15009000000000000000n,
-      plankAmount: 2,
-      oreAmount: ["NeptuniumOre", 3],
-    },
-  ],
-  Axe: [
-    { name: "WoodenAxe", mass: 22500000000000000n, plankAmount: 5 },
-    {
-      name: "CopperAxe",
-      mass: 2034000000000000000n,
-      plankAmount: 2,
-      oreAmount: ["CopperOre", 3],
-    },
-    {
-      name: "IronAxe",
-      mass: 2034000000000000000n,
-      plankAmount: 2,
-      oreAmount: ["IronOre", 3],
-    },
-    {
-      name: "GoldAxe",
-      mass: 4809000000000000000n,
-      plankAmount: 2,
-      oreAmount: ["GoldOre", 3],
-    },
-    {
-      name: "DiamondAxe",
-      mass: 15009000000000000000n,
-      plankAmount: 2,
-      oreAmount: ["DiamondOre", 3],
-    },
-    {
-      name: "NeptuniumAxe",
-      mass: 15009000000000000000n,
-      plankAmount: 2,
-      oreAmount: ["NeptuniumOre", 3],
-    },
-  ],
-  Whacker: [
-    { name: "WoodenWhacker", mass: 36000000000000000n, plankAmount: 8 },
-    {
-      name: "CopperWhacker",
-      mass: 4059000000000000000n,
-      plankAmount: 2,
-      oreAmount: ["CopperOre", 6],
-    },
-    {
-      name: "IronWhacker",
-      mass: 4059000000000000000n,
-      plankAmount: 2,
-      oreAmount: ["IronOre", 6],
-    },
-  ],
-  Hoe: [{ name: "WoodenHoe", mass: 18000000000000000n, plankAmount: 4 }],
-  OreBar: [
-    { name: "GoldBar", mass: 1600000000000000000n },
-    { name: "IronBar", mass: 675000000000000000n },
-    { name: "Diamond", mass: 5000000000000000000n },
-    { name: "NeptuniumBar", mass: 5000000000000000000n },
-  ],
-  Bucket: [
-    { name: "Bucket", mass: 13500000000000000n },
-    { name: "WaterBucket", mass: 13500000000000000n },
-  ],
-  Food: [
-    { name: "WheatSlop", energy: 68800000000000000n },
-    { name: "PumpkinSoup", energy: 34300000000000000n },
-    { name: "MelonSmoothie", energy: 34300000000000000n },
-  ],
-  Fuel: [{ name: "Battery", energy: 90000000000000000n }],
-  Player: [{ name: "Player" }],
-  SmartEntityNonBlock: [{ name: "Fragment" }],
-} as const;
+  { name: "GoldBar", mass: 1600000000000000000n },
+  { name: "IronBar", mass: 675000000000000000n },
+  { name: "Diamond", mass: 5000000000000000000n },
+  { name: "NeptuniumBar", mass: 5000000000000000000n },
+  { name: "Bucket", mass: 13500000000000000n },
+  { name: "WaterBucket", mass: 13500000000000000n },
+  { name: "WheatSlop", energy: 68800000000000000n },
+  { name: "PumpkinSoup", energy: 34300000000000000n },
+  { name: "MelonSmoothie", energy: 34300000000000000n },
+  { name: "Battery", energy: 90000000000000000n },
+  { name: "Player" },
+  { name: "Fragment" },
+] as const;
 
-export const objects: ObjectDefinition[] = Object.entries(
-  categoryObjects,
-).flatMap(([category, objects]) => {
-  const catIndex = categoryIndex[category as Category];
-  return objects.map((obj, index) => ({
-    ...obj,
-    id: (catIndex << 8) | index,
-    terrainId:
-      catIndex < 16 && index < 16 ? (catIndex << 4) | index : undefined,
-    categoryIndex: catIndex,
-    index,
-    category: category as Category,
-  }));
+let current = 0;
+export const objects: ObjectDefinition[] = objectDef.map((obj) => {
+  current = obj.id ?? current;
+  return { ...obj, id: current++ };
 });
 
 export type ObjectAmount = [ObjectName, number | bigint];
@@ -767,3 +623,83 @@ export const objectsByName = objects.reduce(
   },
   {} as Record<ObjectName, ObjectDefinition>,
 );
+
+export const categories: { [key: string]: Category } = {
+  NonSolid: { objects: ["Air", "Water"] },
+  Stone: { objects: [] },
+  Gemstone: { objects: [] },
+  Soil: { objects: [] },
+  Ore: { objects: [] },
+  Sand: { objects: [] },
+  Terracotta: { objects: [] },
+  Log: { objects: [] },
+  Leaf: { objects: [] },
+  Flower: { objects: [] },
+  Greenery: { objects: [] },
+  Crop: { objects: [] },
+  CropBlock: { objects: [] },
+  UnderwaterPlant: { objects: [] },
+  UnderwaterBlock: { objects: [] },
+  MiscBlock: { objects: [] },
+  // non-terrain categories
+  Plank: { objects: [] },
+  OreBlock: { objects: [] },
+  Seed: { objects: [] },
+  Sapling: { objects: [] },
+  SmartEntityBlock: { objects: [] },
+  Station: { objects: [] },
+  MiscPassThrough: { objects: [] },
+
+  Pick: { objects: [] },
+  Axe: { objects: [] },
+  Hoe: { objects: [] },
+  Whacker: { objects: [] },
+  OreBar: { objects: [] },
+  Bucket: { objects: [] },
+  Food: { objects: [] },
+  Fuel: { objects: [] },
+  Player: { objects: [] },
+  SmartEntityNonBlock: { objects: [] },
+
+  // { name: "hasAny", categories: ["Log", "Leaf", "Plank"] },
+  // {
+  //   name: "hasExtraDrops",
+  //   categories: ["Leaf", "Crop", "CropBlock", "Greenery"],
+  // },
+  // {
+  //   name: "hasAxeMultiplier",
+  //   categories: ["Log", "Leaf", "Plank", "CropBlock"],
+  //   objects: ["Chest", "Workbench", "SpawnTile", "Bed", "TextSign", "Torch"],
+  // },
+  // {
+  //   name: "hasPickMultiplier",
+  //   categories: ["Ore", "Gemstone", "Stone", "Terracotta", "OreBlock"],
+  //   objects: ["Powerstone", "Furnace", "ForceField"],
+  // },
+  // {
+  //   name: "isPassThrough",
+  //   categories: [
+  //     "NonSolid",
+  //     "Flower",
+  //     "Seed",
+  //     "Sapling",
+  //     "Greenery",
+  //     "Crop",
+  //     "UnderwaterPlant",
+  //     "MiscPassThrough",
+  //   ],
+  // },
+  // { name: "isGrowable", categories: ["Seed", "Sapling"] },
+  // {
+  //   name: "isUniqueObject",
+  //   categories: ["Pick", "Axe", "Whacker", "Hoe", "Bucket"],
+  //   objects: ["ForceField", "Bed", "SpawnTile"],
+  // },
+  // {
+  //   name: "isSmartEntity",
+  //   categories: ["SmartEntityBlock", "SmartEntityNonBlock"],
+  // },
+  // { name: "isTool", categories: ["Pick", "Axe", "Whacker", "Hoe"] },
+  // { name: "isTillable", objects: ["Dirt", "Grass"] },
+  // { name: "isMachine", objects: ["ForceField"] },
+} as const;

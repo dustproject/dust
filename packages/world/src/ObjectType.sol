@@ -23,259 +23,199 @@ uint16 constant BLOCK_CATEGORY_COUNT = 256 / 2; // 128
 // Object Categories
 // ------------------------------------------------------------
 library Category {
-  // Block Categories
-  uint16 constant NonSolid = uint16(0) << OFFSET_BITS;
-  uint16 constant Stone = uint16(1) << OFFSET_BITS;
-  uint16 constant Gemstone = uint16(2) << OFFSET_BITS;
-  uint16 constant Soil = uint16(3) << OFFSET_BITS;
-  uint16 constant Ore = uint16(4) << OFFSET_BITS;
-  uint16 constant Sand = uint16(5) << OFFSET_BITS;
-  uint16 constant Terracotta = uint16(6) << OFFSET_BITS;
-  uint16 constant Log = uint16(7) << OFFSET_BITS;
-  uint16 constant Leaf = uint16(8) << OFFSET_BITS;
-  uint16 constant Flower = uint16(9) << OFFSET_BITS;
-  uint16 constant Greenery = uint16(10) << OFFSET_BITS;
-  uint16 constant Crop = uint16(11) << OFFSET_BITS;
-  uint16 constant CropBlock = uint16(12) << OFFSET_BITS;
-  uint16 constant UnderwaterPlant = uint16(13) << OFFSET_BITS;
-  uint16 constant UnderwaterBlock = uint16(14) << OFFSET_BITS;
-  uint16 constant MiscBlock = uint16(15) << OFFSET_BITS;
-  uint16 constant Plank = uint16(16) << OFFSET_BITS;
-  uint16 constant OreBlock = uint16(17) << OFFSET_BITS;
-  uint16 constant Seed = uint16(18) << OFFSET_BITS;
-  uint16 constant Sapling = uint16(19) << OFFSET_BITS;
-  uint16 constant SmartEntityBlock = uint16(20) << OFFSET_BITS;
-  uint16 constant Station = uint16(21) << OFFSET_BITS;
-  uint16 constant MiscPassThrough = uint16(22) << OFFSET_BITS;
-  // Non-Block Categories
-  uint16 constant Pick = uint16(128) << OFFSET_BITS;
-  uint16 constant Axe = uint16(129) << OFFSET_BITS;
-  uint16 constant Hoe = uint16(130) << OFFSET_BITS;
-  uint16 constant Whacker = uint16(131) << OFFSET_BITS;
-  uint16 constant OreBar = uint16(132) << OFFSET_BITS;
-  uint16 constant Bucket = uint16(133) << OFFSET_BITS;
-  uint16 constant Food = uint16(134) << OFFSET_BITS;
-  uint16 constant Fuel = uint16(135) << OFFSET_BITS;
-  uint16 constant Player = uint16(136) << OFFSET_BITS;
-  uint16 constant SmartEntityNonBlock = uint16(137) << OFFSET_BITS;
-  // ------------------------------------------------------------
   // Meta Category Masks (fits within uint256; mask bit k set if raw category ID k belongs)
   uint256 constant BLOCK_MASK = uint256(type(uint128).max);
-  uint256 constant MINEABLE_MASK = BLOCK_MASK & ~(uint256(1) << (NonSolid >> OFFSET_BITS));
-  uint256 constant HAS_ANY_MASK = (uint256(1) << (Log >> OFFSET_BITS)) | (uint256(1) << (Leaf >> OFFSET_BITS))
-    | (uint256(1) << (Plank >> OFFSET_BITS));
-  uint256 constant HAS_EXTRA_DROPS_MASK = (uint256(1) << (Leaf >> OFFSET_BITS)) | (uint256(1) << (Crop >> OFFSET_BITS))
-    | (uint256(1) << (CropBlock >> OFFSET_BITS)) | (uint256(1) << (Greenery >> OFFSET_BITS));
-  uint256 constant HAS_AXE_MULTIPLIER_MASK = (uint256(1) << (Log >> OFFSET_BITS))
-    | (uint256(1) << (Leaf >> OFFSET_BITS)) | (uint256(1) << (Plank >> OFFSET_BITS))
-    | (uint256(1) << (CropBlock >> OFFSET_BITS));
-  uint256 constant HAS_PICK_MULTIPLIER_MASK = (uint256(1) << (Ore >> OFFSET_BITS))
-    | (uint256(1) << (Gemstone >> OFFSET_BITS)) | (uint256(1) << (Stone >> OFFSET_BITS))
-    | (uint256(1) << (Terracotta >> OFFSET_BITS)) | (uint256(1) << (OreBlock >> OFFSET_BITS));
-  uint256 constant IS_PASS_THROUGH_MASK = (uint256(1) << (NonSolid >> OFFSET_BITS))
-    | (uint256(1) << (Flower >> OFFSET_BITS)) | (uint256(1) << (Seed >> OFFSET_BITS))
-    | (uint256(1) << (Sapling >> OFFSET_BITS)) | (uint256(1) << (Greenery >> OFFSET_BITS))
-    | (uint256(1) << (Crop >> OFFSET_BITS)) | (uint256(1) << (UnderwaterPlant >> OFFSET_BITS))
-    | (uint256(1) << (MiscPassThrough >> OFFSET_BITS));
-  uint256 constant IS_GROWABLE_MASK = (uint256(1) << (Seed >> OFFSET_BITS)) | (uint256(1) << (Sapling >> OFFSET_BITS));
-  uint256 constant IS_UNIQUE_OBJECT_MASK = (uint256(1) << (Pick >> OFFSET_BITS)) | (uint256(1) << (Axe >> OFFSET_BITS))
-    | (uint256(1) << (Whacker >> OFFSET_BITS)) | (uint256(1) << (Hoe >> OFFSET_BITS))
-    | (uint256(1) << (Bucket >> OFFSET_BITS));
-  uint256 constant IS_SMART_ENTITY_MASK =
-    (uint256(1) << (SmartEntityBlock >> OFFSET_BITS)) | (uint256(1) << (SmartEntityNonBlock >> OFFSET_BITS));
-  uint256 constant IS_TOOL_MASK = (uint256(1) << (Pick >> OFFSET_BITS)) | (uint256(1) << (Axe >> OFFSET_BITS))
-    | (uint256(1) << (Whacker >> OFFSET_BITS)) | (uint256(1) << (Hoe >> OFFSET_BITS));
 }
 
 // ------------------------------------------------------------
 // Object Types
 // ------------------------------------------------------------
 library ObjectTypes {
-  ObjectType constant Null = ObjectType.wrap(Category.NonSolid | 0);
-  ObjectType constant Air = ObjectType.wrap(Category.NonSolid | 1);
-  ObjectType constant Water = ObjectType.wrap(Category.NonSolid | 2);
-  ObjectType constant Stone = ObjectType.wrap(Category.Stone | 0);
-  ObjectType constant Bedrock = ObjectType.wrap(Category.Stone | 1);
-  ObjectType constant Deepslate = ObjectType.wrap(Category.Stone | 2);
-  ObjectType constant Granite = ObjectType.wrap(Category.Stone | 3);
-  ObjectType constant Tuff = ObjectType.wrap(Category.Stone | 4);
-  ObjectType constant Calcite = ObjectType.wrap(Category.Stone | 5);
-  ObjectType constant Basalt = ObjectType.wrap(Category.Stone | 6);
-  ObjectType constant SmoothBasalt = ObjectType.wrap(Category.Stone | 7);
-  ObjectType constant Andesite = ObjectType.wrap(Category.Stone | 8);
-  ObjectType constant Diorite = ObjectType.wrap(Category.Stone | 9);
-  ObjectType constant Cobblestone = ObjectType.wrap(Category.Stone | 10);
-  ObjectType constant MossyCobblestone = ObjectType.wrap(Category.Stone | 11);
-  ObjectType constant Obsidian = ObjectType.wrap(Category.Stone | 12);
-  ObjectType constant Dripstone = ObjectType.wrap(Category.Stone | 13);
-  ObjectType constant Blackstone = ObjectType.wrap(Category.Stone | 14);
-  ObjectType constant CobbledDeepslate = ObjectType.wrap(Category.Stone | 15);
-  ObjectType constant Amethyst = ObjectType.wrap(Category.Gemstone | 0);
-  ObjectType constant Glowstone = ObjectType.wrap(Category.Gemstone | 1);
-  ObjectType constant Grass = ObjectType.wrap(Category.Soil | 0);
-  ObjectType constant Dirt = ObjectType.wrap(Category.Soil | 1);
-  ObjectType constant Moss = ObjectType.wrap(Category.Soil | 2);
-  ObjectType constant Podzol = ObjectType.wrap(Category.Soil | 3);
-  ObjectType constant DirtPath = ObjectType.wrap(Category.Soil | 4);
-  ObjectType constant Mud = ObjectType.wrap(Category.Soil | 5);
-  ObjectType constant PackedMud = ObjectType.wrap(Category.Soil | 6);
-  ObjectType constant Farmland = ObjectType.wrap(Category.Soil | 7);
-  ObjectType constant WetFarmland = ObjectType.wrap(Category.Soil | 8);
-  ObjectType constant UnrevealedOre = ObjectType.wrap(Category.Ore | 0);
-  ObjectType constant CoalOre = ObjectType.wrap(Category.Ore | 1);
-  ObjectType constant CopperOre = ObjectType.wrap(Category.Ore | 2);
-  ObjectType constant IronOre = ObjectType.wrap(Category.Ore | 3);
-  ObjectType constant GoldOre = ObjectType.wrap(Category.Ore | 4);
-  ObjectType constant DiamondOre = ObjectType.wrap(Category.Ore | 5);
-  ObjectType constant NeptuniumOre = ObjectType.wrap(Category.Ore | 6);
-  ObjectType constant Gravel = ObjectType.wrap(Category.Sand | 0);
-  ObjectType constant Sand = ObjectType.wrap(Category.Sand | 1);
-  ObjectType constant RedSand = ObjectType.wrap(Category.Sand | 2);
-  ObjectType constant Sandstone = ObjectType.wrap(Category.Sand | 3);
-  ObjectType constant RedSandstone = ObjectType.wrap(Category.Sand | 4);
-  ObjectType constant Clay = ObjectType.wrap(Category.Sand | 5);
-  ObjectType constant AnyTerracotta = ObjectType.wrap(Category.Terracotta | 0);
-  ObjectType constant Terracotta = ObjectType.wrap(Category.Terracotta | 1);
-  ObjectType constant BrownTerracotta = ObjectType.wrap(Category.Terracotta | 2);
-  ObjectType constant OrangeTerracotta = ObjectType.wrap(Category.Terracotta | 3);
-  ObjectType constant WhiteTerracotta = ObjectType.wrap(Category.Terracotta | 4);
-  ObjectType constant LightGrayTerracotta = ObjectType.wrap(Category.Terracotta | 5);
-  ObjectType constant YellowTerracotta = ObjectType.wrap(Category.Terracotta | 6);
-  ObjectType constant RedTerracotta = ObjectType.wrap(Category.Terracotta | 7);
-  ObjectType constant LightBlueTerracotta = ObjectType.wrap(Category.Terracotta | 8);
-  ObjectType constant CyanTerracotta = ObjectType.wrap(Category.Terracotta | 9);
-  ObjectType constant BlackTerracotta = ObjectType.wrap(Category.Terracotta | 10);
-  ObjectType constant PurpleTerracotta = ObjectType.wrap(Category.Terracotta | 11);
-  ObjectType constant BlueTerracotta = ObjectType.wrap(Category.Terracotta | 12);
-  ObjectType constant MagentaTerracotta = ObjectType.wrap(Category.Terracotta | 13);
-  ObjectType constant AnyLog = ObjectType.wrap(Category.Log | 0);
-  ObjectType constant OakLog = ObjectType.wrap(Category.Log | 1);
-  ObjectType constant BirchLog = ObjectType.wrap(Category.Log | 2);
-  ObjectType constant JungleLog = ObjectType.wrap(Category.Log | 3);
-  ObjectType constant SakuraLog = ObjectType.wrap(Category.Log | 4);
-  ObjectType constant AcaciaLog = ObjectType.wrap(Category.Log | 5);
-  ObjectType constant SpruceLog = ObjectType.wrap(Category.Log | 6);
-  ObjectType constant DarkOakLog = ObjectType.wrap(Category.Log | 7);
-  ObjectType constant MangroveLog = ObjectType.wrap(Category.Log | 8);
-  ObjectType constant AnyLeaf = ObjectType.wrap(Category.Leaf | 0);
-  ObjectType constant OakLeaf = ObjectType.wrap(Category.Leaf | 1);
-  ObjectType constant BirchLeaf = ObjectType.wrap(Category.Leaf | 2);
-  ObjectType constant JungleLeaf = ObjectType.wrap(Category.Leaf | 3);
-  ObjectType constant SakuraLeaf = ObjectType.wrap(Category.Leaf | 4);
-  ObjectType constant SpruceLeaf = ObjectType.wrap(Category.Leaf | 5);
-  ObjectType constant AcaciaLeaf = ObjectType.wrap(Category.Leaf | 6);
-  ObjectType constant DarkOakLeaf = ObjectType.wrap(Category.Leaf | 7);
-  ObjectType constant AzaleaLeaf = ObjectType.wrap(Category.Leaf | 8);
-  ObjectType constant FloweringAzaleaLeaf = ObjectType.wrap(Category.Leaf | 9);
-  ObjectType constant MangroveLeaf = ObjectType.wrap(Category.Leaf | 10);
-  ObjectType constant MangroveRoots = ObjectType.wrap(Category.Leaf | 11);
-  ObjectType constant MuddyMangroveRoots = ObjectType.wrap(Category.Leaf | 12);
-  ObjectType constant AzaleaFlower = ObjectType.wrap(Category.Flower | 0);
-  ObjectType constant BellFlower = ObjectType.wrap(Category.Flower | 1);
-  ObjectType constant DandelionFlower = ObjectType.wrap(Category.Flower | 2);
-  ObjectType constant DaylilyFlower = ObjectType.wrap(Category.Flower | 3);
-  ObjectType constant LilacFlower = ObjectType.wrap(Category.Flower | 4);
-  ObjectType constant RoseFlower = ObjectType.wrap(Category.Flower | 5);
-  ObjectType constant FireFlower = ObjectType.wrap(Category.Flower | 6);
-  ObjectType constant MorninggloryFlower = ObjectType.wrap(Category.Flower | 7);
-  ObjectType constant PeonyFlower = ObjectType.wrap(Category.Flower | 8);
-  ObjectType constant Ultraviolet = ObjectType.wrap(Category.Flower | 9);
-  ObjectType constant SunFlower = ObjectType.wrap(Category.Flower | 10);
-  ObjectType constant FlyTrap = ObjectType.wrap(Category.Flower | 11);
-  ObjectType constant FescueGrass = ObjectType.wrap(Category.Greenery | 0);
-  ObjectType constant SwitchGrass = ObjectType.wrap(Category.Greenery | 1);
-  ObjectType constant VinesBush = ObjectType.wrap(Category.Greenery | 2);
-  ObjectType constant IvyVine = ObjectType.wrap(Category.Greenery | 3);
-  ObjectType constant HempBush = ObjectType.wrap(Category.Greenery | 4);
-  ObjectType constant GoldenMushroom = ObjectType.wrap(Category.Crop | 0);
-  ObjectType constant RedMushroom = ObjectType.wrap(Category.Crop | 1);
-  ObjectType constant CoffeeBush = ObjectType.wrap(Category.Crop | 2);
-  ObjectType constant StrawberryBush = ObjectType.wrap(Category.Crop | 3);
-  ObjectType constant RaspberryBush = ObjectType.wrap(Category.Crop | 4);
-  ObjectType constant Wheat = ObjectType.wrap(Category.Crop | 5);
-  ObjectType constant CottonBush = ObjectType.wrap(Category.Crop | 6);
-  ObjectType constant Pumpkin = ObjectType.wrap(Category.CropBlock | 0);
-  ObjectType constant Melon = ObjectType.wrap(Category.CropBlock | 1);
-  ObjectType constant RedMushroomBlock = ObjectType.wrap(Category.CropBlock | 2);
-  ObjectType constant BrownMushroomBlock = ObjectType.wrap(Category.CropBlock | 3);
-  ObjectType constant MushroomStem = ObjectType.wrap(Category.CropBlock | 4);
-  ObjectType constant BambooBush = ObjectType.wrap(Category.CropBlock | 5);
-  ObjectType constant Cactus = ObjectType.wrap(Category.CropBlock | 6);
-  ObjectType constant Coral = ObjectType.wrap(Category.UnderwaterPlant | 0);
-  ObjectType constant SeaAnemone = ObjectType.wrap(Category.UnderwaterPlant | 1);
-  ObjectType constant Algae = ObjectType.wrap(Category.UnderwaterPlant | 2);
-  ObjectType constant HornCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 0);
-  ObjectType constant FireCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 1);
-  ObjectType constant TubeCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 2);
-  ObjectType constant BubbleCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 3);
-  ObjectType constant BrainCoralBlock = ObjectType.wrap(Category.UnderwaterBlock | 4);
-  ObjectType constant Snow = ObjectType.wrap(Category.MiscBlock | 0);
-  ObjectType constant Ice = ObjectType.wrap(Category.MiscBlock | 1);
-  ObjectType constant Magma = ObjectType.wrap(Category.MiscBlock | 2);
-  ObjectType constant SpiderWeb = ObjectType.wrap(Category.MiscBlock | 3);
-  ObjectType constant Bone = ObjectType.wrap(Category.MiscBlock | 4);
-  ObjectType constant TextSign = ObjectType.wrap(Category.MiscBlock | 5);
-  ObjectType constant AnyPlank = ObjectType.wrap(Category.Plank | 0);
-  ObjectType constant OakPlanks = ObjectType.wrap(Category.Plank | 1);
-  ObjectType constant BirchPlanks = ObjectType.wrap(Category.Plank | 2);
-  ObjectType constant JunglePlanks = ObjectType.wrap(Category.Plank | 3);
-  ObjectType constant SakuraPlanks = ObjectType.wrap(Category.Plank | 4);
-  ObjectType constant SprucePlanks = ObjectType.wrap(Category.Plank | 5);
-  ObjectType constant AcaciaPlanks = ObjectType.wrap(Category.Plank | 6);
-  ObjectType constant DarkOakPlanks = ObjectType.wrap(Category.Plank | 7);
-  ObjectType constant MangrovePlanks = ObjectType.wrap(Category.Plank | 8);
-  ObjectType constant CopperBlock = ObjectType.wrap(Category.OreBlock | 0);
-  ObjectType constant IronBlock = ObjectType.wrap(Category.OreBlock | 1);
-  ObjectType constant GoldBlock = ObjectType.wrap(Category.OreBlock | 2);
-  ObjectType constant DiamondBlock = ObjectType.wrap(Category.OreBlock | 3);
-  ObjectType constant NeptuniumBlock = ObjectType.wrap(Category.OreBlock | 4);
-  ObjectType constant WheatSeed = ObjectType.wrap(Category.Seed | 0);
-  ObjectType constant PumpkinSeed = ObjectType.wrap(Category.Seed | 1);
-  ObjectType constant MelonSeed = ObjectType.wrap(Category.Seed | 2);
-  ObjectType constant OakSapling = ObjectType.wrap(Category.Sapling | 0);
-  ObjectType constant BirchSapling = ObjectType.wrap(Category.Sapling | 1);
-  ObjectType constant JungleSapling = ObjectType.wrap(Category.Sapling | 2);
-  ObjectType constant SakuraSapling = ObjectType.wrap(Category.Sapling | 3);
-  ObjectType constant AcaciaSapling = ObjectType.wrap(Category.Sapling | 4);
-  ObjectType constant SpruceSapling = ObjectType.wrap(Category.Sapling | 5);
-  ObjectType constant DarkOakSapling = ObjectType.wrap(Category.Sapling | 6);
-  ObjectType constant MangroveSapling = ObjectType.wrap(Category.Sapling | 7);
-  ObjectType constant ForceField = ObjectType.wrap(Category.SmartEntityBlock | 0);
-  ObjectType constant Chest = ObjectType.wrap(Category.SmartEntityBlock | 1);
-  ObjectType constant SpawnTile = ObjectType.wrap(Category.SmartEntityBlock | 2);
-  ObjectType constant Bed = ObjectType.wrap(Category.SmartEntityBlock | 3);
-  ObjectType constant Workbench = ObjectType.wrap(Category.Station | 0);
-  ObjectType constant Powerstone = ObjectType.wrap(Category.Station | 1);
-  ObjectType constant Furnace = ObjectType.wrap(Category.Station | 2);
-  ObjectType constant Torch = ObjectType.wrap(Category.MiscPassThrough | 0);
-  ObjectType constant WoodenPick = ObjectType.wrap(Category.Pick | 0);
-  ObjectType constant CopperPick = ObjectType.wrap(Category.Pick | 1);
-  ObjectType constant IronPick = ObjectType.wrap(Category.Pick | 2);
-  ObjectType constant GoldPick = ObjectType.wrap(Category.Pick | 3);
-  ObjectType constant DiamondPick = ObjectType.wrap(Category.Pick | 4);
-  ObjectType constant NeptuniumPick = ObjectType.wrap(Category.Pick | 5);
-  ObjectType constant WoodenAxe = ObjectType.wrap(Category.Axe | 0);
-  ObjectType constant CopperAxe = ObjectType.wrap(Category.Axe | 1);
-  ObjectType constant IronAxe = ObjectType.wrap(Category.Axe | 2);
-  ObjectType constant GoldAxe = ObjectType.wrap(Category.Axe | 3);
-  ObjectType constant DiamondAxe = ObjectType.wrap(Category.Axe | 4);
-  ObjectType constant NeptuniumAxe = ObjectType.wrap(Category.Axe | 5);
-  ObjectType constant WoodenWhacker = ObjectType.wrap(Category.Whacker | 0);
-  ObjectType constant CopperWhacker = ObjectType.wrap(Category.Whacker | 1);
-  ObjectType constant IronWhacker = ObjectType.wrap(Category.Whacker | 2);
-  ObjectType constant WoodenHoe = ObjectType.wrap(Category.Hoe | 0);
-  ObjectType constant GoldBar = ObjectType.wrap(Category.OreBar | 0);
-  ObjectType constant IronBar = ObjectType.wrap(Category.OreBar | 1);
-  ObjectType constant Diamond = ObjectType.wrap(Category.OreBar | 2);
-  ObjectType constant NeptuniumBar = ObjectType.wrap(Category.OreBar | 3);
-  ObjectType constant Bucket = ObjectType.wrap(Category.Bucket | 0);
-  ObjectType constant WaterBucket = ObjectType.wrap(Category.Bucket | 1);
-  ObjectType constant WheatSlop = ObjectType.wrap(Category.Food | 0);
-  ObjectType constant PumpkinSoup = ObjectType.wrap(Category.Food | 1);
-  ObjectType constant MelonSmoothie = ObjectType.wrap(Category.Food | 2);
-  ObjectType constant Battery = ObjectType.wrap(Category.Fuel | 0);
-  ObjectType constant Player = ObjectType.wrap(Category.Player | 0);
-  ObjectType constant Fragment = ObjectType.wrap(Category.SmartEntityNonBlock | 0);
+  ObjectType constant Null = ObjectType.wrap(0);
+  ObjectType constant Air = ObjectType.wrap(1);
+  ObjectType constant Water = ObjectType.wrap(2);
+  ObjectType constant Stone = ObjectType.wrap(3);
+  ObjectType constant Bedrock = ObjectType.wrap(4);
+  ObjectType constant Deepslate = ObjectType.wrap(5);
+  ObjectType constant Granite = ObjectType.wrap(6);
+  ObjectType constant Tuff = ObjectType.wrap(7);
+  ObjectType constant Calcite = ObjectType.wrap(8);
+  ObjectType constant Basalt = ObjectType.wrap(9);
+  ObjectType constant SmoothBasalt = ObjectType.wrap(10);
+  ObjectType constant Andesite = ObjectType.wrap(11);
+  ObjectType constant Diorite = ObjectType.wrap(12);
+  ObjectType constant Cobblestone = ObjectType.wrap(13);
+  ObjectType constant MossyCobblestone = ObjectType.wrap(14);
+  ObjectType constant Obsidian = ObjectType.wrap(15);
+  ObjectType constant Dripstone = ObjectType.wrap(16);
+  ObjectType constant Blackstone = ObjectType.wrap(17);
+  ObjectType constant CobbledDeepslate = ObjectType.wrap(18);
+  ObjectType constant Amethyst = ObjectType.wrap(19);
+  ObjectType constant Glowstone = ObjectType.wrap(20);
+  ObjectType constant Grass = ObjectType.wrap(21);
+  ObjectType constant Dirt = ObjectType.wrap(22);
+  ObjectType constant Moss = ObjectType.wrap(23);
+  ObjectType constant Podzol = ObjectType.wrap(24);
+  ObjectType constant DirtPath = ObjectType.wrap(25);
+  ObjectType constant Mud = ObjectType.wrap(26);
+  ObjectType constant PackedMud = ObjectType.wrap(27);
+  ObjectType constant Farmland = ObjectType.wrap(28);
+  ObjectType constant WetFarmland = ObjectType.wrap(29);
+  ObjectType constant UnrevealedOre = ObjectType.wrap(30);
+  ObjectType constant CoalOre = ObjectType.wrap(31);
+  ObjectType constant CopperOre = ObjectType.wrap(32);
+  ObjectType constant IronOre = ObjectType.wrap(33);
+  ObjectType constant GoldOre = ObjectType.wrap(34);
+  ObjectType constant DiamondOre = ObjectType.wrap(35);
+  ObjectType constant NeptuniumOre = ObjectType.wrap(36);
+  ObjectType constant Gravel = ObjectType.wrap(37);
+  ObjectType constant Sand = ObjectType.wrap(38);
+  ObjectType constant RedSand = ObjectType.wrap(39);
+  ObjectType constant Sandstone = ObjectType.wrap(40);
+  ObjectType constant RedSandstone = ObjectType.wrap(41);
+  ObjectType constant Clay = ObjectType.wrap(42);
+  ObjectType constant AnyTerracotta = ObjectType.wrap(43);
+  ObjectType constant Terracotta = ObjectType.wrap(44);
+  ObjectType constant BrownTerracotta = ObjectType.wrap(45);
+  ObjectType constant OrangeTerracotta = ObjectType.wrap(46);
+  ObjectType constant WhiteTerracotta = ObjectType.wrap(47);
+  ObjectType constant LightGrayTerracotta = ObjectType.wrap(48);
+  ObjectType constant YellowTerracotta = ObjectType.wrap(49);
+  ObjectType constant RedTerracotta = ObjectType.wrap(50);
+  ObjectType constant LightBlueTerracotta = ObjectType.wrap(51);
+  ObjectType constant CyanTerracotta = ObjectType.wrap(52);
+  ObjectType constant BlackTerracotta = ObjectType.wrap(53);
+  ObjectType constant PurpleTerracotta = ObjectType.wrap(54);
+  ObjectType constant BlueTerracotta = ObjectType.wrap(55);
+  ObjectType constant MagentaTerracotta = ObjectType.wrap(56);
+  ObjectType constant AnyLog = ObjectType.wrap(57);
+  ObjectType constant OakLog = ObjectType.wrap(58);
+  ObjectType constant BirchLog = ObjectType.wrap(59);
+  ObjectType constant JungleLog = ObjectType.wrap(60);
+  ObjectType constant SakuraLog = ObjectType.wrap(61);
+  ObjectType constant AcaciaLog = ObjectType.wrap(62);
+  ObjectType constant SpruceLog = ObjectType.wrap(63);
+  ObjectType constant DarkOakLog = ObjectType.wrap(64);
+  ObjectType constant MangroveLog = ObjectType.wrap(65);
+  ObjectType constant AnyLeaf = ObjectType.wrap(66);
+  ObjectType constant OakLeaf = ObjectType.wrap(67);
+  ObjectType constant BirchLeaf = ObjectType.wrap(68);
+  ObjectType constant JungleLeaf = ObjectType.wrap(69);
+  ObjectType constant SakuraLeaf = ObjectType.wrap(70);
+  ObjectType constant SpruceLeaf = ObjectType.wrap(71);
+  ObjectType constant AcaciaLeaf = ObjectType.wrap(72);
+  ObjectType constant DarkOakLeaf = ObjectType.wrap(73);
+  ObjectType constant AzaleaLeaf = ObjectType.wrap(74);
+  ObjectType constant FloweringAzaleaLeaf = ObjectType.wrap(75);
+  ObjectType constant MangroveLeaf = ObjectType.wrap(76);
+  ObjectType constant MangroveRoots = ObjectType.wrap(77);
+  ObjectType constant MuddyMangroveRoots = ObjectType.wrap(78);
+  ObjectType constant AzaleaFlower = ObjectType.wrap(79);
+  ObjectType constant BellFlower = ObjectType.wrap(80);
+  ObjectType constant DandelionFlower = ObjectType.wrap(81);
+  ObjectType constant DaylilyFlower = ObjectType.wrap(82);
+  ObjectType constant LilacFlower = ObjectType.wrap(83);
+  ObjectType constant RoseFlower = ObjectType.wrap(84);
+  ObjectType constant FireFlower = ObjectType.wrap(85);
+  ObjectType constant MorninggloryFlower = ObjectType.wrap(86);
+  ObjectType constant PeonyFlower = ObjectType.wrap(87);
+  ObjectType constant Ultraviolet = ObjectType.wrap(88);
+  ObjectType constant SunFlower = ObjectType.wrap(89);
+  ObjectType constant FlyTrap = ObjectType.wrap(90);
+  ObjectType constant FescueGrass = ObjectType.wrap(91);
+  ObjectType constant SwitchGrass = ObjectType.wrap(92);
+  ObjectType constant VinesBush = ObjectType.wrap(93);
+  ObjectType constant IvyVine = ObjectType.wrap(94);
+  ObjectType constant HempBush = ObjectType.wrap(95);
+  ObjectType constant GoldenMushroom = ObjectType.wrap(96);
+  ObjectType constant RedMushroom = ObjectType.wrap(97);
+  ObjectType constant CoffeeBush = ObjectType.wrap(98);
+  ObjectType constant StrawberryBush = ObjectType.wrap(99);
+  ObjectType constant RaspberryBush = ObjectType.wrap(100);
+  ObjectType constant Wheat = ObjectType.wrap(101);
+  ObjectType constant CottonBush = ObjectType.wrap(102);
+  ObjectType constant Pumpkin = ObjectType.wrap(103);
+  ObjectType constant Melon = ObjectType.wrap(104);
+  ObjectType constant RedMushroomBlock = ObjectType.wrap(105);
+  ObjectType constant BrownMushroomBlock = ObjectType.wrap(106);
+  ObjectType constant MushroomStem = ObjectType.wrap(107);
+  ObjectType constant BambooBush = ObjectType.wrap(108);
+  ObjectType constant Cactus = ObjectType.wrap(109);
+  ObjectType constant Coral = ObjectType.wrap(110);
+  ObjectType constant SeaAnemone = ObjectType.wrap(111);
+  ObjectType constant Algae = ObjectType.wrap(112);
+  ObjectType constant HornCoralBlock = ObjectType.wrap(113);
+  ObjectType constant FireCoralBlock = ObjectType.wrap(114);
+  ObjectType constant TubeCoralBlock = ObjectType.wrap(115);
+  ObjectType constant BubbleCoralBlock = ObjectType.wrap(116);
+  ObjectType constant BrainCoralBlock = ObjectType.wrap(117);
+  ObjectType constant Snow = ObjectType.wrap(118);
+  ObjectType constant Ice = ObjectType.wrap(119);
+  ObjectType constant Magma = ObjectType.wrap(120);
+  ObjectType constant SpiderWeb = ObjectType.wrap(121);
+  ObjectType constant Bone = ObjectType.wrap(122);
+  ObjectType constant TextSign = ObjectType.wrap(123);
+  ObjectType constant AnyPlank = ObjectType.wrap(124);
+  ObjectType constant OakPlanks = ObjectType.wrap(125);
+  ObjectType constant BirchPlanks = ObjectType.wrap(126);
+  ObjectType constant JunglePlanks = ObjectType.wrap(127);
+  ObjectType constant SakuraPlanks = ObjectType.wrap(128);
+  ObjectType constant SprucePlanks = ObjectType.wrap(129);
+  ObjectType constant AcaciaPlanks = ObjectType.wrap(130);
+  ObjectType constant DarkOakPlanks = ObjectType.wrap(131);
+  ObjectType constant MangrovePlanks = ObjectType.wrap(132);
+  ObjectType constant CopperBlock = ObjectType.wrap(133);
+  ObjectType constant IronBlock = ObjectType.wrap(134);
+  ObjectType constant GoldBlock = ObjectType.wrap(135);
+  ObjectType constant DiamondBlock = ObjectType.wrap(136);
+  ObjectType constant NeptuniumBlock = ObjectType.wrap(137);
+  ObjectType constant WheatSeed = ObjectType.wrap(138);
+  ObjectType constant PumpkinSeed = ObjectType.wrap(139);
+  ObjectType constant MelonSeed = ObjectType.wrap(140);
+  ObjectType constant OakSapling = ObjectType.wrap(141);
+  ObjectType constant BirchSapling = ObjectType.wrap(142);
+  ObjectType constant JungleSapling = ObjectType.wrap(143);
+  ObjectType constant SakuraSapling = ObjectType.wrap(144);
+  ObjectType constant AcaciaSapling = ObjectType.wrap(145);
+  ObjectType constant SpruceSapling = ObjectType.wrap(146);
+  ObjectType constant DarkOakSapling = ObjectType.wrap(147);
+  ObjectType constant MangroveSapling = ObjectType.wrap(148);
+  ObjectType constant ForceField = ObjectType.wrap(149);
+  ObjectType constant Chest = ObjectType.wrap(150);
+  ObjectType constant SpawnTile = ObjectType.wrap(151);
+  ObjectType constant Bed = ObjectType.wrap(152);
+  ObjectType constant Workbench = ObjectType.wrap(153);
+  ObjectType constant Powerstone = ObjectType.wrap(154);
+  ObjectType constant Furnace = ObjectType.wrap(155);
+  ObjectType constant Torch = ObjectType.wrap(156);
+  ObjectType constant WoodenPick = ObjectType.wrap(157);
+  ObjectType constant CopperPick = ObjectType.wrap(158);
+  ObjectType constant IronPick = ObjectType.wrap(159);
+  ObjectType constant GoldPick = ObjectType.wrap(160);
+  ObjectType constant DiamondPick = ObjectType.wrap(161);
+  ObjectType constant NeptuniumPick = ObjectType.wrap(162);
+  ObjectType constant WoodenAxe = ObjectType.wrap(163);
+  ObjectType constant CopperAxe = ObjectType.wrap(164);
+  ObjectType constant IronAxe = ObjectType.wrap(165);
+  ObjectType constant GoldAxe = ObjectType.wrap(166);
+  ObjectType constant DiamondAxe = ObjectType.wrap(167);
+  ObjectType constant NeptuniumAxe = ObjectType.wrap(168);
+  ObjectType constant WoodenWhacker = ObjectType.wrap(169);
+  ObjectType constant CopperWhacker = ObjectType.wrap(170);
+  ObjectType constant IronWhacker = ObjectType.wrap(171);
+  ObjectType constant WoodenHoe = ObjectType.wrap(172);
+  ObjectType constant GoldBar = ObjectType.wrap(173);
+  ObjectType constant IronBar = ObjectType.wrap(174);
+  ObjectType constant Diamond = ObjectType.wrap(175);
+  ObjectType constant NeptuniumBar = ObjectType.wrap(176);
+  ObjectType constant Bucket = ObjectType.wrap(177);
+  ObjectType constant WaterBucket = ObjectType.wrap(178);
+  ObjectType constant WheatSlop = ObjectType.wrap(179);
+  ObjectType constant PumpkinSoup = ObjectType.wrap(180);
+  ObjectType constant MelonSmoothie = ObjectType.wrap(181);
+  ObjectType constant Battery = ObjectType.wrap(182);
+  ObjectType constant Player = ObjectType.wrap(183);
+  ObjectType constant Fragment = ObjectType.wrap(184);
 }
 
 // ------------------------------------------------------------
@@ -305,437 +245,171 @@ library ObjectTypeLib {
 
   // Direct Category Checks
 
-  function isNonSolid(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.NonSolid;
-  }
-
-  function isStone(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Stone;
-  }
-
-  function isGemstone(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Gemstone;
-  }
-
-  function isSoil(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Soil;
-  }
-
-  function isOre(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Ore;
-  }
-
-  function isSand(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Sand;
-  }
-
-  function isTerracotta(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Terracotta;
-  }
-
-  function isLog(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Log;
-  }
-
-  function isLeaf(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Leaf;
-  }
-
-  function isFlower(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Flower;
-  }
-
-  function isGreenery(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Greenery;
-  }
-
-  function isCrop(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Crop;
-  }
-
-  function isCropBlock(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.CropBlock;
-  }
-
-  function isUnderwaterPlant(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.UnderwaterPlant;
-  }
-
-  function isUnderwaterBlock(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.UnderwaterBlock;
-  }
-
-  function isMiscBlock(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.MiscBlock;
-  }
-
-  function isPlank(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Plank;
-  }
-
-  function isOreBlock(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.OreBlock;
-  }
-
-  function isSeed(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Seed;
-  }
-
-  function isSapling(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Sapling;
-  }
-
-  function isSmartEntityBlock(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.SmartEntityBlock;
-  }
-
-  function isStation(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Station;
-  }
-
-  function isMiscPassThrough(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.MiscPassThrough;
-  }
-
-  function isPick(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Pick;
-  }
-
-  function isAxe(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Axe;
-  }
-
-  function isHoe(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Hoe;
-  }
-
-  function isWhacker(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Whacker;
-  }
-
-  function isOreBar(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.OreBar;
-  }
-
-  function isBucket(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Bucket;
-  }
-
-  function isFood(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Food;
-  }
-
-  function isFuel(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Fuel;
-  }
-
-  function isPlayer(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.Player;
-  }
-
-  function isSmartEntityNonBlock(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.SmartEntityNonBlock;
-  }
+  function isNonSolid(ObjectType self) internal pure returns (bool) { }
+  function isStone(ObjectType self) internal pure returns (bool) { }
+  function isGemstone(ObjectType self) internal pure returns (bool) { }
+  function isSoil(ObjectType self) internal pure returns (bool) { }
+  function isOre(ObjectType self) internal pure returns (bool) { }
+  function isSand(ObjectType self) internal pure returns (bool) { }
+  function isTerracotta(ObjectType self) internal pure returns (bool) { }
+  function isLog(ObjectType self) internal pure returns (bool) { }
+  function isLeaf(ObjectType self) internal pure returns (bool) { }
+  function isFlower(ObjectType self) internal pure returns (bool) { }
+  function isGreenery(ObjectType self) internal pure returns (bool) { }
+  function isCrop(ObjectType self) internal pure returns (bool) { }
+  function isCropBlock(ObjectType self) internal pure returns (bool) { }
+  function isUnderwaterPlant(ObjectType self) internal pure returns (bool) { }
+  function isUnderwaterBlock(ObjectType self) internal pure returns (bool) { }
+  function isMiscBlock(ObjectType self) internal pure returns (bool) { }
+  function isPlank(ObjectType self) internal pure returns (bool) { }
+  function isOreBlock(ObjectType self) internal pure returns (bool) { }
+  function isSeed(ObjectType self) internal pure returns (bool) { }
+  function isSapling(ObjectType self) internal pure returns (bool) { }
+  function isSmartEntityBlock(ObjectType self) internal pure returns (bool) { }
+  function isStation(ObjectType self) internal pure returns (bool) { }
+  function isMiscPassThrough(ObjectType self) internal pure returns (bool) { }
+  function isPick(ObjectType self) internal pure returns (bool) { }
+  function isAxe(ObjectType self) internal pure returns (bool) { }
+  function isHoe(ObjectType self) internal pure returns (bool) { }
+  function isWhacker(ObjectType self) internal pure returns (bool) { }
+  function isOreBar(ObjectType self) internal pure returns (bool) { }
+  function isBucket(ObjectType self) internal pure returns (bool) { }
+  function isFood(ObjectType self) internal pure returns (bool) { }
+  function isFuel(ObjectType self) internal pure returns (bool) { }
+  function isPlayer(ObjectType self) internal pure returns (bool) { }
+  function isSmartEntityNonBlock(ObjectType self) internal pure returns (bool) { }
 
   // Category getters
-  function getNonSolidTypes() internal pure returns (ObjectType[3] memory) {
-    return [ObjectTypes.Null, ObjectTypes.Air, ObjectTypes.Water];
+  function getNonSolidTypes() internal pure returns (ObjectType[2] memory) {
+    return [ObjectTypes.undefined, ObjectTypes.undefined];
   }
 
-  function getStoneTypes() internal pure returns (ObjectType[16] memory) {
-    return [
-      ObjectTypes.Stone,
-      ObjectTypes.Bedrock,
-      ObjectTypes.Deepslate,
-      ObjectTypes.Granite,
-      ObjectTypes.Tuff,
-      ObjectTypes.Calcite,
-      ObjectTypes.Basalt,
-      ObjectTypes.SmoothBasalt,
-      ObjectTypes.Andesite,
-      ObjectTypes.Diorite,
-      ObjectTypes.Cobblestone,
-      ObjectTypes.MossyCobblestone,
-      ObjectTypes.Obsidian,
-      ObjectTypes.Dripstone,
-      ObjectTypes.Blackstone,
-      ObjectTypes.CobbledDeepslate
-    ];
+  function getStoneTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getGemstoneTypes() internal pure returns (ObjectType[2] memory) {
-    return [ObjectTypes.Amethyst, ObjectTypes.Glowstone];
+  function getGemstoneTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getSoilTypes() internal pure returns (ObjectType[9] memory) {
-    return [
-      ObjectTypes.Grass,
-      ObjectTypes.Dirt,
-      ObjectTypes.Moss,
-      ObjectTypes.Podzol,
-      ObjectTypes.DirtPath,
-      ObjectTypes.Mud,
-      ObjectTypes.PackedMud,
-      ObjectTypes.Farmland,
-      ObjectTypes.WetFarmland
-    ];
+  function getSoilTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getOreTypes() internal pure returns (ObjectType[7] memory) {
-    return [
-      ObjectTypes.UnrevealedOre,
-      ObjectTypes.CoalOre,
-      ObjectTypes.CopperOre,
-      ObjectTypes.IronOre,
-      ObjectTypes.GoldOre,
-      ObjectTypes.DiamondOre,
-      ObjectTypes.NeptuniumOre
-    ];
+  function getOreTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getSandTypes() internal pure returns (ObjectType[6] memory) {
-    return [
-      ObjectTypes.Gravel,
-      ObjectTypes.Sand,
-      ObjectTypes.RedSand,
-      ObjectTypes.Sandstone,
-      ObjectTypes.RedSandstone,
-      ObjectTypes.Clay
-    ];
+  function getSandTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getTerracottaTypes() internal pure returns (ObjectType[14] memory) {
-    return [
-      ObjectTypes.AnyTerracotta,
-      ObjectTypes.Terracotta,
-      ObjectTypes.BrownTerracotta,
-      ObjectTypes.OrangeTerracotta,
-      ObjectTypes.WhiteTerracotta,
-      ObjectTypes.LightGrayTerracotta,
-      ObjectTypes.YellowTerracotta,
-      ObjectTypes.RedTerracotta,
-      ObjectTypes.LightBlueTerracotta,
-      ObjectTypes.CyanTerracotta,
-      ObjectTypes.BlackTerracotta,
-      ObjectTypes.PurpleTerracotta,
-      ObjectTypes.BlueTerracotta,
-      ObjectTypes.MagentaTerracotta
-    ];
+  function getTerracottaTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getLogTypes() internal pure returns (ObjectType[9] memory) {
-    return [
-      ObjectTypes.AnyLog,
-      ObjectTypes.OakLog,
-      ObjectTypes.BirchLog,
-      ObjectTypes.JungleLog,
-      ObjectTypes.SakuraLog,
-      ObjectTypes.AcaciaLog,
-      ObjectTypes.SpruceLog,
-      ObjectTypes.DarkOakLog,
-      ObjectTypes.MangroveLog
-    ];
+  function getLogTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getLeafTypes() internal pure returns (ObjectType[13] memory) {
-    return [
-      ObjectTypes.AnyLeaf,
-      ObjectTypes.OakLeaf,
-      ObjectTypes.BirchLeaf,
-      ObjectTypes.JungleLeaf,
-      ObjectTypes.SakuraLeaf,
-      ObjectTypes.SpruceLeaf,
-      ObjectTypes.AcaciaLeaf,
-      ObjectTypes.DarkOakLeaf,
-      ObjectTypes.AzaleaLeaf,
-      ObjectTypes.FloweringAzaleaLeaf,
-      ObjectTypes.MangroveLeaf,
-      ObjectTypes.MangroveRoots,
-      ObjectTypes.MuddyMangroveRoots
-    ];
+  function getLeafTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getFlowerTypes() internal pure returns (ObjectType[12] memory) {
-    return [
-      ObjectTypes.AzaleaFlower,
-      ObjectTypes.BellFlower,
-      ObjectTypes.DandelionFlower,
-      ObjectTypes.DaylilyFlower,
-      ObjectTypes.LilacFlower,
-      ObjectTypes.RoseFlower,
-      ObjectTypes.FireFlower,
-      ObjectTypes.MorninggloryFlower,
-      ObjectTypes.PeonyFlower,
-      ObjectTypes.Ultraviolet,
-      ObjectTypes.SunFlower,
-      ObjectTypes.FlyTrap
-    ];
+  function getFlowerTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getGreeneryTypes() internal pure returns (ObjectType[5] memory) {
-    return [
-      ObjectTypes.FescueGrass,
-      ObjectTypes.SwitchGrass,
-      ObjectTypes.VinesBush,
-      ObjectTypes.IvyVine,
-      ObjectTypes.HempBush
-    ];
+  function getGreeneryTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getCropTypes() internal pure returns (ObjectType[7] memory) {
-    return [
-      ObjectTypes.GoldenMushroom,
-      ObjectTypes.RedMushroom,
-      ObjectTypes.CoffeeBush,
-      ObjectTypes.StrawberryBush,
-      ObjectTypes.RaspberryBush,
-      ObjectTypes.Wheat,
-      ObjectTypes.CottonBush
-    ];
+  function getCropTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getCropBlockTypes() internal pure returns (ObjectType[7] memory) {
-    return [
-      ObjectTypes.Pumpkin,
-      ObjectTypes.Melon,
-      ObjectTypes.RedMushroomBlock,
-      ObjectTypes.BrownMushroomBlock,
-      ObjectTypes.MushroomStem,
-      ObjectTypes.BambooBush,
-      ObjectTypes.Cactus
-    ];
+  function getCropBlockTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getUnderwaterPlantTypes() internal pure returns (ObjectType[3] memory) {
-    return [ObjectTypes.Coral, ObjectTypes.SeaAnemone, ObjectTypes.Algae];
+  function getUnderwaterPlantTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getUnderwaterBlockTypes() internal pure returns (ObjectType[5] memory) {
-    return [
-      ObjectTypes.HornCoralBlock,
-      ObjectTypes.FireCoralBlock,
-      ObjectTypes.TubeCoralBlock,
-      ObjectTypes.BubbleCoralBlock,
-      ObjectTypes.BrainCoralBlock
-    ];
+  function getUnderwaterBlockTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getMiscBlockTypes() internal pure returns (ObjectType[6] memory) {
-    return [
-      ObjectTypes.Snow,
-      ObjectTypes.Ice,
-      ObjectTypes.Magma,
-      ObjectTypes.SpiderWeb,
-      ObjectTypes.Bone,
-      ObjectTypes.TextSign
-    ];
+  function getMiscBlockTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getPlankTypes() internal pure returns (ObjectType[9] memory) {
-    return [
-      ObjectTypes.AnyPlank,
-      ObjectTypes.OakPlanks,
-      ObjectTypes.BirchPlanks,
-      ObjectTypes.JunglePlanks,
-      ObjectTypes.SakuraPlanks,
-      ObjectTypes.SprucePlanks,
-      ObjectTypes.AcaciaPlanks,
-      ObjectTypes.DarkOakPlanks,
-      ObjectTypes.MangrovePlanks
-    ];
+  function getPlankTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getOreBlockTypes() internal pure returns (ObjectType[5] memory) {
-    return [
-      ObjectTypes.CopperBlock,
-      ObjectTypes.IronBlock,
-      ObjectTypes.GoldBlock,
-      ObjectTypes.DiamondBlock,
-      ObjectTypes.NeptuniumBlock
-    ];
+  function getOreBlockTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getSeedTypes() internal pure returns (ObjectType[3] memory) {
-    return [ObjectTypes.WheatSeed, ObjectTypes.PumpkinSeed, ObjectTypes.MelonSeed];
+  function getSeedTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getSaplingTypes() internal pure returns (ObjectType[8] memory) {
-    return [
-      ObjectTypes.OakSapling,
-      ObjectTypes.BirchSapling,
-      ObjectTypes.JungleSapling,
-      ObjectTypes.SakuraSapling,
-      ObjectTypes.AcaciaSapling,
-      ObjectTypes.SpruceSapling,
-      ObjectTypes.DarkOakSapling,
-      ObjectTypes.MangroveSapling
-    ];
+  function getSaplingTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getSmartEntityBlockTypes() internal pure returns (ObjectType[4] memory) {
-    return [ObjectTypes.ForceField, ObjectTypes.Chest, ObjectTypes.SpawnTile, ObjectTypes.Bed];
+  function getSmartEntityBlockTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getStationTypes() internal pure returns (ObjectType[3] memory) {
-    return [ObjectTypes.Workbench, ObjectTypes.Powerstone, ObjectTypes.Furnace];
+  function getStationTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getMiscPassThroughTypes() internal pure returns (ObjectType[1] memory) {
-    return [ObjectTypes.Torch];
+  function getMiscPassThroughTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getPickTypes() internal pure returns (ObjectType[6] memory) {
-    return [
-      ObjectTypes.WoodenPick,
-      ObjectTypes.CopperPick,
-      ObjectTypes.IronPick,
-      ObjectTypes.GoldPick,
-      ObjectTypes.DiamondPick,
-      ObjectTypes.NeptuniumPick
-    ];
+  function getPickTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getAxeTypes() internal pure returns (ObjectType[6] memory) {
-    return [
-      ObjectTypes.WoodenAxe,
-      ObjectTypes.CopperAxe,
-      ObjectTypes.IronAxe,
-      ObjectTypes.GoldAxe,
-      ObjectTypes.DiamondAxe,
-      ObjectTypes.NeptuniumAxe
-    ];
+  function getAxeTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getHoeTypes() internal pure returns (ObjectType[1] memory) {
-    return [ObjectTypes.WoodenHoe];
+  function getHoeTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getWhackerTypes() internal pure returns (ObjectType[3] memory) {
-    return [ObjectTypes.WoodenWhacker, ObjectTypes.CopperWhacker, ObjectTypes.IronWhacker];
+  function getWhackerTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getOreBarTypes() internal pure returns (ObjectType[4] memory) {
-    return [ObjectTypes.GoldBar, ObjectTypes.IronBar, ObjectTypes.Diamond, ObjectTypes.NeptuniumBar];
+  function getOreBarTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getBucketTypes() internal pure returns (ObjectType[2] memory) {
-    return [ObjectTypes.Bucket, ObjectTypes.WaterBucket];
+  function getBucketTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getFoodTypes() internal pure returns (ObjectType[3] memory) {
-    return [ObjectTypes.WheatSlop, ObjectTypes.PumpkinSoup, ObjectTypes.MelonSmoothie];
+  function getFoodTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getFuelTypes() internal pure returns (ObjectType[1] memory) {
-    return [ObjectTypes.Battery];
+  function getFuelTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getPlayerTypes() internal pure returns (ObjectType[1] memory) {
-    return [ObjectTypes.Player];
+  function getPlayerTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
-  function getSmartEntityNonBlockTypes() internal pure returns (ObjectType[1] memory) {
-    return [ObjectTypes.Fragment];
+  function getSmartEntityNonBlockTypes() internal pure returns (ObjectType[0] memory) {
+    return [];
   }
 
   // Specialized getters
@@ -924,59 +598,6 @@ library ObjectTypeLib {
 
   function isMineable(ObjectType self) internal pure returns (bool) {
     return applyCategoryMask(self, Category.MINEABLE_MASK);
-  }
-
-  function hasAny(ObjectType self) internal pure returns (bool) {
-    return applyCategoryMask(self, Category.HAS_ANY_MASK);
-  }
-
-  function hasExtraDrops(ObjectType self) internal pure returns (bool) {
-    return applyCategoryMask(self, Category.HAS_EXTRA_DROPS_MASK);
-  }
-
-  function hasAxeMultiplier(ObjectType self) internal pure returns (bool) {
-    return applyCategoryMask(self, Category.HAS_AXE_MULTIPLIER_MASK) || self == ObjectTypes.Chest
-      || self == ObjectTypes.Workbench || self == ObjectTypes.SpawnTile || self == ObjectTypes.Bed
-      || self == ObjectTypes.TextSign || self == ObjectTypes.Torch;
-  }
-
-  function hasPickMultiplier(ObjectType self) internal pure returns (bool) {
-    return applyCategoryMask(self, Category.HAS_PICK_MULTIPLIER_MASK) || self == ObjectTypes.Powerstone
-      || self == ObjectTypes.Furnace || self == ObjectTypes.ForceField;
-  }
-
-  function isPassThrough(ObjectType self) internal pure returns (bool) {
-    return applyCategoryMask(self, Category.IS_PASS_THROUGH_MASK);
-  }
-
-  function isGrowable(ObjectType self) internal pure returns (bool) {
-    return applyCategoryMask(self, Category.IS_GROWABLE_MASK);
-  }
-
-  function isUniqueObject(ObjectType self) internal pure returns (bool) {
-    return applyCategoryMask(self, Category.IS_UNIQUE_OBJECT_MASK) || self == ObjectTypes.ForceField
-      || self == ObjectTypes.Bed || self == ObjectTypes.SpawnTile;
-  }
-
-  function isSmartEntity(ObjectType self) internal pure returns (bool) {
-    return applyCategoryMask(self, Category.IS_SMART_ENTITY_MASK);
-  }
-
-  function isTool(ObjectType self) internal pure returns (bool) {
-    return applyCategoryMask(self, Category.IS_TOOL_MASK);
-  }
-
-  function isTillable(ObjectType self) internal pure returns (bool) {
-    return self == ObjectTypes.Dirt || self == ObjectTypes.Grass;
-  }
-
-  function isMachine(ObjectType self) internal pure returns (bool) {
-    return self == ObjectTypes.ForceField;
-  }
-
-  function applyCategoryMask(ObjectType self, uint256 mask) internal pure returns (bool) {
-    uint16 c = category(self);
-    return ((uint256(1) << (c >> OFFSET_BITS)) & mask) != 0;
   }
 
   function matches(ObjectType self, ObjectType other) internal pure returns (bool) {
