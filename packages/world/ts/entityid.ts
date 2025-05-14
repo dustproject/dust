@@ -6,10 +6,11 @@ import { packVec3 } from "./vec3";
 export type EntityId = string; // bytes32 in Solidity
 export type EntityType = number; // bytes1 in Solidity
 
-const ENTITY_TYPE_BITS = 8n;
 const BYTES_32_BITS = 256n;
+const ENTITY_TYPE_BITS = 8n;
+const ENTITY_ID_BITS = BYTES_32_BITS - ENTITY_TYPE_BITS;
 const ADDRESS_BITS = 20n * 8n;
-const COORD_BITS = 96n;
+const VEC3_BITS = 96n;
 
 // Entity Types enum
 // TODO: codegen `EntityId.sol` from this
@@ -28,17 +29,12 @@ function toBytes32Hex(value: bigint): `0x${string}` {
 }
 
 function encode(entityType: EntityType, data: bigint): EntityId {
-  return toBytes32Hex(
-    (BigInt(entityType) << (BYTES_32_BITS - ENTITY_TYPE_BITS)) | data,
-  );
+  return toBytes32Hex((BigInt(entityType) << ENTITY_ID_BITS) | data);
 }
 
 function encodeCoord(entityType: EntityType, coord: Vec3): EntityId {
   const packedCoord = packVec3(coord);
-  return encode(
-    entityType,
-    packedCoord << (BYTES_32_BITS - COORD_BITS - ENTITY_TYPE_BITS),
-  );
+  return encode(entityType, packedCoord << (ENTITY_ID_BITS - VEC3_BITS));
 }
 
 export function encodeBlock(coord: Vec3): EntityId {
@@ -53,6 +49,6 @@ export function encodePlayer(player: string): EntityId {
   const playerBigInt = BigInt(player);
   return encode(
     EntityTypes.Player,
-    playerBigInt << (BYTES_32_BITS - ADDRESS_BITS - ENTITY_TYPE_BITS),
+    playerBigInt << (ENTITY_ID_BITS - ADDRESS_BITS),
   );
 }
