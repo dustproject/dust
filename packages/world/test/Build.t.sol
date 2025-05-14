@@ -27,6 +27,7 @@ import { BUILD_ENERGY_COST, CHUNK_SIZE, MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
+import { NonPassableBlock } from "../src/systems/libraries/MoveLib.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
@@ -221,7 +222,7 @@ contract BuildTest is DustTest {
     setObjectAtCoord(playerCoord + vec3(0, 2, 0), ObjectTypes.Grass);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot move through a non-passable block");
+    vm.expectPartialRevert(NonPassableBlock.selector);
     world.jumpBuild(aliceEntityId, inventorySlot, "");
   }
 

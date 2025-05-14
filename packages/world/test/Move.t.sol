@@ -38,6 +38,8 @@ import { ObjectType } from "../src/ObjectType.sol";
 import { ObjectTypes } from "../src/ObjectType.sol";
 
 import { Vec3, vec3 } from "../src/Vec3.sol";
+
+import { NonPassableBlock } from "../src/systems/libraries/MoveLib.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
@@ -407,13 +409,13 @@ contract MoveTest is DustTest {
     setObjectAtCoord(newCoords[1], ObjectTypes.Dirt);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot move through a non-passable block");
+    vm.expectPartialRevert(NonPassableBlock.selector);
     world.move(aliceEntityId, newCoords);
 
     setObjectAtCoord(newCoords[0] + vec3(0, 1, 0), ObjectTypes.Dirt);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot move through a non-passable block");
+    vm.expectPartialRevert(NonPassableBlock.selector);
     world.move(aliceEntityId, newCoords);
   }
 
