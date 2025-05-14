@@ -12,6 +12,7 @@ const COORD_MASK_96 = (1n << 96n) - 1n; // lower‑96‑bit mask
 const BYTE_MASK = 0xffn; // lower‑8‑bit mask
 
 // Entity Types enum
+// TODO: codegen `EntityId.sol` from this
 const EntityTypes = {
   Incremental: 0x00,
   Player: 0x01,
