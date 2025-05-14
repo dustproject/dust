@@ -15,7 +15,7 @@ const VEC3_BITS = 96n;
 
 // Entity Types enum
 // TODO: codegen `EntityId.sol` from this
-const EntityTypes = {
+export const EntityTypes = {
   Incremental: 0x00,
   Player: 0x01,
   Fragment: 0x02,
@@ -71,4 +71,9 @@ export function decodePlayer(entityId: EntityId): Hex {
   }
   const address = data >> (ENTITY_ID_BITS - ADDRESS_BITS);
   return getAddress(toHex(address, { size: 20 }));
+}
+
+export function decodeEntityType(entityId: EntityId): EntityType {
+  const { entityType } = decode(entityId);
+  return entityType;
 }
