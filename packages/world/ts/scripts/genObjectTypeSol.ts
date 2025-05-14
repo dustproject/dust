@@ -1,4 +1,4 @@
-import { buildBucket } from "../mphf";
+import { type Bucket, buildBucket } from "../mphf";
 import {
   type Category,
   type MetaCategory,
@@ -15,34 +15,31 @@ const constName = (str: string): string =>
     .join("_")
     .toUpperCase();
 
-function renderMetaCategoryMask(categories: Category[]): string {
-  return categories
-    .map((cat) => `(uint256(1) << (${cat} >> OFFSET_BITS))`)
-    .join(" | ");
+const buckets: Record<string, Bucket> = {};
+
+for (const [name, data] of Object.entries(categories)) {
+  const ids = data.objects.map((obj) => objectsByName[obj].id);
+  const bucket = buildBucket(ids);
+  buckets[name] = bucket;
 }
 
-function renderMetaCategoryMaskDefinition(metaCategory: MetaCategory): string {
-  if (!metaCategory.categories) {
-    return "";
+function renderCategoryTable(name: string): string {
+  const table = `${Buffer.from(buckets[name]!.table).toString("hex")}`;
+  return `bytes constant ${constName(name)}_TABLE = hex"${table}";`;
+}
+
+function renderCategoryCheck(name: string): string {
+  const { S, A0, A1, A2, gpack } = buckets[name]!;
+  const tableName = `${constName(name)}_TABLE`;
+  return `
+  function is${name}(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), ${S}, ${A0}, ${A1}, ${A2}, ${gpack});
+    uint16 ref =
+        uint16(uint8(Category.${tableName}[slot * 2])) |
+        (uint16(uint8(Category.${tableName}[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
   }
-
-  return `uint256 constant ${constName(metaCategory.name)}_MASK = ${renderMetaCategoryMask(metaCategory.categories)};`;
-}
-
-function renderMetaCategoryCheck(metaCategory: MetaCategory): string {
-  const categoryCheck =
-    metaCategory.categories &&
-    `applyCategoryMask(self, Category.${constName(metaCategory.name)}_MASK)`;
-
-  const objectCheck = metaCategory.objects
-    ?.map((obj) => `self == ObjectTypes.${obj}`)
-    .join(" || ");
-
-  const condition = [categoryCheck, objectCheck].filter(Boolean).join(" || ");
-
-  return `function ${metaCategory.name}(ObjectType self) internal pure returns (bool) {
-    return ${condition};
-  }`;
+  `;
 }
 
 function renderObjectAmount([objectType, amount]: ObjectAmount): string {
@@ -58,6 +55,7 @@ import { IMachineSystem } from "./codegen/world/IMachineSystem.sol";
 import { ITransferSystem } from "./codegen/world/ITransferSystem.sol";
 import { Direction } from "./codegen/common.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
+import { PerfectHashLib } from "./utils/PerfectHashLib.sol";
 
 type ObjectType is uint16;
 
@@ -67,9 +65,6 @@ struct ObjectAmount {
   uint16 amount;
 }
 
-// 8 category bits (bits 15..8), 8 index bits (bits 7..0)
-uint16 constant OFFSET_BITS = 8;
-uint16 constant CATEGORY_MASK = type(uint16).max << OFFSET_BITS;
 uint16 constant BLOCK_CATEGORY_COUNT = 256 / 2; // 128
 
 // ------------------------------------------------------------
@@ -78,6 +73,10 @@ uint16 constant BLOCK_CATEGORY_COUNT = 256 / 2; // 128
 library Category {
   // Meta Category Masks (fits within uint256; mask bit k set if raw category ID k belongs)
   uint256 constant BLOCK_MASK = uint256(type(uint128).max);
+
+  ${Object.keys(categories)
+    .map((name) => renderCategoryTable(name))
+    .join("\n")}
 }
 
 // ------------------------------------------------------------
@@ -88,7 +87,6 @@ ${objects
   .map((obj, i) => {
     return `  ObjectType constant ${obj.name} = ObjectType.wrap(${i});`;
   })
-
   .join("\n")}
 }
 
@@ -98,15 +96,6 @@ library ObjectTypeLib {
     return ObjectType.unwrap(self);
   }
 
-  /// @dev Extract raw category ID from the top bits
-  function category(ObjectType self) internal pure returns (uint16) {
-    return self.unwrap() & CATEGORY_MASK;
-  }
-
-  function index(ObjectType self) internal pure returns (uint16) {
-    return self.unwrap() & ~CATEGORY_MASK;
-  }
-
   /// @dev True if this is the null object
   function isNull(ObjectType self) internal pure returns (bool) {
     return self.unwrap() == 0;
@@ -114,16 +103,13 @@ library ObjectTypeLib {
 
   /// @dev True if this is any block category
   function isBlock(ObjectType self) internal pure returns (bool) {
-    return (category(self) >> OFFSET_BITS) < BLOCK_CATEGORY_COUNT && !self.isNull();
+    // TODO
+    return  !self.isNull();
   }
 
   // Direct Category Checks
-${Object.entries(categories)
-  .map(
-    ([name, data]) => `
-  function is${name}(ObjectType self) internal pure returns (bool) {
-  }`,
-  )
+${Object.keys(categories)
+  .map((name) => renderCategoryCheck(name))
   .join("")}
 
 // Category getters
@@ -131,7 +117,7 @@ ${Object.entries(categories)
   .map(([name, data]) => {
     const categoryObjects = data.objects;
     return `function get${name}Types() internal pure returns (ObjectType[${categoryObjects.length}] memory) {
-    return [${categoryObjects.map((obj) => `ObjectTypes.${obj.name}`).join(", ")}];
+    return [${categoryObjects.map((obj) => `ObjectTypes.${obj}`).join(", ")}];
   }`;
   })
   .join("\n")}
@@ -294,16 +280,7 @@ ${Object.entries(categories)
     return false;
   }
 
-  // Meta Category Checks
-  function isAny(ObjectType self) internal pure returns (bool) {
-    // Check if:
-    // 1. Index bits are all 0
-    // 2. Category is one that supports "Any" types
-    return self.index() == 0 && applyCategoryMask(self, Category.HAS_ANY_MASK);
-  }
-
   function isMineable(ObjectType self) internal pure returns (bool) {
-    return applyCategoryMask(self, Category.MINEABLE_MASK);
   }
 
   function matches(ObjectType self, ObjectType other) internal pure returns (bool) {
@@ -329,22 +306,3 @@ using ObjectTypeLib for ObjectType global;
 }
 
 console.info(generateObjectTypeSol());
-
-console.error(
-  Object.entries(categories)
-    .map(([name, data]) => renderCategoryLib(name, data))
-    .join("\n"),
-);
-
-function renderCategoryLib(name: string, category: Category): string {
-  const ids = category.objects.map((obj) => objectsByName[obj].id);
-
-  if (ids.length === 0) {
-    return "";
-  }
-  const bucket = buildBucket(ids);
-  return `
-  library ${name}Lib {
-
-  }`;
-}

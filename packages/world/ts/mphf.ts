@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------
    buildBucket(ids)  →  { S, A0,A1,A2, gpack, table }
    --------------------------------------------------------------- */
-type Bucket = {
+export type Bucket = {
   S: number; // #keys (≤128)
   A0: number; // three odd 16-bit multipliers
   A1: number;

@@ -6,6 +6,8 @@ import { Direction } from "./codegen/common.sol";
 import { IMachineSystem } from "./codegen/world/IMachineSystem.sol";
 import { ITransferSystem } from "./codegen/world/ITransferSystem.sol";
 
+import { PerfectHashLib } from "./utils/PerfectHashLib.sol";
+
 type ObjectType is uint16;
 
 // Structs
@@ -14,9 +16,6 @@ struct ObjectAmount {
   uint16 amount;
 }
 
-// 8 category bits (bits 15..8), 8 index bits (bits 7..0)
-uint16 constant OFFSET_BITS = 8;
-uint16 constant CATEGORY_MASK = type(uint16).max << OFFSET_BITS;
 uint16 constant BLOCK_CATEGORY_COUNT = 256 / 2; // 128
 
 // ------------------------------------------------------------
@@ -25,6 +24,40 @@ uint16 constant BLOCK_CATEGORY_COUNT = 256 / 2; // 128
 library Category {
   // Meta Category Masks (fits within uint256; mask bit k set if raw category ID k belongs)
   uint256 constant BLOCK_MASK = uint256(type(uint128).max);
+
+  bytes constant NON_SOLID_TABLE = hex"010000000200";
+  bytes constant STONE_TABLE = hex"11000c0012000f0008000d0000000000000000000000000000000000000000000000000000000000";
+  bytes constant GEMSTONE_TABLE = hex"140013000000";
+  bytes constant SOIL_TABLE = hex"000015001d001a001c00000000001b000000000000000000";
+  bytes constant ORE_TABLE = hex"230000000000000000002400210000000000";
+  bytes constant SAND_TABLE = hex"00002900280000002a00000000000000";
+  bytes constant TERRACOTTA_TABLE = hex"330037003800320000000000360000000000000000000000000000000000000000000000";
+  bytes constant LOG_TABLE = hex"3c00410040003b00000000003f0000000000000000000000";
+  bytes constant LEAF_TABLE = hex"48004d004e00000000004c004b004200000000000000000000000000000000000000";
+  bytes constant FLOWER_TABLE = hex"5700500000005a0053005800540059000000000000000000000000000000";
+  bytes constant GREENERY_TABLE = hex"5f005c005d005e00000000000000";
+  bytes constant CROP_TABLE = hex"650000000000660000000000000000000000";
+  bytes constant CROP_BLOCK_TABLE = hex"000000006d00000067006b006c0000000000";
+  bytes constant UNDERWATER_PLANT_TABLE = hex"70006e0000006f00";
+  bytes constant UNDERWATER_BLOCK_TABLE = hex"7400750000007300000072000000";
+  bytes constant MISC_BLOCK_TABLE = hex"78007b00000000000000790076000000";
+  bytes constant PLANK_TABLE = hex"800000008100000084000000000000000000000000000000";
+  bytes constant ORE_BLOCK_TABLE = hex"8900000087000000850000000000";
+  bytes constant SEED_TABLE = hex"8c00000000008b00";
+  bytes constant SAPLING_TABLE = hex"9200910093008f00940000000000000000000000";
+  bytes constant SMART_ENTITY_BLOCK_TABLE = hex"96000000970000009800";
+  bytes constant STATION_TABLE = hex"9b00990000009a00";
+  bytes constant MISC_PASS_THROUGH_TABLE = hex"9c000000";
+  bytes constant PICK_TABLE = hex"a1000000a2009f000000000000000000";
+  bytes constant AXE_TABLE = hex"a80000000000a5000000000000000000";
+  bytes constant HOE_TABLE = hex"ac000000";
+  bytes constant WHACKER_TABLE = hex"0000a9000000ab00";
+  bytes constant ORE_BAR_TABLE = hex"b00000000000ad000000";
+  bytes constant BUCKET_TABLE = hex"b20000000000";
+  bytes constant FOOD_TABLE = hex"b500000000000000";
+  bytes constant FUEL_TABLE = hex"b6000000";
+  bytes constant PLAYER_TABLE = hex"b7000000";
+  bytes constant SMART_ENTITY_NON_BLOCK_TABLE = hex"b8000000";
 }
 
 // ------------------------------------------------------------
@@ -224,15 +257,6 @@ library ObjectTypeLib {
     return ObjectType.unwrap(self);
   }
 
-  /// @dev Extract raw category ID from the top bits
-  function category(ObjectType self) internal pure returns (uint16) {
-    return self.unwrap() & CATEGORY_MASK;
-  }
-
-  function index(ObjectType self) internal pure returns (uint16) {
-    return self.unwrap() & ~CATEGORY_MASK;
-  }
-
   /// @dev True if this is the null object
   function isNull(ObjectType self) internal pure returns (bool) {
     return self.unwrap() == 0;
@@ -240,176 +264,530 @@ library ObjectTypeLib {
 
   /// @dev True if this is any block category
   function isBlock(ObjectType self) internal pure returns (bool) {
-    return (category(self) >> OFFSET_BITS) < BLOCK_CATEGORY_COUNT && !self.isNull();
+    // TODO
+    return !self.isNull();
   }
 
   // Direct Category Checks
 
-  function isNonSolid(ObjectType self) internal pure returns (bool) { }
-  function isStone(ObjectType self) internal pure returns (bool) { }
-  function isGemstone(ObjectType self) internal pure returns (bool) { }
-  function isSoil(ObjectType self) internal pure returns (bool) { }
-  function isOre(ObjectType self) internal pure returns (bool) { }
-  function isSand(ObjectType self) internal pure returns (bool) { }
-  function isTerracotta(ObjectType self) internal pure returns (bool) { }
-  function isLog(ObjectType self) internal pure returns (bool) { }
-  function isLeaf(ObjectType self) internal pure returns (bool) { }
-  function isFlower(ObjectType self) internal pure returns (bool) { }
-  function isGreenery(ObjectType self) internal pure returns (bool) { }
-  function isCrop(ObjectType self) internal pure returns (bool) { }
-  function isCropBlock(ObjectType self) internal pure returns (bool) { }
-  function isUnderwaterPlant(ObjectType self) internal pure returns (bool) { }
-  function isUnderwaterBlock(ObjectType self) internal pure returns (bool) { }
-  function isMiscBlock(ObjectType self) internal pure returns (bool) { }
-  function isPlank(ObjectType self) internal pure returns (bool) { }
-  function isOreBlock(ObjectType self) internal pure returns (bool) { }
-  function isSeed(ObjectType self) internal pure returns (bool) { }
-  function isSapling(ObjectType self) internal pure returns (bool) { }
-  function isSmartEntityBlock(ObjectType self) internal pure returns (bool) { }
-  function isStation(ObjectType self) internal pure returns (bool) { }
-  function isMiscPassThrough(ObjectType self) internal pure returns (bool) { }
-  function isPick(ObjectType self) internal pure returns (bool) { }
-  function isAxe(ObjectType self) internal pure returns (bool) { }
-  function isHoe(ObjectType self) internal pure returns (bool) { }
-  function isWhacker(ObjectType self) internal pure returns (bool) { }
-  function isOreBar(ObjectType self) internal pure returns (bool) { }
-  function isBucket(ObjectType self) internal pure returns (bool) { }
-  function isFood(ObjectType self) internal pure returns (bool) { }
-  function isFuel(ObjectType self) internal pure returns (bool) { }
-  function isPlayer(ObjectType self) internal pure returns (bool) { }
-  function isSmartEntityNonBlock(ObjectType self) internal pure returns (bool) { }
+  function isNonSolid(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 3, 25899, 34697, 53025, 17);
+    uint16 ref =
+      uint16(uint8(Category.NON_SOLID_TABLE[slot * 2])) | (uint16(uint8(Category.NON_SOLID_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isStone(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 20, 60515, 52903, 713, 833293058076);
+    uint16 ref =
+      uint16(uint8(Category.STONE_TABLE[slot * 2])) | (uint16(uint8(Category.STONE_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isGemstone(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 3, 63499, 51099, 28249, 34);
+    uint16 ref =
+      uint16(uint8(Category.GEMSTONE_TABLE[slot * 2])) | (uint16(uint8(Category.GEMSTONE_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isSoil(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 12, 59395, 40229, 59647, 14681269);
+    uint16 ref = uint16(uint8(Category.SOIL_TABLE[slot * 2])) | (uint16(uint8(Category.SOIL_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isOre(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 9, 30015, 14597, 58253, 197504);
+    uint16 ref = uint16(uint8(Category.ORE_TABLE[slot * 2])) | (uint16(uint8(Category.ORE_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isSand(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 8, 24639, 27365, 56525, 264);
+    uint16 ref = uint16(uint8(Category.SAND_TABLE[slot * 2])) | (uint16(uint8(Category.SAND_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isTerracotta(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 18, 45187, 20439, 55971, 34443627540);
+    uint16 ref =
+      uint16(uint8(Category.TERRACOTTA_TABLE[slot * 2])) | (uint16(uint8(Category.TERRACOTTA_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isLog(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 12, 46667, 21335, 62653, 7651328);
+    uint16 ref = uint16(uint8(Category.LOG_TABLE[slot * 2])) | (uint16(uint8(Category.LOG_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isLeaf(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 17, 23121, 1295, 31393, 12935497508);
+    uint16 ref = uint16(uint8(Category.LEAF_TABLE[slot * 2])) | (uint16(uint8(Category.LEAF_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isFlower(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 15, 55723, 49669, 31423, 3379974);
+    uint16 ref =
+      uint16(uint8(Category.FLOWER_TABLE[slot * 2])) | (uint16(uint8(Category.FLOWER_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isGreenery(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 7, 11031, 60349, 22229, 96);
+    uint16 ref =
+      uint16(uint8(Category.GREENERY_TABLE[slot * 2])) | (uint16(uint8(Category.GREENERY_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isCrop(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 9, 43361, 16703, 44307, 48);
+    uint16 ref = uint16(uint8(Category.CROP_TABLE[slot * 2])) | (uint16(uint8(Category.CROP_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isCropBlock(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 9, 34219, 45475, 34399, 39945);
+    uint16 ref =
+      uint16(uint8(Category.CROP_BLOCK_TABLE[slot * 2])) | (uint16(uint8(Category.CROP_BLOCK_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isUnderwaterPlant(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 4, 42141, 51705, 58735, 200);
+    uint16 ref = uint16(uint8(Category.UNDERWATER_PLANT_TABLE[slot * 2]))
+      | (uint16(uint8(Category.UNDERWATER_PLANT_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isUnderwaterBlock(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 7, 9173, 28889, 32039, 2063);
+    uint16 ref = uint16(uint8(Category.UNDERWATER_BLOCK_TABLE[slot * 2]))
+      | (uint16(uint8(Category.UNDERWATER_BLOCK_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isMiscBlock(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 8, 38907, 63159, 15229, 60652);
+    uint16 ref =
+      uint16(uint8(Category.MISC_BLOCK_TABLE[slot * 2])) | (uint16(uint8(Category.MISC_BLOCK_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isPlank(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 12, 44331, 1461, 62483, 8);
+    uint16 ref =
+      uint16(uint8(Category.PLANK_TABLE[slot * 2])) | (uint16(uint8(Category.PLANK_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isOreBlock(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 7, 34897, 3733, 62365, 2);
+    uint16 ref =
+      uint16(uint8(Category.ORE_BLOCK_TABLE[slot * 2])) | (uint16(uint8(Category.ORE_BLOCK_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isSeed(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 4, 51239, 18021, 49973, 45);
+    uint16 ref = uint16(uint8(Category.SEED_TABLE[slot * 2])) | (uint16(uint8(Category.SEED_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isSapling(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 10, 16433, 26977, 38719, 131873);
+    uint16 ref =
+      uint16(uint8(Category.SAPLING_TABLE[slot * 2])) | (uint16(uint8(Category.SAPLING_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isSmartEntityBlock(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 5, 11977, 63989, 43031, 18);
+    uint16 ref = uint16(uint8(Category.SMART_ENTITY_BLOCK_TABLE[slot * 2]))
+      | (uint16(uint8(Category.SMART_ENTITY_BLOCK_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isStation(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 4, 65431, 45793, 23811, 163);
+    uint16 ref =
+      uint16(uint8(Category.STATION_TABLE[slot * 2])) | (uint16(uint8(Category.STATION_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isMiscPassThrough(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 2, 21771, 58883, 7135, 0);
+    uint16 ref = uint16(uint8(Category.MISC_PASS_THROUGH_TABLE[slot * 2]))
+      | (uint16(uint8(Category.MISC_PASS_THROUGH_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isPick(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 8, 57105, 50375, 48315, 4225);
+    uint16 ref = uint16(uint8(Category.PICK_TABLE[slot * 2])) | (uint16(uint8(Category.PICK_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isAxe(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 8, 8785, 33995, 31787, 49152);
+    uint16 ref = uint16(uint8(Category.AXE_TABLE[slot * 2])) | (uint16(uint8(Category.AXE_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isHoe(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 2, 11007, 49579, 58121, 0);
+    uint16 ref = uint16(uint8(Category.HOE_TABLE[slot * 2])) | (uint16(uint8(Category.HOE_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isWhacker(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 4, 8839, 61323, 37211, 44);
+    uint16 ref =
+      uint16(uint8(Category.WHACKER_TABLE[slot * 2])) | (uint16(uint8(Category.WHACKER_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isOreBar(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 5, 2723, 64471, 56059, 12);
+    uint16 ref =
+      uint16(uint8(Category.ORE_BAR_TABLE[slot * 2])) | (uint16(uint8(Category.ORE_BAR_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isBucket(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 3, 11741, 41265, 61961, 0);
+    uint16 ref =
+      uint16(uint8(Category.BUCKET_TABLE[slot * 2])) | (uint16(uint8(Category.BUCKET_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isFood(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 4, 2781, 22611, 41139, 0);
+    uint16 ref = uint16(uint8(Category.FOOD_TABLE[slot * 2])) | (uint16(uint8(Category.FOOD_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isFuel(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 2, 20125, 59095, 1449, 0);
+    uint16 ref = uint16(uint8(Category.FUEL_TABLE[slot * 2])) | (uint16(uint8(Category.FUEL_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isPlayer(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 2, 43639, 58763, 11931, 1);
+    uint16 ref =
+      uint16(uint8(Category.PLAYER_TABLE[slot * 2])) | (uint16(uint8(Category.PLAYER_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
+
+  function isSmartEntityNonBlock(ObjectType self) internal pure returns (bool) {
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 2, 53175, 5149, 23027, 0);
+    uint16 ref = uint16(uint8(Category.SMART_ENTITY_NON_BLOCK_TABLE[slot * 2]))
+      | (uint16(uint8(Category.SMART_ENTITY_NON_BLOCK_TABLE[slot * 2 + 1])) << 8);
+    return ref == self.unwrap();
+  }
 
   // Category getters
   function getNonSolidTypes() internal pure returns (ObjectType[2] memory) {
-    return [ObjectTypes.undefined, ObjectTypes.undefined];
+    return [ObjectTypes.Air, ObjectTypes.Water];
   }
 
-  function getStoneTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getStoneTypes() internal pure returns (ObjectType[16] memory) {
+    return [
+      ObjectTypes.Stone,
+      ObjectTypes.Bedrock,
+      ObjectTypes.Deepslate,
+      ObjectTypes.Granite,
+      ObjectTypes.Tuff,
+      ObjectTypes.Calcite,
+      ObjectTypes.Basalt,
+      ObjectTypes.SmoothBasalt,
+      ObjectTypes.Andesite,
+      ObjectTypes.Diorite,
+      ObjectTypes.Cobblestone,
+      ObjectTypes.MossyCobblestone,
+      ObjectTypes.Obsidian,
+      ObjectTypes.Dripstone,
+      ObjectTypes.Blackstone,
+      ObjectTypes.CobbledDeepslate
+    ];
   }
 
-  function getGemstoneTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getGemstoneTypes() internal pure returns (ObjectType[2] memory) {
+    return [ObjectTypes.Amethyst, ObjectTypes.Glowstone];
   }
 
-  function getSoilTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getSoilTypes() internal pure returns (ObjectType[9] memory) {
+    return [
+      ObjectTypes.Grass,
+      ObjectTypes.Dirt,
+      ObjectTypes.Moss,
+      ObjectTypes.Podzol,
+      ObjectTypes.DirtPath,
+      ObjectTypes.Mud,
+      ObjectTypes.PackedMud,
+      ObjectTypes.Farmland,
+      ObjectTypes.WetFarmland
+    ];
   }
 
-  function getOreTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getOreTypes() internal pure returns (ObjectType[7] memory) {
+    return [
+      ObjectTypes.UnrevealedOre,
+      ObjectTypes.CoalOre,
+      ObjectTypes.CopperOre,
+      ObjectTypes.IronOre,
+      ObjectTypes.GoldOre,
+      ObjectTypes.DiamondOre,
+      ObjectTypes.NeptuniumOre
+    ];
   }
 
-  function getSandTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getSandTypes() internal pure returns (ObjectType[6] memory) {
+    return [
+      ObjectTypes.Gravel,
+      ObjectTypes.Sand,
+      ObjectTypes.RedSand,
+      ObjectTypes.Sandstone,
+      ObjectTypes.RedSandstone,
+      ObjectTypes.Clay
+    ];
   }
 
-  function getTerracottaTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getTerracottaTypes() internal pure returns (ObjectType[14] memory) {
+    return [
+      ObjectTypes.AnyTerracotta,
+      ObjectTypes.Terracotta,
+      ObjectTypes.BrownTerracotta,
+      ObjectTypes.OrangeTerracotta,
+      ObjectTypes.WhiteTerracotta,
+      ObjectTypes.LightGrayTerracotta,
+      ObjectTypes.YellowTerracotta,
+      ObjectTypes.RedTerracotta,
+      ObjectTypes.LightBlueTerracotta,
+      ObjectTypes.CyanTerracotta,
+      ObjectTypes.BlackTerracotta,
+      ObjectTypes.PurpleTerracotta,
+      ObjectTypes.BlueTerracotta,
+      ObjectTypes.MagentaTerracotta
+    ];
   }
 
-  function getLogTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getLogTypes() internal pure returns (ObjectType[9] memory) {
+    return [
+      ObjectTypes.AnyLog,
+      ObjectTypes.OakLog,
+      ObjectTypes.BirchLog,
+      ObjectTypes.JungleLog,
+      ObjectTypes.SakuraLog,
+      ObjectTypes.AcaciaLog,
+      ObjectTypes.SpruceLog,
+      ObjectTypes.DarkOakLog,
+      ObjectTypes.MangroveLog
+    ];
   }
 
-  function getLeafTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getLeafTypes() internal pure returns (ObjectType[13] memory) {
+    return [
+      ObjectTypes.AnyLeaf,
+      ObjectTypes.OakLeaf,
+      ObjectTypes.BirchLeaf,
+      ObjectTypes.JungleLeaf,
+      ObjectTypes.SakuraLeaf,
+      ObjectTypes.SpruceLeaf,
+      ObjectTypes.AcaciaLeaf,
+      ObjectTypes.DarkOakLeaf,
+      ObjectTypes.AzaleaLeaf,
+      ObjectTypes.FloweringAzaleaLeaf,
+      ObjectTypes.MangroveLeaf,
+      ObjectTypes.MangroveRoots,
+      ObjectTypes.MuddyMangroveRoots
+    ];
   }
 
-  function getFlowerTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getFlowerTypes() internal pure returns (ObjectType[12] memory) {
+    return [
+      ObjectTypes.AzaleaFlower,
+      ObjectTypes.BellFlower,
+      ObjectTypes.DandelionFlower,
+      ObjectTypes.DaylilyFlower,
+      ObjectTypes.LilacFlower,
+      ObjectTypes.RoseFlower,
+      ObjectTypes.FireFlower,
+      ObjectTypes.MorninggloryFlower,
+      ObjectTypes.PeonyFlower,
+      ObjectTypes.Ultraviolet,
+      ObjectTypes.SunFlower,
+      ObjectTypes.FlyTrap
+    ];
   }
 
-  function getGreeneryTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getGreeneryTypes() internal pure returns (ObjectType[5] memory) {
+    return [
+      ObjectTypes.FescueGrass,
+      ObjectTypes.SwitchGrass,
+      ObjectTypes.VinesBush,
+      ObjectTypes.IvyVine,
+      ObjectTypes.HempBush
+    ];
   }
 
-  function getCropTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getCropTypes() internal pure returns (ObjectType[7] memory) {
+    return [
+      ObjectTypes.GoldenMushroom,
+      ObjectTypes.RedMushroom,
+      ObjectTypes.CoffeeBush,
+      ObjectTypes.StrawberryBush,
+      ObjectTypes.RaspberryBush,
+      ObjectTypes.Wheat,
+      ObjectTypes.CottonBush
+    ];
   }
 
-  function getCropBlockTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getCropBlockTypes() internal pure returns (ObjectType[7] memory) {
+    return [
+      ObjectTypes.Pumpkin,
+      ObjectTypes.Melon,
+      ObjectTypes.RedMushroomBlock,
+      ObjectTypes.BrownMushroomBlock,
+      ObjectTypes.MushroomStem,
+      ObjectTypes.BambooBush,
+      ObjectTypes.Cactus
+    ];
   }
 
-  function getUnderwaterPlantTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getUnderwaterPlantTypes() internal pure returns (ObjectType[3] memory) {
+    return [ObjectTypes.Coral, ObjectTypes.SeaAnemone, ObjectTypes.Algae];
   }
 
-  function getUnderwaterBlockTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getUnderwaterBlockTypes() internal pure returns (ObjectType[5] memory) {
+    return [
+      ObjectTypes.HornCoralBlock,
+      ObjectTypes.FireCoralBlock,
+      ObjectTypes.TubeCoralBlock,
+      ObjectTypes.BubbleCoralBlock,
+      ObjectTypes.BrainCoralBlock
+    ];
   }
 
-  function getMiscBlockTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getMiscBlockTypes() internal pure returns (ObjectType[6] memory) {
+    return [
+      ObjectTypes.Snow,
+      ObjectTypes.Ice,
+      ObjectTypes.Magma,
+      ObjectTypes.SpiderWeb,
+      ObjectTypes.Bone,
+      ObjectTypes.TextSign
+    ];
   }
 
-  function getPlankTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getPlankTypes() internal pure returns (ObjectType[9] memory) {
+    return [
+      ObjectTypes.AnyPlank,
+      ObjectTypes.OakPlanks,
+      ObjectTypes.BirchPlanks,
+      ObjectTypes.JunglePlanks,
+      ObjectTypes.SakuraPlanks,
+      ObjectTypes.SprucePlanks,
+      ObjectTypes.AcaciaPlanks,
+      ObjectTypes.DarkOakPlanks,
+      ObjectTypes.MangrovePlanks
+    ];
   }
 
-  function getOreBlockTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getOreBlockTypes() internal pure returns (ObjectType[5] memory) {
+    return [
+      ObjectTypes.CopperBlock,
+      ObjectTypes.IronBlock,
+      ObjectTypes.GoldBlock,
+      ObjectTypes.DiamondBlock,
+      ObjectTypes.NeptuniumBlock
+    ];
   }
 
-  function getSeedTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getSeedTypes() internal pure returns (ObjectType[3] memory) {
+    return [ObjectTypes.WheatSeed, ObjectTypes.PumpkinSeed, ObjectTypes.MelonSeed];
   }
 
-  function getSaplingTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getSaplingTypes() internal pure returns (ObjectType[8] memory) {
+    return [
+      ObjectTypes.OakSapling,
+      ObjectTypes.BirchSapling,
+      ObjectTypes.JungleSapling,
+      ObjectTypes.SakuraSapling,
+      ObjectTypes.AcaciaSapling,
+      ObjectTypes.SpruceSapling,
+      ObjectTypes.DarkOakSapling,
+      ObjectTypes.MangroveSapling
+    ];
   }
 
-  function getSmartEntityBlockTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getSmartEntityBlockTypes() internal pure returns (ObjectType[4] memory) {
+    return [ObjectTypes.ForceField, ObjectTypes.Chest, ObjectTypes.SpawnTile, ObjectTypes.Bed];
   }
 
-  function getStationTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getStationTypes() internal pure returns (ObjectType[3] memory) {
+    return [ObjectTypes.Workbench, ObjectTypes.Powerstone, ObjectTypes.Furnace];
   }
 
-  function getMiscPassThroughTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getMiscPassThroughTypes() internal pure returns (ObjectType[1] memory) {
+    return [ObjectTypes.Torch];
   }
 
-  function getPickTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getPickTypes() internal pure returns (ObjectType[6] memory) {
+    return [
+      ObjectTypes.WoodenPick,
+      ObjectTypes.CopperPick,
+      ObjectTypes.IronPick,
+      ObjectTypes.GoldPick,
+      ObjectTypes.DiamondPick,
+      ObjectTypes.NeptuniumPick
+    ];
   }
 
-  function getAxeTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getAxeTypes() internal pure returns (ObjectType[6] memory) {
+    return [
+      ObjectTypes.WoodenAxe,
+      ObjectTypes.CopperAxe,
+      ObjectTypes.IronAxe,
+      ObjectTypes.GoldAxe,
+      ObjectTypes.DiamondAxe,
+      ObjectTypes.NeptuniumAxe
+    ];
   }
 
-  function getHoeTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getHoeTypes() internal pure returns (ObjectType[1] memory) {
+    return [ObjectTypes.WoodenHoe];
   }
 
-  function getWhackerTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getWhackerTypes() internal pure returns (ObjectType[3] memory) {
+    return [ObjectTypes.WoodenWhacker, ObjectTypes.CopperWhacker, ObjectTypes.IronWhacker];
   }
 
-  function getOreBarTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getOreBarTypes() internal pure returns (ObjectType[4] memory) {
+    return [ObjectTypes.GoldBar, ObjectTypes.IronBar, ObjectTypes.Diamond, ObjectTypes.NeptuniumBar];
   }
 
-  function getBucketTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getBucketTypes() internal pure returns (ObjectType[2] memory) {
+    return [ObjectTypes.Bucket, ObjectTypes.WaterBucket];
   }
 
-  function getFoodTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getFoodTypes() internal pure returns (ObjectType[3] memory) {
+    return [ObjectTypes.WheatSlop, ObjectTypes.PumpkinSoup, ObjectTypes.MelonSmoothie];
   }
 
-  function getFuelTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getFuelTypes() internal pure returns (ObjectType[1] memory) {
+    return [ObjectTypes.Battery];
   }
 
-  function getPlayerTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getPlayerTypes() internal pure returns (ObjectType[1] memory) {
+    return [ObjectTypes.Player];
   }
 
-  function getSmartEntityNonBlockTypes() internal pure returns (ObjectType[0] memory) {
-    return [];
+  function getSmartEntityNonBlockTypes() internal pure returns (ObjectType[1] memory) {
+    return [ObjectTypes.Fragment];
   }
 
   // Specialized getters
@@ -588,17 +966,7 @@ library ObjectTypeLib {
     return false;
   }
 
-  // Meta Category Checks
-  function isAny(ObjectType self) internal pure returns (bool) {
-    // Check if:
-    // 1. Index bits are all 0
-    // 2. Category is one that supports "Any" types
-    return self.index() == 0 && applyCategoryMask(self, Category.HAS_ANY_MASK);
-  }
-
-  function isMineable(ObjectType self) internal pure returns (bool) {
-    return applyCategoryMask(self, Category.MINEABLE_MASK);
-  }
+  function isMineable(ObjectType self) internal pure returns (bool) { }
 
   function matches(ObjectType self, ObjectType other) internal pure returns (bool) {
     if (self.isAny()) {
