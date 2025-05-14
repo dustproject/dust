@@ -56,7 +56,7 @@ export function encodePlayer(player: Hex): EntityId {
   );
 }
 
-export function getPosition(entityId: EntityId): Vec3 {
+export function decodePosition(entityId: EntityId): Vec3 {
   const { entityType, data } = decode(entityId);
   if (entityType === EntityTypes.Block || entityType === EntityTypes.Fragment) {
     return unpackVec3(data >> (ENTITY_ID_BITS - VEC3_BITS));
@@ -64,7 +64,7 @@ export function getPosition(entityId: EntityId): Vec3 {
   throw new Error("Entity is not a block or fragment");
 }
 
-export function getPlayerAddress(entityId: EntityId): Hex {
+export function decodePlayer(entityId: EntityId): Hex {
   const { entityType, data } = decode(entityId);
   if (entityType !== EntityTypes.Player) {
     throw new Error("Entity is not a player");
