@@ -1,4 +1,3 @@
-import { AccountButton, useSessionClient } from "@latticexyz/entrykit/internal";
 import {
   type AppRpcSchema,
   getMessagePortRpcClient,
@@ -6,12 +5,13 @@ import {
 } from "dustkit/internal";
 import { useEffect, useRef } from "react";
 import type { SocketRpcClient } from "viem/utils";
-import { getWorldAddress } from "./common";
-import { createClientRpcServer } from "./createClientRpcServer";
+import { useAccount } from "wagmi";
+import { useClientRpcServer } from "./useClientRpcServer";
 
 export function AppPane() {
-  const { data: sessionClient } = useSessionClient();
+  const { address: userAddress } = useAccount();
   const rpcClientRef = useRef<SocketRpcClient<MessagePort> | null>(null);
+  useClientRpcServer();
 
   useEffect(() => {
     return () => {
@@ -22,17 +22,16 @@ export function AppPane() {
     };
   }, []);
 
-  useEffect(
-    () =>
-      createClientRpcServer({ sessionClient, worldAddress: getWorldAddress() }),
-    [sessionClient],
-  );
-
   return (
     <iframe
       title="DustKit app"
       src={import.meta.env.VITE_DUSTKIT_APP_URL}
       onLoad={async (event) => {
+        if (!userAddress) {
+          console.info("no user address, skipping app transport");
+          return;
+        }
+
         console.info("setting up app transport");
         const rpcClient = await getMessagePortRpcClient(
           event.currentTarget.contentWindow!,
@@ -47,6 +46,7 @@ export function AppPane() {
               name: "Playground",
               startUrl: "/",
             },
+            userAddress,
           },
         });
         console.info("got hello reply", res);

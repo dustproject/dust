@@ -15,10 +15,25 @@ export function Game() {
         Connector client {sessionClientStatus} for chain{" "}
         {sessionClient?.chain.id} (uid: {sessionClient?.uid})
       </p>
-      <button type="button" onClick={() => setAppOpen(!appOpen)}>
-        {appOpen ? "Close App" : "Open App"}
-      </button>
-      {appOpen ? <AppPane /> : null}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+          width: "fit-content",
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setAppOpen(!appOpen)}
+          style={{ width: "fit-content" }}
+        >
+          {appOpen ? "Close App" : "Open App"}
+        </button>
+        <div style={{ scale: appOpen ? "100%" : 0 }}>
+          <AppPane />
+        </div>
+      </div>
     </div>
   );
 }

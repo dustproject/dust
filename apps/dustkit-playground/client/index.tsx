@@ -1,13 +1,13 @@
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
-import { App } from "./App";
+import { Game } from "./Game";
 import { Providers } from "./Providers";
 
 const root = ReactDOM.createRoot(document.querySelector("#react-root")!);
 root.render(
   <StrictMode>
     <Providers>
-      <App />
+      <Game />
     </Providers>
   </StrictMode>,
 );
