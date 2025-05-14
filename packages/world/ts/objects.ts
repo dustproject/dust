@@ -333,7 +333,7 @@ export interface ObjectDefinition {
   terrainId?: number;
   mass?: bigint;
   energy?: bigint;
-  seedEnergy?: bigint;
+  growableEnergy?: bigint;
   timeToGrow?: bigint;
   sapling?: ObjectName;
   crop?: ObjectName;
@@ -567,19 +567,19 @@ export const categoryObjects: {
   Seed: [
     {
       name: "WheatSeed",
-      seedEnergy: 4300000000000000n,
+      growableEnergy: 4300000000000000n,
       timeToGrow: 900n,
       crop: "Wheat",
     },
     {
       name: "PumpkinSeed",
-      seedEnergy: 34300000000000000n,
+      growableEnergy: 34300000000000000n,
       timeToGrow: 3600n,
       crop: "Pumpkin",
     },
     {
       name: "MelonSeed",
-      seedEnergy: 34300000000000000n,
+      growableEnergy: 34300000000000000n,
       timeToGrow: 3600n,
       crop: "Melon",
     },
@@ -587,42 +587,42 @@ export const categoryObjects: {
   Sapling: [
     {
       name: "OakSapling",
-      seedEnergy: 148000000000000000n,
+      growableEnergy: 148000000000000000n,
       timeToGrow: 345600n,
     },
     {
       name: "BirchSapling",
-      seedEnergy: 139000000000000000n,
+      growableEnergy: 139000000000000000n,
       timeToGrow: 345600n,
     },
     {
       name: "JungleSapling",
-      seedEnergy: 300000000000000000n,
+      growableEnergy: 300000000000000000n,
       timeToGrow: 345600n,
     },
     {
       name: "SakuraSapling",
-      seedEnergy: 187000000000000000n,
+      growableEnergy: 187000000000000000n,
       timeToGrow: 345600n,
     },
     {
       name: "AcaciaSapling",
-      seedEnergy: 158000000000000000n,
+      growableEnergy: 158000000000000000n,
       timeToGrow: 345600n,
     },
     {
       name: "SpruceSapling",
-      seedEnergy: 256000000000000000n,
+      growableEnergy: 256000000000000000n,
       timeToGrow: 345600n,
     },
     {
       name: "DarkOakSapling",
-      seedEnergy: 202000000000000000n,
+      growableEnergy: 202000000000000000n,
       timeToGrow: 345600n,
     },
     {
       name: "MangroveSapling",
-      seedEnergy: 232000000000000000n,
+      growableEnergy: 232000000000000000n,
       timeToGrow: 345600n,
     },
   ],

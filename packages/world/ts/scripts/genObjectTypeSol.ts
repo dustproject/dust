@@ -283,12 +283,12 @@ ${allCategoryMetadata
     return 0;
   }
 
-  function getSeedEnergy(ObjectType self) internal pure returns(uint128) {
+  function getGrowableEnergy(ObjectType self) internal pure returns(uint128) {
     ${objects
-      .filter((obj) => obj.seedEnergy)
+      .filter((obj) => obj.growableEnergy)
       .map(
         (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ${obj.seedEnergy};`,
+          `if (self == ObjectTypes.${obj.name}) return ${obj.growableEnergy};`,
       )
       .join("\n    ")}
     return 0;

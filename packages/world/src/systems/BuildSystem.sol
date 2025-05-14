@@ -140,7 +140,7 @@ library BuildLib {
     ObjectType belowType = getObjectTypeAt(baseCoord - vec3(0, 1, 0));
     require(buildType.isPlantableOn(belowType), "Cannot plant on this block");
 
-    removeEnergyFromLocalPool(baseCoord, ObjectPhysics._getEnergy(buildType));
+    removeEnergyFromLocalPool(baseCoord, buildType.getGrowableEnergy());
 
     SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildType.getTimeToGrow());
   }
