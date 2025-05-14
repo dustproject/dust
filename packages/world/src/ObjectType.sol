@@ -889,6 +889,21 @@ library ObjectTypeLib {
     return 0;
   }
 
+  function getSeedEnergy(ObjectType self) internal pure returns (uint128) {
+    if (self == ObjectTypes.WheatSeed) return 4300000000000000;
+    if (self == ObjectTypes.PumpkinSeed) return 34300000000000000;
+    if (self == ObjectTypes.MelonSeed) return 34300000000000000;
+    if (self == ObjectTypes.OakSapling) return 148000000000000000;
+    if (self == ObjectTypes.BirchSapling) return 139000000000000000;
+    if (self == ObjectTypes.JungleSapling) return 300000000000000000;
+    if (self == ObjectTypes.SakuraSapling) return 187000000000000000;
+    if (self == ObjectTypes.AcaciaSapling) return 158000000000000000;
+    if (self == ObjectTypes.SpruceSapling) return 256000000000000000;
+    if (self == ObjectTypes.DarkOakSapling) return 202000000000000000;
+    if (self == ObjectTypes.MangroveSapling) return 232000000000000000;
+    return 0;
+  }
+
   function isPlantableOn(ObjectType self, ObjectType on) internal pure returns (bool) {
     if (self.isSeed()) {
       return on == ObjectTypes.WetFarmland;

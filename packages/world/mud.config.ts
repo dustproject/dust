@@ -164,6 +164,15 @@ export default defineWorld({
       },
       key: ["x", "y", "z"],
     },
+    LockedPoolEnergy: {
+      schema: {
+        x: "int32",
+        y: "int32",
+        z: "int32",
+        energy: "uint128",
+      },
+      key: ["x", "y", "z"],
+    },
     ExploredChunk: {
       schema: {
         x: "int32",

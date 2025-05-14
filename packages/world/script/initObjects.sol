@@ -142,17 +142,6 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.GoldBlock, ObjectPhysicsData({ mass: 14400000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.DiamondBlock, ObjectPhysicsData({ mass: 45000000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.NeptuniumBlock, ObjectPhysicsData({ mass: 45000000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.WheatSeed, ObjectPhysicsData({ mass: 0, energy: 4300000000000000 }));
-  ObjectPhysics.set(ObjectTypes.PumpkinSeed, ObjectPhysicsData({ mass: 0, energy: 34300000000000000 }));
-  ObjectPhysics.set(ObjectTypes.MelonSeed, ObjectPhysicsData({ mass: 0, energy: 34300000000000000 }));
-  ObjectPhysics.set(ObjectTypes.OakSapling, ObjectPhysicsData({ mass: 0, energy: 148000000000000000 }));
-  ObjectPhysics.set(ObjectTypes.BirchSapling, ObjectPhysicsData({ mass: 0, energy: 139000000000000000 }));
-  ObjectPhysics.set(ObjectTypes.JungleSapling, ObjectPhysicsData({ mass: 0, energy: 300000000000000000 }));
-  ObjectPhysics.set(ObjectTypes.SakuraSapling, ObjectPhysicsData({ mass: 0, energy: 187000000000000000 }));
-  ObjectPhysics.set(ObjectTypes.AcaciaSapling, ObjectPhysicsData({ mass: 0, energy: 158000000000000000 }));
-  ObjectPhysics.set(ObjectTypes.SpruceSapling, ObjectPhysicsData({ mass: 0, energy: 256000000000000000 }));
-  ObjectPhysics.set(ObjectTypes.DarkOakSapling, ObjectPhysicsData({ mass: 0, energy: 202000000000000000 }));
-  ObjectPhysics.set(ObjectTypes.MangroveSapling, ObjectPhysicsData({ mass: 0, energy: 232000000000000000 }));
   ObjectPhysics.set(ObjectTypes.ForceField, ObjectPhysicsData({ mass: 1035000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Chest, ObjectPhysicsData({ mass: 36000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.SpawnTile, ObjectPhysicsData({ mass: 6435000000000000000, energy: 0 }));
