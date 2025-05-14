@@ -6,11 +6,6 @@ import { packVec3 } from "./vec3";
 export type EntityId = string; // bytes32 in Solidity
 export type EntityType = number; // bytes1 in Solidity
 
-// Constants
-const ENTITY_TYPE_OFFSET_BITS = 248n;
-const COORD_MASK_96 = (1n << 96n) - 1n; // lower‑96‑bit mask
-const BYTE_MASK = 0xffn; // lower‑8‑bit mask
-
 // Entity Types enum
 // TODO: codegen `EntityId.sol` from this
 const EntityTypes = {
@@ -27,10 +22,14 @@ function toBytes32Hex(value: bigint): `0x${string}` {
   return `0x${value.toString(16).padStart(64, "0")}` as const;
 }
 
+function encode(entityType: EntityType, data: bigint): EntityId {
+  return toBytes32Hex((BigInt(entityType) << 248n) | data);
+}
+
 function encodeCoord(entityType: EntityType, coord: Vec3): EntityId {
-  const typeByte = (BigInt(entityType) & BYTE_MASK) << ENTITY_TYPE_OFFSET_BITS;
-  const coordBits = packVec3(coord) << 160n;
-  return toBytes32Hex(typeByte | coordBits);
+  // Pack Vec3 into a single bigint
+  const packedCoord = packVec3(coord);
+  return encode(entityType, packedCoord);
 }
 
 export function encodeBlock(coord: Vec3): EntityId {
@@ -42,8 +41,7 @@ export function encodeFragment(coord: Vec3): EntityId {
 }
 
 export function encodePlayer(player: string): EntityId {
-  const typeByte =
-    (BigInt(EntityTypes.Player) & BYTE_MASK) << ENTITY_TYPE_OFFSET_BITS;
-  const playerBits = BigInt(player);
-  return toBytes32Hex(typeByte | playerBits);
+  // Convert player address to bigint and pad to 20 bytes (40 hex chars)
+  const playerBigInt = BigInt(player);
+  return encode(EntityTypes.Player, playerBigInt);
 }
