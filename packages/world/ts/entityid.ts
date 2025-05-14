@@ -45,7 +45,7 @@ export function encodeFragment(coord: Vec3): EntityId {
   return encodeCoord(EntityTypes.Fragment, coord);
 }
 
-export function encodePlayer(player: string): EntityId {
+export function encodePlayer(player: `0x${string}`): EntityId {
   const playerBigInt = BigInt(player);
   return encode(
     EntityTypes.Player,
