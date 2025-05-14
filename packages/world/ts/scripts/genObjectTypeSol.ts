@@ -283,7 +283,7 @@ ${allCategoryMetadata
     return 0;
   }
 
-  function getGrowableEnergy(ObjectType self) internal pure returns(uint128) {
+  function getGrowableEnergy(ObjectType self) public pure returns(uint128) {
     ${objects
       .filter((obj) => obj.growableEnergy)
       .map(

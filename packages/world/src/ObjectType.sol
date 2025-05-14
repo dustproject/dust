@@ -889,7 +889,7 @@ library ObjectTypeLib {
     return 0;
   }
 
-  function getGrowableEnergy(ObjectType self) internal pure returns (uint128) {
+  function getGrowableEnergy(ObjectType self) public pure returns (uint128) {
     if (self == ObjectTypes.WheatSeed) return 4300000000000000;
     if (self == ObjectTypes.PumpkinSeed) return 34300000000000000;
     if (self == ObjectTypes.MelonSeed) return 34300000000000000;
