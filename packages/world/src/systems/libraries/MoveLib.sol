@@ -20,6 +20,8 @@ import { Vec3, vec3 } from "../../Vec3.sol";
 import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../../utils/EnergyUtils.sol";
 import { EntityUtils } from "../../utils/EntityUtils.sol";
 
+error NonPassableBlock(int32 x, int32 y, int32 z, ObjectType objectType);
+
 library MoveLib {
   function moveWithoutGravity(Vec3 playerCoord, Vec3[] memory newBaseCoords) public {
     EntityId[] memory playerEntityIds = _removePlayerPosition(playerCoord);
@@ -108,7 +110,9 @@ library MoveLib {
       Vec3 newCoord = newPlayerCoords[i];
 
       ObjectType newObjectType = EntityUtils.safeGetObjectTypeAt(newCoord);
-      require(newObjectType.isPassThrough(), "Cannot move through a non-passable block");
+      if (!newObjectType.isPassThrough()) {
+        revert NonPassableBlock(newCoord.x(), newCoord.y(), newCoord.z(), newObjectType);
+      }
       require(!EntityUtils.getMovableEntityAt(newCoord).exists(), "Cannot move through a player");
     }
   }
