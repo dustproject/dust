@@ -9,16 +9,14 @@ import { zeroHash } from "viem";
 import { dustClient } from "./dust";
 
 export function App() {
-  useEffect(
-    () =>
-      createMessagePortRpcServer<AppRpcSchema>({
-        async dustApp_init(params) {
-          console.info("client asked this app to initialize with", params);
-          return { success: true };
-        },
-      }),
-    [],
-  );
+  useEffect(() => {
+    createMessagePortRpcServer<AppRpcSchema>({
+      async dustApp_init(params) {
+        console.info("client asked this app to initialize with", params);
+        return { success: true };
+      },
+    });
+  }, []);
 
   return (
     <div>

@@ -30,9 +30,7 @@ export function Game() {
         >
           {appOpen ? "Close App" : "Open App"}
         </button>
-        <div style={{ scale: appOpen ? "100%" : 0 }}>
-          <AppPane />
-        </div>
+        {appOpen ? <AppPane /> : null}
       </div>
     </div>
   );
