@@ -215,6 +215,9 @@ importers:
       solady:
         specifier: ^0.1.12
         version: 0.1.12
+      viem:
+        specifier: 2.23.2
+        version: 2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8)
     devDependencies:
       '@latticexyz/gas-report':
         specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2

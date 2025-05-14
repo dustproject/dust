@@ -1,9 +1,10 @@
+import { type Hex, getAddress, toHex } from "viem";
 import type { Vec3 } from "./vec3";
 
-import { packVec3 } from "./vec3";
+import { packVec3, unpackVec3 } from "./vec3";
 
 // Types
-export type EntityId = `0x${string}`; // bytes32 in Solidity
+export type EntityId = Hex; // bytes32 in Solidity
 export type EntityType = number; // bytes1 in Solidity
 
 const BYTES_32_BITS = 256n;
@@ -21,15 +22,17 @@ const EntityTypes = {
   Block: 0x03,
 } as const;
 
-/**
- * Pads a bigint to 32‑byte (64‑hex‑char) 0x‑prefixed string.
- */
-function toBytes32Hex(value: bigint): `0x${string}` {
-  return `0x${value.toString(16).padStart(64, "0")}` as const;
+function encode(entityType: EntityType, data: bigint): EntityId {
+  return toHex((BigInt(entityType) << ENTITY_ID_BITS) | data, {
+    size: 32,
+  });
 }
 
-function encode(entityType: EntityType, data: bigint): EntityId {
-  return toBytes32Hex((BigInt(entityType) << ENTITY_ID_BITS) | data);
+function decode(entityId: EntityId): { entityType: EntityType; data: bigint } {
+  const value = BigInt(entityId);
+  const entityType = Number(value >> ENTITY_ID_BITS);
+  const data = value & ((1n << ENTITY_ID_BITS) - 1n);
+  return { entityType, data };
 }
 
 function encodeCoord(entityType: EntityType, coord: Vec3): EntityId {
@@ -45,10 +48,27 @@ export function encodeFragment(coord: Vec3): EntityId {
   return encodeCoord(EntityTypes.Fragment, coord);
 }
 
-export function encodePlayer(player: `0x${string}`): EntityId {
+export function encodePlayer(player: Hex): EntityId {
   const playerBigInt = BigInt(player);
   return encode(
     EntityTypes.Player,
     playerBigInt << (ENTITY_ID_BITS - ADDRESS_BITS),
   );
+}
+
+export function getPosition(entityId: EntityId): Vec3 {
+  const { entityType, data } = decode(entityId);
+  if (entityType === EntityTypes.Block || entityType === EntityTypes.Fragment) {
+    return unpackVec3(data >> (ENTITY_ID_BITS - VEC3_BITS));
+  }
+  throw new Error("Entity is not a block or fragment");
+}
+
+export function getPlayerAddress(entityId: EntityId): Hex {
+  const { entityType, data } = decode(entityId);
+  if (entityType !== EntityTypes.Player) {
+    throw new Error("Entity is not a player");
+  }
+  const address = data >> (ENTITY_ID_BITS - ADDRESS_BITS);
+  return getAddress(toHex(address, { size: 20 }));
 }
