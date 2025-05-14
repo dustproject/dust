@@ -29,7 +29,7 @@ function toBytes32Hex(value: bigint): `0x${string}` {
 
 function encodeCoord(entityType: EntityType, coord: Vec3): EntityId {
   const typeByte = (BigInt(entityType) & BYTE_MASK) << ENTITY_TYPE_OFFSET_BITS;
-  const coordBits = packVec3(coord) & COORD_MASK_96;
+  const coordBits = packVec3(coord) << 160n;
   return toBytes32Hex(typeByte | coordBits);
 }
 
