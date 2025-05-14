@@ -3,7 +3,7 @@ import type { Vec3 } from "./vec3";
 import { packVec3 } from "./vec3";
 
 // Types
-export type EntityId = string; // bytes32 in Solidity
+export type EntityId = `0x${string}`; // bytes32 in Solidity
 export type EntityType = number; // bytes1 in Solidity
 
 const BYTES_32_BITS = 256n;
