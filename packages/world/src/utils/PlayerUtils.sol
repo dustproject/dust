@@ -81,7 +81,8 @@ library PlayerUtils {
     if (ReverseMovablePosition._get(coord) != player) {
       return;
     }
-    (EntityId to,) = EntityUtils.getBlockAt(coord);
+    // We use getOrCreateBlockAt because when moving the block entity might not be set
+    (EntityId to,) = EntityUtils.getOrCreateBlockAt(coord);
     InventoryUtils.transferAll(player, to);
     removePlayerFromGrid(player, coord);
     notify(player, DeathNotification({ deathCoord: coord }));
