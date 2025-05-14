@@ -7,7 +7,6 @@ import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
-import { Player } from "../codegen/tables/Player.sol";
 import { PlayerBed } from "../codegen/tables/PlayerBed.sol";
 
 import { MAX_RESPAWN_HALF_WIDTH, PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
@@ -21,7 +20,7 @@ import {
   updateSleepingPlayerEnergy
 } from "../utils/EnergyUtils.sol";
 
-import { getOrCreateEntityAt } from "../utils/EntityUtils.sol";
+import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { SleepNotification, WakeupNotification, notify } from "../utils/NotifUtils.sol";
@@ -101,7 +100,7 @@ contract BedSystem is System {
 
     require(bedCoord.inSurroundingCube(dropCoord, MAX_RESPAWN_HALF_WIDTH), "Drop location is too far from bed");
 
-    (EntityId drop, ObjectType objectType) = getOrCreateEntityAt(dropCoord);
+    (EntityId drop, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(dropCoord);
     require(objectType.isPassThrough(), "Cannot drop items on a non-passable block");
 
     (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);

@@ -11,7 +11,7 @@ import { Mass } from "../codegen/tables/Mass.sol";
 import { Recipes, RecipesData } from "../codegen/tables/Recipes.sol";
 
 import { transferEnergyToPool } from "../utils/EnergyUtils.sol";
-import { createEntity } from "../utils/EntityUtils.sol";
+import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils, SlotAmount, SlotData } from "../utils/InventoryUtils.sol";
 import { CraftNotification, notify } from "../utils/NotifUtils.sol";
 
@@ -29,7 +29,6 @@ contract CraftSystem is System {
     require(recipe.inputTypes.length > 0, "Recipe not found");
 
     if (!recipe.stationTypeId.isNull()) {
-      require(station.exists(), "This recipe requires a station");
       require(station.getObjectType() == recipe.stationTypeId, "Invalid station");
       caller.requireConnected(station);
     }
@@ -95,7 +94,7 @@ library CraftLib {
 
       if (outputType.isTool()) {
         for (uint256 j = 0; j < outputAmount; j++) {
-          EntityId tool = createEntity(outputType);
+          EntityId tool = EntityUtils.createUniqueEntity(outputType);
           withdrawals[withdrawalIndex++] = SlotData({ entityId: tool, objectType: outputType, amount: 1 });
           InventoryUtils.addEntity(caller, tool);
         }

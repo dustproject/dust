@@ -30,13 +30,7 @@ import {
   updateSleepingPlayerEnergy
 } from "../utils/EnergyUtils.sol";
 
-import {
-  createEntityAt,
-  getEntityAt,
-  getMovableEntityAt,
-  getObjectTypeAt,
-  getOrCreateEntityAt
-} from "../utils/EntityUtils.sol";
+import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils, ToolData } from "../utils/InventoryUtils.sol";
 import { DeathNotification, MineNotification, notify } from "../utils/NotifUtils.sol";
@@ -103,7 +97,7 @@ contract MineSystem is System {
     uint128 callerEnergy = caller.activate().energy;
     caller.requireConnected(coord);
 
-    (EntityId mined, ObjectType minedType) = getOrCreateEntityAt(coord);
+    (EntityId mined, ObjectType minedType) = EntityUtils.getOrCreateBlockAt(coord);
     require(minedType.isMineable(), "Object is not mineable");
 
     mined = mined.baseEntityId();
@@ -148,10 +142,10 @@ contract MineSystem is System {
     // Remove growables on top of this block
     Vec3 aboveCoord = coord + vec3(0, 1, 0);
     // If above is growable, the entity must exist as there are not growables in the base terrain
-    (EntityId above, ObjectType aboveType) = getEntityAt(aboveCoord);
+    (EntityId above, ObjectType aboveType) = EntityUtils.getBlockAt(aboveCoord);
     if (aboveType.isGrowable()) {
       if (!above.exists()) {
-        above = createEntityAt(aboveCoord, aboveType);
+        EntityUtils.getOrCreateBlockAt(aboveCoord);
       }
       _removeGrowable(above, aboveType, aboveCoord);
       _handleDrop(caller, above, aboveType, aboveCoord);
@@ -174,7 +168,7 @@ contract MineSystem is System {
     EntityObjectType._set(entityId, ObjectTypes.Air);
 
     Vec3 aboveCoord = coord + vec3(0, 1, 0);
-    EntityId above = getMovableEntityAt(aboveCoord);
+    EntityId above = EntityUtils.getMovableEntityAt(aboveCoord);
     // Note: currently it is not possible for the above player to not be the base entity,
     // but if we add other types of movable entities we should check that it is a base entity
     if (above.exists()) {
@@ -189,7 +183,7 @@ contract MineSystem is System {
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];
-      (EntityId relative, ObjectType relativeType) = getEntityAt(relativeCoord);
+      (EntityId relative, ObjectType relativeType) = EntityUtils.getBlockAt(relativeCoord);
       BaseEntity._deleteRecord(relative);
 
       _removeBlock(relative, relativeType, relativeCoord);
@@ -247,7 +241,7 @@ contract MineSystem is System {
 
     ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
 
-    uint128 energyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, massLeft);
+    uint128 energyReduction = MineLib._getCallerEnergyReduction(toolData.toolType, callerEnergy, massLeft);
 
     if (energyReduction > 0) {
       // If player died, return early
@@ -259,38 +253,13 @@ contract MineSystem is System {
       massLeft -= energyReduction;
     }
 
-    uint128 toolMultiplier = _getToolMultiplier(toolData.toolType, minedType);
+    uint128 toolMultiplier = MineLib._getToolMultiplier(toolData.toolType, minedType);
     (uint128 mineMassReduction, uint128 toolMassReduction) = toolData.getMassReduction(massLeft, toolMultiplier);
     toolData.reduceMass(toolMassReduction);
 
     massLeft -= mineMassReduction;
 
     return (massLeft, true);
-  }
-
-  function _getToolMultiplier(ObjectType toolType, ObjectType minedType) internal pure returns (uint128) {
-    if (toolType.isNull()) {
-      return 1;
-    }
-
-    bool isWoodenTool = toolType == ObjectTypes.WoodenAxe || toolType == ObjectTypes.WoodenPick;
-
-    if ((toolType.isAxe() && minedType.hasAxeMultiplier()) || (toolType.isPick() && minedType.hasPickMultiplier())) {
-      return isWoodenTool ? SPECIALIZED_WOODEN_TOOL_MULTIPLIER : SPECIALIZED_ORE_TOOL_MULTIPLIER;
-    }
-
-    return isWoodenTool ? DEFAULT_WOODEN_TOOL_MULTIPLIER : DEFAULT_ORE_TOOL_MULTIPLIER;
-  }
-
-  function _getCallerEnergyReduction(ObjectType toolType, uint128 currentEnergy, uint128 massLeft)
-    internal
-    pure
-    returns (uint128)
-  {
-    // if tool mass reduction is not enough, consume energy from player up to mine energy cost
-    uint128 maxEnergyCost = toolType.isNull() ? DEFAULT_MINE_ENERGY_COST : TOOL_MINE_ENERGY_COST;
-    maxEnergyCost = Math.min(currentEnergy, maxEnergyCost);
-    return Math.min(massLeft, maxEnergyCost);
   }
 }
 
@@ -341,6 +310,31 @@ library MineLib {
     bytes memory onMine = abi.encodeCall(IMineHook.onMine, (caller, forceField, objectType, coord, extraData));
 
     program.callOrRevert(onMine);
+  }
+
+  function _getToolMultiplier(ObjectType toolType, ObjectType minedType) public pure returns (uint128) {
+    if (toolType.isNull()) {
+      return 1;
+    }
+
+    bool isWoodenTool = toolType == ObjectTypes.WoodenAxe || toolType == ObjectTypes.WoodenPick;
+
+    if ((toolType.isAxe() && minedType.hasAxeMultiplier()) || (toolType.isPick() && minedType.hasPickMultiplier())) {
+      return isWoodenTool ? SPECIALIZED_WOODEN_TOOL_MULTIPLIER : SPECIALIZED_ORE_TOOL_MULTIPLIER;
+    }
+
+    return isWoodenTool ? DEFAULT_WOODEN_TOOL_MULTIPLIER : DEFAULT_ORE_TOOL_MULTIPLIER;
+  }
+
+  function _getCallerEnergyReduction(ObjectType toolType, uint128 currentEnergy, uint128 massLeft)
+    public
+    pure
+    returns (uint128)
+  {
+    // if tool mass reduction is not enough, consume energy from player up to mine energy cost
+    uint128 maxEnergyCost = toolType.isNull() ? DEFAULT_MINE_ENERGY_COST : TOOL_MINE_ENERGY_COST;
+    maxEnergyCost = Math.min(currentEnergy, maxEnergyCost);
+    return Math.min(massLeft, maxEnergyCost);
   }
 }
 

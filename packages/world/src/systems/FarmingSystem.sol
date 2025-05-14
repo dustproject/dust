@@ -8,7 +8,7 @@ import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 
 import { addEnergyToLocalPool, transferEnergyToPool } from "../utils/EnergyUtils.sol";
-import { getObjectTypeAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
+import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 
 import { Math } from "../utils/Math.sol";
@@ -25,7 +25,7 @@ contract FarmingSystem is System {
     uint128 callerEnergy = caller.activate().energy;
     caller.requireConnected(coord);
 
-    (EntityId farmland, ObjectType objectType) = getOrCreateEntityAt(coord);
+    (EntityId farmland, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(coord);
     require(objectType.isTillable(), "Not tillable");
 
     // If player died, return early

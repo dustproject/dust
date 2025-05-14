@@ -16,9 +16,7 @@ import { ChunkCommitment as _ChunkCommitment } from "../codegen/tables/ChunkComm
 import { EntityPosition as _EntityPosition } from "../codegen/tables/EntityPosition.sol";
 import { ResourcePosition as _ResourcePosition } from "../codegen/tables/ResourcePosition.sol";
 
-import { ReverseFragmentPosition as _ReverseFragmentPosition } from "../codegen/tables/ReverseFragmentPosition.sol";
 import { ReverseMovablePosition as _ReverseMovablePosition } from "../codegen/tables/ReverseMovablePosition.sol";
-import { ReverseTerrainPosition as _ReverseTerrainPosition } from "../codegen/tables/ReverseTerrainPosition.sol";
 
 import { SurfaceChunkByIndex as _SurfaceChunkByIndex } from "../codegen/tables/SurfaceChunkByIndex.sol";
 
@@ -159,38 +157,6 @@ library EntityPosition {
   }
 }
 
-library ReverseTerrainPosition {
-  function get(Vec3 position) internal view returns (EntityId entityId) {
-    return
-      EntityId.wrap(Vec3Storage.get(_ReverseTerrainPosition._tableId, _ReverseTerrainPosition._fieldLayout, position));
-  }
-
-  function _get(Vec3 position) internal view returns (EntityId entityId) {
-    return
-      EntityId.wrap(Vec3Storage._get(_ReverseTerrainPosition._tableId, _ReverseTerrainPosition._fieldLayout, position));
-  }
-
-  function set(Vec3 position, EntityId entityId) internal {
-    Vec3Storage.set(
-      _ReverseTerrainPosition._tableId, _ReverseTerrainPosition._fieldLayout, position, abi.encodePacked(entityId)
-    );
-  }
-
-  function _set(Vec3 position, EntityId entityId) internal {
-    Vec3Storage._set(
-      _ReverseTerrainPosition._tableId, _ReverseTerrainPosition._fieldLayout, position, abi.encodePacked(entityId)
-    );
-  }
-
-  function deleteRecord(Vec3 position) internal {
-    Vec3Storage.deleteRecord(_ReverseTerrainPosition._tableId, position);
-  }
-
-  function _deleteRecord(Vec3 position) internal {
-    Vec3Storage._deleteRecord(_ReverseTerrainPosition._tableId, position);
-  }
-}
-
 library ReverseMovablePosition {
   function get(Vec3 position) internal view returns (EntityId entityId) {
     return
@@ -324,39 +290,6 @@ library SurfaceChunkByIndex {
 
   function _deleteRecord(uint256 key) internal {
     Vec3Storage._deleteRecord(_SurfaceChunkByIndex._tableId, bytes32(key));
-  }
-}
-
-library ReverseFragmentPosition {
-  function get(Vec3 position) internal view returns (EntityId entityId) {
-    return
-      EntityId.wrap(Vec3Storage.get(_ReverseFragmentPosition._tableId, _ReverseFragmentPosition._fieldLayout, position));
-  }
-
-  function _get(Vec3 position) internal view returns (EntityId entityId) {
-    return EntityId.wrap(
-      Vec3Storage._get(_ReverseFragmentPosition._tableId, _ReverseFragmentPosition._fieldLayout, position)
-    );
-  }
-
-  function set(Vec3 position, EntityId entityId) internal {
-    Vec3Storage.set(
-      _ReverseFragmentPosition._tableId, _ReverseFragmentPosition._fieldLayout, position, abi.encodePacked(entityId)
-    );
-  }
-
-  function _set(Vec3 position, EntityId entityId) internal {
-    Vec3Storage._set(
-      _ReverseFragmentPosition._tableId, _ReverseFragmentPosition._fieldLayout, position, abi.encodePacked(entityId)
-    );
-  }
-
-  function deleteRecord(Vec3 position) internal {
-    Vec3Storage.deleteRecord(_ReverseFragmentPosition._tableId, position);
-  }
-
-  function _deleteRecord(Vec3 position) internal {
-    Vec3Storage._deleteRecord(_ReverseFragmentPosition._tableId, position);
   }
 }
 

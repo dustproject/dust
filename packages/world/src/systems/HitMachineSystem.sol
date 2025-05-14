@@ -4,7 +4,6 @@ pragma solidity >=0.8.24;
 import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
-import { console } from "forge-std/console.sol";
 
 import { LocalEnergyPool } from "../codegen/tables/LocalEnergyPool.sol";
 import { ERC165Checker } from "@latticexyz/world/src/ERC165Checker.sol";

@@ -14,8 +14,8 @@ import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
 import { addEnergyToLocalPool } from "../utils/EnergyUtils.sol";
 
-import { getObjectTypeAt, getOrCreateEntityAt } from "../utils/EntityUtils.sol";
-import { ChunkCommitment, EntityPosition, ResourcePosition, ReverseTerrainPosition } from "../utils/Vec3Storage.sol";
+import { EntityUtils } from "../utils/EntityUtils.sol";
+import { ChunkCommitment, ResourcePosition } from "../utils/Vec3Storage.sol";
 
 import { CHUNK_COMMIT_EXPIRY_BLOCKS, CHUNK_COMMIT_HALF_WIDTH, RESPAWN_ORE_BLOCK_RANGE } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
@@ -57,8 +57,7 @@ contract NatureSystem is System {
     Vec3 resourceCoord = ResourcePosition._get(resourceType, resourceIdx);
 
     // Check existing entity
-    EntityId entityId = ReverseTerrainPosition._get(resourceCoord);
-    ObjectType objectType = entityId.getObjectType();
+    (EntityId entityId, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(resourceCoord);
     require(objectType == ObjectTypes.Air, "Resource coordinate is not air");
     require(Inventory._lengthOccupiedSlots(entityId) == 0, "Cannot respawn where there are dropped objects");
 
@@ -75,15 +74,13 @@ contract NatureSystem is System {
 
     // This is enough to respawn the resource block, as it will be read from the original terrain next time
     EntityObjectType._deleteRecord(entityId);
-    EntityPosition._deleteRecord(entityId);
-    ReverseTerrainPosition._deleteRecord(resourceCoord);
   }
 
   function growSeed(EntityId caller, Vec3 coord) external {
     caller.activate();
     // TODO: should we do proximity checks?
 
-    (EntityId seed, ObjectType objectType) = getOrCreateEntityAt(coord);
+    (EntityId seed, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(coord);
     require(objectType.isGrowable(), "Not growable");
     require(SeedGrowth._getFullyGrownAt(seed) <= block.timestamp, "Seed cannot be grown yet");
 
@@ -95,7 +92,7 @@ contract NatureSystem is System {
 
     if (objectType.isSeed()) {
       // Turn wet farmland to regular farmland if mining a seed or crop
-      (EntityId below, ObjectType belowType) = getOrCreateEntityAt(coord - vec3(0, 1, 0));
+      (EntityId below, ObjectType belowType) = EntityUtils.getOrCreateBlockAt(coord - vec3(0, 1, 0));
       // Sanity check
       if (belowType == ObjectTypes.WetFarmland) {
         EntityObjectType._set(below, ObjectTypes.Farmland);
@@ -132,7 +129,8 @@ contract NatureSystem is System {
     }
 
     // Adjust if the tree is blocked
-    if (trunkHeight < treeData.trunkHeight) {
+    bool obstructed = trunkHeight < treeData.trunkHeight;
+    if (obstructed) {
       trunkHeight = trunkHeight + 1; // Still allow one layer above the trunk
     }
 
@@ -142,22 +140,21 @@ contract NatureSystem is System {
     uint256 rand = uint256(keccak256(abi.encodePacked(block.timestamp, baseCoord)));
 
     uint32 leafCount;
-    ObjectType leafType = treeData.leafType;
 
     for (uint256 i = 0; i < fixedLeaves.length; ++i) {
       Vec3 rel = fixedLeaves[i];
-      if (rel.y() > int32(trunkHeight)) {
+      if (obstructed && rel.y() > int32(trunkHeight)) {
         break;
       }
 
-      if (_tryCreateLeaf(leafType, baseCoord + rel)) {
+      if (_tryCreateLeaf(treeData.leafType, baseCoord + rel)) {
         ++leafCount;
       }
     }
 
     for (uint256 j = 0; j < randomLeaves.length; ++j) {
       Vec3 rel = randomLeaves[j];
-      if (rel.y() > int32(trunkHeight)) {
+      if (obstructed && rel.y() > int32(trunkHeight)) {
         break;
       }
 
@@ -165,7 +162,7 @@ contract NatureSystem is System {
 
       if (rand % 100 < 40) continue; // 40 % trimmed
 
-      if (_tryCreateLeaf(leafType, baseCoord + rel)) {
+      if (_tryCreateLeaf(treeData.leafType, baseCoord + rel)) {
         ++leafCount;
       }
     }
@@ -174,7 +171,7 @@ contract NatureSystem is System {
   }
 
   function _tryCreateLeaf(ObjectType leafType, Vec3 coord) private returns (bool) {
-    (EntityId leaf, ObjectType existing) = getOrCreateEntityAt(coord);
+    (EntityId leaf, ObjectType existing) = EntityUtils.getOrCreateBlockAt(coord);
     if (existing != ObjectTypes.Air) {
       return false;
     }
@@ -190,7 +187,7 @@ contract NatureSystem is System {
     // Create the trunk up to available space
     for (uint32 i = 1; i < treeData.trunkHeight; i++) {
       Vec3 trunkCoord = baseCoord + vec3(0, int32(i), 0);
-      (EntityId trunk, ObjectType objectType) = getOrCreateEntityAt(trunkCoord);
+      (EntityId trunk, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(trunkCoord);
       if (objectType != ObjectTypes.Air) {
         return i;
       }

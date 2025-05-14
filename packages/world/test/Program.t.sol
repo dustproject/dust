@@ -12,7 +12,6 @@ import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { LocalEnergyPool } from "../src/codegen/tables/LocalEnergyPool.sol";
 
 import { EntityProgram } from "../src/codegen/tables/EntityProgram.sol";
-import { Player } from "../src/codegen/tables/Player.sol";
 
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";

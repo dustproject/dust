@@ -21,9 +21,10 @@ import {
   updatePlayerEnergy as _updatePlayerEnergy
 } from "../../src/utils/EnergyUtils.sol";
 
-import { createEntity } from "../../src/utils/EntityUtils.sol";
+import { EntityUtils } from "../../src/utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../../src/utils/ForceFieldUtils.sol";
 import { InventoryUtils, SlotTransfer } from "../../src/utils/InventoryUtils.sol";
+import { PlayerUtils } from "../../src/utils/PlayerUtils.sol";
 
 Vm constant vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
@@ -55,6 +56,58 @@ library TestUtils {
   }
 }
 
+library TestEntityUtils {
+  bytes32 constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestEntityUtils");
+
+  modifier asWorld() {
+    TestUtils.asWorld(LIB_ADDRESS_SLOT);
+    _;
+  }
+
+  // Hack to be able to access the library address until we figure out why mud doesn't allow it
+  function init(address libAddress) public {
+    TestUtils.init(LIB_ADDRESS_SLOT, libAddress);
+  }
+
+  function getObjectTypeAt(Vec3 coord) public asWorld returns (ObjectType) {
+    return EntityUtils.getObjectTypeAt(coord);
+  }
+
+  function getBlockAt(Vec3 coord) public asWorld returns (EntityId, ObjectType) {
+    return EntityUtils.getBlockAt(coord);
+  }
+
+  function getOrCreateFragmentAt(Vec3 fragmentCoord) public asWorld returns (EntityId) {
+    return EntityUtils.getOrCreateFragmentAt(fragmentCoord);
+  }
+
+  function getFragmentAt(Vec3 fragmentCoord) public asWorld returns (EntityId) {
+    return EntityUtils.getFragmentAt(fragmentCoord);
+  }
+
+  function exists(EntityId self) public asWorld returns (bool) {
+    return self.exists();
+  }
+}
+
+library TestPlayerUtils {
+  bytes32 constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestPlayerUtils");
+
+  modifier asWorld() {
+    TestUtils.asWorld(LIB_ADDRESS_SLOT);
+    _;
+  }
+
+  // Hack to be able to access the library address until we figure out why mud doesn't allow it
+  function init(address libAddress) public {
+    TestUtils.init(LIB_ADDRESS_SLOT, libAddress);
+  }
+
+  function addPlayerToGrid(EntityId player, Vec3 playerCoord) public asWorld {
+    PlayerUtils.addPlayerToGrid(player, playerCoord);
+  }
+}
+
 library TestInventoryUtils {
   bytes32 constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestInventoryUtils");
 
@@ -80,7 +133,7 @@ library TestInventoryUtils {
   }
 
   function addEntity(EntityId ownerEntityId, ObjectType toolObjectType) public asWorld returns (EntityId) {
-    EntityId entityId = createEntity(toolObjectType);
+    EntityId entityId = EntityUtils.createUniqueEntity(toolObjectType);
     InventoryUtils.addEntity(ownerEntityId, entityId);
     return entityId;
   }
@@ -90,7 +143,7 @@ library TestInventoryUtils {
     asWorld
     returns (EntityId)
   {
-    EntityId entityId = createEntity(toolObjectType);
+    EntityId entityId = EntityUtils.createUniqueEntity(toolObjectType);
     InventoryUtils.addEntityToSlot(ownerEntityId, entityId, slot);
     return entityId;
   }
@@ -182,14 +235,6 @@ library TestForceFieldUtils {
 
   function getForceField(Vec3 coord) public asWorld returns (EntityId, EntityId) {
     return ForceFieldUtils.getForceField(coord);
-  }
-
-  function getOrCreateFragmentAt(Vec3 fragmentCoord) public asWorld returns (EntityId) {
-    return ForceFieldUtils.getOrCreateFragmentAt(fragmentCoord);
-  }
-
-  function getFragmentAt(Vec3 fragmentCoord) public asWorld returns (EntityId) {
-    return ForceFieldUtils.getFragmentAt(fragmentCoord);
   }
 
   function setupForceField(EntityId forceField, Vec3 coord) public asWorld {

@@ -8,6 +8,7 @@ import { console } from "forge-std/console.sol";
 
 import { EntityId } from "../src/EntityId.sol";
 
+import { Direction } from "../src/codegen/common.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
 
@@ -19,10 +20,8 @@ import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
-import { Player } from "../src/codegen/tables/Player.sol";
 
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
-import { ReverseTerrainPosition } from "../src/codegen/tables/ReverseTerrainPosition.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 
@@ -35,7 +34,7 @@ import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { SlotAmount } from "../src/utils/InventoryUtils.sol";
 
-import { TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract CraftTest is DustTest {
   function hashRecipe(
@@ -261,7 +260,7 @@ contract CraftTest is DustTest {
     uint16[] memory toolSlots = InventoryTypeSlots.get(aliceEntityId, outputTypes[0]);
     assertEq(toolSlots.length, 1, "should have 1 tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
-    assertTrue(toolEntityId.exists(), "tool entity id should exist");
+    assertTrue(TestEntityUtils.exists(toolEntityId), "tool entity id should exist");
     ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
@@ -299,7 +298,7 @@ contract CraftTest is DustTest {
     uint16[] memory toolSlots = InventoryTypeSlots.get(aliceEntityId, outputTypes[0]);
     assertEq(toolSlots.length, 1, "should have 1 of the crafted tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
-    assertTrue(toolEntityId.exists(), "tool entity id should exist");
+    assertTrue(TestEntityUtils.exists(toolEntityId), "tool entity id should exist");
     ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
@@ -337,7 +336,7 @@ contract CraftTest is DustTest {
     uint16[] memory toolSlots = InventoryTypeSlots.get(aliceEntityId, outputTypes[0]);
     assertEq(toolSlots.length, 1, "should have 1 of the crafted tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
-    assertTrue(toolEntityId.exists(), "tool entity id should exist");
+    assertTrue(TestEntityUtils.exists(toolEntityId), "tool entity id should exist");
     ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
@@ -451,7 +450,7 @@ contract CraftTest is DustTest {
     inputs[1] = SlotAmount({ slot: 1, amount: inputAmounts[1] });
 
     vm.prank(alice);
-    vm.expectRevert("This recipe requires a station");
+    vm.expectRevert("Invalid station");
     world.craft(aliceEntityId, recipeId, inputs);
 
     vm.prank(alice);
@@ -567,7 +566,8 @@ contract CraftTest is DustTest {
       assertInventoryHasObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
     }
 
-    PlayerBed.setBedEntityId(aliceEntityId, randomEntityId());
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     SlotAmount[] memory inputs = new SlotAmount[](1);
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
