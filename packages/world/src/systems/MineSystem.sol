@@ -241,7 +241,7 @@ contract MineSystem is System {
 
     ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
 
-    uint128 energyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, massLeft);
+    uint128 energyReduction = MineLib._getCallerEnergyReduction(toolData.toolType, callerEnergy, massLeft);
 
     if (energyReduction > 0) {
       // If player died, return early
@@ -253,38 +253,13 @@ contract MineSystem is System {
       massLeft -= energyReduction;
     }
 
-    uint128 toolMultiplier = _getToolMultiplier(toolData.toolType, minedType);
+    uint128 toolMultiplier = MineLib._getToolMultiplier(toolData.toolType, minedType);
     (uint128 mineMassReduction, uint128 toolMassReduction) = toolData.getMassReduction(massLeft, toolMultiplier);
     toolData.reduceMass(toolMassReduction);
 
     massLeft -= mineMassReduction;
 
     return (massLeft, true);
-  }
-
-  function _getToolMultiplier(ObjectType toolType, ObjectType minedType) internal pure returns (uint128) {
-    if (toolType.isNull()) {
-      return 1;
-    }
-
-    bool isWoodenTool = toolType == ObjectTypes.WoodenAxe || toolType == ObjectTypes.WoodenPick;
-
-    if ((toolType.isAxe() && minedType.hasAxeMultiplier()) || (toolType.isPick() && minedType.hasPickMultiplier())) {
-      return isWoodenTool ? SPECIALIZED_WOODEN_TOOL_MULTIPLIER : SPECIALIZED_ORE_TOOL_MULTIPLIER;
-    }
-
-    return isWoodenTool ? DEFAULT_WOODEN_TOOL_MULTIPLIER : DEFAULT_ORE_TOOL_MULTIPLIER;
-  }
-
-  function _getCallerEnergyReduction(ObjectType toolType, uint128 currentEnergy, uint128 massLeft)
-    internal
-    pure
-    returns (uint128)
-  {
-    // if tool mass reduction is not enough, consume energy from player up to mine energy cost
-    uint128 maxEnergyCost = toolType.isNull() ? DEFAULT_MINE_ENERGY_COST : TOOL_MINE_ENERGY_COST;
-    maxEnergyCost = Math.min(currentEnergy, maxEnergyCost);
-    return Math.min(massLeft, maxEnergyCost);
   }
 }
 
@@ -335,6 +310,31 @@ library MineLib {
     bytes memory onMine = abi.encodeCall(IMineHook.onMine, (caller, forceField, objectType, coord, extraData));
 
     program.callOrRevert(onMine);
+  }
+
+  function _getToolMultiplier(ObjectType toolType, ObjectType minedType) public pure returns (uint128) {
+    if (toolType.isNull()) {
+      return 1;
+    }
+
+    bool isWoodenTool = toolType == ObjectTypes.WoodenAxe || toolType == ObjectTypes.WoodenPick;
+
+    if ((toolType.isAxe() && minedType.hasAxeMultiplier()) || (toolType.isPick() && minedType.hasPickMultiplier())) {
+      return isWoodenTool ? SPECIALIZED_WOODEN_TOOL_MULTIPLIER : SPECIALIZED_ORE_TOOL_MULTIPLIER;
+    }
+
+    return isWoodenTool ? DEFAULT_WOODEN_TOOL_MULTIPLIER : DEFAULT_ORE_TOOL_MULTIPLIER;
+  }
+
+  function _getCallerEnergyReduction(ObjectType toolType, uint128 currentEnergy, uint128 massLeft)
+    public
+    pure
+    returns (uint128)
+  {
+    // if tool mass reduction is not enough, consume energy from player up to mine energy cost
+    uint128 maxEnergyCost = toolType.isNull() ? DEFAULT_MINE_ENERGY_COST : TOOL_MINE_ENERGY_COST;
+    maxEnergyCost = Math.min(currentEnergy, maxEnergyCost);
+    return Math.min(massLeft, maxEnergyCost);
   }
 }
 

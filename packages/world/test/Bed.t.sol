@@ -28,7 +28,7 @@ import { DustTest, console } from "./DustTest.sol";
 import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import { CHUNK_SIZE, MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
-import { EntityId } from "../src/EntityId.sol";
+import { EntityId, EntityIdLib } from "../src/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../src/ObjectType.sol";
 
 import { ProgramId } from "../src/ProgramId.sol";
@@ -107,7 +107,7 @@ contract BedTest is DustTest {
     Vec3 bedCoord = coord + vec3(500, 0, 0);
 
     // Set forcefield
-    setupForceField(bedCoord);
+    setupForceField(bedCoord + vec3(4, 0, 0));
 
     // Set entity to bed
     EntityId bedEntityId = createBed(bedCoord);

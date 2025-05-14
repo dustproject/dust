@@ -87,11 +87,12 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
   function createTestPlayer(Vec3 coord) internal returns (address, EntityId) {
     address playerAddress = vm.randomAddress();
     EntityId player = EntityIdLib.encodePlayer(playerAddress);
-    EntityObjectType.set(player, ObjectTypes.Player);
 
     if (!TerrainLib._isChunkExplored(coord.toChunkCoord(), worldAddress)) {
       setupAirChunk(coord);
     }
+
+    EntityObjectType.set(player, ObjectTypes.Player);
 
     TestPlayerUtils.addPlayerToGrid(player, coord);
 

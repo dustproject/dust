@@ -29,8 +29,6 @@ type EntityId is bytes32;
 
 type EntityType is bytes1;
 
-uint256 constant ENTITY_TYPE_OFFSET_BITS = 248;
-
 library EntityIdLib {
   // We need to use this internal library function in order to obtain the msg.sig and msg.sender
   function activate(EntityId self) internal returns (EnergyData memory) {
@@ -81,7 +79,7 @@ library EntityIdLib {
   function getPosition(EntityId self) internal view returns (Vec3) {
     (EntityType entityType, bytes31 data) = EntityTypeLib.decode(self);
     if (entityType == EntityTypes.Block || entityType == EntityTypes.Fragment) {
-      return Vec3.wrap(uint96(bytes12(data)));
+      return Vec3.wrap(uint96(uint256(bytes32(data) >> 160)));
     }
     return EntityPosition._get(self);
   }
@@ -111,16 +109,18 @@ library EntityIdLib {
   }
 
   function encodePlayer(address player) internal pure returns (EntityId) {
-    return EntityTypes.Player.encode(bytes20(uint160(player)));
+    return EntityTypes.Player.encode(bytes20(player));
   }
 
-  function getPlayerAddress(EntityId self) internal view returns (address) {
-    require(self.getObjectType() == ObjectTypes.Player, "Entity is not a player");
-    return address(uint160(uint256(EntityId.unwrap(self))));
+  function getPlayerAddress(EntityId self) internal pure returns (address) {
+    (EntityType entityType, bytes31 data) = EntityTypeLib.decode(self);
+    require(entityType == EntityTypes.Player, "Entity is not a player");
+
+    return address(bytes20(data));
   }
 
   function _encodeCoord(EntityType entityType, Vec3 coord) private pure returns (EntityId) {
-    return entityType.encode(bytes12(uint96(coord.unwrap())));
+    return entityType.encode(bytes12(coord.unwrap()));
   }
 }
 
@@ -175,13 +175,13 @@ library EntityTypeLib {
   }
 
   function encode(EntityType self, bytes31 data) internal pure returns (EntityId) {
-    return EntityId.wrap((bytes32(EntityType.unwrap(self)) << ENTITY_TYPE_OFFSET_BITS) | bytes32(data));
+    return EntityId.wrap(bytes32(self.unwrap()) | bytes32(data) >> 8);
   }
 
   function decode(EntityId self) internal pure returns (EntityType, bytes31) {
     bytes32 _self = self.unwrap();
-    EntityType entityType = EntityType.wrap(bytes1(_self >> ENTITY_TYPE_OFFSET_BITS));
-    return (entityType, bytes31(_self));
+    EntityType entityType = EntityType.wrap(bytes1(_self));
+    return (entityType, bytes31(_self << 8));
   }
 }
 

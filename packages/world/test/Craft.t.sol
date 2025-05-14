@@ -450,7 +450,7 @@ contract CraftTest is DustTest {
     inputs[1] = SlotAmount({ slot: 1, amount: inputAmounts[1] });
 
     vm.prank(alice);
-    vm.expectRevert("This recipe requires a station");
+    vm.expectRevert("Invalid station");
     world.craft(aliceEntityId, recipeId, inputs);
 
     vm.prank(alice);
