@@ -155,7 +155,7 @@ contract MineSystem is System {
   function _removeGrowable(EntityId entityId, ObjectType objectType, Vec3 coord) internal {
     EntityObjectType._set(entityId, ObjectTypes.Air);
     require(SeedGrowth._getFullyGrownAt(entityId) > block.timestamp, "Cannot mine fully grown seed");
-    addEnergyToLocalPool(coord, ObjectPhysics._getEnergy(objectType));
+    addEnergyToLocalPool(coord, objectType.getGrowableEnergy());
   }
 
   function _removeBlock(EntityId entityId, ObjectType objectType, Vec3 coord) internal {

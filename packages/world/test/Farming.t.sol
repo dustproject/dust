@@ -196,7 +196,6 @@ contract FarmingTest is DustTest {
 
     // Check initial local energy pool
     uint128 initialLocalEnergy = LocalEnergyPool.get(farmlandCoord.toLocalEnergyPoolShardCoord());
-    uint128 seedEnergy = ObjectPhysics.getEnergy(ObjectTypes.WheatSeed);
 
     uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
 
@@ -209,10 +208,9 @@ contract FarmingTest is DustTest {
     assertTrue(TestEntityUtils.exists(cropEntityId), "Crop entity doesn't exist after planting");
     assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.WheatSeed, "Wheat seeds were not planted correctly");
 
-    // Verify energy was taken from local pool
     assertEq(
       LocalEnergyPool.get(farmlandCoord.toLocalEnergyPoolShardCoord()),
-      initialLocalEnergy + BUILD_ENERGY_COST - seedEnergy,
+      initialLocalEnergy + BUILD_ENERGY_COST - ObjectTypes.WheatSeed.getGrowableEnergy(),
       "Energy not correctly taken from local pool"
     );
 
@@ -322,9 +320,6 @@ contract FarmingTest is DustTest {
 
     Vec3 cropCoord = farmlandCoord + vec3(0, 1, 0);
 
-    // Get initial energy
-    uint128 seedEnergy = ObjectPhysics.getEnergy(ObjectTypes.WheatSeed);
-
     uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
 
     // Plant wheat seeds
@@ -369,7 +364,7 @@ contract FarmingTest is DustTest {
     // Note: currently player's energy is only decreased if the
     assertEq(
       LocalEnergyPool.get(farmlandCoord.toLocalEnergyPoolShardCoord()),
-      beforeHarvestEnergy + seedEnergy,
+      beforeHarvestEnergy + ObjectTypes.WheatSeed.getGrowableEnergy(),
       "Energy not correctly returned to local pool"
     );
   }

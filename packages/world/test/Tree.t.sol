@@ -9,7 +9,6 @@ import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
-import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 import { SeedGrowth } from "../src/codegen/tables/SeedGrowth.sol";
@@ -63,7 +62,6 @@ contract TreeTest is DustTest {
 
     // Check initial local energy pool
     uint128 initialLocalEnergy = LocalEnergyPool.get(dirtCoord.toLocalEnergyPoolShardCoord());
-    uint128 seedEnergy = ObjectPhysics.getEnergy(ObjectTypes.OakSapling);
 
     // Plant oak seeds
     Vec3 seedCoord = dirtCoord + vec3(0, 1, 0);
@@ -79,7 +77,7 @@ contract TreeTest is DustTest {
     // Verify energy was taken from local pool
     assertEq(
       LocalEnergyPool.get(dirtCoord.toLocalEnergyPoolShardCoord()),
-      initialLocalEnergy + BUILD_ENERGY_COST - seedEnergy,
+      initialLocalEnergy + BUILD_ENERGY_COST - ObjectTypes.OakSapling.getGrowableEnergy(),
       "Energy not correctly taken from local pool"
     );
 
@@ -287,9 +285,6 @@ contract TreeTest is DustTest {
     (EntityId seedEntityId, ObjectType seedType) = TestEntityUtils.getBlockAt(seedCoord);
     assertEq(seedType, ObjectTypes.OakSapling, "Seed object type not set");
 
-    // Get initial energy
-    uint128 seedEnergy = ObjectPhysics.getEnergy(ObjectTypes.OakSapling);
-
     // Get full grown time
     uint128 fullyGrownAt = SeedGrowth.getFullyGrownAt(seedEntityId);
 
@@ -324,7 +319,7 @@ contract TreeTest is DustTest {
     // Verify energy was returned to local pool
     assertEq(
       LocalEnergyPool.get(dirtCoord.toLocalEnergyPoolShardCoord()),
-      beforeHarvestEnergy + seedEnergy,
+      beforeHarvestEnergy + ObjectTypes.OakSapling.getGrowableEnergy(),
       "Energy not correctly returned to local pool"
     );
   }

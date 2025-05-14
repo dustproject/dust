@@ -37,10 +37,10 @@ function validateSeeds() {
     if (seed.mass !== undefined) {
       throw new Error(`Seed ${seed.name} has mass`);
     }
-    if (seed.energy === undefined) {
+    if (seed.growableEnergy === undefined) {
       throw new Error(`Seed ${seed.name} has no energy`);
     }
-    const totalOutputMassEnergy = seed.energy;
+    const totalOutputMassEnergy = seed.growableEnergy;
     if (totalInputMassEnergy !== totalOutputMassEnergy) {
       throw new Error(
         `Seed ${seed.name} does not maintain mass+energy balance ${totalInputMassEnergy} != ${totalOutputMassEnergy}`,

@@ -105,11 +105,11 @@ contract NatureSystem is System {
 
       (uint32 trunkHeight, uint32 leaves) = _growTree(seed, coord, treeData, objectType);
 
-      uint128 seedEnergy = ObjectPhysics._getEnergy(objectType);
+      uint128 growableEnergy = objectType.getGrowableEnergy();
       uint128 trunkEnergy = trunkHeight * ObjectPhysics._getEnergy(treeData.logType);
       uint128 leafEnergy = leaves * ObjectPhysics._getEnergy(treeData.leafType);
 
-      uint128 energyToReturn = seedEnergy - trunkEnergy - leafEnergy;
+      uint128 energyToReturn = growableEnergy - trunkEnergy - leafEnergy;
 
       if (energyToReturn > 0) {
         addEnergyToLocalPool(coord, energyToReturn);
