@@ -20,6 +20,7 @@ import { privateKeyToAccount } from "viem/accounts";
 
 dotenv.config();
 
+// TODO: generalize to work with any chain
 export function getWorldAddress() {
   const worldAddress = worldsJson[mudFoundry.id]?.address;
   if (!worldAddress) {
@@ -76,6 +77,7 @@ async function registerApp() {
   });
 
   console.info("registering app namespace", appNamespaceId);
+  // TODO: consolidate common code
   let txHash: Hex;
   try {
     txHash = await walletClient.writeContract({
