@@ -6,8 +6,6 @@ import { Direction } from "./codegen/common.sol";
 import { IMachineSystem } from "./codegen/world/IMachineSystem.sol";
 import { ITransferSystem } from "./codegen/world/ITransferSystem.sol";
 
-import { PerfectHashLib } from "./utils/PerfectHashLib.sol";
-
 type ObjectType is uint16;
 
 // Structs
@@ -24,39 +22,6 @@ uint16 constant BLOCK_CATEGORY_COUNT = 256 / 2; // 128
 library Category {
   // Meta Category Masks (fits within uint256; mask bit k set if raw category ID k belongs)
   uint256 constant BLOCK_MASK = uint256(type(uint128).max);
-
-  bytes constant NON_SOLID_TABLE = hex"02000100ffff";
-  bytes constant ANY_TABLE = hex"420039002b007c00ffff";
-  bytes constant ORE_TABLE = hex"2100240023001f00200022001e00ffffffff";
-  bytes constant LOG_TABLE = hex"41003a003e003f0040003c003b003d00ffffffff";
-  bytes constant LEAF_TABLE = hex"490044004c004b004700480043004a004e00460045004d00ffffffffffff";
-  bytes constant PLANK_TABLE = hex"83007f00810084007e007d0080008200ffffffff";
-  bytes constant SEED_TABLE = hex"8c008a008b00ffff";
-  bytes constant SAPLING_TABLE = hex"91008f0092008e0093008d0094009000ffffffff";
-  bytes constant SMART_ENTITY_TABLE = hex"98009700b80095009600ffffffff";
-  bytes constant STATION_TABLE = hex"9b0099009a00ffff";
-  bytes constant PICK_TABLE = hex"a1009e00a200a0009f009d00ffffffff";
-  bytes constant AXE_TABLE = hex"a800a500a400a300a600a700ffffffff";
-  bytes constant HOE_TABLE = hex"ac00ffff";
-  bytes constant WHACKER_TABLE = hex"a900aa00ab00ffff";
-  bytes constant ORE_BAR_TABLE = hex"ae00af00b000ad00ffff";
-  bytes constant FOOD_TABLE = hex"b300b500b400ffff";
-  bytes constant FUEL_TABLE = hex"b600ffff";
-  bytes constant PLAYER_TABLE = hex"b700ffff";
-  bytes constant EXTRA_DROPS_TABLE =
-    hex"5c006a0066005f006100640062005d0047005b004800670046004300690045004c004e006d0065004900440063004b006c0068004a006b005e004d006000ffffffffffffffffffffffffffffffff";
-  bytes constant HAS_AXE_MULTIPLIER_TABLE =
-    hex"96006d004e004d007f0097006b00670043008000990047006c004c00680046003d0045007e00400069007b004b003f006a007d0044004800980082008100840083003b003e0041009c0049003c003a004a00ffffffffffffffffffffffffffffffffffffffff";
-  bytes constant HAS_PICK_MULTIPLIER_TABLE =
-    hex"880035003800860034000d0031000e002f002c00120010000b0089009a00200009000f00220014002b000c0006003000850007002e0011000a00320095000400370033001f00030013002d0021009b00230036000500240087000800ffffffffffffffffffffffffffffffffffffffffffff";
-  bytes constant PASS_THROUGH_TABLE =
-    hex"70005f006e005e005c005b006400520094008a006500900063008b006600580056005d000100570051005a0093008f008d00600062005300610055009100020050008e006f0054004f009c00920059008c00ffffffffffffffffffffffffffffffffffffffff";
-  bytes constant GROWABLE_TABLE = hex"9400920090008f008c008a008e00930091008d008b00ffffffffffff";
-  bytes constant UNIQUE_OBJECT_TABLE =
-    hex"9800a800a000a900a700a6009e00a400ac00b20095009d00a200b100aa00ab00a5009f00a3009700a100ffffffffffffffffffff";
-  bytes constant TOOL_TABLE = hex"a300a600a2009f00a800a5009d00ac00aa00a000a4009e00a900a100ab00a700ffffffffffffffff";
-  bytes constant TILLABLE_TABLE = hex"16001500ffff";
-  bytes constant MACHINE_TABLE = hex"9500ffff";
 }
 
 // ------------------------------------------------------------
@@ -269,244 +234,809 @@ library ObjectTypeLib {
 
   // Direct Category Checks
 
-  function isNonSolid(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 3, 143321960123805, 131073, 0, 0, 0);
-    if (slot >= Category.NON_SOLID_TABLE.length) return false;
-    uint16 ref =
-      uint16(uint8(Category.NON_SOLID_TABLE[slot * 2])) | (uint16(uint8(Category.NON_SOLID_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isNonSolid(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..2] in one word
+      function gByte(i) -> b {
+        b := byte(i, 452326652075959969500899029701911694102740779818102794052241512579358261248)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 36387)), 0xFF)
+      let h1 := and(shr(8, mul(id, 30927)), 0xFF)
+      let h2 := and(shr(8, mul(id, 59677)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 3)), add(gByte(mod(h1, 3)), gByte(mod(h2, 3))))
+      slot := addmod(slot, 0, 3) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 281470681874433
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isAny(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 5, 24452023150891, 8657240576, 0, 0, 0);
-    if (slot >= Category.ANY_TABLE.length) return false;
-    uint16 ref = uint16(uint8(Category.ANY_TABLE[slot * 2])) | (uint16(uint8(Category.ANY_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isAny(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..4] in one word
+      function gByte(i) -> b {
+        b := byte(i, 1360492945329020888807615753235470143630860818558933299714400485076610580480)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 50185)), 0xFF)
+      let h1 := and(shr(8, mul(id, 65303)), 0xFF)
+      let h2 := and(shr(8, mul(id, 57935)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 5)), add(gByte(mod(h1, 5)), gByte(mod(h2, 5))))
+      slot := addmod(slot, 0, 5) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 1208907391448436507738155
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isOre(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 9, 66348214499949, 562984397439232, 0, 0, 0);
-    if (slot >= Category.ORE_TABLE.length) return false;
-    uint16 ref = uint16(uint8(Category.ORE_TABLE[slot * 2])) | (uint16(uint8(Category.ORE_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isOre(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..8] in one word
+      function gByte(i) -> b {
+        b := byte(i, 10656512041499105264260086188907376938030111411171137687072325998959656960)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 14261)), 0xFF)
+      let h1 := and(shr(8, mul(id, 57329)), 0xFF)
+      let h2 := and(shr(8, mul(id, 27411)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 9)), add(gByte(mod(h1, 9)), gByte(mod(h2, 9))))
+      slot := addmod(slot, 0, 9) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 22300745193341099306166217502292977861787681
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isLog(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 10, 251710452733513, 55774837281802093063, 0, 0, 0);
-    if (slot >= Category.LOG_TABLE.length) return false;
-    uint16 ref = uint16(uint8(Category.LOG_TABLE[slot * 2])) | (uint16(uint8(Category.LOG_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isLog(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..9] in one word
+      function gByte(i) -> b {
+        b := byte(i, 3627337213657461937142115707151136226846698972963216681130983074704536895488)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 45595)), 0xFF)
+      let h1 := and(shr(8, mul(id, 16675)), 0xFF)
+      let h2 := and(shr(8, mul(id, 37663)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 10)), add(gByte(mod(h1, 10)), gByte(mod(h2, 10))))
+      slot := addmod(slot, 0, 10) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 1461501636990926901630387956257476049351913439297
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isLeaf(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 15, 189637935363955, 102525584755242348622506768468736, 0, 0, 0);
-    if (slot >= Category.LEAF_TABLE.length) return false;
-    uint16 ref = uint16(uint8(Category.LEAF_TABLE[slot * 2])) | (uint16(uint8(Category.LEAF_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isLeaf(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..14] in one word
+      function gByte(i) -> b {
+        b := byte(i, 6351849707455009884420264545062848978040678997249469723480446843129859932160)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 14945)), 0xFF)
+      let h1 := and(shr(8, mul(id, 26193)), 0xFF)
+      let h2 := and(shr(8, mul(id, 63523)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 15)), add(gByte(mod(h1, 15)), gByte(mod(h2, 15))))
+      slot := addmod(slot, 0, 15) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 1766847064778378059282119229492879835942430191645452838232319899558477900
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isPlank(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 10, 225295998591699, 42557216446201009800713, 0, 0, 0);
-    if (slot >= Category.PLANK_TABLE.length) return false;
-    uint16 ref =
-      uint16(uint8(Category.PLANK_TABLE[slot * 2])) | (uint16(uint8(Category.PLANK_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isPlank(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..9] in one word
+      function gByte(i) -> b {
+        b := byte(i, 12368119122545990090712379808429105654012232204985129870119925677159350272)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 26613)), 0xFF)
+      let h1 := and(shr(8, mul(id, 16415)), 0xFF)
+      let h2 := and(shr(8, mul(id, 52547)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 10)), add(gByte(mod(h1, 10)), gByte(mod(h2, 10))))
+      slot := addmod(slot, 0, 10) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 1461501636991295559857257909637573630033672536193
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isSeed(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 4, 149340974706253, 131842, 0, 0, 0);
-    if (slot >= Category.SEED_TABLE.length) return false;
-    uint16 ref = uint16(uint8(Category.SEED_TABLE[slot * 2])) | (uint16(uint8(Category.SEED_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isSeed(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..3] in one word
+      function gByte(i) -> b {
+        b := byte(i, 1780677517418632607797961679482559586363059751964382271804412353350467584)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 34459)), 0xFF)
+      let h1 := and(shr(8, mul(id, 8145)), 0xFF)
+      let h2 := and(shr(8, mul(id, 10695)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 4)), add(gByte(mod(h1, 4)), gByte(mod(h2, 4))))
+      slot := addmod(slot, 0, 4) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 18446463200037372042
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isSapling(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 10, 195600792509543, 33093458870434026030592, 0, 0, 0);
-    if (slot >= Category.SAPLING_TABLE.length) return false;
-    uint16 ref =
-      uint16(uint8(Category.SAPLING_TABLE[slot * 2])) | (uint16(uint8(Category.SAPLING_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isSapling(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..9] in one word
+      function gByte(i) -> b {
+        b := byte(i, 2713939208168235694692784837415668337665417169240240971229142815467263492096)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 49281)), 0xFF)
+      let h1 := and(shr(8, mul(id, 28797)), 0xFF)
+      let h2 := and(shr(8, mul(id, 29811)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 10)), add(gByte(mod(h1, 10)), gByte(mod(h2, 10))))
+      slot := addmod(slot, 0, 10) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 1461501636991357869004145338814310190328119754896
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isSmartEntity(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 7, 45660218450675, 4328653829, 0, 0, 0);
-    if (slot >= Category.SMART_ENTITY_TABLE.length) return false;
-    uint16 ref = uint16(uint8(Category.SMART_ENTITY_TABLE[slot * 2]))
-      | (uint16(uint8(Category.SMART_ENTITY_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isSmartEntity(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..6] in one word
+      function gByte(i) -> b {
+        b := byte(i, 1809279055238355691677991523059881094120968709086426472961853059184770154496)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 27181)), 0xFF)
+      let h1 := and(shr(8, mul(id, 10081)), 0xFF)
+      let h2 := and(shr(8, mul(id, 4567)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 7)), add(gByte(mod(h1, 7)), gByte(mod(h2, 7))))
+      slot := addmod(slot, 0, 7) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 5192296857328650425574889847521431
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isStation(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 4, 168265511203861, 65538, 0, 0, 0);
-    if (slot >= Category.STATION_TABLE.length) return false;
-    uint16 ref =
-      uint16(uint8(Category.STATION_TABLE[slot * 2])) | (uint16(uint8(Category.STATION_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isStation(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..3] in one word
+      function gByte(i) -> b {
+        b := byte(i, 5314344687028734116324762013953309598387353908571197647475143652325457920)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 34531)), 0xFF)
+      let h1 := and(shr(8, mul(id, 15205)), 0xFF)
+      let h2 := and(shr(8, mul(id, 3163)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 4)), add(gByte(mod(h1, 4)), gByte(mod(h2, 4))))
+      slot := addmod(slot, 0, 4) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 18446463264462799002
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isPick(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 8, 252559159035903, 1408504493966080, 0, 0, 0);
-    if (slot >= Category.PICK_TABLE.length) return false;
-    uint16 ref = uint16(uint8(Category.PICK_TABLE[slot * 2])) | (uint16(uint8(Category.PICK_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isPick(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..7] in one word
+      function gByte(i) -> b {
+        b := byte(i, 2273932200069792992810861301742390898252139108155050725518848539100352348160)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 28211)), 0xFF)
+      let h1 := and(shr(8, mul(id, 11767)), 0xFF)
+      let h2 := and(shr(8, mul(id, 34197)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 8)), add(gByte(mod(h1, 8)), gByte(mod(h2, 8))))
+      slot := addmod(slot, 0, 8) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 340282366841904940994484957334848077982
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isAxe(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 8, 122492379559057, 72063113188343812, 0, 0, 0);
-    if (slot >= Category.AXE_TABLE.length) return false;
-    uint16 ref = uint16(uint8(Category.AXE_TABLE[slot * 2])) | (uint16(uint8(Category.AXE_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isAxe(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..7] in one word
+      function gByte(i) -> b {
+        b := byte(i, 3178592405228000500581818355950704396819431786765318781662581092269735018496)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 57899)), 0xFF)
+      let h1 := and(shr(8, mul(id, 24857)), 0xFF)
+      let h2 := and(shr(8, mul(id, 44439)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 8)), add(gByte(mod(h1, 8)), gByte(mod(h2, 8))))
+      slot := addmod(slot, 0, 8) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 340282366841909776789998825095725056168
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isHoe(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 2, 258151333849345, 0, 0, 0, 0);
-    if (slot >= Category.HOE_TABLE.length) return false;
-    uint16 ref = uint16(uint8(Category.HOE_TABLE[slot * 2])) | (uint16(uint8(Category.HOE_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isHoe(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..1] in one word
+      function gByte(i) -> b {
+        b := byte(i, 0)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 5751)), 0xFF)
+      let h1 := and(shr(8, mul(id, 46457)), 0xFF)
+      let h2 := and(shr(8, mul(id, 44467)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 2)), add(gByte(mod(h1, 2)), gByte(mod(h2, 2))))
+      slot := addmod(slot, 0, 2) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 4294901932
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isWhacker(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 4, 32708862885525, 50332163, 0, 0, 0);
-    if (slot >= Category.WHACKER_TABLE.length) return false;
-    uint16 ref =
-      uint16(uint8(Category.WHACKER_TABLE[slot * 2])) | (uint16(uint8(Category.WHACKER_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isWhacker(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..3] in one word
+      function gByte(i) -> b {
+        b := byte(i, 1360486043372049514906713945083771811238067502812170938526747100043764826112)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 59175)), 0xFF)
+      let h1 := and(shr(8, mul(id, 31273)), 0xFF)
+      let h2 := and(shr(8, mul(id, 12597)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 4)), add(gByte(mod(h1, 4)), gByte(mod(h2, 4))))
+      slot := addmod(slot, 0, 4) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 18446463328888357035
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isOreBar(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 5, 110817901266753, 17246978819, 0, 0, 0);
-    if (slot >= Category.ORE_BAR_TABLE.length) return false;
-    uint16 ref =
-      uint16(uint8(Category.ORE_BAR_TABLE[slot * 2])) | (uint16(uint8(Category.ORE_BAR_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isOreBar(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..4] in one word
+      function gByte(i) -> b {
+        b := byte(i, 1809251502488789097101527379522562991336877501905896789480462008301016580096)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 887)), 0xFF)
+      let h1 := and(shr(8, mul(id, 12559)), 0xFF)
+      let h2 := and(shr(8, mul(id, 29975)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 5)), add(gByte(mod(h1, 5)), gByte(mod(h2, 5))))
+      slot := addmod(slot, 0, 5) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 1208907421566478066778288
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isFood(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 4, 3287736900369, 33619971, 0, 0, 0);
-    if (slot >= Category.FOOD_TABLE.length) return false;
-    uint16 ref = uint16(uint8(Category.FOOD_TABLE[slot * 2])) | (uint16(uint8(Category.FOOD_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isFood(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..3] in one word
+      function gByte(i) -> b {
+        b := byte(i, 904632598912879567310435755136236557129124206309289076944817537586045124608)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 12169)), 0xFF)
+      let h1 := and(shr(8, mul(id, 9057)), 0xFF)
+      let h2 := and(shr(8, mul(id, 37691)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 4)), add(gByte(mod(h1, 4)), gByte(mod(h2, 4))))
+      slot := addmod(slot, 0, 4) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 18446463376133652660
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isFuel(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 2, 133692510690517, 0, 0, 0, 0);
-    if (slot >= Category.FUEL_TABLE.length) return false;
-    uint16 ref = uint16(uint8(Category.FUEL_TABLE[slot * 2])) | (uint16(uint8(Category.FUEL_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isFuel(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..1] in one word
+      function gByte(i) -> b {
+        b := byte(i, 0)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 62005)), 0xFF)
+      let h1 := and(shr(8, mul(id, 57989)), 0xFF)
+      let h2 := and(shr(8, mul(id, 5005)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 2)), add(gByte(mod(h1, 2)), gByte(mod(h2, 2))))
+      slot := addmod(slot, 0, 2) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 4294901942
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isPlayer(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 2, 1817254645479, 0, 0, 0, 0);
-    if (slot >= Category.PLAYER_TABLE.length) return false;
-    uint16 ref =
-      uint16(uint8(Category.PLAYER_TABLE[slot * 2])) | (uint16(uint8(Category.PLAYER_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isPlayer(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..1] in one word
+      function gByte(i) -> b {
+        b := byte(i, 0)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 49499)), 0xFF)
+      let h1 := and(shr(8, mul(id, 9695)), 0xFF)
+      let h2 := and(shr(8, mul(id, 37495)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 2)), add(gByte(mod(h1, 2)), gByte(mod(h2, 2))))
+      slot := addmod(slot, 0, 2) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 4294901943
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function hasExtraDrops(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(
-      self.unwrap(),
-      39,
-      181596937236495,
-      10857323528762962877790297978171590394234585045700985605122058093066696589339,
-      9588961164918796,
-      0,
-      0
-    );
-    if (slot >= Category.EXTRA_DROPS_TABLE.length) return false;
-    uint16 ref = uint16(uint8(Category.EXTRA_DROPS_TABLE[slot * 2]))
-      | (uint16(uint8(Category.EXTRA_DROPS_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function hasExtraDrops(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      function gByte(i) -> b {
+        let off := and(i, 31) // idx within word
+        switch shr(5, i)
+          // word 0..1
+        case 0 { b := byte(off, 11760135089550039445254600977187564053549231349426707298275149585207563328540) }
+        case 1 { b := byte(off, 14504158713259495667629752866170850055048122198623278914947149467885622001664) }
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 49939)), 0xFF)
+      let h1 := and(shr(8, mul(id, 40509)), 0xFF)
+      let h2 := and(shr(8, mul(id, 61403)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 39)), add(gByte(mod(h1, 39)), gByte(mod(h2, 39))))
+      slot := addmod(slot, 0, 39) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+
+      let w
+      switch shr(4, slot)
+        // slot / 16
+      case 0 { w := 130749486665489473308047427782494228322415813307753690869166324054694953055 }
+      case 1 { w := 115790325248037028776925143150719525901128972406273603203012746550152316846180 }
+      default { w := 5192296858534827628530496329220095 }
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function hasAxeMultiplier(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(
-      self.unwrap(),
-      51,
-      174148059996017,
-      22682969802234899553799548914166459880266022954338992727577022206492335147539,
-      960252339328792737424758207654343992645718318,
-      0,
-      0
-    );
-    if (slot >= Category.HAS_AXE_MULTIPLIER_TABLE.length) return false;
-    uint16 ref = uint16(uint8(Category.HAS_AXE_MULTIPLIER_TABLE[slot * 2]))
-      | (uint16(uint8(Category.HAS_AXE_MULTIPLIER_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function hasAxeMultiplier(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      function gByte(i) -> b {
+        let off := and(i, 31) // idx within word
+        switch shr(5, i)
+          // word 0..1
+        case 0 { b := byte(off, 1105690205424847211141004283391727110801588672735963595760834635441152) }
+        case 1 { b := byte(off, 60073720748789420709773322823776498067480739937762600875663438495594053632) }
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 8655)), 0xFF)
+      let h1 := and(shr(8, mul(id, 61409)), 0xFF)
+      let h2 := and(shr(8, mul(id, 24371)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 51)), add(gByte(mod(h1, 51)), gByte(mod(h2, 51))))
+      slot := addmod(slot, 0, 51) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+
+      let w
+      switch shr(4, slot)
+        // slot / 16
+      case 0 { w := 189054684918910580369645037601081869872295635562812956377565267738509246616 }
+      case 1 { w := 118380586641619519059196439391103526569069078332552046793014421370381074503 }
+      case 2 { w := 115792089237316195423570985008687885588595028576352080733761963979822988263498 }
+      default { w := 281474976710655 }
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function hasPickMultiplier(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(
-      self.unwrap(),
-      57,
-      105052087878949,
-      35267825274476258440231930403503750523327529276876511133624045323291912,
-      1055410522834334618537999688236362741795992136724854026001,
-      0,
-      0
-    );
-    if (slot >= Category.HAS_PICK_MULTIPLIER_TABLE.length) return false;
-    uint16 ref = uint16(uint8(Category.HAS_PICK_MULTIPLIER_TABLE[slot * 2]))
-      | (uint16(uint8(Category.HAS_PICK_MULTIPLIER_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function hasPickMultiplier(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      function gByte(i) -> b {
+        let off := and(i, 31) // idx within word
+        switch shr(5, i)
+          // word 0..1
+        case 0 { b := byte(off, 18544930321606643743928591734329299274862808522273801038975799942915524598580) }
+        case 1 { b := byte(off, 7772409767920030684479211373823448752408729911466445772426046560834957606912) }
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 27413)), 0xFF)
+      let h1 := and(shr(8, mul(id, 42803)), 0xFF)
+      let h2 := and(shr(8, mul(id, 64635)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 57)), add(gByte(mod(h1, 57)), gByte(mod(h2, 57))))
+      slot := addmod(slot, 0, 57) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+
+      let w
+      switch shr(4, slot)
+        // slot / 16
+      case 0 { w := 272095715095832843616285400521235469924955107797037820012398116159897403525 }
+      case 1 { w := 26502813826271993406626741558814342467197055333509669126180448726710026273 }
+      case 2 { w := 115792089210358305950972945582495091782445466314013416072255640336758962585631 }
+      default { w := 22300745198530623141535718272648361505980415 }
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isPassThrough(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(
-      self.unwrap(),
-      51,
-      42542276262987,
-      5936641482165689760698183665326365276466101464614680389770891118054998878756,
-      693588072428566926853167414526030887127220758,
-      0,
-      0
-    );
-    if (slot >= Category.PASS_THROUGH_TABLE.length) return false;
-    uint16 ref = uint16(uint8(Category.PASS_THROUGH_TABLE[slot * 2]))
-      | (uint16(uint8(Category.PASS_THROUGH_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isPassThrough(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      function gByte(i) -> b {
+        let off := and(i, 31) // idx within word
+        switch shr(5, i)
+          // word 0..1
+        case 0 { b := byte(off, 42742515760015969613707001518721370492102930437083464472115312846366904107) }
+        case 1 { b := byte(off, 22243010890354258988886670783601293153040808928678678296686724293858200387584) }
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 15059)), 0xFF)
+      let h1 := and(shr(8, mul(id, 37823)), 0xFF)
+      let h2 := and(shr(8, mul(id, 28743)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 51)), add(gByte(mod(h1, 51)), gByte(mod(h2, 51))))
+      slot := addmod(slot, 0, 51) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+
+      let w
+      switch shr(4, slot)
+        // slot / 16
+      case 0 { w := 173153330962933900084662030983032808002600168031617633767763600302303150192 }
+      case 1 { w := 148417741630409472458196858217802031214650272879760913826548812696502599777 }
+      case 2 { w := 115792089237316195423570985008687885553206088186580621027997312973068298944513 }
+      default { w := 281474976710655 }
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isGrowable(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 14, 194180663053189, 636934709269134123847762577665, 0, 0, 0);
-    if (slot >= Category.GROWABLE_TABLE.length) return false;
-    uint16 ref =
-      uint16(uint8(Category.GROWABLE_TABLE[slot * 2])) | (uint16(uint8(Category.GROWABLE_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isGrowable(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..13] in one word
+      function gByte(i) -> b {
+        b := byte(i, 2277479939908689553362182879120440772815617739113806198877562545562129006592)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 47771)), 0xFF)
+      let h1 := and(shr(8, mul(id, 4099)), 0xFF)
+      let h2 := and(shr(8, mul(id, 24671)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 14)), add(gByte(mod(h1, 14)), gByte(mod(h2, 14))))
+      slot := addmod(slot, 0, 14) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 26959946667150544225616637436831140100204489502055291229380340285588
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isUniqueObject(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(
-      self.unwrap(), 26, 154480080657307, 16151546728409508996330591791804458706122490004555347597331207, 0, 0, 0
-    );
-    if (slot >= Category.UNIQUE_OBJECT_TABLE.length) return false;
-    uint16 ref = uint16(uint8(Category.UNIQUE_OBJECT_TABLE[slot * 2]))
-      | (uint16(uint8(Category.UNIQUE_OBJECT_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isUniqueObject(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..25] in one word
+      function gByte(i) -> b {
+        b := byte(i, 17841311287567819656795847928944003124805419649692877805659959172253351936)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 54247)), 0xFF)
+      let h1 := and(shr(8, mul(id, 5799)), 0xFF)
+      let h2 := and(shr(8, mul(id, 60947)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 26)), add(gByte(mod(h1, 26)), gByte(mod(h2, 26))))
+      slot := addmod(slot, 0, 26) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+
+      let w
+      switch shr(4, slot)
+        // slot / 16
+      case 0 { w := 296834323980643102965667306663876101216582742950427881583376826255754395819 }
+      default { w := 1461501637330902918203683627055581861320505884850 }
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isTool(ObjectType self) internal pure returns (bool) {
-    uint8 slot =
-      PerfectHashLib.slot(self.unwrap(), 20, 122282106499733, 80327635376510271994904071092573083181678662400, 0, 0, 0);
-    if (slot >= Category.TOOL_TABLE.length) return false;
-    uint16 ref = uint16(uint8(Category.TOOL_TABLE[slot * 2])) | (uint16(uint8(Category.TOOL_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isTool(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..19] in one word
+      function gByte(i) -> b {
+        b := byte(i, 6784741040979598916902094215048625576941674528585235167622736123937236713472)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 43265)), 0xFF)
+      let h1 := and(shr(8, mul(id, 29637)), 0xFF)
+      let h2 := and(shr(8, mul(id, 32883)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 20)), add(gByte(mod(h1, 20)), gByte(mod(h2, 20))))
+      slot := addmod(slot, 0, 20) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+
+      let w
+      switch shr(4, slot)
+        // slot / 16
+      case 0 { w := 302135134774445059280622057217338339497320721794262367051805622344085799082 }
+      default { w := 18446744073709551615 }
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isTillable(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 3, 237595900998823, 257, 0, 0, 0);
-    if (slot >= Category.TILLABLE_TABLE.length) return false;
-    uint16 ref =
-      uint16(uint8(Category.TILLABLE_TABLE[slot * 2])) | (uint16(uint8(Category.TILLABLE_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isTillable(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..2] in one word
+      function gByte(i) -> b {
+        b := byte(i, 454079695648044772702907457690930058567663361497034072237252793732203282432)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 47837)), 0xFF)
+      let h1 := and(shr(8, mul(id, 45165)), 0xFF)
+      let h2 := and(shr(8, mul(id, 42127)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 3)), add(gByte(mod(h1, 3)), gByte(mod(h2, 3))))
+      slot := addmod(slot, 0, 3) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 281470683185173
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
-  function isMachine(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 2, 230043901093225, 0, 0, 0, 0);
-    if (slot >= Category.MACHINE_TABLE.length) return false;
-    uint16 ref =
-      uint16(uint8(Category.MACHINE_TABLE[slot * 2])) | (uint16(uint8(Category.MACHINE_TABLE[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function isMachine(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self); // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      // g[0..1] in one word
+      function gByte(i) -> b {
+        b := byte(i, 0)
+      }
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, 1157)), 0xFF)
+      let h1 := and(shr(8, mul(id, 60967)), 0xFF)
+      let h2 := and(shr(8, mul(id, 32613)), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, 2)), add(gByte(mod(h1, 2)), gByte(mod(h2, 2))))
+      slot := addmod(slot, 0, 2) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      let w := 4294901909
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is := eq(ref, id)
+    }
   }
 
   // Category getters

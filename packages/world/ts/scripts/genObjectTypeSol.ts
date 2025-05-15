@@ -16,24 +16,68 @@ for (const [name, data] of Object.entries(categories)) {
   buckets[name] = bucket;
 }
 
-function renderCategoryTable(name: string): string {
-  const table = `${Buffer.from(buckets[name]!.table).toString("hex")}`;
-  return `bytes constant ${constName(name)}_TABLE = hex"${table}";`;
-}
+// function renderCategoryTable(name: string): string {
+// const table = `${Buffer.from(buckets[name]!.table).toString("hex")}`;
+// return `bytes constant ${constName(name)}_TABLE = hex"${table}";`;
+// }
 
 function renderCategoryCheck(name: string): string {
   const { checkName } = categories[name]!;
-  const functionName = checkName ?? `is${name}`;
-  const { S, packedA, gWords } = buckets[name]!;
-  const tableName = `${constName(name)}_TABLE`;
+  const fn = checkName ?? `is${name}`;
+  const { S, A, G, table } = buckets[name]!; // G & table already 0x… big-endian
+
+  /* ---------- gByte helper ---------------------------------- */
+  const numG = Math.ceil(S / 32); // 1‥4 words
+  const gByte =
+    numG === 1
+      ? // single word → one BYTE, no switch
+        `// g[0..${S - 1}] in one word
+        function gByte(i) -> b { b := byte(i, ${G[0]}) }`
+      : // 2‥4 words → BYTE + tiny switch
+        `function gByte(i) -> b {
+            let off := and(i, 31)              // idx within word
+            switch shr(5, i)                   // word 0..${numG - 1}
+        ${G.slice(0, numG)
+          .map((w, i) => `case ${i} { b := byte(off, ${w}) }`)
+          .join("\n            ")}
+        }`;
+
+  /* ---------- slot→id table --------------------------------- */
+  const tableSwitch =
+    table.length === 1
+      ? `let w := ${table[0]}` // S ≤ 16 – single PUSH32
+      : `
+        let w
+        switch shr(4, slot)                     // slot / 16
+        ${table
+          .map((w, i, arr) => (i === arr.length - 1 ? `default { w := ${w} }` : `case ${i} { w := ${w} }`))
+          .join("\n        ")}`;
+
+  /* ---------- function body --------------------------------- */
   return `
-  function ${functionName}(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), ${S}, ${packedA}, ${gWords.join(", ")});
-    if (slot >= Category.${tableName}.length) return false;
-    uint16 ref =
-        uint16(uint8(Category.${tableName}[slot * 2])) |
-        (uint16(uint8(Category.${tableName}[slot * 2 + 1])) << 8);
-    return ref == self.unwrap();
+  function ${fn}(ObjectType self) internal pure returns (bool _is) {
+    uint16 id = ObjectType.unwrap(self);      // 2-byte key
+
+    /// @solidity memory-safe-assembly
+    assembly {
+      /* g[idx] ------------------------------------------------ */
+      ${gByte}
+
+      /* three 16-bit hashes ---------------------------------- */
+      let h0 := and(shr(8, mul(id, ${A[0]})), 0xFF)
+      let h1 := and(shr(8, mul(id, ${A[1]})), 0xFF)
+      let h2 := and(shr(8, mul(id, ${A[2]})), 0xFF)
+
+      /* g look-ups + final mod ------------------------------- */
+      let slot := add(gByte(mod(h0, ${S})), add(gByte(mod(h1, ${S})), gByte(mod(h2, ${S}))))
+      slot := addmod(slot, 0, ${S}) // 0‥S-1
+
+      /* slot → id table -------------------------------------- */
+      ${tableSwitch}
+
+      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
+      _is   := eq(ref, id)
+    }
   }
   `;
 }
@@ -51,7 +95,6 @@ import { IMachineSystem } from "./codegen/world/IMachineSystem.sol";
 import { ITransferSystem } from "./codegen/world/ITransferSystem.sol";
 import { Direction } from "./codegen/common.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
-import { PerfectHashLib } from "./utils/PerfectHashLib.sol";
 
 type ObjectType is uint16;
 
@@ -70,9 +113,6 @@ library Category {
   // Meta Category Masks (fits within uint256; mask bit k set if raw category ID k belongs)
   uint256 constant BLOCK_MASK = uint256(type(uint128).max);
 
-  ${Object.keys(categories)
-    .map((name) => renderCategoryTable(name))
-    .join("\n")}
 }
 
 // ------------------------------------------------------------

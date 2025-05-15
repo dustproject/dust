@@ -1,8 +1,8 @@
 export interface Bucket {
   S: number; // Number of slots
-  packedA: bigint; // Packed hash multipliers (uint48)
-  gWords: bigint[]; // 1–4 uint256 words for g values
-  table: Uint8Array; // Lookup table (2 × S bytes)
+  A: [number, number, number]; // hash multipliers
+  G: [bigint, bigint, bigint, bigint]; // 1–4 uint256 words for g values
+  table: bigint[]; // Lookup table (2 × S bytes)
 }
 
 export function buildBucket(ids: number[]): Bucket {
@@ -17,8 +17,12 @@ export function buildBucket(ids: number[]): Bucket {
   const hash = (id: number, A: number): number => ((id * A) >> 8) & 0xff;
 
   while (true) {
-    const [A0, A1, A2] = [odd16(), odd16(), odd16()];
-    const edges: [number, number, number][] = ids.map((id) => [hash(id, A0) % S, hash(id, A1) % S, hash(id, A2) % S]);
+    const A: [number, number, number] = [odd16(), odd16(), odd16()];
+    const edges: [number, number, number][] = ids.map((id) => [
+      hash(id, A[0]) % S,
+      hash(id, A[1]) % S,
+      hash(id, A[2]) % S,
+    ]);
 
     // Peeling process with peel vertex tracking
     const deg = new Uint8Array(S);
@@ -94,16 +98,32 @@ export function buildBucket(ids: number[]): Bucket {
     }
 
     // Pack g into gWords
-    const wordCnt = Math.ceil(S / 32);
-    const gWords: bigint[] = new Array(wordCnt).fill(0n);
-    for (let i = 0; i < S; i++) {
-      const w = Math.floor(i / 32);
-      gWords[w]! |= BigInt(g[i]!) << BigInt(8 * (i % 32));
+    const G: [bigint, bigint, bigint, bigint] = [0n, 0n, 0n, 0n];
+    for (let i = 0; i < g.length; ++i) {
+      const w = i >> 5; // word index 0..3
+      const off = 31 - (i & 31); // big-endian byte position
+      G[w]! |= BigInt(g[i]!) << BigInt(off * 8);
     }
 
     // Pack hash multipliers
-    const packedA = BigInt(A0) | (BigInt(A1) << 16n) | (BigInt(A2) << 32n);
 
-    return { S, packedA, gWords: [...gWords, 0n, 0n, 0n].slice(0, 4), table };
+    return { S, A, G, table: packTable(table) };
   }
+}
+
+function packTable(bytes: Uint8Array): bigint[] {
+  const out: bigint[] = [];
+  let acc = 0n,
+    filled = 0;
+
+  for (const b of bytes) {
+    acc |= BigInt(b) << BigInt(8 * filled++);
+    if (filled === 32) {
+      out.push(acc);
+      acc = 0n;
+      filled = 0;
+    }
+  }
+  if (filled) out.push(acc); // now word 0 = slots 0-15
+  return out;
 }

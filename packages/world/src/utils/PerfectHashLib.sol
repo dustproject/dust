@@ -21,7 +21,7 @@ library PerfectHashLib {
         let off := and(idx, 0x1f) // idx % 32
         let be := sub(31, off) // flip -> big-endian
         switch shr(5, idx)
-          // idx / 32   0…3
+        // idx / 32   0…3
         case 0 { g := byte(be, g0) }
         case 1 { g := byte(be, g1) }
         case 2 { g := byte(be, g2) }

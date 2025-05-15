@@ -9,20 +9,20 @@ import { PerfectHashLib } from "../src/utils/PerfectHashLib.sol";
 contract ObjectTypeTest is DustTest {
   function testCategoryCheck() public {
     uint256 gasStart = gasleft();
-    uint8 slot = PerfectHashLib.slot(1, 10, 81481903218933, 42648873711319057235968, 0, 0, 0);
+    // PerfectHashLib.slot(1, 10, 81481903218933, 42648873711319057235968, 0, 0, 0);
+    ObjectTypes.AzaleaFlower.isPassThrough();
     console.log(gasStart - gasleft());
-    console.log(slot);
-
-    gasStart = gasleft();
-    slot = PerfectHashLib.slot2(1, 10, 81481903218933, 42648873711319057235968, 0, 0, 0);
-    console.log(gasStart - gasleft());
-    console.log(slot);
   }
 
   function testCategories() public pure {
     ObjectType[8] memory logTypes = ObjectTypeLib.getLogTypes();
     for (uint256 i = 0; i < logTypes.length; i++) {
       assertTrue(logTypes[i].isLog(), "isLog");
+    }
+
+    ObjectType[2] memory tillableTypes = ObjectTypeLib.getTillableTypes();
+    for (uint256 i = 0; i < tillableTypes.length; i++) {
+      assertTrue(tillableTypes[i].isTillable(), "isTillable");
     }
 
     ObjectType[41] memory passthroughTypes = ObjectTypeLib.getPassThroughTypes();
