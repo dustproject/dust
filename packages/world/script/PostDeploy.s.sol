@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { metadataSystem } from
+  "@latticexyz/world-module-metadata/src/codegen/experimental/systems/MetadataSystemLib.sol";
+import { ResourceId, WorldResourceIdInstance, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
+
 import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 import { Script } from "forge-std/Script.sol";
 import { console } from "forge-std/console.sol";
@@ -22,9 +26,18 @@ contract PostDeploy is Script {
     // Start broadcasting transactions from the deployer account
     vm.startBroadcast(deployerPrivateKey);
 
-    initTerrain();
-    initObjects();
-    initRecipes();
+    IWorld world = IWorld(worldAddress);
+
+    // initTerrain();
+    // initObjects();
+    // initRecipes();
+    ResourceId shopProgramId = WorldResourceIdLib.encodeNamespace("coords-app");
+
+    world.registerNamespace(shopProgramId);
+
+    string memory marketAppConfigUrl = "https://trading-app-client-psi.vercel.app/dust-app.json";
+
+    metadataSystem.setResourceTag(shopProgramId, "dust.appConfigUrl", bytes(marketAppConfigUrl));
 
     vm.stopBroadcast();
   }

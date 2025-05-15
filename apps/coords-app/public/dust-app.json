@@ -1,0 +1,9 @@
+{
+  "$schema": "https://esm.sh/pr/dustproject/dust/dustkit@54a4093/json-schemas/app-config.json",
+  "name": "Coords App",
+  "startUrl": "/",
+  "frame": {
+    "width": 600,
+    "height": 900
+  }
+}

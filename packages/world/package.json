@@ -43,6 +43,7 @@
     "@latticexyz/store": "2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2",
     "@latticexyz/world": "2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2",
     "@latticexyz/world-consumer": "2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2",
+    "@latticexyz/world-module-metadata": "2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2",
     "@openzeppelin/contracts": "^4.9.6",
     "solady": "^0.1.12",
     "viem": "2.23.2"
