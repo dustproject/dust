@@ -71,6 +71,9 @@ importers:
       '@latticexyz/world':
         specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
         version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
+      '@latticexyz/world-module-metadata':
+        specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
+        version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
       '@tanstack/react-query':
         specifier: ^5.74.4
         version: 5.74.4(react@19.1.0)

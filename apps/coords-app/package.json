@@ -19,6 +19,7 @@
     "@latticexyz/common": "2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2",
     "@latticexyz/entrykit": "2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2",
     "@latticexyz/world": "2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2",
+    "@latticexyz/world-module-metadata": "2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2",
     "@tanstack/react-query": "^5.74.4",
     "dustkit": "workspace:*",
     "dotenv": "^16.3.1",

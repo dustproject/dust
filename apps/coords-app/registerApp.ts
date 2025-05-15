@@ -13,6 +13,7 @@ import {
 import { createWalletClient } from "viem";
 import type { Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+import MetadataSystemAbi from "@latticexyz/world-module-metadata/out/MetadataSystem.sol/MetadataSystem.abi.json";
 
 dotenv.config();
 
@@ -63,24 +64,65 @@ async function registerApp() {
     account: account,
   });
 
-  const worldContract = getContract({
-    abi: IWorldAbi,
-    address: getWorldAddress(),
-    client: {
-      public: publicClient,
-      wallet: walletClient,
-    },
+  const worldAddress = getWorldAddress();
+
+  const appNamespaceId = resourceToHex({
+    type: "namespace",
+    namespace: appNamespace,
+    name: "",
   });
 
-  await worldContract.write.registerNamespace([
-    resourceToHex({ type: "namespace", namespace: appNamespace, name: "" }),
-  ]);
+  console.log("registering app namespace", appNamespaceId);
+  let txHash: Hex;
+  try {
+    txHash = await walletClient.writeContract({
+      address: worldAddress as Hex,
+      abi: IWorldAbi,
+      account,
+      functionName: "registerNamespace",
+      args: [appNamespaceId],
+    });
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+  let receipt = await publicClient.waitForTransactionReceipt({
+    hash: txHash,
+    pollingInterval: 1_000,
+    retryDelay: 2_000,
+    timeout: 60_000,
+    confirmations: 0,
+  });
+  if (receipt.status === "success") {
+    console.log("App registered successfully");
+  } else {
+    throw new Error("App registration failed");
+  }
 
-  await worldContract.write.metadata_setResourceTag(
-    resourceToHex({ type: "namespace", namespace: appNamespace, name: "" }),
-    "dust.appConfigUrl",
-    "https://trading-app-client-psi.vercel.app/dust-app.json",
-  );
+  console.log("setting app config url");
+  txHash = await walletClient.writeContract({
+    address: worldAddress as Hex,
+    abi: MetadataSystemAbi,
+    account,
+    functionName: "metadata_setResourceTag",
+    args: [
+      appNamespaceId,
+      "dust.appConfigUrl",
+      "http://localhost:5501/dust-app.json",
+    ],
+  });
+  receipt = await publicClient.waitForTransactionReceipt({
+    hash: txHash,
+    pollingInterval: 1_000,
+    retryDelay: 2_000,
+    timeout: 60_000,
+    confirmations: 0,
+  });
+  if (receipt.status === "success") {
+    console.log("App config url set successfully");
+  } else {
+    throw new Error("App config url set failed");
+  }
 }
 
 registerApp();
