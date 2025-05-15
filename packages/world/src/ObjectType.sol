@@ -226,816 +226,341 @@ library ObjectTypeLib {
     return self.unwrap() == 0;
   }
 
-  /// @dev True if this is any block category
-  function isBlock(ObjectType self) internal pure returns (bool) {
-    // TODO
-    return !self.isNull();
-  }
-
   // Direct Category Checks
 
   function isNonSolid(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..2] in one word
-      function gByte(i) -> b {
-        b := byte(i, 452326652075959969500899029701911694102740779818102794052241512579358261248)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000000000006)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 36387)), 0xFF)
-      let h1 := and(shr(8, mul(id, 30927)), 0xFF)
-      let h2 := and(shr(8, mul(id, 59677)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 3)), add(gByte(mod(h1, 3)), gByte(mod(h2, 3))))
-      slot := addmod(slot, 0, 3) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 281470681874433
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isAny(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..4] in one word
-      function gByte(i) -> b {
-        b := byte(i, 1360492945329020888807615753235470143630860818558933299714400485076610580480)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x0000000000000000000000000000000010000000000000040200080000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
+    }
+  }
 
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 50185)), 0xFF)
-      let h1 := and(shr(8, mul(id, 65303)), 0xFF)
-      let h2 := and(shr(8, mul(id, 57935)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 5)), add(gByte(mod(h1, 5)), gByte(mod(h2, 5))))
-      slot := addmod(slot, 0, 5) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 1208907391448436507738155
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
+  function isBlock(ObjectType self) internal pure returns (bool _is) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x0000000000000000000000000ffffffffffffffffffffffffffffffffffffff8)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
+      }
     }
   }
 
   function isOre(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..8] in one word
-      function gByte(i) -> b {
-        b := byte(i, 10656512041499105264260086188907376938030111411171137687072325998959656960)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000001fc0000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 14261)), 0xFF)
-      let h1 := and(shr(8, mul(id, 57329)), 0xFF)
-      let h2 := and(shr(8, mul(id, 27411)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 9)), add(gByte(mod(h1, 9)), gByte(mod(h2, 9))))
-      slot := addmod(slot, 0, 9) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 22300745193341099306166217502292977861787681
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isLog(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..9] in one word
-      function gByte(i) -> b {
-        b := byte(i, 3627337213657461937142115707151136226846698972963216681130983074704536895488)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x000000000000000000000000000000000000000000000003fc00000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 45595)), 0xFF)
-      let h1 := and(shr(8, mul(id, 16675)), 0xFF)
-      let h2 := and(shr(8, mul(id, 37663)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 10)), add(gByte(mod(h1, 10)), gByte(mod(h2, 10))))
-      slot := addmod(slot, 0, 10) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 1461501636990926901630387956257476049351913439297
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isLeaf(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..14] in one word
-      function gByte(i) -> b {
-        b := byte(i, 6351849707455009884420264545062848978040678997249469723480446843129859932160)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x000000000000000000000000000000000000000000007ff80000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 14945)), 0xFF)
-      let h1 := and(shr(8, mul(id, 26193)), 0xFF)
-      let h2 := and(shr(8, mul(id, 63523)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 15)), add(gByte(mod(h1, 15)), gByte(mod(h2, 15))))
-      slot := addmod(slot, 0, 15) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 1766847064778378059282119229492879835942430191645452838232319899558477900
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isPlank(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..9] in one word
-      function gByte(i) -> b {
-        b := byte(i, 12368119122545990090712379808429105654012232204985129870119925677159350272)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x0000000000000000000000000000001fe0000000000000000000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 26613)), 0xFF)
-      let h1 := and(shr(8, mul(id, 16415)), 0xFF)
-      let h2 := and(shr(8, mul(id, 52547)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 10)), add(gByte(mod(h1, 10)), gByte(mod(h2, 10))))
-      slot := addmod(slot, 0, 10) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 1461501636991295559857257909637573630033672536193
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isSeed(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..3] in one word
-      function gByte(i) -> b {
-        b := byte(i, 1780677517418632607797961679482559586363059751964382271804412353350467584)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x00000000000000000000000000001c0000000000000000000000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 34459)), 0xFF)
-      let h1 := and(shr(8, mul(id, 8145)), 0xFF)
-      let h2 := and(shr(8, mul(id, 10695)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 4)), add(gByte(mod(h1, 4)), gByte(mod(h2, 4))))
-      slot := addmod(slot, 0, 4) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 18446463200037372042
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isSapling(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..9] in one word
-      function gByte(i) -> b {
-        b := byte(i, 2713939208168235694692784837415668337665417169240240971229142815467263492096)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x000000000000000000000000001fe00000000000000000000000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 49281)), 0xFF)
-      let h1 := and(shr(8, mul(id, 28797)), 0xFF)
-      let h2 := and(shr(8, mul(id, 29811)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 10)), add(gByte(mod(h1, 10)), gByte(mod(h2, 10))))
-      slot := addmod(slot, 0, 10) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 1461501636991357869004145338814310190328119754896
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isSmartEntity(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..6] in one word
-      function gByte(i) -> b {
-        b := byte(i, 1809279055238355691677991523059881094120968709086426472961853059184770154496)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x00000000000000000100000001e0000000000000000000000000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 27181)), 0xFF)
-      let h1 := and(shr(8, mul(id, 10081)), 0xFF)
-      let h2 := and(shr(8, mul(id, 4567)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 7)), add(gByte(mod(h1, 7)), gByte(mod(h2, 7))))
-      slot := addmod(slot, 0, 7) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 5192296857328650425574889847521431
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isStation(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..3] in one word
-      function gByte(i) -> b {
-        b := byte(i, 5314344687028734116324762013953309598387353908571197647475143652325457920)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x0000000000000000000000000e00000000000000000000000000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 34531)), 0xFF)
-      let h1 := and(shr(8, mul(id, 15205)), 0xFF)
-      let h2 := and(shr(8, mul(id, 3163)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 4)), add(gByte(mod(h1, 4)), gByte(mod(h2, 4))))
-      slot := addmod(slot, 0, 4) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 18446463264462799002
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isPick(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..7] in one word
-      function gByte(i) -> b {
-        b := byte(i, 2273932200069792992810861301742390898252139108155050725518848539100352348160)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x000000000000000000000007e000000000000000000000000000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 28211)), 0xFF)
-      let h1 := and(shr(8, mul(id, 11767)), 0xFF)
-      let h2 := and(shr(8, mul(id, 34197)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 8)), add(gByte(mod(h1, 8)), gByte(mod(h2, 8))))
-      slot := addmod(slot, 0, 8) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 340282366841904940994484957334848077982
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isAxe(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..7] in one word
-      function gByte(i) -> b {
-        b := byte(i, 3178592405228000500581818355950704396819431786765318781662581092269735018496)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x0000000000000000000001f80000000000000000000000000000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 57899)), 0xFF)
-      let h1 := and(shr(8, mul(id, 24857)), 0xFF)
-      let h2 := and(shr(8, mul(id, 44439)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 8)), add(gByte(mod(h1, 8)), gByte(mod(h2, 8))))
-      slot := addmod(slot, 0, 8) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 340282366841909776789998825095725056168
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isHoe(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..1] in one word
-      function gByte(i) -> b {
-        b := byte(i, 0)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x0000000000000000000010000000000000000000000000000000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 5751)), 0xFF)
-      let h1 := and(shr(8, mul(id, 46457)), 0xFF)
-      let h2 := and(shr(8, mul(id, 44467)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 2)), add(gByte(mod(h1, 2)), gByte(mod(h2, 2))))
-      slot := addmod(slot, 0, 2) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 4294901932
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isWhacker(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..3] in one word
-      function gByte(i) -> b {
-        b := byte(i, 1360486043372049514906713945083771811238067502812170938526747100043764826112)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x000000000000000000000e000000000000000000000000000000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 59175)), 0xFF)
-      let h1 := and(shr(8, mul(id, 31273)), 0xFF)
-      let h2 := and(shr(8, mul(id, 12597)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 4)), add(gByte(mod(h1, 4)), gByte(mod(h2, 4))))
-      slot := addmod(slot, 0, 4) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 18446463328888357035
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isOreBar(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..4] in one word
-      function gByte(i) -> b {
-        b := byte(i, 1809251502488789097101527379522562991336877501905896789480462008301016580096)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x00000000000000000001e0000000000000000000000000000000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 887)), 0xFF)
-      let h1 := and(shr(8, mul(id, 12559)), 0xFF)
-      let h2 := and(shr(8, mul(id, 29975)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 5)), add(gByte(mod(h1, 5)), gByte(mod(h2, 5))))
-      slot := addmod(slot, 0, 5) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 1208907421566478066778288
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isFood(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..3] in one word
-      function gByte(i) -> b {
-        b := byte(i, 904632598912879567310435755136236557129124206309289076944817537586045124608)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x0000000000000000003800000000000000000000000000000000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 12169)), 0xFF)
-      let h1 := and(shr(8, mul(id, 9057)), 0xFF)
-      let h2 := and(shr(8, mul(id, 37691)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 4)), add(gByte(mod(h1, 4)), gByte(mod(h2, 4))))
-      slot := addmod(slot, 0, 4) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 18446463376133652660
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isFuel(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..1] in one word
-      function gByte(i) -> b {
-        b := byte(i, 0)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x0000000000000000004000000000000000000000000000000000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 62005)), 0xFF)
-      let h1 := and(shr(8, mul(id, 57989)), 0xFF)
-      let h2 := and(shr(8, mul(id, 5005)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 2)), add(gByte(mod(h1, 2)), gByte(mod(h2, 2))))
-      slot := addmod(slot, 0, 2) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 4294901942
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isPlayer(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..1] in one word
-      function gByte(i) -> b {
-        b := byte(i, 0)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x0000000000000000008000000000000000000000000000000000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 49499)), 0xFF)
-      let h1 := and(shr(8, mul(id, 9695)), 0xFF)
-      let h2 := and(shr(8, mul(id, 37495)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 2)), add(gByte(mod(h1, 2)), gByte(mod(h2, 2))))
-      slot := addmod(slot, 0, 2) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 4294901943
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function hasExtraDrops(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      function gByte(i) -> b {
-        let off := and(i, 31) // idx within word
-        switch shr(5, i)
-          // word 0..1
-        case 0 { b := byte(off, 11760135089550039445254600977187564053549231349426707298275149585207563328540) }
-        case 1 { b := byte(off, 14504158713259495667629752866170850055048122198623278914947149467885622001664) }
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000003ffff8007ff80000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 49939)), 0xFF)
-      let h1 := and(shr(8, mul(id, 40509)), 0xFF)
-      let h2 := and(shr(8, mul(id, 61403)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 39)), add(gByte(mod(h1, 39)), gByte(mod(h2, 39))))
-      slot := addmod(slot, 0, 39) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-
-      let w
-      switch shr(4, slot)
-        // slot / 16
-      case 0 { w := 130749486665489473308047427782494228322415813307753690869166324054694953055 }
-      case 1 { w := 115790325248037028776925143150719525901128972406273603203012746550152316846180 }
-      default { w := 5192296858534827628530496329220095 }
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function hasAxeMultiplier(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      function gByte(i) -> b {
-        let off := and(i, 31) // idx within word
-        switch shr(5, i)
-          // word 0..1
-        case 0 { b := byte(off, 1105690205424847211141004283391727110801588672735963595760834635441152) }
-        case 1 { b := byte(off, 60073720748789420709773322823776498067480739937762600875663438495594053632) }
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x00000000000000000000000013c0001fe8003f8000007ffbfc00000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 8655)), 0xFF)
-      let h1 := and(shr(8, mul(id, 61409)), 0xFF)
-      let h2 := and(shr(8, mul(id, 24371)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 51)), add(gByte(mod(h1, 51)), gByte(mod(h2, 51))))
-      slot := addmod(slot, 0, 51) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-
-      let w
-      switch shr(4, slot)
-        // slot / 16
-      case 0 { w := 189054684918910580369645037601081869872295635562812956377565267738509246616 }
-      case 1 { w := 118380586641619519059196439391103526569069078332552046793014421370381074503 }
-      case 2 { w := 115792089237316195423570985008687885588595028576352080733761963979822988263498 }
-      default { w := 281474976710655 }
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function hasPickMultiplier(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      function gByte(i) -> b {
-        let off := and(i, 31) // idx within word
-        switch shr(5, i)
-          // word 0..1
-        case 0 { b := byte(off, 18544930321606643743928591734329299274862808522273801038975799942915524598580) }
-        case 1 { b := byte(off, 7772409767920030684479211373823448752408729911466445772426046560834957606912) }
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x0000000000000000000000000c2003e0000000000000000001fff81f801ffff8)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 27413)), 0xFF)
-      let h1 := and(shr(8, mul(id, 42803)), 0xFF)
-      let h2 := and(shr(8, mul(id, 64635)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 57)), add(gByte(mod(h1, 57)), gByte(mod(h2, 57))))
-      slot := addmod(slot, 0, 57) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-
-      let w
-      switch shr(4, slot)
-        // slot / 16
-      case 0 { w := 272095715095832843616285400521235469924955107797037820012398116159897403525 }
-      case 1 { w := 26502813826271993406626741558814342467197055333509669126180448726710026273 }
-      case 2 { w := 115792089210358305950972945582495091782445466314013416072255640336758962585631 }
-      default { w := 22300745198530623141535718272648361505980415 }
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isPassThrough(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      function gByte(i) -> b {
-        let off := and(i, 31) // idx within word
-        switch shr(5, i)
-          // word 0..1
-        case 0 { b := byte(off, 42742515760015969613707001518721370492102930437083464472115312846366904107) }
-        case 1 { b := byte(off, 22243010890354258988886670783601293153040808928678678296686724293858200387584) }
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x000000000000000000000000101ffc000001c07fffff80000000000000000006)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 15059)), 0xFF)
-      let h1 := and(shr(8, mul(id, 37823)), 0xFF)
-      let h2 := and(shr(8, mul(id, 28743)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 51)), add(gByte(mod(h1, 51)), gByte(mod(h2, 51))))
-      slot := addmod(slot, 0, 51) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-
-      let w
-      switch shr(4, slot)
-        // slot / 16
-      case 0 { w := 173153330962933900084662030983032808002600168031617633767763600302303150192 }
-      case 1 { w := 148417741630409472458196858217802031214650272879760913826548812696502599777 }
-      case 2 { w := 115792089237316195423570985008687885553206088186580621027997312973068298944513 }
-      default { w := 281474976710655 }
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isGrowable(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..13] in one word
-      function gByte(i) -> b {
-        b := byte(i, 2277479939908689553362182879120440772815617739113806198877562545562129006592)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x000000000000000000000000001ffc0000000000000000000000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 47771)), 0xFF)
-      let h1 := and(shr(8, mul(id, 4099)), 0xFF)
-      let h2 := and(shr(8, mul(id, 24671)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 14)), add(gByte(mod(h1, 14)), gByte(mod(h2, 14))))
-      slot := addmod(slot, 0, 14) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 26959946667150544225616637436831140100204489502055291229380340285588
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isUniqueObject(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..25] in one word
-      function gByte(i) -> b {
-        b := byte(i, 17841311287567819656795847928944003124805419649692877805659959172253351936)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x000000000000000000061fffe1a0000000000000000000000000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 54247)), 0xFF)
-      let h1 := and(shr(8, mul(id, 5799)), 0xFF)
-      let h2 := and(shr(8, mul(id, 60947)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 26)), add(gByte(mod(h1, 26)), gByte(mod(h2, 26))))
-      slot := addmod(slot, 0, 26) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-
-      let w
-      switch shr(4, slot)
-        // slot / 16
-      case 0 { w := 296834323980643102965667306663876101216582742950427881583376826255754395819 }
-      default { w := 1461501637330902918203683627055581861320505884850 }
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isTool(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..19] in one word
-      function gByte(i) -> b {
-        b := byte(i, 6784741040979598916902094215048625576941674528585235167622736123937236713472)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x000000000000000000001fffe000000000000000000000000000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 43265)), 0xFF)
-      let h1 := and(shr(8, mul(id, 29637)), 0xFF)
-      let h2 := and(shr(8, mul(id, 32883)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 20)), add(gByte(mod(h1, 20)), gByte(mod(h2, 20))))
-      slot := addmod(slot, 0, 20) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-
-      let w
-      switch shr(4, slot)
-        // slot / 16
-      case 0 { w := 302135134774445059280622057217338339497320721794262367051805622344085799082 }
-      default { w := 18446744073709551615 }
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isTillable(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..2] in one word
-      function gByte(i) -> b {
-        b := byte(i, 454079695648044772702907457690930058567663361497034072237252793732203282432)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000000600000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 47837)), 0xFF)
-      let h1 := and(shr(8, mul(id, 45165)), 0xFF)
-      let h2 := and(shr(8, mul(id, 42127)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 3)), add(gByte(mod(h1, 3)), gByte(mod(h2, 3))))
-      slot := addmod(slot, 0, 3) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 281470683185173
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
   function isMachine(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self); // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      // g[0..1] in one word
-      function gByte(i) -> b {
-        b := byte(i, 0)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, 32) {
+        let bits := byte(sub(31, ix), 0x0000000000000000000000000020000000000000000000000000000000000000)
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
       }
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, 1157)), 0xFF)
-      let h1 := and(shr(8, mul(id, 60967)), 0xFF)
-      let h2 := and(shr(8, mul(id, 32613)), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, 2)), add(gByte(mod(h1, 2)), gByte(mod(h2, 2))))
-      slot := addmod(slot, 0, 2) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      let w := 4294901909
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is := eq(ref, id)
     }
   }
 
@@ -1046,6 +571,164 @@ library ObjectTypeLib {
 
   function getAnyTypes() internal pure returns (ObjectType[4] memory) {
     return [ObjectTypes.AnyPlank, ObjectTypes.AnyLog, ObjectTypes.AnyLeaf, ObjectTypes.AnyTerracotta];
+  }
+
+  function getBlockTypes() internal pure returns (ObjectType[153] memory) {
+    return [
+      ObjectTypes.Magma,
+      ObjectTypes.Stone,
+      ObjectTypes.Bedrock,
+      ObjectTypes.Deepslate,
+      ObjectTypes.Granite,
+      ObjectTypes.Tuff,
+      ObjectTypes.Calcite,
+      ObjectTypes.Basalt,
+      ObjectTypes.SmoothBasalt,
+      ObjectTypes.Andesite,
+      ObjectTypes.Diorite,
+      ObjectTypes.Cobblestone,
+      ObjectTypes.MossyCobblestone,
+      ObjectTypes.Obsidian,
+      ObjectTypes.Dripstone,
+      ObjectTypes.Blackstone,
+      ObjectTypes.CobbledDeepslate,
+      ObjectTypes.Amethyst,
+      ObjectTypes.Glowstone,
+      ObjectTypes.Grass,
+      ObjectTypes.Dirt,
+      ObjectTypes.Moss,
+      ObjectTypes.Podzol,
+      ObjectTypes.DirtPath,
+      ObjectTypes.Mud,
+      ObjectTypes.PackedMud,
+      ObjectTypes.Farmland,
+      ObjectTypes.WetFarmland,
+      ObjectTypes.Snow,
+      ObjectTypes.Ice,
+      ObjectTypes.UnrevealedOre,
+      ObjectTypes.CoalOre,
+      ObjectTypes.CopperOre,
+      ObjectTypes.IronOre,
+      ObjectTypes.GoldOre,
+      ObjectTypes.DiamondOre,
+      ObjectTypes.NeptuniumOre,
+      ObjectTypes.Gravel,
+      ObjectTypes.Sand,
+      ObjectTypes.RedSand,
+      ObjectTypes.Sandstone,
+      ObjectTypes.RedSandstone,
+      ObjectTypes.Clay,
+      ObjectTypes.AnyTerracotta,
+      ObjectTypes.Terracotta,
+      ObjectTypes.BrownTerracotta,
+      ObjectTypes.OrangeTerracotta,
+      ObjectTypes.WhiteTerracotta,
+      ObjectTypes.LightGrayTerracotta,
+      ObjectTypes.YellowTerracotta,
+      ObjectTypes.RedTerracotta,
+      ObjectTypes.LightBlueTerracotta,
+      ObjectTypes.CyanTerracotta,
+      ObjectTypes.BlackTerracotta,
+      ObjectTypes.PurpleTerracotta,
+      ObjectTypes.BlueTerracotta,
+      ObjectTypes.MagentaTerracotta,
+      ObjectTypes.AnyLog,
+      ObjectTypes.OakLog,
+      ObjectTypes.BirchLog,
+      ObjectTypes.JungleLog,
+      ObjectTypes.SakuraLog,
+      ObjectTypes.AcaciaLog,
+      ObjectTypes.SpruceLog,
+      ObjectTypes.DarkOakLog,
+      ObjectTypes.MangroveLog,
+      ObjectTypes.AnyLeaf,
+      ObjectTypes.OakLeaf,
+      ObjectTypes.BirchLeaf,
+      ObjectTypes.JungleLeaf,
+      ObjectTypes.SakuraLeaf,
+      ObjectTypes.SpruceLeaf,
+      ObjectTypes.AcaciaLeaf,
+      ObjectTypes.DarkOakLeaf,
+      ObjectTypes.AzaleaLeaf,
+      ObjectTypes.FloweringAzaleaLeaf,
+      ObjectTypes.MangroveLeaf,
+      ObjectTypes.MangroveRoots,
+      ObjectTypes.MuddyMangroveRoots,
+      ObjectTypes.AzaleaFlower,
+      ObjectTypes.BellFlower,
+      ObjectTypes.DandelionFlower,
+      ObjectTypes.DaylilyFlower,
+      ObjectTypes.LilacFlower,
+      ObjectTypes.RoseFlower,
+      ObjectTypes.FireFlower,
+      ObjectTypes.MorninggloryFlower,
+      ObjectTypes.PeonyFlower,
+      ObjectTypes.Ultraviolet,
+      ObjectTypes.SunFlower,
+      ObjectTypes.FlyTrap,
+      ObjectTypes.FescueGrass,
+      ObjectTypes.SwitchGrass,
+      ObjectTypes.VinesBush,
+      ObjectTypes.IvyVine,
+      ObjectTypes.HempBush,
+      ObjectTypes.Coral,
+      ObjectTypes.SeaAnemone,
+      ObjectTypes.Algae,
+      ObjectTypes.HornCoralBlock,
+      ObjectTypes.FireCoralBlock,
+      ObjectTypes.TubeCoralBlock,
+      ObjectTypes.BubbleCoralBlock,
+      ObjectTypes.BrainCoralBlock,
+      ObjectTypes.SpiderWeb,
+      ObjectTypes.Bone,
+      ObjectTypes.GoldenMushroom,
+      ObjectTypes.RedMushroom,
+      ObjectTypes.CoffeeBush,
+      ObjectTypes.StrawberryBush,
+      ObjectTypes.RaspberryBush,
+      ObjectTypes.Wheat,
+      ObjectTypes.CottonBush,
+      ObjectTypes.Pumpkin,
+      ObjectTypes.Melon,
+      ObjectTypes.RedMushroomBlock,
+      ObjectTypes.BrownMushroomBlock,
+      ObjectTypes.MushroomStem,
+      ObjectTypes.BambooBush,
+      ObjectTypes.Cactus,
+      ObjectTypes.AnyPlank,
+      ObjectTypes.OakPlanks,
+      ObjectTypes.BirchPlanks,
+      ObjectTypes.JunglePlanks,
+      ObjectTypes.SakuraPlanks,
+      ObjectTypes.SprucePlanks,
+      ObjectTypes.AcaciaPlanks,
+      ObjectTypes.DarkOakPlanks,
+      ObjectTypes.MangrovePlanks,
+      ObjectTypes.CopperBlock,
+      ObjectTypes.IronBlock,
+      ObjectTypes.GoldBlock,
+      ObjectTypes.DiamondBlock,
+      ObjectTypes.NeptuniumBlock,
+      ObjectTypes.WheatSeed,
+      ObjectTypes.PumpkinSeed,
+      ObjectTypes.MelonSeed,
+      ObjectTypes.OakSapling,
+      ObjectTypes.BirchSapling,
+      ObjectTypes.JungleSapling,
+      ObjectTypes.SakuraSapling,
+      ObjectTypes.AcaciaSapling,
+      ObjectTypes.SpruceSapling,
+      ObjectTypes.DarkOakSapling,
+      ObjectTypes.MangroveSapling,
+      ObjectTypes.Furnace,
+      ObjectTypes.Workbench,
+      ObjectTypes.Powerstone,
+      ObjectTypes.ForceField,
+      ObjectTypes.Chest,
+      ObjectTypes.SpawnTile,
+      ObjectTypes.Bed,
+      ObjectTypes.TextSign
+    ];
   }
 
   function getOreTypes() internal pure returns (ObjectType[7] memory) {
@@ -1599,8 +1282,6 @@ library ObjectTypeLib {
     }
     return false;
   }
-
-  function isMineable(ObjectType self) internal pure returns (bool) { }
 
   function matches(ObjectType self, ObjectType other) internal pure returns (bool) {
     if (

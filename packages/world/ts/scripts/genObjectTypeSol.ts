@@ -1,85 +1,51 @@
-import { type Bucket, buildBucket } from "../buildBucket";
-import { type Category, type ObjectAmount, categories, objects, objectsByName } from "../objects";
+import { buildBitmap } from "../buildBitmap";
+import {
+  type ObjectAmount,
+  categories,
+  objects,
+  objectsByName,
+} from "../objects";
 
-const constName = (str: string): string =>
-  str
-    .replace(/\W+/g, " ")
-    .split(/ |\B(?=[A-Z])/)
-    .join("_")
-    .toUpperCase();
+function renderCategoryBitmap(
+  name: string,
+  ids: number[],
+  customFnName?: string,
+): string {
+  const fn = customFnName ?? `is${name}`;
+  const { words } = buildBitmap(ids);
+  const totalBytes = words.length * 32; // bitmap length
 
-const buckets: Record<string, Bucket> = {};
+  let bitmapAccess: string;
+  if (words.length === 1) {
+    const W = words[0]!.toString(16).padStart(64, "0");
+    bitmapAccess = `let bits := byte(sub(31, ix), 0x${W})`;
+  } else {
+    // several 32-byte words
+    const cases = words
+      .map((w, i) => {
+        const W = w.toString(16).padStart(64, "0");
+        return `case ${i} { bits := byte(sub(31, and(ix, 31)), 0x${W}) }`;
+      })
+      .join("\n        ");
+    bitmapAccess = `
+        // word index = ix / 32
+        switch shr(5, ix)
+        ${cases}
+  `;
+  }
 
-for (const [name, data] of Object.entries(categories)) {
-  const ids = data.objects.map((obj) => objectsByName[obj].id);
-  const bucket = buildBucket(ids);
-  buckets[name] = bucket;
-}
-
-// function renderCategoryTable(name: string): string {
-// const table = `${Buffer.from(buckets[name]!.table).toString("hex")}`;
-// return `bytes constant ${constName(name)}_TABLE = hex"${table}";`;
-// }
-
-function renderCategoryCheck(name: string): string {
-  const { checkName } = categories[name]!;
-  const fn = checkName ?? `is${name}`;
-  const { S, A, G, table } = buckets[name]!; // G & table already 0x… big-endian
-
-  /* ---------- gByte helper ---------------------------------- */
-  const numG = Math.ceil(S / 32); // 1‥4 words
-  const gByte =
-    numG === 1
-      ? // single word → one BYTE, no switch
-        `// g[0..${S - 1}] in one word
-        function gByte(i) -> b { b := byte(i, ${G[0]}) }`
-      : // 2‥4 words → BYTE + tiny switch
-        `function gByte(i) -> b {
-            let off := and(i, 31)              // idx within word
-            switch shr(5, i)                   // word 0..${numG - 1}
-        ${G.slice(0, numG)
-          .map((w, i) => `case ${i} { b := byte(off, ${w}) }`)
-          .join("\n            ")}
-        }`;
-
-  /* ---------- slot→id table --------------------------------- */
-  const tableSwitch =
-    table.length === 1
-      ? `let w := ${table[0]}` // S ≤ 16 – single PUSH32
-      : `
-        let w
-        switch shr(4, slot)                     // slot / 16
-        ${table
-          .map((w, i, arr) => (i === arr.length - 1 ? `default { w := ${w} }` : `case ${i} { w := ${w} }`))
-          .join("\n        ")}`;
-
-  /* ---------- function body --------------------------------- */
   return `
   function ${fn}(ObjectType self) internal pure returns (bool _is) {
-    uint16 id = ObjectType.unwrap(self);      // 2-byte key
-
     /// @solidity memory-safe-assembly
     assembly {
-      /* g[idx] ------------------------------------------------ */
-      ${gByte}
-
-      /* three 16-bit hashes ---------------------------------- */
-      let h0 := and(shr(8, mul(id, ${A[0]})), 0xFF)
-      let h1 := and(shr(8, mul(id, ${A[1]})), 0xFF)
-      let h2 := and(shr(8, mul(id, ${A[2]})), 0xFF)
-
-      /* g look-ups + final mod ------------------------------- */
-      let slot := add(gByte(mod(h0, ${S})), add(gByte(mod(h1, ${S})), gByte(mod(h2, ${S}))))
-      slot := addmod(slot, 0, ${S}) // 0‥S-1
-
-      /* slot → id table -------------------------------------- */
-      ${tableSwitch}
-
-      let ref := and(shr(shl(4, and(slot, 15)), w), 0xFFFF) // 2-byte little-endian
-      _is   := eq(ref, id)
+      let ix := shr(3, self) // byte index = id / 8
+      if lt(ix, ${totalBytes}) {
+        ${bitmapAccess}
+        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+        _is := eq(and(bits, mask), mask) // 1 if set
+      }
     }
-  }
-  `;
+  }`;
 }
 
 function renderObjectAmount([objectType, amount]: ObjectAmount): string {
@@ -137,16 +103,16 @@ library ObjectTypeLib {
     return self.unwrap() == 0;
   }
 
-  /// @dev True if this is any block category
-  function isBlock(ObjectType self) internal pure returns (bool) {
-    // TODO
-    return  !self.isNull();
-  }
-
   // Direct Category Checks
-${Object.keys(categories)
-  .map((name) => renderCategoryCheck(name))
-  .join("")}
+${Object.entries(categories)
+  .map(([name, data]) => {
+    return renderCategoryBitmap(
+      name,
+      data.objects.map((obj) => objectsByName[obj].id),
+      data.checkName,
+    );
+  })
+  .join("\n")}
 
 // Category getters
 ${Object.entries(categories)
@@ -243,7 +209,10 @@ ${Object.entries(categories)
   function getOreAmount(ObjectType self) internal pure returns(ObjectAmount memory) {
     ${objects
       .filter((result) => result.oreAmount !== undefined)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${renderObjectAmount(obj.oreAmount!)};`)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ${renderObjectAmount(obj.oreAmount!)};`,
+      )
       .join("\n    ")}
     return ObjectAmount(ObjectTypes.Null, 0);
   }
@@ -251,7 +220,10 @@ ${Object.entries(categories)
   function getPlankAmount(ObjectType self) internal pure returns(uint16) {
     ${objects
       .filter((obj) => obj.plankAmount !== undefined)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${obj.plankAmount!.toString()};`)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ${obj.plankAmount!.toString()};`,
+      )
       .join("\n    ")}
     return 0;
   }
@@ -259,7 +231,10 @@ ${Object.entries(categories)
   function getCrop(ObjectType self) internal pure returns(ObjectType) {
     ${objects
       .filter((obj) => obj.crop)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.crop};`)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.crop};`,
+      )
       .join("\n    ")}
     return ObjectTypes.Null;
   }
@@ -267,7 +242,10 @@ ${Object.entries(categories)
   function getSapling(ObjectType self) internal pure returns(ObjectType) {
     ${objects
       .filter((obj) => obj.sapling)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.sapling};`)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.sapling};`,
+      )
       .join("\n    ")}
     return ObjectTypes.Null;
   }
@@ -275,7 +253,10 @@ ${Object.entries(categories)
   function getTimeToGrow(ObjectType self) internal pure returns(uint128) {
     ${objects
       .filter((obj) => obj.timeToGrow)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${obj.timeToGrow};`)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ${obj.timeToGrow};`,
+      )
       .join("\n    ")}
     return 0;
   }
@@ -283,7 +264,10 @@ ${Object.entries(categories)
   function getGrowableEnergy(ObjectType self) public pure returns(uint128) {
     ${objects
       .filter((obj) => obj.growableEnergy)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${obj.growableEnergy};`)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ${obj.growableEnergy};`,
+      )
       .join("\n    ")}
     return 0;
   }
@@ -296,9 +280,6 @@ ${Object.entries(categories)
       return on == ObjectTypes.Dirt || on == ObjectTypes.Grass;
     }
     return false;
-  }
-
-  function isMineable(ObjectType self) internal pure returns (bool) {
   }
 
   function matches(ObjectType self, ObjectType other) internal pure returns (bool) {

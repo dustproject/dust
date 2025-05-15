@@ -104,7 +104,7 @@ contract MineSystem is System {
     caller.requireConnected(coord);
 
     (EntityId mined, ObjectType minedType) = getOrCreateEntityAt(coord);
-    require(minedType.isMineable(), "Object is not mineable");
+    require(minedType.isBlock(), "Object is not mineable");
 
     mined = mined.baseEntityId();
     Vec3 baseCoord = mined.getPosition();

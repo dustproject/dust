@@ -9,7 +9,6 @@ import { PerfectHashLib } from "../src/utils/PerfectHashLib.sol";
 contract ObjectTypeTest is DustTest {
   function testCategoryCheck() public {
     uint256 gasStart = gasleft();
-    // PerfectHashLib.slot(1, 10, 81481903218933, 42648873711319057235968, 0, 0, 0);
     ObjectTypes.AzaleaFlower.isPassThrough();
     console.log(gasStart - gasleft());
   }
