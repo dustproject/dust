@@ -34,7 +34,8 @@
     "script:attach-program": "./runForgeScript.bash script/utils/AttachProgramScript.s.sol",
     "script:give": "./runForgeScript.bash script/admin/GiveScript.s.sol",
     "script:teleport": "./runForgeScript.bash script/admin/TeleportScript.s.sol",
-    "test": "./runTests.bash"
+    "test": "./runTests.bash",
+    "test:js": "vitest"
   },
   "dependencies": {
     "@latticexyz/config": "2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2",
@@ -43,7 +44,8 @@
     "@latticexyz/world": "2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2",
     "@latticexyz/world-consumer": "2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2",
     "@openzeppelin/contracts": "^4.9.6",
-    "solady": "^0.1.12"
+    "solady": "^0.1.12",
+    "viem": "2.23.2"
   },
   "devDependencies": {
     "@latticexyz/gas-report": "2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2",
@@ -52,6 +54,7 @@
     "solhint-config-mud": "2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2",
     "solhint-plugin-mud": "2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2",
     "tsx": "^4.19.3",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.3"
   }
 }

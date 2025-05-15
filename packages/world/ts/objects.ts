@@ -572,7 +572,7 @@ export const objectsByName = objects.reduce(
   {} as Record<ObjectName, ObjectDefinition>,
 );
 
-export const categories: { [key: string]: Category } = {
+export const categories: Record<string, Category> = {
   NonSolid: { objects: ["Air", "Water"] },
   Any: {
     objects: ["AnyPlank", "AnyLog", "AnyLeaf", "AnyTerracotta"],

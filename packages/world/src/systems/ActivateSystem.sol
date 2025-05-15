@@ -4,7 +4,6 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
-import { Player } from "../codegen/tables/Player.sol";
 
 import { ObjectType } from "../ObjectType.sol";
 
@@ -13,7 +12,7 @@ import { ObjectTypes } from "../ObjectType.sol";
 import { checkWorldStatus } from "../Utils.sol";
 import { updateMachineEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
 
-import { EntityId } from "../EntityId.sol";
+import { EntityId, EntityIdLib } from "../EntityId.sol";
 
 contract ActivateSystem is System {
   function activate(EntityId entityId) public {
@@ -33,9 +32,7 @@ contract ActivateSystem is System {
   }
 
   function activatePlayer(address playerAddress) public {
-    EntityId player = Player._get(playerAddress);
-    player = player.baseEntityId();
-    require(player.exists(), "Entity does not exist");
+    EntityId player = EntityIdLib.encodePlayer(playerAddress);
     ObjectType objectType = player.getObjectType();
     require(objectType == ObjectTypes.Player, "Entity is not player");
     updatePlayerEnergy(player);

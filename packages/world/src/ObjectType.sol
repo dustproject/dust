@@ -1285,12 +1285,10 @@ library ObjectTypeLib {
   }
 
   function matches(ObjectType self, ObjectType other) internal pure returns (bool) {
-    if (!self.isAny()) {
-      return self == other;
-    }
+    if (!self.isAny()) return self == other;
 
-    return self == ObjectTypes.AnyLog && self.isLog() || self == ObjectTypes.AnyPlank && self.isPlank()
-      || self == ObjectTypes.AnyLeaf && self.isLeaf();
+    return (self == ObjectTypes.AnyLog && other.isLog()) || (self == ObjectTypes.AnyPlank && other.isPlank())
+      || (self == ObjectTypes.AnyLeaf && other.isLeaf());
   }
 }
 

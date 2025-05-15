@@ -8,7 +8,7 @@ import { WorldContextConsumer } from "@latticexyz/world/src/WorldContext.sol";
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
-import { TestUtils } from "./utils/TestUtils.sol";
+import { TestEntityUtils } from "./utils/TestUtils.sol";
 
 import { EntityId } from "../src/EntityId.sol";
 
@@ -20,7 +20,7 @@ import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest, console } from "./DustTest.sol";
 
-import { LocalEnergyPool, ReverseTerrainPosition } from "../src/utils/Vec3Storage.sol";
+import { LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import {
   CHUNK_SIZE, MACHINE_ENERGY_DRAIN_RATE, MAX_PLAYER_ENERGY, PLAYER_ENERGY_DRAIN_RATE
@@ -58,7 +58,7 @@ contract SpawnTest is DustTest {
 
     vm.prank(alice);
     EntityId playerEntityId = world.randomSpawn(blockNumber, spawnCoord.y());
-    assertTrue(playerEntityId.exists());
+    assertTrue(TestEntityUtils.exists(playerEntityId));
 
     assertEq(
       Energy.getEnergy(playerEntityId), MAX_PLAYER_ENERGY * 3 / 10, "Player energy is not correct after random spawn"
@@ -114,7 +114,7 @@ contract SpawnTest is DustTest {
     // Spawn alice
     vm.prank(alice);
     EntityId playerEntityId = world.spawn(spawnTileEntityId, spawnCoord, 1, "");
-    assertTrue(playerEntityId.exists());
+    assertTrue(TestEntityUtils.exists(playerEntityId));
   }
 
   function testSpawnFailsIfNoSpawnTile() public {
@@ -296,7 +296,7 @@ contract SpawnTest is DustTest {
     EntityId spawnTileEntityId = setObjectAtCoord(spawnTileCoord, ObjectTypes.SpawnTile);
 
     // Set forcefield with energy
-    EntityId forceFieldEntityId = setupForceField(spawnTileCoord);
+    EntityId forceFieldEntityId = setupForceField(spawnTileCoord + vec3(0, 0, 1));
     Energy.set(
       forceFieldEntityId,
       EnergyData({
@@ -309,7 +309,7 @@ contract SpawnTest is DustTest {
     // Create original player
     vm.prank(alice);
     EntityId playerEntityId = world.spawn(spawnTileEntityId, spawnCoord, 1, "");
-    assertTrue(playerEntityId.exists());
+    assertTrue(TestEntityUtils.exists(playerEntityId));
 
     // Kill player by depleting energy
     vm.warp(vm.getBlockTimestamp() + 1);
@@ -342,7 +342,7 @@ contract SpawnTest is DustTest {
     // First player spawns
     vm.prank(alice);
     EntityId aliceEntityId = world.spawn(spawnTileEntityId, spawnCoord, 1, "");
-    assertTrue(aliceEntityId.exists());
+    assertTrue(TestEntityUtils.exists(aliceEntityId));
 
     // Second player tries to spawn at the same coordinates
     vm.prank(bob);

@@ -6,15 +6,15 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { ROOT_NAMESPACE_ID } from "@latticexyz/world/src/constants.sol";
 
 import { Vec3, vec3 } from "../../Vec3.sol";
-import { Player } from "../../codegen/tables/Player.sol";
+
 import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
 
-import { EntityId } from "../../EntityId.sol";
+import { EntityId, EntityIdLib } from "../../EntityId.sol";
 import { ObjectType } from "../../ObjectType.sol";
 
 import { ObjectTypes } from "../../ObjectType.sol";
 
-import { createEntity, getMovableEntityAt, safeGetObjectTypeAt, setMovableEntityAt } from "../../utils/EntityUtils.sol";
+import { EntityUtils } from "../../utils/EntityUtils.sol";
 import { InventoryUtils } from "../../utils/InventoryUtils.sol";
 import { PlayerUtils } from "../../utils/PlayerUtils.sol";
 import { MoveLib } from "../libraries/MoveLib.sol";
@@ -31,7 +31,7 @@ contract AdminSystem is System {
   }
 
   function adminAddToolToInventory(EntityId owner, ObjectType toolObjectType) public onlyAdmin returns (EntityId) {
-    EntityId tool = createEntity(toolObjectType);
+    EntityId tool = EntityUtils.createUniqueEntity(toolObjectType);
     InventoryUtils.addEntity(owner, tool);
     return tool;
   }
@@ -45,7 +45,7 @@ contract AdminSystem is System {
   }
 
   function adminTeleportPlayer(address playerAddress, Vec3 finalCoord) public onlyAdmin {
-    EntityId player = Player.get(playerAddress);
+    EntityId player = EntityIdLib.encodePlayer(playerAddress);
     player.activate();
 
     Vec3[] memory playerCoords = ObjectTypes.Player.getRelativeCoords(player.getPosition());
@@ -60,11 +60,11 @@ contract AdminSystem is System {
     for (uint256 i = 0; i < newPlayerCoords.length; i++) {
       Vec3 newCoord = newPlayerCoords[i];
 
-      ObjectType newObjectType = safeGetObjectTypeAt(newCoord);
+      ObjectType newObjectType = EntityUtils.safeGetObjectTypeAt(newCoord);
       require(newObjectType.isPassThrough(), "Cannot teleport to a non-passable block");
-      require(!getMovableEntityAt(newCoord).exists(), "Cannot teleport where a player already exists");
+      require(!EntityUtils.getMovableEntityAt(newCoord).exists(), "Cannot teleport where a player already exists");
 
-      setMovableEntityAt(newCoord, players[i]);
+      EntityUtils.setMovableEntityAt(newCoord, players[i]);
     }
   }
 
@@ -77,7 +77,7 @@ contract AdminSystem is System {
     players[0] = basePlayer;
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < playerCoords.length; i++) {
-      players[i] = getMovableEntityAt(playerCoords[i]);
+      players[i] = EntityUtils.getMovableEntityAt(playerCoords[i]);
     }
     return players;
   }

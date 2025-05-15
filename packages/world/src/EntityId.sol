@@ -12,7 +12,6 @@ import { Energy, EnergyData } from "./codegen/tables/Energy.sol";
 import { EntityObjectType } from "./codegen/tables/EntityObjectType.sol";
 import { EntityProgram } from "./codegen/tables/EntityProgram.sol";
 import { PlayerBed } from "./codegen/tables/PlayerBed.sol";
-import { ReversePlayer } from "./codegen/tables/ReversePlayer.sol";
 
 import { updateMachineEnergy, updatePlayerEnergy } from "./utils/EnergyUtils.sol";
 import { ForceFieldUtils } from "./utils/ForceFieldUtils.sol";
@@ -28,6 +27,8 @@ import { Vec3 } from "./Vec3.sol";
 
 type EntityId is bytes32;
 
+type EntityType is bytes1;
+
 library EntityIdLib {
   // We need to use this internal library function in order to obtain the msg.sig and msg.sender
   function activate(EntityId self) internal returns (EnergyData memory) {
@@ -37,7 +38,7 @@ library EntityIdLib {
 
   function requireCallerAllowed(EntityId self, address caller, ObjectType objectType) internal view {
     if (objectType == ObjectTypes.Player) {
-      require(caller == ReversePlayer._get(self), "Caller not allowed");
+      require(caller == self.getPlayerAddress(), "Caller not allowed");
     } else {
       address programAddress = self.getProgram().getAddress();
       require(caller == programAddress, "Caller not allowed");
@@ -76,6 +77,10 @@ library EntityIdLib {
   }
 
   function getPosition(EntityId self) internal view returns (Vec3) {
+    (EntityType entityType, bytes31 data) = EntityTypeLib.decode(self);
+    if (entityType == EntityTypes.Block || entityType == EntityTypes.Fragment) {
+      return Vec3.wrap(uint96(uint256(bytes32(data) >> 160)));
+    }
     return EntityPosition._get(self);
   }
 
@@ -87,12 +92,35 @@ library EntityIdLib {
     return EntityObjectType._get(self);
   }
 
-  function exists(EntityId self) internal pure returns (bool) {
-    return EntityId.unwrap(self) != bytes32(0);
+  function exists(EntityId self) internal view returns (bool) {
+    return !self.getObjectType().isNull();
   }
 
   function unwrap(EntityId self) internal pure returns (bytes32) {
     return EntityId.unwrap(self);
+  }
+
+  function encodeBlock(Vec3 coord) internal pure returns (EntityId) {
+    return _encodeCoord(EntityTypes.Block, coord);
+  }
+
+  function encodeFragment(Vec3 coord) internal pure returns (EntityId) {
+    return _encodeCoord(EntityTypes.Fragment, coord);
+  }
+
+  function encodePlayer(address player) internal pure returns (EntityId) {
+    return EntityTypes.Player.encode(bytes20(player));
+  }
+
+  function getPlayerAddress(EntityId self) internal pure returns (address) {
+    (EntityType entityType, bytes31 data) = EntityTypeLib.decode(self);
+    require(entityType == EntityTypes.Player, "Entity is not a player");
+
+    return address(bytes20(data));
+  }
+
+  function _encodeCoord(EntityType entityType, Vec3 coord) private pure returns (EntityId) {
+    return entityType.encode(bytes12(coord.unwrap()));
   }
 }
 
@@ -134,5 +162,35 @@ library ActivateLib {
   }
 }
 
+library EntityTypes {
+  EntityType constant Incremental = EntityType.wrap(0x00);
+  EntityType constant Player = EntityType.wrap(0x01);
+  EntityType constant Fragment = EntityType.wrap(0x02);
+  EntityType constant Block = EntityType.wrap(0x03);
+}
+
+library EntityTypeLib {
+  function unwrap(EntityType self) internal pure returns (bytes1) {
+    return EntityType.unwrap(self);
+  }
+
+  function encode(EntityType self, bytes31 data) internal pure returns (EntityId) {
+    return EntityId.wrap(bytes32(self.unwrap()) | bytes32(data) >> 8);
+  }
+
+  function decode(EntityId self) internal pure returns (EntityType, bytes31) {
+    bytes32 _self = self.unwrap();
+    EntityType entityType = EntityType.wrap(bytes1(_self));
+    return (entityType, bytes31(_self << 8));
+  }
+}
+
+function typeEq(EntityType self, EntityType other) pure returns (bool) {
+  return EntityType.unwrap(self) == EntityType.unwrap(other);
+}
+
 using EntityIdLib for EntityId global;
 using { eq as ==, neq as != } for EntityId global;
+
+using EntityTypeLib for EntityType global;
+using { typeEq as == } for EntityType global;

@@ -123,15 +123,6 @@ export default defineWorld({
       },
       key: ["entityId"],
     },
-    ReverseTerrainPosition: {
-      schema: {
-        x: "int32",
-        y: "int32",
-        z: "int32",
-        entityId: "EntityId",
-      },
-      key: ["x", "y", "z"],
-    },
     Orientation: {
       schema: {
         entityId: "EntityId",
@@ -242,20 +233,6 @@ export default defineWorld({
     // ------------------------------------------------------------
     // Player
     // ------------------------------------------------------------
-    Player: {
-      schema: {
-        player: "address",
-        entityId: "EntityId",
-      },
-      key: ["player"],
-    },
-    ReversePlayer: {
-      schema: {
-        entityId: "EntityId",
-        player: "address",
-      },
-      key: ["entityId"],
-    },
     BedPlayer: {
       schema: {
         bedEntityId: "EntityId",
@@ -291,15 +268,6 @@ export default defineWorld({
         extraDrainRate: "uint128",
       },
       key: ["entityId"],
-    },
-    ReverseFragmentPosition: {
-      schema: {
-        x: "int32",
-        y: "int32",
-        z: "int32",
-        entityId: "EntityId",
-      },
-      key: ["x", "y", "z"],
     },
     Machine: {
       schema: {

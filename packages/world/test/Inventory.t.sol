@@ -13,14 +13,13 @@ import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
-import { Player } from "../src/codegen/tables/Player.sol";
 
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 
-import { EntityPosition, ReverseTerrainPosition } from "../src/utils/Vec3Storage.sol";
+import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
 import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
@@ -34,7 +33,7 @@ import { SlotTransfer } from "../src/utils/InventoryUtils.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 
 import { DustTest } from "./DustTest.sol";
-import { TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract InventoryTest is DustTest {
   function testDropTerrain() public {
@@ -46,8 +45,7 @@ contract InventoryTest is DustTest {
     uint16 numToTransfer = 10;
     TestInventoryUtils.addObject(aliceEntityId, transferObjectType, numToTransfer);
     assertInventoryHasObject(aliceEntityId, transferObjectType, numToTransfer);
-    EntityId airEntityId = ReverseTerrainPosition.get(dropCoord);
-    assertFalse(airEntityId.exists(), "Drop entity already exists");
+    (EntityId airEntityId,) = TestEntityUtils.getBlockAt(dropCoord);
 
     vm.prank(alice);
     startGasReport("drop terrain");
@@ -56,8 +54,6 @@ contract InventoryTest is DustTest {
     world.drop(aliceEntityId, drops, dropCoord);
     endGasReport();
 
-    airEntityId = ReverseTerrainPosition.get(dropCoord);
-    assertTrue(airEntityId.exists(), "Drop entity does not exist");
     assertInventoryHasObject(aliceEntityId, transferObjectType, 0);
     assertInventoryHasObject(airEntityId, transferObjectType, numToTransfer);
     assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Wrong number of occupied inventory slots");
@@ -73,8 +69,7 @@ contract InventoryTest is DustTest {
     uint16 numToTransfer = 10;
     TestInventoryUtils.addObject(aliceEntityId, transferObjectType, numToTransfer);
     assertInventoryHasObject(aliceEntityId, transferObjectType, numToTransfer);
-    EntityId airEntityId = ReverseTerrainPosition.get(dropCoord);
-    assertTrue(airEntityId.exists(), "Drop entity doesn't exist");
+    (EntityId airEntityId,) = TestEntityUtils.getBlockAt(dropCoord);
 
     SlotTransfer[] memory drops = new SlotTransfer[](1);
     drops[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: numToTransfer });
@@ -98,8 +93,7 @@ contract InventoryTest is DustTest {
     ObjectType transferObjectType = ObjectTypes.WoodenPick;
     EntityId toolEntityId = TestInventoryUtils.addEntity(aliceEntityId, transferObjectType);
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
-    EntityId airEntityId = ReverseTerrainPosition.get(dropCoord);
-    assertFalse(airEntityId.exists(), "Drop entity already exists");
+    (EntityId airEntityId,) = TestEntityUtils.getBlockAt(dropCoord);
 
     SlotTransfer[] memory drops = new SlotTransfer[](1);
     drops[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
@@ -109,8 +103,6 @@ contract InventoryTest is DustTest {
     world.drop(aliceEntityId, drops, dropCoord);
     endGasReport();
 
-    airEntityId = ReverseTerrainPosition.get(dropCoord);
-    assertTrue(airEntityId.exists(), "Drop entity does not exist");
     assertInventoryHasEntity(aliceEntityId, toolEntityId, 0);
     assertInventoryHasEntity(airEntityId, toolEntityId, 1);
     assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Wrong number of occupied inventory slots");
@@ -125,8 +117,7 @@ contract InventoryTest is DustTest {
     ObjectType transferObjectType = ObjectTypes.WoodenPick;
     EntityId toolEntityId = TestInventoryUtils.addEntity(aliceEntityId, transferObjectType);
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
-    EntityId airEntityId = ReverseTerrainPosition.get(dropCoord);
-    assertTrue(airEntityId.exists(), "Drop entity already exists");
+    (EntityId airEntityId,) = TestEntityUtils.getBlockAt(dropCoord);
 
     SlotTransfer[] memory drops = new SlotTransfer[](1);
     drops[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
@@ -151,8 +142,7 @@ contract InventoryTest is DustTest {
     uint16 numToTransfer = 10;
     TestInventoryUtils.addObject(aliceEntityId, transferObjectType, numToTransfer);
     assertInventoryHasObject(aliceEntityId, transferObjectType, numToTransfer);
-    EntityId airEntityId = ReverseTerrainPosition.get(dropCoord);
-    assertTrue(airEntityId.exists(), "Drop entity doesn't exist");
+    (EntityId airEntityId,) = TestEntityUtils.getBlockAt(dropCoord);
 
     SlotTransfer[] memory drops = new SlotTransfer[](1);
     drops[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: numToTransfer });
@@ -292,9 +282,7 @@ contract InventoryTest is DustTest {
     vm.prank(alice);
     world.mine(aliceEntityId, chestCoord, "");
 
-    EntityId airEntityId = ReverseTerrainPosition.get(chestCoord);
-    assertEq(airEntityId.exists(), true, "Drop entity does not exist");
-    assertEq(EntityObjectType.get(airEntityId), ObjectTypes.Air, "Drop entity is not air");
+    (EntityId airEntityId,) = TestEntityUtils.getBlockAt(chestCoord);
     assertInventoryHasObject(airEntityId, transferObjectType, numToPickup);
 
     vm.prank(alice);
@@ -443,17 +431,12 @@ contract InventoryTest is DustTest {
 
     Vec3 pickupCoord = playerCoord + vec3(0, 1, 1);
     setTerrainAtCoord(pickupCoord, ObjectTypes.Air);
-    EntityId airEntityId = ReverseTerrainPosition.get(pickupCoord);
-    assertFalse(airEntityId.exists(), "Drop entity doesn't exists");
-
-    SlotTransfer[] memory pickup = new SlotTransfer[](1);
-    pickup[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
-    vm.prank(alice);
-    vm.expectRevert("No entity at pickup location");
-    world.pickup(aliceEntityId, pickup, pickupCoord);
 
     EntityId chestEntityId = setObjectAtCoord(pickupCoord, ObjectTypes.Chest);
     TestInventoryUtils.addObject(chestEntityId, ObjectTypes.Grass, 1);
+
+    SlotTransfer[] memory pickup = new SlotTransfer[](1);
+    pickup[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
 
     vm.prank(alice);
     vm.expectRevert("Cannot pickup from a non-passable block");
@@ -546,7 +529,8 @@ contract InventoryTest is DustTest {
     assertInventoryHasObject(airEntityId, transferObjectType, 1);
     assertInventoryHasObject(aliceEntityId, transferObjectType, 0);
 
-    PlayerBed.setBedEntityId(aliceEntityId, randomEntityId());
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     SlotTransfer[] memory pickup = new SlotTransfer[](1);
     pickup[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
@@ -565,7 +549,8 @@ contract InventoryTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, transferObjectType, 1);
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
 
-    PlayerBed.setBedEntityId(aliceEntityId, randomEntityId());
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     SlotTransfer[] memory drops = new SlotTransfer[](1);
     drops[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });

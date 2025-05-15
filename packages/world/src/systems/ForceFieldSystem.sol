@@ -9,6 +9,7 @@ import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
 import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
 
+import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { AddFragmentNotification, RemoveFragmentNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
@@ -111,7 +112,7 @@ contract ForceFieldSystem is System {
 
     require(ForceFieldUtils.isFragment(forceField, refFragmentCoord), "Reference fragment is not part of forcefield");
 
-    EntityId fragment = ForceFieldUtils.getOrCreateFragmentAt(fragmentCoord);
+    EntityId fragment = EntityUtils.getOrCreateFragmentAt(fragmentCoord);
 
     ForceFieldUtils.addFragment(forceField, fragment);
 
@@ -146,7 +147,7 @@ contract ForceFieldSystem is System {
     Vec3 forceFieldFragmentCoord = forceField.getPosition().toFragmentCoord();
     require(forceFieldFragmentCoord != fragmentCoord, "Can't remove forcefield's fragment");
 
-    EntityId fragment = ForceFieldUtils.getFragmentAt(fragmentCoord);
+    EntityId fragment = EntityUtils.getFragmentAt(fragmentCoord);
     require(ForceFieldUtils.isFragment(forceField, fragment), "Fragment is not part of forcefield");
 
     {

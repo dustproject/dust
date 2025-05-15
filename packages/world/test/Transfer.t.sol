@@ -13,6 +13,7 @@ import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
 import { EntityId } from "../src/EntityId.sol";
 
+import { Direction } from "../src/codegen/common.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { EnergyData } from "../src/codegen/tables/Energy.sol";
 
@@ -21,11 +22,11 @@ import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-import { Player } from "../src/codegen/tables/Player.sol";
 
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 import { ReverseMovablePosition } from "../src/codegen/tables/ReverseMovablePosition.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
+import { ITransferSystem } from "../src/codegen/world/ITransferSystem.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { DustTest } from "./DustTest.sol";
 
@@ -41,7 +42,7 @@ import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { SlotData, SlotTransfer } from "../src/utils/InventoryUtils.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
-import { TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract TestChestProgram is System {
   // Store the last inputs received by onTransfer
@@ -113,7 +114,7 @@ contract TransferTest is DustTest {
     Vec3 coord = EntityPosition.get(entityId);
 
     // Attach program with test player
-    (address bob, EntityId bobEntityId) = createTestPlayer(coord - vec3(1, 0, 0));
+    (address bob, EntityId bobEntityId) = createTestPlayer(coord + vec3(0, 0, 2));
     vm.prank(bob);
     world.attachProgram(bobEntityId, entityId, ProgramId.wrap(programSystemId.unwrap()), "");
   }
@@ -478,7 +479,8 @@ contract TransferTest is DustTest {
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
     assertInventoryHasObject(chestEntityId, transferObjectType, 0);
 
-    PlayerBed.setBedEntityId(aliceEntityId, randomEntityId());
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
@@ -499,7 +501,9 @@ contract TransferTest is DustTest {
     assertInventoryHasObject(aliceEntityId, transferObjectType, numToTransfer);
     assertInventoryHasObject(chestEntityId, transferObjectType, 0);
 
-    setupForceField(chestCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 }));
+    setupForceField(
+      chestCoord + vec3(0, 0, 3), EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 })
+    );
 
     TestChestProgram program = new TestChestProgram();
     attachTestProgram(chestEntityId, program, "namespace");
@@ -527,7 +531,8 @@ contract TransferTest is DustTest {
     assertInventoryHasObject(otherChestEntityId, transferObjectType, 0);
 
     setupForceField(
-      chestCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000 * 10 ** 14, drainRate: 1 })
+      chestCoord + vec3(3, 0, 0),
+      EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000 * 10 ** 14, drainRate: 1 })
     );
 
     TestChestProgram program = new TestChestProgram();
@@ -558,7 +563,9 @@ contract TransferTest is DustTest {
     assertInventoryHasObject(chestEntityId, transferObjectType, numToTransfer);
     assertInventoryHasObject(otherChestEntityId, transferObjectType, 0);
 
-    setupForceField(chestCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 }));
+    setupForceField(
+      chestCoord + vec3(0, 0, 3), EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 })
+    );
 
     TestChestProgram program = new TestChestProgram();
     attachTestProgram(chestEntityId, program, "namespace");
@@ -707,7 +714,8 @@ contract TransferTest is DustTest {
     assertInventoryHasObject(chestEntityId, transferObjectType, numToTransfer);
 
     setupForceField(
-      chestCoord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000 * 10 ** 14, drainRate: 1 })
+      chestCoord + vec3(0, 0, 3),
+      EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000 * 10 ** 14, drainRate: 1 })
     );
 
     TestChestProgram program = new TestChestProgram();

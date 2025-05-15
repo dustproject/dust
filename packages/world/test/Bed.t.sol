@@ -8,7 +8,9 @@ import { WorldContextConsumer } from "@latticexyz/world/src/WorldContext.sol";
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
-import { TestEnergyUtils, TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
+import { Direction } from "../src/codegen/common.sol";
+
+import { TestEnergyUtils, TestEntityUtils, TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 import { BedPlayer, BedPlayerData } from "../src/codegen/tables/BedPlayer.sol";
 import { Fragment } from "../src/codegen/tables/Fragment.sol";
@@ -23,10 +25,10 @@ import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest, console } from "./DustTest.sol";
 
-import { EntityPosition, LocalEnergyPool, ReverseTerrainPosition } from "../src/utils/Vec3Storage.sol";
+import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import { CHUNK_SIZE, MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
-import { EntityId } from "../src/EntityId.sol";
+import { EntityId, EntityIdLib } from "../src/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../src/ObjectType.sol";
 
 import { ProgramId } from "../src/ProgramId.sol";
@@ -39,11 +41,8 @@ contract TestBedProgram is System {
 contract BedTest is DustTest {
   function createBed(Vec3 bedCoord) internal returns (EntityId) {
     // Set entity to bed
-    EntityId bedEntityId = randomEntityId();
-    EntityPosition.set(bedEntityId, bedCoord);
-    ReverseTerrainPosition.set(bedCoord, bedEntityId);
-    EntityObjectType.set(bedEntityId, ObjectTypes.Bed);
-    return bedEntityId;
+    EntityId bed = setObjectAtCoord(bedCoord, ObjectTypes.Bed, Direction.NegativeZ);
+    return bed;
   }
 
   function attachTestProgram(EntityId bedEntityId) internal {
@@ -108,7 +107,7 @@ contract BedTest is DustTest {
     Vec3 bedCoord = coord + vec3(500, 0, 0);
 
     // Set forcefield
-    setupForceField(bedCoord);
+    setupForceField(bedCoord + vec3(4, 0, 0));
 
     // Set entity to bed
     EntityId bedEntityId = createBed(bedCoord);
@@ -149,7 +148,7 @@ contract BedTest is DustTest {
       })
     );
 
-    EntityId fragment = TestForceFieldUtils.getFragmentAt(bedCoord.toFragmentCoord());
+    EntityId fragment = TestEntityUtils.getFragmentAt(bedCoord.toFragmentCoord());
 
     assertEq(Fragment.getExtraDrainRate(fragment), 0);
 
@@ -366,7 +365,7 @@ contract BedTest is DustTest {
 
     // Set forcefield
     EntityId forcefieldEntityId = setupForceField(
-      bedCoord,
+      bedCoord + vec3(1, 0, 0),
       EnergyData({
         energy: initialForcefieldEnergy,
         lastUpdatedTime: initialTimestamp,

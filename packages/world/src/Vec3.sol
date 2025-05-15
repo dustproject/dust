@@ -17,11 +17,11 @@ function vec3(int32 _x, int32 _y, int32 _z) pure returns (Vec3) {
 }
 
 function eq(Vec3 a, Vec3 b) pure returns (bool) {
-  return Vec3.unwrap(a) == Vec3.unwrap(b);
+  return a.unwrap() == b.unwrap();
 }
 
 function neq(Vec3 a, Vec3 b) pure returns (bool) {
-  return Vec3.unwrap(a) != Vec3.unwrap(b);
+  return a.unwrap() != b.unwrap();
 }
 
 function lt(Vec3 a, Vec3 b) pure returns (bool) {
@@ -83,19 +83,23 @@ library Vec3Lib {
   using LibString for *;
   using Math for *;
 
+  function unwrap(Vec3 self) internal pure returns (uint96) {
+    return Vec3.unwrap(self);
+  }
+
   function x(Vec3 a) internal pure returns (int32) {
     // Extract z component (leftmost 32 bits)
-    return int32(uint32(Vec3.unwrap(a) >> 64));
+    return int32(uint32(a.unwrap() >> 64));
   }
 
   function y(Vec3 a) internal pure returns (int32) {
     // Extract y component (middle 32 bits)
-    return int32(uint32(Vec3.unwrap(a) >> 32));
+    return int32(uint32(a.unwrap() >> 32));
   }
 
   function z(Vec3 a) internal pure returns (int32) {
     // Extract x component (rightmost 32 bits)
-    return int32(uint32(Vec3.unwrap(a)));
+    return int32(uint32(a.unwrap()));
   }
 
   function xyz(Vec3 self) internal pure returns (int32, int32, int32) {
