@@ -257,7 +257,7 @@ library ObjectTypeLib {
     assembly {
       let ix := shr(3, self) // byte index = id / 8
       if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x0000000000000000000000000ffffffffffffffffffffffffffffffffffffff8)
+        let bits := byte(sub(31, ix), 0x0000000000000000000000001ffffffffffffffffffffffffffffffffffffff8)
         let mask := shl(and(self, 7), 1) // 1 << (id & 7)
         _is := eq(and(bits, mask), mask) // 1 if set
       }
@@ -573,7 +573,7 @@ library ObjectTypeLib {
     return [ObjectTypes.AnyPlank, ObjectTypes.AnyLog, ObjectTypes.AnyLeaf, ObjectTypes.AnyTerracotta];
   }
 
-  function getBlockTypes() internal pure returns (ObjectType[153] memory) {
+  function getBlockTypes() internal pure returns (ObjectType[154] memory) {
     return [
       ObjectTypes.Magma,
       ObjectTypes.Stone,
@@ -727,7 +727,8 @@ library ObjectTypeLib {
       ObjectTypes.Chest,
       ObjectTypes.SpawnTile,
       ObjectTypes.Bed,
-      ObjectTypes.TextSign
+      ObjectTypes.TextSign,
+      ObjectTypes.Torch
     ];
   }
 
@@ -1284,13 +1285,12 @@ library ObjectTypeLib {
   }
 
   function matches(ObjectType self, ObjectType other) internal pure returns (bool) {
-    if (
-      self == ObjectTypes.AnyLog && self.isLog() || self == ObjectTypes.AnyPlank && self.isPlank()
-        || self == ObjectTypes.AnyLeaf && self.isLeaf()
-    ) {
-      return true;
+    if (!self.isAny()) {
+      return self == other;
     }
-    return self == other;
+
+    return self == ObjectTypes.AnyLog && self.isLog() || self == ObjectTypes.AnyPlank && self.isPlank()
+      || self == ObjectTypes.AnyLeaf && self.isLeaf();
   }
 }
 

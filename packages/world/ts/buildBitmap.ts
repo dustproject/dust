@@ -14,8 +14,7 @@ export function buildBitmap(ids: number[]) {
   for (let off = 0; off < bytes.length; off += 32) {
     const chunk = bytes.slice(off, off + 32); // little-endian
     const buf = new Uint8Array(32);
-    buf.set(chunk); // <-- HERE  (was 32-chunk.length)
-    //      put at low end
+    buf.set(chunk);
     buf.reverse(); // flip to big-endian
 
     let w = 0n;

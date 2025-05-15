@@ -6,7 +6,7 @@ import {
   objectsByName,
 } from "../objects";
 
-function renderCategoryBitmap(
+function renderCategoryCheck(
   name: string,
   ids: number[],
   customFnName?: string,
@@ -106,7 +106,7 @@ library ObjectTypeLib {
   // Direct Category Checks
 ${Object.entries(categories)
   .map(([name, data]) => {
-    return renderCategoryBitmap(
+    return renderCategoryCheck(
       name,
       data.objects.map((obj) => objectsByName[obj].id),
       data.checkName,
@@ -283,10 +283,10 @@ ${Object.entries(categories)
   }
 
   function matches(ObjectType self, ObjectType other) internal pure returns (bool) {
-    if (self == ObjectTypes.AnyLog && self.isLog() || self == ObjectTypes.AnyPlank && self.isPlank() || self == ObjectTypes.AnyLeaf && self.isLeaf()) {
-      return true;
-    }
-    return self == other;
+    if (!self.isAny()) return self == other;
+
+    return self == ObjectTypes.AnyLog && self.isLog() || self == ObjectTypes.AnyPlank && self.isPlank()
+      || self == ObjectTypes.AnyLeaf && self.isLeaf();
   }
 }
 

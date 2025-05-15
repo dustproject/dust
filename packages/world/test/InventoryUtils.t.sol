@@ -317,6 +317,7 @@ contract InventoryUtilsTest is DustTest {
 
     // Use tool with mass reduction ≥ 1
     ToolData memory toolData = TestInventoryUtils.getToolData(alice, 0);
+    assertEq(toolData.toolType, ObjectTypes.WoodenPick, "Wrong tool type");
     TestInventoryUtils.use(toolData, 1, 5);
 
     assertEq(Inventory.lengthOccupiedSlots(alice), 0, "slot not recycled");
