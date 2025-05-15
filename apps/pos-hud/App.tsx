@@ -1,5 +1,3 @@
-import defaultProgramAbi from "@dust/programs/out/DefaultProgram.sol/DefaultProgram.abi";
-import { resourceToHex } from "@latticexyz/common";
 import {
   type AppRpcSchema,
   type ClientRpcSchema,
@@ -9,7 +7,6 @@ import {
   messagePort,
 } from "dustkit/internal";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { zeroHash } from "viem";
 
 export function App() {
   const dustClientRef = useRef<MessagePortTransport<ClientRpcSchema> | null>(

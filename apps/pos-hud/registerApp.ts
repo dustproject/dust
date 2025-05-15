@@ -27,7 +27,7 @@ export function getWorldAddress() {
   return worldAddress;
 }
 
-const appNamespace = "coords-app";
+const appNamespace = "pos-hud";
 
 async function registerApp() {
   const privateKey = process.env.PRIVATE_KEY;

@@ -1,6 +1,6 @@
 {
   "$schema": "https://esm.sh/pr/dustproject/dust/dustkit@54a4093/json-schemas/app-config.json",
-  "name": "Coords App",
+  "name": "PosHUD",
   "startUrl": "/",
   "frame": {
     "width": 600,
