@@ -22,8 +22,6 @@ contract PostDeploy is Script {
     // Start broadcasting transactions from the deployer account
     vm.startBroadcast(deployerPrivateKey);
 
-    IWorld world = IWorld(worldAddress);
-
     initTerrain();
     initObjects();
     initRecipes();
