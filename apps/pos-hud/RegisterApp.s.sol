@@ -27,7 +27,6 @@ contract RegisterApp is Script {
     ResourceId appNamespaceId = WorldResourceIdLib.encodeNamespace("pos-hud");
 
     world.registerNamespace(appNamespaceId);
-
     metadataSystem.setResourceTag(appNamespaceId, "dust.appConfigUrl", bytes("http://localhost:5501/dust-app.json"));
 
     vm.stopBroadcast();
