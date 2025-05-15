@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "npx tsx registerApp.ts && pnpm vite --port 5501",
+    "dev": "pnpm vite --port 5501",
+    "register": "npx tsx registerApp.ts",
     "test": "tsc --noEmit"
   },
   "devDependencies": {

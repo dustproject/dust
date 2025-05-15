@@ -3,16 +3,19 @@ import worldsJson from "@dust/world/worlds.json";
 import { resourceToHex, transportObserver } from "@latticexyz/common";
 import { mudFoundry } from "@latticexyz/common/chains";
 import MetadataSystemAbi from "@latticexyz/world-module-metadata/out/MetadataSystem.sol/MetadataSystem.abi.json";
+import { encodeSystemCall } from "@latticexyz/world/internal";
 import dotenv from "dotenv";
 import {
   http,
   createPublicClient,
   fallback,
   getContract,
+  toBytes,
+  toHex,
   webSocket,
 } from "viem";
 import { createWalletClient } from "viem";
-import type { Hex } from "viem";
+import type { Abi, Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
 dotenv.config();
@@ -102,14 +105,23 @@ async function registerApp() {
   console.info("setting app config url");
   txHash = await walletClient.writeContract({
     address: worldAddress as Hex,
-    abi: MetadataSystemAbi,
+    abi: IWorldAbi,
     account,
-    functionName: "metadata_setResourceTag",
-    args: [
-      appNamespaceId,
-      "dust.appConfigUrl",
-      "http://localhost:5501/dust-app.json",
-    ],
+    functionName: "call",
+    args: encodeSystemCall({
+      abi: MetadataSystemAbi as Abi,
+      systemId: resourceToHex({
+        type: "system",
+        namespace: "metadata",
+        name: "MetadataSystem",
+      }),
+      functionName: "setResourceTag",
+      args: [
+        appNamespaceId,
+        toHex("dust.appConfigUrl", { size: 32 }),
+        toHex("http://localhost:5501/dust-app.json"),
+      ],
+    }),
   });
   receipt = await publicClient.waitForTransactionReceipt({
     hash: txHash,
