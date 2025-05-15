@@ -52,8 +52,8 @@ contract BuildSystem is System {
     require(buildType.isBlock(), "Cannot build non-block object");
 
     // If player died, return early
-    (callerEnergy,) = transferEnergyToPool(caller, Math.min(callerEnergy, BUILD_ENERGY_COST));
-    if (callerEnergy == 0) {
+    bool playerDied = BuildLib._handleEnergyReduction(caller, callerEnergy);
+    if (playerDied) {
       return EntityId.wrap(0);
     }
 
@@ -97,6 +97,11 @@ contract BuildSystem is System {
 }
 
 library BuildLib {
+  function _handleEnergyReduction(EntityId caller, uint128 callerEnergy) public returns (bool) {
+    (callerEnergy,) = transferEnergyToPool(caller, Math.min(callerEnergy, BUILD_ENERGY_COST));
+    return callerEnergy == 0;
+  }
+
   function _handleBuildType(EntityId base, ObjectType buildType, Vec3 coord) public {
     if (buildType.isGrowable()) {
       _handleGrowable(base, buildType, coord);

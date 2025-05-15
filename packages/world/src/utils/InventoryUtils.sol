@@ -183,7 +183,7 @@ library InventoryUtils {
   }
 
   // IMPORTANT: this does not burn tool ores
-  function removeEntity(EntityId owner, EntityId entity) public {
+  function removeEntity(EntityId owner, EntityId entity) internal {
     uint16[] memory slots = Inventory._getOccupiedSlots(owner);
     for (uint256 i = 0; i < slots.length; i++) {
       if (entity == InventorySlot._getEntityId(owner, slots[i])) {
@@ -204,7 +204,7 @@ library InventoryUtils {
     Mass._deleteRecord(entity);
   }
 
-  function removeObject(EntityId owner, ObjectType objectType, uint16 amount) public {
+  function removeObject(EntityId owner, ObjectType objectType, uint16 amount) internal {
     require(amount > 0, "Amount must be greater than 0");
     require(!objectType.isNull(), "Empty slot");
 

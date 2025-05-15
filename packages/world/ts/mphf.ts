@@ -1,95 +1,109 @@
-/* ---------------------------------------------------------------
-   buildBucket(ids)  →  { S, A0,A1,A2, gpack, table }
-   --------------------------------------------------------------- */
-export type Bucket = {
-  S: number; // #keys (≤128)
-  A0: number; // three odd 16-bit multipliers
-  A1: number;
-  A2: number;
-  gpack: bigint; // 2-bit g[] packed little-endian in a uint256
-  table: Uint8Array; // 2×S bytes, slot→id little-endian
-};
+export interface Bucket {
+  S: number; // Number of slots
+  packedA: bigint; // Packed hash multipliers (uint48)
+  gWords: bigint[]; // 1–4 uint256 words for g values
+  table: Uint8Array; // Lookup table (2 × S bytes)
+}
 
 export function buildBucket(ids: number[]): Bucket {
-  if (ids.length === 0) throw new Error("empty set");
-  if (ids.length > 128) throw new Error("split set first (S>128)");
+  if (!ids.length) throw new Error("empty set");
+  if (ids.length > 128) throw new Error("split set first (n > 128)");
+
   const n = ids.length;
-  const S = Math.ceil(n * 1.25);
+  const S = Math.ceil(n * 1.23);
 
-  /* ------------ helpers ---------------- */
-  const odd16 = () => ((Math.random() * 0xffff) | 1) & 0xffff;
+  // Helper functions
+  const odd16 = (): number => (Math.floor(Math.random() * 0xffff) | 1) & 0xffff;
+  const hash = (id: number, A: number): number => ((id * A) >> 8) & 0xff;
 
-  const hash = (id: number, A: number) => ((id * A) >> 8) & 0xff;
-
-  /* repeat until we get a peelable graph */
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const [A0, A1, A2] = [odd16(), odd16(), odd16()];
+    const edges: [number, number, number][] = ids.map((id) => [hash(id, A0) % S, hash(id, A1) % S, hash(id, A2) % S]);
 
-    const edges: [number, number, number][] = ids.map((id) => [
-      hash(id, A0) % S,
-      hash(id, A1) % S,
-      hash(id, A2) % S,
-    ]);
-
-    /* ----------- peel order (reverse topological) ------------ */
-    const deg = Array(S).fill(0);
-    for (const edge of edges) {
-      for (const v of edge) {
-        ++deg[v];
-      }
+    // Peeling process with peel vertex tracking
+    const deg = new Uint8Array(S);
+    for (const [v0, v1, v2] of edges) {
+      deg[v0]!++;
+      deg[v1]!++;
+      deg[v2]!++;
     }
 
-    const stack: number[] = [];
-    const order: number[] = Array(edges.length);
+    const stack: [number, number][] = []; // [edge index, peel vertex]
+    const order: [number, number][] = []; // [edge index, peel vertex]
+    const peeled = new Set<number>();
 
-    for (const [i, edge] of edges.entries()) {
-      if (deg[edge[0]] === 1 || deg[edge[1]] === 1 || deg[edge[2]] === 1)
-        stack.push(i);
+    // Initialize stack with edges having a degree-1 vertex
+    for (let i = 0; i < n; i++) {
+      const [v0, v1, v2] = edges[i]!;
+      if (deg[v0] === 1) stack.push([i, v0]);
+      else if (deg[v1] === 1) stack.push([i, v1]);
+      else if (deg[v2] === 1) stack.push([i, v2]);
     }
 
-    let ptr = edges.length;
     while (stack.length) {
-      const ei = stack.pop()!;
-      order[--ptr] = ei;
-      for (const v of edges[ei]!) {
-        if (--deg[v] === 1) {
-          for (const [j, edge] of edges.entries()) {
-            if (
-              deg[edge[0]] &&
-              deg[edge[1]] &&
-              deg[edge[2]] &&
-              edge.includes(v)
-            )
-              stack.push(j);
+      const [ei, peelV] = stack.pop()!;
+      if (peeled.has(ei)) continue;
+      peeled.add(ei);
+      order.push([ei, peelV]);
+      const [v0, v1, v2] = edges[ei]!;
+      for (const v of [v0, v1, v2]) {
+        deg[v]!--;
+        if (deg[v] === 1) {
+          for (let j = 0; j < n; j++) {
+            if (!peeled.has(j)) {
+              const [u0, u1, u2] = edges[j]!;
+              if (u0 === v || u1 === v || u2 === v) {
+                stack.push([j, v]);
+              }
+            }
           }
         }
       }
     }
-    if (ptr !== 0) continue; // graph had cycles – pick new multipliers
 
-    /* ------------- assign 2-bit g[] --------------------------- */
-    const g = new Uint8Array(S); // all 0 by default
-    const used = new Uint8Array(S);
+    if (peeled.size !== n) continue; // Retry if not fully peelable
 
-    for (const ei of order) {
-      const [v0, v1, v2] = edges[ei]!;
-      const need = ((S + ids[ei]! - (g[v0]! + g[v1]!)) % S) & 3;
-      g[v2] = need;
-      used[v2] = 1;
-    }
-
-    /* ------------- pack results ------------------------------ */
-    let gpack = 0n;
-    for (let i = 0; i < S; ++i) gpack |= BigInt(g[i]!) << BigInt(2 * i);
-
+    // Assign g values in reverse peeling order
+    const g = new Uint8Array(S);
     const table = new Uint8Array(2 * S);
-    for (const [i, edge] of edges.entries()) {
-      const slot = (g[edge[0]]! + g[edge[1]]! + g[edge[2]]!) % S;
-      table[2 * slot] = ids[i]! & 0xff; // little-endian
-      table[2 * slot + 1] = ids[i]! >> 8;
+    for (let k = n - 1; k >= 0; k--) {
+      const [ei, peelV] = order[k]!;
+      const [v0, v1, v2] = edges[ei]!;
+      // Identify the two other vertices
+      let vOther1, vOther2;
+      if (peelV === v0) {
+        vOther1 = v1;
+        vOther2 = v2;
+      } else if (peelV === v1) {
+        vOther1 = v0;
+        vOther2 = v2;
+      } else {
+        vOther1 = v0;
+        vOther2 = v1;
+      }
+      const slot = k; // Unique slot from 0 to n-1
+      g[peelV] = (slot + S - ((g[vOther1]! + g[vOther2]!) % S)) % S;
+      table[2 * slot] = ids[ei]! & 0xff;
+      table[2 * slot + 1] = ids[ei]! >> 8;
     }
 
-    return { S, A0, A1, A2, gpack, table };
+    // Pad remaining slots
+    for (let s = n; s < S; s++) {
+      table[2 * s] = 0xff;
+      table[2 * s + 1] = 0xff;
+    }
+
+    // Pack g into gWords
+    const wordCnt = Math.ceil(S / 32);
+    const gWords: bigint[] = new Array(wordCnt).fill(0n);
+    for (let i = 0; i < S; i++) {
+      const w = Math.floor(i / 32);
+      gWords[w]! |= BigInt(g[i]!) << BigInt(8 * (i % 32));
+    }
+
+    // Pack hash multipliers
+    const packedA = BigInt(A0) | (BigInt(A1) << 16n) | (BigInt(A2) << 32n);
+
+    return { S, packedA, gWords, table };
   }
 }
