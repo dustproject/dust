@@ -15,6 +15,27 @@ export function App() {
   const dustClientRef = useRef<MessagePortTransport<ClientRpcSchema> | null>(
     null,
   );
+  const [playerPosition, setPlayerPosition] = useState<{
+    x: number;
+    y: number;
+    z: number;
+  } | null>(null);
+
+  const updatePlayerPosition = useCallback(async () => {
+    if (!dustClientRef.current) {
+      console.error("no dust client");
+      return;
+    }
+
+    const position = await dustClientRef.current({}).request({
+      method: "dustClient_getPlayerPosition",
+      params: {
+        entity: "0x",
+      },
+    });
+
+    setPlayerPosition(position);
+  }, []);
 
   const loadDustClient = useCallback(async () => {
     if (!window.opener && !window.parent) {
@@ -41,58 +62,20 @@ export function App() {
     });
   }, [loadDustClient]);
 
+  useEffect(() => {
+    updatePlayerPosition();
+
+    // run every 100ms
+    const interval = setInterval(updatePlayerPosition, 100);
+
+    return () => clearInterval(interval);
+  }, [updatePlayerPosition]);
+
   return (
     <div>
-      <h1>App</h1>
-      <p>
-        <button
-          type="button"
-          onClick={async () => {
-            if (!dustClientRef.current) {
-              console.error("no dust client");
-              return;
-            }
-
-            await dustClientRef.current({}).request({
-              method: "dustClient_setWaypoint",
-              params: {
-                entity: "0x",
-                label: "Somewhere",
-              },
-            });
-          }}
-        >
-          Set waypoint
-        </button>{" "}
-        <button
-          type="button"
-          onClick={async () => {
-            if (!dustClientRef.current) {
-              console.error("no dust client");
-              return;
-            }
-
-            await dustClientRef.current({}).request({
-              method: "dustClient_systemCall",
-              params: [
-                {
-                  systemId: resourceToHex({
-                    type: "system",
-                    namespace: "",
-                    name: "",
-                  }),
-                  abi: defaultProgramAbi,
-                  // TODO: figure out why this isn't narrowing with the provided ABI
-                  functionName: "setAllowed",
-                  args: [zeroHash, zeroHash, true],
-                },
-              ],
-            });
-          }}
-        >
-          Call system
-        </button>
-      </p>
+      <span>x: {playerPosition?.x}</span>
+      <span>y: {playerPosition?.y}</span>
+      <span>z: {playerPosition?.z}</span>
     </div>
   );
 }

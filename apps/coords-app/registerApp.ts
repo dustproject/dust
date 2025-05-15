@@ -2,6 +2,7 @@ import IWorldAbi from "@dust/world/out/IWorld.sol/IWorld.abi";
 import worldsJson from "@dust/world/worlds.json";
 import { resourceToHex, transportObserver } from "@latticexyz/common";
 import { mudFoundry } from "@latticexyz/common/chains";
+import MetadataSystemAbi from "@latticexyz/world-module-metadata/out/MetadataSystem.sol/MetadataSystem.abi.json";
 import dotenv from "dotenv";
 import {
   http,
@@ -13,7 +14,6 @@ import {
 import { createWalletClient } from "viem";
 import type { Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import MetadataSystemAbi from "@latticexyz/world-module-metadata/out/MetadataSystem.sol/MetadataSystem.abi.json";
 
 dotenv.config();
 
@@ -72,7 +72,7 @@ async function registerApp() {
     name: "",
   });
 
-  console.log("registering app namespace", appNamespaceId);
+  console.info("registering app namespace", appNamespaceId);
   let txHash: Hex;
   try {
     txHash = await walletClient.writeContract({
@@ -94,12 +94,12 @@ async function registerApp() {
     confirmations: 0,
   });
   if (receipt.status === "success") {
-    console.log("App registered successfully");
+    console.info("App registered successfully");
   } else {
     throw new Error("App registration failed");
   }
 
-  console.log("setting app config url");
+  console.info("setting app config url");
   txHash = await walletClient.writeContract({
     address: worldAddress as Hex,
     abi: MetadataSystemAbi,
@@ -119,7 +119,7 @@ async function registerApp() {
     confirmations: 0,
   });
   if (receipt.status === "success") {
-    console.log("App config url set successfully");
+    console.info("App config url set successfully");
   } else {
     throw new Error("App config url set failed");
   }
