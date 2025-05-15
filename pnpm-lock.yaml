@@ -54,7 +54,7 @@ importers:
         specifier: ^8.0.3
         version: 8.0.3
 
-  apps/coords-app:
+  apps/dustkit-playground:
     dependencies:
       '@dust/programs':
         specifier: workspace:*
@@ -71,15 +71,9 @@ importers:
       '@latticexyz/world':
         specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
         version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
-      '@latticexyz/world-module-metadata':
-        specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
-        version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
       '@tanstack/react-query':
         specifier: ^5.74.4
         version: 5.74.4(react@19.1.0)
-      dotenv:
-        specifier: ^16.3.1
-        version: 16.4.7
       dustkit:
         specifier: workspace:*
         version: link:../../packages/dustkit
@@ -115,7 +109,7 @@ importers:
         specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
         version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(vite@6.3.0(@types/node@20.17.30)(terser@5.39.0)(tsx@4.19.3))
 
-  apps/dustkit-playground:
+  apps/pos-hud:
     dependencies:
       '@dust/programs':
         specifier: workspace:*
@@ -132,9 +126,15 @@ importers:
       '@latticexyz/world':
         specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
         version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
+      '@latticexyz/world-module-metadata':
+        specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
+        version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
       '@tanstack/react-query':
         specifier: ^5.74.4
         version: 5.74.4(react@19.1.0)
+      dotenv:
+        specifier: ^16.3.1
+        version: 16.4.7
       dustkit:
         specifier: workspace:*
         version: link:../../packages/dustkit
@@ -268,9 +268,6 @@ importers:
         specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
         version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
       '@latticexyz/world-consumer':
-        specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
-        version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
-      '@latticexyz/world-module-metadata':
         specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
         version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
       '@openzeppelin/contracts':
