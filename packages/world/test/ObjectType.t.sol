@@ -9,7 +9,7 @@ import { PerfectHashLib } from "../src/utils/PerfectHashLib.sol";
 contract ObjectTypeTest is DustTest {
   function testCategoryCheck() public {
     uint256 gasStart = gasleft();
-    ObjectTypes.AzaleaFlower.isPassThrough();
+    ObjectTypes.AzaleaFlower.isBlock();
     console.log(gasStart - gasleft());
   }
 

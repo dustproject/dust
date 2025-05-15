@@ -1,26 +1,22 @@
 export function buildBitmap(ids: number[]) {
-  if (!ids.length) throw new Error("empty set");
-  const maxId = Math.max(...ids);
-  const byteLen = (maxId >> 3) + 1;
-  const bytes = new Uint8Array(byteLen);
+  const bytes: Uint8Array[] = [];
 
-  // set bits
   for (const id of ids) {
-    bytes[id >> 3]! |= 1 << (id & 7);
+    const index = id >>> 3; // byte index inside logical bitmap
+    const byte = id & 7; // bit position inside that byte
+    const word = index >>> 5; // which 32-byte word
+    const pos = 31 - (index & 31); // byte position *inside* that word
+
+    if (!bytes[word]) bytes[word] = new Uint8Array(32);
+    bytes[word]![pos]! |= 1 << byte; // set bit (big-endian layout)
   }
 
-  // chop into 32-byte words, build big-endian literals
-  const words: bigint[] = [];
-  for (let off = 0; off < bytes.length; off += 32) {
-    const chunk = bytes.slice(off, off + 32); // little-endian
-    const buf = new Uint8Array(32);
-    buf.set(chunk);
-    buf.reverse(); // flip to big-endian
-
+  // pack each 32-byte buffer into a bigint literal
+  const words = bytes.map((buf) => {
     let w = 0n;
-    for (const b of buf) w = (w << 8n) | BigInt(b);
-    words.push(w);
-  }
+    for (const b of buf ?? new Uint8Array(32)) w = (w << 8n) | BigInt(b);
+    return w;
+  });
 
-  return { byteLen, words };
+  return { words, byteLen: (Math.max(...ids) >>> 3) + 1 };
 }

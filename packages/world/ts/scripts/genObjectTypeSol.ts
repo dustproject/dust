@@ -13,37 +13,23 @@ function renderCategoryCheck(
 ): string {
   const fn = customFnName ?? `is${name}`;
   const { words } = buildBitmap(ids);
-  const totalBytes = words.length * 32; // bitmap length
-
-  let bitmapAccess: string;
-  if (words.length === 1) {
-    const W = words[0]!.toString(16).padStart(64, "0");
-    bitmapAccess = `let bits := byte(sub(31, ix), 0x${W})`;
-  } else {
-    // several 32-byte words
-    const cases = words
-      .map((w, i) => {
-        const W = w.toString(16).padStart(64, "0");
-        return `case ${i} { bits := byte(sub(31, and(ix, 31)), 0x${W}) }`;
-      })
-      .join("\n        ");
-    bitmapAccess = `
-        // word index = ix / 32
-        switch shr(5, ix)
-        ${cases}
-  `;
-  }
+  const g =
+    words.length === 1
+      ? `let bits := byte(sub(31, ix), 0x${words[0]!.toString(16)})`
+      : `
+      switch shr(5, ix) { // ix / 32
+        ${words.map((w, i) => `case ${i} { bits := byte(and(ix,31), 0x${w.toString(16)}) }`).join("\n")}
+        default { bits := 0 }
+      }`;
 
   return `
-  function ${fn}(ObjectType self) internal pure returns (bool _is) {
+  function ${fn}(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, ${totalBytes}) {
-        ${bitmapAccess}
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix   := shr(3, self)          // byte index
+      ${g}
+      let mask := shl(and(self, 7), 1)  // 1 << (id & 7)
+      ok      := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }`;
 }

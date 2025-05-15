@@ -228,339 +228,283 @@ library ObjectTypeLib {
 
   // Direct Category Checks
 
-  function isNonSolid(ObjectType self) internal pure returns (bool _is) {
+  function isNonSolid(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000000000006)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x6)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isAny(ObjectType self) internal pure returns (bool _is) {
+  function isAny(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x0000000000000000000000000000000010000000000000040200080000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x10000000000000040200080000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isBlock(ObjectType self) internal pure returns (bool _is) {
+  function isBlock(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x0000000000000000000000001ffffffffffffffffffffffffffffffffffffff8)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x1ffffffffffffffffffffffffffffffffffffff8)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isOre(ObjectType self) internal pure returns (bool _is) {
+  function isOre(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000001fc0000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x1fc0000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isLog(ObjectType self) internal pure returns (bool _is) {
+  function isLog(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x000000000000000000000000000000000000000000000003fc00000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x3fc00000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isLeaf(ObjectType self) internal pure returns (bool _is) {
+  function isLeaf(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x000000000000000000000000000000000000000000007ff80000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x7ff80000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isPlank(ObjectType self) internal pure returns (bool _is) {
+  function isPlank(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x0000000000000000000000000000001fe0000000000000000000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x1fe0000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isSeed(ObjectType self) internal pure returns (bool _is) {
+  function isSeed(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x00000000000000000000000000001c0000000000000000000000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x1c0000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isSapling(ObjectType self) internal pure returns (bool _is) {
+  function isSapling(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x000000000000000000000000001fe00000000000000000000000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x1fe00000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isSmartEntity(ObjectType self) internal pure returns (bool _is) {
+  function isSmartEntity(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x00000000000000000100000001e0000000000000000000000000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x100000001e0000000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isStation(ObjectType self) internal pure returns (bool _is) {
+  function isStation(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x0000000000000000000000000e00000000000000000000000000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0xe00000000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isPick(ObjectType self) internal pure returns (bool _is) {
+  function isPick(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x000000000000000000000007e000000000000000000000000000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x7e000000000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isAxe(ObjectType self) internal pure returns (bool _is) {
+  function isAxe(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x0000000000000000000001f80000000000000000000000000000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x1f80000000000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isHoe(ObjectType self) internal pure returns (bool _is) {
+  function isHoe(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x0000000000000000000010000000000000000000000000000000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x10000000000000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isWhacker(ObjectType self) internal pure returns (bool _is) {
+  function isWhacker(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x000000000000000000000e000000000000000000000000000000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0xe000000000000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isOreBar(ObjectType self) internal pure returns (bool _is) {
+  function isOreBar(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x00000000000000000001e0000000000000000000000000000000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x1e0000000000000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isFood(ObjectType self) internal pure returns (bool _is) {
+  function isFood(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x0000000000000000003800000000000000000000000000000000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x3800000000000000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isFuel(ObjectType self) internal pure returns (bool _is) {
+  function isFuel(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x0000000000000000004000000000000000000000000000000000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x4000000000000000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isPlayer(ObjectType self) internal pure returns (bool _is) {
+  function isPlayer(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x0000000000000000008000000000000000000000000000000000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x8000000000000000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function hasExtraDrops(ObjectType self) internal pure returns (bool _is) {
+  function hasExtraDrops(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000003ffff8007ff80000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x3ffff8007ff80000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function hasAxeMultiplier(ObjectType self) internal pure returns (bool _is) {
+  function hasAxeMultiplier(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x00000000000000000000000013c0001fe8003f8000007ffbfc00000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x13c0001fe8003f8000007ffbfc00000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function hasPickMultiplier(ObjectType self) internal pure returns (bool _is) {
+  function hasPickMultiplier(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x0000000000000000000000000c2003e0000000000000000001fff81f801ffff8)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0xc2003e0000000000000000001fff81f801ffff8)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isPassThrough(ObjectType self) internal pure returns (bool _is) {
+  function isPassThrough(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x000000000000000000000000101ffc000001c07fffff80000000000000000006)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x101ffc000001c07fffff80000000000000000006)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isGrowable(ObjectType self) internal pure returns (bool _is) {
+  function isGrowable(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x000000000000000000000000001ffc0000000000000000000000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x1ffc0000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isUniqueObject(ObjectType self) internal pure returns (bool _is) {
+  function isUniqueObject(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x000000000000000000061fffe1a0000000000000000000000000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x61fffe1a0000000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isTool(ObjectType self) internal pure returns (bool _is) {
+  function isTool(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x000000000000000000001fffe000000000000000000000000000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x1fffe000000000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isTillable(ObjectType self) internal pure returns (bool _is) {
+  function isTillable(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000000600000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x600000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
-  function isMachine(ObjectType self) internal pure returns (bool _is) {
+  function isMachine(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index = id / 8
-      if lt(ix, 32) {
-        let bits := byte(sub(31, ix), 0x0000000000000000000000000020000000000000000000000000000000000000)
-        let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-        _is := eq(and(bits, mask), mask) // 1 if set
-      }
+      let ix := shr(3, self) // byte index
+      let bits := byte(sub(31, ix), 0x20000000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
+      ok := gt(and(bits, mask), 0) // 1 if bit is set
     }
   }
 
