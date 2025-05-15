@@ -3,7 +3,7 @@
   "name": "PosHUD",
   "startUrl": "/",
   "frame": {
-    "width": 600,
-    "height": 900
+    "width": 300,
+    "height": 100
   }
 }

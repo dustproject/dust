@@ -69,10 +69,12 @@ export function App() {
   }, [updatePlayerPosition]);
 
   return (
-    <div>
-      <span>x: {playerPosition?.x}</span>
-      <span>y: {playerPosition?.y}</span>
-      <span>z: {playerPosition?.z}</span>
+    <div
+      style={{ display: "flex", flexDirection: "row", gap: 5, color: "white" }}
+    >
+      <span>x: {Math.floor(playerPosition?.x ?? 0)}</span>
+      <span>y: {Math.floor(playerPosition?.y ?? 0)}</span>
+      <span>z: {Math.floor(playerPosition?.z ?? 0)}</span>
     </div>
   );
 }
