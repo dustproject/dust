@@ -25,36 +25,36 @@ library Category {
   // Meta Category Masks (fits within uint256; mask bit k set if raw category ID k belongs)
   uint256 constant BLOCK_MASK = uint256(type(uint128).max);
 
-  bytes constant NON_SOLID_TABLE = hex"01000200ffff";
-  bytes constant ANY_TABLE = hex"42002b007c003900ffff";
-  bytes constant ORE_TABLE = hex"23001e0022001f00200024002100ffffffff";
-  bytes constant LOG_TABLE = hex"41003d003f003c0040003a003e003b00ffffffff";
-  bytes constant LEAF_TABLE = hex"49004300440048004b0045004e004c0046004d004a004700ffffffffffff";
-  bytes constant PLANK_TABLE = hex"84008200830080007e007f007d008100ffffffff";
-  bytes constant SEED_TABLE = hex"8b008a008c00ffff";
-  bytes constant SAPLING_TABLE = hex"9300900092008e0094008f0091008d00ffffffff";
-  bytes constant SMART_ENTITY_TABLE = hex"b8009600950098009700ffffffff";
-  bytes constant STATION_TABLE = hex"9b009a009900ffff";
-  bytes constant PICK_TABLE = hex"a0009f00a2009e00a1009d00ffffffff";
-  bytes constant AXE_TABLE = hex"a800a600a500a400a300a700ffffffff";
+  bytes constant NON_SOLID_TABLE = hex"02000100ffff";
+  bytes constant ANY_TABLE = hex"420039002b007c00ffff";
+  bytes constant ORE_TABLE = hex"2100240023001f00200022001e00ffffffff";
+  bytes constant LOG_TABLE = hex"41003a003e003f0040003c003b003d00ffffffff";
+  bytes constant LEAF_TABLE = hex"490044004c004b004700480043004a004e00460045004d00ffffffffffff";
+  bytes constant PLANK_TABLE = hex"83007f00810084007e007d0080008200ffffffff";
+  bytes constant SEED_TABLE = hex"8c008a008b00ffff";
+  bytes constant SAPLING_TABLE = hex"91008f0092008e0093008d0094009000ffffffff";
+  bytes constant SMART_ENTITY_TABLE = hex"98009700b80095009600ffffffff";
+  bytes constant STATION_TABLE = hex"9b0099009a00ffff";
+  bytes constant PICK_TABLE = hex"a1009e00a200a0009f009d00ffffffff";
+  bytes constant AXE_TABLE = hex"a800a500a400a300a600a700ffffffff";
   bytes constant HOE_TABLE = hex"ac00ffff";
-  bytes constant WHACKER_TABLE = hex"ab00aa00a900ffff";
-  bytes constant ORE_BAR_TABLE = hex"af00ad00ae00b000ffff";
-  bytes constant FOOD_TABLE = hex"b400b500b300ffff";
+  bytes constant WHACKER_TABLE = hex"a900aa00ab00ffff";
+  bytes constant ORE_BAR_TABLE = hex"ae00af00b000ad00ffff";
+  bytes constant FOOD_TABLE = hex"b300b500b400ffff";
   bytes constant FUEL_TABLE = hex"b600ffff";
   bytes constant PLAYER_TABLE = hex"b700ffff";
   bytes constant EXTRA_DROPS_TABLE =
-    hex"6b00650066006800450061004c004a0049004b006c00620069005b0047005d006a0046005e005f004e004d006300600067004800430044006d005c006400ffffffffffffffffffffffffffffffff";
+    hex"5c006a0066005f006100640062005d0047005b004800670046004300690045004c004e006d0065004900440063004b006c0068004a006b005e004d006000ffffffffffffffffffffffffffffffff";
   bytes constant HAS_AXE_MULTIPLIER_TABLE =
-    hex"97006c0043006a00670084006b0045004b003e009c007d0047004900980069003f007e00830082006d0040003d004e004d003c0096004800410099004a007b004c003b00800068007f008100440046003a00ffffffffffffffffffffffffffffffffffffffff";
+    hex"96006d004e004d007f0097006b00670043008000990047006c004c00680046003d0045007e00400069007b004b003f006a007d0044004800980082008100840083003b003e0041009c0049003c003a004a00ffffffffffffffffffffffffffffffffffffffff";
   bytes constant HAS_PICK_MULTIPLIER_TABLE =
-    hex"300089002d009a002f0035000d0009003700850022003300210014000f00870005000c00130004002400320023009b00110038000a0003002b00100088002c002000340006002e0012009500310007000b001f00860036000e000800ffffffffffffffffffffffffffffffffffffffffffff";
+    hex"880035003800860034000d0031000e002f002c00120010000b0089009a00200009000f00220014002b000c0006003000850007002e0011000a00320095000400370033001f00030013002d0021009b00230036000500240087000800ffffffffffffffffffffffffffffffffffffffffffff";
   bytes constant PASS_THROUGH_TABLE =
-    hex"6f006e009c006500620060008a005d0061004f00700059008f005f00920093005e0094005100630053005c008d005a00580090008e00550064005b00660057008c00910054008b0050005600520002000100ffffffffffffffffffffffffffffffffffffffff";
-  bytes constant GROWABLE_TABLE = hex"940092008b008e008c0093008d0090008a0091008f00ffffffffffff";
+    hex"70005f006e005e005c005b006400520094008a006500900063008b006600580056005d000100570051005a0093008f008d00600062005300610055009100020050008e006f0054004f009c00920059008c00ffffffffffffffffffffffffffffffffffffffff";
+  bytes constant GROWABLE_TABLE = hex"9400920090008f008c008a008e00930091008d008b00ffffffffffff";
   bytes constant UNIQUE_OBJECT_TABLE =
-    hex"b2009500b100aa00a500ac0097009d00a800a200a7009f00a000a1009e00a300a400a6009800ab00a900ffffffffffffffffffff";
-  bytes constant TOOL_TABLE = hex"ab00a300aa00a9009e00a500a200a4009f009d00a100a800a000ac00a600a700ffffffffffffffff";
+    hex"9800a800a000a900a700a6009e00a400ac00b20095009d00a200b100aa00ab00a5009f00a3009700a100ffffffffffffffffffff";
+  bytes constant TOOL_TABLE = hex"a300a600a2009f00a800a5009d00ac00aa00a000a4009e00a900a100ab00a700ffffffffffffffff";
   bytes constant TILLABLE_TABLE = hex"16001500ffff";
   bytes constant MACHINE_TABLE = hex"9500ffff";
 }
@@ -270,116 +270,134 @@ library ObjectTypeLib {
   // Direct Category Checks
 
   function isNonSolid(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 3, 153055144143711, 65538);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 3, 143321960123805, 131073, 0, 0, 0);
+    if (slot >= Category.NON_SOLID_TABLE.length) return false;
     uint16 ref =
       uint16(uint8(Category.NON_SOLID_TABLE[slot * 2])) | (uint16(uint8(Category.NON_SOLID_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isAny(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 5, 87659440321321, 17180066048);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 5, 24452023150891, 8657240576, 0, 0, 0);
+    if (slot >= Category.ANY_TABLE.length) return false;
     uint16 ref = uint16(uint8(Category.ANY_TABLE[slot * 2])) | (uint16(uint8(Category.ANY_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isOre(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 9, 228024987672193, 37327804070843713543);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 9, 66348214499949, 562984397439232, 0, 0, 0);
+    if (slot >= Category.ORE_TABLE.length) return false;
     uint16 ref = uint16(uint8(Category.ORE_TABLE[slot * 2])) | (uint16(uint8(Category.ORE_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isLog(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 10, 235223967664291, 19018593422594805925123);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 10, 251710452733513, 55774837281802093063, 0, 0, 0);
+    if (slot >= Category.LOG_TABLE.length) return false;
     uint16 ref = uint16(uint8(Category.LOG_TABLE[slot * 2])) | (uint16(uint8(Category.LOG_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isLeaf(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 15, 17934348957431, 36346872471100227003360935084558606);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 15, 189637935363955, 102525584755242348622506768468736, 0, 0, 0);
+    if (slot >= Category.LEAF_TABLE.length) return false;
     uint16 ref = uint16(uint8(Category.LEAF_TABLE[slot * 2])) | (uint16(uint8(Category.LEAF_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isPlank(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 10, 147737047953583, 37871166716930939225600);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 10, 225295998591699, 42557216446201009800713, 0, 0, 0);
+    if (slot >= Category.PLANK_TABLE.length) return false;
     uint16 ref =
       uint16(uint8(Category.PLANK_TABLE[slot * 2])) | (uint16(uint8(Category.PLANK_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isSeed(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 4, 108968054734761, 770);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 4, 149340974706253, 131842, 0, 0, 0);
+    if (slot >= Category.SEED_TABLE.length) return false;
     uint16 ref = uint16(uint8(Category.SEED_TABLE[slot * 2])) | (uint16(uint8(Category.SEED_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isSapling(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 10, 240386340772271, 14278356374941780541446);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 10, 195600792509543, 33093458870434026030592, 0, 0, 0);
+    if (slot >= Category.SAPLING_TABLE.length) return false;
     uint16 ref =
       uint16(uint8(Category.SAPLING_TABLE[slot * 2])) | (uint16(uint8(Category.SAPLING_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isSmartEntity(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 7, 255195920837829, 1130298054148096);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 7, 45660218450675, 4328653829, 0, 0, 0);
+    if (slot >= Category.SMART_ENTITY_TABLE.length) return false;
     uint16 ref = uint16(uint8(Category.SMART_ENTITY_TABLE[slot * 2]))
       | (uint16(uint8(Category.SMART_ENTITY_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isStation(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 4, 99442783920975, 50332160);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 4, 168265511203861, 65538, 0, 0, 0);
+    if (slot >= Category.STATION_TABLE.length) return false;
     uint16 ref =
       uint16(uint8(Category.STATION_TABLE[slot * 2])) | (uint16(uint8(Category.STATION_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isPick(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 8, 118211785777329, 360850920260960516);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 8, 252559159035903, 1408504493966080, 0, 0, 0);
+    if (slot >= Category.PICK_TABLE.length) return false;
     uint16 ref = uint16(uint8(Category.PICK_TABLE[slot * 2])) | (uint16(uint8(Category.PICK_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isAxe(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 8, 111058672004095, 361132425184610052);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 8, 122492379559057, 72063113188343812, 0, 0, 0);
+    if (slot >= Category.AXE_TABLE.length) return false;
     uint16 ref = uint16(uint8(Category.AXE_TABLE[slot * 2])) | (uint16(uint8(Category.AXE_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isHoe(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 2, 50532986518647, 0);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 2, 258151333849345, 0, 0, 0, 0);
+    if (slot >= Category.HOE_TABLE.length) return false;
     uint16 ref = uint16(uint8(Category.HOE_TABLE[slot * 2])) | (uint16(uint8(Category.HOE_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isWhacker(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 4, 271009557371915, 131328);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 4, 32708862885525, 50332163, 0, 0, 0);
+    if (slot >= Category.WHACKER_TABLE.length) return false;
     uint16 ref =
       uint16(uint8(Category.WHACKER_TABLE[slot * 2])) | (uint16(uint8(Category.WHACKER_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isOreBar(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 5, 213062374117401, 12952011523);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 5, 110817901266753, 17246978819, 0, 0, 0);
+    if (slot >= Category.ORE_BAR_TABLE.length) return false;
     uint16 ref =
       uint16(uint8(Category.ORE_BAR_TABLE[slot * 2])) | (uint16(uint8(Category.ORE_BAR_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isFood(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 4, 62576131290693, 50332163);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 4, 3287736900369, 33619971, 0, 0, 0);
+    if (slot >= Category.FOOD_TABLE.length) return false;
     uint16 ref = uint16(uint8(Category.FOOD_TABLE[slot * 2])) | (uint16(uint8(Category.FOOD_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isFuel(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 2, 13038326061443, 0);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 2, 133692510690517, 0, 0, 0, 0);
+    if (slot >= Category.FUEL_TABLE.length) return false;
     uint16 ref = uint16(uint8(Category.FUEL_TABLE[slot * 2])) | (uint16(uint8(Category.FUEL_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isPlayer(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 2, 191218336103373, 0);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 2, 1817254645479, 0, 0, 0, 0);
+    if (slot >= Category.PLAYER_TABLE.length) return false;
     uint16 ref =
       uint16(uint8(Category.PLAYER_TABLE[slot * 2])) | (uint16(uint8(Category.PLAYER_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
@@ -389,10 +407,13 @@ library ObjectTypeLib {
     uint8 slot = PerfectHashLib.slot(
       self.unwrap(),
       39,
-      265591707241827,
-      11327318786712156411607553474534157941855236671982409785613964906887621905178,
-      26397508503552
+      181596937236495,
+      10857323528762962877790297978171590394234585045700985605122058093066696589339,
+      9588961164918796,
+      0,
+      0
     );
+    if (slot >= Category.EXTRA_DROPS_TABLE.length) return false;
     uint16 ref = uint16(uint8(Category.EXTRA_DROPS_TABLE[slot * 2]))
       | (uint16(uint8(Category.EXTRA_DROPS_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
@@ -402,10 +423,13 @@ library ObjectTypeLib {
     uint8 slot = PerfectHashLib.slot(
       self.unwrap(),
       51,
-      133535535559985,
-      9569244137573401102114794341089309476737432757284604520828537797885959341824,
-      1118883184666530796481281162149217421807396634
+      174148059996017,
+      22682969802234899553799548914166459880266022954338992727577022206492335147539,
+      960252339328792737424758207654343992645718318,
+      0,
+      0
     );
+    if (slot >= Category.HAS_AXE_MULTIPLIER_TABLE.length) return false;
     uint16 ref = uint16(uint8(Category.HAS_AXE_MULTIPLIER_TABLE[slot * 2]))
       | (uint16(uint8(Category.HAS_AXE_MULTIPLIER_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
@@ -415,10 +439,13 @@ library ObjectTypeLib {
     uint8 slot = PerfectHashLib.slot(
       self.unwrap(),
       57,
-      79756328924809,
-      3831090463034416685760479824524733853414729594255977917993525583338805292,
-      222403495876929800348036700088258707094895825440193787661
+      105052087878949,
+      35267825274476258440231930403503750523327529276876511133624045323291912,
+      1055410522834334618537999688236362741795992136724854026001,
+      0,
+      0
     );
+    if (slot >= Category.HAS_PICK_MULTIPLIER_TABLE.length) return false;
     uint16 ref = uint16(uint8(Category.HAS_PICK_MULTIPLIER_TABLE[slot * 2]))
       | (uint16(uint8(Category.HAS_PICK_MULTIPLIER_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
@@ -428,17 +455,21 @@ library ObjectTypeLib {
     uint8 slot = PerfectHashLib.slot(
       self.unwrap(),
       51,
-      2513338053925,
-      22672527622193139640165015780201688237169901331739194094126129884087007060017,
-      783240884123268255001444126521220754982317588
+      42542276262987,
+      5936641482165689760698183665326365276466101464614680389770891118054998878756,
+      693588072428566926853167414526030887127220758,
+      0,
+      0
     );
+    if (slot >= Category.PASS_THROUGH_TABLE.length) return false;
     uint16 ref = uint16(uint8(Category.PASS_THROUGH_TABLE[slot * 2]))
       | (uint16(uint8(Category.PASS_THROUGH_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isGrowable(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 14, 236839984163831, 243389236860645494355458833517826);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 14, 194180663053189, 636934709269134123847762577665, 0, 0, 0);
+    if (slot >= Category.GROWABLE_TABLE.length) return false;
     uint16 ref =
       uint16(uint8(Category.GROWABLE_TABLE[slot * 2])) | (uint16(uint8(Category.GROWABLE_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
@@ -446,28 +477,33 @@ library ObjectTypeLib {
 
   function isUniqueObject(ObjectType self) internal pure returns (bool) {
     uint8 slot = PerfectHashLib.slot(
-      self.unwrap(), 26, 265246873848919, 27362426383016985097927994399087245707660520569332238810027264
+      self.unwrap(), 26, 154480080657307, 16151546728409508996330591791804458706122490004555347597331207, 0, 0, 0
     );
+    if (slot >= Category.UNIQUE_OBJECT_TABLE.length) return false;
     uint16 ref = uint16(uint8(Category.UNIQUE_OBJECT_TABLE[slot * 2]))
       | (uint16(uint8(Category.UNIQUE_OBJECT_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isTool(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 20, 218149059502681, 90428354960689830299965833772635010024475648);
+    uint8 slot =
+      PerfectHashLib.slot(self.unwrap(), 20, 122282106499733, 80327635376510271994904071092573083181678662400, 0, 0, 0);
+    if (slot >= Category.TOOL_TABLE.length) return false;
     uint16 ref = uint16(uint8(Category.TOOL_TABLE[slot * 2])) | (uint16(uint8(Category.TOOL_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isTillable(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 3, 103925676056537, 65792);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 3, 237595900998823, 257, 0, 0, 0);
+    if (slot >= Category.TILLABLE_TABLE.length) return false;
     uint16 ref =
       uint16(uint8(Category.TILLABLE_TABLE[slot * 2])) | (uint16(uint8(Category.TILLABLE_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();
   }
 
   function isMachine(ObjectType self) internal pure returns (bool) {
-    uint8 slot = PerfectHashLib.slot(self.unwrap(), 2, 154978435932363, 0);
+    uint8 slot = PerfectHashLib.slot(self.unwrap(), 2, 230043901093225, 0, 0, 0, 0);
+    if (slot >= Category.MACHINE_TABLE.length) return false;
     uint16 ref =
       uint16(uint8(Category.MACHINE_TABLE[slot * 2])) | (uint16(uint8(Category.MACHINE_TABLE[slot * 2 + 1])) << 8);
     return ref == self.unwrap();

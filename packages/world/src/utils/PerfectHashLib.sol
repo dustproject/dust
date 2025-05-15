@@ -3,16 +3,50 @@ pragma solidity ^0.8.24;
 
 /* 8-bit CHD helper with packed A */
 library PerfectHashLib {
-  function slot(uint16 id, uint8 S, uint48 packedA, uint256 G0, uint256 G1, uint256 G2) internal pure returns (uint8) {
-    return slot(id, S, packedA, G0, G1, G2, 0);
-  }
+  /**
+   * @param id       key (object id)
+   * @param S        slot count
+   * @param packedA  A0 | A1<<16 | A2<<32
+   * @param G0-G3    packed g[] words (unused = 0)
+   */
+  function slot(uint16 id, uint8 S, uint48 packedA, uint256 G0, uint256 G1, uint256 G2, uint256 G3)
+    internal
+    pure
+    returns (uint8 _slot)
+  {
+    /// @solidity memory-safe-assembly
+    assembly {
+      // g[idx]
+      function gByte(idx, g0, g1, g2, g3) -> g {
+        let off := and(idx, 0x1f) // idx % 32
+        let be := sub(31, off) // flip -> big-endian
+        switch shr(5, idx)
+          // idx / 32   0…3
+        case 0 { g := byte(be, g0) }
+        case 1 { g := byte(be, g1) }
+        case 2 { g := byte(be, g2) }
+        default { g := byte(be, g3) } // 96-127
+      }
 
-  function slot(uint16 id, uint8 S, uint48 packedA, uint256 G0, uint256 G1) internal pure returns (uint8) {
-    return slot(id, S, packedA, G0, G1, 0, 0);
-  }
+      // unpack 16-bit multipliers
+      let A0 := and(packedA, 0xFFFF)
+      let A1 := and(shr(16, packedA), 0xFFFF)
+      let A2 := and(shr(32, packedA), 0xFFFF)
 
-  function slot(uint16 id, uint8 S, uint48 packedA, uint256 G0) internal pure returns (uint8) {
-    return slot(id, S, packedA, G0, 0, 0, 0);
+      // h0 = (id*A0)>>8 % S
+      let h := and(shr(8, mul(id, A0)), 0xff)
+      _slot := gByte(mod(h, S), G0, G1, G2, G3)
+
+      // h1 = (id*A1)>>8 % S
+      h := and(shr(8, mul(id, A1)), 0xff)
+      _slot := add(_slot, gByte(mod(h, S), G0, G1, G2, G3))
+
+      // h2 = (id*A2)>>8 % S
+      h := and(shr(8, mul(id, A2)), 0xff)
+      _slot := add(_slot, gByte(mod(h, S), G0, G1, G2, G3))
+
+      _slot := mod(_slot, S) // final slot
+    }
   }
 
   /**
@@ -21,7 +55,7 @@ library PerfectHashLib {
    * @param packedA  A0 | A1<<16 | A2<<32
    * @param G0-G3    packed g[] words (unused = 0)
    */
-  function slot(uint16 id, uint8 S, uint48 packedA, uint256 G0, uint256 G1, uint256 G2, uint256 G3)
+  function slot2(uint16 id, uint8 S, uint48 packedA, uint256 G0, uint256 G1, uint256 G2, uint256 G3)
     internal
     pure
     returns (uint8)

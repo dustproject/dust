@@ -104,6 +104,6 @@ export function buildBucket(ids: number[]): Bucket {
     // Pack hash multipliers
     const packedA = BigInt(A0) | (BigInt(A1) << 16n) | (BigInt(A2) << 32n);
 
-    return { S, packedA, gWords, table };
+    return { S, packedA, gWords: [...gWords, 0n, 0n, 0n].slice(0, 4), table };
   }
 }

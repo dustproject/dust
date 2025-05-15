@@ -4,8 +4,21 @@ pragma solidity >=0.8.24;
 import { DustTest, console } from "./DustTest.sol";
 
 import { ObjectType, ObjectTypeLib, ObjectTypes } from "../src/ObjectType.sol";
+import { PerfectHashLib } from "../src/utils/PerfectHashLib.sol";
 
 contract ObjectTypeTest is DustTest {
+  function testCategoryCheck() public {
+    uint256 gasStart = gasleft();
+    uint8 slot = PerfectHashLib.slot(1, 10, 81481903218933, 42648873711319057235968, 0, 0, 0);
+    console.log(gasStart - gasleft());
+    console.log(slot);
+
+    gasStart = gasleft();
+    slot = PerfectHashLib.slot2(1, 10, 81481903218933, 42648873711319057235968, 0, 0, 0);
+    console.log(gasStart - gasleft());
+    console.log(slot);
+  }
+
   function testCategories() public pure {
     ObjectType[8] memory logTypes = ObjectTypeLib.getLogTypes();
     for (uint256 i = 0; i < logTypes.length; i++) {

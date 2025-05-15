@@ -1,4 +1,4 @@
-import { type Bucket, buildBucket } from "../mphf";
+import { type Bucket, buildBucket } from "../buildBucket";
 import { type Category, type ObjectAmount, categories, objects, objectsByName } from "../objects";
 
 const constName = (str: string): string =>
@@ -29,6 +29,7 @@ function renderCategoryCheck(name: string): string {
   return `
   function ${functionName}(ObjectType self) internal pure returns (bool) {
     uint8 slot = PerfectHashLib.slot(self.unwrap(), ${S}, ${packedA}, ${gWords.join(", ")});
+    if (slot >= Category.${tableName}.length) return false;
     uint16 ref =
         uint16(uint8(Category.${tableName}[slot * 2])) |
         (uint16(uint8(Category.${tableName}[slot * 2 + 1])) << 8);
