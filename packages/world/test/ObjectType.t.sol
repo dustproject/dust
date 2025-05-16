@@ -427,7 +427,6 @@ contract ObjectTypeTest is DustTest {
       assertTrue(ObjectTypes.Sandstone.isBlock(), "isBlock");
       assertTrue(ObjectTypes.RedSandstone.isBlock(), "isBlock");
       assertTrue(ObjectTypes.Clay.isBlock(), "isBlock");
-      assertTrue(ObjectTypes.AnyTerracotta.isBlock(), "isBlock");
       assertTrue(ObjectTypes.Terracotta.isBlock(), "isBlock");
       assertTrue(ObjectTypes.BrownTerracotta.isBlock(), "isBlock");
       assertTrue(ObjectTypes.OrangeTerracotta.isBlock(), "isBlock");
@@ -441,7 +440,6 @@ contract ObjectTypeTest is DustTest {
       assertTrue(ObjectTypes.PurpleTerracotta.isBlock(), "isBlock");
       assertTrue(ObjectTypes.BlueTerracotta.isBlock(), "isBlock");
       assertTrue(ObjectTypes.MagentaTerracotta.isBlock(), "isBlock");
-      assertTrue(ObjectTypes.AnyLog.isBlock(), "isBlock");
       assertTrue(ObjectTypes.OakLog.isBlock(), "isBlock");
       assertTrue(ObjectTypes.BirchLog.isBlock(), "isBlock");
       assertTrue(ObjectTypes.JungleLog.isBlock(), "isBlock");
@@ -450,7 +448,6 @@ contract ObjectTypeTest is DustTest {
       assertTrue(ObjectTypes.SpruceLog.isBlock(), "isBlock");
       assertTrue(ObjectTypes.DarkOakLog.isBlock(), "isBlock");
       assertTrue(ObjectTypes.MangroveLog.isBlock(), "isBlock");
-      assertTrue(ObjectTypes.AnyLeaf.isBlock(), "isBlock");
       assertTrue(ObjectTypes.OakLeaf.isBlock(), "isBlock");
       assertTrue(ObjectTypes.BirchLeaf.isBlock(), "isBlock");
       assertTrue(ObjectTypes.JungleLeaf.isBlock(), "isBlock");
@@ -504,7 +501,6 @@ contract ObjectTypeTest is DustTest {
       assertTrue(ObjectTypes.MushroomStem.isBlock(), "isBlock");
       assertTrue(ObjectTypes.BambooBush.isBlock(), "isBlock");
       assertTrue(ObjectTypes.Cactus.isBlock(), "isBlock");
-      assertTrue(ObjectTypes.AnyPlank.isBlock(), "isBlock");
       assertTrue(ObjectTypes.OakPlanks.isBlock(), "isBlock");
       assertTrue(ObjectTypes.BirchPlanks.isBlock(), "isBlock");
       assertTrue(ObjectTypes.JunglePlanks.isBlock(), "isBlock");
@@ -541,6 +537,10 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.Air.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.Water.isBlock(), "!isBlock");
+      assertFalse(ObjectTypes.AnyTerracotta.isBlock(), "!isBlock");
+      assertFalse(ObjectTypes.AnyLog.isBlock(), "!isBlock");
+      assertFalse(ObjectTypes.AnyLeaf.isBlock(), "!isBlock");
+      assertFalse(ObjectTypes.AnyPlank.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.WoodenPick.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.CopperPick.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.IronPick.isBlock(), "!isBlock");
@@ -3980,7 +3980,6 @@ contract ObjectTypeTest is DustTest {
       assertTrue(ObjectTypes.Dripstone.hasPickMultiplier(), "hasPickMultiplier");
       assertTrue(ObjectTypes.Blackstone.hasPickMultiplier(), "hasPickMultiplier");
       assertTrue(ObjectTypes.CobbledDeepslate.hasPickMultiplier(), "hasPickMultiplier");
-      assertTrue(ObjectTypes.AnyTerracotta.hasPickMultiplier(), "hasPickMultiplier");
       assertTrue(ObjectTypes.Terracotta.hasPickMultiplier(), "hasPickMultiplier");
       assertTrue(ObjectTypes.BrownTerracotta.hasPickMultiplier(), "hasPickMultiplier");
       assertTrue(ObjectTypes.OrangeTerracotta.hasPickMultiplier(), "hasPickMultiplier");
@@ -4024,6 +4023,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Sandstone.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.RedSandstone.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.Clay.hasPickMultiplier(), "!hasPickMultiplier");
+      assertFalse(ObjectTypes.AnyTerracotta.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.AnyLog.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.OakLog.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.BirchLog.hasPickMultiplier(), "!hasPickMultiplier");

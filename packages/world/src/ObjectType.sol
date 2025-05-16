@@ -49,132 +49,128 @@ library ObjectTypes {
   ObjectType constant Farmland = ObjectType.wrap(28);
   ObjectType constant WetFarmland = ObjectType.wrap(29);
   ObjectType constant UnrevealedOre = ObjectType.wrap(30);
-  ObjectType constant CoalOre = ObjectType.wrap(31);
-  ObjectType constant CopperOre = ObjectType.wrap(32);
-  ObjectType constant IronOre = ObjectType.wrap(33);
-  ObjectType constant GoldOre = ObjectType.wrap(34);
-  ObjectType constant DiamondOre = ObjectType.wrap(35);
-  ObjectType constant NeptuniumOre = ObjectType.wrap(36);
-  ObjectType constant Gravel = ObjectType.wrap(37);
-  ObjectType constant Sand = ObjectType.wrap(38);
-  ObjectType constant RedSand = ObjectType.wrap(39);
-  ObjectType constant Sandstone = ObjectType.wrap(40);
-  ObjectType constant RedSandstone = ObjectType.wrap(41);
-  ObjectType constant Clay = ObjectType.wrap(42);
-  ObjectType constant AnyTerracotta = ObjectType.wrap(43);
-  ObjectType constant Terracotta = ObjectType.wrap(44);
-  ObjectType constant BrownTerracotta = ObjectType.wrap(45);
-  ObjectType constant OrangeTerracotta = ObjectType.wrap(46);
-  ObjectType constant WhiteTerracotta = ObjectType.wrap(47);
-  ObjectType constant LightGrayTerracotta = ObjectType.wrap(48);
-  ObjectType constant YellowTerracotta = ObjectType.wrap(49);
-  ObjectType constant RedTerracotta = ObjectType.wrap(50);
-  ObjectType constant LightBlueTerracotta = ObjectType.wrap(51);
-  ObjectType constant CyanTerracotta = ObjectType.wrap(52);
-  ObjectType constant BlackTerracotta = ObjectType.wrap(53);
-  ObjectType constant PurpleTerracotta = ObjectType.wrap(54);
-  ObjectType constant BlueTerracotta = ObjectType.wrap(55);
-  ObjectType constant MagentaTerracotta = ObjectType.wrap(56);
-  ObjectType constant AnyLog = ObjectType.wrap(57);
-  ObjectType constant OakLog = ObjectType.wrap(58);
-  ObjectType constant BirchLog = ObjectType.wrap(59);
-  ObjectType constant JungleLog = ObjectType.wrap(60);
-  ObjectType constant SakuraLog = ObjectType.wrap(61);
-  ObjectType constant AcaciaLog = ObjectType.wrap(62);
-  ObjectType constant SpruceLog = ObjectType.wrap(63);
-  ObjectType constant DarkOakLog = ObjectType.wrap(64);
-  ObjectType constant MangroveLog = ObjectType.wrap(65);
-  ObjectType constant AnyLeaf = ObjectType.wrap(66);
-  ObjectType constant OakLeaf = ObjectType.wrap(67);
-  ObjectType constant BirchLeaf = ObjectType.wrap(68);
-  ObjectType constant JungleLeaf = ObjectType.wrap(69);
-  ObjectType constant SakuraLeaf = ObjectType.wrap(70);
-  ObjectType constant SpruceLeaf = ObjectType.wrap(71);
-  ObjectType constant AcaciaLeaf = ObjectType.wrap(72);
-  ObjectType constant DarkOakLeaf = ObjectType.wrap(73);
-  ObjectType constant AzaleaLeaf = ObjectType.wrap(74);
-  ObjectType constant FloweringAzaleaLeaf = ObjectType.wrap(75);
-  ObjectType constant MangroveLeaf = ObjectType.wrap(76);
-  ObjectType constant MangroveRoots = ObjectType.wrap(77);
-  ObjectType constant MuddyMangroveRoots = ObjectType.wrap(78);
-  ObjectType constant AzaleaFlower = ObjectType.wrap(79);
-  ObjectType constant BellFlower = ObjectType.wrap(80);
-  ObjectType constant DandelionFlower = ObjectType.wrap(81);
-  ObjectType constant DaylilyFlower = ObjectType.wrap(82);
-  ObjectType constant LilacFlower = ObjectType.wrap(83);
-  ObjectType constant RoseFlower = ObjectType.wrap(84);
-  ObjectType constant FireFlower = ObjectType.wrap(85);
-  ObjectType constant MorninggloryFlower = ObjectType.wrap(86);
-  ObjectType constant PeonyFlower = ObjectType.wrap(87);
-  ObjectType constant Ultraviolet = ObjectType.wrap(88);
-  ObjectType constant SunFlower = ObjectType.wrap(89);
-  ObjectType constant FlyTrap = ObjectType.wrap(90);
-  ObjectType constant FescueGrass = ObjectType.wrap(91);
-  ObjectType constant SwitchGrass = ObjectType.wrap(92);
-  ObjectType constant VinesBush = ObjectType.wrap(93);
-  ObjectType constant IvyVine = ObjectType.wrap(94);
-  ObjectType constant HempBush = ObjectType.wrap(95);
-  ObjectType constant GoldenMushroom = ObjectType.wrap(96);
-  ObjectType constant RedMushroom = ObjectType.wrap(97);
-  ObjectType constant CoffeeBush = ObjectType.wrap(98);
-  ObjectType constant StrawberryBush = ObjectType.wrap(99);
-  ObjectType constant RaspberryBush = ObjectType.wrap(100);
-  ObjectType constant Wheat = ObjectType.wrap(101);
-  ObjectType constant CottonBush = ObjectType.wrap(102);
-  ObjectType constant Pumpkin = ObjectType.wrap(103);
-  ObjectType constant Melon = ObjectType.wrap(104);
-  ObjectType constant RedMushroomBlock = ObjectType.wrap(105);
-  ObjectType constant BrownMushroomBlock = ObjectType.wrap(106);
-  ObjectType constant MushroomStem = ObjectType.wrap(107);
-  ObjectType constant BambooBush = ObjectType.wrap(108);
-  ObjectType constant Cactus = ObjectType.wrap(109);
-  ObjectType constant Coral = ObjectType.wrap(110);
-  ObjectType constant SeaAnemone = ObjectType.wrap(111);
-  ObjectType constant Algae = ObjectType.wrap(112);
-  ObjectType constant HornCoralBlock = ObjectType.wrap(113);
-  ObjectType constant FireCoralBlock = ObjectType.wrap(114);
-  ObjectType constant TubeCoralBlock = ObjectType.wrap(115);
-  ObjectType constant BubbleCoralBlock = ObjectType.wrap(116);
-  ObjectType constant BrainCoralBlock = ObjectType.wrap(117);
-  ObjectType constant Snow = ObjectType.wrap(118);
-  ObjectType constant Ice = ObjectType.wrap(119);
-  ObjectType constant Magma = ObjectType.wrap(120);
-  ObjectType constant SpiderWeb = ObjectType.wrap(121);
-  ObjectType constant Bone = ObjectType.wrap(122);
-  ObjectType constant TextSign = ObjectType.wrap(123);
-  ObjectType constant AnyPlank = ObjectType.wrap(124);
-  ObjectType constant OakPlanks = ObjectType.wrap(125);
-  ObjectType constant BirchPlanks = ObjectType.wrap(126);
-  ObjectType constant JunglePlanks = ObjectType.wrap(127);
-  ObjectType constant SakuraPlanks = ObjectType.wrap(128);
-  ObjectType constant SprucePlanks = ObjectType.wrap(129);
-  ObjectType constant AcaciaPlanks = ObjectType.wrap(130);
-  ObjectType constant DarkOakPlanks = ObjectType.wrap(131);
-  ObjectType constant MangrovePlanks = ObjectType.wrap(132);
-  ObjectType constant CopperBlock = ObjectType.wrap(133);
-  ObjectType constant IronBlock = ObjectType.wrap(134);
-  ObjectType constant GoldBlock = ObjectType.wrap(135);
-  ObjectType constant DiamondBlock = ObjectType.wrap(136);
-  ObjectType constant NeptuniumBlock = ObjectType.wrap(137);
-  ObjectType constant WheatSeed = ObjectType.wrap(138);
-  ObjectType constant PumpkinSeed = ObjectType.wrap(139);
-  ObjectType constant MelonSeed = ObjectType.wrap(140);
-  ObjectType constant OakSapling = ObjectType.wrap(141);
-  ObjectType constant BirchSapling = ObjectType.wrap(142);
-  ObjectType constant JungleSapling = ObjectType.wrap(143);
-  ObjectType constant SakuraSapling = ObjectType.wrap(144);
-  ObjectType constant AcaciaSapling = ObjectType.wrap(145);
-  ObjectType constant SpruceSapling = ObjectType.wrap(146);
-  ObjectType constant DarkOakSapling = ObjectType.wrap(147);
-  ObjectType constant MangroveSapling = ObjectType.wrap(148);
-  ObjectType constant ForceField = ObjectType.wrap(149);
-  ObjectType constant Chest = ObjectType.wrap(150);
-  ObjectType constant SpawnTile = ObjectType.wrap(151);
-  ObjectType constant Bed = ObjectType.wrap(152);
-  ObjectType constant Workbench = ObjectType.wrap(153);
-  ObjectType constant Powerstone = ObjectType.wrap(154);
-  ObjectType constant Furnace = ObjectType.wrap(155);
-  ObjectType constant Torch = ObjectType.wrap(156);
+  ObjectType constant Gravel = ObjectType.wrap(31);
+  ObjectType constant Sand = ObjectType.wrap(32);
+  ObjectType constant RedSand = ObjectType.wrap(33);
+  ObjectType constant Sandstone = ObjectType.wrap(34);
+  ObjectType constant RedSandstone = ObjectType.wrap(35);
+  ObjectType constant Clay = ObjectType.wrap(36);
+  ObjectType constant Terracotta = ObjectType.wrap(37);
+  ObjectType constant BrownTerracotta = ObjectType.wrap(38);
+  ObjectType constant OrangeTerracotta = ObjectType.wrap(39);
+  ObjectType constant WhiteTerracotta = ObjectType.wrap(40);
+  ObjectType constant LightGrayTerracotta = ObjectType.wrap(41);
+  ObjectType constant YellowTerracotta = ObjectType.wrap(42);
+  ObjectType constant RedTerracotta = ObjectType.wrap(43);
+  ObjectType constant LightBlueTerracotta = ObjectType.wrap(44);
+  ObjectType constant CyanTerracotta = ObjectType.wrap(45);
+  ObjectType constant BlackTerracotta = ObjectType.wrap(46);
+  ObjectType constant PurpleTerracotta = ObjectType.wrap(47);
+  ObjectType constant BlueTerracotta = ObjectType.wrap(48);
+  ObjectType constant MagentaTerracotta = ObjectType.wrap(49);
+  ObjectType constant OakLog = ObjectType.wrap(50);
+  ObjectType constant BirchLog = ObjectType.wrap(51);
+  ObjectType constant JungleLog = ObjectType.wrap(52);
+  ObjectType constant SakuraLog = ObjectType.wrap(53);
+  ObjectType constant AcaciaLog = ObjectType.wrap(54);
+  ObjectType constant SpruceLog = ObjectType.wrap(55);
+  ObjectType constant DarkOakLog = ObjectType.wrap(56);
+  ObjectType constant MangroveLog = ObjectType.wrap(57);
+  ObjectType constant OakLeaf = ObjectType.wrap(58);
+  ObjectType constant BirchLeaf = ObjectType.wrap(59);
+  ObjectType constant JungleLeaf = ObjectType.wrap(60);
+  ObjectType constant SakuraLeaf = ObjectType.wrap(61);
+  ObjectType constant SpruceLeaf = ObjectType.wrap(62);
+  ObjectType constant AcaciaLeaf = ObjectType.wrap(63);
+  ObjectType constant DarkOakLeaf = ObjectType.wrap(64);
+  ObjectType constant AzaleaLeaf = ObjectType.wrap(65);
+  ObjectType constant FloweringAzaleaLeaf = ObjectType.wrap(66);
+  ObjectType constant MangroveLeaf = ObjectType.wrap(67);
+  ObjectType constant MangroveRoots = ObjectType.wrap(68);
+  ObjectType constant MuddyMangroveRoots = ObjectType.wrap(69);
+  ObjectType constant AzaleaFlower = ObjectType.wrap(70);
+  ObjectType constant BellFlower = ObjectType.wrap(71);
+  ObjectType constant DandelionFlower = ObjectType.wrap(72);
+  ObjectType constant DaylilyFlower = ObjectType.wrap(73);
+  ObjectType constant LilacFlower = ObjectType.wrap(74);
+  ObjectType constant RoseFlower = ObjectType.wrap(75);
+  ObjectType constant FireFlower = ObjectType.wrap(76);
+  ObjectType constant MorninggloryFlower = ObjectType.wrap(77);
+  ObjectType constant PeonyFlower = ObjectType.wrap(78);
+  ObjectType constant Ultraviolet = ObjectType.wrap(79);
+  ObjectType constant SunFlower = ObjectType.wrap(80);
+  ObjectType constant FlyTrap = ObjectType.wrap(81);
+  ObjectType constant FescueGrass = ObjectType.wrap(82);
+  ObjectType constant SwitchGrass = ObjectType.wrap(83);
+  ObjectType constant VinesBush = ObjectType.wrap(84);
+  ObjectType constant IvyVine = ObjectType.wrap(85);
+  ObjectType constant HempBush = ObjectType.wrap(86);
+  ObjectType constant GoldenMushroom = ObjectType.wrap(87);
+  ObjectType constant RedMushroom = ObjectType.wrap(88);
+  ObjectType constant CoffeeBush = ObjectType.wrap(89);
+  ObjectType constant StrawberryBush = ObjectType.wrap(90);
+  ObjectType constant RaspberryBush = ObjectType.wrap(91);
+  ObjectType constant Wheat = ObjectType.wrap(92);
+  ObjectType constant CottonBush = ObjectType.wrap(93);
+  ObjectType constant Pumpkin = ObjectType.wrap(94);
+  ObjectType constant Melon = ObjectType.wrap(95);
+  ObjectType constant RedMushroomBlock = ObjectType.wrap(96);
+  ObjectType constant BrownMushroomBlock = ObjectType.wrap(97);
+  ObjectType constant MushroomStem = ObjectType.wrap(98);
+  ObjectType constant BambooBush = ObjectType.wrap(99);
+  ObjectType constant Cactus = ObjectType.wrap(100);
+  ObjectType constant Coral = ObjectType.wrap(101);
+  ObjectType constant SeaAnemone = ObjectType.wrap(102);
+  ObjectType constant Algae = ObjectType.wrap(103);
+  ObjectType constant HornCoralBlock = ObjectType.wrap(104);
+  ObjectType constant FireCoralBlock = ObjectType.wrap(105);
+  ObjectType constant TubeCoralBlock = ObjectType.wrap(106);
+  ObjectType constant BubbleCoralBlock = ObjectType.wrap(107);
+  ObjectType constant BrainCoralBlock = ObjectType.wrap(108);
+  ObjectType constant Snow = ObjectType.wrap(109);
+  ObjectType constant Ice = ObjectType.wrap(110);
+  ObjectType constant Magma = ObjectType.wrap(111);
+  ObjectType constant SpiderWeb = ObjectType.wrap(112);
+  ObjectType constant Bone = ObjectType.wrap(113);
+  ObjectType constant CoalOre = ObjectType.wrap(114);
+  ObjectType constant CopperOre = ObjectType.wrap(115);
+  ObjectType constant IronOre = ObjectType.wrap(116);
+  ObjectType constant GoldOre = ObjectType.wrap(117);
+  ObjectType constant DiamondOre = ObjectType.wrap(118);
+  ObjectType constant NeptuniumOre = ObjectType.wrap(119);
+  ObjectType constant TextSign = ObjectType.wrap(120);
+  ObjectType constant OakPlanks = ObjectType.wrap(121);
+  ObjectType constant BirchPlanks = ObjectType.wrap(122);
+  ObjectType constant JunglePlanks = ObjectType.wrap(123);
+  ObjectType constant SakuraPlanks = ObjectType.wrap(124);
+  ObjectType constant SprucePlanks = ObjectType.wrap(125);
+  ObjectType constant AcaciaPlanks = ObjectType.wrap(126);
+  ObjectType constant DarkOakPlanks = ObjectType.wrap(127);
+  ObjectType constant MangrovePlanks = ObjectType.wrap(128);
+  ObjectType constant CopperBlock = ObjectType.wrap(129);
+  ObjectType constant IronBlock = ObjectType.wrap(130);
+  ObjectType constant GoldBlock = ObjectType.wrap(131);
+  ObjectType constant DiamondBlock = ObjectType.wrap(132);
+  ObjectType constant NeptuniumBlock = ObjectType.wrap(133);
+  ObjectType constant WheatSeed = ObjectType.wrap(134);
+  ObjectType constant PumpkinSeed = ObjectType.wrap(135);
+  ObjectType constant MelonSeed = ObjectType.wrap(136);
+  ObjectType constant OakSapling = ObjectType.wrap(137);
+  ObjectType constant BirchSapling = ObjectType.wrap(138);
+  ObjectType constant JungleSapling = ObjectType.wrap(139);
+  ObjectType constant SakuraSapling = ObjectType.wrap(140);
+  ObjectType constant AcaciaSapling = ObjectType.wrap(141);
+  ObjectType constant SpruceSapling = ObjectType.wrap(142);
+  ObjectType constant DarkOakSapling = ObjectType.wrap(143);
+  ObjectType constant MangroveSapling = ObjectType.wrap(144);
+  ObjectType constant ForceField = ObjectType.wrap(145);
+  ObjectType constant Chest = ObjectType.wrap(146);
+  ObjectType constant SpawnTile = ObjectType.wrap(147);
+  ObjectType constant Bed = ObjectType.wrap(148);
+  ObjectType constant Workbench = ObjectType.wrap(149);
+  ObjectType constant Powerstone = ObjectType.wrap(150);
+  ObjectType constant Furnace = ObjectType.wrap(151);
+  ObjectType constant Torch = ObjectType.wrap(152);
   ObjectType constant WoodenPick = ObjectType.wrap(32768);
   ObjectType constant CopperPick = ObjectType.wrap(32769);
   ObjectType constant IronPick = ObjectType.wrap(32770);
@@ -201,8 +197,12 @@ library ObjectTypes {
   ObjectType constant PumpkinSoup = ObjectType.wrap(32791);
   ObjectType constant MelonSmoothie = ObjectType.wrap(32792);
   ObjectType constant Battery = ObjectType.wrap(32793);
-  ObjectType constant Player = ObjectType.wrap(32794);
-  ObjectType constant Fragment = ObjectType.wrap(32795);
+  ObjectType constant AnyLog = ObjectType.wrap(32794);
+  ObjectType constant AnyPlank = ObjectType.wrap(32795);
+  ObjectType constant AnyTerracotta = ObjectType.wrap(32796);
+  ObjectType constant AnyLeaf = ObjectType.wrap(32797);
+  ObjectType constant Player = ObjectType.wrap(32798);
+  ObjectType constant Fragment = ObjectType.wrap(32799);
 }
 
 // ------------------------------------------------------------
@@ -231,84 +231,80 @@ library ObjectTypeLib {
   function isAny(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 124)
-      ok := or(ok, eq(self, 57))
-      ok := or(ok, eq(self, 66))
-      ok := or(ok, eq(self, 43))
+      ok := eq(self, 32794)
+      ok := or(ok, eq(self, 32795))
+      ok := or(ok, eq(self, 32796))
+      ok := or(ok, eq(self, 32797))
     }
   }
 
-  // Block — 154 keys in 1 word @ window 0 (fast)
+  // Block — 150 keys in 1 window
   function isBlock(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x0000000000000000000000001ffffffffffffffffffffffffffffffffffffff8)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      let bucket := shr(8, self)
+      if eq(bucket, 0) {
+        let rem := and(self, 0xff) // id % 256
+        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
+        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
+        ok := gt(and(byte(bpos, 0x1fffffffffffffffffffffffffffffffffffff8), mask), 0)
+      }
     }
   }
 
-  // Ore — 7 keys via eq-chain
+  // Ore — 7 keys in 1 window
   function isOre(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 30)
-      ok := or(ok, eq(self, 31))
-      ok := or(ok, eq(self, 32))
-      ok := or(ok, eq(self, 33))
-      ok := or(ok, eq(self, 34))
-      ok := or(ok, eq(self, 35))
-      ok := or(ok, eq(self, 36))
+      let bucket := shr(8, self)
+      if eq(bucket, 0) {
+        let rem := and(self, 0xff) // id % 256
+        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
+        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
+        ok := gt(and(byte(bpos, 0xfc0000000000000000000040000000), mask), 0)
+      }
     }
   }
 
-  // Log — 8 keys via eq-chain
+  // Log — 8 keys in 1 window
   function isLog(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 58)
-      ok := or(ok, eq(self, 59))
-      ok := or(ok, eq(self, 60))
-      ok := or(ok, eq(self, 61))
-      ok := or(ok, eq(self, 62))
-      ok := or(ok, eq(self, 63))
-      ok := or(ok, eq(self, 64))
-      ok := or(ok, eq(self, 65))
+      let bucket := shr(8, self)
+      if eq(bucket, 0) {
+        let rem := and(self, 0xff) // id % 256
+        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
+        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
+        ok := gt(and(byte(bpos, 0x3fc000000000000), mask), 0)
+      }
     }
   }
 
-  // Leaf — 12 keys via eq-chain
+  // Leaf — 12 keys in 1 window
   function isLeaf(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 67)
-      ok := or(ok, eq(self, 68))
-      ok := or(ok, eq(self, 69))
-      ok := or(ok, eq(self, 70))
-      ok := or(ok, eq(self, 71))
-      ok := or(ok, eq(self, 72))
-      ok := or(ok, eq(self, 73))
-      ok := or(ok, eq(self, 74))
-      ok := or(ok, eq(self, 75))
-      ok := or(ok, eq(self, 76))
-      ok := or(ok, eq(self, 77))
-      ok := or(ok, eq(self, 78))
+      let bucket := shr(8, self)
+      if eq(bucket, 0) {
+        let rem := and(self, 0xff) // id % 256
+        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
+        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
+        ok := gt(and(byte(bpos, 0x3ffc00000000000000), mask), 0)
+      }
     }
   }
 
-  // Plank — 8 keys via eq-chain
+  // Plank — 8 keys in 1 window
   function isPlank(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 125)
-      ok := or(ok, eq(self, 126))
-      ok := or(ok, eq(self, 127))
-      ok := or(ok, eq(self, 128))
-      ok := or(ok, eq(self, 129))
-      ok := or(ok, eq(self, 130))
-      ok := or(ok, eq(self, 131))
-      ok := or(ok, eq(self, 132))
+      let bucket := shr(8, self)
+      if eq(bucket, 0) {
+        let rem := and(self, 0xff) // id % 256
+        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
+        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
+        ok := gt(and(byte(bpos, 0x1fe000000000000000000000000000000), mask), 0)
+      }
     }
   }
 
@@ -316,24 +312,23 @@ library ObjectTypeLib {
   function isSeed(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 138)
-      ok := or(ok, eq(self, 139))
-      ok := or(ok, eq(self, 140))
+      ok := eq(self, 134)
+      ok := or(ok, eq(self, 135))
+      ok := or(ok, eq(self, 136))
     }
   }
 
-  // Sapling — 8 keys via eq-chain
+  // Sapling — 8 keys in 1 window
   function isSapling(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 141)
-      ok := or(ok, eq(self, 142))
-      ok := or(ok, eq(self, 143))
-      ok := or(ok, eq(self, 144))
-      ok := or(ok, eq(self, 145))
-      ok := or(ok, eq(self, 146))
-      ok := or(ok, eq(self, 147))
-      ok := or(ok, eq(self, 148))
+      let bucket := shr(8, self)
+      if eq(bucket, 0) {
+        let rem := and(self, 0xff) // id % 256
+        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
+        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
+        ok := gt(and(byte(bpos, 0x1fe0000000000000000000000000000000000), mask), 0)
+      }
     }
   }
 
@@ -341,11 +336,11 @@ library ObjectTypeLib {
   function isSmartEntity(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 149)
-      ok := or(ok, eq(self, 150))
-      ok := or(ok, eq(self, 151))
-      ok := or(ok, eq(self, 152))
-      ok := or(ok, eq(self, 32795))
+      ok := eq(self, 145)
+      ok := or(ok, eq(self, 146))
+      ok := or(ok, eq(self, 147))
+      ok := or(ok, eq(self, 148))
+      ok := or(ok, eq(self, 32799))
     }
   }
 
@@ -353,35 +348,37 @@ library ObjectTypeLib {
   function isStation(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 153)
-      ok := or(ok, eq(self, 154))
-      ok := or(ok, eq(self, 155))
+      ok := eq(self, 149)
+      ok := or(ok, eq(self, 150))
+      ok := or(ok, eq(self, 151))
     }
   }
 
-  // Pick — 6 keys via eq-chain
+  // Pick — 6 keys in 1 window
   function isPick(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 32768)
-      ok := or(ok, eq(self, 32769))
-      ok := or(ok, eq(self, 32770))
-      ok := or(ok, eq(self, 32771))
-      ok := or(ok, eq(self, 32772))
-      ok := or(ok, eq(self, 32773))
+      let bucket := shr(8, self)
+      if eq(bucket, 128) {
+        let rem := and(self, 0xff) // id % 256
+        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
+        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
+        ok := gt(and(byte(bpos, 0x3f), mask), 0)
+      }
     }
   }
 
-  // Axe — 6 keys via eq-chain
+  // Axe — 6 keys in 1 window
   function isAxe(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 32774)
-      ok := or(ok, eq(self, 32775))
-      ok := or(ok, eq(self, 32776))
-      ok := or(ok, eq(self, 32777))
-      ok := or(ok, eq(self, 32778))
-      ok := or(ok, eq(self, 32779))
+      let bucket := shr(8, self)
+      if eq(bucket, 128) {
+        let rem := and(self, 0xff) // id % 256
+        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
+        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
+        ok := gt(and(byte(bpos, 0xfc0), mask), 0)
+      }
     }
   }
 
@@ -436,105 +433,104 @@ library ObjectTypeLib {
   function isPlayer(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 32794)
+      ok := eq(self, 32798)
     }
   }
 
-  // ExtraDrops — 31 keys in 1 word @ window 0 (fast)
+  // ExtraDrops — 31 keys in 1 window
   function hasExtraDrops(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000003ffff8007ff80000000000000000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      let bucket := shr(8, self)
+      if eq(bucket, 0) {
+        let rem := and(self, 0xff) // id % 256
+        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
+        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
+        ok := gt(and(byte(bpos, 0x1ffffc003ffc00000000000000), mask), 0)
+      }
     }
   }
 
-  // AxeMultiplier — 41 keys in 1 word @ window 0 (fast)
+  // AxeMultiplier — 41 keys in 1 window
   function hasAxeMultiplier(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x00000000000000000000000013c0001fe8003f8000007ffbfc00000000000000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      let bucket := shr(8, self)
+      if eq(bucket, 0) {
+        let rem := and(self, 0xff) // id % 256
+        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
+        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
+        ok := gt(and(byte(bpos, 0x13c0001ff00001fc000003ffffc000000000000), mask), 0)
+      }
     }
   }
 
-  // PickMultiplier — 46 keys in 1 word @ window 0 (fast)
+  // PickMultiplier — 45 keys in 1 window
   function hasPickMultiplier(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x0000000000000000000000000c2003e0000000000000000001fff81f801ffff8)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      let bucket := shr(8, self)
+      if eq(bucket, 0) {
+        let rem := and(self, 0xff) // id % 256
+        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
+        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
+        ok := gt(and(byte(bpos, 0xc2003e00fc0000000000000003ffe0001ffff8), mask), 0)
+      }
     }
   }
 
-  // PassThrough — 41 keys in 1 word @ window 0 (fast)
+  // PassThrough — 41 keys in 1 window
   function isPassThrough(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x000000000000000000000000101ffc000001c07fffff80000000000000000006)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      let bucket := shr(8, self)
+      if eq(bucket, 0) {
+        let rem := and(self, 0xff) // id % 256
+        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
+        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
+        ok := gt(and(byte(bpos, 0x101ffc0000000e03fffffc00000000000000006), mask), 0)
+      }
     }
   }
 
-  // Growable — 11 keys via eq-chain
+  // Growable — 11 keys in 1 window
   function isGrowable(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 138)
-      ok := or(ok, eq(self, 139))
-      ok := or(ok, eq(self, 140))
-      ok := or(ok, eq(self, 141))
-      ok := or(ok, eq(self, 142))
-      ok := or(ok, eq(self, 143))
-      ok := or(ok, eq(self, 144))
-      ok := or(ok, eq(self, 145))
-      ok := or(ok, eq(self, 146))
-      ok := or(ok, eq(self, 147))
-      ok := or(ok, eq(self, 148))
+      let bucket := shr(8, self)
+      if eq(bucket, 0) {
+        let rem := and(self, 0xff) // id % 256
+        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
+        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
+        ok := gt(and(byte(bpos, 0x1ffc000000000000000000000000000000000), mask), 0)
+      }
     }
   }
 
-  // UniqueObject — 21 keys in 2 windows (generic)
+  // UniqueObject — 21 keys in 1 window
   function isUniqueObject(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let win := shr(8, self)
+      let bucket := shr(8, self)
       let v := 0
-      switch win
-      case 0 { v := 0x00000000000000000000000001a0000000000000000000000000000000000000 }
-      case 128 { v := 0x000000000000000000000000000000000000000000000000000000000030ffff }
+      switch bucket
+      case 0 { v := 0x1a000000000000000000000000000000000000 }
+      case 128 { v := 0x30ffff }
       ok := and(shr(and(self, 0xff), v), 1)
     }
   }
 
-  // Tool — 16 keys via eq-chain
+  // Tool — 16 keys in 1 window
   function isTool(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 32768)
-      ok := or(ok, eq(self, 32769))
-      ok := or(ok, eq(self, 32770))
-      ok := or(ok, eq(self, 32771))
-      ok := or(ok, eq(self, 32772))
-      ok := or(ok, eq(self, 32773))
-      ok := or(ok, eq(self, 32774))
-      ok := or(ok, eq(self, 32775))
-      ok := or(ok, eq(self, 32776))
-      ok := or(ok, eq(self, 32777))
-      ok := or(ok, eq(self, 32778))
-      ok := or(ok, eq(self, 32779))
-      ok := or(ok, eq(self, 32780))
-      ok := or(ok, eq(self, 32781))
-      ok := or(ok, eq(self, 32782))
-      ok := or(ok, eq(self, 32783))
+      let bucket := shr(8, self)
+      if eq(bucket, 128) {
+        let rem := and(self, 0xff) // id % 256
+        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
+        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
+        ok := gt(and(byte(bpos, 0xffff), mask), 0)
+      }
     }
   }
 
@@ -542,8 +538,8 @@ library ObjectTypeLib {
   function isTillable(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 22)
-      ok := or(ok, eq(self, 21))
+      ok := eq(self, 21)
+      ok := or(ok, eq(self, 22))
     }
   }
 
@@ -551,7 +547,7 @@ library ObjectTypeLib {
   function isMachine(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 149)
+      ok := eq(self, 145)
     }
   }
 
@@ -564,7 +560,7 @@ library ObjectTypeLib {
     return [ObjectTypes.AnyPlank, ObjectTypes.AnyLog, ObjectTypes.AnyLeaf, ObjectTypes.AnyTerracotta];
   }
 
-  function getBlockTypes() internal pure returns (ObjectType[154] memory) {
+  function getBlockTypes() internal pure returns (ObjectType[150] memory) {
     return [
       ObjectTypes.Magma,
       ObjectTypes.Stone,
@@ -609,7 +605,6 @@ library ObjectTypeLib {
       ObjectTypes.Sandstone,
       ObjectTypes.RedSandstone,
       ObjectTypes.Clay,
-      ObjectTypes.AnyTerracotta,
       ObjectTypes.Terracotta,
       ObjectTypes.BrownTerracotta,
       ObjectTypes.OrangeTerracotta,
@@ -623,7 +618,6 @@ library ObjectTypeLib {
       ObjectTypes.PurpleTerracotta,
       ObjectTypes.BlueTerracotta,
       ObjectTypes.MagentaTerracotta,
-      ObjectTypes.AnyLog,
       ObjectTypes.OakLog,
       ObjectTypes.BirchLog,
       ObjectTypes.JungleLog,
@@ -632,7 +626,6 @@ library ObjectTypeLib {
       ObjectTypes.SpruceLog,
       ObjectTypes.DarkOakLog,
       ObjectTypes.MangroveLog,
-      ObjectTypes.AnyLeaf,
       ObjectTypes.OakLeaf,
       ObjectTypes.BirchLeaf,
       ObjectTypes.JungleLeaf,
@@ -686,7 +679,6 @@ library ObjectTypeLib {
       ObjectTypes.MushroomStem,
       ObjectTypes.BambooBush,
       ObjectTypes.Cactus,
-      ObjectTypes.AnyPlank,
       ObjectTypes.OakPlanks,
       ObjectTypes.BirchPlanks,
       ObjectTypes.JunglePlanks,
@@ -931,7 +923,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function getPickMultiplierTypes() internal pure returns (ObjectType[46] memory) {
+  function getPickMultiplierTypes() internal pure returns (ObjectType[45] memory) {
     return [
       ObjectTypes.CoalOre,
       ObjectTypes.CopperOre,
@@ -957,7 +949,6 @@ library ObjectTypeLib {
       ObjectTypes.Dripstone,
       ObjectTypes.Blackstone,
       ObjectTypes.CobbledDeepslate,
-      ObjectTypes.AnyTerracotta,
       ObjectTypes.Terracotta,
       ObjectTypes.BrownTerracotta,
       ObjectTypes.OrangeTerracotta,

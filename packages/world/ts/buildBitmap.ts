@@ -1,9 +1,6 @@
-/**
- * Turn a sorted array of ids into a sparse list of
- * 256-bit words, each as a bigint.
- */
 export function buildBitmap(ids: number[]) {
   if (ids.length === 0) throw new Error("empty set");
+  ids.sort();
 
   // bytes[word][byteInWord] = the 8-bit chunk
   const bytes: Array<Uint8Array | undefined> = [];
@@ -27,5 +24,5 @@ export function buildBitmap(ids: number[]) {
     if (w !== 0n) words.push({ idx: i, val: w });
   });
 
-  return { words, minId: Math.min(...ids) };
+  return { words };
 }

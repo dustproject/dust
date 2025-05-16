@@ -14,34 +14,45 @@ export function renderCategoryCheck(
   const fn = customFnName ?? `is${name}`;
   const { words } = buildBitmap(ids);
 
-  // 1) Small sets via direct equality (<=16 IDs)
-  if (ids.length <= 16) {
+  // very small → eq-chain
+  if ((ids.length <= 8 && words.length > 1) || ids.length <= 4) {
     return renderEqChainCategoryCheck(name, fn, ids);
   }
 
-  // 2) Single-word bitmap
+  // single-window is just a two-line switch
   if (words.length === 1) {
-    const { idx: W, val } = words[0]!;
-    const CONST = `0x${val.toString(16).padStart(64, "0")}`;
-    const OFFSET = W * 256;
-    if (W === 0) {
-      // 2A) window 0: pure fast path
-      return renderSingleWordBitmapCategoryCheck(name, fn, CONST, ids.length);
-    }
-
-    // 2B) window K>0: guarded fast path
-    return renderSingleWordOffsetBitmapCategoryCheck(
-      name,
-      fn,
-      CONST,
-      ids.length,
-      W,
-      OFFSET,
-    );
+    const { idx, val } = words[0]!;
+    return `
+    // ${name} — ${ids.length} keys in 1 window
+    function ${fn}(ObjectType self) internal pure returns (bool ok) {
+      /// @solidity memory-safe-assembly
+      assembly {
+        let bucket := shr(8, self)
+        if eq(bucket, ${idx}) {
+          let rem  := and(self, 0xff)              // id % 256
+          let bpos := sub(31, shr(3, rem))         // 31 - (rem>>3)
+          let mask := shl(and(rem, 7), 1)          // 1 << (rem&7)
+          ok := gt(and(byte(bpos, 0x${val.toString(16)}), mask), 0)
+        }
+      }
+    }`;
   }
 
-  // 3) Generic multi-window fallback
-  return renderMultiWindowCategoryCheck(name, fn, words, ids.length);
+  const switchCases = words
+    .map(({ idx, val }) => `case ${idx} { v := 0x${val.toString(16)} }`)
+    .join("\n    ");
+  return `
+    // ${name} — ${ids.length} keys in 1 window
+    function ${fn}(ObjectType self) internal pure returns (bool ok) {
+      /// @solidity memory-safe-assembly
+      assembly {
+        let bucket := shr(8, self)
+        let v := 0
+        switch bucket
+          ${switchCases}
+        ok := and(shr(and(self, 0xff), v), 1)
+      }
+    }`;
 }
 
 // Direct eq-chain renderer
@@ -53,83 +64,14 @@ function renderEqChainCategoryCheck(
   const exprs = ids.map((i) => `eq(self, ${i})`);
   const [first, ...rest] = exprs;
   return `
-// ${name} — ${ids.length} keys via eq-chain
-function ${fn}(ObjectType self) internal pure returns (bool ok) {
-  /// @solidity memory-safe-assembly
-  assembly {
-    ok := ${first}
-    ${rest.map((e) => `ok := or(ok, ${e})`).join("\n    ")}
-  }
-}`;
-}
-
-function renderSingleWordBitmapCategoryCheck(
-  name: string,
-  fn: string,
-  CONST: string,
-  idsLen: number,
-): string {
-  return `
-// ${name} — ${idsLen} keys in 1 word @ window 0 (fast)
-function ${fn}(ObjectType self) internal pure returns (bool ok) {
-  /// @solidity memory-safe-assembly
-  assembly {
-    let ix   := shr(3, self)
-    let bits := byte(sub(31, ix), ${CONST})
-    let mask := shl(and(self, 7), 1)
-    ok      := gt(and(bits, mask), 0)
-  }
-}`;
-}
-
-function renderSingleWordOffsetBitmapCategoryCheck(
-  name: string,
-  fn: string,
-  CONST: string,
-  idsLen: number,
-  W: number,
-  OFFSET: number,
-): string {
-  return `
-// ${name} — ${idsLen} keys in 1 word @ window ${W} (fast)
-function ${fn}(ObjectType self) internal pure returns (bool ok) {
-  /// @solidity memory-safe-assembly
-  assembly {
-    if eq(shr(8, self), ${W}) {
-      let x    := sub(self, ${OFFSET})
-      let ix   := shr(3, x)
-      let bits := byte(sub(31, ix), ${CONST})
-      let mask := shl(and(x, 7), 1)
-      ok      := gt(and(bits, mask), 0)
+  // ${name} — ${ids.length} keys via eq-chain
+  function ${fn}(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      ok := ${first}
+      ${rest.map((e) => `ok := or(ok, ${e})`).join("\n")}
     }
-  }
-}`;
-}
-
-function renderMultiWindowCategoryCheck(
-  name: string,
-  fn: string,
-  words: { idx: number; val: bigint }[],
-  idsLen: number,
-): string {
-  const cases = words
-    .map(
-      ({ idx, val }) =>
-        `case ${idx} { v := 0x${val.toString(16).padStart(64, "0")} }`,
-    )
-    .join("\n    ");
-  return `
-// ${name} — ${idsLen} keys in ${words.length} windows (generic)
-function ${fn}(ObjectType self) internal pure returns (bool ok) {
-  /// @solidity memory-safe-assembly
-  assembly {
-    let win := shr(8, self)
-    let v := 0
-    switch win
-      ${cases}
-    ok := and(shr(and(self, 0xff), v), 1)
-  }
-}`;
+  }`;
 }
 
 function renderObjectAmount([objectType, amount]: ObjectAmount): string {

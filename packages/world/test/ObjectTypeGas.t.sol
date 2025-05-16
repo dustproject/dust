@@ -8,32 +8,45 @@ import { ObjectType, ObjectTypeLib, ObjectTypes } from "../src/ObjectType.sol";
 contract ObjectTypeGasTest is DustTest {
   function testCategoryCheckGas() public {
     ObjectType obj = ObjectType.wrap(uint16(vm.randomUint()));
+    bool ok;
     uint256 gasStart = gasleft();
-    obj.isBlock();
+    ok = obj.isBlock();
     console.log(gasStart - gasleft());
+    console.log(ok);
 
     gasStart = gasleft();
-    obj.isSmartEntity();
+    ok = obj.isSmartEntity();
     console.log(gasStart - gasleft());
+    console.log(ok);
 
     gasStart = gasleft();
-    obj.isTool();
+    ok = obj.isTool();
     console.log(gasStart - gasleft());
+    console.log(ok);
 
     gasStart = gasleft();
-    obj.isLeaf();
+    ok = obj.isLeaf();
     console.log(gasStart - gasleft());
+    console.log(ok);
 
     gasStart = gasleft();
-    obj.isUniqueObject();
+    ok = obj.isUniqueObject();
     console.log(gasStart - gasleft());
+    console.log(ok);
 
     gasStart = gasleft();
-    obj.hasExtraDrops();
+    ok = obj.hasExtraDrops();
     console.log(gasStart - gasleft());
+    console.log(ok);
 
     gasStart = gasleft();
-    obj.hasPickMultiplier();
+    ok = obj.hasPickMultiplier();
     console.log(gasStart - gasleft());
+    console.log(ok);
+
+    gasStart = gasleft();
+    ok = obj.isAny();
+    console.log(gasStart - gasleft());
+    console.log(ok);
   }
 }
