@@ -27,8 +27,8 @@ contract ObjectTypeTest is DustTest {
       const categoryCheck = data.checkName ?? `is${name}`;
       return `
       {
-        ${categoryObjects.map((obj) => `assertTrue(ObjectTypes.${obj}.${categoryCheck}());`).join("\n")}
-        ${objectsNotInCategory.map((obj) => `assertFalse(ObjectTypes.${obj}.${categoryCheck}());`).join("\n")}
+        ${categoryObjects.map((obj) => `assertTrue(ObjectTypes.${obj}.${categoryCheck}(), "${categoryCheck}");`).join("\n")}
+        ${objectsNotInCategory.map((obj) => `assertFalse(ObjectTypes.${obj}.${categoryCheck}(), "!${categoryCheck}");`).join("\n")}
       }
       `;
     })

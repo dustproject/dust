@@ -14,16 +14,6 @@ struct ObjectAmount {
   uint16 amount;
 }
 
-uint16 constant BLOCK_CATEGORY_COUNT = 256 / 2; // 128
-
-// ------------------------------------------------------------
-// Object Categories
-// ------------------------------------------------------------
-library Category {
-  // Meta Category Masks (fits within uint256; mask bit k set if raw category ID k belongs)
-  uint256 constant BLOCK_MASK = uint256(type(uint128).max);
-}
-
 // ------------------------------------------------------------
 // Object Types
 // ------------------------------------------------------------
@@ -185,34 +175,34 @@ library ObjectTypes {
   ObjectType constant Powerstone = ObjectType.wrap(154);
   ObjectType constant Furnace = ObjectType.wrap(155);
   ObjectType constant Torch = ObjectType.wrap(156);
-  ObjectType constant WoodenPick = ObjectType.wrap(157);
-  ObjectType constant CopperPick = ObjectType.wrap(158);
-  ObjectType constant IronPick = ObjectType.wrap(159);
-  ObjectType constant GoldPick = ObjectType.wrap(160);
-  ObjectType constant DiamondPick = ObjectType.wrap(161);
-  ObjectType constant NeptuniumPick = ObjectType.wrap(162);
-  ObjectType constant WoodenAxe = ObjectType.wrap(163);
-  ObjectType constant CopperAxe = ObjectType.wrap(164);
-  ObjectType constant IronAxe = ObjectType.wrap(165);
-  ObjectType constant GoldAxe = ObjectType.wrap(166);
-  ObjectType constant DiamondAxe = ObjectType.wrap(167);
-  ObjectType constant NeptuniumAxe = ObjectType.wrap(168);
-  ObjectType constant WoodenWhacker = ObjectType.wrap(169);
-  ObjectType constant CopperWhacker = ObjectType.wrap(170);
-  ObjectType constant IronWhacker = ObjectType.wrap(171);
-  ObjectType constant WoodenHoe = ObjectType.wrap(172);
-  ObjectType constant GoldBar = ObjectType.wrap(173);
-  ObjectType constant IronBar = ObjectType.wrap(174);
-  ObjectType constant Diamond = ObjectType.wrap(175);
-  ObjectType constant NeptuniumBar = ObjectType.wrap(176);
-  ObjectType constant Bucket = ObjectType.wrap(177);
-  ObjectType constant WaterBucket = ObjectType.wrap(178);
-  ObjectType constant WheatSlop = ObjectType.wrap(179);
-  ObjectType constant PumpkinSoup = ObjectType.wrap(180);
-  ObjectType constant MelonSmoothie = ObjectType.wrap(181);
-  ObjectType constant Battery = ObjectType.wrap(182);
-  ObjectType constant Player = ObjectType.wrap(183);
-  ObjectType constant Fragment = ObjectType.wrap(184);
+  ObjectType constant WoodenPick = ObjectType.wrap(32768);
+  ObjectType constant CopperPick = ObjectType.wrap(32769);
+  ObjectType constant IronPick = ObjectType.wrap(32770);
+  ObjectType constant GoldPick = ObjectType.wrap(32771);
+  ObjectType constant DiamondPick = ObjectType.wrap(32772);
+  ObjectType constant NeptuniumPick = ObjectType.wrap(32773);
+  ObjectType constant WoodenAxe = ObjectType.wrap(32774);
+  ObjectType constant CopperAxe = ObjectType.wrap(32775);
+  ObjectType constant IronAxe = ObjectType.wrap(32776);
+  ObjectType constant GoldAxe = ObjectType.wrap(32777);
+  ObjectType constant DiamondAxe = ObjectType.wrap(32778);
+  ObjectType constant NeptuniumAxe = ObjectType.wrap(32779);
+  ObjectType constant WoodenWhacker = ObjectType.wrap(32780);
+  ObjectType constant CopperWhacker = ObjectType.wrap(32781);
+  ObjectType constant IronWhacker = ObjectType.wrap(32782);
+  ObjectType constant WoodenHoe = ObjectType.wrap(32783);
+  ObjectType constant GoldBar = ObjectType.wrap(32784);
+  ObjectType constant IronBar = ObjectType.wrap(32785);
+  ObjectType constant Diamond = ObjectType.wrap(32786);
+  ObjectType constant NeptuniumBar = ObjectType.wrap(32787);
+  ObjectType constant Bucket = ObjectType.wrap(32788);
+  ObjectType constant WaterBucket = ObjectType.wrap(32789);
+  ObjectType constant WheatSlop = ObjectType.wrap(32790);
+  ObjectType constant PumpkinSoup = ObjectType.wrap(32791);
+  ObjectType constant MelonSmoothie = ObjectType.wrap(32792);
+  ObjectType constant Battery = ObjectType.wrap(32793);
+  ObjectType constant Player = ObjectType.wrap(32794);
+  ObjectType constant Fragment = ObjectType.wrap(32795);
 }
 
 // ------------------------------------------------------------
@@ -252,9 +242,9 @@ library ObjectTypeLib {
   function isBlock(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // id/8
-      let bits := byte(sub(31, ix), 0x0000000000000000000000001ffffffffffffffffffffffffffffffffffffff8) // pick byte
-      let mask := shl(and(self, 7), 1) // 1 << (id%8)
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x0000000000000000000000001ffffffffffffffffffffffffffffffffffffff8)
+      let mask := shl(and(self, 7), 1)
       ok := gt(and(bits, mask), 0)
     }
   }
@@ -355,7 +345,7 @@ library ObjectTypeLib {
       ok := or(ok, eq(self, 150))
       ok := or(ok, eq(self, 151))
       ok := or(ok, eq(self, 152))
-      ok := or(ok, eq(self, 184))
+      ok := or(ok, eq(self, 32795))
     }
   }
 
@@ -373,12 +363,12 @@ library ObjectTypeLib {
   function isPick(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 157)
-      ok := or(ok, eq(self, 158))
-      ok := or(ok, eq(self, 159))
-      ok := or(ok, eq(self, 160))
-      ok := or(ok, eq(self, 161))
-      ok := or(ok, eq(self, 162))
+      ok := eq(self, 32768)
+      ok := or(ok, eq(self, 32769))
+      ok := or(ok, eq(self, 32770))
+      ok := or(ok, eq(self, 32771))
+      ok := or(ok, eq(self, 32772))
+      ok := or(ok, eq(self, 32773))
     }
   }
 
@@ -386,12 +376,12 @@ library ObjectTypeLib {
   function isAxe(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 163)
-      ok := or(ok, eq(self, 164))
-      ok := or(ok, eq(self, 165))
-      ok := or(ok, eq(self, 166))
-      ok := or(ok, eq(self, 167))
-      ok := or(ok, eq(self, 168))
+      ok := eq(self, 32774)
+      ok := or(ok, eq(self, 32775))
+      ok := or(ok, eq(self, 32776))
+      ok := or(ok, eq(self, 32777))
+      ok := or(ok, eq(self, 32778))
+      ok := or(ok, eq(self, 32779))
     }
   }
 
@@ -399,7 +389,7 @@ library ObjectTypeLib {
   function isHoe(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 172)
+      ok := eq(self, 32783)
     }
   }
 
@@ -407,9 +397,9 @@ library ObjectTypeLib {
   function isWhacker(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 169)
-      ok := or(ok, eq(self, 170))
-      ok := or(ok, eq(self, 171))
+      ok := eq(self, 32780)
+      ok := or(ok, eq(self, 32781))
+      ok := or(ok, eq(self, 32782))
     }
   }
 
@@ -417,10 +407,10 @@ library ObjectTypeLib {
   function isOreBar(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 173)
-      ok := or(ok, eq(self, 174))
-      ok := or(ok, eq(self, 175))
-      ok := or(ok, eq(self, 176))
+      ok := eq(self, 32784)
+      ok := or(ok, eq(self, 32785))
+      ok := or(ok, eq(self, 32786))
+      ok := or(ok, eq(self, 32787))
     }
   }
 
@@ -428,9 +418,9 @@ library ObjectTypeLib {
   function isFood(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 179)
-      ok := or(ok, eq(self, 180))
-      ok := or(ok, eq(self, 181))
+      ok := eq(self, 32790)
+      ok := or(ok, eq(self, 32791))
+      ok := or(ok, eq(self, 32792))
     }
   }
 
@@ -438,7 +428,7 @@ library ObjectTypeLib {
   function isFuel(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 182)
+      ok := eq(self, 32793)
     }
   }
 
@@ -446,7 +436,7 @@ library ObjectTypeLib {
   function isPlayer(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 183)
+      ok := eq(self, 32794)
     }
   }
 
@@ -454,9 +444,9 @@ library ObjectTypeLib {
   function hasExtraDrops(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // id/8
-      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000003ffff8007ff80000000000000000) // pick byte
-      let mask := shl(and(self, 7), 1) // 1 << (id%8)
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000003ffff8007ff80000000000000000)
+      let mask := shl(and(self, 7), 1)
       ok := gt(and(bits, mask), 0)
     }
   }
@@ -465,9 +455,9 @@ library ObjectTypeLib {
   function hasAxeMultiplier(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // id/8
-      let bits := byte(sub(31, ix), 0x00000000000000000000000013c0001fe8003f8000007ffbfc00000000000000) // pick byte
-      let mask := shl(and(self, 7), 1) // 1 << (id%8)
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x00000000000000000000000013c0001fe8003f8000007ffbfc00000000000000)
+      let mask := shl(and(self, 7), 1)
       ok := gt(and(bits, mask), 0)
     }
   }
@@ -476,9 +466,9 @@ library ObjectTypeLib {
   function hasPickMultiplier(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // id/8
-      let bits := byte(sub(31, ix), 0x0000000000000000000000000c2003e0000000000000000001fff81f801ffff8) // pick byte
-      let mask := shl(and(self, 7), 1) // 1 << (id%8)
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000c2003e0000000000000000001fff81f801ffff8)
+      let mask := shl(and(self, 7), 1)
       ok := gt(and(bits, mask), 0)
     }
   }
@@ -487,9 +477,9 @@ library ObjectTypeLib {
   function isPassThrough(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // id/8
-      let bits := byte(sub(31, ix), 0x000000000000000000000000101ffc000001c07fffff80000000000000000006) // pick byte
-      let mask := shl(and(self, 7), 1) // 1 << (id%8)
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x000000000000000000000000101ffc000001c07fffff80000000000000000006)
+      let mask := shl(and(self, 7), 1)
       ok := gt(and(bits, mask), 0)
     }
   }
@@ -512,14 +502,16 @@ library ObjectTypeLib {
     }
   }
 
-  // UniqueObject — 21 keys in 1 word @ window 0 (fast)
+  // UniqueObject — 21 keys in 2 windows (generic)
   function isUniqueObject(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // id/8
-      let bits := byte(sub(31, ix), 0x000000000000000000061fffe1a0000000000000000000000000000000000000) // pick byte
-      let mask := shl(and(self, 7), 1) // 1 << (id%8)
-      ok := gt(and(bits, mask), 0)
+      let win := shr(8, self)
+      let v := 0
+      switch win
+      case 0 { v := 0x00000000000000000000000001a0000000000000000000000000000000000000 }
+      case 128 { v := 0x000000000000000000000000000000000000000000000000000000000030ffff }
+      ok := and(shr(and(self, 0xff), v), 1)
     }
   }
 
@@ -527,22 +519,22 @@ library ObjectTypeLib {
   function isTool(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 157)
-      ok := or(ok, eq(self, 158))
-      ok := or(ok, eq(self, 159))
-      ok := or(ok, eq(self, 160))
-      ok := or(ok, eq(self, 161))
-      ok := or(ok, eq(self, 162))
-      ok := or(ok, eq(self, 163))
-      ok := or(ok, eq(self, 164))
-      ok := or(ok, eq(self, 165))
-      ok := or(ok, eq(self, 166))
-      ok := or(ok, eq(self, 167))
-      ok := or(ok, eq(self, 168))
-      ok := or(ok, eq(self, 169))
-      ok := or(ok, eq(self, 170))
-      ok := or(ok, eq(self, 171))
-      ok := or(ok, eq(self, 172))
+      ok := eq(self, 32768)
+      ok := or(ok, eq(self, 32769))
+      ok := or(ok, eq(self, 32770))
+      ok := or(ok, eq(self, 32771))
+      ok := or(ok, eq(self, 32772))
+      ok := or(ok, eq(self, 32773))
+      ok := or(ok, eq(self, 32774))
+      ok := or(ok, eq(self, 32775))
+      ok := or(ok, eq(self, 32776))
+      ok := or(ok, eq(self, 32777))
+      ok := or(ok, eq(self, 32778))
+      ok := or(ok, eq(self, 32779))
+      ok := or(ok, eq(self, 32780))
+      ok := or(ok, eq(self, 32781))
+      ok := or(ok, eq(self, 32782))
+      ok := or(ok, eq(self, 32783))
     }
   }
 

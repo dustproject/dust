@@ -463,7 +463,12 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   { name: "Torch", mass: 1125000000000000n },
 
   // Non Blocks
-  { name: "WoodenPick", mass: 22500000000000000n, plankAmount: 5 },
+  {
+    name: "WoodenPick",
+    mass: 22500000000000000n,
+    plankAmount: 5,
+    id: 2 ** 16 / 2,
+  },
   {
     name: "CopperPick",
     mass: 2034000000000000000n,
