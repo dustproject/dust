@@ -1,4 +1,3 @@
-import { buildBitmap } from "../buildBitmap";
 import {
   type ObjectAmount,
   categories,
@@ -12,47 +11,97 @@ export function renderCategoryCheck(
   customFnName?: string,
 ): string {
   const fn = customFnName ?? `is${name}`;
-  const { words } = buildBitmap(ids);
 
-  // very small → eq-chain
-  if ((ids.length <= 8 && words.length > 1) || ids.length <= 4) {
+  if (ids.length === 0) {
+    return "";
+  }
+
+  // figure out absolute window of IDs
+  const minId = Math.min(...ids);
+  const maxId = Math.max(...ids);
+  const w0 = minId >>> 8;
+  const w1 = maxId >>> 8;
+
+  // If they all sit in the same 256-bit window, compact ids into a bitmap
+  if (w0 === w1) {
+    const base = w0 << 8; // window * 256
+    // build a 32-byte little-endian bitmap for (id – base)
+    const le = new Uint8Array(32);
+    for (const id of ids) {
+      const off = id - base;
+      le[off >>> 3]! |= 1 << (off & 7);
+    }
+    // reverse into big-endian for the PUSH32 literal
+    const be = Uint8Array.from({ length: 32 }, (_, i) => le[31 - i] || 0);
+    const BITS = `0x${[...be].map((b) => b.toString(16).padStart(2, "0")).join("")}`;
+
+    return `
+    // ${name} — single 256-bit window
+    function ${fn}(ObjectType self) internal pure returns (bool ok) {
+      /// @solidity memory-safe-assembly
+      assembly {
+        ${base !== 0 ? `self := sub(self, ${base})` : ""}
+        let ix   := shr(3, self)
+        let bits := byte(sub(31, ix), ${BITS})
+        let mask := shl(and(self, 7), 1)
+        ok       := gt(and(bits, mask), 0)
+      }
+    }`;
+  }
+
+  if (ids.length <= 4) {
     return renderEqChainCategoryCheck(name, fn, ids);
   }
 
-  // single-window is just a two-line switch
-  if (words.length === 1) {
-    const { idx, val } = words[0]!;
-    return `
-    // ${name} — ${ids.length} keys in 1 window
-    function ${fn}(ObjectType self) internal pure returns (bool ok) {
-      /// @solidity memory-safe-assembly
-      assembly {
-        let bucket := shr(8, self)
-        if eq(bucket, ${idx}) {
-          let rem  := and(self, 0xff)              // id % 256
-          let bpos := sub(31, shr(3, rem))         // 31 - (rem>>3)
-          let mask := shl(and(rem, 7), 1)          // 1 << (rem&7)
-          ok := gt(and(byte(bpos, 0x${val.toString(16)}), mask), 0)
-        }
-      }
-    }`;
-  }
+  // otherwise fall back to the multi-window OR/shr/eq approach
+  return renderMultiWindowCheck(name, ids, minId, fn);
+}
 
-  const switchCases = words
-    .map(({ idx, val }) => `case ${idx} { v := 0x${val.toString(16)} }`)
-    .join("\n    ");
+// multi-window fallback (≈114 gas)
+function renderMultiWindowCheck(
+  name: string,
+  ids: number[],
+  minId: number,
+  fn: string,
+): string {
+  const words = buildBitmapWords(ids.map((id) => id - minId));
+  const lines = words.map(({ idx, val }, i) => {
+    const hex = `0x${val.toString(16)}`;
+    return i === 0
+      ? `ok := and(shr(bitpos, ${hex}), eq(bucket, ${idx}))`
+      : `ok := or(ok,  and(shr(bitpos, ${hex}), eq(bucket, ${idx})))`;
+  });
+
   return `
-    // ${name} — ${ids.length} keys in 1 window
-    function ${fn}(ObjectType self) internal pure returns (bool ok) {
-      /// @solidity memory-safe-assembly
-      assembly {
-        let bucket := shr(8, self)
-        let v := 0
-        switch bucket
-          ${switchCases}
-        ok := and(shr(and(self, 0xff), v), 1)
-      }
-    }`;
+  // ${name} — sparse, ${ids.length} keys over ${words.length} window(s)
+  function ${fn}(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      let off    := sub(self, ${minId})
+      let bucket := shr(8, off)
+      let bitpos := and(off, 0xff)
+
+      ${lines.join("\n    ")}
+    }
+  }`;
+}
+
+// helper to pack 0-based offsets into 32-byte windows
+function buildBitmapWords(offsetIds: number[]): { idx: number; val: bigint }[] {
+  const buckets: Uint8Array[] = [];
+  for (const off of offsetIds) {
+    const byteIx = off >>> 3;
+    const bit = 1 << (off & 7);
+    const win = byteIx >>> 5;
+    const pos = 31 - (byteIx & 31);
+    if (!buckets[win]) buckets[win] = new Uint8Array(32);
+    buckets[win]![pos]! |= bit;
+  }
+  return buckets.map((buf, idx) => {
+    let w = 0n;
+    for (const b of buf) w = (w << 8n) | BigInt(b);
+    return { idx, val: w };
+  });
 }
 
 // Direct eq-chain renderer

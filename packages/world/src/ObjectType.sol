@@ -218,336 +218,327 @@ library ObjectTypeLib {
 
   // Direct Category Checks
 
-  // NonSolid — 2 keys via eq-chain
+  // NonSolid — single 256-bit window
   function isNonSolid(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 1)
-      ok := or(ok, eq(self, 2))
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000000000006)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // Any — 4 keys via eq-chain
+  // Any — single 256-bit window
   function isAny(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 32794)
-      ok := or(ok, eq(self, 32795))
-      ok := or(ok, eq(self, 32796))
-      ok := or(ok, eq(self, 32797))
+      self := sub(self, 32768)
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x000000000000000000000000000000000000000000000000000000003c000000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // Block — 150 keys in 1 window
+  // Block — single 256-bit window
   function isBlock(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let bucket := shr(8, self)
-      if eq(bucket, 0) {
-        let rem := and(self, 0xff) // id % 256
-        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
-        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
-        ok := gt(and(byte(bpos, 0x1fffffffffffffffffffffffffffffffffffff8), mask), 0)
-      }
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x00000000000000000000000001fffffffffffffffffffffffffffffffffffff8)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // Ore — 7 keys in 1 window
+  // Ore — single 256-bit window
   function isOre(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let bucket := shr(8, self)
-      if eq(bucket, 0) {
-        let rem := and(self, 0xff) // id % 256
-        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
-        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
-        ok := gt(and(byte(bpos, 0xfc0000000000000000000040000000), mask), 0)
-      }
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000fc0000000000000000000040000000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // Log — 8 keys in 1 window
+  // Log — single 256-bit window
   function isLog(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let bucket := shr(8, self)
-      if eq(bucket, 0) {
-        let rem := and(self, 0xff) // id % 256
-        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
-        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
-        ok := gt(and(byte(bpos, 0x3fc000000000000), mask), 0)
-      }
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x00000000000000000000000000000000000000000000000003fc000000000000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // Leaf — 12 keys in 1 window
+  // Leaf — single 256-bit window
   function isLeaf(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let bucket := shr(8, self)
-      if eq(bucket, 0) {
-        let rem := and(self, 0xff) // id % 256
-        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
-        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
-        ok := gt(and(byte(bpos, 0x3ffc00000000000000), mask), 0)
-      }
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x00000000000000000000000000000000000000000000003ffc00000000000000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // Plank — 8 keys in 1 window
+  // Plank — single 256-bit window
   function isPlank(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let bucket := shr(8, self)
-      if eq(bucket, 0) {
-        let rem := and(self, 0xff) // id % 256
-        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
-        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
-        ok := gt(and(byte(bpos, 0x1fe000000000000000000000000000000), mask), 0)
-      }
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x00000000000000000000000000000001fe000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // Seed — 3 keys via eq-chain
+  // Seed — single 256-bit window
   function isSeed(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 134)
-      ok := or(ok, eq(self, 135))
-      ok := or(ok, eq(self, 136))
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x000000000000000000000000000001c000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // Sapling — 8 keys in 1 window
+  // Sapling — single 256-bit window
   function isSapling(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let bucket := shr(8, self)
-      if eq(bucket, 0) {
-        let rem := and(self, 0xff) // id % 256
-        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
-        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
-        ok := gt(and(byte(bpos, 0x1fe0000000000000000000000000000000000), mask), 0)
-      }
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000001fe0000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // SmartEntity — 5 keys via eq-chain
+  // SmartEntity — sparse, 5 keys over 128 window(s)
   function isSmartEntity(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 145)
-      ok := or(ok, eq(self, 146))
-      ok := or(ok, eq(self, 147))
-      ok := or(ok, eq(self, 148))
-      ok := or(ok, eq(self, 32799))
+      let off := sub(self, 145)
+      let bucket := shr(8, off)
+      let bitpos := and(off, 0xff)
+
+      ok := and(shr(bitpos, 0xf), eq(bucket, 0))
+
+      ok := or(ok, and(shr(bitpos, 0x400000000000000000000000000000000000), eq(bucket, 127)))
     }
   }
 
-  // Station — 3 keys via eq-chain
+  // Station — single 256-bit window
   function isStation(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 149)
-      ok := or(ok, eq(self, 150))
-      ok := or(ok, eq(self, 151))
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x00000000000000000000000000e0000000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // Pick — 6 keys in 1 window
+  // Pick — single 256-bit window
   function isPick(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let bucket := shr(8, self)
-      if eq(bucket, 128) {
-        let rem := and(self, 0xff) // id % 256
-        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
-        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
-        ok := gt(and(byte(bpos, 0x3f), mask), 0)
-      }
+      self := sub(self, 32768)
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x000000000000000000000000000000000000000000000000000000000000003f)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // Axe — 6 keys in 1 window
+  // Axe — single 256-bit window
   function isAxe(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let bucket := shr(8, self)
-      if eq(bucket, 128) {
-        let rem := and(self, 0xff) // id % 256
-        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
-        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
-        ok := gt(and(byte(bpos, 0xfc0), mask), 0)
-      }
+      self := sub(self, 32768)
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000000000fc0)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // Hoe — 1 keys via eq-chain
+  // Hoe — single 256-bit window
   function isHoe(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 32783)
+      self := sub(self, 32768)
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000000008000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // Whacker — 3 keys via eq-chain
+  // Whacker — single 256-bit window
   function isWhacker(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 32780)
-      ok := or(ok, eq(self, 32781))
-      ok := or(ok, eq(self, 32782))
+      self := sub(self, 32768)
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000000007000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // OreBar — 4 keys via eq-chain
+  // OreBar — single 256-bit window
   function isOreBar(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 32784)
-      ok := or(ok, eq(self, 32785))
-      ok := or(ok, eq(self, 32786))
-      ok := or(ok, eq(self, 32787))
+      self := sub(self, 32768)
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x00000000000000000000000000000000000000000000000000000000000f0000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // Food — 3 keys via eq-chain
+  // Food — single 256-bit window
   function isFood(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 32790)
-      ok := or(ok, eq(self, 32791))
-      ok := or(ok, eq(self, 32792))
+      self := sub(self, 32768)
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000001c00000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // Fuel — 1 keys via eq-chain
+  // Fuel — single 256-bit window
   function isFuel(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 32793)
+      self := sub(self, 32768)
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000002000000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // Player — 1 keys via eq-chain
+  // Player — single 256-bit window
   function isPlayer(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 32798)
+      self := sub(self, 32768)
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000040000000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // ExtraDrops — 31 keys in 1 window
+  // ExtraDrops — single 256-bit window
   function hasExtraDrops(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let bucket := shr(8, self)
-      if eq(bucket, 0) {
-        let rem := and(self, 0xff) // id % 256
-        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
-        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
-        ok := gt(and(byte(bpos, 0x1ffffc003ffc00000000000000), mask), 0)
-      }
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x000000000000000000000000000000000000001ffffc003ffc00000000000000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // AxeMultiplier — 41 keys in 1 window
+  // AxeMultiplier — single 256-bit window
   function hasAxeMultiplier(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let bucket := shr(8, self)
-      if eq(bucket, 0) {
-        let rem := and(self, 0xff) // id % 256
-        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
-        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
-        ok := gt(and(byte(bpos, 0x13c0001ff00001fc000003ffffc000000000000), mask), 0)
-      }
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x000000000000000000000000013c0001ff00001fc000003ffffc000000000000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // PickMultiplier — 45 keys in 1 window
+  // PickMultiplier — single 256-bit window
   function hasPickMultiplier(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let bucket := shr(8, self)
-      if eq(bucket, 0) {
-        let rem := and(self, 0xff) // id % 256
-        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
-        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
-        ok := gt(and(byte(bpos, 0xc2003e00fc0000000000000003ffe0001ffff8), mask), 0)
-      }
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x00000000000000000000000000c2003e00fc0000000000000003ffe0001ffff8)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // PassThrough — 41 keys in 1 window
+  // PassThrough — single 256-bit window
   function isPassThrough(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let bucket := shr(8, self)
-      if eq(bucket, 0) {
-        let rem := and(self, 0xff) // id % 256
-        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
-        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
-        ok := gt(and(byte(bpos, 0x101ffc0000000e03fffffc00000000000000006), mask), 0)
-      }
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000101ffc0000000e03fffffc00000000000000006)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // Growable — 11 keys in 1 window
+  // Growable — single 256-bit window
   function isGrowable(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let bucket := shr(8, self)
-      if eq(bucket, 0) {
-        let rem := and(self, 0xff) // id % 256
-        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
-        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
-        ok := gt(and(byte(bpos, 0x1ffc000000000000000000000000000000000), mask), 0)
-      }
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000001ffc000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // UniqueObject — 21 keys in 1 window
+  // UniqueObject — sparse, 21 keys over 128 window(s)
   function isUniqueObject(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let bucket := shr(8, self)
-      let v := 0
-      switch bucket
-      case 0 { v := 0x1a000000000000000000000000000000000000 }
-      case 128 { v := 0x30ffff }
-      ok := and(shr(and(self, 0xff), v), 1)
+      let off := sub(self, 145)
+      let bucket := shr(8, off)
+      let bitpos := and(off, 0xff)
+
+      ok := and(shr(bitpos, 0xd), eq(bucket, 0))
+
+      ok := or(ok, and(shr(bitpos, 0x187fff8000000000000000000000000000), eq(bucket, 127)))
     }
   }
 
-  // Tool — 16 keys in 1 window
+  // Tool — single 256-bit window
   function isTool(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let bucket := shr(8, self)
-      if eq(bucket, 128) {
-        let rem := and(self, 0xff) // id % 256
-        let bpos := sub(31, shr(3, rem)) // 31 - (rem>>3)
-        let mask := shl(and(rem, 7), 1) // 1 << (rem&7)
-        ok := gt(and(byte(bpos, 0xffff), mask), 0)
-      }
+      self := sub(self, 32768)
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x000000000000000000000000000000000000000000000000000000000000ffff)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // Tillable — 2 keys via eq-chain
+  // Tillable — single 256-bit window
   function isTillable(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 21)
-      ok := or(ok, eq(self, 22))
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000000600000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // Machine — 1 keys via eq-chain
+  // Machine — single 256-bit window
   function isMachine(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 145)
+      let ix := shr(3, self)
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000002000000000000000000000000000000000000)
+      let mask := shl(and(self, 7), 1)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
