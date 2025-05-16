@@ -5,4 +5,4 @@ procs:
   register:
     shell:
       wait-on -l ../../packages/world/deploys/31337/latest.json &&
-      forge script RegisterApp.s.sol --sig 'run(address)' --broadcast -- $(cat ../../packages/world/worlds.json | jq -r ".[\"31337\"].address // empty")
+      forge script RegisterApp.s.sol --sig 'run(address)' --broadcast --legacy --rpc-url http://127.0.0.1:8545 -- $(cat ../../packages/world/worlds.json | jq -r ".[\"31337\"].address // empty")
