@@ -1,65 +1,91 @@
 import { buildBitmap } from "../buildBitmap";
-import { type ObjectAmount, categories, objects, objectsByName } from "../objects";
+import {
+  type ObjectAmount,
+  categories,
+  objects,
+  objectsByName,
+} from "../objects";
 
-export function renderCategoryCheck(name: string, ids: number[], customFnName?: string): string {
+export function renderCategoryCheck(
+  name: string,
+  ids: number[],
+  customFnName?: string,
+): string {
   const fn = customFnName ?? `is${name}`;
   const { words } = buildBitmap(ids);
-  if (words.length === 0) throw new Error("empty set");
 
-  const hexLit = (v: bigint) => "0x" + v.toString(16).padStart(64, "0");
-
-  // 1) FAST path: single word @ window 0
-  if (words.length === 1 && words[0]!.idx === 0) {
-    const lit = hexLit(words[0]!.val);
+  // 1) Small sets via direct equality (<=32 IDs)
+  if (ids.length <= 32) {
+    const exprs = ids.map((i) => `eq(self, ${i})`);
+    const [first, ...rest] = exprs;
     return `
+  // ${name} — ${ids.length} keys via eq-chain
+  function ${fn}(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      ok := ${first}
+      ${rest.map((e) => `ok := or(ok, ${e})`).join("\n      ")}
+    }
+  }`;
+  }
+
+  // 2) Single-word bitmap
+  if (words.length === 1) {
+    const { idx: W, val } = words[0]!;
+    const CONST = `0x${val.toString(16).padStart(64, "0")}`;
+    const OFFSET = W * 256;
+
+    // 2A) window 0: pure fast path (10 gas)
+    if (W === 0) {
+      return `
   // ${name} — ${ids.length} keys in 1 word @ window 0 (fast)
   function ${fn}(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
       let ix   := shr(3, self)                   // id/8
-      let bits := byte(sub(31, ix), ${lit})     // pick that byte
-      let mask := shl(and(self, 7), 1)           // 1 << (id % 8)
+      let bits := byte(sub(31, ix), ${CONST})   // pick byte
+      let mask := shl(and(self, 7), 1)           // 1 << (id%8)
       ok        := gt(and(bits, mask), 0)
+    }
+  }`;
+    }
+
+    // 2B) window K>0: guarded fast path (~30 gas)
+    return `
+  // ${name} — ${ids.length} keys in 1 word @ window ${W} (fast)
+  function ${fn}(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      // only if id/256 == ${W}
+      if eq(shr(8, self), ${W}) {
+        let x    := sub(self, ${OFFSET})           // bring into [0..255]
+        let ix   := shr(3, x)                      // x/8
+        let bits := byte(sub(31, ix), ${CONST})
+        let mask := shl(and(x, 7), 1)
+        ok        := gt(and(bits, mask), 0)
+      }
     }
   }`;
   }
 
-  // 2) single non-zero window → cheap `if`
-  let extractor: string;
-  if (words.length === 1) {
-    const { idx, val } = words[0]!;
-    extractor = `
-      // single word @ window ${idx}
-      if eq(win, ${idx}) {
-        chunk := byte(byteOff, ${hexLit(val)})
-      }`;
-  } else {
-    // 3) multi-window → sparse switch + default debug‐revert
-    extractor = `
-      // sparse windows
-      switch win
-        ${words.map(({ idx, val }) => `case ${idx} { chunk := byte(byteOff, ${hexLit(val)}) }`).join("\n        ")}
-        default {
-          // unexpected window — shove win into return‐data so you can inspect it
-          mstore(0x00, win)
-          revert(0x00, 0x20)
-        }`;
-  }
-
-  // 4) common on-chain path
+  // 3) Generic multi-window fallback (~80 gas)
+  const cases = words
+    .map(
+      ({ idx, val }) =>
+        `case ${idx} { v := 0x${val.toString(16).padStart(64, "0")} }`,
+    )
+    .join("\n        ");
   return `
-  // ${name} — ${ids.length} keys in ${words.length} window${words.length > 1 ? "s" : ""}
+  // ${name} — ${ids.length} keys in ${words.length} windows (generic)
   function ${fn}(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let id      := self
-      let win     := shr(8, id)                // window = id / 256
-      let idx8    := shr(3, id)                // byte-offset = id / 8
-      let byteOff := sub(31, and(idx8, 31))    // 31 - (idx8 % 32)
-      let chunk   := 0
-      ${extractor}
-      let mask := shl(and(id, 7), 1)          // 1 << (id % 8)
-      ok        := gt(and(chunk, mask), 0)
+      let win := shr(8, self)
+      let v := 0
+      switch win
+        ${cases}
+      // test bit (self % 256) in the selected 256-bit word
+      ok := and(shr(and(self, 0xff), v), 1)
     }
   }`;
 }
@@ -102,7 +128,7 @@ library Category {
 // ------------------------------------------------------------
 library ObjectTypes {
 ${objects
-  .map((obj, i) => {
+  .map((obj) => {
     return `  ObjectType constant ${obj.name} = ObjectType.wrap(${obj.id});`;
   })
   .join("\n")}
@@ -225,7 +251,10 @@ ${Object.entries(categories)
   function getOreAmount(ObjectType self) internal pure returns(ObjectAmount memory) {
     ${objects
       .filter((result) => result.oreAmount !== undefined)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${renderObjectAmount(obj.oreAmount!)};`)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ${renderObjectAmount(obj.oreAmount!)};`,
+      )
       .join("\n    ")}
     return ObjectAmount(ObjectTypes.Null, 0);
   }
@@ -233,7 +262,10 @@ ${Object.entries(categories)
   function getPlankAmount(ObjectType self) internal pure returns(uint16) {
     ${objects
       .filter((obj) => obj.plankAmount !== undefined)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${obj.plankAmount!.toString()};`)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ${obj.plankAmount!.toString()};`,
+      )
       .join("\n    ")}
     return 0;
   }
@@ -241,7 +273,10 @@ ${Object.entries(categories)
   function getCrop(ObjectType self) internal pure returns(ObjectType) {
     ${objects
       .filter((obj) => obj.crop)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.crop};`)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.crop};`,
+      )
       .join("\n    ")}
     return ObjectTypes.Null;
   }
@@ -249,7 +284,10 @@ ${Object.entries(categories)
   function getSapling(ObjectType self) internal pure returns(ObjectType) {
     ${objects
       .filter((obj) => obj.sapling)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.sapling};`)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.sapling};`,
+      )
       .join("\n    ")}
     return ObjectTypes.Null;
   }
@@ -257,7 +295,10 @@ ${Object.entries(categories)
   function getTimeToGrow(ObjectType self) internal pure returns(uint128) {
     ${objects
       .filter((obj) => obj.timeToGrow)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${obj.timeToGrow};`)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ${obj.timeToGrow};`,
+      )
       .join("\n    ")}
     return 0;
   }
@@ -265,7 +306,10 @@ ${Object.entries(categories)
   function getGrowableEnergy(ObjectType self) public pure returns(uint128) {
     ${objects
       .filter((obj) => obj.growableEnergy)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${obj.growableEnergy};`)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ${obj.growableEnergy};`,
+      )
       .join("\n    ")}
     return 0;
   }

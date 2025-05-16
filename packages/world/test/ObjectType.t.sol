@@ -32,6 +32,36 @@ contract ObjectTypeTest is DustTest {
     gasStart = gasleft();
     ObjectTypes.Player.isTool();
     console.log(gasStart - gasleft());
+
+    console.log("isUniqueObject");
+    gasStart = gasleft();
+    ObjectTypes.WoodenPick.isUniqueObject();
+    console.log(gasStart - gasleft());
+
+    console.log("!isUniqueObject");
+    gasStart = gasleft();
+    ObjectTypes.OakLog.isUniqueObject();
+    console.log(gasStart - gasleft());
+
+    console.log("hasExtraDrops");
+    gasStart = gasleft();
+    ObjectTypes.OakLeaf.hasExtraDrops();
+    console.log(gasStart - gasleft());
+
+    console.log("!hasExtraDrops");
+    gasStart = gasleft();
+    ObjectTypes.OakLog.hasExtraDrops();
+    console.log(gasStart - gasleft());
+
+    console.log("hasPickMultiplier");
+    gasStart = gasleft();
+    ObjectTypes.Stone.hasPickMultiplier();
+    console.log(gasStart - gasleft());
+
+    console.log("!hasPickMultiplier");
+    gasStart = gasleft();
+    ObjectTypes.OakLog.hasPickMultiplier();
+    console.log(gasStart - gasleft());
   }
 
   function testCategories() public pure {
