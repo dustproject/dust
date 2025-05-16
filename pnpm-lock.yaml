@@ -109,6 +109,91 @@ importers:
         specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
         version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(vite@6.3.0(@types/node@20.17.30)(terser@5.39.0)(tsx@4.19.3))
 
+  apps/pos-hud:
+    dependencies:
+      '@dust/programs':
+        specifier: workspace:*
+        version: link:../../packages/programs
+      '@dust/world':
+        specifier: workspace:*
+        version: link:../../packages/world
+      '@latticexyz/common':
+        specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
+        version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
+      '@latticexyz/config':
+        specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
+        version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
+      '@latticexyz/entrykit':
+        specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
+        version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(@aws-sdk/client-kms@3.750.0)(@tanstack/react-query@5.74.4(react@19.1.0))(@types/react-dom@19.1.2(@types/react@19.1.2))(@types/react@19.1.2)(asn1.js@5.4.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(wagmi@2.14.16(@tanstack/query-core@5.74.4)(@tanstack/react-query@5.74.4(react@19.1.0))(@types/react@19.1.2)(bufferutil@4.0.9)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8))(zod@3.23.8)
+      '@latticexyz/schema-type':
+        specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
+        version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
+      '@latticexyz/store':
+        specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
+        version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
+      '@latticexyz/world':
+        specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
+        version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
+      '@latticexyz/world-module-metadata':
+        specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
+        version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
+      '@tanstack/react-query':
+        specifier: ^5.74.4
+        version: 5.74.4(react@19.1.0)
+      dotenv:
+        specifier: ^16.3.1
+        version: 16.4.7
+      dustkit:
+        specifier: workspace:*
+        version: link:../../packages/dustkit
+      ox:
+        specifier: ^0.6.10
+        version: 0.6.12(typescript@5.8.3)(zod@3.23.8)
+      react:
+        specifier: ^19.1.0
+        version: 19.1.0
+      react-dom:
+        specifier: ^19.1.0
+        version: 19.1.0(react@19.1.0)
+      solady:
+        specifier: ^0.1.12
+        version: 0.1.12
+      viem:
+        specifier: 2.23.2
+        version: 2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8)
+      wagmi:
+        specifier: ^2.14.16
+        version: 2.14.16(@tanstack/query-core@5.74.4)(@tanstack/react-query@5.74.4(react@19.1.0))(@types/react@19.1.2)(bufferutil@4.0.9)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
+    devDependencies:
+      '@types/react':
+        specifier: ^19.1.2
+        version: 19.1.2
+      '@types/react-dom':
+        specifier: ^19.1.2
+        version: 19.1.2(@types/react@19.1.2)
+      '@vitejs/plugin-react':
+        specifier: ^4.4.0
+        version: 4.4.0(vite@6.3.0(@types/node@20.17.30)(terser@5.39.0)(tsx@4.19.3))
+      forge-std:
+        specifier: https://github.com/foundry-rs/forge-std.git#3b20d60d14b343ee4f908cb8079495c07f5e8981
+        version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/3b20d60d14b343ee4f908cb8079495c07f5e8981
+      solhint:
+        specifier: ^3.4.1
+        version: 3.6.2(typescript@5.8.3)
+      solhint-config-mud:
+        specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
+        version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
+      solhint-plugin-mud:
+        specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
+        version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
+      vite:
+        specifier: ^6.3.0
+        version: 6.3.0(@types/node@20.17.30)(terser@5.39.0)(tsx@4.19.3)
+      vite-plugin-mud:
+        specifier: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2
+        version: 2.2.22-b94aca694dd82b32bf78de9e6408f61b32e5b8e2(vite@6.3.0(@types/node@20.17.30)(terser@5.39.0)(tsx@4.19.3))
+
   packages/dustkit:
     dependencies:
       '@dust/world':
