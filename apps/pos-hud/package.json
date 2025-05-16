@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "mprocs",
+    "build": "vite build",
     "test": "tsc --noEmit"
   },
   "devDependencies": {
