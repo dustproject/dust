@@ -1,11 +1,4 @@
-import { buildBitmap } from "../buildBitmap";
-import {
-  type ObjectAmount,
-  categories,
-  objectNames,
-  objects,
-  objectsByName,
-} from "../objects";
+import { categories, objectNames } from "../objects";
 
 // Template for the Solidity file
 function generateObjectTypeTestSol(): string {
