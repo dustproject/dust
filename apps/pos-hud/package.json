@@ -3,8 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm vite --port 5501",
-    "register": "./registerApp.bash",
+    "dev": "mprocs",
     "test": "tsc --noEmit"
   },
   "devDependencies": {

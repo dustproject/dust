@@ -1,0 +1,8 @@
+scrollback: 10000
+procs:
+  app:
+    shell: pnpm vite app --port 5501
+  register:
+    shell:
+      wait-on -l ../../packages/world/deploys/31337/latest.json &&
+      forge script RegisterApp.s.sol --sig 'run(address)' --broadcast -- $(cat ../../packages/world/worlds.json | jq -r ".[\"31337\"].address // empty")

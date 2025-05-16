@@ -6,6 +6,8 @@ import { metadataSystem } from
 import { ResourceId, WorldResourceIdInstance, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 
 import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
+
+import { ResourceIds } from "@latticexyz/store/src/codegen/tables/ResourceIds.sol";
 import { Script } from "forge-std/Script.sol";
 import { console } from "forge-std/console.sol";
 
@@ -25,8 +27,10 @@ contract RegisterApp is Script {
     IWorld world = IWorld(worldAddress);
 
     ResourceId appNamespaceId = WorldResourceIdLib.encodeNamespace("pos-hud");
+    if (!ResourceIds.getExists(appNamespaceId)) {
+      world.registerNamespace(appNamespaceId);
+    }
 
-    world.registerNamespace(appNamespaceId);
     metadataSystem.setResourceTag(appNamespaceId, "dust.appConfigUrl", bytes("http://localhost:5501/dust-app.json"));
 
     vm.stopBroadcast();
