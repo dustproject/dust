@@ -8,8 +8,29 @@ import { PerfectHashLib } from "../src/utils/PerfectHashLib.sol";
 
 contract ObjectTypeTest is DustTest {
   function testCategoryCheck() public {
+    console.log("isBlock");
     uint256 gasStart = gasleft();
     ObjectTypes.AzaleaFlower.isBlock();
+    console.log(gasStart - gasleft());
+
+    console.log("!isSmartEntity");
+    gasStart = gasleft();
+    ObjectTypes.AzaleaFlower.isSmartEntity();
+    console.log(gasStart - gasleft());
+
+    console.log("isSmartEntity");
+    gasStart = gasleft();
+    ObjectTypes.Fragment.isSmartEntity();
+    console.log(gasStart - gasleft());
+
+    console.log("isTool");
+    gasStart = gasleft();
+    ObjectTypes.WoodenPick.isTool();
+    console.log(gasStart - gasleft());
+
+    console.log("!isTool");
+    gasStart = gasleft();
+    ObjectTypes.Player.isTool();
     console.log(gasStart - gasleft());
   }
 
@@ -27,6 +48,12 @@ contract ObjectTypeTest is DustTest {
     ObjectType[41] memory passthroughTypes = ObjectTypeLib.getPassThroughTypes();
     for (uint256 i = 0; i < passthroughTypes.length; i++) {
       assertTrue(passthroughTypes[i].isPassThrough(), "isPassThrough");
+    }
+
+    ObjectType[5] memory smartEntityTypes = ObjectTypeLib.getSmartEntityTypes();
+    for (uint256 i = 0; i < smartEntityTypes.length; i++) {
+      console.log(smartEntityTypes[i].unwrap());
+      assertTrue(smartEntityTypes[i].isSmartEntity(), "isSmartEntity");
     }
 
     for (uint256 i = 0; i < logTypes.length; i++) {

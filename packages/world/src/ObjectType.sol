@@ -185,34 +185,34 @@ library ObjectTypes {
   ObjectType constant Powerstone = ObjectType.wrap(154);
   ObjectType constant Furnace = ObjectType.wrap(155);
   ObjectType constant Torch = ObjectType.wrap(156);
-  ObjectType constant WoodenPick = ObjectType.wrap(157);
-  ObjectType constant CopperPick = ObjectType.wrap(158);
-  ObjectType constant IronPick = ObjectType.wrap(159);
-  ObjectType constant GoldPick = ObjectType.wrap(160);
-  ObjectType constant DiamondPick = ObjectType.wrap(161);
-  ObjectType constant NeptuniumPick = ObjectType.wrap(162);
-  ObjectType constant WoodenAxe = ObjectType.wrap(163);
-  ObjectType constant CopperAxe = ObjectType.wrap(164);
-  ObjectType constant IronAxe = ObjectType.wrap(165);
-  ObjectType constant GoldAxe = ObjectType.wrap(166);
-  ObjectType constant DiamondAxe = ObjectType.wrap(167);
-  ObjectType constant NeptuniumAxe = ObjectType.wrap(168);
-  ObjectType constant WoodenWhacker = ObjectType.wrap(169);
-  ObjectType constant CopperWhacker = ObjectType.wrap(170);
-  ObjectType constant IronWhacker = ObjectType.wrap(171);
-  ObjectType constant WoodenHoe = ObjectType.wrap(172);
-  ObjectType constant GoldBar = ObjectType.wrap(173);
-  ObjectType constant IronBar = ObjectType.wrap(174);
-  ObjectType constant Diamond = ObjectType.wrap(175);
-  ObjectType constant NeptuniumBar = ObjectType.wrap(176);
-  ObjectType constant Bucket = ObjectType.wrap(177);
-  ObjectType constant WaterBucket = ObjectType.wrap(178);
-  ObjectType constant WheatSlop = ObjectType.wrap(179);
-  ObjectType constant PumpkinSoup = ObjectType.wrap(180);
-  ObjectType constant MelonSmoothie = ObjectType.wrap(181);
-  ObjectType constant Battery = ObjectType.wrap(182);
-  ObjectType constant Player = ObjectType.wrap(183);
-  ObjectType constant Fragment = ObjectType.wrap(184);
+  ObjectType constant WoodenPick = ObjectType.wrap(32768);
+  ObjectType constant CopperPick = ObjectType.wrap(32769);
+  ObjectType constant IronPick = ObjectType.wrap(32770);
+  ObjectType constant GoldPick = ObjectType.wrap(32771);
+  ObjectType constant DiamondPick = ObjectType.wrap(32772);
+  ObjectType constant NeptuniumPick = ObjectType.wrap(32773);
+  ObjectType constant WoodenAxe = ObjectType.wrap(32774);
+  ObjectType constant CopperAxe = ObjectType.wrap(32775);
+  ObjectType constant IronAxe = ObjectType.wrap(32776);
+  ObjectType constant GoldAxe = ObjectType.wrap(32777);
+  ObjectType constant DiamondAxe = ObjectType.wrap(32778);
+  ObjectType constant NeptuniumAxe = ObjectType.wrap(32779);
+  ObjectType constant WoodenWhacker = ObjectType.wrap(32780);
+  ObjectType constant CopperWhacker = ObjectType.wrap(32781);
+  ObjectType constant IronWhacker = ObjectType.wrap(32782);
+  ObjectType constant WoodenHoe = ObjectType.wrap(32783);
+  ObjectType constant GoldBar = ObjectType.wrap(32784);
+  ObjectType constant IronBar = ObjectType.wrap(32785);
+  ObjectType constant Diamond = ObjectType.wrap(32786);
+  ObjectType constant NeptuniumBar = ObjectType.wrap(32787);
+  ObjectType constant Bucket = ObjectType.wrap(32788);
+  ObjectType constant WaterBucket = ObjectType.wrap(32789);
+  ObjectType constant WheatSlop = ObjectType.wrap(32790);
+  ObjectType constant PumpkinSoup = ObjectType.wrap(32791);
+  ObjectType constant MelonSmoothie = ObjectType.wrap(32792);
+  ObjectType constant Battery = ObjectType.wrap(32793);
+  ObjectType constant Player = ObjectType.wrap(32794);
+  ObjectType constant Fragment = ObjectType.wrap(32795);
 }
 
 // ------------------------------------------------------------
@@ -228,283 +228,391 @@ library ObjectTypeLib {
 
   // Direct Category Checks
 
+  // NonSolid — 2 keys in 1 word @ window 0 (fast)
   function isNonSolid(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x6)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000000000006) // pick that byte
+      let mask := shl(and(self, 7), 1) // 1 << (id % 8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
+  // Any — 4 keys in 1 word @ window 0 (fast)
   function isAny(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x10000000000000040200080000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000010000000000000040200080000000000) // pick that byte
+      let mask := shl(and(self, 7), 1) // 1 << (id % 8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
+  // Block — 154 keys in 1 word @ window 0 (fast)
   function isBlock(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x1ffffffffffffffffffffffffffffffffffffff8)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x0000000000000000000000001ffffffffffffffffffffffffffffffffffffff8) // pick that byte
+      let mask := shl(and(self, 7), 1) // 1 << (id % 8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
+  // Ore — 7 keys in 1 word @ window 0 (fast)
   function isOre(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x1fc0000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000001fc0000000) // pick that byte
+      let mask := shl(and(self, 7), 1) // 1 << (id % 8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
+  // Log — 8 keys in 1 word @ window 0 (fast)
   function isLog(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x3fc00000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x000000000000000000000000000000000000000000000003fc00000000000000) // pick that byte
+      let mask := shl(and(self, 7), 1) // 1 << (id % 8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
+  // Leaf — 12 keys in 1 word @ window 0 (fast)
   function isLeaf(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x7ff80000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x000000000000000000000000000000000000000000007ff80000000000000000) // pick that byte
+      let mask := shl(and(self, 7), 1) // 1 << (id % 8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
+  // Plank — 8 keys in 1 word @ window 0 (fast)
   function isPlank(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x1fe0000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000000001fe0000000000000000000000000000000) // pick that byte
+      let mask := shl(and(self, 7), 1) // 1 << (id % 8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
+  // Seed — 3 keys in 1 word @ window 0 (fast)
   function isSeed(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x1c0000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x00000000000000000000000000001c0000000000000000000000000000000000) // pick that byte
+      let mask := shl(and(self, 7), 1) // 1 << (id % 8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
+  // Sapling — 8 keys in 1 word @ window 0 (fast)
   function isSapling(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x1fe00000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x000000000000000000000000001fe00000000000000000000000000000000000) // pick that byte
+      let mask := shl(and(self, 7), 1) // 1 << (id % 8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
+  // SmartEntity — 5 keys in 2 windows
   function isSmartEntity(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x100000001e0000000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let id := self
+      let win := shr(8, id) // window = id / 256
+      let idx8 := shr(3, id) // byte-offset = id / 8
+      let byteOff := sub(31, and(idx8, 31)) // 31 - (idx8 % 32)
+      let chunk := 0
+
+      // sparse windows
+      switch win
+      case 0 { chunk := byte(byteOff, 0x00000000000000000000000001e0000000000000000000000000000000000000) }
+      case 128 { chunk := byte(byteOff, 0x0000000000000000000000000000000000000000000000000000000008000000) }
+      default {
+        // unexpected window — shove win into return‐data so you can inspect it
+        mstore(0x00, win)
+        revert(0x00, 0x20)
+      }
+      let mask := shl(and(id, 7), 1) // 1 << (id % 8)
+      ok := gt(and(chunk, mask), 0)
     }
   }
 
+  // Station — 3 keys in 1 word @ window 0 (fast)
   function isStation(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0xe00000000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000e00000000000000000000000000000000000000) // pick that byte
+      let mask := shl(and(self, 7), 1) // 1 << (id % 8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
+  // Pick — 6 keys in 1 window
   function isPick(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x7e000000000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let id := self
+      let win := shr(8, id) // window = id / 256
+      let idx8 := shr(3, id) // byte-offset = id / 8
+      let byteOff := sub(31, and(idx8, 31)) // 31 - (idx8 % 32)
+      let chunk := 0
+
+      // single word @ window 128
+      if eq(win, 128) { chunk := byte(byteOff, 0x000000000000000000000000000000000000000000000000000000000000003f) }
+      let mask := shl(and(id, 7), 1) // 1 << (id % 8)
+      ok := gt(and(chunk, mask), 0)
     }
   }
 
+  // Axe — 6 keys in 1 window
   function isAxe(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x1f80000000000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let id := self
+      let win := shr(8, id) // window = id / 256
+      let idx8 := shr(3, id) // byte-offset = id / 8
+      let byteOff := sub(31, and(idx8, 31)) // 31 - (idx8 % 32)
+      let chunk := 0
+
+      // single word @ window 128
+      if eq(win, 128) { chunk := byte(byteOff, 0x0000000000000000000000000000000000000000000000000000000000000fc0) }
+      let mask := shl(and(id, 7), 1) // 1 << (id % 8)
+      ok := gt(and(chunk, mask), 0)
     }
   }
 
+  // Hoe — 1 keys in 1 window
   function isHoe(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x10000000000000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let id := self
+      let win := shr(8, id) // window = id / 256
+      let idx8 := shr(3, id) // byte-offset = id / 8
+      let byteOff := sub(31, and(idx8, 31)) // 31 - (idx8 % 32)
+      let chunk := 0
+
+      // single word @ window 128
+      if eq(win, 128) { chunk := byte(byteOff, 0x0000000000000000000000000000000000000000000000000000000000008000) }
+      let mask := shl(and(id, 7), 1) // 1 << (id % 8)
+      ok := gt(and(chunk, mask), 0)
     }
   }
 
+  // Whacker — 3 keys in 1 window
   function isWhacker(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0xe000000000000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let id := self
+      let win := shr(8, id) // window = id / 256
+      let idx8 := shr(3, id) // byte-offset = id / 8
+      let byteOff := sub(31, and(idx8, 31)) // 31 - (idx8 % 32)
+      let chunk := 0
+
+      // single word @ window 128
+      if eq(win, 128) { chunk := byte(byteOff, 0x0000000000000000000000000000000000000000000000000000000000007000) }
+      let mask := shl(and(id, 7), 1) // 1 << (id % 8)
+      ok := gt(and(chunk, mask), 0)
     }
   }
 
+  // OreBar — 4 keys in 1 window
   function isOreBar(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x1e0000000000000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let id := self
+      let win := shr(8, id) // window = id / 256
+      let idx8 := shr(3, id) // byte-offset = id / 8
+      let byteOff := sub(31, and(idx8, 31)) // 31 - (idx8 % 32)
+      let chunk := 0
+
+      // single word @ window 128
+      if eq(win, 128) { chunk := byte(byteOff, 0x00000000000000000000000000000000000000000000000000000000000f0000) }
+      let mask := shl(and(id, 7), 1) // 1 << (id % 8)
+      ok := gt(and(chunk, mask), 0)
     }
   }
 
+  // Food — 3 keys in 1 window
   function isFood(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x3800000000000000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let id := self
+      let win := shr(8, id) // window = id / 256
+      let idx8 := shr(3, id) // byte-offset = id / 8
+      let byteOff := sub(31, and(idx8, 31)) // 31 - (idx8 % 32)
+      let chunk := 0
+
+      // single word @ window 128
+      if eq(win, 128) { chunk := byte(byteOff, 0x0000000000000000000000000000000000000000000000000000000001c00000) }
+      let mask := shl(and(id, 7), 1) // 1 << (id % 8)
+      ok := gt(and(chunk, mask), 0)
     }
   }
 
+  // Fuel — 1 keys in 1 window
   function isFuel(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x4000000000000000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let id := self
+      let win := shr(8, id) // window = id / 256
+      let idx8 := shr(3, id) // byte-offset = id / 8
+      let byteOff := sub(31, and(idx8, 31)) // 31 - (idx8 % 32)
+      let chunk := 0
+
+      // single word @ window 128
+      if eq(win, 128) { chunk := byte(byteOff, 0x0000000000000000000000000000000000000000000000000000000002000000) }
+      let mask := shl(and(id, 7), 1) // 1 << (id % 8)
+      ok := gt(and(chunk, mask), 0)
     }
   }
 
+  // Player — 1 keys in 1 window
   function isPlayer(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x8000000000000000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let id := self
+      let win := shr(8, id) // window = id / 256
+      let idx8 := shr(3, id) // byte-offset = id / 8
+      let byteOff := sub(31, and(idx8, 31)) // 31 - (idx8 % 32)
+      let chunk := 0
+
+      // single word @ window 128
+      if eq(win, 128) { chunk := byte(byteOff, 0x0000000000000000000000000000000000000000000000000000000004000000) }
+      let mask := shl(and(id, 7), 1) // 1 << (id % 8)
+      ok := gt(and(chunk, mask), 0)
     }
   }
 
+  // ExtraDrops — 31 keys in 1 word @ window 0 (fast)
   function hasExtraDrops(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x3ffff8007ff80000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000003ffff8007ff80000000000000000) // pick that byte
+      let mask := shl(and(self, 7), 1) // 1 << (id % 8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
+  // hasAxeMultiplier — 41 keys in 1 word @ window 0 (fast)
   function hasAxeMultiplier(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x13c0001fe8003f8000007ffbfc00000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x00000000000000000000000013c0001fe8003f8000007ffbfc00000000000000) // pick that byte
+      let mask := shl(and(self, 7), 1) // 1 << (id % 8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
+  // hasPickMultiplier — 46 keys in 1 word @ window 0 (fast)
   function hasPickMultiplier(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0xc2003e0000000000000000001fff81f801ffff8)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000c2003e0000000000000000001fff81f801ffff8) // pick that byte
+      let mask := shl(and(self, 7), 1) // 1 << (id % 8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
+  // PassThrough — 41 keys in 1 word @ window 0 (fast)
   function isPassThrough(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x101ffc000001c07fffff80000000000000000006)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x000000000000000000000000101ffc000001c07fffff80000000000000000006) // pick that byte
+      let mask := shl(and(self, 7), 1) // 1 << (id % 8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
+  // Growable — 11 keys in 1 word @ window 0 (fast)
   function isGrowable(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x1ffc0000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x000000000000000000000000001ffc0000000000000000000000000000000000) // pick that byte
+      let mask := shl(and(self, 7), 1) // 1 << (id % 8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
+  // UniqueObject — 21 keys in 2 windows
   function isUniqueObject(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x61fffe1a0000000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let id := self
+      let win := shr(8, id) // window = id / 256
+      let idx8 := shr(3, id) // byte-offset = id / 8
+      let byteOff := sub(31, and(idx8, 31)) // 31 - (idx8 % 32)
+      let chunk := 0
+
+      // sparse windows
+      switch win
+      case 0 { chunk := byte(byteOff, 0x00000000000000000000000001a0000000000000000000000000000000000000) }
+      case 128 { chunk := byte(byteOff, 0x000000000000000000000000000000000000000000000000000000000030ffff) }
+      default {
+        // unexpected window — shove win into return‐data so you can inspect it
+        mstore(0x00, win)
+        revert(0x00, 0x20)
+      }
+      let mask := shl(and(id, 7), 1) // 1 << (id % 8)
+      ok := gt(and(chunk, mask), 0)
     }
   }
 
+  // Tool — 16 keys in 1 window
   function isTool(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x1fffe000000000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let id := self
+      let win := shr(8, id) // window = id / 256
+      let idx8 := shr(3, id) // byte-offset = id / 8
+      let byteOff := sub(31, and(idx8, 31)) // 31 - (idx8 % 32)
+      let chunk := 0
+
+      // single word @ window 128
+      if eq(win, 128) { chunk := byte(byteOff, 0x000000000000000000000000000000000000000000000000000000000000ffff) }
+      let mask := shl(and(id, 7), 1) // 1 << (id % 8)
+      ok := gt(and(chunk, mask), 0)
     }
   }
 
+  // Tillable — 2 keys in 1 word @ window 0 (fast)
   function isTillable(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x600000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000000600000) // pick that byte
+      let mask := shl(and(self, 7), 1) // 1 << (id % 8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
+  // Machine — 1 keys in 1 word @ window 0 (fast)
   function isMachine(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self) // byte index
-      let bits := byte(sub(31, ix), 0x20000000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1) // 1 << (id & 7)
-      ok := gt(and(bits, mask), 0) // 1 if bit is set
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000020000000000000000000000000000000000000) // pick that byte
+      let mask := shl(and(self, 7), 1) // 1 << (id % 8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 

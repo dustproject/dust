@@ -1,35 +1,65 @@
 import { buildBitmap } from "../buildBitmap";
-import {
-  type ObjectAmount,
-  categories,
-  objects,
-  objectsByName,
-} from "../objects";
+import { type ObjectAmount, categories, objects, objectsByName } from "../objects";
 
-function renderCategoryCheck(
-  name: string,
-  ids: number[],
-  customFnName?: string,
-): string {
+export function renderCategoryCheck(name: string, ids: number[], customFnName?: string): string {
   const fn = customFnName ?? `is${name}`;
   const { words } = buildBitmap(ids);
-  const g =
-    words.length === 1
-      ? `let bits := byte(sub(31, ix), 0x${words[0]!.toString(16)})`
-      : `
-      switch shr(5, ix) { // ix / 32
-        ${words.map((w, i) => `case ${i} { bits := byte(and(ix,31), 0x${w.toString(16)}) }`).join("\n")}
-        default { bits := 0 }
-      }`;
+  if (words.length === 0) throw new Error("empty set");
 
-  return `
+  const hexLit = (v: bigint) => "0x" + v.toString(16).padStart(64, "0");
+
+  // 1) FAST path: single word @ window 0
+  if (words.length === 1 && words[0]!.idx === 0) {
+    const lit = hexLit(words[0]!.val);
+    return `
+  // ${name} — ${ids.length} keys in 1 word @ window 0 (fast)
   function ${fn}(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      let ix   := shr(3, self)          // byte index
-      ${g}
-      let mask := shl(and(self, 7), 1)  // 1 << (id & 7)
-      ok      := gt(and(bits, mask), 0) // 1 if bit is set
+      let ix   := shr(3, self)                   // id/8
+      let bits := byte(sub(31, ix), ${lit})     // pick that byte
+      let mask := shl(and(self, 7), 1)           // 1 << (id % 8)
+      ok        := gt(and(bits, mask), 0)
+    }
+  }`;
+  }
+
+  // 2) single non-zero window → cheap `if`
+  let extractor: string;
+  if (words.length === 1) {
+    const { idx, val } = words[0]!;
+    extractor = `
+      // single word @ window ${idx}
+      if eq(win, ${idx}) {
+        chunk := byte(byteOff, ${hexLit(val)})
+      }`;
+  } else {
+    // 3) multi-window → sparse switch + default debug‐revert
+    extractor = `
+      // sparse windows
+      switch win
+        ${words.map(({ idx, val }) => `case ${idx} { chunk := byte(byteOff, ${hexLit(val)}) }`).join("\n        ")}
+        default {
+          // unexpected window — shove win into return‐data so you can inspect it
+          mstore(0x00, win)
+          revert(0x00, 0x20)
+        }`;
+  }
+
+  // 4) common on-chain path
+  return `
+  // ${name} — ${ids.length} keys in ${words.length} window${words.length > 1 ? "s" : ""}
+  function ${fn}(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      let id      := self
+      let win     := shr(8, id)                // window = id / 256
+      let idx8    := shr(3, id)                // byte-offset = id / 8
+      let byteOff := sub(31, and(idx8, 31))    // 31 - (idx8 % 32)
+      let chunk   := 0
+      ${extractor}
+      let mask := shl(and(id, 7), 1)          // 1 << (id % 8)
+      ok        := gt(and(chunk, mask), 0)
     }
   }`;
 }
@@ -73,7 +103,7 @@ library Category {
 library ObjectTypes {
 ${objects
   .map((obj, i) => {
-    return `  ObjectType constant ${obj.name} = ObjectType.wrap(${i});`;
+    return `  ObjectType constant ${obj.name} = ObjectType.wrap(${obj.id});`;
   })
   .join("\n")}
 }
@@ -195,10 +225,7 @@ ${Object.entries(categories)
   function getOreAmount(ObjectType self) internal pure returns(ObjectAmount memory) {
     ${objects
       .filter((result) => result.oreAmount !== undefined)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ${renderObjectAmount(obj.oreAmount!)};`,
-      )
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${renderObjectAmount(obj.oreAmount!)};`)
       .join("\n    ")}
     return ObjectAmount(ObjectTypes.Null, 0);
   }
@@ -206,10 +233,7 @@ ${Object.entries(categories)
   function getPlankAmount(ObjectType self) internal pure returns(uint16) {
     ${objects
       .filter((obj) => obj.plankAmount !== undefined)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ${obj.plankAmount!.toString()};`,
-      )
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${obj.plankAmount!.toString()};`)
       .join("\n    ")}
     return 0;
   }
@@ -217,10 +241,7 @@ ${Object.entries(categories)
   function getCrop(ObjectType self) internal pure returns(ObjectType) {
     ${objects
       .filter((obj) => obj.crop)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.crop};`,
-      )
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.crop};`)
       .join("\n    ")}
     return ObjectTypes.Null;
   }
@@ -228,10 +249,7 @@ ${Object.entries(categories)
   function getSapling(ObjectType self) internal pure returns(ObjectType) {
     ${objects
       .filter((obj) => obj.sapling)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.sapling};`,
-      )
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.sapling};`)
       .join("\n    ")}
     return ObjectTypes.Null;
   }
@@ -239,10 +257,7 @@ ${Object.entries(categories)
   function getTimeToGrow(ObjectType self) internal pure returns(uint128) {
     ${objects
       .filter((obj) => obj.timeToGrow)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ${obj.timeToGrow};`,
-      )
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${obj.timeToGrow};`)
       .join("\n    ")}
     return 0;
   }
@@ -250,10 +265,7 @@ ${Object.entries(categories)
   function getGrowableEnergy(ObjectType self) public pure returns(uint128) {
     ${objects
       .filter((obj) => obj.growableEnergy)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ${obj.growableEnergy};`,
-      )
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${obj.growableEnergy};`)
       .join("\n    ")}
     return 0;
   }

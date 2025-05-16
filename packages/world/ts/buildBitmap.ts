@@ -1,22 +1,31 @@
+/**
+ * Turn a sorted array of ids into a sparse list of
+ * 256-bit words, each as a bigint.
+ */
 export function buildBitmap(ids: number[]) {
-  const bytes: Uint8Array[] = [];
+  if (ids.length === 0) throw new Error("empty set");
 
+  // bytes[word][byteInWord] = the 8-bit chunk
+  const bytes: Array<Uint8Array | undefined> = [];
   for (const id of ids) {
-    const index = id >>> 3; // byte index inside logical bitmap
-    const byte = id & 7; // bit position inside that byte
-    const word = index >>> 5; // which 32-byte word
-    const pos = 31 - (index & 31); // byte position *inside* that word
-
+    const absByte = id >>> 3; // floor(id/8)
+    const word = absByte >>> 5; // floor(absByte/32) == floor(id/256)
+    const b = 31 - (absByte & 31); // MSB-first byte
+    const bit = 1 << (id & 7); // which bit in that byte
     if (!bytes[word]) bytes[word] = new Uint8Array(32);
-    bytes[word]![pos]! |= 1 << byte; // set bit (big-endian layout)
+    bytes[word]![b]! |= bit;
   }
 
-  // pack each 32-byte buffer into a bigint literal
-  const words = bytes.map((buf) => {
+  // pack each non-zero Uint8Array into a bigint
+  const words: { idx: number; val: bigint }[] = [];
+  bytes.forEach((buf, i) => {
+    if (!buf) return;
     let w = 0n;
-    for (const b of buf ?? new Uint8Array(32)) w = (w << 8n) | BigInt(b);
-    return w;
+    for (const byte of buf) {
+      w = (w << 8n) | BigInt(byte);
+    }
+    if (w !== 0n) words.push({ idx: i, val: w });
   });
 
-  return { words, byteLen: (Math.max(...ids) >>> 3) + 1 };
+  return { words, minId: Math.min(...ids) };
 }

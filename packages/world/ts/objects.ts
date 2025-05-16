@@ -1,4 +1,4 @@
-export const numBlockCategories = 256 / 2;
+const numBlocks = 2 ** 16 / 2;
 
 export interface Category {
   objects: ObjectName[];
@@ -465,7 +465,7 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   { name: "Torch", mass: 1125000000000000n },
 
   // Non Blocks
-  { name: "WoodenPick", mass: 22500000000000000n, plankAmount: 5 },
+  { name: "WoodenPick", mass: 22500000000000000n, plankAmount: 5, id: numBlocks },
   {
     name: "CopperPick",
     mass: 2034000000000000000n,
@@ -736,27 +736,10 @@ export const categories: Record<string, Category> = {
     ],
   },
   Ore: {
-    objects: [
-      "UnrevealedOre",
-      "CoalOre",
-      "CopperOre",
-      "IronOre",
-      "GoldOre",
-      "DiamondOre",
-      "NeptuniumOre",
-    ],
+    objects: ["UnrevealedOre", "CoalOre", "CopperOre", "IronOre", "GoldOre", "DiamondOre", "NeptuniumOre"],
   },
   Log: {
-    objects: [
-      "OakLog",
-      "BirchLog",
-      "JungleLog",
-      "SakuraLog",
-      "AcaciaLog",
-      "SpruceLog",
-      "DarkOakLog",
-      "MangroveLog",
-    ],
+    objects: ["OakLog", "BirchLog", "JungleLog", "SakuraLog", "AcaciaLog", "SpruceLog", "DarkOakLog", "MangroveLog"],
   },
   Leaf: {
     objects: [
@@ -808,24 +791,10 @@ export const categories: Record<string, Category> = {
     objects: ["Workbench", "Powerstone", "Furnace"],
   },
   Pick: {
-    objects: [
-      "WoodenPick",
-      "CopperPick",
-      "IronPick",
-      "GoldPick",
-      "DiamondPick",
-      "NeptuniumPick",
-    ],
+    objects: ["WoodenPick", "CopperPick", "IronPick", "GoldPick", "DiamondPick", "NeptuniumPick"],
   },
   Axe: {
-    objects: [
-      "WoodenAxe",
-      "CopperAxe",
-      "IronAxe",
-      "GoldAxe",
-      "DiamondAxe",
-      "NeptuniumAxe",
-    ],
+    objects: ["WoodenAxe", "CopperAxe", "IronAxe", "GoldAxe", "DiamondAxe", "NeptuniumAxe"],
   },
   Hoe: {
     objects: ["WoodenHoe"],
