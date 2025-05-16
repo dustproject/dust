@@ -1,5 +1,3 @@
-const numBlocks = 2 ** 16 / 2;
-
 export interface Category {
   objects: ObjectName[];
   checkName?: string;
