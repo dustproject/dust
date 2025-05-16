@@ -14,8 +14,8 @@ export function renderCategoryCheck(
   const fn = customFnName ?? `is${name}`;
   const { words } = buildBitmap(ids);
 
-  // 1) Small sets via direct equality (<=32 IDs)
-  if (ids.length <= 32) {
+  // 1) Small sets via direct equality (<=16 IDs)
+  if (ids.length <= 16) {
     const exprs = ids.map((i) => `eq(self, ${i})`);
     const [first, ...rest] = exprs;
     return `

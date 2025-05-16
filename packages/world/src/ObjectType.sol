@@ -450,45 +450,18 @@ library ObjectTypeLib {
     }
   }
 
-  // ExtraDrops — 31 keys via eq-chain
+  // ExtraDrops — 31 keys in 1 word @ window 0 (fast)
   function hasExtraDrops(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 67)
-      ok := or(ok, eq(self, 68))
-      ok := or(ok, eq(self, 69))
-      ok := or(ok, eq(self, 70))
-      ok := or(ok, eq(self, 71))
-      ok := or(ok, eq(self, 72))
-      ok := or(ok, eq(self, 73))
-      ok := or(ok, eq(self, 74))
-      ok := or(ok, eq(self, 75))
-      ok := or(ok, eq(self, 76))
-      ok := or(ok, eq(self, 77))
-      ok := or(ok, eq(self, 78))
-      ok := or(ok, eq(self, 96))
-      ok := or(ok, eq(self, 97))
-      ok := or(ok, eq(self, 98))
-      ok := or(ok, eq(self, 99))
-      ok := or(ok, eq(self, 100))
-      ok := or(ok, eq(self, 101))
-      ok := or(ok, eq(self, 102))
-      ok := or(ok, eq(self, 103))
-      ok := or(ok, eq(self, 104))
-      ok := or(ok, eq(self, 105))
-      ok := or(ok, eq(self, 106))
-      ok := or(ok, eq(self, 107))
-      ok := or(ok, eq(self, 108))
-      ok := or(ok, eq(self, 109))
-      ok := or(ok, eq(self, 91))
-      ok := or(ok, eq(self, 92))
-      ok := or(ok, eq(self, 93))
-      ok := or(ok, eq(self, 94))
-      ok := or(ok, eq(self, 95))
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000003ffff8007ff80000000000000000) // pick byte
+      let mask := shl(and(self, 7), 1) // 1 << (id%8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
-  // hasAxeMultiplier — 41 keys in 1 word @ window 0 (fast)
+  // AxeMultiplier — 41 keys in 1 word @ window 0 (fast)
   function hasAxeMultiplier(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
@@ -499,7 +472,7 @@ library ObjectTypeLib {
     }
   }
 
-  // hasPickMultiplier — 46 keys in 1 word @ window 0 (fast)
+  // PickMultiplier — 46 keys in 1 word @ window 0 (fast)
   function hasPickMultiplier(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
@@ -539,31 +512,14 @@ library ObjectTypeLib {
     }
   }
 
-  // UniqueObject — 21 keys via eq-chain
+  // UniqueObject — 21 keys in 1 word @ window 0 (fast)
   function isUniqueObject(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      ok := eq(self, 157)
-      ok := or(ok, eq(self, 158))
-      ok := or(ok, eq(self, 159))
-      ok := or(ok, eq(self, 160))
-      ok := or(ok, eq(self, 161))
-      ok := or(ok, eq(self, 162))
-      ok := or(ok, eq(self, 163))
-      ok := or(ok, eq(self, 164))
-      ok := or(ok, eq(self, 165))
-      ok := or(ok, eq(self, 166))
-      ok := or(ok, eq(self, 167))
-      ok := or(ok, eq(self, 168))
-      ok := or(ok, eq(self, 169))
-      ok := or(ok, eq(self, 170))
-      ok := or(ok, eq(self, 171))
-      ok := or(ok, eq(self, 172))
-      ok := or(ok, eq(self, 177))
-      ok := or(ok, eq(self, 178))
-      ok := or(ok, eq(self, 149))
-      ok := or(ok, eq(self, 152))
-      ok := or(ok, eq(self, 151))
+      let ix := shr(3, self) // id/8
+      let bits := byte(sub(31, ix), 0x000000000000000000061fffe1a0000000000000000000000000000000000000) // pick byte
+      let mask := shl(and(self, 7), 1) // 1 << (id%8)
+      ok := gt(and(bits, mask), 0)
     }
   }
 
@@ -937,7 +893,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function gethasAxeMultiplierTypes() internal pure returns (ObjectType[41] memory) {
+  function getAxeMultiplierTypes() internal pure returns (ObjectType[41] memory) {
     return [
       ObjectTypes.OakLog,
       ObjectTypes.BirchLog,
@@ -983,7 +939,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function gethasPickMultiplierTypes() internal pure returns (ObjectType[46] memory) {
+  function getPickMultiplierTypes() internal pure returns (ObjectType[46] memory) {
     return [
       ObjectTypes.CoalOre,
       ObjectTypes.CopperOre,

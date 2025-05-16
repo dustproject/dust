@@ -881,7 +881,7 @@ export const categories: Record<string, Category> = {
       "HempBush",
     ],
   },
-  hasAxeMultiplier: {
+  AxeMultiplier: {
     checkName: "hasAxeMultiplier",
     objects: [
       "OakLog",
@@ -927,7 +927,7 @@ export const categories: Record<string, Category> = {
       "Torch",
     ],
   },
-  hasPickMultiplier: {
+  PickMultiplier: {
     checkName: "hasPickMultiplier",
     objects: [
       "CoalOre",

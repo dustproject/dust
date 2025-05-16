@@ -8,59 +8,33 @@ import { PerfectHashLib } from "../src/utils/PerfectHashLib.sol";
 
 contract ObjectTypeTest is DustTest {
   function testCategoryCheck() public {
-    console.log("isBlock");
+    ObjectType obj = ObjectType.wrap(uint16(vm.randomUint()));
     uint256 gasStart = gasleft();
-    ObjectTypes.AzaleaFlower.isBlock();
+    obj.isBlock();
     console.log(gasStart - gasleft());
 
-    console.log("!isSmartEntity");
     gasStart = gasleft();
-    ObjectTypes.AzaleaFlower.isSmartEntity();
+    obj.isSmartEntity();
     console.log(gasStart - gasleft());
 
-    console.log("isSmartEntity");
     gasStart = gasleft();
-    ObjectTypes.Fragment.isSmartEntity();
+    obj.isTool();
     console.log(gasStart - gasleft());
 
-    console.log("isTool");
     gasStart = gasleft();
-    ObjectTypes.WoodenPick.isTool();
+    obj.isLeaf();
     console.log(gasStart - gasleft());
 
-    console.log("!isTool");
     gasStart = gasleft();
-    ObjectTypes.Player.isTool();
+    obj.isUniqueObject();
     console.log(gasStart - gasleft());
 
-    console.log("isUniqueObject");
     gasStart = gasleft();
-    ObjectTypes.WoodenPick.isUniqueObject();
+    obj.hasExtraDrops();
     console.log(gasStart - gasleft());
 
-    console.log("!isUniqueObject");
     gasStart = gasleft();
-    ObjectTypes.OakLog.isUniqueObject();
-    console.log(gasStart - gasleft());
-
-    console.log("hasExtraDrops");
-    gasStart = gasleft();
-    ObjectTypes.OakLeaf.hasExtraDrops();
-    console.log(gasStart - gasleft());
-
-    console.log("!hasExtraDrops");
-    gasStart = gasleft();
-    ObjectTypes.OakLog.hasExtraDrops();
-    console.log(gasStart - gasleft());
-
-    console.log("hasPickMultiplier");
-    gasStart = gasleft();
-    ObjectTypes.Stone.hasPickMultiplier();
-    console.log(gasStart - gasleft());
-
-    console.log("!hasPickMultiplier");
-    gasStart = gasleft();
-    ObjectTypes.OakLog.hasPickMultiplier();
+    obj.hasPickMultiplier();
     console.log(gasStart - gasleft());
   }
 
@@ -82,16 +56,22 @@ contract ObjectTypeTest is DustTest {
 
     ObjectType[5] memory smartEntityTypes = ObjectTypeLib.getSmartEntityTypes();
     for (uint256 i = 0; i < smartEntityTypes.length; i++) {
-      console.log(smartEntityTypes[i].unwrap());
       assertTrue(smartEntityTypes[i].isSmartEntity(), "isSmartEntity");
     }
 
     for (uint256 i = 0; i < logTypes.length; i++) {
-      assertTrue(!logTypes[i].isPassThrough(), "isLog should not be pass through");
+      assertFalse(logTypes[i].isPassThrough(), "isLog should not be pass through");
+      assertFalse(logTypes[i].isSmartEntity(), "isLog should not be smart entity");
     }
 
     for (uint256 i = 0; i < passthroughTypes.length; i++) {
-      assertTrue(!passthroughTypes[i].isLog(), "isPassThrough should not be log");
+      assertFalse(passthroughTypes[i].isLog(), "isPassThrough should not be log");
+      assertFalse(passthroughTypes[i].isSmartEntity(), "isPassThrough should not be smart entity");
+    }
+
+    for (uint256 i = 0; i < smartEntityTypes.length; i++) {
+      assertFalse(smartEntityTypes[i].isLog(), "smart entity should not be log");
+      assertFalse(smartEntityTypes[i].isPassThrough(), "smart entity should not be passthrough");
     }
   }
 }
