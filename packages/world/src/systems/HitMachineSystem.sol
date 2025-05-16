@@ -67,10 +67,7 @@ contract HitMachineSystem is System {
       return;
     }
 
-    (uint128 massReduction, uint128 toolMassReduction) =
-      toolData.getMassReduction(machineData.energy, _getToolMultiplier(toolData.toolType));
-
-    toolData.reduceMass(toolMassReduction);
+    uint128 massReduction = toolData.use(machineData.energy, _getToolMultiplier(toolData.toolType));
 
     uint128 machineEnergyReduction = playerEnergyReduction + massReduction;
 

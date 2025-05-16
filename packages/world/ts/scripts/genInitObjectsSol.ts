@@ -1,4 +1,4 @@
-import { objects, objectsByName } from "../objects";
+import { categories, objects, objectsByName } from "../objects";
 
 // Template for the Solidity file
 function generateInitObjectsSol(): string {
@@ -20,7 +20,9 @@ ${objects
 }
 
 function validateSeeds() {
-  const seeds = objects.filter((obj) => obj.category === "Seed");
+  const seeds = objects.filter((obj) =>
+    categories.Seed!.objects.includes(obj.name),
+  );
   for (const seed of seeds) {
     if (!seed.crop) {
       throw new Error(`Seed ${seed.name} has no crop`);

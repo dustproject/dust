@@ -1,48 +1,125 @@
 import {
-  type Category,
-  type MetaCategory,
   type ObjectAmount,
-  allCategoryMetadata,
-  blockCategoryMetadata,
-  metaCategories,
-  nonBlockCategoryMetadata,
+  categories,
   objects,
+  objectsByName,
 } from "../objects";
 
-const constName = (str: string): string =>
-  str
-    .replace(/\W+/g, " ")
-    .split(/ |\B(?=[A-Z])/)
-    .join("_")
-    .toUpperCase();
+export function renderCategoryCheck(
+  name: string,
+  ids: number[],
+  customFnName?: string,
+): string {
+  const fn = customFnName ?? `is${name}`;
 
-function renderMetaCategoryMask(categories: Category[]): string {
-  return categories
-    .map((cat) => `(uint256(1) << (${cat} >> OFFSET_BITS))`)
-    .join(" | ");
-}
-
-function renderMetaCategoryMaskDefinition(metaCategory: MetaCategory): string {
-  if (!metaCategory.categories) {
+  if (ids.length === 0) {
     return "";
   }
 
-  return `uint256 constant ${constName(metaCategory.name)}_MASK = ${renderMetaCategoryMask(metaCategory.categories)};`;
+  // figure out absolute window of IDs
+  const minId = Math.min(...ids);
+  const maxId = Math.max(...ids);
+  const w0 = minId >>> 8;
+  const w1 = maxId >>> 8;
+
+  // If they all sit in the same 256-bit window, compact ids into a bitmap
+  if (w0 === w1) {
+    const base = w0 << 8; // window * 256
+    // build a 32-byte little-endian bitmap for (id – base)
+    const le = new Uint8Array(32);
+    for (const id of ids) {
+      const off = id - base;
+      le[off >>> 3]! |= 1 << (off & 7);
+    }
+    // reverse into big-endian for the PUSH32 literal
+    const be = Uint8Array.from({ length: 32 }, (_, i) => le[31 - i] || 0);
+    const BITS = `0x${[...be].map((b) => b.toString(16).padStart(2, "0")).join("")}`;
+
+    return `
+    // ${name} — single 256-bit window
+    function ${fn}(ObjectType self) internal pure returns (bool ok) {
+      /// @solidity memory-safe-assembly
+      assembly {
+        ${base !== 0 ? `self := sub(self, ${base})` : ""}
+        let ix   := shr(3, self)
+        let bits := byte(sub(31, ix), ${BITS})
+        let mask := shl(and(self, 7), 1)
+        ok       := gt(and(bits, mask), 0)
+      }
+    }`;
+  }
+
+  if (ids.length <= 4) {
+    return renderEqChainCategoryCheck(name, fn, ids);
+  }
+
+  // otherwise fall back to the multi-window OR/shr/eq approach
+  return renderMultiWindowCheck(name, ids, minId, fn);
 }
 
-function renderMetaCategoryCheck(metaCategory: MetaCategory): string {
-  const categoryCheck =
-    metaCategory.categories &&
-    `applyCategoryMask(self, Category.${constName(metaCategory.name)}_MASK)`;
+// multi-window fallback (≈114 gas)
+function renderMultiWindowCheck(
+  name: string,
+  ids: number[],
+  minId: number,
+  fn: string,
+): string {
+  const words = buildBitmapWords(ids.map((id) => id - minId));
+  const lines = words.map(({ idx, val }, i) => {
+    const hex = `0x${val.toString(16)}`;
+    return i === 0
+      ? `ok := and(shr(bitpos, ${hex}), eq(bucket, ${idx}))`
+      : `ok := or(ok,  and(shr(bitpos, ${hex}), eq(bucket, ${idx})))`;
+  });
 
-  const objectCheck = metaCategory.objects
-    ?.map((obj) => `self == ObjectTypes.${obj}`)
-    .join(" || ");
+  return `
+  // ${name} — sparse, ${ids.length} keys over ${words.length} window(s)
+  function ${fn}(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      let off    := sub(self, ${minId})
+      let bucket := shr(8, off)
+      let bitpos := and(off, 0xff)
 
-  const condition = [categoryCheck, objectCheck].filter(Boolean).join(" || ");
+      ${lines.join("\n    ")}
+    }
+  }`;
+}
 
-  return `function ${metaCategory.name}(ObjectType self) internal pure returns (bool) {
-    return ${condition};
+// helper to pack 0-based offsets into 32-byte windows
+function buildBitmapWords(offsetIds: number[]): { idx: number; val: bigint }[] {
+  const buckets: Uint8Array[] = [];
+  for (const off of offsetIds) {
+    const byteIx = off >>> 3;
+    const bit = 1 << (off & 7);
+    const win = byteIx >>> 5;
+    const pos = 31 - (byteIx & 31);
+    if (!buckets[win]) buckets[win] = new Uint8Array(32);
+    buckets[win]![pos]! |= bit;
+  }
+  return buckets.map((buf, idx) => {
+    let w = 0n;
+    for (const b of buf) w = (w << 8n) | BigInt(b);
+    return { idx, val: w };
+  });
+}
+
+// Direct eq-chain renderer
+function renderEqChainCategoryCheck(
+  name: string,
+  fn: string,
+  ids: number[],
+): string {
+  const exprs = ids.map((i) => `eq(self, ${i})`);
+  const [first, ...rest] = exprs;
+  return `
+  // ${name} — ${ids.length} keys via eq-chain
+  function ${fn}(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      ok := ${first}
+      ${rest.map((e) => `ok := or(ok, ${e})`).join("\n")}
+    }
   }`;
 }
 
@@ -68,36 +145,14 @@ struct ObjectAmount {
   uint16 amount;
 }
 
-// 8 category bits (bits 15..8), 8 index bits (bits 7..0)
-uint16 constant OFFSET_BITS = 8;
-uint16 constant CATEGORY_MASK = type(uint16).max << OFFSET_BITS;
-uint16 constant BLOCK_CATEGORY_COUNT = 256 / 2; // 128
-
-// ------------------------------------------------------------
-// Object Categories
-// ------------------------------------------------------------
-library Category {
-  // Block Categories
-${blockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(${cat.index}) << OFFSET_BITS;`).join("\n")}
-  // Non-Block Categories
-${nonBlockCategoryMetadata.map((cat) => `  uint16 constant ${cat.name} = uint16(${cat.index}) << OFFSET_BITS;`).join("\n")}
-  // ------------------------------------------------------------
-  // Meta Category Masks (fits within uint256; mask bit k set if raw category ID k belongs)
-  uint256 constant BLOCK_MASK = uint256(type(uint128).max);
-  uint256 constant MINEABLE_MASK = BLOCK_MASK & ~${renderMetaCategoryMask(["NonSolid"])};
-  ${metaCategories.map((metaCategory) => renderMetaCategoryMaskDefinition(metaCategory)).join("\n  ")}
-}
-
 // ------------------------------------------------------------
 // Object Types
 // ------------------------------------------------------------
 library ObjectTypes {
 ${objects
   .map((obj) => {
-    const categoryRef = `Category.${obj.category}`;
-    return `  ObjectType constant ${obj.name} = ObjectType.wrap(${categoryRef} | ${obj.index});`;
+    return `  ObjectType constant ${obj.name} = ObjectType.wrap(${obj.id});`;
   })
-
   .join("\n")}
 }
 
@@ -107,41 +162,28 @@ library ObjectTypeLib {
     return ObjectType.unwrap(self);
   }
 
-  /// @dev Extract raw category ID from the top bits
-  function category(ObjectType self) internal pure returns (uint16) {
-    return self.unwrap() & CATEGORY_MASK;
-  }
-
-  function index(ObjectType self) internal pure returns (uint16) {
-    return self.unwrap() & ~CATEGORY_MASK;
-  }
-
   /// @dev True if this is the null object
   function isNull(ObjectType self) internal pure returns (bool) {
     return self.unwrap() == 0;
   }
 
-  /// @dev True if this is any block category
-  function isBlock(ObjectType self) internal pure returns (bool) {
-    return (category(self) >> OFFSET_BITS) < BLOCK_CATEGORY_COUNT && !self.isNull();
-  }
-
   // Direct Category Checks
-${allCategoryMetadata
-  .map(
-    (cat) => `
-  function is${cat.name}(ObjectType self) internal pure returns (bool) {
-    return category(self) == Category.${cat.name};
-  }`,
-  )
-  .join("")}
+${Object.entries(categories)
+  .map(([name, data]) => {
+    return renderCategoryCheck(
+      name,
+      data.objects.map((obj) => objectsByName[obj].id),
+      data.checkName,
+    );
+  })
+  .join("\n")}
 
 // Category getters
-${allCategoryMetadata
-  .map((cat) => {
-    const categoryObjects = objects.filter((obj) => obj.category === cat.name);
-    return `function get${cat.name}Types() internal pure returns (ObjectType[${categoryObjects.length}] memory) {
-    return [${categoryObjects.map((obj) => `ObjectTypes.${obj.name}`).join(", ")}];
+${Object.entries(categories)
+  .map(([name, data]) => {
+    const categoryObjects = data.objects;
+    return `function get${name}Types() internal pure returns (ObjectType[${categoryObjects.length}] memory) {
+    return [${categoryObjects.map((obj) => `ObjectTypes.${obj}`).join(", ")}];
   }`;
   })
   .join("\n")}
@@ -304,30 +346,12 @@ ${allCategoryMetadata
     return false;
   }
 
-  // Meta Category Checks
-  function isAny(ObjectType self) internal pure returns (bool) {
-    // Check if:
-    // 1. Index bits are all 0
-    // 2. Category is one that supports "Any" types
-    return self.index() == 0 && applyCategoryMask(self, Category.HAS_ANY_MASK);
-  }
-
-  function isMineable(ObjectType self) internal pure returns (bool) {
-    return applyCategoryMask(self, Category.MINEABLE_MASK);
-  }
-
-  ${metaCategories.map(renderMetaCategoryCheck).join("\n  ")}
-
-  function applyCategoryMask(ObjectType self, uint256 mask) internal pure returns (bool) {
-    uint16 c = category(self);
-    return ((uint256(1) << (c >> OFFSET_BITS)) & mask) != 0;
-  }
-
   function matches(ObjectType self, ObjectType other) internal pure returns (bool) {
-    if (self.isAny()) {
-      return self.category() == other.category();
-    }
-    return self == other;
+    if (!self.isAny()) return self == other;
+
+    return (self == ObjectTypes.AnyLog && other.isLog())
+      || (self == ObjectTypes.AnyPlank && other.isPlank())
+      || (self == ObjectTypes.AnyLeaf && other.isLeaf());
   }
 }
 

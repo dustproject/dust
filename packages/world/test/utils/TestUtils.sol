@@ -23,7 +23,7 @@ import {
 
 import { EntityUtils } from "../../src/utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../../src/utils/ForceFieldUtils.sol";
-import { InventoryUtils, SlotTransfer } from "../../src/utils/InventoryUtils.sol";
+import { InventoryUtils, SlotTransfer, ToolData } from "../../src/utils/InventoryUtils.sol";
 import { PlayerUtils } from "../../src/utils/PlayerUtils.sol";
 
 Vm constant vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
@@ -172,8 +172,12 @@ library TestInventoryUtils {
     InventoryUtils.removeObjectFromSlot(ownerEntityId, slot, numObjectsToRemove);
   }
 
-  function useTool(EntityId owner, uint16 slot, uint128 useMassMax) public asWorld {
-    InventoryUtils.useTool(owner, slot, useMassMax);
+  function getToolData(EntityId owner, uint16 slot) public asWorld returns (ToolData memory) {
+    return InventoryUtils.getToolData(owner, slot);
+  }
+
+  function use(ToolData memory toolData, uint128 useMassMax, uint128 multiplier) public asWorld returns (uint128) {
+    return toolData.use(useMassMax, multiplier);
   }
 
   function getEntitySlot(EntityId owner, EntityId entityId) public asWorld returns (uint16) {

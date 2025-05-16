@@ -189,6 +189,15 @@ contract CraftTest is DustTest {
     ObjectType inputObjectType2 = ObjectTypes.BirchPlanks;
     ObjectType inputObjectType3 = ObjectTypes.JunglePlanks;
 
+    assertTrue(inputObjectType1.isPlank(), "inputObjectType1 should be Plank");
+    assertTrue(inputObjectType2.isPlank(), "inputObjectType2 should be Plank");
+    assertTrue(inputObjectType3.isPlank(), "inputObjectType3 should be Plank");
+
+    assertTrue(inputTypes[0].isAny(), "input should be Any");
+    assertTrue(inputTypes[0].matches(inputObjectType1), "inputObjectType1 should match AnyPlank");
+    assertTrue(inputTypes[0].matches(inputObjectType2), "inputObjectType2 should match AnyPlank");
+    assertTrue(inputTypes[0].matches(inputObjectType3), "inputObjectType3 should match AnyPlank");
+
     // Doing it here to avoid stack too deep
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 

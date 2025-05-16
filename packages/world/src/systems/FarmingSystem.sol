@@ -8,8 +8,9 @@ import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 
 import { addEnergyToLocalPool, transferEnergyToPool } from "../utils/EnergyUtils.sol";
+
 import { EntityUtils } from "../utils/EntityUtils.sol";
-import { InventoryUtils } from "../utils/InventoryUtils.sol";
+import { InventoryUtils, ToolData } from "../utils/InventoryUtils.sol";
 
 import { Math } from "../utils/Math.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
@@ -34,8 +35,9 @@ contract FarmingSystem is System {
       return;
     }
 
-    ObjectType toolType = InventoryUtils.useTool(caller, toolSlot, type(uint128).max);
-    require(toolType.isHoe(), "Must equip a hoe");
+    ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
+    require(toolData.toolType.isHoe(), "Must equip a hoe");
+    toolData.use(type(uint128).max, 1);
 
     EntityObjectType._set(farmland, ObjectTypes.Farmland);
   }

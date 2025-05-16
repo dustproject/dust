@@ -48,9 +48,7 @@ library TerrainLib {
     uint256 index = _getBlockIndex(coord);
     bytes1 blockType = chunkPointer.readBytes1(index);
 
-    // Unpack the block type (first 4 bits are the category, last 4 bits are the index)
-    uint16 blockValue = uint16(uint8(blockType));
-    return ObjectType.wrap(((blockValue & 0xF0) << 4) | (blockValue & 0x0F));
+    return ObjectType.wrap(uint16(uint8(blockType)));
   }
 
   /// @notice Get the biome of a voxel coordinate.

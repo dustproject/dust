@@ -79,7 +79,12 @@ contract NatureSystem is System {
   function growSeed(EntityId caller, Vec3 coord) external {
     caller.activate();
     // TODO: should we do proximity checks?
+    GrowSeedLib._growSeed(coord);
+  }
+}
 
+library GrowSeedLib {
+  function _growSeed(Vec3 coord) public {
     (EntityId seed, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(coord);
     require(objectType.isGrowable(), "Not growable");
     require(SeedGrowth._getFullyGrownAt(seed) <= block.timestamp, "Seed cannot be grown yet");

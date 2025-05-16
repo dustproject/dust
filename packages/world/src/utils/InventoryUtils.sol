@@ -54,12 +54,10 @@ library InventoryUtils {
     return ToolData(owner, tool, toolType, slot, Mass._getMass(tool));
   }
 
-  function useTool(EntityId owner, uint16 slot, uint128 useMassMax) public returns (ObjectType toolType) {
-    ToolData memory toolData = getToolData(owner, slot);
-
-    (, uint128 toolMassReduction) = toolData.getMassReduction(useMassMax, 1);
+  function use(ToolData memory toolData, uint128 useMassMax, uint128 multiplier) public returns (uint128) {
+    (uint128 actionMassReduction, uint128 toolMassReduction) = getMassReduction(toolData, useMassMax, multiplier);
     reduceMass(toolData, toolMassReduction);
-    return toolData.toolType;
+    return actionMassReduction;
   }
 
   function getMassReduction(ToolData memory toolData, uint128 massLeft, uint128 multiplier)
@@ -84,7 +82,7 @@ library InventoryUtils {
     return (massReduction, toolMassReduction);
   }
 
-  function reduceMass(ToolData memory toolData, uint128 massReduction) public {
+  function reduceMass(ToolData memory toolData, uint128 massReduction) internal {
     if (!toolData.tool.exists()) {
       return;
     }
@@ -185,7 +183,7 @@ library InventoryUtils {
   }
 
   // IMPORTANT: this does not burn tool ores
-  function removeEntity(EntityId owner, EntityId entity) public {
+  function removeEntity(EntityId owner, EntityId entity) internal {
     uint16[] memory slots = Inventory._getOccupiedSlots(owner);
     for (uint256 i = 0; i < slots.length; i++) {
       if (entity == InventorySlot._getEntityId(owner, slots[i])) {
@@ -198,7 +196,7 @@ library InventoryUtils {
     revert("Entity not found");
   }
 
-  function removeEntityFromSlot(EntityId owner, uint16 slot) public {
+  function removeEntityFromSlot(EntityId owner, uint16 slot) internal {
     EntityId entity = InventorySlot._getEntityId(owner, slot);
     require(entity.exists(), "Not an entity");
 
@@ -206,7 +204,7 @@ library InventoryUtils {
     Mass._deleteRecord(entity);
   }
 
-  function removeObject(EntityId owner, ObjectType objectType, uint16 amount) public {
+  function removeObject(EntityId owner, ObjectType objectType, uint16 amount) internal {
     require(amount > 0, "Amount must be greater than 0");
     require(!objectType.isNull(), "Empty slot");
 

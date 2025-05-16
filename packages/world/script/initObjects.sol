@@ -33,19 +33,12 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.Farmland, ObjectPhysicsData({ mass: 3000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.WetFarmland, ObjectPhysicsData({ mass: 3000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.UnrevealedOre, ObjectPhysicsData({ mass: 10000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.CoalOre, ObjectPhysicsData({ mass: 540000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.CopperOre, ObjectPhysicsData({ mass: 675000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.IronOre, ObjectPhysicsData({ mass: 675000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.GoldOre, ObjectPhysicsData({ mass: 1600000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.DiamondOre, ObjectPhysicsData({ mass: 5000000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.NeptuniumOre, ObjectPhysicsData({ mass: 5000000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Gravel, ObjectPhysicsData({ mass: 2400000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Sand, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.RedSand, ObjectPhysicsData({ mass: 5000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Sandstone, ObjectPhysicsData({ mass: 30000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.RedSandstone, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Clay, ObjectPhysicsData({ mass: 2400000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.AnyTerracotta, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Terracotta, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.BrownTerracotta, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.OrangeTerracotta, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
@@ -59,7 +52,6 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.PurpleTerracotta, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.BlueTerracotta, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.MagentaTerracotta, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.AnyLog, ObjectPhysicsData({ mass: 12500000000000000, energy: 5500000000000000 }));
   ObjectPhysics.set(ObjectTypes.OakLog, ObjectPhysicsData({ mass: 12500000000000000, energy: 5500000000000000 }));
   ObjectPhysics.set(ObjectTypes.BirchLog, ObjectPhysicsData({ mass: 12500000000000000, energy: 5500000000000000 }));
   ObjectPhysics.set(ObjectTypes.JungleLog, ObjectPhysicsData({ mass: 12500000000000000, energy: 5500000000000000 }));
@@ -68,7 +60,6 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.SpruceLog, ObjectPhysicsData({ mass: 12500000000000000, energy: 5500000000000000 }));
   ObjectPhysics.set(ObjectTypes.DarkOakLog, ObjectPhysicsData({ mass: 12500000000000000, energy: 5500000000000000 }));
   ObjectPhysics.set(ObjectTypes.MangroveLog, ObjectPhysicsData({ mass: 12500000000000000, energy: 5500000000000000 }));
-  ObjectPhysics.set(ObjectTypes.AnyLeaf, ObjectPhysicsData({ mass: 500000000000000, energy: 500000000000000 }));
   ObjectPhysics.set(ObjectTypes.OakLeaf, ObjectPhysicsData({ mass: 500000000000000, energy: 500000000000000 }));
   ObjectPhysics.set(ObjectTypes.BirchLeaf, ObjectPhysicsData({ mass: 500000000000000, energy: 500000000000000 }));
   ObjectPhysics.set(ObjectTypes.JungleLeaf, ObjectPhysicsData({ mass: 500000000000000, energy: 500000000000000 }));
@@ -127,8 +118,13 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.Magma, ObjectPhysicsData({ mass: 500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.SpiderWeb, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Bone, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.CoalOre, ObjectPhysicsData({ mass: 540000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.CopperOre, ObjectPhysicsData({ mass: 675000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.IronOre, ObjectPhysicsData({ mass: 675000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.GoldOre, ObjectPhysicsData({ mass: 1600000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.DiamondOre, ObjectPhysicsData({ mass: 5000000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.NeptuniumOre, ObjectPhysicsData({ mass: 5000000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.TextSign, ObjectPhysicsData({ mass: 18000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.AnyPlank, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.OakPlanks, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.BirchPlanks, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.JunglePlanks, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));
@@ -176,4 +172,8 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.PumpkinSoup, ObjectPhysicsData({ mass: 0, energy: 34300000000000000 }));
   ObjectPhysics.set(ObjectTypes.MelonSmoothie, ObjectPhysicsData({ mass: 0, energy: 34300000000000000 }));
   ObjectPhysics.set(ObjectTypes.Battery, ObjectPhysicsData({ mass: 0, energy: 90000000000000000 }));
+  ObjectPhysics.set(ObjectTypes.AnyLog, ObjectPhysicsData({ mass: 12500000000000000, energy: 5500000000000000 }));
+  ObjectPhysics.set(ObjectTypes.AnyPlank, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.AnyTerracotta, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.AnyLeaf, ObjectPhysicsData({ mass: 500000000000000, energy: 500000000000000 }));
 }

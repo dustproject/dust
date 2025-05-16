@@ -98,7 +98,7 @@ contract MineSystem is System {
     caller.requireConnected(coord);
 
     (EntityId mined, ObjectType minedType) = EntityUtils.getOrCreateBlockAt(coord);
-    require(minedType.isMineable(), "Object is not mineable");
+    require(minedType.isBlock(), "Object is not mineable");
 
     mined = mined.baseEntityId();
     Vec3 baseCoord = mined.getPosition();
@@ -111,7 +111,7 @@ contract MineSystem is System {
     }
 
     (uint128 massLeft, bool canMine) =
-      _applyMassReduction(caller, callerEnergy, toolSlot, minedType, Mass._getMass(mined));
+      MineLib._applyMassReduction(caller, callerEnergy, toolSlot, minedType, Mass._getMass(mined));
 
     if (!canMine) {
       // Player died, return early
@@ -227,14 +227,16 @@ contract MineSystem is System {
       }
     }
   }
+}
 
+library MineLib {
   function _applyMassReduction(
     EntityId caller,
     uint128 callerEnergy,
     uint16 toolSlot,
     ObjectType minedType,
     uint128 massLeft
-  ) internal returns (uint128, bool) {
+  ) public returns (uint128, bool) {
     if (massLeft == 0) {
       return (0, true);
     }
@@ -253,17 +255,26 @@ contract MineSystem is System {
       massLeft -= energyReduction;
     }
 
-    uint128 toolMultiplier = MineLib._getToolMultiplier(toolData.toolType, minedType);
-    (uint128 mineMassReduction, uint128 toolMassReduction) = toolData.getMassReduction(massLeft, toolMultiplier);
-    toolData.reduceMass(toolMassReduction);
+    uint128 toolMultiplier = _getToolMultiplier(toolData.toolType, minedType);
 
-    massLeft -= mineMassReduction;
+    uint128 massReduction = toolData.use(massLeft, toolMultiplier);
+
+    massLeft -= massReduction;
 
     return (massLeft, true);
   }
-}
 
-library MineLib {
+  function _getCallerEnergyReduction(ObjectType toolType, uint128 currentEnergy, uint128 massLeft)
+    internal
+    pure
+    returns (uint128)
+  {
+    // if tool mass reduction is not enough, consume energy from player up to mine energy cost
+    uint128 maxEnergyCost = toolType.isNull() ? DEFAULT_MINE_ENERGY_COST : TOOL_MINE_ENERGY_COST;
+    maxEnergyCost = Math.min(currentEnergy, maxEnergyCost);
+    return Math.min(massLeft, maxEnergyCost);
+  }
+
   function _mineBed(EntityId bed, Vec3 bedCoord) public {
     // If there is a player sleeping in the mined bed, kill them
     EntityId sleepingPlayerId = BedPlayer._getPlayerEntityId(bed);
@@ -324,17 +335,6 @@ library MineLib {
     }
 
     return isWoodenTool ? DEFAULT_WOODEN_TOOL_MULTIPLIER : DEFAULT_ORE_TOOL_MULTIPLIER;
-  }
-
-  function _getCallerEnergyReduction(ObjectType toolType, uint128 currentEnergy, uint128 massLeft)
-    public
-    pure
-    returns (uint128)
-  {
-    // if tool mass reduction is not enough, consume energy from player up to mine energy cost
-    uint128 maxEnergyCost = toolType.isNull() ? DEFAULT_MINE_ENERGY_COST : TOOL_MINE_ENERGY_COST;
-    maxEnergyCost = Math.min(currentEnergy, maxEnergyCost);
-    return Math.min(massLeft, maxEnergyCost);
   }
 }
 
