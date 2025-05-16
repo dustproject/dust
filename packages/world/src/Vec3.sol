@@ -11,9 +11,11 @@ import { Math } from "./utils/Math.sol";
 // Vec3 stores 3 packed int32 values (x, y, z)
 type Vec3 is uint96;
 
-function vec3(int32 _x, int32 _y, int32 _z) pure returns (Vec3) {
+function vec3(int32 _x, int32 _y, int32 _z) pure returns (Vec3 v) {
   // Pack 3 int32 values into a single uint96
-  return Vec3.wrap((uint96(uint32(_x)) << 64) | (uint96(uint32(_y)) << 32) | uint96(uint32(_z)));
+  assembly {
+    v := or(or(shl(64, and(_x, 0xffffffff)), shl(32, and(_y, 0xffffffff))), and(_z, 0xffffffff))
+  }
 }
 
 function eq(Vec3 a, Vec3 b) pure returns (bool) {
@@ -37,11 +39,15 @@ function leq(Vec3 a, Vec3 b) pure returns (bool) {
 }
 
 function add(Vec3 a, Vec3 b) pure returns (Vec3) {
-  return vec3(a.x() + b.x(), a.y() + b.y(), a.z() + b.z());
+  (int32 ax, int32 ay, int32 az) = a.xyz();
+  (int32 bx, int32 by, int32 bz) = b.xyz();
+  return vec3(ax + bx, ay + by, az + bz);
 }
 
 function sub(Vec3 a, Vec3 b) pure returns (Vec3) {
-  return vec3(a.x() - b.x(), a.y() - b.y(), a.z() - b.z());
+  (int32 ax, int32 ay, int32 az) = a.xyz();
+  (int32 bx, int32 by, int32 bz) = b.xyz();
+  return vec3(ax - bx, ay - by, az - bz);
 }
 
 function getDirectionVector(Direction direction) pure returns (Vec3) {
@@ -87,23 +93,31 @@ library Vec3Lib {
     return Vec3.unwrap(self);
   }
 
-  function x(Vec3 a) internal pure returns (int32) {
-    // Extract z component (leftmost 32 bits)
-    return int32(uint32(a.unwrap() >> 64));
+  function x(Vec3 self) internal pure returns (int32 r) {
+    assembly {
+      r := signextend(3, shr(64, self))
+    }
   }
 
-  function y(Vec3 a) internal pure returns (int32) {
-    // Extract y component (middle 32 bits)
-    return int32(uint32(a.unwrap() >> 32));
+  function y(Vec3 self) internal pure returns (int32 r) {
+    assembly {
+      r := signextend(3, shr(32, self))
+    }
   }
 
-  function z(Vec3 a) internal pure returns (int32) {
-    // Extract x component (rightmost 32 bits)
-    return int32(uint32(a.unwrap()));
+  function z(Vec3 self) internal pure returns (int32 r) {
+    assembly {
+      r := signextend(3, self)
+    }
   }
 
-  function xyz(Vec3 self) internal pure returns (int32, int32, int32) {
-    return (self.x(), self.y(), self.z());
+  function xyz(Vec3 self) internal pure returns (int32 x_, int32 y_, int32 z_) {
+    assembly {
+      // sign-extend the top 96−32 = 64 bits, then shift down
+      x_ := signextend(3, shr(64, self))
+      y_ := signextend(3, shr(32, self))
+      z_ := signextend(3, self)
+    }
   }
 
   function mul(Vec3 a, int32 scalar) internal pure returns (Vec3) {
@@ -112,33 +126,38 @@ library Vec3Lib {
 
   function div(Vec3 a, int32 scalar) internal pure returns (Vec3) {
     require(scalar != 0, "Division by zero");
-    return vec3(x(a) / scalar, y(a) / scalar, z(a) / scalar);
+    (int32 ax, int32 ay, int32 az) = a.xyz();
+    return vec3(ax / scalar, ay / scalar, az / scalar);
   }
 
   function mod(Vec3 a, int32 scalar) internal pure returns (Vec3) {
-    return vec3(_mod(x(a), scalar), _mod(y(a), scalar), _mod(z(a), scalar));
+    (int32 ax, int32 ay, int32 az) = a.xyz();
+    return vec3(_mod(ax, scalar), _mod(ay, scalar), _mod(az, scalar));
   }
 
   function floorDiv(Vec3 a, int32 divisor) internal pure returns (Vec3) {
     require(divisor != 0, "Division by zero");
 
-    return vec3(_floorDiv(x(a), divisor), _floorDiv(y(a), divisor), _floorDiv(z(a), divisor));
+    (int32 ax, int32 ay, int32 az) = a.xyz();
+    return vec3(_floorDiv(ax, divisor), _floorDiv(ay, divisor), _floorDiv(az, divisor));
   }
 
   function neg(Vec3 a) internal pure returns (Vec3) {
-    return vec3(-x(a), -y(a), -z(a));
+    (int32 ax, int32 ay, int32 az) = a.xyz();
+    return vec3(-ax, -ay, -az);
   }
 
   function manhattanDistance(Vec3 a, Vec3 b) internal pure returns (uint256) {
-    return x(a).dist(x(b)) + y(a).dist(y(b)) + z(a).dist(z(b));
+    (int32 ax, int32 ay, int32 az) = a.xyz();
+    (int32 bx, int32 by, int32 bz) = b.xyz();
+    return ax.dist(bx) + ay.dist(by) + az.dist(bz);
   }
 
   function chebyshevDistance(Vec3 a, Vec3 b) internal pure returns (uint256) {
-    uint256 dx = x(a).dist(x(b));
-    uint256 dy = y(a).dist(y(b));
-    uint256 dz = z(a).dist(z(b));
+    (int32 ax, int32 ay, int32 az) = a.xyz();
+    (int32 bx, int32 by, int32 bz) = b.xyz();
 
-    return Math.max(dx, dy, dz);
+    return Math.max(ax.dist(bx), ay.dist(by), az.dist(bz));
   }
 
   function clamp(Vec3 self, Vec3 min, Vec3 max) internal pure returns (Vec3) {
