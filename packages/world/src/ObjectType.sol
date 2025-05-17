@@ -218,327 +218,465 @@ library ObjectTypeLib {
 
   // Direct Category Checks
 
-  // NonSolid — single 256-bit window
+  /// @notice true iff `self` is in your NonSolid set
   function isNonSolid(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000000000006)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [1 .. 256]
+        let off := sub(id, 1)
+        let bit := and(shr(off, 0x300000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Any — single 256-bit window
+  /// @notice true iff `self` is in your Any set
   function isAny(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      self := sub(self, 32768)
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x000000000000000000000000000000000000000000000000000000003c000000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [32794 .. 33049]
+        let off := sub(id, 32794)
+        let bit := and(shr(off, 0xf00000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Block — single 256-bit window
+  /// @notice true iff `self` is in your Block set
   function isBlock(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x00000000000000000000000001fffffffffffffffffffffffffffffffffffff8)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [3 .. 258]
+        let off := sub(id, 3)
+        let bit := and(shr(off, 0xffffffffffffffffffffffffffffffffffff3f00000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Ore — single 256-bit window
+  /// @notice true iff `self` is in your Ore set
   function isOre(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000fc0000000000000000000040000000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [30 .. 285]
+        let off := sub(id, 30)
+        let bit := and(shr(off, 0x1000000000000000000f0030000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Log — single 256-bit window
+  /// @notice true iff `self` is in your Log set
   function isLog(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x00000000000000000000000000000000000000000000000003fc000000000000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [50 .. 305]
+        let off := sub(id, 50)
+        let bit := and(shr(off, 0xff00000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Leaf — single 256-bit window
+  /// @notice true iff `self` is in your Leaf set
   function isLeaf(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x00000000000000000000000000000000000000000000003ffc00000000000000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [58 .. 313]
+        let off := sub(id, 58)
+        let bit := and(shr(off, 0xff0f000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Plank — single 256-bit window
+  /// @notice true iff `self` is in your Plank set
   function isPlank(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x00000000000000000000000000000001fe000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [121 .. 376]
+        let off := sub(id, 121)
+        let bit := and(shr(off, 0xff00000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Seed — single 256-bit window
+  /// @notice true iff `self` is in your Seed set
   function isSeed(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x000000000000000000000000000001c000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [134 .. 389]
+        let off := sub(id, 134)
+        let bit := and(shr(off, 0x700000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Sapling — single 256-bit window
+  /// @notice true iff `self` is in your Sapling set
   function isSapling(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x0000000000000000000000000001fe0000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [137 .. 392]
+        let off := sub(id, 137)
+        let bit := and(shr(off, 0xff00000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // SmartEntity — sparse, 5 keys over 128 window(s)
+  /// @notice true iff `self` is in your SmartEntity set
   function isSmartEntity(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      let off := sub(self, 145)
-      let bucket := shr(8, off)
-      let bitpos := and(off, 0xff)
+      ok := 0
 
-      ok := and(shr(bitpos, 0xf), eq(bucket, 0))
+      {
+        // window 0: [145 .. 400]
+        let off := sub(id, 145)
+        let bit := and(shr(off, 0xf00000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
 
-      ok := or(ok, and(shr(bitpos, 0x400000000000000000000000000000000000), eq(bucket, 127)))
+      {
+        // window 1: [32799 .. 33054]
+        let off := sub(id, 32799)
+        let bit := and(shr(off, 0x100000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Station — single 256-bit window
+  /// @notice true iff `self` is in your Station set
   function isStation(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x00000000000000000000000000e0000000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [149 .. 404]
+        let off := sub(id, 149)
+        let bit := and(shr(off, 0x700000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Pick — single 256-bit window
+  /// @notice true iff `self` is in your Pick set
   function isPick(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      self := sub(self, 32768)
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x000000000000000000000000000000000000000000000000000000000000003f)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [32768 .. 33023]
+        let off := sub(id, 32768)
+        let bit := and(shr(off, 0x3f00000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Axe — single 256-bit window
+  /// @notice true iff `self` is in your Axe set
   function isAxe(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      self := sub(self, 32768)
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000000000fc0)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [32774 .. 33029]
+        let off := sub(id, 32774)
+        let bit := and(shr(off, 0x3f00000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Hoe — single 256-bit window
+  /// @notice true iff `self` is in your Hoe set
   function isHoe(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      self := sub(self, 32768)
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000000008000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [32783 .. 33038]
+        let off := sub(id, 32783)
+        let bit := and(shr(off, 0x100000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Whacker — single 256-bit window
+  /// @notice true iff `self` is in your Whacker set
   function isWhacker(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      self := sub(self, 32768)
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000000007000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [32780 .. 33035]
+        let off := sub(id, 32780)
+        let bit := and(shr(off, 0x700000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // OreBar — single 256-bit window
+  /// @notice true iff `self` is in your OreBar set
   function isOreBar(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      self := sub(self, 32768)
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x00000000000000000000000000000000000000000000000000000000000f0000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [32784 .. 33039]
+        let off := sub(id, 32784)
+        let bit := and(shr(off, 0xf00000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Food — single 256-bit window
+  /// @notice true iff `self` is in your Food set
   function isFood(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      self := sub(self, 32768)
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000001c00000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [32790 .. 33045]
+        let off := sub(id, 32790)
+        let bit := and(shr(off, 0x700000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Fuel — single 256-bit window
+  /// @notice true iff `self` is in your Fuel set
   function isFuel(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      self := sub(self, 32768)
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000002000000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [32793 .. 33048]
+        let off := sub(id, 32793)
+        let bit := and(shr(off, 0x100000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Player — single 256-bit window
+  /// @notice true iff `self` is in your Player set
   function isPlayer(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      self := sub(self, 32768)
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000040000000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [32798 .. 33053]
+        let off := sub(id, 32798)
+        let bit := and(shr(off, 0x100000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // ExtraDrops — single 256-bit window
+  /// @notice true iff `self` is in your ExtraDrops set
   function hasExtraDrops(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x000000000000000000000000000000000000001ffffc003ffc00000000000000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [58 .. 313]
+        let off := sub(id, 58)
+        let bit := and(shr(off, 0xff0f00ffff070000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // AxeMultiplier — single 256-bit window
+  /// @notice true iff `self` is in your AxeMultiplier set
   function hasAxeMultiplier(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x000000000000000000000000013c0001ff00001fc000003ffffc000000000000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [50 .. 305]
+        let off := sub(id, 50)
+        let bit := and(shr(off, 0xffff0f0000f00700c07f00004f00000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // PickMultiplier — single 256-bit window
+  /// @notice true iff `self` is in your PickMultiplier set
   function hasPickMultiplier(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x00000000000000000000000000c2003e00fc0000000000000003ffe0001ffff8)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [3 .. 258]
+        let off := sub(id, 3)
+        let bit := and(shr(off, 0xffff0300fc7f00000000000000801fc007401800000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // PassThrough — single 256-bit window
+  /// @notice true iff `self` is in your PassThrough set
   function isPassThrough(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x0000000000000000000000000101ffc0000000e03fffffc00000000000000006)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [1 .. 256]
+        let off := sub(id, 1)
+        let bit := and(shr(off, 0x300000000000000e0ffff1f70000000e0ff8000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Growable — single 256-bit window
+  /// @notice true iff `self` is in your Growable set
   function isGrowable(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x0000000000000000000000000001ffc000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [134 .. 389]
+        let off := sub(id, 134)
+        let bit := and(shr(off, 0xff07000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // UniqueObject — sparse, 21 keys over 128 window(s)
+  /// @notice true iff `self` is in your UniqueObject set
   function isUniqueObject(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      let off := sub(self, 145)
-      let bucket := shr(8, off)
-      let bitpos := and(off, 0xff)
+      ok := 0
 
-      ok := and(shr(bitpos, 0xd), eq(bucket, 0))
+      {
+        // window 0: [145 .. 400]
+        let off := sub(id, 145)
+        let bit := and(shr(off, 0xd00000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
 
-      ok := or(ok, and(shr(bitpos, 0x187fff8000000000000000000000000000), eq(bucket, 127)))
+      {
+        // window 1: [32768 .. 33023]
+        let off := sub(id, 32768)
+        let bit := and(shr(off, 0xffff300000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Tool — single 256-bit window
+  /// @notice true iff `self` is in your Tool set
   function isTool(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      self := sub(self, 32768)
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x000000000000000000000000000000000000000000000000000000000000ffff)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [32768 .. 33023]
+        let off := sub(id, 32768)
+        let bit := and(shr(off, 0xffff000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Tillable — single 256-bit window
+  /// @notice true iff `self` is in your Tillable set
   function isTillable(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x0000000000000000000000000000000000000000000000000000000000600000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [21 .. 276]
+        let off := sub(id, 21)
+        let bit := and(shr(off, 0x300000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 
-  // Machine — single 256-bit window
+  /// @notice true iff `self` is in your Machine set
   function isMachine(ObjectType self) internal pure returns (bool ok) {
+    uint16 id = ObjectType.unwrap(self);
     /// @solidity memory-safe-assembly
     assembly {
-      let ix := shr(3, self)
-      let bits := byte(sub(31, ix), 0x0000000000000000000000000002000000000000000000000000000000000000)
-      let mask := shl(and(self, 7), 1)
-      ok := gt(and(bits, mask), 0)
+      ok := 0
+
+      {
+        // window 0: [145 .. 400]
+        let off := sub(id, 145)
+        let bit := and(shr(off, 0x100000000000000000000000000000000000000000000000000000000000000), 1)
+        ok := or(ok, bit)
+      }
     }
   }
 

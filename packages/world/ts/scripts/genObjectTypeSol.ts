@@ -1,15 +1,76 @@
-import {
-  type ObjectAmount,
-  categories,
-  objects,
-  objectsByName,
-} from "../objects";
+import { type ObjectAmount, categories, objects, objectsByName } from "../objects";
 
-export function renderCategoryCheck(
-  name: string,
-  ids: number[],
-  customFnName?: string,
-): string {
+export function buildSlidingWindows(ids: number[]) {
+  if (!ids.length) throw new Error("empty set");
+  ids = Array.from(new Set(ids)).sort((a, b) => a - b);
+
+  type Win = { start: number; mask: bigint };
+  const windows: Win[] = [];
+
+  let curStart = ids[0]!;
+  let buf = new Uint8Array(32); // big-endian byte buffer
+
+  const flushWindow = () => {
+    // pack big-endian
+    let w = 0n;
+    for (const b of buf) {
+      w = (w << 8n) | BigInt(b);
+    }
+    windows.push({ start: curStart, mask: w });
+    buf.fill(0);
+  };
+
+  for (const id of ids) {
+    const delta = id - curStart;
+    if (delta >= 256) {
+      // finish previous window
+      flushWindow();
+      // start new one
+      curStart = id;
+    }
+    const off = id - curStart; // 0..255
+    const byteIndex = off >> 3; // 0..31
+    const bitInByte = off & 7; // 0..7
+    // big-endian buffer: byte 0 is MSB
+    buf[byteIndex]! |= 1 << bitInByte;
+  }
+  // final window
+  flushWindow();
+
+  return windows;
+}
+
+export function renderCheck(name: string, ids: number[], customFnName?: string) {
+  const fn = customFnName ?? `is${name}`;
+  const windows = buildSlidingWindows(ids);
+
+  // Emit one `off/shr/and/or` block per window
+  const body = windows
+    .map(({ start, mask }, i) => {
+      return `
+      {
+        // window ${i}: [${start} .. ${start + 255}]
+        let off := sub(id, ${start})
+        let bit := and(shr(off, 0x${mask.toString(16)}), 1)
+        ok := or(ok, bit)
+      }`;
+    })
+    .join("\n");
+
+  return `
+/// @notice true iff \`self\` is in your ${name} set
+function ${fn}(ObjectType self) internal pure returns (bool ok) {
+  uint16 id = ObjectType.unwrap(self);
+  /// @solidity memory-safe-assembly
+  assembly {
+    ok := 0
+${body}
+  }
+}
+`;
+}
+
+export function renderCategoryCheck(name: string, ids: number[], customFnName?: string): string {
   const fn = customFnName ?? `is${name}`;
 
   if (ids.length === 0) {
@@ -58,12 +119,7 @@ export function renderCategoryCheck(
 }
 
 // multi-window fallback (≈114 gas)
-function renderMultiWindowCheck(
-  name: string,
-  ids: number[],
-  minId: number,
-  fn: string,
-): string {
+function renderMultiWindowCheck(name: string, ids: number[], minId: number, fn: string): string {
   const words = buildBitmapWords(ids.map((id) => id - minId));
   const lines = words.map(({ idx, val }, i) => {
     const hex = `0x${val.toString(16)}`;
@@ -105,11 +161,7 @@ function buildBitmapWords(offsetIds: number[]): { idx: number; val: bigint }[] {
 }
 
 // Direct eq-chain renderer
-function renderEqChainCategoryCheck(
-  name: string,
-  fn: string,
-  ids: number[],
-): string {
+function renderEqChainCategoryCheck(name: string, fn: string, ids: number[]): string {
   const exprs = ids.map((i) => `eq(self, ${i})`);
   const [first, ...rest] = exprs;
   return `
@@ -170,7 +222,7 @@ library ObjectTypeLib {
   // Direct Category Checks
 ${Object.entries(categories)
   .map(([name, data]) => {
-    return renderCategoryCheck(
+    return renderCheck(
       name,
       data.objects.map((obj) => objectsByName[obj].id),
       data.checkName,
@@ -273,10 +325,7 @@ ${Object.entries(categories)
   function getOreAmount(ObjectType self) internal pure returns(ObjectAmount memory) {
     ${objects
       .filter((result) => result.oreAmount !== undefined)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ${renderObjectAmount(obj.oreAmount!)};`,
-      )
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${renderObjectAmount(obj.oreAmount!)};`)
       .join("\n    ")}
     return ObjectAmount(ObjectTypes.Null, 0);
   }
@@ -284,10 +333,7 @@ ${Object.entries(categories)
   function getPlankAmount(ObjectType self) internal pure returns(uint16) {
     ${objects
       .filter((obj) => obj.plankAmount !== undefined)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ${obj.plankAmount!.toString()};`,
-      )
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${obj.plankAmount!.toString()};`)
       .join("\n    ")}
     return 0;
   }
@@ -295,10 +341,7 @@ ${Object.entries(categories)
   function getCrop(ObjectType self) internal pure returns(ObjectType) {
     ${objects
       .filter((obj) => obj.crop)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.crop};`,
-      )
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.crop};`)
       .join("\n    ")}
     return ObjectTypes.Null;
   }
@@ -306,10 +349,7 @@ ${Object.entries(categories)
   function getSapling(ObjectType self) internal pure returns(ObjectType) {
     ${objects
       .filter((obj) => obj.sapling)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.sapling};`,
-      )
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.sapling};`)
       .join("\n    ")}
     return ObjectTypes.Null;
   }
@@ -317,10 +357,7 @@ ${Object.entries(categories)
   function getTimeToGrow(ObjectType self) internal pure returns(uint128) {
     ${objects
       .filter((obj) => obj.timeToGrow)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ${obj.timeToGrow};`,
-      )
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${obj.timeToGrow};`)
       .join("\n    ")}
     return 0;
   }
@@ -328,10 +365,7 @@ ${Object.entries(categories)
   function getGrowableEnergy(ObjectType self) public pure returns(uint128) {
     ${objects
       .filter((obj) => obj.growableEnergy)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ${obj.growableEnergy};`,
-      )
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${obj.growableEnergy};`)
       .join("\n    ")}
     return 0;
   }
