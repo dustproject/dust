@@ -1,178 +1,82 @@
-import { type ObjectAmount, categories, objects, objectsByName } from "../objects";
+import {
+  type ObjectAmount,
+  categories,
+  objects,
+  objectsByName,
+} from "../objects";
 
-export function buildSlidingWindows(ids: number[]) {
-  if (!ids.length) throw new Error("empty set");
-  ids = Array.from(new Set(ids)).sort((a, b) => a - b);
+// Build minimal sliding windows over sorted ids
+function buildSlidingWindows(ids: number[]): { start: number; mask: bigint }[] {
+  const sorted = Array.from(new Set(ids)).sort((a, b) => a - b);
+  const windows: { start: number; mask: bigint }[] = [];
+  let i = 0;
+  const n = sorted.length;
 
-  type Win = { start: number; mask: bigint };
-  const windows: Win[] = [];
-
-  let curStart = ids[0]!;
-  let buf = new Uint8Array(32); // big-endian byte buffer
-
-  const flushWindow = () => {
-    // pack big-endian
-    let w = 0n;
-    for (const b of buf) {
-      w = (w << 8n) | BigInt(b);
+  while (i < n) {
+    const start = sorted[i]!;
+    let mask = 0n;
+    // build bitmap for [start..start+255]
+    while (i < n && sorted[i]! <= start + 255) {
+      mask |= 1n << BigInt(sorted[i]! - start);
+      i++;
     }
-    windows.push({ start: curStart, mask: w });
-    buf.fill(0);
-  };
-
-  for (const id of ids) {
-    const delta = id - curStart;
-    if (delta >= 256) {
-      // finish previous window
-      flushWindow();
-      // start new one
-      curStart = id;
-    }
-    const off = id - curStart; // 0..255
-    const byteIndex = off >> 3; // 0..31
-    const bitInByte = off & 7; // 0..7
-    // big-endian buffer: byte 0 is MSB
-    buf[byteIndex]! |= 1 << bitInByte;
+    windows.push({ start, mask });
   }
-  // final window
-  flushWindow();
-
   return windows;
 }
 
-export function renderCheck(name: string, ids: number[], customFnName?: string) {
-  const fn = customFnName ?? `is${name}`;
-  const windows = buildSlidingWindows(ids);
+export function renderCheck(
+  name: string,
+  ids: number[],
+  customFnName?: string,
+): string {
+  if (ids.length === 0) {
+    throw new Error(`No ids for ${name} Category`);
+  }
 
-  // Emit one `off/shr/and/or` block per window
-  const body = windows
-    .map(({ start, mask }, i) => {
+  const fn = customFnName ?? `is${name}`;
+  const orig = buildSlidingWindows(ids);
+
+  // consider zero-based alternative only if orig[0].start>0 && we have some id < 256
+  let windows = orig;
+  if (orig[0]!.start > 0 && ids.some((x) => x < 256)) {
+    // build an alternative window starting at 0
+    const lowIds = ids.filter((x) => x < 256);
+    let lowMask = 0n;
+    for (const x of lowIds) lowMask |= 1n << BigInt(x);
+    const rest = ids.filter((x) => x > 255);
+    const alt = [{ start: 0, mask: lowMask }, ...buildSlidingWindows(rest)];
+    if (alt.length <= orig.length) windows = alt;
+  }
+
+  const blocks = windows.map(({ start, mask }) => {
+    const hex = mask.toString(16);
+    if (start === 0) {
       return `
+      // IDs in [0..255]
       {
-        // window ${i}: [${start} .. ${start + 255}]
-        let off := sub(id, ${start})
-        let bit := and(shr(off, 0x${mask.toString(16)}), 1)
-        ok := or(ok, bit)
+        let bit := and(shr(self, 0x${hex}), 1)
+        ok      := or(ok, bit)
       }`;
-    })
-    .join("\n");
+    }
+
+    return `
+    // IDs in [${start}..${start + 255}]
+    {
+      let off := sub(self, ${start})
+      let bit := and(shr(off, 0x${hex}), 1)
+      ok      := or(ok, bit)
+    }`;
+  });
 
   return `
-/// @notice true iff \`self\` is in your ${name} set
 function ${fn}(ObjectType self) internal pure returns (bool ok) {
-  uint16 id = ObjectType.unwrap(self);
   /// @solidity memory-safe-assembly
   assembly {
-    ok := 0
-${body}
+    ${blocks.join("\n")}
   }
 }
 `;
-}
-
-export function renderCategoryCheck(name: string, ids: number[], customFnName?: string): string {
-  const fn = customFnName ?? `is${name}`;
-
-  if (ids.length === 0) {
-    return "";
-  }
-
-  // figure out absolute window of IDs
-  const minId = Math.min(...ids);
-  const maxId = Math.max(...ids);
-  const w0 = minId >>> 8;
-  const w1 = maxId >>> 8;
-
-  // If they all sit in the same 256-bit window, compact ids into a bitmap
-  if (w0 === w1) {
-    const base = w0 << 8; // window * 256
-    // build a 32-byte little-endian bitmap for (id – base)
-    const le = new Uint8Array(32);
-    for (const id of ids) {
-      const off = id - base;
-      le[off >>> 3]! |= 1 << (off & 7);
-    }
-    // reverse into big-endian for the PUSH32 literal
-    const be = Uint8Array.from({ length: 32 }, (_, i) => le[31 - i] || 0);
-    const BITS = `0x${[...be].map((b) => b.toString(16).padStart(2, "0")).join("")}`;
-
-    return `
-    // ${name} — single 256-bit window
-    function ${fn}(ObjectType self) internal pure returns (bool ok) {
-      /// @solidity memory-safe-assembly
-      assembly {
-        ${base !== 0 ? `self := sub(self, ${base})` : ""}
-        let ix   := shr(3, self)
-        let bits := byte(sub(31, ix), ${BITS})
-        let mask := shl(and(self, 7), 1)
-        ok       := gt(and(bits, mask), 0)
-      }
-    }`;
-  }
-
-  if (ids.length <= 4) {
-    return renderEqChainCategoryCheck(name, fn, ids);
-  }
-
-  // otherwise fall back to the multi-window OR/shr/eq approach
-  return renderMultiWindowCheck(name, ids, minId, fn);
-}
-
-// multi-window fallback (≈114 gas)
-function renderMultiWindowCheck(name: string, ids: number[], minId: number, fn: string): string {
-  const words = buildBitmapWords(ids.map((id) => id - minId));
-  const lines = words.map(({ idx, val }, i) => {
-    const hex = `0x${val.toString(16)}`;
-    return i === 0
-      ? `ok := and(shr(bitpos, ${hex}), eq(bucket, ${idx}))`
-      : `ok := or(ok,  and(shr(bitpos, ${hex}), eq(bucket, ${idx})))`;
-  });
-
-  return `
-  // ${name} — sparse, ${ids.length} keys over ${words.length} window(s)
-  function ${fn}(ObjectType self) internal pure returns (bool ok) {
-    /// @solidity memory-safe-assembly
-    assembly {
-      let off    := sub(self, ${minId})
-      let bucket := shr(8, off)
-      let bitpos := and(off, 0xff)
-
-      ${lines.join("\n    ")}
-    }
-  }`;
-}
-
-// helper to pack 0-based offsets into 32-byte windows
-function buildBitmapWords(offsetIds: number[]): { idx: number; val: bigint }[] {
-  const buckets: Uint8Array[] = [];
-  for (const off of offsetIds) {
-    const byteIx = off >>> 3;
-    const bit = 1 << (off & 7);
-    const win = byteIx >>> 5;
-    const pos = 31 - (byteIx & 31);
-    if (!buckets[win]) buckets[win] = new Uint8Array(32);
-    buckets[win]![pos]! |= bit;
-  }
-  return buckets.map((buf, idx) => {
-    let w = 0n;
-    for (const b of buf) w = (w << 8n) | BigInt(b);
-    return { idx, val: w };
-  });
-}
-
-// Direct eq-chain renderer
-function renderEqChainCategoryCheck(name: string, fn: string, ids: number[]): string {
-  const exprs = ids.map((i) => `eq(self, ${i})`);
-  const [first, ...rest] = exprs;
-  return `
-  // ${name} — ${ids.length} keys via eq-chain
-  function ${fn}(ObjectType self) internal pure returns (bool ok) {
-    /// @solidity memory-safe-assembly
-    assembly {
-      ok := ${first}
-      ${rest.map((e) => `ok := or(ok, ${e})`).join("\n")}
-    }
-  }`;
 }
 
 function renderObjectAmount([objectType, amount]: ObjectAmount): string {
@@ -325,7 +229,10 @@ ${Object.entries(categories)
   function getOreAmount(ObjectType self) internal pure returns(ObjectAmount memory) {
     ${objects
       .filter((result) => result.oreAmount !== undefined)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${renderObjectAmount(obj.oreAmount!)};`)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ${renderObjectAmount(obj.oreAmount!)};`,
+      )
       .join("\n    ")}
     return ObjectAmount(ObjectTypes.Null, 0);
   }
@@ -333,7 +240,10 @@ ${Object.entries(categories)
   function getPlankAmount(ObjectType self) internal pure returns(uint16) {
     ${objects
       .filter((obj) => obj.plankAmount !== undefined)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${obj.plankAmount!.toString()};`)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ${obj.plankAmount!.toString()};`,
+      )
       .join("\n    ")}
     return 0;
   }
@@ -341,7 +251,10 @@ ${Object.entries(categories)
   function getCrop(ObjectType self) internal pure returns(ObjectType) {
     ${objects
       .filter((obj) => obj.crop)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.crop};`)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.crop};`,
+      )
       .join("\n    ")}
     return ObjectTypes.Null;
   }
@@ -349,7 +262,10 @@ ${Object.entries(categories)
   function getSapling(ObjectType self) internal pure returns(ObjectType) {
     ${objects
       .filter((obj) => obj.sapling)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.sapling};`)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.sapling};`,
+      )
       .join("\n    ")}
     return ObjectTypes.Null;
   }
@@ -357,7 +273,10 @@ ${Object.entries(categories)
   function getTimeToGrow(ObjectType self) internal pure returns(uint128) {
     ${objects
       .filter((obj) => obj.timeToGrow)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${obj.timeToGrow};`)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ${obj.timeToGrow};`,
+      )
       .join("\n    ")}
     return 0;
   }
@@ -365,7 +284,10 @@ ${Object.entries(categories)
   function getGrowableEnergy(ObjectType self) public pure returns(uint128) {
     ${objects
       .filter((obj) => obj.growableEnergy)
-      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${obj.growableEnergy};`)
+      .map(
+        (obj) =>
+          `if (self == ObjectTypes.${obj.name}) return ${obj.growableEnergy};`,
+      )
       .join("\n    ")}
     return 0;
   }
