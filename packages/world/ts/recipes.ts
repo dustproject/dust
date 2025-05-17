@@ -112,7 +112,6 @@ export const recipes: Recipe[] = [
     outputs: [["Workbench", 1]],
   },
   {
-    station: "Workbench",
     inputs: [
       ["Stone", 6],
       ["Sand", 2],

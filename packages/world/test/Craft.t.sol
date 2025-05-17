@@ -98,15 +98,12 @@ contract CraftTest is DustTest {
     outputTypes[0] = ObjectTypes.Powerstone;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
-    bytes32 recipeId = hashRecipe(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts);
+    bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
     for (uint256 i = 0; i < inputTypes.length; i++) {
       TestInventoryUtils.addObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
       assertInventoryHasObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
     }
-
-    Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
-    EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
@@ -116,7 +113,7 @@ contract CraftTest is DustTest {
 
     vm.prank(alice);
     startGasReport("handcraft multiple inputs");
-    world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
+    world.craft(aliceEntityId, recipeId, inputs);
     endGasReport();
 
     for (uint256 i = 0; i < inputTypes.length; i++) {

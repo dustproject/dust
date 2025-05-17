@@ -400,8 +400,8 @@ function initRecipes() {
     (outputTypes[0], outputAmounts[0]) = (ObjectTypes.Powerstone.unwrap(), 1);
 
     Recipes.set(
-      keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
-      ObjectTypes.Workbench,
+      keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      ObjectTypes.Null,
       0,
       inputTypes,
       inputAmounts,
