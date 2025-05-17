@@ -49,14 +49,15 @@ export function renderCheck(
     if (alt.length <= orig.length) windows = alt;
   }
 
-  const blocks = windows.map(({ start, mask }) => {
+  const blocks = windows.map(({ start, mask }, i) => {
+    const returnValue = i === 0 ? "ok := bit" : "ok := or(ok, bit)";
     const hex = mask.toString(16);
     if (start === 0) {
       return `
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0x${hex}), 1)
-        ok      := or(ok, bit)
+        ${returnValue}
       }`;
     }
 
@@ -65,7 +66,7 @@ export function renderCheck(
     {
       let off := sub(self, ${start})
       let bit := and(shr(off, 0x${hex}), 1)
-      ok      := or(ok, bit)
+      ${returnValue}
     }`;
   });
 

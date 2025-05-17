@@ -224,7 +224,7 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0x6), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -236,7 +236,7 @@ library ObjectTypeLib {
       {
         let off := sub(self, 32794)
         let bit := and(shr(off, 0xf), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -247,7 +247,7 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0x1fffffffffffffffffffffffffffffffffffff8), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -258,7 +258,7 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0xfc0000000000000000000040000000), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -269,7 +269,7 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0x3fc000000000000), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -280,7 +280,7 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0x3ffc00000000000000), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -291,7 +291,7 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0x1fe000000000000000000000000000000), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -302,7 +302,7 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0x1c000000000000000000000000000000000), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -313,7 +313,7 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0x1fe0000000000000000000000000000000000), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -324,7 +324,7 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0x1e000000000000000000000000000000000000), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
 
       // IDs in [32799..33054]
@@ -342,7 +342,7 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0xe0000000000000000000000000000000000000), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -354,7 +354,7 @@ library ObjectTypeLib {
       {
         let off := sub(self, 32768)
         let bit := and(shr(off, 0x3f), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -366,7 +366,7 @@ library ObjectTypeLib {
       {
         let off := sub(self, 32774)
         let bit := and(shr(off, 0x3f), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -378,7 +378,7 @@ library ObjectTypeLib {
       {
         let off := sub(self, 32783)
         let bit := and(shr(off, 0x1), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -390,7 +390,7 @@ library ObjectTypeLib {
       {
         let off := sub(self, 32780)
         let bit := and(shr(off, 0x7), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -402,7 +402,7 @@ library ObjectTypeLib {
       {
         let off := sub(self, 32784)
         let bit := and(shr(off, 0xf), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -414,7 +414,7 @@ library ObjectTypeLib {
       {
         let off := sub(self, 32790)
         let bit := and(shr(off, 0x7), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -426,7 +426,7 @@ library ObjectTypeLib {
       {
         let off := sub(self, 32793)
         let bit := and(shr(off, 0x1), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -438,7 +438,7 @@ library ObjectTypeLib {
       {
         let off := sub(self, 32798)
         let bit := and(shr(off, 0x1), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -449,7 +449,7 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0x1ffffc003ffc00000000000000), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -460,7 +460,7 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0x13c0001ff00001fc000003ffffc000000000000), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -471,7 +471,7 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0xc2003e00fc0000000000000003ffe0001ffff8), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -482,7 +482,7 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0x101ffc0000000e03fffffc00000000000000006), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -493,7 +493,7 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0x1ffc000000000000000000000000000000000), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -504,7 +504,7 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0x1a000000000000000000000000000000000000), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
 
       // IDs in [32768..33023]
@@ -523,7 +523,7 @@ library ObjectTypeLib {
       {
         let off := sub(self, 32768)
         let bit := and(shr(off, 0xffff), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -534,7 +534,7 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0x600000), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
@@ -545,7 +545,7 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0x2000000000000000000000000000000000000), 1)
-        ok := or(ok, bit)
+        ok := bit
       }
     }
   }
