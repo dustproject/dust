@@ -6,5 +6,5 @@ pragma solidity >=0.8.24;
 import { RegionMerkleRoot } from "../src/codegen/tables/RegionMerkleRoot.sol";
 
 function initTerrain() {
-  RegionMerkleRoot.set(0, 0, hex"c657825b4bcfabedd80467941a18238050d443377cfae8aa151a0fddcab87b11");
+  RegionMerkleRoot.set(0, 0, hex"08b0af63e4cbdd09fbaf8db60c749114a933b226774c77502f05425c35ba40f5");
 }
