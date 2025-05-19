@@ -252,6 +252,17 @@ library ObjectTypeLib {
     }
   }
 
+  function isTerracotta(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      // IDs in [0..255]
+      {
+        let bit := and(shr(self, 0x3ffe000000000), 1)
+        ok := bit
+      }
+    }
+  }
+
   function isOre(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
@@ -711,6 +722,24 @@ library ObjectTypeLib {
       ObjectTypes.Bed,
       ObjectTypes.TextSign,
       ObjectTypes.Torch
+    ];
+  }
+
+  function getTerracottaTypes() internal pure returns (ObjectType[13] memory) {
+    return [
+      ObjectTypes.Terracotta,
+      ObjectTypes.BrownTerracotta,
+      ObjectTypes.OrangeTerracotta,
+      ObjectTypes.WhiteTerracotta,
+      ObjectTypes.LightGrayTerracotta,
+      ObjectTypes.YellowTerracotta,
+      ObjectTypes.RedTerracotta,
+      ObjectTypes.LightBlueTerracotta,
+      ObjectTypes.CyanTerracotta,
+      ObjectTypes.BlackTerracotta,
+      ObjectTypes.PurpleTerracotta,
+      ObjectTypes.BlueTerracotta,
+      ObjectTypes.MagentaTerracotta
     ];
   }
 
