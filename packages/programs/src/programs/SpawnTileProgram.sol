@@ -9,7 +9,7 @@ import { ISpawnHook } from "@dust/world/src/ProgramInterfaces.sol";
 
 import { DefaultProgram } from "./DefaultProgram.sol";
 
-contract SpawnTileProgram is DefaultProgram, ISpawnHook {
+contract SpawnTileProgram is ISpawnHook, DefaultProgram {
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
 
   function onSpawn(EntityId caller, EntityId target, uint128, bytes memory) external view onlyWorld {

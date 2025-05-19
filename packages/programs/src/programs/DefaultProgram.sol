@@ -2,6 +2,7 @@
 pragma solidity >=0.8.24;
 
 import { IBaseWorld, WorldConsumer } from "@latticexyz/world-consumer/src/experimental/WorldConsumer.sol";
+import { System, WorldContextConsumer } from "@latticexyz/world/src/System.sol";
 
 import { EntityId, EntityIdLib } from "@dust/world/src/EntityId.sol";
 
@@ -13,7 +14,7 @@ import { Owner } from "../codegen/tables/Owner.sol";
 import { SmartItem } from "../codegen/tables/SmartItem.sol";
 import { UniqueEntity } from "../codegen/tables/UniqueEntity.sol";
 
-contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, WorldConsumer {
+abstract contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, WorldConsumer {
   constructor(IBaseWorld _world) WorldConsumer(_world) { }
 
   function onAttachProgram(EntityId caller, EntityId target, bytes memory) external onlyWorld {

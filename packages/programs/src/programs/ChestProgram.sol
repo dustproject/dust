@@ -9,7 +9,7 @@ import { ITransferHook, SlotData } from "@dust/world/src/ProgramInterfaces.sol";
 
 import { DefaultProgram } from "./DefaultProgram.sol";
 
-contract ChestProgram is DefaultProgram, ITransferHook {
+contract ChestProgram is ITransferHook, DefaultProgram {
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
 
   function onTransfer(EntityId caller, EntityId target, SlotData[] memory, SlotData[] memory, bytes memory)
