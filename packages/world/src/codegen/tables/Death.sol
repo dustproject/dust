@@ -19,14 +19,14 @@ import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 // Import user types
 import { EntityId } from "../../EntityId.sol";
 
-struct PlayerData {
+struct DeathData {
   uint256 deaths;
   uint128 lastDiedAt;
 }
 
-library Player {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "Player", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x74620000000000000000000000000000506c6179657200000000000000000000);
+library Death {
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "Death", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x7462000000000000000000000000000044656174680000000000000000000000);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0030020020100000000000000000000000000000000000000000000000000000);
@@ -156,7 +156,7 @@ library Player {
   /**
    * @notice Get the full data.
    */
-  function get(EntityId player) internal view returns (PlayerData memory _table) {
+  function get(EntityId player) internal view returns (DeathData memory _table) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(player);
 
@@ -171,7 +171,7 @@ library Player {
   /**
    * @notice Get the full data.
    */
-  function _get(EntityId player) internal view returns (PlayerData memory _table) {
+  function _get(EntityId player) internal view returns (DeathData memory _table) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(player);
 
@@ -216,7 +216,7 @@ library Player {
   /**
    * @notice Set the full data using the data struct.
    */
-  function set(EntityId player, PlayerData memory _table) internal {
+  function set(EntityId player, DeathData memory _table) internal {
     bytes memory _staticData = encodeStatic(_table.deaths, _table.lastDiedAt);
 
     EncodedLengths _encodedLengths;
@@ -231,7 +231,7 @@ library Player {
   /**
    * @notice Set the full data using the data struct.
    */
-  function _set(EntityId player, PlayerData memory _table) internal {
+  function _set(EntityId player, DeathData memory _table) internal {
     bytes memory _staticData = encodeStatic(_table.deaths, _table.lastDiedAt);
 
     EncodedLengths _encodedLengths;
@@ -262,7 +262,7 @@ library Player {
     bytes memory _staticData,
     EncodedLengths,
     bytes memory
-  ) internal pure returns (PlayerData memory _table) {
+  ) internal pure returns (DeathData memory _table) {
     (_table.deaths, _table.lastDiedAt) = decodeStatic(_staticData);
   }
 
