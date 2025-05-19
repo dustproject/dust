@@ -734,6 +734,23 @@ export const categories: Record<string, Category> = {
       "Torch",
     ],
   },
+  Terracotta: {
+    objects: [
+      "Terracotta",
+      "BrownTerracotta",
+      "OrangeTerracotta",
+      "WhiteTerracotta",
+      "LightGrayTerracotta",
+      "YellowTerracotta",
+      "RedTerracotta",
+      "LightBlueTerracotta",
+      "CyanTerracotta",
+      "BlackTerracotta",
+      "PurpleTerracotta",
+      "BlueTerracotta",
+      "MagentaTerracotta",
+    ],
+  },
   Ore: {
     objects: [
       "UnrevealedOre",
