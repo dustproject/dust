@@ -20,6 +20,7 @@ import { Inventory, InventoryData } from "./tables/Inventory.sol";
 import { InventorySlot, InventorySlotData } from "./tables/InventorySlot.sol";
 import { InventoryTypeSlots } from "./tables/InventoryTypeSlots.sol";
 import { ReverseMovablePosition } from "./tables/ReverseMovablePosition.sol";
+import { Death, DeathData } from "./tables/Death.sol";
 import { BedPlayer, BedPlayerData } from "./tables/BedPlayer.sol";
 import { PlayerBed } from "./tables/PlayerBed.sol";
 import { EntityProgram } from "./tables/EntityProgram.sol";

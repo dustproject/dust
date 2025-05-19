@@ -233,6 +233,14 @@ export default defineWorld({
     // ------------------------------------------------------------
     // Player
     // ------------------------------------------------------------
+    Death: {
+      schema: {
+        player: "EntityId",
+        deaths: "uint256",
+        lastDiedAt: "uint128",
+      },
+      key: ["player"],
+    },
     BedPlayer: {
       schema: {
         bedEntityId: "EntityId",

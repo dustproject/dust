@@ -8,6 +8,7 @@ import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 
+import { Death, DeathData } from "../codegen/tables/Death.sol";
 import { PlayerBed } from "../codegen/tables/PlayerBed.sol";
 
 import { EntityPosition, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
@@ -85,6 +86,7 @@ library PlayerUtils {
     (EntityId to,) = EntityUtils.getOrCreateBlockAt(coord);
     InventoryUtils.transferAll(player, to);
     removePlayerFromGrid(player, coord);
+    Death.set(player, DeathData({ lastDiedAt: uint128(block.timestamp), deaths: Death.getDeaths(player) + 1 }));
     notify(player, DeathNotification({ deathCoord: coord }));
   }
 }
