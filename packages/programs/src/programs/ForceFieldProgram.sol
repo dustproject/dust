@@ -22,13 +22,13 @@ import { Owner } from "../codegen/tables/Owner.sol";
 import { DefaultProgram } from "./DefaultProgram.sol";
 
 contract ForceFieldProgram is
-  DefaultProgram,
   IProgramValidator,
   IAddFragmentHook,
   IRemoveFragmentHook,
   IFuelHook,
   IBuildHook,
-  IMineHook
+  IMineHook,
+  DefaultProgram
 {
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
 
@@ -43,32 +43,23 @@ contract ForceFieldProgram is
     // TODO: should we add a method to restrict programs?
   }
 
-  function onFuel(EntityId caller, EntityId target, uint16 fuelAmount, bytes memory extraData) external onlyWorld {
+  function onFuel(EntityId caller, EntityId target, uint16 fuelAmount, bytes memory extraData) external view onlyWorld {
     // Allow anyone to fuel the force field
   }
 
-  function onAddFragment(EntityId caller, EntityId target, EntityId added, bytes memory extraData) external onlyWorld {
+  function onAddFragment(EntityId caller, EntityId target, EntityId, bytes memory) external view onlyWorld {
     require(_isAllowed(target, caller), "Only approved callers can add fragments to the force field");
   }
 
-  function onRemoveFragment(EntityId caller, EntityId target, EntityId removed, bytes memory extraData)
-    external
-    onlyWorld
-  {
+  function onRemoveFragment(EntityId caller, EntityId target, EntityId, bytes memory) external view onlyWorld {
     require(_isAllowed(target, caller), "Only approved callers can remove fragments from the force field");
   }
 
-  function onBuild(EntityId caller, EntityId target, ObjectType objectType, Vec3 coord, bytes memory extraData)
-    external
-    onlyWorld
-  {
+  function onBuild(EntityId caller, EntityId target, ObjectType, Vec3, bytes memory) external view onlyWorld {
     require(_isAllowed(target, caller), "Only approved callers can build in the force field");
   }
 
-  function onMine(EntityId caller, EntityId target, ObjectType objectType, Vec3 coord, bytes memory extraData)
-    external
-    onlyWorld
-  {
+  function onMine(EntityId caller, EntityId target, ObjectType, Vec3, bytes memory) external view onlyWorld {
     require(_isAllowed(target, caller), "Only approved callers can mine in the force field");
   }
 }
