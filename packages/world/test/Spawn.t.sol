@@ -57,7 +57,9 @@ contract SpawnTest is DustTest {
     LocalEnergyPool.set(shardCoord, MAX_PLAYER_ENERGY);
 
     vm.prank(alice);
+    startGasReport("randomSpawn");
     EntityId playerEntityId = world.randomSpawn(blockNumber, spawnCoord.y());
+    endGasReport();
     assertTrue(TestEntityUtils.exists(playerEntityId));
 
     assertEq(
@@ -78,7 +80,7 @@ contract SpawnTest is DustTest {
     world.randomSpawn(pastBlock, y);
   }
 
-  function testSpawn() public {
+  function testSpawnTile() public {
     address alice = vm.randomAddress();
     Vec3 spawnCoord = vec3(0, 1, 0);
     Vec3 spawnTileCoord = spawnCoord - vec3(0, 1, 0);
@@ -113,7 +115,9 @@ contract SpawnTest is DustTest {
 
     // Spawn alice
     vm.prank(alice);
+    startGasReport("spawn with spawn tile");
     EntityId playerEntityId = world.spawn(spawnTileEntityId, spawnCoord, 1, "");
+    endGasReport();
     assertTrue(TestEntityUtils.exists(playerEntityId));
   }
 
