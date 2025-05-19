@@ -57,7 +57,9 @@ contract SpawnTest is DustTest {
     LocalEnergyPool.set(shardCoord, MAX_PLAYER_ENERGY);
 
     vm.prank(alice);
+    startGasReport("randomSpawn");
     EntityId playerEntityId = world.randomSpawn(blockNumber, spawnCoord.y());
+    endGasReport();
     assertTrue(TestEntityUtils.exists(playerEntityId));
 
     assertEq(
