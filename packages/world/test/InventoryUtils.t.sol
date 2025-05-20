@@ -64,6 +64,8 @@ contract InventoryUtilsTest is DustTest {
 
     assertEq(Inventory.lengthOccupiedSlots(aliceEntity), 0);
     assertEq(Inventory.lengthOccupiedSlots(bobEntity), 35);
+
+    _verifyInventorySlotIntegrity(aliceEntity);
   }
 
   function testTransferEntityToNullSlot() public {
@@ -88,6 +90,8 @@ contract InventoryUtilsTest is DustTest {
       InventorySlotData memory slotData = InventorySlot.get(aliceEntity, slots[i]);
       assertEq(i, slotData.occupiedIndex, "Wrong occupied index");
     }
+
+    _verifyInventorySlotIntegrity(aliceEntity);
   }
 
   function testDuplicateOccupiedSlots() public {
@@ -110,6 +114,8 @@ contract InventoryUtilsTest is DustTest {
     uint16[] memory slots = Inventory.getOccupiedSlots(alice);
     assertEq(slots.length, 2, "length mismatch");
     assertNotEq(slots[0], slots[1]);
+
+    _verifyInventorySlotIntegrity(alice);
   }
 
   function testDuplicateOccupiedSlotsWithSelfTransfers() public {
@@ -140,6 +146,8 @@ contract InventoryUtilsTest is DustTest {
       InventorySlotData memory slotData = InventorySlot.get(aliceEntity, slots[i]);
       assertEq(i, slotData.occupiedIndex, "Wrong occupied index");
     }
+
+    _verifyInventorySlotIntegrity(aliceEntity);
   }
 
   function testDuplicateOccupiedSlotsWhenUsingNonSequentialEmptySlots() public {
@@ -159,6 +167,8 @@ contract InventoryUtilsTest is DustTest {
       InventorySlotData memory slotData = InventorySlot.get(aliceEntity, slots[i]);
       assertEq(i, slotData.occupiedIndex, "Wrong occupied index");
     }
+
+    _verifyInventorySlotIntegrity(aliceEntity);
   }
 
   function testSlotGapSequential() public {
@@ -179,6 +189,8 @@ contract InventoryUtilsTest is DustTest {
       InventorySlotData memory sd = InventorySlot.get(alice, slots[i]);
       assertEq(i, sd.occupiedIndex, "Wrong occupiedIndex");
     }
+
+    _verifyInventorySlotIntegrity(alice);
   }
 
   function testSwapEntityAndObject() public {
@@ -200,6 +212,8 @@ contract InventoryUtilsTest is DustTest {
       InventorySlotData memory sd = InventorySlot.get(alice, slots[i]);
       assertEq(i, sd.occupiedIndex, "index mismatch after swap");
     }
+
+    _verifyInventorySlotIntegrity(alice);
   }
 
   function testSwapEntities() public {
@@ -220,6 +234,8 @@ contract InventoryUtilsTest is DustTest {
       InventorySlotData memory sd = InventorySlot.get(alice, slots[i]);
       assertEq(i, sd.occupiedIndex, "index mismatch after swap");
     }
+
+    _verifyInventorySlotIntegrity(alice);
   }
 
   function testPartialStackAddsOneSlot() public {
@@ -238,6 +254,8 @@ contract InventoryUtilsTest is DustTest {
     uint16 a1 = InventorySlot.getAmount(alice, 1);
     assertEq(a0, 99);
     assertEq(a1, 6);
+
+    _verifyInventorySlotIntegrity(alice);
   }
 
   function testPartialThenFullRemoval() public {
@@ -257,6 +275,8 @@ contract InventoryUtilsTest is DustTest {
 
     // Null list should contain exactly one new entry
     assertEq(InventoryTypeSlots.length(alice, ObjectTypes.Null), 1);
+
+    _verifyInventorySlotIntegrity(alice);
   }
 
   function testUseEmptySlotAfterGap() public {
@@ -271,6 +291,8 @@ contract InventoryUtilsTest is DustTest {
 
     assertEq(occ.length, 2, "two occupied slots expected");
     assertTrue(occ[0] != occ[1], "slots must differ");
+
+    _verifyInventorySlotIntegrity(alice);
   }
 
   function testRemoveAcrossSlots() public {
@@ -283,6 +305,8 @@ contract InventoryUtilsTest is DustTest {
     uint16[] memory occ = Inventory.getOccupiedSlots(alice);
     assertEq(occ.length, 1, "only one slot should remain");
     assertEq(InventorySlot.getAmount(alice, occ[0]), 30, "wrong remaining amount");
+
+    _verifyInventorySlotIntegrity(alice);
   }
 
   function testSwapDifferentTypesBetweenEntities() public {
@@ -309,6 +333,9 @@ contract InventoryUtilsTest is DustTest {
       InventorySlotData memory d = InventorySlot.get(bob, bobSlots[i]);
       assertEq(i, d.occupiedIndex, "bob index wrong");
     }
+
+    _verifyInventorySlotIntegrity(alice);
+    _verifyInventorySlotIntegrity(bob);
   }
 
   function testToolBreakRemovesSlot() public {
@@ -325,31 +352,8 @@ contract InventoryUtilsTest is DustTest {
 
     assertEq(Inventory.lengthOccupiedSlots(alice), 0, "slot not recycled");
     assertEq(InventoryTypeSlots.length(alice, ObjectTypes.Null), 1, "slot not in Null list");
-  }
 
-  // Helper function to verify the integrity of inventory slots after operations
-  function _verifyInventorySlotIntegrity(EntityId entity) internal view {
-    uint16[] memory slots = Inventory.getOccupiedSlots(entity);
-
-    ObjectType[] memory objectTypes = new ObjectType[](slots.length);
-    // Check that each occupied slot has correct index
-    for (uint256 i = 0; i < slots.length; i++) {
-      InventorySlotData memory slotData = InventorySlot.get(entity, slots[i]);
-      objectTypes[i] = slotData.objectType;
-      assertEq(i, slotData.occupiedIndex, "Occupied index mismatch");
-    }
-
-    // Verify each object type's slots are correct
-    for (uint256 i = 0; i < objectTypes.length; i++) {
-      if (objectTypes[i] == ObjectTypes.Null) continue;
-
-      uint16[] memory typeSlots = InventoryTypeSlots.get(entity, objectTypes[i]);
-      for (uint256 j = 0; j < typeSlots.length; j++) {
-        InventorySlotData memory slotData = InventorySlot.get(entity, typeSlots[j]);
-        assertEq(j, slotData.typeIndex, "Type index mismatch");
-        assertEq(objectTypes[i], slotData.objectType, "Object type mismatch");
-      }
-    }
+    _verifyInventorySlotIntegrity(alice);
   }
 
   // Fuzz test for adding objects to inventory
@@ -690,5 +694,30 @@ contract InventoryUtilsTest is DustTest {
     // Verify inventory integrity
     _verifyInventorySlotIntegrity(alice);
     _verifyInventorySlotIntegrity(bob);
+  }
+
+  // Helper function to verify the integrity of inventory slots after operations
+  function _verifyInventorySlotIntegrity(EntityId entity) internal view {
+    uint16[] memory slots = Inventory.getOccupiedSlots(entity);
+
+    ObjectType[] memory objectTypes = new ObjectType[](slots.length);
+    // Check that each occupied slot has correct index
+    for (uint256 i = 0; i < slots.length; i++) {
+      InventorySlotData memory slotData = InventorySlot.get(entity, slots[i]);
+      objectTypes[i] = slotData.objectType;
+      assertEq(i, slotData.occupiedIndex, "Occupied index mismatch");
+    }
+
+    // Verify each object type's slots are correct
+    for (uint256 i = 0; i < objectTypes.length; i++) {
+      if (objectTypes[i] == ObjectTypes.Null) continue;
+
+      uint16[] memory typeSlots = InventoryTypeSlots.get(entity, objectTypes[i]);
+      for (uint256 j = 0; j < typeSlots.length; j++) {
+        InventorySlotData memory slotData = InventorySlot.get(entity, typeSlots[j]);
+        assertEq(j, slotData.typeIndex, "Type index mismatch");
+        assertEq(objectTypes[i], slotData.objectType, "Object type mismatch");
+      }
+    }
   }
 }
