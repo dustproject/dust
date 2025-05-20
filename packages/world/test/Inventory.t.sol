@@ -561,7 +561,7 @@ contract InventoryTest is DustTest {
   }
 
   function testInventorySlotManagement() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
     // Add different types of items to test slot management
     ObjectType[] memory itemTypes = new ObjectType[](3);
@@ -592,7 +592,7 @@ contract InventoryTest is DustTest {
   }
 
   function testItemStacking() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
     // Add same item type multiple times
     ObjectType itemType = ObjectTypes.Grass;
@@ -613,7 +613,7 @@ contract InventoryTest is DustTest {
   }
 
   function testInventoryLimits() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
     // Get max slots from player inventory type
     uint16 maxSlots = ObjectTypes.Player.getMaxInventorySlots();
@@ -638,7 +638,7 @@ contract InventoryTest is DustTest {
   }
 
   function testTransferPartialStack() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
     // Add items to Alice's inventory
     ObjectType itemType = ObjectTypes.Grass;
@@ -659,7 +659,7 @@ contract InventoryTest is DustTest {
   }
 
   function testInventoryStackingLimits() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
     // Test stacking up to the limit (99 for most items)
     ObjectType stackableType = ObjectTypes.Dirt;

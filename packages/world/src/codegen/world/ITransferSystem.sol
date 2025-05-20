@@ -16,7 +16,7 @@ interface ITransferSystem {
     EntityId caller,
     EntityId from,
     EntityId to,
-    SlotTransfer[] memory transfers,
+    SlotTransfer[] calldata transfers,
     bytes calldata extraData
   ) external;
 }

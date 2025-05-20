@@ -21,9 +21,9 @@ contract TransferSystem is System {
     EntityId caller,
     EntityId from,
     EntityId to,
-    SlotTransfer[] memory transfers,
+    SlotTransfer[] calldata transfers,
     bytes calldata extraData
-  ) public {
+  ) external {
     caller.activate();
 
     bool selfTransfer = (from == to);
