@@ -4,6 +4,7 @@ import {
   objects,
   objectsByName,
 } from "../objects";
+import { getOrientation } from "../orientation";
 
 // Build minimal sliding windows over sorted ids
 function buildSlidingWindows(ids: number[]): { start: number; mask: bigint }[] {
@@ -91,7 +92,6 @@ pragma solidity >=0.8.24;
 
 import { IMachineSystem } from "./codegen/world/IMachineSystem.sol";
 import { ITransferSystem } from "./codegen/world/ITransferSystem.sol";
-import { Direction } from "./codegen/common.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
 
 type ObjectType is uint16;
@@ -171,7 +171,7 @@ ${Object.entries(categories)
   }
 
   /// @dev Get relative schema coords, including base coord
-  function getRelativeCoords(ObjectType self, Vec3 baseCoord, Direction direction)
+  function getRelativeCoords(ObjectType self, Vec3 baseCoord, uint8 orientation)
     internal
     pure
     returns (Vec3[] memory)
@@ -182,24 +182,27 @@ ${Object.entries(categories)
     coords[0] = baseCoord;
 
     for (uint256 i = 0; i < schemaCoords.length; i++) {
-      require(isDirectionSupported(self, direction), "Direction not supported");
-      coords[i + 1] = baseCoord + schemaCoords[i].rotate(direction);
+      require(isOrientationSupported(self, orientation), "Orientation not supported");
+      coords[i + 1] = baseCoord + schemaCoords[i].applyOrientation(orientation);
     }
 
     return coords;
   }
 
-  function isDirectionSupported(ObjectType self, Direction direction) internal pure returns (bool) {
-    if (self == ObjectTypes.Bed) {
-      // Note: before supporting more directions, we need to ensure clients can render it
-      return direction == Direction.NegativeX || direction == Direction.NegativeZ;
-    }
+  function isOrientationSupported(ObjectType self, uint8 orientation) internal pure returns (bool) {
+    ${objects
+      .filter((obj) => obj.supportedOrientations !== undefined)
+      .map((obj) => {
+        return `if (self == ObjectTypes.${obj.name}) {
+          return ${obj.supportedOrientations!.map((orientation) => `orientation == ${orientation}`).join(" || ")};
+        }`;
+      })}
 
     return true;
   }
 
   function getRelativeCoords(ObjectType self, Vec3 baseCoord) internal pure returns (Vec3[] memory) {
-    return getRelativeCoords(self, baseCoord, Direction.PositiveZ);
+    return getRelativeCoords(self, baseCoord, ${getOrientation("PositiveZ")});
   }
 
   function isActionAllowed(ObjectType self, bytes4 sig) internal pure returns (bool) {

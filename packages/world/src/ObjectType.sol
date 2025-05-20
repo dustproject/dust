@@ -2,7 +2,6 @@
 pragma solidity >=0.8.24;
 
 import { Vec3, vec3 } from "./Vec3.sol";
-import { Direction } from "./codegen/common.sol";
 import { IMachineSystem } from "./codegen/world/IMachineSystem.sol";
 import { ITransferSystem } from "./codegen/world/ITransferSystem.sol";
 
@@ -1144,35 +1143,30 @@ library ObjectTypeLib {
   }
 
   /// @dev Get relative schema coords, including base coord
-  function getRelativeCoords(ObjectType self, Vec3 baseCoord, Direction direction)
-    internal
-    pure
-    returns (Vec3[] memory)
-  {
+  function getRelativeCoords(ObjectType self, Vec3 baseCoord, uint8 orientation) internal pure returns (Vec3[] memory) {
     Vec3[] memory schemaCoords = getObjectTypeSchema(self);
     Vec3[] memory coords = new Vec3[](schemaCoords.length + 1);
 
     coords[0] = baseCoord;
 
     for (uint256 i = 0; i < schemaCoords.length; i++) {
-      require(isDirectionSupported(self, direction), "Direction not supported");
-      coords[i + 1] = baseCoord + schemaCoords[i].rotate(direction);
+      require(isOrientationSupported(self, orientation), "Orientation not supported");
+      coords[i + 1] = baseCoord + schemaCoords[i].applyOrientation(orientation);
     }
 
     return coords;
   }
 
-  function isDirectionSupported(ObjectType self, Direction direction) internal pure returns (bool) {
+  function isOrientationSupported(ObjectType self, uint8 orientation) internal pure returns (bool) {
     if (self == ObjectTypes.Bed) {
-      // Note: before supporting more directions, we need to ensure clients can render it
-      return direction == Direction.NegativeX || direction == Direction.NegativeZ;
+      return orientation == 1 || orientation == 44;
     }
 
     return true;
   }
 
   function getRelativeCoords(ObjectType self, Vec3 baseCoord) internal pure returns (Vec3[] memory) {
-    return getRelativeCoords(self, baseCoord, Direction.PositiveZ);
+    return getRelativeCoords(self, baseCoord, 40);
   }
 
   function isActionAllowed(ObjectType self, bytes4 sig) internal pure returns (bool) {

@@ -126,7 +126,7 @@ export default defineWorld({
     Orientation: {
       schema: {
         entityId: "EntityId",
-        direction: "Direction",
+        orientation: "uint8",
       },
       key: ["entityId"],
     },

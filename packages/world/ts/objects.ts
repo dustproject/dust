@@ -1,3 +1,5 @@
+import { getOrientation } from "./orientation";
+
 export interface Category {
   objects: ObjectName[];
   checkName?: string;
@@ -208,6 +210,7 @@ export interface ObjectDefinition {
   // Used for tools
   plankAmount?: number;
   oreAmount?: ObjectAmount;
+  supportedOrientations?: number[];
 }
 
 type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
@@ -453,7 +456,14 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   { name: "ForceField", mass: 1035000000000000000n },
   { name: "Chest", mass: 36000000000000000n },
   { name: "SpawnTile", mass: 6435000000000000000n },
-  { name: "Bed", mass: 13500000000000000n },
+  {
+    name: "Bed",
+    mass: 13500000000000000n,
+    supportedOrientations: [
+      getOrientation("NegativeX"),
+      getOrientation("NegativeZ"),
+    ],
+  },
   { name: "Workbench", mass: 18000000000000000n },
   { name: "Powerstone", mass: 80000000000000000n },
   { name: "Furnace", mass: 108000000000000000n },

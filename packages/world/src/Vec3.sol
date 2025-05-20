@@ -89,6 +89,9 @@ library Vec3Lib {
   using LibString for *;
   using Math for *;
 
+  bytes18 constant PERMUTATIONS_BYTES = hex"000102002101010201201201020100";
+  bytes24 constant REFLECTIONS_BYTES = hex"000000010000000100010100000001010001000101010101";
+
   function unwrap(Vec3 self) internal pure returns (uint96) {
     return Vec3.unwrap(self);
   }
@@ -118,6 +121,12 @@ library Vec3Lib {
       y_ := signextend(3, shr(32, self))
       z_ := signextend(3, self)
     }
+  }
+
+  function toArray(Vec3 self) internal pure returns (int32[3] memory) {
+    int32[3] memory arr;
+    (arr[0], arr[1], arr[2]) = self.xyz();
+    return arr;
   }
 
   function mul(Vec3 a, int32 scalar) internal pure returns (Vec3) {
@@ -192,49 +201,19 @@ library Vec3Lib {
     return result;
   }
 
-  function rotate(Vec3 self, Direction direction) internal pure returns (Vec3) {
-    // Default facing direction is North (Positive Z)
-    if (direction == Direction.PositiveZ) {
-      return self; // No rotation needed for default facing direction
-    } else if (direction == Direction.PositiveX) {
-      // 90 degree rotation clockwise around Y axis
-      return vec3(self.z(), self.y(), -self.x());
-    } else if (direction == Direction.NegativeZ) {
-      // 180 degree rotation around Y axis
-      return vec3(-self.x(), self.y(), -self.z());
-    } else if (direction == Direction.NegativeX) {
-      // 270 degree rotation around Y axis
-      return vec3(-self.z(), self.y(), self.x());
-    }
+  function applyOrientation(Vec3 v, uint8 orientation) internal pure returns (Vec3) {
+    (uint8 a, uint8 b, uint8 c) = _getPermutation(orientation);
+    (uint8 rx, uint8 ry, uint8 rz) = _getReflection(orientation);
 
-    // Note: before supporting more directions, we need to ensure clients can render it
-    revert("Direction not supported for rotation");
-  }
+    int32[3] memory arr = v.toArray();
 
-  // Check if the coord is adjacent to the cuboid
-  function isAdjacentToCuboid(Vec3 self, Vec3 from, Vec3 to) internal pure returns (bool) {
-    // X-axis adjacency (left or right face)
-    if (
-      (self.x() == from.x() - 1 || self.x() == to.x() + 1) && self.y() >= from.y() && self.y() <= to.y()
-        && self.z() >= from.z() && self.z() <= to.z()
-    ) {
-      return true;
-    }
-    // Y-axis adjacency (bottom or top face)
-    if (
-      (self.y() == from.y() - 1 || self.y() == to.y() + 1) && self.x() >= from.x() && self.x() <= to.x()
-        && self.z() >= from.z() && self.z() <= to.z()
-    ) {
-      return true;
-    }
-    // Z-axis adjacency (front or back face)
-    if (
-      (self.z() == from.z() - 1 || self.z() == to.z() + 1) && self.x() >= from.x() && self.x() <= to.x()
-        && self.y() >= from.y() && self.y() <= to.y()
-    ) {
-      return true;
-    }
-    return false;
+    (int32 nx, int32 ny, int32 nz) = (arr[a], arr[b], arr[c]);
+
+    if (rx != 0) nx = -nx;
+    if (ry != 0) ny = -ny;
+    if (rz != 0) nz = -nz;
+
+    return vec3(nx, ny, nz);
   }
 
   function inSurroundingCube(Vec3 self, Vec3 other, uint256 radius) internal pure returns (bool) {
@@ -273,6 +252,28 @@ library Vec3Lib {
   }
 
   // ======== Helper Functions ========
+
+  function _getPermutation(uint8 orientation) private pure returns (uint8 a, uint8 b, uint8 c) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      let permIdx := shr(orientation, 3)
+      let offset := mul(permIdx, 3)
+      a := shr(5, and(shr(offset, PERMUTATIONS_BYTES), 0x7))
+      b := shr(5, and(shr(add(offset, 1), PERMUTATIONS_BYTES), 0x7))
+      c := shr(5, and(shr(add(offset, 2), PERMUTATIONS_BYTES), 0x7))
+    }
+  }
+
+  function _getReflection(uint8 orientation) private pure returns (uint8 rx, uint8 ry, uint8 rz) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      let reflIdx := and(orientation, 7)
+      let offset := mul(reflIdx, 3)
+      rx := shr(5, and(shr(offset, REFLECTIONS_BYTES), 0x1))
+      ry := shr(5, and(shr(add(offset, 1), REFLECTIONS_BYTES), 0x1))
+      rz := shr(5, and(shr(add(offset, 2), REFLECTIONS_BYTES), 0x1))
+    }
+  }
 
   // Floor division (integer division that rounds down)
   function _floorDiv(int32 a, int32 b) private pure returns (int32) {
