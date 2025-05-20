@@ -93,6 +93,7 @@ pragma solidity >=0.8.24;
 import { IMachineSystem } from "./codegen/world/IMachineSystem.sol";
 import { ITransferSystem } from "./codegen/world/ITransferSystem.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
+import { Orientation } from "./Orientation.sol";
 
 type ObjectType is uint16;
 
@@ -171,7 +172,7 @@ ${Object.entries(categories)
   }
 
   /// @dev Get relative schema coords, including base coord
-  function getRelativeCoords(ObjectType self, Vec3 baseCoord, uint8 orientation)
+  function getRelativeCoords(ObjectType self, Vec3 baseCoord, Orientation orientation)
     internal
     pure
     returns (Vec3[] memory)
@@ -189,20 +190,20 @@ ${Object.entries(categories)
     return coords;
   }
 
-  function isOrientationSupported(ObjectType self, uint8 orientation) internal pure returns (bool) {
+  function isOrientationSupported(ObjectType self, Orientation orientation) internal pure returns (bool) {
     ${objects
       .filter((obj) => obj.supportedOrientations !== undefined)
       .map((obj) => {
         return `if (self == ObjectTypes.${obj.name}) {
-          return ${obj.supportedOrientations!.map((orientation) => `orientation == ${orientation}`).join(" || ")};
+          return ${obj.supportedOrientations!.map((orientation) => `orientation == Orientation.wrap(${orientation})`).join(" || ")};
         }`;
       })}
 
-    return true;
+    return orientation == Orientation.wrap(0);
   }
 
   function getRelativeCoords(ObjectType self, Vec3 baseCoord) internal pure returns (Vec3[] memory) {
-    return getRelativeCoords(self, baseCoord, ${getOrientation("PositiveZ")});
+    return getRelativeCoords(self, baseCoord, Orientation.wrap(0));
   }
 
   function isActionAllowed(ObjectType self, bytes4 sig) internal pure returns (bool) {

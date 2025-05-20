@@ -7,7 +7,7 @@ import { BatchSystem } from "../../systems/BatchSystem.sol";
 import { EntityId } from "../../EntityId.sol";
 import { Vec3 } from "../../Vec3.sol";
 import { ProgramId } from "../../ProgramId.sol";
-import { Direction } from "../common.sol";
+import { Orientation } from "../../Orientation.sol";
 import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 import { IWorldCall } from "@latticexyz/world/src/IWorldKernel.sol";
 import { SystemCall } from "@latticexyz/world/src/SystemCall.sol";
@@ -61,22 +61,22 @@ library BatchSystemLib {
       );
   }
 
-  function buildAndAttachProgramWithDirection(
+  function buildAndAttachProgramWithOrientation(
     BatchSystemType self,
     EntityId caller,
     Vec3 coord,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
   ) internal returns (EntityId) {
     return
-      CallWrapper(self.toResourceId(), address(0)).buildAndAttachProgramWithDirection(
+      CallWrapper(self.toResourceId(), address(0)).buildAndAttachProgramWithOrientation(
         caller,
         coord,
         slot,
-        direction,
+        orientation,
         program,
         buildExtraData,
         attachExtraData
@@ -101,20 +101,20 @@ library BatchSystemLib {
       );
   }
 
-  function jumpBuildWithDirectionAndAttachProgram(
+  function jumpBuildWithOrientationAndAttachProgram(
     BatchSystemType self,
     EntityId caller,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
   ) internal returns (EntityId) {
     return
-      CallWrapper(self.toResourceId(), address(0)).jumpBuildWithDirectionAndAttachProgram(
+      CallWrapper(self.toResourceId(), address(0)).jumpBuildWithOrientationAndAttachProgram(
         caller,
         slot,
-        direction,
+        orientation,
         program,
         buildExtraData,
         attachExtraData
@@ -144,12 +144,12 @@ library BatchSystemLib {
     return abi.decode(result, (EntityId));
   }
 
-  function buildAndAttachProgramWithDirection(
+  function buildAndAttachProgramWithOrientation(
     CallWrapper memory self,
     EntityId caller,
     Vec3 coord,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
@@ -158,9 +158,9 @@ library BatchSystemLib {
     if (address(_world()) == address(this)) revert BatchSystemLib_CallingFromRootSystem();
 
     bytes memory systemCall = abi.encodeCall(
-      _buildAndAttachProgramWithDirection_EntityId_Vec3_uint16_Direction_ProgramId_bytes_bytes
-        .buildAndAttachProgramWithDirection,
-      (caller, coord, slot, direction, program, buildExtraData, attachExtraData)
+      _buildAndAttachProgramWithOrientation_EntityId_Vec3_uint16_Orientation_ProgramId_bytes_bytes
+        .buildAndAttachProgramWithOrientation,
+      (caller, coord, slot, orientation, program, buildExtraData, attachExtraData)
     );
 
     bytes memory result = self.from == address(0)
@@ -191,11 +191,11 @@ library BatchSystemLib {
     return abi.decode(result, (EntityId));
   }
 
-  function jumpBuildWithDirectionAndAttachProgram(
+  function jumpBuildWithOrientationAndAttachProgram(
     CallWrapper memory self,
     EntityId caller,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
@@ -204,9 +204,9 @@ library BatchSystemLib {
     if (address(_world()) == address(this)) revert BatchSystemLib_CallingFromRootSystem();
 
     bytes memory systemCall = abi.encodeCall(
-      _jumpBuildWithDirectionAndAttachProgram_EntityId_uint16_Direction_ProgramId_bytes_bytes
-        .jumpBuildWithDirectionAndAttachProgram,
-      (caller, slot, direction, program, buildExtraData, attachExtraData)
+      _jumpBuildWithOrientationAndAttachProgram_EntityId_uint16_Orientation_ProgramId_bytes_bytes
+        .jumpBuildWithOrientationAndAttachProgram,
+      (caller, slot, orientation, program, buildExtraData, attachExtraData)
     );
 
     bytes memory result = self.from == address(0)
@@ -233,20 +233,20 @@ library BatchSystemLib {
     return abi.decode(result, (EntityId));
   }
 
-  function buildAndAttachProgramWithDirection(
+  function buildAndAttachProgramWithOrientation(
     RootCallWrapper memory self,
     EntityId caller,
     Vec3 coord,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
   ) internal returns (EntityId) {
     bytes memory systemCall = abi.encodeCall(
-      _buildAndAttachProgramWithDirection_EntityId_Vec3_uint16_Direction_ProgramId_bytes_bytes
-        .buildAndAttachProgramWithDirection,
-      (caller, coord, slot, direction, program, buildExtraData, attachExtraData)
+      _buildAndAttachProgramWithOrientation_EntityId_Vec3_uint16_Orientation_ProgramId_bytes_bytes
+        .buildAndAttachProgramWithOrientation,
+      (caller, coord, slot, orientation, program, buildExtraData, attachExtraData)
     );
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
@@ -270,19 +270,19 @@ library BatchSystemLib {
     return abi.decode(result, (EntityId));
   }
 
-  function jumpBuildWithDirectionAndAttachProgram(
+  function jumpBuildWithOrientationAndAttachProgram(
     RootCallWrapper memory self,
     EntityId caller,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
   ) internal returns (EntityId) {
     bytes memory systemCall = abi.encodeCall(
-      _jumpBuildWithDirectionAndAttachProgram_EntityId_uint16_Direction_ProgramId_bytes_bytes
-        .jumpBuildWithDirectionAndAttachProgram,
-      (caller, slot, direction, program, buildExtraData, attachExtraData)
+      _jumpBuildWithOrientationAndAttachProgram_EntityId_uint16_Orientation_ProgramId_bytes_bytes
+        .jumpBuildWithOrientationAndAttachProgram,
+      (caller, slot, orientation, program, buildExtraData, attachExtraData)
     );
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
@@ -338,12 +338,12 @@ interface _buildAndAttachProgram_EntityId_Vec3_uint16_ProgramId_bytes_bytes {
   ) external;
 }
 
-interface _buildAndAttachProgramWithDirection_EntityId_Vec3_uint16_Direction_ProgramId_bytes_bytes {
-  function buildAndAttachProgramWithDirection(
+interface _buildAndAttachProgramWithOrientation_EntityId_Vec3_uint16_Orientation_ProgramId_bytes_bytes {
+  function buildAndAttachProgramWithOrientation(
     EntityId caller,
     Vec3 coord,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
@@ -360,11 +360,11 @@ interface _jumpBuildAndAttachProgram_EntityId_uint16_ProgramId_bytes_bytes {
   ) external;
 }
 
-interface _jumpBuildWithDirectionAndAttachProgram_EntityId_uint16_Direction_ProgramId_bytes_bytes {
-  function jumpBuildWithDirectionAndAttachProgram(
+interface _jumpBuildWithOrientationAndAttachProgram_EntityId_uint16_Orientation_ProgramId_bytes_bytes {
+  function jumpBuildWithOrientationAndAttachProgram(
     EntityId caller,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData

@@ -3,8 +3,6 @@ pragma solidity >=0.8.24;
 
 import { console } from "forge-std/console.sol";
 
-import { Direction } from "../src/codegen/common.sol";
-
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
@@ -15,7 +13,6 @@ import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 
 import { Machine } from "../src/codegen/tables/Machine.sol";
-import { Orientation } from "../src/codegen/tables/Orientation.sol";
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 
 import { BurnedResourceCount } from "../src/codegen/tables/BurnedResourceCount.sol";
@@ -263,7 +260,7 @@ contract MineTest is DustTest {
     );
 
     // Create bed
-    EntityId bedEntityId = setObjectAtCoord(bedCoord, ObjectTypes.Bed, Direction.NegativeZ);
+    EntityId bedEntityId = setObjectAtCoord(bedCoord, ObjectTypes.Bed);
 
     vm.prank(alice);
     world.sleep(aliceEntityId, bedEntityId, "");
@@ -458,7 +455,7 @@ contract MineTest is DustTest {
     ObjectType mineObjectType = ObjectTypes.Dirt;
     setObjectAtCoord(mineCoord, mineObjectType);
 
-    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed);
     PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     vm.prank(alice);

@@ -5,8 +5,7 @@ pragma solidity >=0.8.24;
 
 import { BuildSystem } from "../../systems/BuildSystem.sol";
 import { EntityId } from "../../EntityId.sol";
-import { Vec3 } from "../../Vec3.sol";
-import { Direction } from "../common.sol";
+import { Vec3, Orientation } from "../../Vec3.sol";
 import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 import { IWorldCall } from "@latticexyz/world/src/IWorldKernel.sol";
 import { SystemCall } from "@latticexyz/world/src/SystemCall.sol";
@@ -50,25 +49,26 @@ library BuildSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).build(caller, coord, slot, extraData);
   }
 
-  function buildWithDirection(
+  function buildWithOrientation(
     BuildSystemType self,
     EntityId caller,
     Vec3 coord,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     bytes memory extraData
   ) internal returns (EntityId) {
-    return CallWrapper(self.toResourceId(), address(0)).buildWithDirection(caller, coord, slot, direction, extraData);
+    return
+      CallWrapper(self.toResourceId(), address(0)).buildWithOrientation(caller, coord, slot, orientation, extraData);
   }
 
-  function jumpBuildWithDirection(
+  function jumpBuildWithOrientation(
     BuildSystemType self,
     EntityId caller,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     bytes memory extraData
   ) internal returns (EntityId) {
-    return CallWrapper(self.toResourceId(), address(0)).jumpBuildWithDirection(caller, slot, direction, extraData);
+    return CallWrapper(self.toResourceId(), address(0)).jumpBuildWithOrientation(caller, slot, orientation, extraData);
   }
 
   function jumpBuild(
@@ -98,20 +98,20 @@ library BuildSystemLib {
     return abi.decode(result, (EntityId));
   }
 
-  function buildWithDirection(
+  function buildWithOrientation(
     CallWrapper memory self,
     EntityId caller,
     Vec3 coord,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     bytes memory extraData
   ) internal returns (EntityId) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert BuildSystemLib_CallingFromRootSystem();
 
     bytes memory systemCall = abi.encodeCall(
-      _buildWithDirection_EntityId_Vec3_uint16_Direction_bytes.buildWithDirection,
-      (caller, coord, slot, direction, extraData)
+      _buildWithOrientation_EntityId_Vec3_uint16_Orientation_bytes.buildWithOrientation,
+      (caller, coord, slot, orientation, extraData)
     );
 
     bytes memory result = self.from == address(0)
@@ -120,19 +120,19 @@ library BuildSystemLib {
     return abi.decode(result, (EntityId));
   }
 
-  function jumpBuildWithDirection(
+  function jumpBuildWithOrientation(
     CallWrapper memory self,
     EntityId caller,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     bytes memory extraData
   ) internal returns (EntityId) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert BuildSystemLib_CallingFromRootSystem();
 
     bytes memory systemCall = abi.encodeCall(
-      _jumpBuildWithDirection_EntityId_uint16_Direction_bytes.jumpBuildWithDirection,
-      (caller, slot, direction, extraData)
+      _jumpBuildWithOrientation_EntityId_uint16_Orientation_bytes.jumpBuildWithOrientation,
+      (caller, slot, orientation, extraData)
     );
 
     bytes memory result = self.from == address(0)
@@ -171,33 +171,33 @@ library BuildSystemLib {
     return abi.decode(result, (EntityId));
   }
 
-  function buildWithDirection(
+  function buildWithOrientation(
     RootCallWrapper memory self,
     EntityId caller,
     Vec3 coord,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     bytes memory extraData
   ) internal returns (EntityId) {
     bytes memory systemCall = abi.encodeCall(
-      _buildWithDirection_EntityId_Vec3_uint16_Direction_bytes.buildWithDirection,
-      (caller, coord, slot, direction, extraData)
+      _buildWithOrientation_EntityId_Vec3_uint16_Orientation_bytes.buildWithOrientation,
+      (caller, coord, slot, orientation, extraData)
     );
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
     return abi.decode(result, (EntityId));
   }
 
-  function jumpBuildWithDirection(
+  function jumpBuildWithOrientation(
     RootCallWrapper memory self,
     EntityId caller,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     bytes memory extraData
   ) internal returns (EntityId) {
     bytes memory systemCall = abi.encodeCall(
-      _jumpBuildWithDirection_EntityId_uint16_Direction_bytes.jumpBuildWithDirection,
-      (caller, slot, direction, extraData)
+      _jumpBuildWithOrientation_EntityId_uint16_Orientation_bytes.jumpBuildWithOrientation,
+      (caller, slot, orientation, extraData)
     );
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
@@ -258,18 +258,23 @@ interface _build_EntityId_Vec3_uint16_bytes {
   function build(EntityId caller, Vec3 coord, uint16 slot, bytes memory extraData) external;
 }
 
-interface _buildWithDirection_EntityId_Vec3_uint16_Direction_bytes {
-  function buildWithDirection(
+interface _buildWithOrientation_EntityId_Vec3_uint16_Orientation_bytes {
+  function buildWithOrientation(
     EntityId caller,
     Vec3 coord,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     bytes memory extraData
   ) external;
 }
 
-interface _jumpBuildWithDirection_EntityId_uint16_Direction_bytes {
-  function jumpBuildWithDirection(EntityId caller, uint16 slot, Direction direction, bytes memory extraData) external;
+interface _jumpBuildWithOrientation_EntityId_uint16_Orientation_bytes {
+  function jumpBuildWithOrientation(
+    EntityId caller,
+    uint16 slot,
+    Orientation orientation,
+    bytes memory extraData
+  ) external;
 }
 
 interface _jumpBuild_EntityId_uint16_bytes {

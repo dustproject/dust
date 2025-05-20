@@ -3,9 +3,10 @@ pragma solidity >=0.8.24;
 
 import { LibString } from "solady/utils/LibString.sol";
 
+import { CHUNK_SIZE, FRAGMENT_SIZE, REGION_SIZE } from "./Constants.sol";
+import { Orientation } from "./Orientation.sol";
 import { Direction } from "./codegen/common.sol";
 
-import { CHUNK_SIZE, FRAGMENT_SIZE, REGION_SIZE } from "./Constants.sol";
 import { Math } from "./utils/Math.sol";
 
 // Vec3 stores 3 packed int32 values (x, y, z)
@@ -201,7 +202,7 @@ library Vec3Lib {
     return result;
   }
 
-  function applyOrientation(Vec3 v, uint8 orientation) internal pure returns (Vec3) {
+  function applyOrientation(Vec3 v, Orientation orientation) internal pure returns (Vec3) {
     (uint8 a, uint8 b, uint8 c) = _getPermutation(orientation);
     (uint8 rx, uint8 ry, uint8 rz) = _getReflection(orientation);
 
@@ -253,7 +254,7 @@ library Vec3Lib {
 
   // ======== Helper Functions ========
 
-  function _getPermutation(uint8 orientation) private pure returns (uint8 a, uint8 b, uint8 c) {
+  function _getPermutation(Orientation orientation) private pure returns (uint8 a, uint8 b, uint8 c) {
     /// @solidity memory-safe-assembly
     assembly {
       let permIdx := shr(orientation, 3)
@@ -264,7 +265,7 @@ library Vec3Lib {
     }
   }
 
-  function _getReflection(uint8 orientation) private pure returns (uint8 rx, uint8 ry, uint8 rz) {
+  function _getReflection(Orientation orientation) private pure returns (uint8 rx, uint8 ry, uint8 rz) {
     /// @solidity memory-safe-assembly
     assembly {
       let reflIdx := and(orientation, 7)

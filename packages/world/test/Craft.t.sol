@@ -8,7 +8,6 @@ import { console } from "forge-std/console.sol";
 
 import { EntityId } from "../src/EntityId.sol";
 
-import { Direction } from "../src/codegen/common.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
 
@@ -572,7 +571,7 @@ contract CraftTest is DustTest {
       assertInventoryHasObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
     }
 
-    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed);
     PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     SlotAmount[] memory inputs = new SlotAmount[](1);

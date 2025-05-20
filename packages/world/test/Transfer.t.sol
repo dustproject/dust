@@ -13,7 +13,6 @@ import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
 import { EntityId } from "../src/EntityId.sol";
 
-import { Direction } from "../src/codegen/common.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { EnergyData } from "../src/codegen/tables/Energy.sol";
 
@@ -479,7 +478,7 @@ contract TransferTest is DustTest {
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
     assertInventoryHasObject(chestEntityId, transferObjectType, 0);
 
-    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed);
     PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);

@@ -529,7 +529,7 @@ contract InventoryTest is DustTest {
     assertInventoryHasObject(airEntityId, transferObjectType, 1);
     assertInventoryHasObject(aliceEntityId, transferObjectType, 0);
 
-    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed);
     PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     SlotTransfer[] memory pickup = new SlotTransfer[](1);
@@ -549,7 +549,7 @@ contract InventoryTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, transferObjectType, 1);
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
 
-    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed);
     PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     SlotTransfer[] memory drops = new SlotTransfer[](1);

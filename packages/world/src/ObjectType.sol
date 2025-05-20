@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { Orientation } from "./Orientation.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
 import { IMachineSystem } from "./codegen/world/IMachineSystem.sol";
 import { ITransferSystem } from "./codegen/world/ITransferSystem.sol";
@@ -1143,7 +1144,11 @@ library ObjectTypeLib {
   }
 
   /// @dev Get relative schema coords, including base coord
-  function getRelativeCoords(ObjectType self, Vec3 baseCoord, uint8 orientation) internal pure returns (Vec3[] memory) {
+  function getRelativeCoords(ObjectType self, Vec3 baseCoord, Orientation orientation)
+    internal
+    pure
+    returns (Vec3[] memory)
+  {
     Vec3[] memory schemaCoords = getObjectTypeSchema(self);
     Vec3[] memory coords = new Vec3[](schemaCoords.length + 1);
 
@@ -1157,16 +1162,16 @@ library ObjectTypeLib {
     return coords;
   }
 
-  function isOrientationSupported(ObjectType self, uint8 orientation) internal pure returns (bool) {
+  function isOrientationSupported(ObjectType self, Orientation orientation) internal pure returns (bool) {
     if (self == ObjectTypes.Bed) {
-      return orientation == 1 || orientation == 44;
+      return orientation == Orientation.wrap(1) || orientation == Orientation.wrap(44);
     }
 
-    return true;
+    return orientation == Orientation.wrap(0);
   }
 
   function getRelativeCoords(ObjectType self, Vec3 baseCoord) internal pure returns (Vec3[] memory) {
-    return getRelativeCoords(self, baseCoord, 40);
+    return getRelativeCoords(self, baseCoord, Orientation.wrap(0));
   }
 
   function isActionAllowed(ObjectType self, bytes4 sig) internal pure returns (bool) {
