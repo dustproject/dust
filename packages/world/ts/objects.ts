@@ -381,7 +381,16 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   { name: "GoldOre", mass: 1600000000000000000n },
   { name: "DiamondOre", mass: 5000000000000000000n },
   { name: "NeptuniumOre", mass: 5000000000000000000n },
-  { name: "TextSign", mass: 18000000000000000n },
+  {
+    name: "TextSign",
+    mass: 18000000000000000n,
+    supportedOrientations: [
+      getOrientation("PositiveX"),
+      getOrientation("NegativeX"),
+      getOrientation("PositiveZ"),
+      getOrientation("NegativeZ"),
+    ],
+  },
   { name: "OakPlanks", mass: 4500000000000000n },
   { name: "BirchPlanks", mass: 4500000000000000n },
   { name: "JunglePlanks", mass: 4500000000000000n },
@@ -453,12 +462,9 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
     growableEnergy: 232000000000000000n,
     timeToGrow: 345600n,
   },
-  { name: "ForceField", mass: 1035000000000000000n },
-  { name: "Chest", mass: 36000000000000000n },
-  { name: "SpawnTile", mass: 6435000000000000000n },
   {
-    name: "Bed",
-    mass: 13500000000000000n,
+    name: "ForceField",
+    mass: 1035000000000000000n,
     supportedOrientations: [
       getOrientation("PositiveX"),
       getOrientation("NegativeX"),
@@ -466,9 +472,64 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
       getOrientation("NegativeZ"),
     ],
   },
-  { name: "Workbench", mass: 18000000000000000n },
-  { name: "Powerstone", mass: 80000000000000000n },
-  { name: "Furnace", mass: 108000000000000000n },
+  {
+    name: "Chest",
+    mass: 36000000000000000n,
+    supportedOrientations: [
+      getOrientation("PositiveX"),
+      getOrientation("NegativeX"),
+      getOrientation("PositiveZ"),
+      getOrientation("NegativeZ"),
+    ],
+  },
+  {
+    name: "SpawnTile",
+    mass: 6435000000000000000n,
+    supportedOrientations: [
+      getOrientation("PositiveX"),
+      getOrientation("NegativeX"),
+      getOrientation("PositiveZ"),
+      getOrientation("NegativeZ"),
+    ],
+  },
+  {
+    name: "Bed",
+    mass: 13500000000000000n,
+    supportedOrientations: [
+      getOrientation("NegativeX"),
+      getOrientation("NegativeZ"),
+    ],
+  },
+  {
+    name: "Workbench",
+    mass: 18000000000000000n,
+    supportedOrientations: [
+      getOrientation("PositiveX"),
+      getOrientation("NegativeX"),
+      getOrientation("PositiveZ"),
+      getOrientation("NegativeZ"),
+    ],
+  },
+  {
+    name: "Powerstone",
+    mass: 80000000000000000n,
+    supportedOrientations: [
+      getOrientation("PositiveX"),
+      getOrientation("NegativeX"),
+      getOrientation("PositiveZ"),
+      getOrientation("NegativeZ"),
+    ],
+  },
+  {
+    name: "Furnace",
+    mass: 108000000000000000n,
+    supportedOrientations: [
+      getOrientation("PositiveX"),
+      getOrientation("NegativeX"),
+      getOrientation("PositiveZ"),
+      getOrientation("NegativeZ"),
+    ],
+  },
   { name: "Torch", mass: 1125000000000000n },
 
   // Non blocks
