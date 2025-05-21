@@ -496,9 +496,7 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
     name: "Bed",
     mass: 13500000000000000n,
     supportedOrientations: [
-      getOrientation("PositiveX"),
       getOrientation("NegativeX"),
-      getOrientation("PositiveZ"),
       getOrientation("NegativeZ"),
     ],
   },

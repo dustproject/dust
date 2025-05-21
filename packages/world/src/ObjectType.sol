@@ -1130,7 +1130,7 @@ library ObjectTypeLib {
 
     if (self == ObjectTypes.Bed) {
       Vec3[] memory bedRelativePositions = new Vec3[](1);
-      bedRelativePositions[0] = vec3(1, 0, 0);
+      bedRelativePositions[0] = vec3(0, 0, 1);
       return bedRelativePositions;
     }
 
@@ -1180,8 +1180,7 @@ library ObjectTypeLib {
         || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
     }
     if (self == ObjectTypes.Bed) {
-      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
-        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+      return orientation == Orientation.wrap(1) || orientation == Orientation.wrap(44);
     }
     if (self == ObjectTypes.Workbench) {
       return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
