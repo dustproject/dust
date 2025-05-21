@@ -197,7 +197,8 @@ ${Object.entries(categories)
         return `if (self == ObjectTypes.${obj.name}) {
           return ${obj.supportedOrientations!.map((orientation) => `orientation == Orientation.wrap(${orientation})`).join(" || ")};
         }`;
-      })}
+      })
+      .join("\n    ")}
 
     return orientation == Orientation.wrap(0);
   }

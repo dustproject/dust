@@ -1163,7 +1163,35 @@ library ObjectTypeLib {
   }
 
   function isOrientationSupported(ObjectType self, Orientation orientation) internal pure returns (bool) {
+    if (self == ObjectTypes.TextSign) {
+      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
+        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    }
+    if (self == ObjectTypes.ForceField) {
+      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
+        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    }
+    if (self == ObjectTypes.Chest) {
+      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
+        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    }
+    if (self == ObjectTypes.SpawnTile) {
+      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
+        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    }
     if (self == ObjectTypes.Bed) {
+      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
+        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    }
+    if (self == ObjectTypes.Workbench) {
+      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
+        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    }
+    if (self == ObjectTypes.Powerstone) {
+      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
+        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    }
+    if (self == ObjectTypes.Furnace) {
       return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
         || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
     }
