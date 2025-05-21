@@ -26,6 +26,7 @@ import { ObjectType } from "../src/ObjectType.sol";
 import { ObjectTypes } from "../src/ObjectType.sol";
 import { NonPassableBlock } from "../src/systems/libraries/MoveLib.sol";
 
+import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
@@ -462,7 +463,7 @@ contract BuildTest is DustTest {
     // Use any slot for this test
     uint8 inventorySlot = 0;
 
-    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed);
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Orientation.wrap(44));
     PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     vm.prank(alice);

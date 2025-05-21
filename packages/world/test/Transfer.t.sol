@@ -34,6 +34,7 @@ import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
 
+import { Orientation } from "../src/Orientation.sol";
 import { ProgramId } from "../src/ProgramId.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
@@ -478,7 +479,7 @@ contract TransferTest is DustTest {
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
     assertInventoryHasObject(chestEntityId, transferObjectType, 0);
 
-    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed);
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Orientation.wrap(44));
     PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);

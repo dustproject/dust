@@ -177,13 +177,14 @@ ${Object.entries(categories)
     pure
     returns (Vec3[] memory)
   {
+    require(isOrientationSupported(self, orientation), "Orientation not supported");
+
     Vec3[] memory schemaCoords = getObjectTypeSchema(self);
     Vec3[] memory coords = new Vec3[](schemaCoords.length + 1);
 
     coords[0] = baseCoord;
 
     for (uint256 i = 0; i < schemaCoords.length; i++) {
-      require(isOrientationSupported(self, orientation), "Orientation not supported");
       coords[i + 1] = baseCoord + schemaCoords[i].applyOrientation(orientation);
     }
 

@@ -41,6 +41,8 @@ import {
 import { ObjectAmount, ObjectType, ObjectTypes } from "../src/ObjectType.sol";
 
 import { EntityId } from "../src/EntityId.sol";
+
+import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
@@ -260,10 +262,10 @@ contract MineTest is DustTest {
     );
 
     // Create bed
-    EntityId bedEntityId = setObjectAtCoord(bedCoord, ObjectTypes.Bed);
+    EntityId bed = setObjectAtCoord(bedCoord, ObjectTypes.Bed, Orientation.wrap(44));
 
     vm.prank(alice);
-    world.sleep(aliceEntityId, bedEntityId, "");
+    world.sleep(aliceEntityId, bed, "");
 
     // After 1000 seconds, the forcefield should be depleted
     // We wait more time so the player's energy is FULLY depleted in this period
@@ -284,9 +286,9 @@ contract MineTest is DustTest {
     assertPlayerIsDead(aliceEntityId, coord);
 
     // bed entity id should now be air and contain the inventory
-    assertEq(EntityObjectType.get(bedEntityId), ObjectTypes.Air, "Top entity is not air");
-    assertInventoryHasObject(bedEntityId, ObjectTypes.Grass, 1);
-    assertInventoryHasObject(bedEntityId, ObjectTypes.IronPick, 1);
+    assertEq(EntityObjectType.get(bed), ObjectTypes.Air, "Top entity is not air");
+    assertInventoryHasObject(bed, ObjectTypes.Grass, 1);
+    assertInventoryHasObject(bed, ObjectTypes.IronPick, 1);
   }
 
   function testMineMultiSize() public {
@@ -455,7 +457,7 @@ contract MineTest is DustTest {
     ObjectType mineObjectType = ObjectTypes.Dirt;
     setObjectAtCoord(mineCoord, mineObjectType);
 
-    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed);
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Orientation.wrap(44));
     PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     vm.prank(alice);

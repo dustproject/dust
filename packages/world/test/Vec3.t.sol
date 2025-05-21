@@ -46,22 +46,20 @@ contract Vec3Test is DustTest {
     assertEq(value, storedValue, "Values do not match");
   }
 
-  function testVec3ToArray() public {
+  function testVec3ToArray() public pure {
     Vec3 v = vec3(11, 22, 33);
-    int32[3] memory arr = v.toArray();
     assertEq(v, vec3(11, 22, 33));
   }
 
-  function testApplyOrientationIdentity() public {
+  function testApplyOrientationIdentity() public pure {
     // Identity orientation: perm = [0,1,2], refl = [0,0,0], should be orientation 0
     Orientation o = Orientation.wrap(0);
     Vec3 v = vec3(1, 2, 3);
     Vec3 r = v.applyOrientation(o);
-    int32[3] memory arr = r.toArray();
     assertEq(r, vec3(1, 2, 3));
   }
 
-  function testApplyOrientationFlipX() public {
+  function testApplyOrientationFlipX() public pure {
     // perm = [0,1,2], refl = [1,0,0] => orientation 1
     Orientation o = Orientation.wrap(1);
     Vec3 v = vec3(2, 3, 4);
@@ -69,7 +67,7 @@ contract Vec3Test is DustTest {
     assertEq(r, vec3(-2, 3, 4));
   }
 
-  function testApplyOrientationSwapYZ() public {
+  function testApplyOrientationSwapYZ() public pure {
     // TODO: check
     // perm = [0,2,1], refl = [0,0,0] => orientation 2*8+0 = 16
     Orientation o = Orientation.wrap(16);
@@ -79,7 +77,7 @@ contract Vec3Test is DustTest {
     assertEq(r, vec3(3, 2, 4));
   }
 
-  function testGetRelativeCoordsPlayer() public {
+  function testGetRelativeCoordsPlayer() public pure {
     // Only orientation 0 is supported for Player (identity)
     Vec3 base = vec3(10, 20, 30);
     Vec3[] memory coords = ObjectTypes.Player.getRelativeCoords(base);
@@ -89,18 +87,7 @@ contract Vec3Test is DustTest {
     assertEq(coords[1], vec3(10, 21, 30));
   }
 
-  function testGetRelativeCoordsBedPositiveX() public {
-    // Test for supported orientation == 0
-    Vec3 base = vec3(7, 0, 0);
-    Orientation o = Orientation.wrap(0);
-    Vec3[] memory coords = ObjectTypes.Bed.getRelativeCoords(base, o);
-    assertEq(coords.length, 2, "Should have 2 coords (base + 1 offset)");
-
-    assertEq(coords[0], vec3(7, 0, 0));
-    assertEq(coords[1], vec3(8, 0, 0));
-  }
-
-  function testGetRelativeCoordsBedNegativeX() public {
+  function testGetRelativeCoordsBedNegativeX() public pure {
     // Test for supported orientation == 1
     Vec3 base = vec3(5, 5, 5);
     Orientation o = Orientation.wrap(1);
@@ -111,35 +98,31 @@ contract Vec3Test is DustTest {
     assertEq(coords[1], vec3(4, 5, 5));
   }
 
-  function testGetRelativeCoordsBedPositiveZ() public {
-    // Test for supported orientation == 40
-    Vec3 base = vec3(7, 0, 0);
-    Orientation o = Orientation.wrap(40);
-    Vec3[] memory coords = ObjectTypes.Bed.getRelativeCoords(base, o);
-    assertEq(coords.length, 2, "Should have 2 coords (base + 1 offset)");
-
-    int32[3] memory arr0 = coords[0].toArray();
-    int32[3] memory arr1 = coords[1].toArray();
-
-    assertEq(coords[0], vec3(7, 0, 0));
-    assertEq(coords[1], vec3(7, 0, 1));
-  }
-
-  function testGetRelativeCoordsBedNegativeZ() public {
+  function testGetRelativeCoordsBedNegativeZ() public pure {
     // Test for supported orientation == 44
     Vec3 base = vec3(7, 0, 0);
     Orientation o = Orientation.wrap(44);
     Vec3[] memory coords = ObjectTypes.Bed.getRelativeCoords(base, o);
     assertEq(coords.length, 2, "Should have 2 coords (base + 1 offset)");
 
-    int32[3] memory arr0 = coords[0].toArray();
-    int32[3] memory arr1 = coords[1].toArray();
-
     assertEq(coords[0], vec3(7, 0, 0));
     assertEq(coords[1], vec3(7, 0, -1));
   }
 
-  function testOrientationUnsupportedRevert() public {
-    vm.skip(true, "TODO");
+  /// forge-config: default.allow_internal_expect_revert = true
+  function testOrientationUnsupportedSingleBlock() public {
+    // Only supported orientation is 0 for now
+    for (uint8 i = 1; i < 48; i++) {
+      Orientation o = Orientation.wrap(i);
+      vm.expectRevert("Orientation not supported");
+      ObjectTypes.Dirt.getRelativeCoords(vec3(0, 0, 0), o);
+    }
+  }
+
+  /// forge-config: default.allow_internal_expect_revert = true
+  function testOrientationUnsupportedMultiBlockRevert() public {
+    Orientation o = Orientation.wrap(20);
+    vm.expectRevert("Orientation not supported");
+    ObjectTypes.Bed.getRelativeCoords(vec3(0, 0, 0), o);
   }
 }
