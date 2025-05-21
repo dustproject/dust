@@ -90,9 +90,6 @@ library Vec3Lib {
   using LibString for *;
   using Math for *;
 
-  bytes18 constant PERMUTATIONS_BYTES = hex"000102000201010002010200020001020100";
-  bytes24 constant REFLECTIONS_BYTES = hex"000000010000000100010100000001010001000101010101";
-
   function unwrap(Vec3 self) internal pure returns (uint96) {
     return Vec3.unwrap(self);
   }
@@ -203,8 +200,8 @@ library Vec3Lib {
   }
 
   function applyOrientation(Vec3 v, Orientation orientation) internal pure returns (Vec3) {
-    (uint8 a, uint8 b, uint8 c) = _getPermutation(orientation);
-    (bool rx, bool ry, bool rz) = _getReflection(orientation);
+    (uint8 a, uint8 b, uint8 c) = orientation.getPermutation();
+    (bool rx, bool ry, bool rz) = orientation.getReflection();
 
     int32[3] memory arr = v.toArray();
 
@@ -253,28 +250,6 @@ library Vec3Lib {
   }
 
   // ======== Helper Functions ========
-
-  function _getPermutation(Orientation orientation) private pure returns (uint8 a, uint8 b, uint8 c) {
-    /// @solidity memory-safe-assembly
-    assembly {
-      let permIdx := shr(3, orientation)
-      let offset := mul(permIdx, 3)
-      a := byte(offset, PERMUTATIONS_BYTES)
-      b := byte(add(offset, 1), PERMUTATIONS_BYTES)
-      c := byte(add(offset, 2), PERMUTATIONS_BYTES)
-    }
-  }
-
-  function _getReflection(Orientation orientation) private pure returns (bool rx, bool ry, bool rz) {
-    /// @solidity memory-safe-assembly
-    assembly {
-      let reflIdx := and(orientation, 7)
-      let offset := mul(reflIdx, 3)
-      rx := byte(offset, REFLECTIONS_BYTES)
-      ry := byte(add(offset, 1), REFLECTIONS_BYTES)
-      rz := byte(add(offset, 2), REFLECTIONS_BYTES)
-    }
-  }
 
   // Floor division (integer division that rounds down)
   function _floorDiv(int32 a, int32 b) private pure returns (int32) {
