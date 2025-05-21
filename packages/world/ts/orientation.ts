@@ -101,8 +101,8 @@ export function encodeOrientation(refl: Reflect, perm: Permute): Orientation {
 
 export function decodeOrientation(
   orientation: Orientation,
-): [Reflect, Permute] {
-  const reflIdx = orientation & 8;
+): [Permute, Reflect] {
   const permIdx = orientation >> 3;
-  return [REFLECTIONS[reflIdx]!, PERMUTATIONS[permIdx]!];
+  const reflIdx = orientation & 7;
+  return [PERMUTATIONS[permIdx]!, REFLECTIONS[reflIdx]!];
 }
