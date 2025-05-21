@@ -33,22 +33,6 @@ abstract contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, Worl
     SmartItem.deleteRecord(target);
   }
 
-  function setAllowed(EntityId target, EntityId caller, bool allowed) external {
-    bytes32 smartItemId = SmartItem.get(target);
-    _requireOwner(smartItemId);
-    AllowedCaller.set(smartItemId, caller, allowed);
-  }
-
-  function setOwner(EntityId target, EntityId newOwner) external {
-    bytes32 smartItemId = SmartItem.get(target);
-    _requireOwner(smartItemId);
-    Owner.set(smartItemId, newOwner);
-  }
-
-  function _requireOwner(bytes32 smartItemId) internal view {
-    require(Owner.get(smartItemId) == EntityIdLib.encodePlayer(_msgSender()), "Only the owner can call this function");
-  }
-
   function _isAllowed(EntityId target, EntityId caller) internal view returns (bool) {
     return AllowedCaller.get(SmartItem.get(target), caller);
   }
