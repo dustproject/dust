@@ -1,4 +1,6 @@
 import config from "../mud.config";
+import type { Vec3 } from "./vec3";
+
 // Direction is an array of strings
 config.enums.Direction;
 
@@ -17,49 +19,55 @@ const SUPPORTED_DIRECTION_VECTORS: {
 
 type SupportedDirection = keyof typeof SUPPORTED_DIRECTION_VECTORS;
 
-const PERMUTATIONS: [number, number, number][] = [
-  [0, 1, 2],
-  [0, 2, 1],
-  [1, 0, 2],
-  [1, 2, 0],
-  [2, 0, 1],
-  [2, 1, 0],
+export type Orientation = number; // uint8 in Solidity
+
+type Axis = 0 | 1 | 2;
+export type Permute = readonly [Axis, Axis, Axis];
+export type Reflect = readonly [0 | 1, 0 | 1, 0 | 1];
+
+// 6 possible permutations
+export const PERMUTATIONS: Permute[] = [
+  [0, 1, 2], // Original orientation
+  [0, 2, 1], // Swap y and z
+  [1, 0, 2], // Swap x and y
+  [1, 2, 0], // Rotate x->y->z->x
+  [2, 0, 1], // Rotate x->z->y->x
+  [2, 1, 0], // Swap x and z
 ];
 
-const REFLECTIONS: [number, number, number][] = [
-  [0, 0, 0],
-  [1, 0, 0],
-  [0, 1, 0],
-  [1, 1, 0],
-  [0, 0, 1],
-  [1, 0, 1],
-  [0, 1, 1],
-  [1, 1, 1],
+// 8 possible reflections
+export const REFLECTIONS: Reflect[] = [
+  [0, 0, 0], // No reflection
+  [1, 0, 0], // Reflect x
+  [0, 1, 0], // Reflect y
+  [1, 1, 0], // Reflect x and y
+  [0, 0, 1], // Reflect z
+  [1, 0, 1], // Reflect x and z
+  [0, 1, 1], // Reflect y and z
+  [1, 1, 1], // Reflect all axes
 ];
 
-const CANONICAL_UP: [number, number, number] = [0, 1, 0];
-const CANONICAL_FORWARD: [number, number, number] = [1, 0, 0];
+const CANONICAL_UP: Vec3 = [0, 1, 0];
+const CANONICAL_FORWARD: Vec3 = [1, 0, 0];
 
-function applyOrientation(
-  v: [number, number, number],
-  perm: [number, number, number],
-  refl: [number, number, number],
-): [number, number, number] {
-  const out: [number, number, number] = [v[perm[0]]!, v[perm[1]]!, v[perm[2]]!];
+export function applyOrientation(v: Vec3, perm: Permute, refl: Reflect): Vec3 {
+  const out: Vec3 = [v[perm[0]]!, v[perm[1]]!, v[perm[2]]!];
   if (refl[0]) out[0] = -out[0];
   if (refl[1]) out[1] = -out[1];
   if (refl[2]) out[2] = -out[2];
   return out;
 }
 
-export function getOrientation(forwardDirection: SupportedDirection): number {
+export function getOrientation(
+  forwardDirection: SupportedDirection,
+): Orientation {
   return getOrientationGeneric(forwardDirection, "PositiveY");
 }
 
 export function getOrientationGeneric(
   forwardDirection: SupportedDirection,
   upDirection: SupportedDirection,
-): number {
+): Orientation {
   const targetForward = SUPPORTED_DIRECTION_VECTORS[forwardDirection]!;
   const targetUp = SUPPORTED_DIRECTION_VECTORS[upDirection]!;
 
@@ -84,4 +92,17 @@ export function getOrientationGeneric(
     }
   }
   throw new Error("Unable to find orientation");
+}
+
+// TODO: implement
+export function encodeOrientation(refl: Reflect, perm: Permute): Orientation {
+  return 0;
+}
+
+export function decodeOrientation(
+  orientation: Orientation,
+): [Reflect, Permute] {
+  const reflIdx = orientation & 8;
+  const permIdx = orientation >> 3;
+  return [REFLECTIONS[reflIdx]!, PERMUTATIONS[permIdx]!];
 }

@@ -1164,8 +1164,8 @@ library ObjectTypeLib {
 
   function isOrientationSupported(ObjectType self, Orientation orientation) internal pure returns (bool) {
     if (self == ObjectTypes.Bed) {
-      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(40)
-        || orientation == Orientation.wrap(1) || orientation == Orientation.wrap(44);
+      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
+        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
     }
 
     return orientation == Orientation.wrap(0);
