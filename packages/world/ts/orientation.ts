@@ -94,9 +94,21 @@ export function getOrientationGeneric(
   throw new Error("Unable to find orientation");
 }
 
-// TODO: implement
-export function encodeOrientation(refl: Reflect, perm: Permute): Orientation {
-  return 0;
+export function encodeOrientation(perm: Permute, refl: Reflect): Orientation {
+  // Find the index of the permutation in PERMUTATIONS array
+  const permIdx = PERMUTATIONS.findIndex(
+    (p) => p[0] === perm[0] && p[1] === perm[1] && p[2] === perm[2],
+  );
+  if (permIdx === -1) throw new Error("Invalid permutation");
+
+  // Find the index of the reflection in REFLECTIONS array
+  const reflIdx = REFLECTIONS.findIndex(
+    (r) => r[0] === refl[0] && r[1] === refl[1] && r[2] === refl[2],
+  );
+  if (reflIdx === -1) throw new Error("Invalid reflection");
+
+  // Combine the indices into a single orientation number
+  return (permIdx << 3) | reflIdx;
 }
 
 export function decodeOrientation(
