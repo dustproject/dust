@@ -90,7 +90,7 @@ library Vec3Lib {
   using LibString for *;
   using Math for *;
 
-  bytes18 constant PERMUTATIONS_BYTES = hex"000102002101010201201201020100";
+  bytes18 constant PERMUTATIONS_BYTES = hex"000102000201010002010200020001020100";
   bytes24 constant REFLECTIONS_BYTES = hex"000000010000000100010100000001010001000101010101";
 
   function unwrap(Vec3 self) internal pure returns (uint96) {
