@@ -204,15 +204,15 @@ library Vec3Lib {
 
   function applyOrientation(Vec3 v, Orientation orientation) internal pure returns (Vec3) {
     (uint8 a, uint8 b, uint8 c) = _getPermutation(orientation);
-    (uint8 rx, uint8 ry, uint8 rz) = _getReflection(orientation);
+    (bool rx, bool ry, bool rz) = _getReflection(orientation);
 
     int32[3] memory arr = v.toArray();
 
     (int32 nx, int32 ny, int32 nz) = (arr[a], arr[b], arr[c]);
 
-    if (rx != 0) nx = -nx;
-    if (ry != 0) ny = -ny;
-    if (rz != 0) nz = -nz;
+    if (rx) nx = -nx;
+    if (ry) ny = -ny;
+    if (rz) nz = -nz;
 
     return vec3(nx, ny, nz);
   }
@@ -257,22 +257,22 @@ library Vec3Lib {
   function _getPermutation(Orientation orientation) private pure returns (uint8 a, uint8 b, uint8 c) {
     /// @solidity memory-safe-assembly
     assembly {
-      let permIdx := shr(orientation, 3)
+      let permIdx := shr(3, orientation)
       let offset := mul(permIdx, 3)
-      a := shr(5, and(shr(offset, PERMUTATIONS_BYTES), 0x7))
-      b := shr(5, and(shr(add(offset, 1), PERMUTATIONS_BYTES), 0x7))
-      c := shr(5, and(shr(add(offset, 2), PERMUTATIONS_BYTES), 0x7))
+      a := byte(offset, PERMUTATIONS_BYTES)
+      b := byte(add(offset, 1), PERMUTATIONS_BYTES)
+      c := byte(add(offset, 2), PERMUTATIONS_BYTES)
     }
   }
 
-  function _getReflection(Orientation orientation) private pure returns (uint8 rx, uint8 ry, uint8 rz) {
+  function _getReflection(Orientation orientation) private pure returns (bool rx, bool ry, bool rz) {
     /// @solidity memory-safe-assembly
     assembly {
       let reflIdx := and(orientation, 7)
       let offset := mul(reflIdx, 3)
-      rx := shr(5, and(shr(offset, REFLECTIONS_BYTES), 0x1))
-      ry := shr(5, and(shr(add(offset, 1), REFLECTIONS_BYTES), 0x1))
-      rz := shr(5, and(shr(add(offset, 2), REFLECTIONS_BYTES), 0x1))
+      rx := byte(offset, REFLECTIONS_BYTES)
+      ry := byte(add(offset, 1), REFLECTIONS_BYTES)
+      rz := byte(add(offset, 2), REFLECTIONS_BYTES)
     }
   }
 
