@@ -1036,6 +1036,7 @@ export const categories: Record<string, Category> = {
       "SeaAnemone",
       "Algae",
       "Torch",
+      "BambooBush",
     ],
   },
   Growable: {
