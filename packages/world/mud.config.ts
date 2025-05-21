@@ -63,6 +63,7 @@ export default defineWorld({
   },
   userTypes: {
     ObjectType: { filePath: "./src/ObjectType.sol", type: "uint16" },
+    Orientation: { filePath: "./src/Orientation.sol", type: "uint8" },
     EntityId: { filePath: "./src/EntityId.sol", type: "bytes32" },
     ProgramId: { filePath: "./src/ProgramId.sol", type: "bytes32" },
     ResourceId: {
@@ -123,10 +124,10 @@ export default defineWorld({
       },
       key: ["entityId"],
     },
-    Orientation: {
+    EntityOrientation: {
       schema: {
         entityId: "EntityId",
-        direction: "Direction",
+        orientation: "Orientation",
       },
       key: ["entityId"],
     },

@@ -6,9 +6,9 @@ import { EntityId } from "../EntityId.sol";
 import { buildSystem } from "../codegen/systems/BuildSystemLib.sol";
 import { programSystem } from "../codegen/systems/ProgramSystemLib.sol";
 
+import { Orientation } from "../Orientation.sol";
 import { ProgramId } from "../ProgramId.sol";
 import { Vec3 } from "../Vec3.sol";
-import { Direction } from "../codegen/common.sol";
 
 import { System } from "@latticexyz/world/src/System.sol";
 
@@ -28,16 +28,17 @@ contract BatchSystem is System {
     return buildEntity;
   }
 
-  function buildAndAttachProgramWithDirection(
+  function buildAndAttachProgramWithOrientation(
     EntityId caller,
     Vec3 coord,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     ProgramId program,
     bytes calldata buildExtraData,
     bytes calldata attachExtraData
   ) public returns (EntityId) {
-    EntityId buildEntity = buildSystem.callAsRoot().buildWithDirection(caller, coord, slot, direction, buildExtraData);
+    EntityId buildEntity =
+      buildSystem.callAsRoot().buildWithOrientation(caller, coord, slot, orientation, buildExtraData);
     if (buildEntity.exists()) {
       programSystem.callAsRoot().attachProgram(caller, buildEntity, program, attachExtraData);
     }
@@ -58,15 +59,15 @@ contract BatchSystem is System {
     return buildEntity;
   }
 
-  function jumpBuildWithDirectionAndAttachProgram(
+  function jumpBuildWithOrientationAndAttachProgram(
     EntityId caller,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     ProgramId program,
     bytes calldata buildExtraData,
     bytes calldata attachExtraData
   ) public returns (EntityId) {
-    EntityId buildEntity = buildSystem.callAsRoot().jumpBuildWithDirection(caller, slot, direction, buildExtraData);
+    EntityId buildEntity = buildSystem.callAsRoot().jumpBuildWithOrientation(caller, slot, orientation, buildExtraData);
     if (buildEntity.exists()) {
       programSystem.callAsRoot().attachProgram(caller, buildEntity, program, attachExtraData);
     }

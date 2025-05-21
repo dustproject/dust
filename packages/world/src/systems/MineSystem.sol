@@ -10,10 +10,11 @@ import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
 
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
+
+import { EntityOrientation } from "../codegen/tables/EntityOrientation.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
-import { Orientation } from "../codegen/tables/Orientation.sol";
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
@@ -178,7 +179,7 @@ contract MineSystem is System {
 
   function _removeRelativeBlocks(EntityId mined, ObjectType minedType, Vec3 baseCoord) internal {
     // First coord will be the base coord, the rest is relative schema coords
-    Vec3[] memory coords = minedType.getRelativeCoords(baseCoord, Orientation._get(mined));
+    Vec3[] memory coords = minedType.getRelativeCoords(baseCoord, EntityOrientation._get(mined));
 
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {

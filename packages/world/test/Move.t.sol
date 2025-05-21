@@ -5,7 +5,6 @@ import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { console } from "forge-std/console.sol";
 
-import { Direction } from "../src/codegen/common.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
@@ -33,6 +32,7 @@ import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
 
+import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 
 import { NonPassableBlock } from "../src/systems/libraries/MoveLib.sol";
@@ -620,7 +620,7 @@ contract MoveTest is DustTest {
     newCoords[0] = playerCoord + vec3(0, 0, 1);
     newCoords[1] = playerCoord + vec3(0, 0, 2);
 
-    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Orientation.wrap(44));
     PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     vm.prank(alice);

@@ -30,6 +30,7 @@ import { ObjectTypes } from "../src/ObjectType.sol";
 
 import { SlotTransfer } from "../src/utils/InventoryUtils.sol";
 
+import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 
 import { DustTest } from "./DustTest.sol";
@@ -529,7 +530,7 @@ contract InventoryTest is DustTest {
     assertInventoryHasObject(airEntityId, transferObjectType, 1);
     assertInventoryHasObject(aliceEntityId, transferObjectType, 0);
 
-    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Orientation.wrap(44));
     PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     SlotTransfer[] memory pickup = new SlotTransfer[](1);
@@ -549,7 +550,7 @@ contract InventoryTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, transferObjectType, 1);
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
 
-    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Orientation.wrap(44));
     PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     SlotTransfer[] memory drops = new SlotTransfer[](1);

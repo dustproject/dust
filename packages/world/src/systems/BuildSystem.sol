@@ -3,7 +3,7 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
-import { Action, Direction } from "../codegen/common.sol";
+import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 
 import { DisabledExtraDrops } from "../codegen/tables/DisabledExtraDrops.sol";
@@ -14,8 +14,8 @@ import { Inventory } from "../codegen/tables/Inventory.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 
+import { EntityOrientation } from "../codegen/tables/EntityOrientation.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
-import { Orientation } from "../codegen/tables/Orientation.sol";
 
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
@@ -35,17 +35,20 @@ import { ObjectType, ObjectTypes } from "../ObjectType.sol";
 
 import { ProgramId } from "../ProgramId.sol";
 import { IBuildHook } from "../ProgramInterfaces.sol";
-import { Vec3, vec3 } from "../Vec3.sol";
+import { Orientation, Vec3, vec3 } from "../Vec3.sol";
 
 contract BuildSystem is System {
   function build(EntityId caller, Vec3 coord, uint16 slot, bytes calldata extraData) public returns (EntityId) {
-    return buildWithDirection(caller, coord, slot, Direction.PositiveZ, extraData);
+    return buildWithOrientation(caller, coord, slot, Orientation.wrap(0), extraData);
   }
 
-  function buildWithDirection(EntityId caller, Vec3 coord, uint16 slot, Direction direction, bytes calldata extraData)
-    public
-    returns (EntityId)
-  {
+  function buildWithOrientation(
+    EntityId caller,
+    Vec3 coord,
+    uint16 slot,
+    Orientation orientation,
+    bytes calldata extraData
+  ) public returns (EntityId) {
     uint128 callerEnergy = caller.activate().energy;
     caller.requireConnected(coord);
     ObjectType buildType = InventorySlot._getObjectType(caller, slot);
@@ -57,7 +60,7 @@ contract BuildSystem is System {
       return EntityId.wrap(0);
     }
 
-    (EntityId base, Vec3[] memory coords) = BuildLib._addBlocks(coord, buildType, direction);
+    (EntityId base, Vec3[] memory coords) = BuildLib._addBlocks(coord, buildType, orientation);
 
     BuildLib._handleBuildType(base, buildType, coord);
 
@@ -71,7 +74,7 @@ contract BuildSystem is System {
     return base;
   }
 
-  function jumpBuildWithDirection(EntityId caller, uint16 slot, Direction direction, bytes calldata extraData)
+  function jumpBuildWithOrientation(EntityId caller, uint16 slot, Orientation orientation, bytes calldata extraData)
     public
     returns (EntityId)
   {
@@ -88,11 +91,11 @@ contract BuildSystem is System {
 
     notify(caller, MoveNotification({ moveCoords: moveCoords }));
 
-    return buildWithDirection(caller, coord, slot, direction, extraData);
+    return buildWithOrientation(caller, coord, slot, orientation, extraData);
   }
 
   function jumpBuild(EntityId caller, uint16 slot, bytes calldata extraData) public returns (EntityId) {
-    return jumpBuildWithDirection(caller, slot, Direction.PositiveZ, extraData);
+    return jumpBuildWithOrientation(caller, slot, Orientation.wrap(0), extraData);
   }
 }
 
@@ -123,13 +126,13 @@ library BuildLib {
     return terrain;
   }
 
-  function _addBlocks(Vec3 baseCoord, ObjectType buildType, Direction direction)
+  function _addBlocks(Vec3 baseCoord, ObjectType buildType, Orientation orientation)
     public
     returns (EntityId, Vec3[] memory)
   {
-    Vec3[] memory coords = buildType.getRelativeCoords(baseCoord, direction);
+    Vec3[] memory coords = buildType.getRelativeCoords(baseCoord, orientation);
     EntityId base = _addBlock(buildType, baseCoord);
-    Orientation._set(base, direction);
+    EntityOrientation._set(base, orientation);
     uint128 mass = ObjectPhysics._getMass(buildType);
     Mass._setMass(base, mass);
     // Only iterate through relative schema coords

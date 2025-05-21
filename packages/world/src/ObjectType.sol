@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { Orientation } from "./Orientation.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
-import { Direction } from "./codegen/common.sol";
 import { IMachineSystem } from "./codegen/world/IMachineSystem.sol";
 import { ITransferSystem } from "./codegen/world/ITransferSystem.sol";
 
@@ -1130,7 +1130,7 @@ library ObjectTypeLib {
 
     if (self == ObjectTypes.Bed) {
       Vec3[] memory bedRelativePositions = new Vec3[](1);
-      bedRelativePositions[0] = vec3(0, 0, 1);
+      bedRelativePositions[0] = vec3(1, 0, 0);
       return bedRelativePositions;
     }
 
@@ -1144,35 +1144,63 @@ library ObjectTypeLib {
   }
 
   /// @dev Get relative schema coords, including base coord
-  function getRelativeCoords(ObjectType self, Vec3 baseCoord, Direction direction)
+  function getRelativeCoords(ObjectType self, Vec3 baseCoord, Orientation orientation)
     internal
     pure
     returns (Vec3[] memory)
   {
+    require(isOrientationSupported(self, orientation), "Orientation not supported");
+
     Vec3[] memory schemaCoords = getObjectTypeSchema(self);
     Vec3[] memory coords = new Vec3[](schemaCoords.length + 1);
 
     coords[0] = baseCoord;
 
     for (uint256 i = 0; i < schemaCoords.length; i++) {
-      require(isDirectionSupported(self, direction), "Direction not supported");
-      coords[i + 1] = baseCoord + schemaCoords[i].rotate(direction);
+      coords[i + 1] = baseCoord + schemaCoords[i].applyOrientation(orientation);
     }
 
     return coords;
   }
 
-  function isDirectionSupported(ObjectType self, Direction direction) internal pure returns (bool) {
+  function isOrientationSupported(ObjectType self, Orientation orientation) internal pure returns (bool) {
+    if (self == ObjectTypes.TextSign) {
+      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
+        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    }
+    if (self == ObjectTypes.ForceField) {
+      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
+        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    }
+    if (self == ObjectTypes.Chest) {
+      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
+        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    }
+    if (self == ObjectTypes.SpawnTile) {
+      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
+        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    }
     if (self == ObjectTypes.Bed) {
-      // Note: before supporting more directions, we need to ensure clients can render it
-      return direction == Direction.NegativeX || direction == Direction.NegativeZ;
+      return orientation == Orientation.wrap(1) || orientation == Orientation.wrap(44);
+    }
+    if (self == ObjectTypes.Workbench) {
+      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
+        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    }
+    if (self == ObjectTypes.Powerstone) {
+      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
+        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    }
+    if (self == ObjectTypes.Furnace) {
+      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
+        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
     }
 
-    return true;
+    return orientation == Orientation.wrap(0);
   }
 
   function getRelativeCoords(ObjectType self, Vec3 baseCoord) internal pure returns (Vec3[] memory) {
-    return getRelativeCoords(self, baseCoord, Direction.PositiveZ);
+    return getRelativeCoords(self, baseCoord, Orientation.wrap(0));
   }
 
   function isActionAllowed(ObjectType self, bytes4 sig) internal pure returns (bool) {

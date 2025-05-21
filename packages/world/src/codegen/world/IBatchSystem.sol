@@ -6,7 +6,7 @@ pragma solidity >=0.8.24;
 import { EntityId } from "../../EntityId.sol";
 import { Vec3 } from "../../Vec3.sol";
 import { ProgramId } from "../../ProgramId.sol";
-import { Direction } from "../common.sol";
+import { Orientation } from "../../Orientation.sol";
 
 /**
  * @title IBatchSystem
@@ -23,11 +23,11 @@ interface IBatchSystem {
     bytes calldata attachExtraData
   ) external returns (EntityId);
 
-  function buildAndAttachProgramWithDirection(
+  function buildAndAttachProgramWithOrientation(
     EntityId caller,
     Vec3 coord,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     ProgramId program,
     bytes calldata buildExtraData,
     bytes calldata attachExtraData
@@ -41,10 +41,10 @@ interface IBatchSystem {
     bytes calldata attachExtraData
   ) external returns (EntityId);
 
-  function jumpBuildWithDirectionAndAttachProgram(
+  function jumpBuildWithOrientationAndAttachProgram(
     EntityId caller,
     uint16 slot,
-    Direction direction,
+    Orientation orientation,
     ProgramId program,
     bytes calldata buildExtraData,
     bytes calldata attachExtraData

@@ -6,8 +6,6 @@ import { console } from "forge-std/console.sol";
 
 import { EntityId } from "../src/EntityId.sol";
 
-import { Direction } from "../src/codegen/common.sol";
-
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
@@ -28,6 +26,7 @@ import { ObjectType } from "../src/ObjectType.sol";
 import { ObjectTypes } from "../src/ObjectType.sol";
 import { NonPassableBlock } from "../src/systems/libraries/MoveLib.sol";
 
+import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
@@ -121,6 +120,42 @@ contract BuildTest is DustTest {
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
     assertEq(Mass.getMass(topEntityId), 0, "Top entity mass is not correct");
+  }
+
+  function testBuildMultiSizeWithOrientation() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    Vec3 buildCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
+    Vec3 negativeXCoord = buildCoord - vec3(1, 0, 0);
+    setObjectAtCoord(buildCoord, ObjectTypes.Air);
+    setObjectAtCoord(negativeXCoord, ObjectTypes.Air);
+    ObjectType buildObjectType = ObjectTypes.Bed;
+    TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
+    (EntityId negativeXEntity,) = TestEntityUtils.getBlockAt(negativeXCoord);
+    assertTrue(TestEntityUtils.exists(negativeXEntity), "NegativeX entity does not exist");
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
+
+    // Find the inventory slot with the TextSign object
+    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
+
+    Vec3[] memory relative = buildObjectType.getRelativeCoords(buildCoord, Orientation.wrap(1));
+
+    vm.prank(alice);
+    startGasReport("build multi-size");
+    // Build with NegativeX orientation
+    world.buildWithOrientation(aliceEntityId, buildCoord, inventorySlot, Orientation.wrap(1), "");
+    endGasReport();
+
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
+    assertEq(EntityObjectType.get(negativeXEntity), buildObjectType, "NegativeX entity is not build object type");
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+    assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
+    assertEq(Mass.getMass(negativeXEntity), 0, "NegativeX entity mass is not correct");
   }
 
   function testJumpBuild() public {
@@ -464,7 +499,7 @@ contract BuildTest is DustTest {
     // Use any slot for this test
     uint8 inventorySlot = 0;
 
-    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Orientation.wrap(44));
     PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     vm.prank(alice);

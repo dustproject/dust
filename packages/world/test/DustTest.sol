@@ -23,13 +23,15 @@ import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
 
+import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
+
+import { EntityOrientation } from "../src/codegen/tables/EntityOrientation.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
-import { Orientation } from "../src/codegen/tables/Orientation.sol";
 
 import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 import { Machine } from "../src/codegen/tables/Machine.sol";
@@ -236,23 +238,23 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
   }
 
   function setObjectAtCoord(Vec3 coord, ObjectType objectType) internal returns (EntityId) {
-    return setObjectAtCoord(coord, objectType, Direction.PositiveZ);
+    return setObjectAtCoord(coord, objectType, Orientation.wrap(0));
   }
 
-  function setObjectAtCoord(Vec3 coord, ObjectType objectType, Direction direction) internal returns (EntityId) {
+  function setObjectAtCoord(Vec3 coord, ObjectType objectType, Orientation orientation) internal returns (EntityId) {
     Vec3 chunkCoord = coord.toChunkCoord();
     if (!TerrainLib._isChunkExplored(chunkCoord, worldAddress)) {
       setupAirChunk(coord);
     }
 
     EntityId entityId = EntityIdLib.encodeBlock(coord);
-    Orientation.set(entityId, direction);
+    EntityOrientation.set(entityId, orientation);
 
     EntityObjectType.set(entityId, objectType);
     EntityPosition.set(entityId, coord);
     Mass.set(entityId, ObjectPhysics.getMass(objectType));
 
-    Vec3[] memory coords = objectType.getRelativeCoords(coord, direction);
+    Vec3[] memory coords = objectType.getRelativeCoords(coord, orientation);
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];

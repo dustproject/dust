@@ -8,7 +8,7 @@ import { Recipes, RecipesData } from "./tables/Recipes.sol";
 import { InitialEnergyPool } from "./tables/InitialEnergyPool.sol";
 import { EntityObjectType } from "./tables/EntityObjectType.sol";
 import { EntityPosition, EntityPositionData } from "./tables/EntityPosition.sol";
-import { Orientation } from "./tables/Orientation.sol";
+import { EntityOrientation } from "./tables/EntityOrientation.sol";
 import { Mass } from "./tables/Mass.sol";
 import { Energy, EnergyData } from "./tables/Energy.sol";
 import { LocalEnergyPool } from "./tables/LocalEnergyPool.sol";

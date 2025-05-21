@@ -3,8 +3,6 @@ pragma solidity >=0.8.24;
 
 import { console } from "forge-std/console.sol";
 
-import { Direction } from "../src/codegen/common.sol";
-
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
@@ -15,7 +13,6 @@ import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 
 import { Machine } from "../src/codegen/tables/Machine.sol";
-import { Orientation } from "../src/codegen/tables/Orientation.sol";
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 
 import { BurnedResourceCount } from "../src/codegen/tables/BurnedResourceCount.sol";
@@ -44,6 +41,8 @@ import {
 import { ObjectAmount, ObjectType, ObjectTypes } from "../src/ObjectType.sol";
 
 import { EntityId } from "../src/EntityId.sol";
+
+import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
@@ -228,7 +227,7 @@ contract MineTest is DustTest {
     world.mine(aliceEntityId, mineCoord, "");
     endGasReport();
 
-    (EntityId mineEntityId, ObjectType objectType) = TestEntityUtils.getBlockAt(mineCoord);
+    (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(mineCoord);
     assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
@@ -263,10 +262,10 @@ contract MineTest is DustTest {
     );
 
     // Create bed
-    EntityId bedEntityId = setObjectAtCoord(bedCoord, ObjectTypes.Bed, Direction.NegativeZ);
+    EntityId bed = setObjectAtCoord(bedCoord, ObjectTypes.Bed, Orientation.wrap(44));
 
     vm.prank(alice);
-    world.sleep(aliceEntityId, bedEntityId, "");
+    world.sleep(aliceEntityId, bed, "");
 
     // After 1000 seconds, the forcefield should be depleted
     // We wait more time so the player's energy is FULLY depleted in this period
@@ -287,9 +286,9 @@ contract MineTest is DustTest {
     assertPlayerIsDead(aliceEntityId, coord);
 
     // bed entity id should now be air and contain the inventory
-    assertEq(EntityObjectType.get(bedEntityId), ObjectTypes.Air, "Top entity is not air");
-    assertInventoryHasObject(bedEntityId, ObjectTypes.Grass, 1);
-    assertInventoryHasObject(bedEntityId, ObjectTypes.IronPick, 1);
+    assertEq(EntityObjectType.get(bed), ObjectTypes.Air, "Top entity is not air");
+    assertInventoryHasObject(bed, ObjectTypes.Grass, 1);
+    assertInventoryHasObject(bed, ObjectTypes.IronPick, 1);
   }
 
   function testMineMultiSize() public {
@@ -344,6 +343,60 @@ contract MineTest is DustTest {
     assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
     assertEq(EntityObjectType.get(topEntityId), ObjectTypes.Air, "Top entity is not air");
+    assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
+  }
+
+  function testMineMultiSizeWithOrientation() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    Vec3 mineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
+    ObjectType mineObjectType = ObjectTypes.Bed;
+    ObjectPhysics.setMass(mineObjectType, playerHandMassReduction - 1);
+    setObjectAtCoord(mineCoord, mineObjectType, Orientation.wrap(1));
+    Vec3 relativeCoord = mineCoord - vec3(1, 0, 0);
+    (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(mineCoord);
+    (EntityId relativeEntityId,) = TestEntityUtils.getBlockAt(relativeCoord);
+    assertTrue(TestEntityUtils.exists(mineEntityId), "Mine entity does not exist");
+    assertTrue(TestEntityUtils.exists(relativeEntityId), "Relative entity does not exist");
+    assertEq(EntityObjectType.get(mineEntityId), mineObjectType, "Mine entity is not mine object type");
+    assertEq(EntityObjectType.get(relativeEntityId), mineObjectType, "Relative entity is not air");
+    assertEq(Mass.getMass(mineEntityId), ObjectPhysics.getMass(mineObjectType), "Mine entity mass is not correct");
+    assertEq(Mass.getMass(relativeEntityId), 0, "Relative entity mass is not correct");
+    assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
+
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
+
+    vm.prank(alice);
+    world.mineUntilDestroyed(aliceEntityId, mineCoord, "");
+    endGasReport();
+
+    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
+    assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
+    assertEq(EntityObjectType.get(relativeEntityId), ObjectTypes.Air, "Relative entity is not air");
+    assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not correct");
+    assertEq(Mass.getMass(relativeEntityId), 0, "Relative entity mass is not correct");
+    assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+
+    uint16 bedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.Bed);
+
+    // Mine again but with a non-base coord
+    vm.prank(alice);
+    world.buildWithOrientation(aliceEntityId, mineCoord, bedSlot, Orientation.wrap(1), "");
+
+    (mineEntityId,) = TestEntityUtils.getBlockAt(mineCoord);
+    (relativeEntityId,) = TestEntityUtils.getBlockAt(relativeCoord);
+    assertTrue(TestEntityUtils.exists(mineEntityId), "Mine entity does not exist");
+    assertTrue(TestEntityUtils.exists(relativeEntityId), "Top entity does not exist");
+    assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
+
+    vm.prank(alice);
+    world.mine(aliceEntityId, relativeCoord, "");
+
+    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
+    assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
+    assertEq(EntityObjectType.get(relativeEntityId), ObjectTypes.Air, "Top entity is not air");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
   }
 
@@ -458,7 +511,7 @@ contract MineTest is DustTest {
     ObjectType mineObjectType = ObjectTypes.Dirt;
     setObjectAtCoord(mineCoord, mineObjectType);
 
-    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Orientation.wrap(44));
     PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     vm.prank(alice);

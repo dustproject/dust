@@ -8,7 +8,6 @@ import { console } from "forge-std/console.sol";
 
 import { EntityId } from "../src/EntityId.sol";
 
-import { Direction } from "../src/codegen/common.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Inventory } from "../src/codegen/tables/Inventory.sol";
 
@@ -30,6 +29,7 @@ import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
 
+import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { SlotAmount } from "../src/utils/InventoryUtils.sol";
@@ -572,7 +572,7 @@ contract CraftTest is DustTest {
       assertInventoryHasObject(aliceEntityId, inputTypes[i], inputAmounts[i]);
     }
 
-    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Direction.NegativeZ);
+    EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Orientation.wrap(44));
     PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     SlotAmount[] memory inputs = new SlotAmount[](1);

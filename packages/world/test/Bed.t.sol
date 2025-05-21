@@ -8,8 +8,6 @@ import { WorldContextConsumer } from "@latticexyz/world/src/WorldContext.sol";
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
-import { Direction } from "../src/codegen/common.sol";
-
 import { TestEnergyUtils, TestEntityUtils, TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 import { BedPlayer, BedPlayerData } from "../src/codegen/tables/BedPlayer.sol";
@@ -31,6 +29,7 @@ import { CHUNK_SIZE, MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE } from 
 import { EntityId, EntityIdLib } from "../src/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../src/ObjectType.sol";
 
+import { Orientation } from "../src/Orientation.sol";
 import { ProgramId } from "../src/ProgramId.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 
@@ -41,7 +40,7 @@ contract TestBedProgram is System {
 contract BedTest is DustTest {
   function createBed(Vec3 bedCoord) internal returns (EntityId) {
     // Set entity to bed
-    EntityId bed = setObjectAtCoord(bedCoord, ObjectTypes.Bed, Direction.NegativeZ);
+    EntityId bed = setObjectAtCoord(bedCoord, ObjectTypes.Bed, Orientation.wrap(44));
     return bed;
   }
 

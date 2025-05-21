@@ -3,9 +3,10 @@ pragma solidity >=0.8.24;
 
 import { LibString } from "solady/utils/LibString.sol";
 
+import { CHUNK_SIZE, FRAGMENT_SIZE, REGION_SIZE } from "./Constants.sol";
+import { Orientation } from "./Orientation.sol";
 import { Direction } from "./codegen/common.sol";
 
-import { CHUNK_SIZE, FRAGMENT_SIZE, REGION_SIZE } from "./Constants.sol";
 import { Math } from "./utils/Math.sol";
 
 // Vec3 stores 3 packed int32 values (x, y, z)
@@ -120,6 +121,12 @@ library Vec3Lib {
     }
   }
 
+  function toArray(Vec3 self) internal pure returns (int32[3] memory) {
+    int32[3] memory arr;
+    (arr[0], arr[1], arr[2]) = self.xyz();
+    return arr;
+  }
+
   function mul(Vec3 a, int32 scalar) internal pure returns (Vec3) {
     return vec3(x(a) * scalar, y(a) * scalar, z(a) * scalar);
   }
@@ -192,49 +199,19 @@ library Vec3Lib {
     return result;
   }
 
-  function rotate(Vec3 self, Direction direction) internal pure returns (Vec3) {
-    // Default facing direction is North (Positive Z)
-    if (direction == Direction.PositiveZ) {
-      return self; // No rotation needed for default facing direction
-    } else if (direction == Direction.PositiveX) {
-      // 90 degree rotation clockwise around Y axis
-      return vec3(self.z(), self.y(), -self.x());
-    } else if (direction == Direction.NegativeZ) {
-      // 180 degree rotation around Y axis
-      return vec3(-self.x(), self.y(), -self.z());
-    } else if (direction == Direction.NegativeX) {
-      // 270 degree rotation around Y axis
-      return vec3(-self.z(), self.y(), self.x());
-    }
+  function applyOrientation(Vec3 v, Orientation orientation) internal pure returns (Vec3) {
+    (uint8 a, uint8 b, uint8 c) = orientation.getPermutation();
+    (bool rx, bool ry, bool rz) = orientation.getReflection();
 
-    // Note: before supporting more directions, we need to ensure clients can render it
-    revert("Direction not supported for rotation");
-  }
+    int32[3] memory arr = v.toArray();
 
-  // Check if the coord is adjacent to the cuboid
-  function isAdjacentToCuboid(Vec3 self, Vec3 from, Vec3 to) internal pure returns (bool) {
-    // X-axis adjacency (left or right face)
-    if (
-      (self.x() == from.x() - 1 || self.x() == to.x() + 1) && self.y() >= from.y() && self.y() <= to.y()
-        && self.z() >= from.z() && self.z() <= to.z()
-    ) {
-      return true;
-    }
-    // Y-axis adjacency (bottom or top face)
-    if (
-      (self.y() == from.y() - 1 || self.y() == to.y() + 1) && self.x() >= from.x() && self.x() <= to.x()
-        && self.z() >= from.z() && self.z() <= to.z()
-    ) {
-      return true;
-    }
-    // Z-axis adjacency (front or back face)
-    if (
-      (self.z() == from.z() - 1 || self.z() == to.z() + 1) && self.x() >= from.x() && self.x() <= to.x()
-        && self.y() >= from.y() && self.y() <= to.y()
-    ) {
-      return true;
-    }
-    return false;
+    (int32 nx, int32 ny, int32 nz) = (arr[a], arr[b], arr[c]);
+
+    if (rx) nx = -nx;
+    if (ry) ny = -ny;
+    if (rz) nz = -nz;
+
+    return vec3(nx, ny, nz);
   }
 
   function inSurroundingCube(Vec3 self, Vec3 other, uint256 radius) internal pure returns (bool) {
