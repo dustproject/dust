@@ -673,4 +673,32 @@ contract MineTest is DustTest {
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden axe on stone");
     }
   }
+
+  function testMineSmartEntity() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    EntityId tool = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.NeptuniumPick);
+    uint16 slot = TestInventoryUtils.getEntitySlot(aliceEntityId, tool);
+
+    Vec3 mineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
+    ObjectType mineObjectType = ObjectTypes.SpawnTile;
+    setObjectAtCoord(mineCoord, mineObjectType);
+    assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
+
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
+
+    ResourceCount.set(ObjectTypes.NeptuniumOre, 3);
+
+    vm.prank(alice);
+    startGasReport("mine smart entity with tool, entirely mined");
+    world.mineUntilDestroyed(aliceEntityId, mineCoord, slot, "");
+    endGasReport();
+
+    (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(mineCoord);
+    assertEq(EntityObjectType.get(mineEntityId), ObjectTypes.Air, "Mine entity is not air");
+    assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
+    assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+  }
 }
