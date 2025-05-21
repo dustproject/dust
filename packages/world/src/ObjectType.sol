@@ -1130,7 +1130,7 @@ library ObjectTypeLib {
 
     if (self == ObjectTypes.Bed) {
       Vec3[] memory bedRelativePositions = new Vec3[](1);
-      bedRelativePositions[0] = vec3(0, 0, 1);
+      bedRelativePositions[0] = vec3(1, 0, 0);
       return bedRelativePositions;
     }
 
