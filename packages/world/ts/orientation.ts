@@ -87,8 +87,8 @@ export function getOrientationGeneric(
   const targetForward = SUPPORTED_DIRECTION_VECTORS[forwardDirection]!;
   const targetUp = SUPPORTED_DIRECTION_VECTORS[upDirection]!;
 
-  for (let permIdx = 0; permIdx < 6; ++permIdx) {
-    for (let reflIdx = 0; reflIdx < 8; ++reflIdx) {
+  for (let permIdx = 0; permIdx < PERMUTATIONS.length; ++permIdx) {
+    for (let reflIdx = 0; reflIdx < REFLECTIONS.length; ++reflIdx) {
       const perm = PERMUTATIONS[permIdx]!;
       const refl = REFLECTIONS[reflIdx]!;
 
@@ -103,11 +103,43 @@ export function getOrientationGeneric(
         forward[1] === targetForward[1] &&
         forward[2] === targetForward[2]
       ) {
-        return permIdx * 8 + reflIdx;
+        return encodeOrientation(perm, refl);
       }
     }
   }
   throw new Error("Unable to find orientation");
+}
+
+export function getDirection(orientation: Orientation): SupportedDirection {
+  return getDirectionGeneric(orientation, "PositiveY");
+}
+
+export function getDirectionGeneric(
+  orientation: Orientation,
+  upDirection: SupportedDirection,
+): SupportedDirection {
+  const [perm, refl] = decodeOrientation(orientation);
+  const up = applyOrientation(CANONICAL_UP, perm, refl);
+  const targetUp = SUPPORTED_DIRECTION_VECTORS[upDirection]!;
+
+  const forward = applyOrientation(CANONICAL_FORWARD, perm, refl);
+
+  const forwardDirection = Object.keys(SUPPORTED_DIRECTION_VECTORS).find(
+    (dir) => {
+      const targetForward =
+        SUPPORTED_DIRECTION_VECTORS[dir as SupportedDirection]!;
+      return (
+        up[0] === targetUp[0] &&
+        up[1] === targetUp[1] &&
+        up[2] === targetUp[2] &&
+        forward[0] === targetForward[0] &&
+        forward[1] === targetForward[1] &&
+        forward[2] === targetForward[2]
+      );
+    },
+  );
+  if (!forwardDirection) throw new Error("Unable to find direction");
+  return forwardDirection as SupportedDirection;
 }
 
 export function encodeOrientation(perm: Permute, refl: Reflect): Orientation {
