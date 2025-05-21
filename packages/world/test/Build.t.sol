@@ -122,6 +122,42 @@ contract BuildTest is DustTest {
     assertEq(Mass.getMass(topEntityId), 0, "Top entity mass is not correct");
   }
 
+  function testBuildMultiSizeWithOrientation() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    Vec3 buildCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
+    Vec3 negativeXCoord = buildCoord - vec3(1, 0, 0);
+    setObjectAtCoord(buildCoord, ObjectTypes.Air);
+    setObjectAtCoord(negativeXCoord, ObjectTypes.Air);
+    ObjectType buildObjectType = ObjectTypes.Bed;
+    TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
+    (EntityId negativeXEntity,) = TestEntityUtils.getBlockAt(negativeXCoord);
+    assertTrue(TestEntityUtils.exists(negativeXEntity), "NegativeX entity does not exist");
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
+
+    // Find the inventory slot with the TextSign object
+    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
+
+    Vec3[] memory relative = buildObjectType.getRelativeCoords(buildCoord, Orientation.wrap(1));
+
+    vm.prank(alice);
+    startGasReport("build multi-size");
+    // Build with NegativeX orientation
+    world.buildWithOrientation(aliceEntityId, buildCoord, inventorySlot, Orientation.wrap(1), "");
+    endGasReport();
+
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity is not build object type");
+    assertEq(EntityObjectType.get(negativeXEntity), buildObjectType, "NegativeX entity is not build object type");
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+    assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
+    assertEq(Mass.getMass(negativeXEntity), 0, "NegativeX entity mass is not correct");
+  }
+
   function testJumpBuild() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
