@@ -6,6 +6,9 @@
     "useIgnoreFile": true,
     "defaultBranch": "main"
   },
+  "files": {
+    "ignore": ["**/broadcast/**"]
+  },
   "formatter": {
     "enabled": true,
     "formatWithErrors": false,
