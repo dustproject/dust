@@ -70,11 +70,18 @@ export function App() {
 
   return (
     <div
-      style={{ display: "flex", flexDirection: "row", gap: 5, color: "white" }}
+      style={{
+        width: "100vw",
+        height: "100vh",
+        display: "grid",
+        placeItems: "center",
+        color: "white",
+        fontFamily: "monospace",
+        whiteSpace: "nowrap",
+      }}
     >
-      <span>x: {Math.floor(playerPosition?.x ?? 0)}</span>
-      <span>y: {Math.floor(playerPosition?.y ?? 0)}</span>
-      <span>z: {Math.floor(playerPosition?.z ?? 0)}</span>
+      {Math.floor(playerPosition?.x ?? 0)}, {Math.floor(playerPosition?.y ?? 0)}
+      , {Math.floor(playerPosition?.z ?? 0)}
     </div>
   );
 }
