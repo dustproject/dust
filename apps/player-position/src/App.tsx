@@ -80,8 +80,12 @@ export function App() {
         whiteSpace: "nowrap",
       }}
     >
-      {Math.floor(playerPosition?.x ?? 0)}, {Math.floor(playerPosition?.y ?? 0)}
-      , {Math.floor(playerPosition?.z ?? 0)}
+      {playerPosition ? (
+        <>
+          {Math.floor(playerPosition.x)}, {Math.floor(playerPosition.y)},{" "}
+          {Math.floor(playerPosition.z)}
+        </>
+      ) : null}
     </div>
   );
 }
