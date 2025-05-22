@@ -7,7 +7,6 @@ export const appConfig = type({
     width: "number",
     height: "number",
   },
-  "isPinnable?": "boolean",
 });
 export type AppConfig = typeof appConfig.infer;
 
@@ -18,6 +17,5 @@ export const appConfigInput = type({
     width: "number",
     height: "number",
   },
-  "isPinnable?": "boolean",
 });
 export type AppConfigInput = typeof appConfigInput.infer;

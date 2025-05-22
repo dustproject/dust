@@ -18,9 +18,6 @@
         }
       },
       "required": ["height", "width"]
-    },
-    "isPinnable": {
-      "type": "boolean"
     }
   },
   "required": ["name", "startUrl"]
