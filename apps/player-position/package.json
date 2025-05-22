@@ -1,5 +1,5 @@
 {
-  "name": "pos-hud",
+  "name": "player-position",
   "private": true,
   "type": "module",
   "scripts": {

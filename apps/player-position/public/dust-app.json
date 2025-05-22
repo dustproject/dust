@@ -1,0 +1,9 @@
+{
+  "$schema": "../../../packages/dustkit/json-schemas/app-config.json",
+  "name": "Player Position",
+  "startUrl": "/",
+  "defaultSize": {
+    "width": 300,
+    "height": 100
+  }
+}

@@ -26,7 +26,7 @@ contract RegisterApp is Script {
 
     IWorld world = IWorld(worldAddress);
 
-    ResourceId appNamespaceId = WorldResourceIdLib.encodeNamespace("pos-hud");
+    ResourceId appNamespaceId = WorldResourceIdLib.encodeNamespace("position-app");
     if (!ResourceIds.getExists(appNamespaceId)) {
       world.registerNamespace(appNamespaceId);
     }
