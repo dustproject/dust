@@ -8,6 +8,8 @@ export type MessagePortRpcClient = SocketRpcClient<{
   readonly port: MessagePort;
 }>;
 
+let nextId = 0;
+
 export async function getMessagePortRpcClient({
   target,
   targetOrigin = "*",
@@ -20,7 +22,7 @@ export async function getMessagePortRpcClient({
   let closed = false;
   return getSocketRpcClient({
     key,
-    url: targetOrigin,
+    url: `${targetOrigin}#${nextId++}`,
     async getSocket({ onClose, onError, onOpen, onResponse }) {
       if (closed) {
         // If we initiated closing the socket, don't allow reconnecting.

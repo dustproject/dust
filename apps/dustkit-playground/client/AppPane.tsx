@@ -1,5 +1,12 @@
 import { useSessionClient } from "@latticexyz/entrykit/internal";
-import { type AppRpcSchema, getMessagePortProvider } from "dustkit/internal";
+import {
+  type AppRpcSchema,
+  type PostMessageRpcClient,
+  getMessagePortRpcClient,
+  getPostMessageRpcClient,
+  messagePort,
+  postMessageTransport,
+} from "dustkit/internal";
 import { useEffect } from "react";
 import { useAccount } from "wagmi";
 import { getWorldAddress } from "./common";
@@ -32,13 +39,15 @@ export function AppPane() {
         }
 
         console.info("setting up app provider");
-        const appProvider = getMessagePortProvider<AppRpcSchema>({
-          target: event.currentTarget.contentWindow!,
-          targetOrigin: url.origin,
-        });
 
-        console.info("sending init");
-        const res = await appProvider.request({
+        const appTransport = messagePort<AppRpcSchema>(
+          getMessagePortRpcClient({
+            target: event.currentTarget.contentWindow!,
+            targetOrigin: url.origin,
+          }),
+        );
+        console.info("rpc client ready, sending hello");
+        const res = await appTransport({ timeout: 1000 }).request({
           method: "dustApp_init",
           params: {
             appConfig: {
@@ -48,7 +57,7 @@ export function AppPane() {
             userAddress,
           },
         });
-        console.info("got init reply", res);
+        console.info("got hello reply", res);
       }}
     />
   );
