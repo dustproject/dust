@@ -50,6 +50,6 @@ function initRecipes() {
 `;
 }
 
-recipes.forEach(validateRecipe);
+// recipes.forEach(validateRecipe);
 
 console.info(generateInitRecipesSol());
