@@ -194,7 +194,8 @@ contract MineSystem is System {
   function _destroyEntity(EntityId caller, EntityId mined, ObjectType minedType, Vec3 baseCoord) internal {
     if (minedType == ObjectTypes.Bed) {
       MineLib._mineBed(mined, baseCoord);
-    } else if (minedType == ObjectTypes.ForceField) {
+    } else if (minedType.isMachine()) {
+      Energy._deleteRecord(mined);
       Machine._deleteRecord(mined);
     }
 
