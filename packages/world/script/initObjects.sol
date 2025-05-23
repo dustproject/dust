@@ -117,12 +117,12 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.Magma, ObjectPhysicsData({ mass: 500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.SpiderWeb, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Bone, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.CoalOre, ObjectPhysicsData({ mass: 540000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.CopperOre, ObjectPhysicsData({ mass: 675000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.CoalOre, ObjectPhysicsData({ mass: 50000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.CopperOre, ObjectPhysicsData({ mass: 175000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.IronOre, ObjectPhysicsData({ mass: 675000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.GoldOre, ObjectPhysicsData({ mass: 1600000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.DiamondOre, ObjectPhysicsData({ mass: 5000000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.NeptuniumOre, ObjectPhysicsData({ mass: 5000000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.NeptuniumOre, ObjectPhysicsData({ mass: 5500000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.TextSign, ObjectPhysicsData({ mass: 18000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.OakPlanks, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.BirchPlanks, ObjectPhysicsData({ mass: 4500000000000000, energy: 0 }));

@@ -375,12 +375,12 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   { name: "Bone", mass: 37500000000000000n },
 
   // Non terrain
-  { name: "CoalOre", mass: 540000000000000000n },
-  { name: "CopperOre", mass: 675000000000000000n },
+  { name: "CoalOre", mass: 50000000000000000n },
+  { name: "CopperOre", mass: 175000000000000000n },
   { name: "IronOre", mass: 675000000000000000n },
   { name: "GoldOre", mass: 1600000000000000000n },
   { name: "DiamondOre", mass: 5000000000000000000n },
-  { name: "NeptuniumOre", mass: 5000000000000000000n },
+  { name: "NeptuniumOre", mass: 5500000000000000000n },
   {
     name: "TextSign",
     mass: 18000000000000000n,
