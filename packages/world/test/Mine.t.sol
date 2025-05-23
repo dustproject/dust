@@ -414,6 +414,12 @@ contract MineTest is DustTest {
     vm.prank(alice);
     vm.expectRevert("Object is not mineable");
     world.mine(aliceEntityId, mineCoord, "");
+
+    setObjectAtCoord(mineCoord, ObjectTypes.Bedrock);
+
+    vm.prank(alice);
+    vm.expectRevert("Object is not mineable");
+    world.mine(aliceEntityId, mineCoord, "");
   }
 
   function testMineFailsIfInvalidCoord() public {
@@ -608,7 +614,7 @@ contract MineTest is DustTest {
 
     {
       Vec3 stoneCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
-      ObjectType stoneType = ObjectTypes.Bedrock; // Has pick multiplier
+      ObjectType stoneType = ObjectTypes.Obsidian; // Has pick multiplier
       setObjectAtCoord(stoneCoord, stoneType);
 
       // Test pick on stone (should apply pick multiplier)
@@ -649,7 +655,7 @@ contract MineTest is DustTest {
 
     {
       Vec3 stoneCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z() + 2);
-      ObjectType stoneType = ObjectTypes.Bedrock; // No multiplier
+      ObjectType stoneType = ObjectTypes.Obsidian; // No multiplier
       setObjectAtCoord(stoneCoord, stoneType);
 
       // Test axe on stone (should apply default multiplier)

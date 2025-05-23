@@ -6,7 +6,6 @@ import { ObjectPhysics, ObjectPhysicsData } from "../src/codegen/tables/ObjectPh
 
 function initObjects() {
   ObjectPhysics.set(ObjectTypes.Stone, ObjectPhysicsData({ mass: 12000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.Bedrock, ObjectPhysicsData({ mass: 50000000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Deepslate, ObjectPhysicsData({ mass: 40000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Granite, ObjectPhysicsData({ mass: 15000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Tuff, ObjectPhysicsData({ mass: 15000000000000000, energy: 0 }));
