@@ -6,13 +6,8 @@ import { type RpcRequestEnvelope, rpcResponseEnvelope } from "./envelope";
 
 export async function getPostMessageRpcClient(
   target: Window,
-  targetOrigin = "*",
-): Promise<
-  SocketRpcClient<{
-    readonly target: Window;
-    readonly targetOrigin: string;
-  }>
-> {
+  { targetOrigin = "*", key = "postMessage" },
+): Promise<SocketRpcClient<{ readonly target: Window }>> {
   return getSocketRpcClient({
     async getSocket({ onClose, onError, onOpen, onResponse }) {
       let closed = false;
@@ -28,7 +23,6 @@ export async function getPostMessageRpcClient(
 
       return {
         target,
-        targetOrigin,
         close() {
           window.removeEventListener("message", onMessage);
           closed = true;
@@ -53,5 +47,6 @@ export async function getPostMessageRpcClient(
       };
     },
     url: targetOrigin,
+    key,
   });
 }
