@@ -10,7 +10,6 @@ import { Vec3, vec3 } from "../src/Vec3.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 import { ForceFieldUtils } from "../src/utils/ForceFieldUtils.sol";
-import { InventoryUtils } from "../src/utils/InventoryUtils.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 import { DustTest } from "./DustTest.sol";
 
@@ -72,7 +71,7 @@ contract HitMachineTest is DustTest {
 
     // Create and equip whacker
     EntityId whacker = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.CopperWhacker);
-    uint16 slot = TestInventoryUtils.getEntitySlot(aliceEntityId, whacker);
+    uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, whacker);
 
     uint128 whackerMass = Mass.getMass(whacker);
     uint128 forceFieldEnergy = whackerMass * 1000;

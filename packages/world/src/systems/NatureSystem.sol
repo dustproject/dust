@@ -4,7 +4,6 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
-import { Inventory } from "../codegen/tables/Inventory.sol";
 
 import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
 
@@ -13,8 +12,8 @@ import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
 import { addEnergyToLocalPool } from "../utils/EnergyUtils.sol";
-
 import { EntityUtils } from "../utils/EntityUtils.sol";
+import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { ChunkCommitment, ResourcePosition } from "../utils/Vec3Storage.sol";
 
 import { CHUNK_COMMIT_EXPIRY_BLOCKS, CHUNK_COMMIT_HALF_WIDTH, RESPAWN_ORE_BLOCK_RANGE } from "../Constants.sol";
@@ -59,7 +58,7 @@ contract NatureSystem is System {
     // Check existing entity
     (EntityId entityId, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(resourceCoord);
     require(objectType == ObjectTypes.Air, "Resource coordinate is not air");
-    require(Inventory._lengthOccupiedSlots(entityId) == 0, "Cannot respawn where there are dropped objects");
+    require(InventoryUtils.isEmpty(entityId), "Cannot respawn where there are dropped objects");
 
     // Remove from collected resource array
     if (resourceIdx < collected) {

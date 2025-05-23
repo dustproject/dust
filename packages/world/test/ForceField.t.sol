@@ -50,7 +50,7 @@ contract TestForceFieldProgram is System {
     require(!revertOnMine, "Not allowed by forcefield");
   }
 
-  function onRemoveFragment(EntityId, EntityId, EntityId, bytes memory) external {
+  function onRemoveFragment(EntityId, EntityId, EntityId, bytes memory) external view {
     require(!revertOnRemoveFragment, "Not allowed by forcefield");
   }
 
@@ -240,7 +240,7 @@ contract ForceFieldTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
-    uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     // Build the block
     vm.prank(alice);
@@ -274,7 +274,7 @@ contract ForceFieldTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Try to build the block, should fail
-    uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
     vm.prank(alice);
     vm.expectRevert("Not allowed by forcefield");
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
@@ -307,7 +307,7 @@ contract ForceFieldTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
-    uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     // Try to build the block, should fail
     vm.prank(alice);
@@ -746,7 +746,7 @@ contract ForceFieldTest is DustTest {
       TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
       assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
-      uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+      uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
       // Build should succeed
       vm.prank(alice);
@@ -768,7 +768,7 @@ contract ForceFieldTest is DustTest {
       TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
       assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
-      inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+      inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
       // Build should fail
       vm.prank(alice);
@@ -1752,7 +1752,7 @@ contract ForceFieldTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
-    uint16 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
     world.build(aliceEntityId, buildCoord, inventorySlot, "");

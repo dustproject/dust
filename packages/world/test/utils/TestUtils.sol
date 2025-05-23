@@ -13,7 +13,6 @@ import { Machine } from "../../src/codegen/tables/Machine.sol";
 
 import { EntityObjectType } from "../../src/codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../../src/codegen/tables/InventorySlot.sol";
-import { InventoryTypeSlots } from "../../src/codegen/tables/InventoryTypeSlots.sol";
 
 import { ObjectType } from "../../src/ObjectType.sol";
 
@@ -181,17 +180,36 @@ library TestInventoryUtils {
     return toolData.use(useMassMax, multiplier);
   }
 
-  function getEntitySlot(EntityId owner, EntityId entityId) public asWorld returns (uint16) {
-    ObjectType objectType = entityId.getObjectType();
-    uint16[] memory slots = InventoryTypeSlots._get(owner, objectType);
-    for (uint256 i = 0; i < slots.length; i++) {
-      EntityId slotEntityId = InventorySlot._getEntityId(owner, slots[i]);
+  function findEntity(EntityId owner, EntityId entityId) public asWorld returns (uint16) {
+    return InventoryUtils.findEntity(owner, entityId);
+  }
 
-      if (slotEntityId == entityId) {
-        return slots[i];
-      }
-    }
-    revert("Entity not found in owner's inventory");
+  function findObjectType(EntityId owner, ObjectType objectType) public asWorld returns (uint16) {
+    return InventoryUtils.findObjectType(owner, objectType);
+  }
+
+  function getOccupiedSlotCount(EntityId owner) public asWorld returns (uint256 count) {
+    return InventoryUtils.getOccupiedSlotCount(owner);
+  }
+
+  function countObjectsOfType(EntityId owner, ObjectType objectType) public asWorld returns (uint256 total) {
+    return InventoryUtils.countObjectsOfType(owner, objectType);
+  }
+
+  function findLowestSetBit(uint256 x) public asWorld returns (uint256) {
+    return InventoryUtils.findLowestSetBit(x);
+  }
+
+  function hasObjectType(EntityId ownerEntityId, ObjectType objectType) public asWorld returns (bool) {
+    return InventoryUtils.hasObjectType(ownerEntityId, objectType);
+  }
+
+  function getSlotsWithType(EntityId ownerEntityId, ObjectType objectType)
+    public
+    asWorld
+    returns (uint16[] memory slots)
+  {
+    return InventoryUtils.getSlotsWithType(ownerEntityId, objectType);
   }
 }
 

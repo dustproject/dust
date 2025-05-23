@@ -5,7 +5,7 @@ pragma solidity >=0.8.24;
 
 import { InventorySystem } from "../../systems/InventorySystem.sol";
 import { EntityId } from "../../EntityId.sol";
-import { SlotTransfer, SlotAmount } from "../../utils/InventoryUtils.sol";
+import { SlotAmount, SlotTransfer } from "../../utils/InventoryUtils.sol";
 import { Vec3 } from "../../Vec3.sol";
 import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 import { IWorldCall } from "@latticexyz/world/src/IWorldKernel.sol";
@@ -40,10 +40,6 @@ struct RootCallWrapper {
 library InventorySystemLib {
   error InventorySystemLib_CallingFromRootSystem();
 
-  function drop(InventorySystemType self, EntityId caller, SlotTransfer[] memory slotTransfers, Vec3 coord) internal {
-    return CallWrapper(self.toResourceId(), address(0)).drop(caller, slotTransfers, coord);
-  }
-
   function drop(InventorySystemType self, EntityId caller, SlotAmount[] memory slots, Vec3 coord) internal {
     return CallWrapper(self.toResourceId(), address(0)).drop(caller, slots, coord);
   }
@@ -54,19 +50,6 @@ library InventorySystemLib {
 
   function pickupAll(InventorySystemType self, EntityId caller, Vec3 coord) internal {
     return CallWrapper(self.toResourceId(), address(0)).pickupAll(caller, coord);
-  }
-
-  function drop(CallWrapper memory self, EntityId caller, SlotTransfer[] memory slotTransfers, Vec3 coord) internal {
-    // if the contract calling this function is a root system, it should use `callAsRoot`
-    if (address(_world()) == address(this)) revert InventorySystemLib_CallingFromRootSystem();
-
-    bytes memory systemCall = abi.encodeCall(
-      _drop_EntityId_SlotTransferArray_Vec3.drop,
-      (caller, slotTransfers, coord)
-    );
-    self.from == address(0)
-      ? _world().call(self.systemId, systemCall)
-      : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
   function drop(CallWrapper memory self, EntityId caller, SlotAmount[] memory slots, Vec3 coord) internal {
@@ -100,19 +83,6 @@ library InventorySystemLib {
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
-  }
-
-  function drop(
-    RootCallWrapper memory self,
-    EntityId caller,
-    SlotTransfer[] memory slotTransfers,
-    Vec3 coord
-  ) internal {
-    bytes memory systemCall = abi.encodeCall(
-      _drop_EntityId_SlotTransferArray_Vec3.drop,
-      (caller, slotTransfers, coord)
-    );
-    SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
   function drop(RootCallWrapper memory self, EntityId caller, SlotAmount[] memory slots, Vec3 coord) internal {
@@ -175,10 +145,6 @@ library InventorySystemLib {
  *
  * Each interface is uniquely named based on the function name and parameters to prevent collisions.
  */
-
-interface _drop_EntityId_SlotTransferArray_Vec3 {
-  function drop(EntityId caller, SlotTransfer[] memory slotTransfers, Vec3 coord) external;
-}
 
 interface _drop_EntityId_SlotAmountArray_Vec3 {
   function drop(EntityId caller, SlotAmount[] memory slots, Vec3 coord) external;

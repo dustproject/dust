@@ -10,7 +10,6 @@ import { Direction } from "../src/codegen/common.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
@@ -28,7 +27,7 @@ import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
 
-import { SlotTransfer } from "../src/utils/InventoryUtils.sol";
+import { SlotAmount, SlotTransfer } from "../src/utils/InventoryUtils.sol";
 
 import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
@@ -50,15 +49,13 @@ contract InventoryTest is DustTest {
 
     vm.prank(alice);
     startGasReport("drop terrain");
-    SlotTransfer[] memory drops = new SlotTransfer[](1);
-    drops[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: numToTransfer });
+    SlotAmount[] memory drops = new SlotAmount[](1);
+    drops[0] = SlotAmount({ slot: 0, amount: numToTransfer });
     world.drop(aliceEntityId, drops, dropCoord);
     endGasReport();
 
     assertInventoryHasObject(aliceEntityId, transferObjectType, 0);
     assertInventoryHasObject(airEntityId, transferObjectType, numToTransfer);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Wrong number of occupied inventory slots");
-    assertEq(Inventory.lengthOccupiedSlots(airEntityId), 1, "Wrong number of occupied inventory slots");
   }
 
   function testDropNonTerrain() public {
@@ -72,8 +69,8 @@ contract InventoryTest is DustTest {
     assertInventoryHasObject(aliceEntityId, transferObjectType, numToTransfer);
     (EntityId airEntityId,) = TestEntityUtils.getBlockAt(dropCoord);
 
-    SlotTransfer[] memory drops = new SlotTransfer[](1);
-    drops[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: numToTransfer });
+    SlotAmount[] memory drops = new SlotAmount[](1);
+    drops[0] = SlotAmount({ slot: 0, amount: numToTransfer });
 
     vm.prank(alice);
     startGasReport("drop non-terrain");
@@ -82,8 +79,6 @@ contract InventoryTest is DustTest {
 
     assertInventoryHasObject(aliceEntityId, transferObjectType, 0);
     assertInventoryHasObject(airEntityId, transferObjectType, numToTransfer);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Wrong number of occupied inventory slots");
-    assertEq(Inventory.lengthOccupiedSlots(airEntityId), 1, "Wrong number of occupied inventory slots");
   }
 
   function testDropToolTerrain() public {
@@ -96,8 +91,8 @@ contract InventoryTest is DustTest {
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
     (EntityId airEntityId,) = TestEntityUtils.getBlockAt(dropCoord);
 
-    SlotTransfer[] memory drops = new SlotTransfer[](1);
-    drops[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
+    SlotAmount[] memory drops = new SlotAmount[](1);
+    drops[0] = SlotAmount({ slot: 0, amount: 1 });
 
     vm.prank(alice);
     startGasReport("drop tool terrain");
@@ -106,8 +101,6 @@ contract InventoryTest is DustTest {
 
     assertInventoryHasEntity(aliceEntityId, toolEntityId, 0);
     assertInventoryHasEntity(airEntityId, toolEntityId, 1);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Wrong number of occupied inventory slots");
-    assertEq(Inventory.lengthOccupiedSlots(airEntityId), 1, "Wrong number of occupied inventory slots");
   }
 
   function testDropToolNonTerrain() public {
@@ -120,8 +113,8 @@ contract InventoryTest is DustTest {
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
     (EntityId airEntityId,) = TestEntityUtils.getBlockAt(dropCoord);
 
-    SlotTransfer[] memory drops = new SlotTransfer[](1);
-    drops[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
+    SlotAmount[] memory drops = new SlotAmount[](1);
+    drops[0] = SlotAmount({ slot: 0, amount: 1 });
 
     vm.prank(alice);
     startGasReport("drop tool non-terrain");
@@ -130,8 +123,6 @@ contract InventoryTest is DustTest {
 
     assertInventoryHasEntity(aliceEntityId, toolEntityId, 0);
     assertInventoryHasEntity(airEntityId, toolEntityId, 1);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Wrong number of occupied inventory slots");
-    assertEq(Inventory.lengthOccupiedSlots(airEntityId), 1, "Wrong number of occupied inventory slots");
   }
 
   function testDropNonAirButPassable() public {
@@ -145,16 +136,14 @@ contract InventoryTest is DustTest {
     assertInventoryHasObject(aliceEntityId, transferObjectType, numToTransfer);
     (EntityId airEntityId,) = TestEntityUtils.getBlockAt(dropCoord);
 
-    SlotTransfer[] memory drops = new SlotTransfer[](1);
-    drops[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: numToTransfer });
+    SlotAmount[] memory drops = new SlotAmount[](1);
+    drops[0] = SlotAmount({ slot: 0, amount: numToTransfer });
 
     vm.prank(alice);
     world.drop(aliceEntityId, drops, dropCoord);
 
     assertInventoryHasObject(aliceEntityId, transferObjectType, 0);
     assertInventoryHasObject(airEntityId, transferObjectType, numToTransfer);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Wrong number of occupied inventory slots");
-    assertEq(Inventory.lengthOccupiedSlots(airEntityId), 1, "Wrong number of occupied inventory slots");
   }
 
   function testPickup() public {
@@ -178,8 +167,6 @@ contract InventoryTest is DustTest {
 
     assertInventoryHasObject(aliceEntityId, transferObjectType, numToPickup);
     assertInventoryHasObject(airEntityId, transferObjectType, 0);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 1, "Wrong number of occupied inventory slots");
-    assertEq(Inventory.lengthOccupiedSlots(airEntityId), 0, "Wrong number of occupied inventory slots");
   }
 
   function testPickupTool() public {
@@ -202,8 +189,6 @@ contract InventoryTest is DustTest {
 
     assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
     assertInventoryHasEntity(airEntityId, toolEntityId, 0);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 1, "Wrong number of occupied inventory slots");
-    assertEq(Inventory.lengthOccupiedSlots(airEntityId), 0, "Wrong number of occupied inventory slots");
   }
 
   function testPickupMultiple() public {
@@ -233,8 +218,6 @@ contract InventoryTest is DustTest {
     assertInventoryHasObject(aliceEntityId, objectObjectType, numToPickup);
     assertInventoryHasObject(airEntityId, objectObjectType, 0);
     assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 2, "Wrong number of occupied inventory slots");
-    assertEq(Inventory.lengthOccupiedSlots(airEntityId), 0, "Wrong number of occupied inventory slots");
   }
 
   function testPickupAll() public {
@@ -264,8 +247,6 @@ contract InventoryTest is DustTest {
     assertInventoryHasEntity(airEntityId, toolEntityId1, 0);
     assertInventoryHasEntity(aliceEntityId, toolEntityId2, 1);
     assertInventoryHasEntity(airEntityId, toolEntityId2, 0);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 3, "Wrong number of occupied inventory slots");
-    assertEq(Inventory.lengthOccupiedSlots(airEntityId), 0, "Wrong number of occupied inventory slots");
   }
 
   function testPickupMinedChestDrops() public {
@@ -291,8 +272,6 @@ contract InventoryTest is DustTest {
 
     assertInventoryHasObject(aliceEntityId, transferObjectType, numToPickup);
     assertInventoryHasObject(airEntityId, transferObjectType, 0);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 2, "Wrong number of occupied inventory slots");
-    assertEq(Inventory.lengthOccupiedSlots(airEntityId), 0, "Wrong number of occupied inventory slots");
   }
 
   function testPickupFromNonAirButPassable() public {
@@ -314,8 +293,6 @@ contract InventoryTest is DustTest {
 
     assertInventoryHasObject(aliceEntityId, transferObjectType, numToPickup);
     assertInventoryHasObject(airEntityId, transferObjectType, 0);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 1, "Wrong number of occupied inventory slots");
-    assertEq(Inventory.lengthOccupiedSlots(airEntityId), 0, "Wrong number of occupied inventory slots");
   }
 
   function testPickupFailsIfInventoryFull() public {
@@ -331,12 +308,6 @@ contract InventoryTest is DustTest {
     TestInventoryUtils.addObject(
       aliceEntityId, transferObjectType, ObjectTypes.Player.getMaxInventorySlots() * transferObjectType.getStackable()
     );
-    assertEq(
-      Inventory.lengthOccupiedSlots(aliceEntityId),
-      ObjectTypes.Player.getMaxInventorySlots(),
-      "Wrong number of occupied inventory slots"
-    );
-
     vm.prank(alice);
     vm.expectRevert("Inventory is full");
     world.pickupAll(aliceEntityId, pickupCoord);
@@ -348,8 +319,8 @@ contract InventoryTest is DustTest {
     Vec3 dropCoord = playerCoord + vec3(0, 0, 1);
     setObjectAtCoord(dropCoord, ObjectTypes.Air);
 
-    SlotTransfer[] memory drop = new SlotTransfer[](1);
-    drop[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
+    SlotAmount[] memory drop = new SlotAmount[](1);
+    drop[0] = SlotAmount({ slot: 0, amount: 1 });
 
     vm.prank(alice);
     vm.expectRevert("Empty slot");
@@ -396,8 +367,8 @@ contract InventoryTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, transferObjectType, 1);
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
 
-    SlotTransfer[] memory drop = new SlotTransfer[](1);
-    drop[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
+    SlotAmount[] memory drop = new SlotAmount[](1);
+    drop[0] = SlotAmount({ slot: 0, amount: 1 });
 
     vm.prank(alice);
     vm.expectRevert("Entity is too far");
@@ -419,8 +390,8 @@ contract InventoryTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, transferObjectType, 1);
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
 
-    SlotTransfer[] memory drops = new SlotTransfer[](1);
-    drops[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
+    SlotAmount[] memory drops = new SlotAmount[](1);
+    drops[0] = SlotAmount({ slot: 0, amount: 1 });
 
     vm.prank(alice);
     vm.expectRevert("Cannot drop on a non-passable block");
@@ -472,15 +443,15 @@ contract InventoryTest is DustTest {
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
     TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenPick);
 
-    SlotTransfer[] memory drops = new SlotTransfer[](1);
-    drops[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 0 });
+    SlotAmount[] memory drops = new SlotAmount[](1);
+    drops[0] = SlotAmount({ slot: 0, amount: 0 });
 
     vm.prank(alice);
     vm.expectRevert("Amount must be greater than 0");
     world.drop(aliceEntityId, drops, dropCoord);
 
-    drops = new SlotTransfer[](1);
-    drops[0] = SlotTransfer({ slotFrom: 1, slotTo: 0, amount: 0 });
+    drops = new SlotAmount[](1);
+    drops[0] = SlotAmount({ slot: 1, amount: 0 });
 
     vm.prank(alice);
     vm.expectRevert("Amount must be greater than 0");
@@ -513,8 +484,8 @@ contract InventoryTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, transferObjectType, 1);
     assertInventoryHasObject(aliceEntityId, transferObjectType, 1);
 
-    SlotTransfer[] memory drops = new SlotTransfer[](1);
-    drops[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
+    SlotAmount[] memory drops = new SlotAmount[](1);
+    drops[0] = SlotAmount({ slot: 0, amount: 1 });
 
     vm.expectRevert("Caller not allowed");
     world.drop(aliceEntityId, drops, dropCoord);
@@ -553,8 +524,8 @@ contract InventoryTest is DustTest {
     EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Orientation.wrap(44));
     PlayerBed.setBedEntityId(aliceEntityId, bed);
 
-    SlotTransfer[] memory drops = new SlotTransfer[](1);
-    drops[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
+    SlotAmount[] memory drops = new SlotAmount[](1);
+    drops[0] = SlotAmount({ slot: 0, amount: 1 });
 
     vm.prank(alice);
     vm.expectRevert("Player is sleeping");
@@ -580,16 +551,11 @@ contract InventoryTest is DustTest {
       assertInventoryHasObject(aliceEntityId, itemTypes[i], 10);
     }
 
-    // Check total occupied slots
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), itemTypes.length, "Wrong number of occupied slots");
-
     // Remove items and check slot cleanup
     for (uint256 i = 0; i < itemTypes.length; i++) {
       TestInventoryUtils.removeObject(aliceEntityId, itemTypes[i], 10);
       assertInventoryHasObject(aliceEntityId, itemTypes[i], 0);
     }
-
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Slots should be empty after removal");
   }
 
   function testItemStacking() public {
@@ -605,12 +571,12 @@ contract InventoryTest is DustTest {
 
     // Check that items are stacked
     assertInventoryHasObject(aliceEntityId, itemType, amount1 + amount2);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 1, "Items should be in same slot");
+    assertEq(TestInventoryUtils.getSlotsWithType(aliceEntityId, itemType).length, 1);
 
     // Remove partial stack
     uint16 removeAmount = 3;
     TestInventoryUtils.removeObject(aliceEntityId, itemType, removeAmount);
-    assertInventoryHasObject(aliceEntityId, itemType, amount1 + amount2 - removeAmount);
+    assertEq(TestInventoryUtils.getSlotsWithType(aliceEntityId, itemType).length, 1);
   }
 
   function testInventoryLimits() public {
@@ -625,8 +591,6 @@ contract InventoryTest is DustTest {
       TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Grass, 99);
       assertInventoryHasObject(aliceEntityId, ObjectTypes.Grass, 99 * uint16(i + 1));
     }
-
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), maxSlots, "Should have filled all slots");
 
     // Try to add one more item
     vm.expectRevert("Inventory is full");
@@ -653,7 +617,6 @@ contract InventoryTest is DustTest {
     vm.prank(alice);
     world.transfer(aliceEntityId, aliceEntityId, aliceEntityId, transfers, "");
 
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 2, "Wrong number of occupied slots after transfer");
     assertInventoryHasObject(aliceEntityId, itemType, totalAmount);
     assertEq(InventorySlot.get(aliceEntityId, 0).amount, totalAmount - transferAmount, "Wrong amount in source slot");
     assertEq(InventorySlot.get(aliceEntityId, 1).amount, transferAmount, "Wrong amount in destination slot");
@@ -669,12 +632,10 @@ contract InventoryTest is DustTest {
     // First add max stack amount
     TestInventoryUtils.addObject(aliceEntityId, stackableType, maxStack);
     assertInventoryHasObject(aliceEntityId, stackableType, maxStack);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 1, "Should only have one occupied slot");
 
     // Try to add one more - should go to a new slot
     TestInventoryUtils.addObject(aliceEntityId, stackableType, 1);
     assertInventoryHasObject(aliceEntityId, stackableType, maxStack + 1);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 2, "Should now have two occupied slots");
 
     // Check slot distribution
     assertEq(InventorySlot.getObjectType(aliceEntityId, 0), stackableType, "First slot type mismatch");
