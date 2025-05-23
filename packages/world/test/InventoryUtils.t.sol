@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { LibBit } from "solady/utils/LibBit.sol";
+
 import { DustTest, console } from "./DustTest.sol";
 
 import { EntityId } from "../src/EntityId.sol";
@@ -507,7 +509,7 @@ contract InventoryUtilsTest is DustTest {
     for (uint256 i = 0; i < bitmap.length; i++) {
       uint256 word = bitmap[i];
       while (word != 0) {
-        uint256 bitIndex = TestInventoryUtils.findLowestSetBit(word);
+        uint256 bitIndex = LibBit.ffs(word);
         word &= word - 1;
 
         uint16 slot = uint16(i * 256 + bitIndex);
@@ -542,7 +544,7 @@ contract InventoryUtilsTest is DustTest {
       uint256 word = bitmap[i];
       uint256 originalWord = word;
       while (word != 0) {
-        uint256 bitIndex = TestInventoryUtils.findLowestSetBit(word);
+        uint256 bitIndex = LibBit.ffs(word);
         word &= word - 1;
 
         uint16 slot = uint16(i * 256 + bitIndex);

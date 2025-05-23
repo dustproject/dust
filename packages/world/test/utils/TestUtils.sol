@@ -196,10 +196,6 @@ library TestInventoryUtils {
     return InventoryUtils.countObjectsOfType(owner, objectType);
   }
 
-  function findLowestSetBit(uint256 x) public asWorld returns (uint256) {
-    return InventoryUtils.findLowestSetBit(x);
-  }
-
   function hasObjectType(EntityId ownerEntityId, ObjectType objectType) public asWorld returns (bool) {
     return InventoryUtils.hasObjectType(ownerEntityId, objectType);
   }

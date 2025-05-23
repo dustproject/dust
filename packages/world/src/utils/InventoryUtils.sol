@@ -55,70 +55,59 @@ library InventoryUtils {
 
   function setBit(EntityId owner, uint16 slot) internal {
     uint256 wordIndex = slot / SLOTS_PER_WORD;
-    uint256 bitIndex = slot % SLOTS_PER_WORD;
+    uint256 bitIndex = slot & 255; // cheaper than % 256
 
-    uint256 bitmapLength = InventoryBitmap._length(owner);
+    _ensureWordExists(owner, wordIndex);
 
-    // Extend bitmap if needed
-    if (wordIndex >= bitmapLength) {
-      for (uint256 i = bitmapLength; i <= wordIndex; i++) {
-        InventoryBitmap._pushBitmap(owner, 0);
-      }
-    }
-
-    // Get the word, update it, and store it back
-    uint256 word = wordIndex < InventoryBitmap._length(owner) ? InventoryBitmap._getItem(owner, wordIndex) : 0;
-    word |= (1 << bitIndex);
+    uint256 word = InventoryBitmap._getItem(owner, wordIndex);
+    word |= uint256(1) << bitIndex;
     InventoryBitmap._updateBitmap(owner, wordIndex, word);
   }
 
   function clearBit(EntityId owner, uint16 slot) internal {
     uint256 wordIndex = slot / SLOTS_PER_WORD;
-    uint256 bitIndex = slot % SLOTS_PER_WORD;
+    uint256 bitIndex = slot & 255;
 
-    uint256 bitmapLength = InventoryBitmap._length(owner);
-    if (wordIndex < bitmapLength) {
-      uint256 word = InventoryBitmap._getItem(owner, wordIndex);
-      word &= ~(1 << bitIndex);
-      InventoryBitmap._updateBitmap(owner, wordIndex, word);
+    uint256 length = InventoryBitmap._length(owner);
+    if (wordIndex >= length) return;
+
+    uint256 word = InventoryBitmap._getItem(owner, wordIndex);
+    word &= ~(uint256(1) << bitIndex);
+    InventoryBitmap._updateBitmap(owner, wordIndex, word);
+
+    // If we touched the last word and it is now zero, prune.
+    if (word == 0 && wordIndex == length - 1) {
+      _pruneTrailingEmptyWords(owner);
     }
   }
 
   function isBitSet(uint256[] memory bitmap, uint16 slot) internal pure returns (bool) {
+    // TODO: optimize
     uint256 wordIndex = slot / SLOTS_PER_WORD;
     uint256 bitIndex = slot % SLOTS_PER_WORD;
-
     if (wordIndex >= bitmap.length) return false;
     return (bitmap[wordIndex] & (1 << bitIndex)) != 0;
   }
 
   function findEmptySlot(EntityId owner) internal view returns (uint16) {
-    uint256 bitmapLength = InventoryBitmap._length(owner);
     uint16 maxSlots = owner.getObjectType().getMaxInventorySlots();
 
-    // Search through existing bitmap words first
-    for (uint256 i = 0; i < bitmapLength; i++) {
-      uint256 word = InventoryBitmap._getItem(owner, i);
-      if (word != type(uint256).max) {
-        // Find first zero bit in this word
-        uint256 invertedWord = ~word;
-        uint256 bitIndex = findLowestSetBit(invertedWord);
-        uint16 slot = uint16(i * SLOTS_PER_WORD + bitIndex);
+    uint256 length = InventoryBitmap._length(owner);
 
-        if (slot < maxSlots) {
-          return slot;
-        }
+    for (uint256 wordIndex = 0; wordIndex < length; ++wordIndex) {
+      uint256 word = InventoryBitmap._getItem(owner, wordIndex);
+      if (word != type(uint256).max) {
+        // at least one free bit here
+        uint256 bitIndex = LibBit.ffs(~word); // first zero bit
+        uint16 slot = uint16(wordIndex * SLOTS_PER_WORD + bitIndex);
+        if (slot < maxSlots) return slot;
       }
     }
 
-    // Check if we can extend
-    uint16 nextSlot = uint16(bitmapLength * SLOTS_PER_WORD);
+    // No free space inside current words: next slot is at current length.
+    uint16 nextSlot = uint16(length * SLOTS_PER_WORD);
     require(nextSlot < maxSlots, "Inventory is full");
     return nextSlot;
-  }
-
-  function findLowestSetBit(uint256 x) internal pure returns (uint256) {
-    return LibBit.ffs(x);
   }
 
   /* Tool operations */
@@ -191,7 +180,6 @@ library InventoryUtils {
 
     // Check slot is within bounds for this entity type
     uint16 maxSlots = owner.getObjectType().getMaxInventorySlots();
-    require(maxSlots > 0, "Invalid slot");
     require(slot < maxSlots, "Slot exceeds entity's max inventory");
 
     InventorySlotData memory slotData = InventorySlot._get(owner, slot);
@@ -213,7 +201,7 @@ library InventoryUtils {
     for (uint256 i = 0; i < bitmap.length && remaining > 0; i++) {
       uint256 word = bitmap[i];
       while (word != 0 && remaining > 0) {
-        uint256 bitIndex = findLowestSetBit(word);
+        uint256 bitIndex = LibBit.ffs(word);
         word &= word - 1; // Clear the bit
 
         uint16 slot = uint16(i * SLOTS_PER_WORD + bitIndex);
@@ -432,7 +420,7 @@ library InventoryUtils {
     for (uint256 i = 0; i < bitmap.length; i++) {
       uint256 word = bitmap[i];
       while (word != 0) {
-        uint256 bitIndex = findLowestSetBit(word);
+        uint256 bitIndex = LibBit.ffs(word);
         word &= word - 1;
 
         uint16 slot = uint16(i * SLOTS_PER_WORD + bitIndex);
@@ -461,7 +449,7 @@ library InventoryUtils {
     for (uint256 i = 0; i < bitmapLength; i++) {
       uint256 word = InventoryBitmap._getItem(owner, i);
       while (word != 0) {
-        uint256 bitIndex = findLowestSetBit(word);
+        uint256 bitIndex = LibBit.ffs(word);
         word &= word - 1;
 
         uint16 slot = uint16(i * SLOTS_PER_WORD + bitIndex);
@@ -485,7 +473,7 @@ library InventoryUtils {
     for (uint256 i = 0; i < bitmapLength; i++) {
       uint256 word = InventoryBitmap._getItem(owner, i);
       while (word != 0) {
-        uint256 bitIndex = findLowestSetBit(word);
+        uint256 bitIndex = LibBit.ffs(word);
         word &= word - 1;
 
         uint16 slot = uint16(i * SLOTS_PER_WORD + bitIndex);
@@ -520,7 +508,7 @@ library InventoryUtils {
     for (uint256 i = 0; i < bitmapLength; i++) {
       uint256 word = InventoryBitmap._getItem(owner, i);
       while (word != 0) {
-        uint256 bitIndex = findLowestSetBit(word);
+        uint256 bitIndex = LibBit.ffs(word);
         word &= word - 1;
 
         slot = uint16(i * SLOTS_PER_WORD + bitIndex);
@@ -539,7 +527,7 @@ library InventoryUtils {
     for (uint256 i = 0; i < bitmapLength; i++) {
       uint256 word = InventoryBitmap._getItem(owner, i);
       while (word != 0) {
-        uint256 bitIndex = findLowestSetBit(word);
+        uint256 bitIndex = LibBit.ffs(word);
         word &= word - 1;
 
         slot = uint16(i * SLOTS_PER_WORD + bitIndex);
@@ -550,6 +538,30 @@ library InventoryUtils {
     }
 
     revert("Entity not found");
+  }
+
+  /// @dev Removes empty words from the end of the bitmap.
+  function _pruneTrailingEmptyWords(EntityId owner) private {
+    uint256 length = InventoryBitmap._length(owner);
+    while (length != 0) {
+      uint256 lastWord = InventoryBitmap._getItem(owner, length - 1);
+      if (lastWord != 0) break;
+      InventoryBitmap._popBitmap(owner);
+      unchecked {
+        --length;
+      }
+    }
+  }
+
+  /// @dev Ensures `wordIndex` exists, extending with zero words if needed.
+  function _ensureWordExists(EntityId owner, uint256 wordIndex) private {
+    uint256 length = InventoryBitmap._length(owner);
+    while (wordIndex >= length) {
+      InventoryBitmap._pushBitmap(owner, 0);
+      unchecked {
+        ++length;
+      }
+    }
   }
 }
 
