@@ -46,6 +46,7 @@ library InventoryUtils {
   /* Bitmap operations */
 
   function isEmpty(EntityId owner) internal view returns (bool) {
+    // Optimize
     uint256 length = InventoryBitmap._length(owner);
     for (uint256 i = 0; i < length; i++) {
       if (InventoryBitmap._getItem(owner, i) != 0) return false;
@@ -207,12 +208,14 @@ library InventoryUtils {
         uint16 slot = uint16(i * SLOTS_PER_WORD + bitIndex);
         InventorySlotData memory data = InventorySlot._get(owner, slot);
 
-        if (data.objectType == objectType && data.amount < stackable) {
-          uint16 canAdd = stackable - data.amount;
-          uint16 toAdd = remaining < canAdd ? uint16(remaining) : canAdd;
-          InventorySlot._setAmount(owner, slot, data.amount + toAdd);
-          remaining -= toAdd;
+        if (data.objectType != objectType || data.amount >= stackable) {
+          continue;
         }
+
+        uint16 canAdd = stackable - data.amount;
+        uint16 toAdd = remaining < canAdd ? uint16(remaining) : canAdd;
+        InventorySlot._setAmount(owner, slot, data.amount + toAdd);
+        remaining -= toAdd;
       }
     }
 
@@ -441,6 +444,7 @@ library InventoryUtils {
 
   /* Helpers */
 
+  // TODO: move unused utils to TestUtils
   function getSlotsWithType(EntityId owner, ObjectType objectType) internal view returns (uint16[] memory) {
     uint256 bitmapLength = InventoryBitmap._length(owner);
     uint16[] memory tempSlots = new uint16[](256); // Max reasonable size
@@ -491,14 +495,9 @@ library InventoryUtils {
   }
 
   function getOccupiedSlotCount(EntityId owner) internal view returns (uint256 count) {
-    uint256 bitmapLength = InventoryBitmap._length(owner);
-
-    for (uint256 i = 0; i < bitmapLength; i++) {
-      uint256 word = InventoryBitmap._getItem(owner, i);
-      while (word != 0) {
-        count++;
-        word &= word - 1;
-      }
+    uint256[] memory bitmap = InventoryBitmap._get(owner);
+    for (uint256 i = 0; i < bitmap.length; ++i) {
+      count += LibBit.popCount(bitmap[i]);
     }
   }
 

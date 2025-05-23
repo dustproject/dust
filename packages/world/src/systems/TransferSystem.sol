@@ -45,7 +45,9 @@ contract TransferSystem is System {
 
     if (target.exists()) {
       caller.requireConnected(target);
-      require(target.getObjectType() != ObjectTypes.Player, "Cannot access another player's inventory");
+      ObjectType targetType = target.getObjectType();
+      require(targetType != ObjectTypes.Player, "Cannot access another player's inventory");
+      require(!targetType.isPassThrough(), "Cannot transfer directly to pass-through object");
     }
 
     (SlotData[] memory fromSlotData, SlotData[] memory toSlotData) = InventoryUtils.transfer(from, to, transfers);

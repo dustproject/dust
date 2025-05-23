@@ -524,52 +524,54 @@ contract InventoryUtilsTest is DustTest {
     _verifyInventoryBitmapIntegrity(bob);
   }
 
-  // Helper function to verify the integrity of inventory bitmap after operations
   function _verifyInventoryBitmapIntegrity(EntityId entity) internal {
     uint256[] memory bitmap = InventoryBitmap.get(entity);
 
-    // Count occupied slots according to bitmap
+    // After pruning, either the bitmap is empty or its last word is non-zero.
+    if (bitmap.length == 0) {
+      assertEq(TestInventoryUtils.getOccupiedSlotCount(entity), 0, "Bitmap empty but slots present");
+      return; // nothing else to verify
+    }
+    assertTrue(bitmap[bitmap.length - 1] != 0, "Trailing zero word detected");
+
+    // count set bits
     uint256 bitmapCount = 0;
-    for (uint256 i = 0; i < bitmap.length; i++) {
-      uint256 word = bitmap[i];
-      while (word != 0) {
-        bitmapCount++;
-        word &= word - 1;
-      }
+    for (uint256 i = 0; i < bitmap.length; ++i) {
+      bitmapCount += LibBit.popCount(bitmap[i]);
     }
 
-    // Verify each bit corresponds to an actual slot with data
+    // per-slot verification
     uint256 actualCount = 0;
-    for (uint256 i = 0; i < bitmap.length; i++) {
-      uint256 word = bitmap[i];
+    for (uint256 wordIndex = 0; wordIndex < bitmap.length; ++wordIndex) {
+      uint256 word = bitmap[wordIndex];
       uint256 originalWord = word;
+
+      // every set bit -> slot MUST have data
       while (word != 0) {
         uint256 bitIndex = LibBit.ffs(word);
-        word &= word - 1;
+        word &= word - 1; // clear LS1B
 
-        uint16 slot = uint16(i * 256 + bitIndex);
+        uint16 slot = uint16(wordIndex * 256 + bitIndex);
         InventorySlotData memory slotData = InventorySlot.get(entity, slot);
 
-        // Verify slot has data
-        assertTrue(!slotData.objectType.isNull(), "Bit set but slot is empty");
-        assertTrue(slotData.amount > 0, "Slot has zero amount");
-
-        actualCount++;
+        assertTrue(!slotData.objectType.isNull(), "Bit set but slot empty");
+        assertTrue(slotData.amount > 0, "Slot amount is zero");
+        ++actualCount;
       }
 
-      // Verify no slots exist without corresponding bits
-      for (uint256 bit = 0; bit < 256; bit++) {
-        uint16 slot = uint16(i * 256 + bit);
-        bool bitSet = (originalWord & (1 << bit)) != 0;
-
+      // every slot with data -> bit MUST be set
+      for (uint256 bit = 0; bit < 256; ++bit) {
+        uint16 slot = uint16(wordIndex * 256 + bit);
         InventorySlotData memory slotData = InventorySlot.get(entity, slot);
+
         if (!slotData.objectType.isNull()) {
-          assertTrue(bitSet, "Slot has data but bit not set");
+          bool bitIsSet = (originalWord & (uint256(1) << bit)) != 0;
+          assertTrue(bitIsSet, "Slot has data but bit not set");
         }
       }
     }
 
     assertEq(bitmapCount, actualCount, "Bitmap count mismatch");
-    assertEq(bitmapCount, TestInventoryUtils.getOccupiedSlotCount(entity), "Count mismatch with utility function");
+    assertEq(bitmapCount, TestInventoryUtils.getOccupiedSlotCount(entity), "Mismatch with utility count");
   }
 }
