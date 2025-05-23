@@ -7,7 +7,7 @@ import {
   type UrlRequiredErrorType,
   createTransport,
 } from "viem";
-import type { SocketRpcClient } from "viem/utils";
+import type { MessagePortRpcClient } from "./getMessagePortRpcClient";
 
 export type MessagePortTransportConfig = {
   /** The key of the MessagePort transport. */
@@ -50,7 +50,7 @@ export type MessagePortTransportErrorType =
  * @description Creates an IPC transport that connects to a JSON-RPC API.
  */
 export function messagePort<schema extends RpcSchema.Generic>(
-  rpcClient: SocketRpcClient<MessagePort>,
+  rpcClientPromise: Promise<MessagePortRpcClient>,
   config: MessagePortTransportConfig = {},
 ): MessagePortTransport<schema> {
   const {
@@ -68,17 +68,28 @@ export function messagePort<schema extends RpcSchema.Generic>(
         methods,
         name,
         async request({ method, params }) {
+          console.info(
+            "waiting for rpc client before sending rpc request",
+            method,
+            params,
+          );
+          const rpcClient = await rpcClientPromise;
+
           const body = { method, params };
+          console.info("sending rpc request", method, params);
           const { error, result } = await rpcClient.requestAsync({
             body,
             timeout,
           });
-          if (error)
+
+          if (error) {
             throw new RpcRequestError({
               body,
               error,
-              url: "*",
+              url: rpcClient.socket.targetOrigin,
             });
+          }
+
           return result;
         },
         retryCount,

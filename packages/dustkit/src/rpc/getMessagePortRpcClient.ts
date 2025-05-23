@@ -1,22 +1,31 @@
-import { WebSocketRequestError } from "viem";
-import {
-  type Socket,
-  type SocketRpcClient,
-  getSocketRpcClient,
-} from "viem/utils";
+import { SocketClosedError, WebSocketRequestError } from "viem";
+import { type SocketRpcClient, getSocketRpcClient } from "viem/utils";
 
 export const initMessage = "MessagePortRpcClient";
 
-export async function getMessagePortRpcClient(
-  target: Window,
-): Promise<SocketRpcClient<MessagePort>> {
+export type MessagePortRpcClient = SocketRpcClient<{
+  readonly target: Window;
+  readonly targetOrigin: string;
+  readonly port: MessagePort;
+}>;
+
+export async function getMessagePortRpcClient({
+  target,
+  targetOrigin = "*",
+  key = "messagePort",
+}: {
+  target: Window;
+  targetOrigin?: string;
+  key?: string;
+}): Promise<MessagePortRpcClient> {
   let closed = false;
   return getSocketRpcClient({
+    key,
+    url: targetOrigin,
     async getSocket({ onClose, onError, onOpen, onResponse }) {
       if (closed) {
-        // On closure, viem will try to reconnect, but we don't want that
-        // since we initiated the closure.
-        throw new Error("MessagePortRpcClient is closed.");
+        // If we initiated closing the socket, don't allow reconnecting.
+        throw new SocketClosedError({ url: targetOrigin });
       }
 
       const port = await new Promise<MessagePort>((resolve, reject) => {
@@ -35,7 +44,7 @@ export async function getMessagePortRpcClient(
         );
         channel.port1.start();
         console.info("establishing MessagePort with", target);
-        target.postMessage(initMessage, "*", [channel.port2]);
+        target.postMessage(initMessage, targetOrigin, [channel.port2]);
       });
 
       port.addEventListener("message", function onMessage(event: MessageEvent) {
@@ -48,7 +57,10 @@ export async function getMessagePortRpcClient(
       console.info("port ready");
 
       const closePort = port.close.bind(port);
-      return Object.assign(port, {
+      return {
+        target,
+        targetOrigin,
+        port,
         close() {
           console.info("closing port");
           closed = true;
@@ -59,14 +71,13 @@ export async function getMessagePortRpcClient(
           if (closed) {
             throw new WebSocketRequestError({
               body,
-              url: "*",
+              url: targetOrigin,
               details: "MessagePort is closed.",
             });
           }
           return port.postMessage(body);
         },
-      } as Socket<WebSocket>);
+      };
     },
-    url: "*",
   });
 }

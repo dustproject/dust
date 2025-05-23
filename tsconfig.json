@@ -3,6 +3,7 @@
   "compilerOptions": {
     "noEmit": false,
     "declarationMap": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "noErrorTruncation": true
   }
 }

@@ -3,19 +3,20 @@ import { resourceToHex } from "@latticexyz/common";
 import {
   type AppRpcSchema,
   type ClientRpcSchema,
-  createPostMessageRpcServer,
-  postMessageTransport,
+  createMessagePortRpcServer,
+  getMessagePortRpcClient,
+  messagePort,
 } from "dustkit/internal";
 import { useEffect } from "react";
 import { zeroHash } from "viem";
 
-const dustClient = postMessageTransport<ClientRpcSchema>(
-  window.opener ?? window.parent,
+const dustClientTransport = messagePort<ClientRpcSchema>(
+  getMessagePortRpcClient({ target: window.opener ?? window.parent }),
 );
 
 export function App() {
   useEffect(() => {
-    return createPostMessageRpcServer<AppRpcSchema>({
+    return createMessagePortRpcServer<AppRpcSchema>({
       async dustApp_init(params) {
         console.info("client asked this app to initialize with", params);
         return { success: true };
@@ -30,7 +31,7 @@ export function App() {
         <button
           type="button"
           onClick={async () => {
-            await dustClient({}).request({
+            await dustClientTransport({}).request({
               method: "dustClient_setWaypoint",
               params: {
                 entity: "0x",
@@ -44,7 +45,7 @@ export function App() {
         <button
           type="button"
           onClick={async () => {
-            await dustClient({}).request({
+            await dustClientTransport({}).request({
               method: "dustClient_systemCall",
               params: [
                 {
@@ -63,7 +64,8 @@ export function App() {
           }}
         >
           Call system
-        </button>
+        </button>{" "}
+        <a href={`?ts=${Date.now()}`}>Navigate</a>
       </p>
     </div>
   );

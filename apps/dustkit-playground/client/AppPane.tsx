@@ -2,10 +2,12 @@ import { useSessionClient } from "@latticexyz/entrykit/internal";
 import {
   type AppRpcSchema,
   type PostMessageRpcClient,
+  getMessagePortRpcClient,
   getPostMessageRpcClient,
+  messagePort,
   postMessageTransport,
 } from "dustkit/internal";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useAccount } from "wagmi";
 import { getWorldAddress } from "./common";
 import { createClientRpcServer } from "./createClientRpcServer";
@@ -21,10 +23,15 @@ export function AppPane() {
     return createClientRpcServer({ sessionClient, worldAddress });
   }, [sessionClient, worldAddress]);
 
+  const url = new URL(
+    import.meta.env.VITE_DUSTKIT_APP_URL,
+    window.location.href,
+  );
+
   return (
     <iframe
       title="DustKit app"
-      src={import.meta.env.VITE_DUSTKIT_APP_URL}
+      src={url.toString()}
       onLoad={async (event) => {
         if (!userAddress) {
           console.info("no user address, skipping app transport");
@@ -32,11 +39,14 @@ export function AppPane() {
         }
 
         console.info("setting up app transport");
-        const appTransport = postMessageTransport<AppRpcSchema>(
-          event.currentTarget.contentWindow!,
+        const appTransport = messagePort<AppRpcSchema>(
+          getMessagePortRpcClient({
+            target: event.currentTarget.contentWindow!,
+            targetOrigin: url.origin,
+          }),
         );
         console.info("rpc client ready, sending hello");
-        const res = await appTransport({}).request({
+        const res = await appTransport({ timeout: 1000 }).request({
           method: "dustApp_init",
           params: {
             appConfig: {

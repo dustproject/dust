@@ -28,7 +28,7 @@ export function Game() {
           onClick={() => setAppOpen(!appOpen)}
           style={{ width: "fit-content" }}
         >
-          {appOpen ? "Close App" : "Open App"}
+          {appOpen ? "Close app" : "Open app"}
         </button>
         {appOpen ? <AppPane /> : null}
       </div>

@@ -7,7 +7,10 @@ export {
   ClientRpcSchema,
 } from "../rpc/schemas";
 
-export { getMessagePortRpcClient } from "../rpc/getMessagePortRpcClient";
+export {
+  getMessagePortRpcClient,
+  type MessagePortRpcClient,
+} from "../rpc/getMessagePortRpcClient";
 export { createMessagePortRpcServer } from "../rpc/createMessagePortRpcServer";
 export {
   messagePort,

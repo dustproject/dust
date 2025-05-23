@@ -6,6 +6,7 @@ import {
   entryPoint07Abi,
   waitForUserOperationReceipt,
 } from "viem/account-abstraction";
+import { formatAbiItemWithArgs, getAction } from "viem/utils";
 
 export type WaitForUserOperationArgs = {
   sessionClient: SessionClient;
@@ -23,10 +24,6 @@ export type WaitForUserOperationResult =
       status: "reverted";
       reason?: string;
       receipt: UserOperationReceipt;
-    }
-  | {
-      status: "timeout";
-      reason: string;
     };
 
 export async function waitForUserOperation({
@@ -35,48 +32,48 @@ export async function waitForUserOperation({
   abi,
   timeout = 10_000,
 }: WaitForUserOperationArgs): Promise<WaitForUserOperationResult> {
-  try {
-    const receipt = await waitForUserOperationReceipt(sessionClient as never, {
-      hash: userOperationHash,
-      timeout,
-    });
-    if (receipt.success) {
-      return {
-        status: "success",
-        receipt,
-      };
-    }
+  const receipt = await getAction(
+    sessionClient,
+    waitForUserOperationReceipt,
+    "waitForUserOperationReceipt",
+  )({
+    hash: userOperationHash,
+    timeout,
+  });
 
+  if (receipt.success) {
+    return {
+      status: "success",
+      receipt,
+    };
+  }
+
+  const reason = (() => {
     try {
-      const encodedReason = parseEventLogs({
+      const revertReasonData = parseEventLogs({
         logs: receipt.receipt.logs,
         abi: entryPoint07Abi,
       }).find((log) => log.eventName === "UserOperationRevertReason")?.args
         .revertReason;
 
-      const errorAbi = parseAbi(["error Error(string)"]);
-      const decodedReason =
-        encodedReason &&
-        decodeErrorResult({
-          data: encodedReason,
-          abi: abi ? [...abi, errorAbi] : errorAbi,
-        }).args[0];
-
-      return {
-        status: "reverted",
-        reason: decodedReason,
-        receipt,
-      };
+      if (revertReasonData) {
+        return formatAbiItemWithArgs(
+          decodeErrorResult({
+            data: revertReasonData,
+            abi: abi ? [...abi, ...errorAbi] : errorAbi,
+          }),
+        );
+      }
     } catch (error) {
-      return {
-        status: "reverted",
-        receipt,
-      };
+      console.warn("Could not decode user op revert reason.", receipt, error);
     }
-  } catch {
-    return {
-      status: "timeout",
-      reason: `Not confirmed after ${Math.floor(timeout / 1000)} seconds`,
-    };
-  }
+  })();
+
+  return {
+    status: "reverted",
+    reason,
+    receipt,
+  };
 }
+
+const errorAbi = parseAbi(["error Error(string)"]);

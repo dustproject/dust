@@ -5,7 +5,7 @@ import {
 } from "@latticexyz/world/internal";
 import {
   type ClientRpcSchema,
-  createPostMessageRpcServer,
+  createMessagePortRpcServer,
 } from "dustkit/internal";
 import { type Hex, isHex } from "viem";
 import { sendUserOperation } from "viem/account-abstraction";
@@ -19,7 +19,7 @@ export function createClientRpcServer({
   worldAddress,
 }: { sessionClient?: SessionClient; worldAddress: Hex }) {
   console.info("setting up client rpc server", { sessionClient, worldAddress });
-  return createPostMessageRpcServer<ClientRpcSchema>({
+  const close = createMessagePortRpcServer<ClientRpcSchema>({
     async dustClient_setWaypoint(waypoint) {
       console.info("app asked for waypoint", waypoint);
     },
@@ -60,7 +60,7 @@ export function createClientRpcServer({
             },
           ],
         });
-        const receipt = await waitForUserOperation({
+        const { receipt } = await waitForUserOperation({
           sessionClient,
           userOperationHash,
           abi,
@@ -99,5 +99,19 @@ export function createClientRpcServer({
         receipt,
       };
     },
+    async dustClient_getSlots() {
+      // TODO
+    },
+    async dustClient_getPlayerPosition() {
+      // TODO
+    },
   });
+
+  return () => {
+    console.info("closing client rpc server", {
+      sessionClient,
+      worldAddress,
+    });
+    close();
+  };
 }
