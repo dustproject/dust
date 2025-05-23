@@ -30,10 +30,8 @@ import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
 import { EntityOrientation } from "../src/codegen/tables/EntityOrientation.sol";
-import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 
-import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 import { Machine } from "../src/codegen/tables/Machine.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
@@ -303,18 +301,5 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     EntityId forceFieldEntityId = setupForceField(coord, energyData);
     Machine.setDepletedTime(forceFieldEntityId, depletedTime);
     return forceFieldEntityId;
-  }
-
-  // Helper function to find the inventory slot with a specific object type
-  function findInventorySlotWithObjectType(EntityId entityId, ObjectType objectType) internal view returns (uint8) {
-    uint256 numSlots = Inventory.lengthOccupiedSlots(entityId);
-    for (uint8 i = 0; i < numSlots; i++) {
-      // Assuming 36 inventory slots
-      ObjectType slotObjectType = InventorySlot.getObjectType(entityId, Inventory.getItemOccupiedSlots(entityId, i));
-      if (slotObjectType == objectType) {
-        return i;
-      }
-    }
-    revert("Object type not found in inventory");
   }
 }

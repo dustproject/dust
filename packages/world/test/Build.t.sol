@@ -7,7 +7,6 @@ import { console } from "forge-std/console.sol";
 import { EntityId } from "../src/EntityId.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
-import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
@@ -44,7 +43,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
@@ -73,7 +72,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
@@ -104,7 +103,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the TextSign object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
@@ -137,11 +136,9 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the TextSign object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
-
-    Vec3[] memory relative = buildObjectType.getRelativeCoords(buildCoord, Orientation.wrap(1));
 
     vm.prank(alice);
     startGasReport("build multi-size");
@@ -166,7 +163,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
@@ -196,7 +193,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 4);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
     world.build(aliceEntityId, bobCoord, inventorySlot, "");
@@ -234,7 +231,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
     vm.expectRevert("Cannot jump build on a pass-through block");
@@ -249,7 +246,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     setObjectAtCoord(playerCoord + vec3(0, 2, 0), ObjectTypes.Grass);
 
@@ -271,7 +268,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
     vm.expectRevert("Cannot move through a player");
@@ -290,7 +287,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
     vm.expectRevert("Cannot build on a non-air block");
@@ -319,7 +316,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
     vm.expectRevert("Cannot build on a movable entity");
@@ -346,7 +343,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the GoldBar object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
     vm.expectRevert("Cannot build non-block object");
@@ -367,7 +364,7 @@ contract BuildTest is DustTest {
     TestInventoryUtils.addObject(airEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
     vm.expectRevert("Cannot build where there are dropped objects");
@@ -382,7 +379,7 @@ contract BuildTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
     vm.expectRevert("Entity is too far");
@@ -407,7 +404,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     Energy.set(aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1, drainRate: 0 }));
 
@@ -432,7 +429,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     // Set player energy to exactly enough for one build operation
     uint128 exactEnergy = BUILD_ENERGY_COST;
@@ -462,7 +459,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
 
     // Use a slot that doesn't have the required object
-    uint8 inventorySlot = 0; // assuming slot 0 is empty or has another item
+    uint16 inventorySlot = 0; // assuming slot 0 is empty or has another item
 
     vm.prank(alice);
     vm.expectRevert("Cannot build non-block object");
@@ -480,7 +477,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
 
     // Use any slot for this test
-    uint8 inventorySlot = 0;
+    uint16 inventorySlot = 0;
 
     vm.expectRevert("Caller not allowed");
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
@@ -497,7 +494,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
 
     // Use any slot for this test
-    uint8 inventorySlot = 0;
+    uint16 inventorySlot = 0;
 
     EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Orientation.wrap(44));
     PlayerBed.setBedEntityId(aliceEntityId, bed);

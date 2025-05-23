@@ -10,7 +10,6 @@ import { EntityId } from "../src/EntityId.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
 import { MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "../src/Constants.sol";

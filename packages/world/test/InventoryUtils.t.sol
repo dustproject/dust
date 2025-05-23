@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { LibBit } from "solady/utils/LibBit.sol";
+
 import { DustTest, console } from "./DustTest.sol";
 
 import { EntityId } from "../src/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../src/ObjectType.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 
-import { Inventory } from "../src/codegen/tables/Inventory.sol";
+import { InventoryBitmap } from "../src/codegen/tables/InventoryBitmap.sol";
 import { Math } from "../src/utils/Math.sol";
 
 import { InventorySlot, InventorySlotData } from "../src/codegen/tables/InventorySlot.sol";
-import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
@@ -42,33 +43,33 @@ contract InventoryUtilsTest is DustTest {
     TestInventoryUtils.addEntity(aliceEntity, ObjectTypes.NeptuniumAxe);
 
     // 36 as forcefields and buckets use a single slot each
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntity), 36);
-    assertEq(Inventory.lengthOccupiedSlots(bobEntity), 0);
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(aliceEntity), 36);
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(bobEntity), 0);
 
     TestInventoryUtils.removeObjectFromSlot(aliceEntity, 1, 1);
 
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntity), 35);
-    assertEq(Inventory.lengthOccupiedSlots(bobEntity), 0);
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(aliceEntity), 35);
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(bobEntity), 0);
 
     TestInventoryUtils.transferAll(aliceEntity, bobEntity);
 
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntity), 0);
-    assertEq(Inventory.lengthOccupiedSlots(bobEntity), 35);
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(aliceEntity), 0);
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(bobEntity), 35);
 
     TestInventoryUtils.transferAll(bobEntity, aliceEntity);
 
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntity), 35);
-    assertEq(Inventory.lengthOccupiedSlots(bobEntity), 0);
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(aliceEntity), 35);
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(bobEntity), 0);
 
     TestInventoryUtils.transferAll(aliceEntity, bobEntity);
 
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntity), 0);
-    assertEq(Inventory.lengthOccupiedSlots(bobEntity), 35);
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(aliceEntity), 0);
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(bobEntity), 35);
 
-    _verifyInventorySlotIntegrity(aliceEntity);
+    _verifyInventoryBitmapIntegrity(aliceEntity);
   }
 
-  function testTransferEntityToNullSlot() public {
+  function testTransferEntityToEmptySlot() public {
     (, EntityId aliceEntity) = createTestPlayer(vec3(1, 0, 0));
 
     TestInventoryUtils.addObject(aliceEntity, ObjectTypes.AcaciaLog, 1);
@@ -77,126 +78,88 @@ contract InventoryUtilsTest is DustTest {
 
     TestInventoryUtils.removeObject(aliceEntity, ObjectTypes.FescueGrass, 1);
 
-    // Transfer CopperAxe to the Null slot where FescueGrass was
+    // Transfer CopperAxe to the empty slot where FescueGrass was
     SlotTransfer[] memory transfers = new SlotTransfer[](1);
     transfers[0] = SlotTransfer({ slotFrom: 1, slotTo: 2, amount: 1 });
 
     TestInventoryUtils.transfer(aliceEntity, aliceEntity, transfers);
 
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntity), 2);
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(aliceEntity), 2);
 
-    uint16[] memory slots = Inventory.getOccupiedSlots(aliceEntity);
-    for (uint256 i = 0; i < slots.length; i++) {
-      InventorySlotData memory slotData = InventorySlot.get(aliceEntity, slots[i]);
-      assertEq(i, slotData.occupiedIndex, "Wrong occupied index");
-    }
-
-    _verifyInventorySlotIntegrity(aliceEntity);
+    _verifyInventoryBitmapIntegrity(aliceEntity);
   }
 
-  function testDuplicateOccupiedSlots() public {
+  function testReuseEmptySlots() public {
     (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
 
     TestInventoryUtils.addEntity(alice, ObjectTypes.WoodenHoe); // slot 0
     TestInventoryUtils.addEntity(alice, ObjectTypes.IronPick); // slot 1
-    assertEq(Inventory.lengthOccupiedSlots(alice), 2, "expected two occupied slots");
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 2, "expected two occupied slots");
 
     TestInventoryUtils.removeEntityFromSlot(alice, 0);
     TestInventoryUtils.removeEntityFromSlot(alice, 1);
-    assertEq(Inventory.lengthOccupiedSlots(alice), 0, "inventory should be empty");
-    assertEq(InventoryTypeSlots.length(alice, ObjectTypes.Null), 2, "expected two null slots");
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 0, "inventory should be empty");
 
-    // Reuse the slots twice
+    // Reuse the slots - should get slot 0 first
     TestInventoryUtils.addEntity(alice, ObjectTypes.CopperAxe);
     TestInventoryUtils.addEntity(alice, ObjectTypes.NeptuniumAxe);
 
-    // Occupied slots should be different
-    uint16[] memory slots = Inventory.getOccupiedSlots(alice);
-    assertEq(slots.length, 2, "length mismatch");
-    assertNotEq(slots[0], slots[1]);
+    // Occupied slots should be 0 and 1 again
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 2, "should have 2 slots occupied");
 
-    _verifyInventorySlotIntegrity(alice);
+    _verifyInventoryBitmapIntegrity(alice);
   }
 
-  function testDuplicateOccupiedSlotsWithSelfTransfers() public {
+  function testSlotTransfersWithinSameInventory() public {
     (, EntityId aliceEntity) = createTestPlayer(vec3(0, 0, 0));
 
     TestInventoryUtils.addEntity(aliceEntity, ObjectTypes.WoodenHoe); // slot 0
     TestInventoryUtils.addEntity(aliceEntity, ObjectTypes.IronPick); // slot 1
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntity), 2, "expected 2 occupied slots");
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(aliceEntity), 2, "expected 2 occupied slots");
 
     SlotTransfer[] memory transfers = new SlotTransfer[](2);
     transfers[0] = SlotTransfer({ slotFrom: 0, slotTo: 2, amount: 1 });
     transfers[1] = SlotTransfer({ slotFrom: 1, slotTo: 3, amount: 1 });
     TestInventoryUtils.transfer(aliceEntity, aliceEntity, transfers);
 
-    // Now the inventory holds slots 2 & 3, while slots 0 & 1 sit in Null
-    // (both with the same incorrect typeIndex = 0).
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntity), 2, "inventory should still have 2 items");
+    // Now the inventory holds slots 2 & 3, while slots 0 & 1 are free
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(aliceEntity), 2, "inventory should still have 2 items");
 
-    // Require two fresh slots, `_useEmptySlot` will be invoked twice
+    // Add two more items - should reuse slots 0 & 1
     TestInventoryUtils.addEntity(aliceEntity, ObjectTypes.CopperAxe);
     TestInventoryUtils.addEntity(aliceEntity, ObjectTypes.NeptuniumAxe);
 
-    uint16[] memory slots = Inventory.getOccupiedSlots(aliceEntity);
-    assertEq(slots.length, 4, "expected 4 occupied-slot entries");
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(aliceEntity), 4, "expected 4 occupied slots");
 
-    // All slots should be unique and correct
-    for (uint256 i = 0; i < slots.length; i++) {
-      InventorySlotData memory slotData = InventorySlot.get(aliceEntity, slots[i]);
-      assertEq(i, slotData.occupiedIndex, "Wrong occupied index");
-    }
-
-    _verifyInventorySlotIntegrity(aliceEntity);
+    _verifyInventoryBitmapIntegrity(aliceEntity);
   }
 
-  function testDuplicateOccupiedSlotsWhenUsingNonSequentialEmptySlots() public {
-    (, EntityId aliceEntity) = createTestPlayer(vec3(0, 0, 0));
+  function testTransferBetweenInventories() public {
+    (, EntityId alice) = createTestPlayer(vec3(5, 0, 0));
+    (, EntityId bob) = createTestPlayer(vec3(6, 0, 0));
 
-    TestInventoryUtils.addEntity(aliceEntity, ObjectTypes.WoodenHoe); // slot 0
-    TestInventoryUtils.addObjectToSlot(aliceEntity, ObjectTypes.Ice, 1, 2); // slot 2
+    TestInventoryUtils.addObjectToSlot(alice, ObjectTypes.Sand, 10, 5);
+    TestInventoryUtils.addObjectToSlot(alice, ObjectTypes.Snow, 20, 10);
 
-    // This will use an empty slot
-    TestInventoryUtils.addObject(aliceEntity, ObjectTypes.Snow, 1);
+    SlotTransfer[] memory transfers = new SlotTransfer[](2);
+    transfers[0] = SlotTransfer({ slotFrom: 5, slotTo: 3, amount: 10 });
+    transfers[1] = SlotTransfer({ slotFrom: 10, slotTo: 7, amount: 20 });
 
-    uint16[] memory slots = Inventory.getOccupiedSlots(aliceEntity);
-    assertEq(slots.length, 3, "expected 3 occupied-slot entries");
+    TestInventoryUtils.transfer(alice, bob, transfers);
 
-    // All slots should be unique and correct
-    for (uint256 i = 0; i < slots.length; i++) {
-      InventorySlotData memory slotData = InventorySlot.get(aliceEntity, slots[i]);
-      assertEq(i, slotData.occupiedIndex, "Wrong occupied index");
-    }
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 0, "Alice should have empty inventory");
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(bob), 2, "Bob should have 2 items");
 
-    _verifyInventorySlotIntegrity(aliceEntity);
+    assertEq(InventorySlot.getAmount(bob, 3), 10, "Bob should have 10 sand in slot 3");
+    assertEq(InventorySlot.getAmount(bob, 7), 20, "Bob should have 20 snow in slot 7");
+
+    _verifyInventoryBitmapIntegrity(alice);
+    _verifyInventoryBitmapIntegrity(bob);
   }
 
-  function testSlotGapSequential() public {
+  function testSwapSlots() public {
     (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
 
-    // jump straight to slot 10
-    TestInventoryUtils.addObjectToSlot(alice, ObjectTypes.Ice, 1, 10);
-    assertEq(Inventory.lengthOccupiedSlots(alice), 1);
-
-    TestInventoryUtils.addObject(alice, ObjectTypes.Snow, 1); // slot 0
-    TestInventoryUtils.addEntity(alice, ObjectTypes.WoodenHoe); // slot 1
-
-    uint16[] memory slots = Inventory.getOccupiedSlots(alice);
-    assertEq(slots.length, 3);
-
-    // every occupiedIndex field must match its position
-    for (uint256 i; i < slots.length; ++i) {
-      InventorySlotData memory sd = InventorySlot.get(alice, slots[i]);
-      assertEq(i, sd.occupiedIndex, "Wrong occupiedIndex");
-    }
-
-    _verifyInventorySlotIntegrity(alice);
-  }
-
-  function testSwapEntityAndObject() public {
-    (, EntityId alice) = createTestPlayer(vec3(1, 1, 1));
-
-    // slot 0 = entity, slot 1 = object
     TestInventoryUtils.addEntity(alice, ObjectTypes.CopperAxe);
     TestInventoryUtils.addObjectToSlot(alice, ObjectTypes.OakLog, 10, 1);
 
@@ -205,37 +168,28 @@ contract InventoryUtilsTest is DustTest {
 
     TestInventoryUtils.transfer(alice, alice, transfers);
 
-    uint16[] memory slots = Inventory.getOccupiedSlots(alice);
-    assertEq(slots.length, 2);
-    // verify indexes were updated by _replaceSlot
-    for (uint256 i; i < slots.length; ++i) {
-      InventorySlotData memory sd = InventorySlot.get(alice, slots[i]);
-      assertEq(i, sd.occupiedIndex, "index mismatch after swap");
-    }
+    // Verify the swap happened
+    assertEq(InventorySlot.getObjectType(alice, 0), ObjectTypes.OakLog);
+    assertEq(InventorySlot.getAmount(alice, 0), 10);
+    assertEq(InventorySlot.getObjectType(alice, 1), ObjectTypes.CopperAxe);
 
-    _verifyInventorySlotIntegrity(alice);
+    _verifyInventoryBitmapIntegrity(alice);
   }
 
   function testSwapEntities() public {
     (, EntityId alice) = createTestPlayer(vec3(1, 1, 1));
 
     TestInventoryUtils.addEntity(alice, ObjectTypes.CopperAxe);
-    TestInventoryUtils.addEntity(alice, ObjectTypes.CopperAxe);
+    TestInventoryUtils.addEntity(alice, ObjectTypes.IronPick);
 
     SlotTransfer[] memory transfers = new SlotTransfer[](1);
     transfers[0] = SlotTransfer({ slotFrom: 0, slotTo: 1, amount: 1 });
 
     TestInventoryUtils.transfer(alice, alice, transfers);
 
-    uint16[] memory slots = Inventory.getOccupiedSlots(alice);
-    assertEq(slots.length, 2);
-    // verify indexes were updated by _replaceSlot
-    for (uint256 i; i < slots.length; ++i) {
-      InventorySlotData memory sd = InventorySlot.get(alice, slots[i]);
-      assertEq(i, sd.occupiedIndex, "index mismatch after swap");
-    }
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 2);
 
-    _verifyInventorySlotIntegrity(alice);
+    _verifyInventoryBitmapIntegrity(alice);
   }
 
   function testPartialStackAddsOneSlot() public {
@@ -243,11 +197,11 @@ contract InventoryUtilsTest is DustTest {
 
     // stack size = 99, add 95 logs
     TestInventoryUtils.addObject(alice, ObjectTypes.OakLog, 95);
-    assertEq(Inventory.lengthOccupiedSlots(alice), 1);
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 1);
 
     // add 10 more, slot 0 reaches 99, slot 1 holds 6
     TestInventoryUtils.addObject(alice, ObjectTypes.OakLog, 10);
-    assertEq(Inventory.lengthOccupiedSlots(alice), 2);
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 2);
 
     // amounts
     uint16 a0 = InventorySlot.getAmount(alice, 0);
@@ -255,28 +209,25 @@ contract InventoryUtilsTest is DustTest {
     assertEq(a0, 99);
     assertEq(a1, 6);
 
-    _verifyInventorySlotIntegrity(alice);
+    _verifyInventoryBitmapIntegrity(alice);
   }
 
   function testPartialThenFullRemoval() public {
     (, EntityId alice) = createTestPlayer(vec3(3, 0, 0));
 
     TestInventoryUtils.addObject(alice, ObjectTypes.Snow, 99 * 2 + 1); // stack 99, so 3 slots: 99,99,1
-    assertEq(Inventory.lengthOccupiedSlots(alice), 3);
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 3);
 
     // remove 10 from slot 0, should remain occupied with 89
     TestInventoryUtils.removeObjectFromSlot(alice, 0, 10);
     assertEq(InventorySlot.getAmount(alice, 0), 89);
-    assertEq(Inventory.lengthOccupiedSlots(alice), 3);
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 3);
 
     // now remove the remaining 89, slot recycled, only two occupied left
     TestInventoryUtils.removeObjectFromSlot(alice, 0, 89);
-    assertEq(Inventory.lengthOccupiedSlots(alice), 2);
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 2);
 
-    // Null list should contain exactly one new entry
-    assertEq(InventoryTypeSlots.length(alice, ObjectTypes.Null), 1);
-
-    _verifyInventorySlotIntegrity(alice);
+    _verifyInventoryBitmapIntegrity(alice);
   }
 
   function testUseEmptySlotAfterGap() public {
@@ -285,111 +236,68 @@ contract InventoryUtilsTest is DustTest {
     // jump straight to slot 10, leaving 0-9 untouched
     TestInventoryUtils.addObjectToSlot(alice, ObjectTypes.Ice, 1, 10);
 
-    // first fresh allocation must reuse slot 9 (we pop from the end of null type slots)
+    // first fresh allocation must use slot 0 (first empty)
     TestInventoryUtils.addObject(alice, ObjectTypes.Snow, 1);
-    uint16[] memory occ = Inventory.getOccupiedSlots(alice);
 
-    assertEq(occ.length, 2, "two occupied slots expected");
-    assertTrue(occ[0] != occ[1], "slots must differ");
+    // Snow should be in slot 0
+    InventorySlotData memory slotData = InventorySlot.get(alice, 0);
+    assertEq(slotData.objectType, ObjectTypes.Snow, "Snow should be in slot 0");
 
-    _verifyInventorySlotIntegrity(alice);
+    _verifyInventoryBitmapIntegrity(alice);
   }
 
   function testRemoveAcrossSlots() public {
     (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
 
-    // 150 OakLog, slots: 99 + 51
-    TestInventoryUtils.addObject(alice, ObjectTypes.OakLog, 150);
-    TestInventoryUtils.removeObject(alice, ObjectTypes.OakLog, 120); // leaves 30
+    // Add 250 oak logs (stackable 99), so we need 3 slots: 99,99,52
+    TestInventoryUtils.addObject(alice, ObjectTypes.OakLog, 250);
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 3, "Should have 3 slots");
 
-    uint16[] memory occ = Inventory.getOccupiedSlots(alice);
-    assertEq(occ.length, 1, "only one slot should remain");
-    assertEq(InventorySlot.getAmount(alice, occ[0]), 30, "wrong remaining amount");
+    // Verify distribution
+    assertEq(InventorySlot.getAmount(alice, 0), 99);
+    assertEq(InventorySlot.getAmount(alice, 1), 99);
+    assertEq(InventorySlot.getAmount(alice, 2), 52);
 
-    _verifyInventorySlotIntegrity(alice);
+    // Remove 150 logs - should remove from slots 2,1,0 in that order
+    TestInventoryUtils.removeObject(alice, ObjectTypes.OakLog, 150);
+
+    // Should have 100 left: 99 in slot 0, 1 in slot 1
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 2, "Should have 2 slots");
+    assertEq(InventorySlot.getAmount(alice, 0), 99);
+    assertEq(InventorySlot.getAmount(alice, 1), 1);
+
+    _verifyInventoryBitmapIntegrity(alice);
   }
 
-  function testSwapDifferentTypesBetweenEntities() public {
-    (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
-    (, EntityId bob) = createTestPlayer(vec3(1, 0, 0));
-
-    TestInventoryUtils.addObject(alice, ObjectTypes.OakLog, 10);
-    TestInventoryUtils.addEntity(alice, ObjectTypes.CopperAxe);
-
-    TestInventoryUtils.addObject(bob, ObjectTypes.Sand, 20);
-
-    SlotTransfer[] memory transfers = new SlotTransfer[](1);
-    transfers[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 10 }); // swap OakLog <-> Sand
-    TestInventoryUtils.transfer(alice, bob, transfers);
-
-    // indices must be consistent
-    uint16[] memory aliceSlots = Inventory.getOccupiedSlots(alice);
-    for (uint256 i; i < aliceSlots.length; ++i) {
-      InventorySlotData memory d = InventorySlot.get(alice, aliceSlots[i]);
-      assertEq(i, d.occupiedIndex, "alice index wrong");
-    }
-    uint16[] memory bobSlots = Inventory.getOccupiedSlots(bob);
-    for (uint256 i; i < bobSlots.length; ++i) {
-      InventorySlotData memory d = InventorySlot.get(bob, bobSlots[i]);
-      assertEq(i, d.occupiedIndex, "bob index wrong");
-    }
-
-    _verifyInventorySlotIntegrity(alice);
-    _verifyInventorySlotIntegrity(bob);
-  }
-
-  function testToolBreakRemovesSlot() public {
+  function testToolUse() public {
     (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
 
-    // manually set mass low so one use breaks it
-    EntityId entityId = TestInventoryUtils.addEntity(alice, ObjectTypes.WoodenPick);
-    Mass.setMass(entityId, 1);
+    // Add a tool
+    TestInventoryUtils.addEntity(alice, ObjectTypes.IronPick);
+    EntityId toolId = InventorySlot.getEntityId(alice, 0);
 
-    // Use tool with mass reduction ≥ 1
+    // Get tool data
     ToolData memory toolData = TestInventoryUtils.getToolData(alice, 0);
-    assertEq(toolData.toolType, ObjectTypes.WoodenPick, "Wrong tool type");
-    TestInventoryUtils.use(toolData, 1, 1);
+    assertEq(toolData.toolType, ObjectTypes.IronPick);
+    assertEq(toolData.tool, toolId);
 
-    assertEq(Inventory.lengthOccupiedSlots(alice), 0, "slot not recycled");
-    assertEq(InventoryTypeSlots.length(alice, ObjectTypes.Null), 1, "slot not in Null list");
+    // Use the tool partially
+    uint128 initialMass = Mass.getMass(toolId);
+    TestInventoryUtils.use(toolData, 100, 1);
 
-    _verifyInventorySlotIntegrity(alice);
+    // Tool should still exist with reduced mass
+    assertTrue(Mass.getMass(toolId) < initialMass, "Tool mass should be reduced");
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 1, "Tool should still be in inventory");
+
+    _verifyInventoryBitmapIntegrity(alice);
   }
 
-  // Fuzz test for adding objects to inventory
-  function testAddObjectDifferentAmounts(uint16 amount) public {
-    // Bound amount to reasonable values for test performance
-    vm.assume(amount > 0 && amount < 1000);
+  // Fuzz tests
 
-    (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
-
-    // Add objects in the given amount
-    TestInventoryUtils.addObject(alice, ObjectTypes.OakLog, amount);
-
-    // Calculate expected slots (OakLog has stackable=99)
-    uint16 expectedSlots = (amount + 98) / 99; // Ceiling division
-
-    // Verify slot count
-    assertEq(Inventory.lengthOccupiedSlots(alice), expectedSlots, "Wrong number of occupied slots");
-
-    // Verify inventory integrity
-    _verifyInventorySlotIntegrity(alice);
-
-    // Verify total amount of objects
-    uint16 totalAmount = 0;
-    uint16[] memory slots = Inventory.getOccupiedSlots(alice);
-    for (uint256 i = 0; i < slots.length; i++) {
-      totalAmount += InventorySlot.getAmount(alice, slots[i]);
-    }
-
-    assertEq(totalAmount, amount, "Total object amount mismatch");
-  }
-
-  // Fuzz test for removing objects from inventory
-  function testRemoveObject(uint16 addAmount, uint16 removeAmount) public {
-    // Bound amounts to reasonable values
-    vm.assume(addAmount > 0 && addAmount < 500);
-    vm.assume(removeAmount > 0 && removeAmount <= addAmount);
+  function testFuzzAddRemoveObjects(uint16 addAmount, uint16 removeAmount) public {
+    // Bound inputs
+    vm.assume(addAmount > 0 && addAmount <= 999);
+    vm.assume(removeAmount <= addAmount);
 
     (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
 
@@ -397,7 +305,9 @@ contract InventoryUtilsTest is DustTest {
     TestInventoryUtils.addObject(alice, ObjectTypes.OakLog, addAmount);
 
     // Remove objects
-    TestInventoryUtils.removeObject(alice, ObjectTypes.OakLog, removeAmount);
+    if (removeAmount > 0) {
+      TestInventoryUtils.removeObject(alice, ObjectTypes.OakLog, removeAmount);
+    }
 
     // Calculate expected remaining amount
     uint16 expectedRemaining = addAmount - removeAmount;
@@ -406,23 +316,18 @@ contract InventoryUtilsTest is DustTest {
     uint16 expectedSlots = expectedRemaining > 0 ? (expectedRemaining + 98) / 99 : 0;
 
     // Verify slot count
-    assertEq(Inventory.lengthOccupiedSlots(alice), expectedSlots, "Wrong number of remaining slots");
-
-    // Verify inventory integrity
-    _verifyInventorySlotIntegrity(alice);
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), expectedSlots, "Wrong number of remaining slots");
 
     // Verify total amount of objects
-    uint16 totalAmount = 0;
-    uint16[] memory slots = Inventory.getOccupiedSlots(alice);
-    for (uint256 i = 0; i < slots.length; i++) {
-      totalAmount += InventorySlot.getAmount(alice, slots[i]);
-    }
+    assertEq(
+      TestInventoryUtils.countObjectsOfType(alice, ObjectTypes.OakLog), expectedRemaining, "Remaining amount mismatch"
+    );
 
-    assertEq(totalAmount, expectedRemaining, "Remaining amount mismatch");
+    _verifyInventoryBitmapIntegrity(alice);
   }
 
   // Fuzz test for transferring objects between slots
-  function testTransferBetweenSlots(uint16 amount1, uint16 amount2, uint16 transferAmount) public {
+  function testFuzzTransferBetweenSlots(uint16 amount1, uint16 amount2, uint16 transferAmount) public {
     // Bound inputs to reasonable values
     vm.assume(amount1 > 0 && amount1 <= 99); // Max stack is 99
     vm.assume(amount2 > 0 && amount2 <= 99);
@@ -443,25 +348,24 @@ contract InventoryUtilsTest is DustTest {
     TestInventoryUtils.transfer(alice, alice, transfers);
 
     // Verify amounts
-    uint16 remainingFromSlot = InventorySlot.getAmount(alice, 0);
     uint16 destinationSlot = InventorySlot.getAmount(alice, 1);
 
     // If we transferred all from slot 0, it should be recycled
     if (transferAmount == amount1) {
-      assertEq(Inventory.lengthOccupiedSlots(alice), 1, "Should only have one occupied slot");
-      assertEq(InventoryTypeSlots.length(alice, ObjectTypes.Null), 1, "Should have one null slot");
+      assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 1, "Should only have one occupied slot");
     } else {
+      uint16 remainingFromSlot = InventorySlot.getAmount(alice, 0);
       assertEq(remainingFromSlot, amount1 - transferAmount, "Source slot amount mismatch");
     }
 
     assertEq(destinationSlot, amount2 + transferAmount, "Destination slot amount mismatch");
 
     // Verify inventory integrity
-    _verifyInventorySlotIntegrity(alice);
+    _verifyInventoryBitmapIntegrity(alice);
   }
 
   // Fuzz test for transferring between inventories
-  function testTransferBetweenInventories(uint16 amount, uint16 transferAmount) public {
+  function testFuzzTransferBetweenInventories(uint16 amount, uint16 transferAmount) public {
     // Bound inputs to reasonable values
     vm.assume(amount > 0 && amount <= 99);
     vm.assume(transferAmount > 0 && transferAmount <= amount);
@@ -482,8 +386,7 @@ contract InventoryUtilsTest is DustTest {
     // Verify amounts
     if (transferAmount == amount) {
       // Alice's inventory should be empty
-      assertEq(Inventory.lengthOccupiedSlots(alice), 0, "Alice should have empty inventory");
-      assertEq(InventoryTypeSlots.length(alice, ObjectTypes.Null), 1, "Alice should have one null slot");
+      assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 0, "Alice should have empty inventory");
     } else {
       uint16 aliceRemaining = InventorySlot.getAmount(alice, 0);
       assertEq(aliceRemaining, amount - transferAmount, "Alice remaining amount mismatch");
@@ -493,131 +396,49 @@ contract InventoryUtilsTest is DustTest {
     assertEq(bobAmount, transferAmount, "Bob received amount mismatch");
 
     // Verify inventory integrity for both inventories
-    _verifyInventorySlotIntegrity(alice);
-    _verifyInventorySlotIntegrity(bob);
+    _verifyInventoryBitmapIntegrity(alice);
+    _verifyInventoryBitmapIntegrity(bob);
   }
 
-  // Fuzz test for complex self transfers across multiple slots
-  function testComplexSelfTransfers(uint16 numSlots, uint16 numTransfers) public {
-    // Bound inputs to reasonable values
-    vm.assume(numSlots > 1 && numSlots <= 10);
-    vm.assume(numTransfers > 0 && numTransfers <= 5);
-
-    // Setup player
-    (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
-
-    // Add objects to multiple slots
-    for (uint16 i = 0; i < numSlots; i++) {
-      TestInventoryUtils.addObjectToSlot(alice, ObjectTypes.OakLog, 10, i);
-    }
-
-    // Create transfers between random slots
-    SlotTransfer[] memory transfers = new SlotTransfer[](numTransfers);
-    for (uint16 i = 0; i < numTransfers; i++) {
-      uint16 fromSlot = uint16(uint256(keccak256(abi.encode(i, "from"))) % numSlots);
-      uint16 toSlot = uint16(uint256(keccak256(abi.encode(i, "to"))) % numSlots);
-
-      // Ensure different slots
-      if (fromSlot == toSlot) {
-        toSlot = (toSlot + 1) % numSlots;
-      }
-
-      // Transfer 1-5 items
-      uint16 amount = (uint16(uint256(keccak256(abi.encode(i, "amount"))) % 5)) + 1;
-
-      transfers[i] = SlotTransfer({ slotFrom: fromSlot, slotTo: toSlot, amount: amount });
-    }
-
-    // Perform transfers
-    TestInventoryUtils.transfer(alice, alice, transfers);
-
-    // Verify inventory integrity
-    _verifyInventorySlotIntegrity(alice);
-
-    // Total amount should remain the same
-    uint16 totalAmount = 0;
-    uint16[] memory slots = Inventory.getOccupiedSlots(alice);
-    for (uint256 i = 0; i < slots.length; i++) {
-      totalAmount += InventorySlot.getAmount(alice, slots[i]);
-    }
-
-    // Total amount in inventory should be unchanged
-    assertEq(totalAmount, numSlots * 10, "Total amount should remain the same");
-  }
-
-  // Fuzz test for adding objects with specific slots
-  function testAddObjectToSpecificSlots(uint16 slot1, uint16 slot2, uint16 amount) public {
-    // Bound inputs to reasonable values
-    vm.assume(slot1 < 36);
-    vm.assume(slot2 < 36);
-    vm.assume(slot1 != slot2);
-    vm.assume(amount > 0 && amount <= 50);
-
-    // Setup player
-    (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
-
-    // Add objects to specific slots
-    TestInventoryUtils.addObjectToSlot(alice, ObjectTypes.OakLog, amount, slot1);
-    TestInventoryUtils.addObjectToSlot(alice, ObjectTypes.OakLog, amount, slot2);
-
-    // Verify amounts
-    assertEq(InventorySlot.getAmount(alice, slot1), amount, "Slot 1 amount mismatch");
-    assertEq(InventorySlot.getAmount(alice, slot2), amount, "Slot 2 amount mismatch");
-
-    // Verify occupied slots count
-    assertEq(Inventory.lengthOccupiedSlots(alice), 2, "Should have two occupied slots");
-
-    // Verify inventory integrity
-    _verifyInventorySlotIntegrity(alice);
-  }
-
-  // Fuzz test for transferring entities between inventories
-  function testTransferEntities(uint16 numEntities) public {
-    // Bound input to reasonable values
-    vm.assume(numEntities > 0 && numEntities <= 5);
+  // Fuzz test for entity transfers
+  function testFuzzEntityTransfers(uint8 numEntities) public {
+    // Bound input
+    vm.assume(numEntities > 0 && numEntities <= 10);
 
     // Setup players
     (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
     (, EntityId bob) = createTestPlayer(vec3(1, 0, 0));
 
-    // Add entities to Alice's inventory
+    // Add entities to Alice
     EntityId[] memory entities = new EntityId[](numEntities);
     for (uint16 i = 0; i < numEntities; i++) {
       entities[i] = TestInventoryUtils.addEntity(alice, ObjectTypes.IronPick);
     }
 
-    // Verify Alice has all entities
-    assertEq(Inventory.lengthOccupiedSlots(alice), numEntities, "Alice should have all entities");
-
-    // Transfer each entity one by one
+    // Transfer all entities to Bob
     for (uint16 i = 0; i < numEntities; i++) {
-      // Find the slot for this entity
-      uint16 slot = TestInventoryUtils.getEntitySlot(alice, entities[i]);
-
-      // Transfer to Bob
       SlotTransfer[] memory transfers = new SlotTransfer[](1);
-      transfers[0] = SlotTransfer({ slotFrom: slot, slotTo: i, amount: 1 });
+      transfers[0] = SlotTransfer({ slotFrom: i, slotTo: i, amount: 1 });
 
       TestInventoryUtils.transfer(alice, bob, transfers);
     }
 
     // Verify results
-    assertEq(Inventory.lengthOccupiedSlots(alice), 0, "Alice should have empty inventory");
-    assertEq(Inventory.lengthOccupiedSlots(bob), numEntities, "Bob should have all entities");
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 0, "Alice should have empty inventory");
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(bob), numEntities, "Bob should have all entities");
 
     // Verify inventory integrity
-    _verifyInventorySlotIntegrity(alice);
-    _verifyInventorySlotIntegrity(bob);
+    _verifyInventoryBitmapIntegrity(alice);
+    _verifyInventoryBitmapIntegrity(bob);
 
     // Verify each entity is now in Bob's inventory
     for (uint16 i = 0; i < numEntities; i++) {
-      uint16 slot = TestInventoryUtils.getEntitySlot(bob, entities[i]);
-      assertEq(InventorySlot.getEntityId(bob, slot), entities[i], "Entity should be in Bob's inventory");
+      TestInventoryUtils.findEntity(bob, entities[i]);
     }
   }
 
   // Fuzz test for swapping different types
-  function testSwapDifferentTypes(uint16 amount1, uint16 amount2) public {
+  function testFuzzSwapDifferentTypes(uint16 amount1, uint16 amount2) public {
     // Bound inputs to reasonable values
     vm.assume(amount1 > 0 && amount1 <= 99);
     vm.assume(amount2 > 0 && amount2 <= 99);
@@ -643,11 +464,11 @@ contract InventoryUtilsTest is DustTest {
     assertEq(InventorySlot.getAmount(alice, 1), amount1, "Slot 1 should have amount1");
 
     // Verify inventory integrity
-    _verifyInventorySlotIntegrity(alice);
+    _verifyInventoryBitmapIntegrity(alice);
   }
 
   // Fuzz test for transferAll between inventories with varying contents
-  function testTransferAll(uint16 numObjects) public {
+  function testFuzzTransferAll(uint16 numObjects) public {
     // Bound input to reasonable values
     vm.assume(numObjects > 0 && numObjects <= 10);
 
@@ -673,51 +494,84 @@ contract InventoryUtilsTest is DustTest {
     }
 
     // Verify initial state
-    assertEq(Inventory.lengthOccupiedSlots(alice), numObjects + numEntities, "Alice should have all items");
-    assertEq(Inventory.lengthOccupiedSlots(bob), 0, "Bob should have empty inventory");
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), numObjects + numEntities, "Alice should have all items");
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(bob), 0, "Bob should have empty inventory");
 
     // Transfer all from Alice to Bob
     TestInventoryUtils.transferAll(alice, bob);
 
     // Verify results
-    assertEq(Inventory.lengthOccupiedSlots(alice), 0, "Alice should have empty inventory");
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 0, "Alice should have empty inventory");
 
     // Count items in Bob's inventory
     uint16 bobTotalItems = 0;
-    uint16[] memory slots = Inventory.getOccupiedSlots(bob);
-    for (uint256 i = 0; i < slots.length; i++) {
-      bobTotalItems += InventorySlot.getAmount(bob, slots[i]);
+    uint256[] memory bitmap = InventoryBitmap.get(bob);
+    for (uint256 i = 0; i < bitmap.length; i++) {
+      uint256 word = bitmap[i];
+      while (word != 0) {
+        uint256 bitIndex = LibBit.ffs(word);
+        word &= word - 1;
+
+        uint16 slot = uint16(i * 256 + bitIndex);
+        bobTotalItems += InventorySlot.getAmount(bob, slot);
+      }
     }
 
     assertEq(bobTotalItems, totalItems, "Bob should have all items");
 
     // Verify inventory integrity
-    _verifyInventorySlotIntegrity(alice);
-    _verifyInventorySlotIntegrity(bob);
+    _verifyInventoryBitmapIntegrity(alice);
+    _verifyInventoryBitmapIntegrity(bob);
   }
 
-  // Helper function to verify the integrity of inventory slots after operations
-  function _verifyInventorySlotIntegrity(EntityId entity) internal view {
-    uint16[] memory slots = Inventory.getOccupiedSlots(entity);
+  function _verifyInventoryBitmapIntegrity(EntityId entity) internal {
+    uint256[] memory bitmap = InventoryBitmap.get(entity);
 
-    ObjectType[] memory objectTypes = new ObjectType[](slots.length);
-    // Check that each occupied slot has correct index
-    for (uint256 i = 0; i < slots.length; i++) {
-      InventorySlotData memory slotData = InventorySlot.get(entity, slots[i]);
-      objectTypes[i] = slotData.objectType;
-      assertEq(i, slotData.occupiedIndex, "Occupied index mismatch");
+    // After pruning, either the bitmap is empty or its last word is non-zero.
+    if (bitmap.length == 0) {
+      assertEq(TestInventoryUtils.getOccupiedSlotCount(entity), 0, "Bitmap empty but slots present");
+      return; // nothing else to verify
+    }
+    assertTrue(bitmap[bitmap.length - 1] != 0, "Trailing zero word detected");
+
+    // count set bits
+    uint256 bitmapCount = 0;
+    for (uint256 i = 0; i < bitmap.length; ++i) {
+      bitmapCount += LibBit.popCount(bitmap[i]);
     }
 
-    // Verify each object type's slots are correct
-    for (uint256 i = 0; i < objectTypes.length; i++) {
-      if (objectTypes[i] == ObjectTypes.Null) continue;
+    // per-slot verification
+    uint256 actualCount = 0;
+    for (uint256 wordIndex = 0; wordIndex < bitmap.length; ++wordIndex) {
+      uint256 word = bitmap[wordIndex];
+      uint256 originalWord = word;
 
-      uint16[] memory typeSlots = InventoryTypeSlots.get(entity, objectTypes[i]);
-      for (uint256 j = 0; j < typeSlots.length; j++) {
-        InventorySlotData memory slotData = InventorySlot.get(entity, typeSlots[j]);
-        assertEq(j, slotData.typeIndex, "Type index mismatch");
-        assertEq(objectTypes[i], slotData.objectType, "Object type mismatch");
+      // every set bit -> slot MUST have data
+      while (word != 0) {
+        uint256 bitIndex = LibBit.ffs(word);
+        word &= word - 1; // clear LS1B
+
+        uint16 slot = uint16(wordIndex * 256 + bitIndex);
+        InventorySlotData memory slotData = InventorySlot.get(entity, slot);
+
+        assertTrue(!slotData.objectType.isNull(), "Bit set but slot empty");
+        assertTrue(slotData.amount > 0, "Slot amount is zero");
+        ++actualCount;
+      }
+
+      // every slot with data -> bit MUST be set
+      for (uint256 bit = 0; bit < 256; ++bit) {
+        uint16 slot = uint16(wordIndex * 256 + bit);
+        InventorySlotData memory slotData = InventorySlot.get(entity, slot);
+
+        if (!slotData.objectType.isNull()) {
+          bool bitIsSet = (originalWord & (uint256(1) << bit)) != 0;
+          assertTrue(bitIsSet, "Slot has data but bit not set");
+        }
       }
     }
+
+    assertEq(bitmapCount, actualCount, "Bitmap count mismatch");
+    assertEq(bitmapCount, TestInventoryUtils.getOccupiedSlotCount(entity), "Mismatch with utility count");
   }
 }

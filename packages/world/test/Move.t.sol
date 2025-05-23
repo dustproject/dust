@@ -9,8 +9,6 @@ import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-import { Inventory } from "../src/codegen/tables/Inventory.sol";
-import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 
@@ -549,8 +547,8 @@ contract MoveTest is DustTest {
     assertInventoryHasObject(entityAtDeathLocation, ObjectTypes.Stone, 10);
     assertInventoryHasObject(entityAtDeathLocation, ObjectTypes.IronOre, 5);
 
-    // Player's inventory should be empty
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Inventory not empty");
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Stone, 0);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.IronOre, 0);
   }
 
   function testMoveHorizontalPathFatal() public {
@@ -598,8 +596,8 @@ contract MoveTest is DustTest {
     assertInventoryHasObject(entityAtDeathLocation, ObjectTypes.IronOre, 8);
     assertInventoryHasObject(entityAtDeathLocation, ObjectTypes.Diamond, 3);
 
-    // Player's inventory should be empty
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 0, "Player inventory not empty");
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.IronOre, 0);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Diamond, 0);
   }
 
   function testMoveFailsIfNoPlayer() public {

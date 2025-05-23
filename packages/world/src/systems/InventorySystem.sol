@@ -15,18 +15,6 @@ import { DropNotification, PickupNotification, notify } from "../utils/NotifUtil
 import { TerrainLib } from "./libraries/TerrainLib.sol";
 
 contract InventorySystem is System {
-  function drop(EntityId caller, SlotTransfer[] memory slotTransfers, Vec3 coord) public {
-    require(slotTransfers.length > 0, "Must drop at least one object");
-    caller.activate();
-    caller.requireConnected(coord);
-
-    (EntityId entityId, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(coord);
-    require(objectType.isPassThrough(), "Cannot drop on a non-passable block");
-
-    InventoryUtils.transfer(caller, entityId, slotTransfers);
-    notify(caller, DropNotification({ dropCoord: coord }));
-  }
-
   function drop(EntityId caller, SlotAmount[] memory slots, Vec3 coord) public {
     require(slots.length > 0, "Must drop at least one object");
     caller.activate();
@@ -35,10 +23,7 @@ contract InventorySystem is System {
     (EntityId entityId, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(coord);
     require(objectType.isPassThrough(), "Cannot drop on a non-passable block");
 
-    for (uint256 i = 0; i < slots.length; i++) {
-      ObjectType dropType = InventoryUtils.removeObjectFromSlot(caller, slots[i].slot, slots[i].amount);
-      InventoryUtils.addObject(entityId, dropType, slots[i].amount);
-    }
+    InventoryUtils.transfer(caller, entityId, slots);
 
     notify(caller, DropNotification({ dropCoord: coord }));
   }

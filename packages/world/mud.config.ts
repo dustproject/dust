@@ -191,14 +191,6 @@ export default defineWorld({
     // ------------------------------------------------------------
     // Inventory
     // ------------------------------------------------------------
-    Inventory: {
-      schema: {
-        owner: "EntityId",
-        nextSlot: "uint16", // Next available slot
-        occupiedSlots: "uint16[]", // Slots with at least 1 item
-      },
-      key: ["owner"],
-    },
     InventorySlot: {
       schema: {
         owner: "EntityId",
@@ -206,18 +198,15 @@ export default defineWorld({
         entityId: "EntityId",
         objectType: "ObjectType",
         amount: "uint16",
-        occupiedIndex: "uint16",
-        typeIndex: "uint16", // Index in InventoryTypeSlots
       },
       key: ["owner", "slot"],
     },
-    InventoryTypeSlots: {
+    InventoryBitmap: {
       schema: {
         owner: "EntityId",
-        objectType: "ObjectType",
-        slots: "uint16[]", // All slots containing this object type
+        bitmap: "uint256[]", // Each uint256 holds 256 slots
       },
-      key: ["owner", "objectType"],
+      key: ["owner"],
     },
     // ------------------------------------------------------------
     // Movable entities

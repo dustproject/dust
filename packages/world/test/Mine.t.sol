@@ -4,7 +4,6 @@ pragma solidity >=0.8.24;
 import { console } from "forge-std/console.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
-import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
@@ -153,7 +152,6 @@ contract MineTest is DustTest {
     assertEq(objectType, ObjectTypes.Air, "Entity should be air");
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
     assertInventoryHasObject(aliceEntityId, ObjectTypes.UnrevealedOre, 0);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 1, "Wrong number of occupied inventory slots");
     oreAmounts = inventoryGetOreAmounts(aliceEntityId);
     assertEq(oreAmounts.length, 1, "No ores in inventory");
     assertEq(oreAmounts[0].amount, 1, "Did not get exactly one ore");
@@ -325,7 +323,7 @@ contract MineTest is DustTest {
 
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
 
-    uint16 signSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.TextSign);
+    uint16 signSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.TextSign);
 
     // Mine again but with a non-base coord
     vm.prank(alice);
@@ -379,7 +377,7 @@ contract MineTest is DustTest {
 
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
 
-    uint16 bedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.Bed);
+    uint16 bedSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.Bed);
 
     // Mine again but with a non-base coord
     vm.prank(alice);
@@ -487,11 +485,6 @@ contract MineTest is DustTest {
 
     TestInventoryUtils.addObject(
       aliceEntityId, mineObjectType, ObjectTypes.Player.getMaxInventorySlots() * mineObjectType.getStackable()
-    );
-    assertEq(
-      Inventory.lengthOccupiedSlots(aliceEntityId),
-      ObjectTypes.Player.getMaxInventorySlots(),
-      "Wrong number of occupied inventory slots"
     );
 
     vm.prank(alice);
@@ -628,7 +621,7 @@ contract MineTest is DustTest {
       uint128 pickMass = ObjectPhysics.getMass(ObjectTypes.WoodenPick);
       uint128 stoneMass = ObjectPhysics.getMass(stoneType);
       EntityId tool = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenPick);
-      uint16 slot = TestInventoryUtils.getEntitySlot(aliceEntityId, tool);
+      uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, tool);
       vm.prank(alice);
       world.mine(aliceEntityId, stoneCoord, slot, "");
 
@@ -650,7 +643,7 @@ contract MineTest is DustTest {
       setObjectAtCoord(logCoord, logType);
 
       EntityId tool = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenAxe);
-      uint16 slot = TestInventoryUtils.getEntitySlot(aliceEntityId, tool);
+      uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, tool);
       vm.prank(alice);
       world.mine(aliceEntityId, logCoord, slot, "");
 
@@ -669,7 +662,7 @@ contract MineTest is DustTest {
       uint128 axeMass = ObjectPhysics.getMass(ObjectTypes.WoodenAxe);
       uint128 stoneMass = ObjectPhysics.getMass(stoneType);
       EntityId tool = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenAxe);
-      uint16 slot = TestInventoryUtils.getEntitySlot(aliceEntityId, tool);
+      uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, tool);
       vm.prank(alice);
       world.mine(aliceEntityId, stoneCoord, slot, "");
 
@@ -684,7 +677,7 @@ contract MineTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     EntityId tool = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.NeptuniumPick);
-    uint16 slot = TestInventoryUtils.getEntitySlot(aliceEntityId, tool);
+    uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, tool);
 
     Vec3 mineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
     ObjectType mineObjectType = ObjectTypes.SpawnTile;

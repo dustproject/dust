@@ -10,9 +10,6 @@ import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
-import { Inventory } from "../src/codegen/tables/Inventory.sol";
-import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
-
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
