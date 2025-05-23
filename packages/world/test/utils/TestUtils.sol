@@ -8,7 +8,8 @@ import { console } from "forge-std/console.sol";
 import { EntityId } from "../../src/EntityId.sol";
 import { Vec3 } from "../../src/Vec3.sol";
 
-import { EnergyData } from "../../src/codegen/tables/Energy.sol";
+import { Energy, EnergyData } from "../../src/codegen/tables/Energy.sol";
+import { Machine } from "../../src/codegen/tables/Machine.sol";
 
 import { EntityObjectType } from "../../src/codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../../src/codegen/tables/InventorySlot.sol";
@@ -246,6 +247,7 @@ library TestForceFieldUtils {
   }
 
   function destroyForceField(EntityId forceField) public asWorld {
-    ForceFieldUtils.destroyForceField(forceField);
+    Energy._deleteRecord(forceField);
+    Machine._deleteRecord(forceField);
   }
 }

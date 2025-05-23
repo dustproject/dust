@@ -100,14 +100,6 @@ library ForceFieldUtils {
   }
 
   /**
-   * @dev Destroys a forcefield, without cleaning up its shards
-   */
-  function destroyForceField(EntityId forceField) internal {
-    EntityProgram._deleteRecord(forceField);
-    Machine._deleteRecord(forceField);
-  }
-
-  /**
    * @dev Check if a fragment is active in a specific forcefield
    */
   function _isFragmentActive(FragmentData memory fragmentData, EntityId forceField) private view returns (bool) {
