@@ -136,7 +136,7 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.IronBlock, ObjectPhysicsData({ mass: 6075000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.GoldBlock, ObjectPhysicsData({ mass: 14400000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.DiamondBlock, ObjectPhysicsData({ mass: 45000000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.NeptuniumBlock, ObjectPhysicsData({ mass: 45000000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.NeptuniumBlock, ObjectPhysicsData({ mass: 49500000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.ForceField, ObjectPhysicsData({ mass: 1035000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Chest, ObjectPhysicsData({ mass: 36000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.SpawnTile, ObjectPhysicsData({ mass: 6435000000000000000, energy: 0 }));
@@ -150,13 +150,13 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.IronPick, ObjectPhysicsData({ mass: 2034000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.GoldPick, ObjectPhysicsData({ mass: 4809000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.DiamondPick, ObjectPhysicsData({ mass: 15009000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.NeptuniumPick, ObjectPhysicsData({ mass: 15009000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.NeptuniumPick, ObjectPhysicsData({ mass: 16509000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.WoodenAxe, ObjectPhysicsData({ mass: 22500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.CopperAxe, ObjectPhysicsData({ mass: 534000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.IronAxe, ObjectPhysicsData({ mass: 2034000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.GoldAxe, ObjectPhysicsData({ mass: 4809000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.DiamondAxe, ObjectPhysicsData({ mass: 15009000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.NeptuniumAxe, ObjectPhysicsData({ mass: 15009000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.NeptuniumAxe, ObjectPhysicsData({ mass: 16509000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.WoodenWhacker, ObjectPhysicsData({ mass: 36000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.CopperWhacker, ObjectPhysicsData({ mass: 1059000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.IronWhacker, ObjectPhysicsData({ mass: 4059000000000000000, energy: 0 }));

@@ -403,7 +403,7 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   { name: "IronBlock", mass: 6075000000000000000n },
   { name: "GoldBlock", mass: 14400000000000000000n },
   { name: "DiamondBlock", mass: 45000000000000000000n },
-  { name: "NeptuniumBlock", mass: 45000000000000000000n },
+  { name: "NeptuniumBlock", mass: 49500000000000000000n },
   {
     name: "WheatSeed",
     growableEnergy: 4300000000000000n,
@@ -565,7 +565,7 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   },
   {
     name: "NeptuniumPick",
-    mass: 15009000000000000000n,
+    mass: 16509000000000000000n,
     plankAmount: 2,
     oreAmount: ["NeptuniumOre", 3],
   },
@@ -596,7 +596,7 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   },
   {
     name: "NeptuniumAxe",
-    mass: 15009000000000000000n,
+    mass: 16509000000000000000n,
     plankAmount: 2,
     oreAmount: ["NeptuniumOre", 3],
   },
