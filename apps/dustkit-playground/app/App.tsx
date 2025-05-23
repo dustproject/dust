@@ -4,15 +4,14 @@ import {
   type AppRpcSchema,
   type ClientRpcSchema,
   createMessagePortRpcServer,
-  getMessagePortRpcClient,
-  messagePort,
+  getMessagePortProvider,
 } from "dustkit/internal";
 import { useEffect } from "react";
 import { zeroHash } from "viem";
 
-const dustClientTransport = messagePort<ClientRpcSchema>(
-  getMessagePortRpcClient({ target: window.opener ?? window.parent }),
-);
+const dustClientProvider = getMessagePortProvider<ClientRpcSchema>({
+  target: window.opener ?? window.parent,
+});
 
 export function App() {
   useEffect(() => {
@@ -31,7 +30,7 @@ export function App() {
         <button
           type="button"
           onClick={async () => {
-            await dustClientTransport({}).request({
+            await dustClientProvider.request({
               method: "dustClient_setWaypoint",
               params: {
                 entity: "0x",
@@ -45,7 +44,7 @@ export function App() {
         <button
           type="button"
           onClick={async () => {
-            await dustClientTransport({}).request({
+            await dustClientProvider.request({
               method: "dustClient_systemCall",
               params: [
                 {

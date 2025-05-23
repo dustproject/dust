@@ -30,3 +30,5 @@ export {
   type PostMessageTransportConfig,
   type PostMessageTransportErrorType,
 } from "../rpc/postMessageTransport";
+
+export { getMessagePortProvider } from "../rpc/getMessagePortProvider";

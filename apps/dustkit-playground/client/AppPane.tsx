@@ -1,12 +1,5 @@
 import { useSessionClient } from "@latticexyz/entrykit/internal";
-import {
-  type AppRpcSchema,
-  type PostMessageRpcClient,
-  getMessagePortRpcClient,
-  getPostMessageRpcClient,
-  messagePort,
-  postMessageTransport,
-} from "dustkit/internal";
+import { type AppRpcSchema, getMessagePortProvider } from "dustkit/internal";
 import { useEffect } from "react";
 import { useAccount } from "wagmi";
 import { getWorldAddress } from "./common";
@@ -34,19 +27,18 @@ export function AppPane() {
       src={url.toString()}
       onLoad={async (event) => {
         if (!userAddress) {
-          console.info("no user address, skipping app transport");
+          console.info("no user address, skipping app init");
           return;
         }
 
-        console.info("setting up app transport");
-        const appTransport = messagePort<AppRpcSchema>(
-          getMessagePortRpcClient({
-            target: event.currentTarget.contentWindow!,
-            targetOrigin: url.origin,
-          }),
-        );
-        console.info("rpc client ready, sending hello");
-        const res = await appTransport({ timeout: 1000 }).request({
+        console.info("setting up app provider");
+        const appProvider = getMessagePortProvider<AppRpcSchema>({
+          target: event.currentTarget.contentWindow!,
+          targetOrigin: url.origin,
+        });
+
+        console.info("sending init");
+        const res = await appProvider.request({
           method: "dustApp_init",
           params: {
             appConfig: {
@@ -56,7 +48,7 @@ export function AppPane() {
             userAddress,
           },
         });
-        console.info("got hello reply", res);
+        console.info("got init reply", res);
       }}
     />
   );

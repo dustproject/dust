@@ -1,6 +1,6 @@
 import { type RpcRequest, RpcResponse, type RpcSchema } from "ox";
 import { MethodNotSupportedError } from "ox/RpcResponse";
-import { initMessage } from "./getMessagePortRpcClient";
+import { initMessage } from "./getMessagePortProvider";
 
 // Ideally we'd have one `onRequest` handler, but unfortunately I couldn't figure out how
 // to get strong types, where narrowing on the RPC method would also narrow the params and
