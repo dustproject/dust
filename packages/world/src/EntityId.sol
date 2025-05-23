@@ -93,7 +93,7 @@ library EntityIdLib {
   }
 
   function exists(EntityId self) internal view returns (bool) {
-    return !self.getObjectType().isNull();
+    return self.unwrap() != 0 && !self.getObjectType().isNull();
   }
 
   function unwrap(EntityId self) internal pure returns (bytes32) {

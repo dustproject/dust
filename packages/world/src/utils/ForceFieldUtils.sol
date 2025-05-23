@@ -104,6 +104,7 @@ library ForceFieldUtils {
    */
   function destroyForceField(EntityId forceField) internal {
     EntityProgram._deleteRecord(forceField);
+    Energy._deleteRecord(forceField);
     Machine._deleteRecord(forceField);
   }
 

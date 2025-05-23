@@ -53,20 +53,24 @@ function getLatestEnergyData(EntityId entityId) view returns (EnergyData memory,
   return (energyData, energyDrained, depletedTime);
 }
 
-function updateMachineEnergy(EntityId entityId) returns (EnergyData memory, uint128) {
-  (EnergyData memory energyData, uint128 energyDrained, uint128 depletedTime) = getLatestEnergyData(entityId);
+function updateMachineEnergy(EntityId machine) returns (EnergyData memory, uint128) {
+  if (!machine.exists()) {
+    return (EnergyData(0, 0, 0), 0);
+  }
+
+  (EnergyData memory energyData, uint128 energyDrained, uint128 depletedTime) = getLatestEnergyData(machine);
 
   if (energyDrained > 0) {
-    addEnergyToLocalPool(entityId.getPosition(), energyDrained);
+    addEnergyToLocalPool(machine.getPosition(), energyDrained);
   }
 
-  uint128 currentDepletedTime = Machine._getDepletedTime(entityId);
+  uint128 currentDepletedTime = Machine._getDepletedTime(machine);
   if (depletedTime > 0) {
     currentDepletedTime += depletedTime;
-    Machine._setDepletedTime(entityId, currentDepletedTime);
+    Machine._setDepletedTime(machine, currentDepletedTime);
   }
 
-  Energy._set(entityId, energyData);
+  Energy._set(machine, energyData);
   return (energyData, currentDepletedTime);
 }
 
@@ -113,15 +117,23 @@ function decreasePlayerEnergy(EntityId player, Vec3 playerCoord, uint128 amount)
 }
 
 function increaseFragmentDrainRate(EntityId forceField, EntityId fragment, uint128 amount) returns (uint128) {
-  (EnergyData memory machineData, uint128 depletedTime) = updateMachineEnergy(forceField);
-  Energy._setDrainRate(forceField, machineData.drainRate + amount);
+  uint128 depletedTime = 0;
+  if (forceField.exists()) {
+    (EnergyData memory machineData, uint128 forceFieldDepletedTime) = updateMachineEnergy(forceField);
+    Energy._setDrainRate(forceField, machineData.drainRate + amount);
+    depletedTime = forceFieldDepletedTime;
+  }
   Fragment._setExtraDrainRate(fragment, Fragment._getExtraDrainRate(fragment) + amount);
   return depletedTime;
 }
 
 function decreaseFragmentDrainRate(EntityId forceField, EntityId fragment, uint128 amount) returns (uint128) {
-  (EnergyData memory machineData, uint128 depletedTime) = updateMachineEnergy(forceField);
-  Energy._setDrainRate(forceField, machineData.drainRate - amount);
+  uint128 depletedTime = 0;
+  if (forceField.exists()) {
+    (EnergyData memory machineData, uint128 forceFieldDepletedTime) = updateMachineEnergy(forceField);
+    Energy._setDrainRate(forceField, machineData.drainRate - amount);
+    depletedTime = forceFieldDepletedTime;
+  }
   Fragment._setExtraDrainRate(fragment, Fragment._getExtraDrainRate(fragment) - amount);
   return depletedTime;
 }
