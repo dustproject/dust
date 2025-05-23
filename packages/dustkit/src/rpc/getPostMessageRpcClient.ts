@@ -4,10 +4,15 @@ import { type SocketRpcClient, getSocketRpcClient } from "viem/utils";
 import packageJson from "../../package.json";
 import { type RpcRequestEnvelope, rpcResponseEnvelope } from "./envelope";
 
+export type PostMessageRpcClient = SocketRpcClient<{
+  readonly target: Window;
+  readonly targetOrigin: string;
+}>;
+
 export async function getPostMessageRpcClient(
   target: Window,
-  { targetOrigin = "*", key = "postMessage" },
-): Promise<SocketRpcClient<{ readonly target: Window }>> {
+  { targetOrigin = "*", key = "postMessage" } = {},
+): Promise<PostMessageRpcClient> {
   return getSocketRpcClient({
     async getSocket({ onClose, onError, onOpen, onResponse }) {
       let closed = false;
@@ -23,6 +28,7 @@ export async function getPostMessageRpcClient(
 
       return {
         target,
+        targetOrigin,
         close() {
           window.removeEventListener("message", onMessage);
           closed = true;

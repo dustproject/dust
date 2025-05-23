@@ -1,26 +1,25 @@
+import { useSessionClient } from "@latticexyz/entrykit/internal";
 import {
   type AppRpcSchema,
-  getMessagePortRpcClient,
-  messagePort,
+  type PostMessageRpcClient,
+  getPostMessageRpcClient,
+  postMessageTransport,
 } from "dustkit/internal";
 import { useEffect, useRef } from "react";
-import type { SocketRpcClient } from "viem/utils";
 import { useAccount } from "wagmi";
-import { useClientRpcServer } from "./useClientRpcServer";
+import { getWorldAddress } from "./common";
+import { createClientRpcServer } from "./createClientRpcServer";
 
 export function AppPane() {
   const { address: userAddress } = useAccount();
-  const rpcClientRef = useRef<SocketRpcClient<MessagePort> | null>(null);
-  useClientRpcServer();
+
+  const { data: sessionClient } = useSessionClient();
+  const worldAddress = getWorldAddress();
 
   useEffect(() => {
-    return () => {
-      if (rpcClientRef.current) {
-        console.info("closing rpc client");
-        rpcClientRef.current.close();
-      }
-    };
-  }, []);
+    if (!sessionClient) return;
+    return createClientRpcServer({ sessionClient, worldAddress });
+  }, [sessionClient, worldAddress]);
 
   return (
     <iframe
@@ -33,11 +32,9 @@ export function AppPane() {
         }
 
         console.info("setting up app transport");
-        const rpcClient = await getMessagePortRpcClient(
+        const appTransport = postMessageTransport<AppRpcSchema>(
           event.currentTarget.contentWindow!,
         );
-        rpcClientRef.current = rpcClient;
-        const appTransport = messagePort<AppRpcSchema>(rpcClient);
         console.info("rpc client ready, sending hello");
         const res = await appTransport({}).request({
           method: "dustApp_init",

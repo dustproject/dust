@@ -2,6 +2,12 @@ export { getEntityProgram } from "../apps/getEntityProgram";
 export { getProgramAppConfigUrl } from "../apps/getProgramAppConfigUrl";
 export { getProgramDefaultAppConfigUrl } from "../apps/getProgramDefaultAppConfigUrl";
 
+export {
+  AppRpcSchema,
+  ClientRpcSchema,
+} from "../rpc/schemas";
+
+export { getMessagePortRpcClient } from "../rpc/getMessagePortRpcClient";
 export { createMessagePortRpcServer } from "../rpc/createMessagePortRpcServer";
 export {
   messagePort,
@@ -9,8 +15,15 @@ export {
   type MessagePortTransportConfig,
   type MessagePortTransportErrorType,
 } from "../rpc/messagePort";
+
 export {
-  AppRpcSchema,
-  ClientRpcSchema,
-} from "../rpc/schemas";
-export { getMessagePortRpcClient } from "../rpc/getMessagePortRpcClient";
+  getPostMessageRpcClient,
+  type PostMessageRpcClient,
+} from "../rpc/getPostMessageRpcClient";
+export { createPostMessageRpcServer } from "../rpc/createPostMessageRpcServer";
+export {
+  postMessageTransport,
+  type PostMessageTransport,
+  type PostMessageTransportConfig,
+  type PostMessageTransportErrorType,
+} from "../rpc/postMessageTransport";

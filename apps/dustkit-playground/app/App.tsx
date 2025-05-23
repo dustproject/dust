@@ -3,43 +3,25 @@ import { resourceToHex } from "@latticexyz/common";
 import {
   type AppRpcSchema,
   type ClientRpcSchema,
-  type MessagePortTransport,
-  createMessagePortRpcServer,
-  getMessagePortRpcClient,
-  messagePort,
+  createPostMessageRpcServer,
+  postMessageTransport,
 } from "dustkit/internal";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { zeroHash } from "viem";
 
+const dustClient = postMessageTransport<ClientRpcSchema>(
+  window.opener ?? window.parent,
+);
+
 export function App() {
-  const dustClientRef = useRef<MessagePortTransport<ClientRpcSchema> | null>(
-    null,
-  );
-
-  const loadDustClient = useCallback(async () => {
-    if (!window.opener && !window.parent) {
-      console.error("no parent or opener");
-      return;
-    }
-
-    const rpcClient = await getMessagePortRpcClient(
-      window.opener ?? window.parent,
-    );
-
-    const newDustClient = messagePort<ClientRpcSchema>(rpcClient);
-    dustClientRef.current = newDustClient;
-  }, []);
-
   useEffect(() => {
-    loadDustClient();
-
-    return createMessagePortRpcServer<AppRpcSchema>({
+    return createPostMessageRpcServer<AppRpcSchema>({
       async dustApp_init(params) {
         console.info("client asked this app to initialize with", params);
         return { success: true };
       },
     });
-  }, [loadDustClient]);
+  }, []);
 
   return (
     <div>
@@ -48,12 +30,7 @@ export function App() {
         <button
           type="button"
           onClick={async () => {
-            if (!dustClientRef.current) {
-              console.error("no dust client");
-              return;
-            }
-
-            await dustClientRef.current({}).request({
+            await dustClient({}).request({
               method: "dustClient_setWaypoint",
               params: {
                 entity: "0x",
@@ -67,12 +44,7 @@ export function App() {
         <button
           type="button"
           onClick={async () => {
-            if (!dustClientRef.current) {
-              console.error("no dust client");
-              return;
-            }
-
-            await dustClientRef.current({}).request({
+            await dustClient({}).request({
               method: "dustClient_systemCall",
               params: [
                 {

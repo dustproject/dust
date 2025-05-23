@@ -4,7 +4,7 @@
     "outDir": "dist",
     "jsx": "react-jsx",
     "jsxImportSource": "react",
-    "types": ["vite/client"]
+    "types": ["vite/client", "vite-plugin-mud/env"]
   },
   "include": ["."]
 }

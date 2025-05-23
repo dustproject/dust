@@ -28,18 +28,24 @@ export function createPostMessageRpcServer<schema extends RpcSchema.Generic>(
 
       const result = await handler(params);
       console.info("got result", { id, method, params, result });
-      event.source.postMessage({
-        jsonrpc,
-        id,
-        result,
-      } satisfies RpcResponse.RpcResponse);
+      event.source.postMessage(
+        {
+          jsonrpc,
+          id,
+          result,
+        } satisfies RpcResponse.RpcResponse,
+        { targetOrigin: "*" },
+      );
     } catch (error) {
       console.info("got error", { id, method, params, error });
-      event.source.postMessage({
-        jsonrpc,
-        id,
-        error: RpcResponse.parseError(error),
-      } satisfies RpcResponse.RpcResponse);
+      event.source.postMessage(
+        {
+          jsonrpc,
+          id,
+          error: RpcResponse.parseError(error),
+        } satisfies RpcResponse.RpcResponse,
+        { targetOrigin: "*" },
+      );
     }
   }
 
