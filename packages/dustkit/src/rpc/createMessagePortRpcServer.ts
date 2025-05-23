@@ -1,6 +1,6 @@
 import { type RpcRequest, RpcResponse, type RpcSchema } from "ox";
 import { MethodNotSupportedError } from "ox/RpcResponse";
-import { initMessage } from "./getMessagePortProvider";
+import { initMessage } from "./createMessagePort";
 
 // Ideally we'd have one `onRequest` handler, but unfortunately I couldn't figure out how
 // to get strong types, where narrowing on the RPC method would also narrow the params and
@@ -9,9 +9,6 @@ import { initMessage } from "./getMessagePortProvider";
 // Instead, we have a map of `handlers`, where each RPC method is implemented as its own
 // handler function.
 
-let nextId = 0;
-const portCache = new Map<MessagePort, string>();
-
 export function createMessagePortRpcServer<schema extends RpcSchema.Generic>(
   handlers: {
     [method in RpcSchema.ExtractMethodName<schema>]: (
@@ -19,25 +16,15 @@ export function createMessagePortRpcServer<schema extends RpcSchema.Generic>(
     ) => Promise<RpcSchema.ExtractReturnType<schema, method>>;
   },
 ): () => void {
-  const id = `MessagePortRpcServer:${nextId++}`;
-
   let connectedPort: MessagePort | undefined;
 
   function onMessage(event: MessageEvent) {
     if (event.data !== initMessage) return;
 
-    console.info("message via", id, event);
-
     const [port] = event.ports;
     if (!port) {
       console.warn(`Got "${initMessage}" message with no message port.`);
       return;
-    }
-
-    if (portCache.has(port)) {
-      console.warn("port already consumed by", portCache.get(port));
-    } else {
-      portCache.set(port, id);
     }
 
     port.addEventListener(

@@ -1,7 +1,6 @@
 import { SocketClosedError, WebSocketRequestError } from "viem";
 import { type SocketRpcClient, getSocketRpcClient } from "viem/utils";
-
-export const initMessage = "MessagePortRpcClient";
+import { createMessagePort } from "./createMessagePort";
 
 export type MessagePortRpcClient = SocketRpcClient<{
   readonly target: Window;
@@ -28,24 +27,7 @@ export async function getMessagePortRpcClient({
         throw new SocketClosedError({ url: targetOrigin });
       }
 
-      const port = await new Promise<MessagePort>((resolve, reject) => {
-        const channel = new MessageChannel();
-        channel.port1.addEventListener(
-          "message",
-          function onMessage(event) {
-            console.info("Got message from port", event);
-            if (event.data === "ready") {
-              resolve(channel.port1);
-            } else {
-              reject(new Error("Unexpected first message from MessagePort."));
-            }
-          },
-          { once: true },
-        );
-        channel.port1.start();
-        console.info("establishing MessagePort with", target);
-        target.postMessage(initMessage, targetOrigin, [channel.port2]);
-      });
+      const port = await createMessagePort({ target, targetOrigin });
 
       port.addEventListener("message", function onMessage(event: MessageEvent) {
         onResponse(event.data);
