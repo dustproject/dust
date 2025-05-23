@@ -21,8 +21,8 @@ library ObjectTypes {
   ObjectType constant Null = ObjectType.wrap(0);
   ObjectType constant Air = ObjectType.wrap(1);
   ObjectType constant Water = ObjectType.wrap(2);
-  ObjectType constant Stone = ObjectType.wrap(3);
-  ObjectType constant Bedrock = ObjectType.wrap(4);
+  ObjectType constant Bedrock = ObjectType.wrap(3);
+  ObjectType constant Stone = ObjectType.wrap(4);
   ObjectType constant Deepslate = ObjectType.wrap(5);
   ObjectType constant Granite = ObjectType.wrap(6);
   ObjectType constant Tuff = ObjectType.wrap(7);
@@ -246,7 +246,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x1fffffffffffffffffffffffffffffffffffff8), 1)
+        let bit := and(shr(self, 0x1fffffffffffffffffffffffffffffffffffff0), 1)
         ok := bit
       }
     }
@@ -481,7 +481,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0xc2003e00fc0000000000000003ffe0001ffff8), 1)
+        let bit := and(shr(self, 0xc2003e00fc0000000000000003ffe0001ffff0), 1)
         ok := bit
       }
     }
@@ -570,11 +570,10 @@ library ObjectTypeLib {
     return [ObjectTypes.AnyPlank, ObjectTypes.AnyLog, ObjectTypes.AnyLeaf, ObjectTypes.AnyTerracotta];
   }
 
-  function getBlockTypes() internal pure returns (ObjectType[150] memory) {
+  function getBlockTypes() internal pure returns (ObjectType[149] memory) {
     return [
       ObjectTypes.Magma,
       ObjectTypes.Stone,
-      ObjectTypes.Bedrock,
       ObjectTypes.Deepslate,
       ObjectTypes.Granite,
       ObjectTypes.Tuff,
@@ -951,7 +950,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function getPickMultiplierTypes() internal pure returns (ObjectType[45] memory) {
+  function getPickMultiplierTypes() internal pure returns (ObjectType[44] memory) {
     return [
       ObjectTypes.CoalOre,
       ObjectTypes.CopperOre,
@@ -962,7 +961,6 @@ library ObjectTypeLib {
       ObjectTypes.Amethyst,
       ObjectTypes.Glowstone,
       ObjectTypes.Stone,
-      ObjectTypes.Bedrock,
       ObjectTypes.Deepslate,
       ObjectTypes.Granite,
       ObjectTypes.Tuff,

@@ -386,7 +386,6 @@ contract ObjectTypeTest is DustTest {
     {
       assertTrue(ObjectTypes.Magma.isBlock(), "isBlock");
       assertTrue(ObjectTypes.Stone.isBlock(), "isBlock");
-      assertTrue(ObjectTypes.Bedrock.isBlock(), "isBlock");
       assertTrue(ObjectTypes.Deepslate.isBlock(), "isBlock");
       assertTrue(ObjectTypes.Granite.isBlock(), "isBlock");
       assertTrue(ObjectTypes.Tuff.isBlock(), "isBlock");
@@ -537,6 +536,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.Air.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.Water.isBlock(), "!isBlock");
+      assertFalse(ObjectTypes.Bedrock.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.AnyTerracotta.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.AnyLog.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.AnyLeaf.isBlock(), "!isBlock");
@@ -4153,7 +4153,6 @@ contract ObjectTypeTest is DustTest {
       assertTrue(ObjectTypes.Amethyst.hasPickMultiplier(), "hasPickMultiplier");
       assertTrue(ObjectTypes.Glowstone.hasPickMultiplier(), "hasPickMultiplier");
       assertTrue(ObjectTypes.Stone.hasPickMultiplier(), "hasPickMultiplier");
-      assertTrue(ObjectTypes.Bedrock.hasPickMultiplier(), "hasPickMultiplier");
       assertTrue(ObjectTypes.Deepslate.hasPickMultiplier(), "hasPickMultiplier");
       assertTrue(ObjectTypes.Granite.hasPickMultiplier(), "hasPickMultiplier");
       assertTrue(ObjectTypes.Tuff.hasPickMultiplier(), "hasPickMultiplier");
@@ -4193,6 +4192,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Air.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.Water.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.Magma.hasPickMultiplier(), "!hasPickMultiplier");
+      assertFalse(ObjectTypes.Bedrock.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.Grass.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.Dirt.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.Moss.hasPickMultiplier(), "!hasPickMultiplier");
