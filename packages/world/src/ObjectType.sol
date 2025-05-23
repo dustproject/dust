@@ -268,7 +268,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0xfc0000000000000000000040000000), 1)
+        let bit := and(shr(self, 0xfc0000000000000000000000000000), 1)
         ok := bit
       }
     }
@@ -742,9 +742,8 @@ library ObjectTypeLib {
     ];
   }
 
-  function getOreTypes() internal pure returns (ObjectType[7] memory) {
+  function getOreTypes() internal pure returns (ObjectType[6] memory) {
     return [
-      ObjectTypes.UnrevealedOre,
       ObjectTypes.CoalOre,
       ObjectTypes.CopperOre,
       ObjectTypes.IronOre,

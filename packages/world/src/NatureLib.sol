@@ -5,6 +5,7 @@ import { BurnedResourceCount } from "./codegen/tables/BurnedResourceCount.sol";
 import { DisabledExtraDrops } from "./codegen/tables/DisabledExtraDrops.sol";
 import { ResourceCount } from "./codegen/tables/ResourceCount.sol";
 
+import { TerrainLib } from "./systems/libraries/TerrainLib.sol";
 import { ChunkCommitment } from "./utils/Vec3Storage.sol";
 
 import {
@@ -32,6 +33,8 @@ import { ObjectAmount, ObjectType, ObjectTypeLib, ObjectTypes } from "./ObjectTy
 import { EntityId } from "./EntityId.sol";
 import { TreeLib } from "./TreeLib.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
+
+int256 constant SEA_LEVEL = 62;
 
 library NatureLib {
   struct RandomDrop {
@@ -182,17 +185,128 @@ library NatureLib {
 
     // Get ore options and their weights (based on remaining amounts)
 
-    ObjectType[7] memory oreTypes = ObjectTypeLib.getOreTypes();
-    uint256[] memory weights = new uint256[](oreTypes.length - 1);
+    ObjectType[6] memory oreTypes = ObjectTypeLib.getOreTypes();
+    uint256[6] memory oreMultipliers = getOreMultipliers(coord);
+    uint256[] memory weights = new uint256[](oreTypes.length);
 
     // Use remaining amounts directly as weights
     // Skip UnrevealedOre (index 0) since it's not a specific ore type
     for (uint256 i = 1; i < oreTypes.length; i++) {
-      (, weights[i - 1]) = getCapAndRemaining(oreTypes[i]);
+      (, uint256 remaining) = getCapAndRemaining(oreTypes[i]);
+      weights[i - 1] = remaining * oreMultipliers[i - 1];
     }
 
     // Select ore based on availability
     return oreTypes[selectByWeight(weights, randomSeed) + 1];
+  }
+
+  function getOreMultipliers(Vec3 coord) internal view returns (uint256[6] memory multipliers) {
+    // TODO: adjust
+
+    uint8 biome = TerrainLib._getBiome(coord);
+    uint256[6] memory biomeMultipliers = _getBiomeMultipliers(biome);
+    uint256[6] memory positionMultipliers = _positionMultipliers(coord);
+    for (uint256 i = 0; i < biomeMultipliers.length; i++) {
+      multipliers[i] = (biomeMultipliers[i] * positionMultipliers[i]) / 100;
+    }
+  }
+
+  /// @dev ore index order must match getOreTypes():
+  //  TODO: this is a placeholder
+  function _getBiomeMultipliers(uint8 biome) internal pure returns (uint256[6] memory) {
+    uint8 class = _biomeClass(biome);
+
+    if (class == 1) {
+      // mountains & high peaks
+      return [uint256(90), 100, 110, 120, 130, 130];
+    } else if (class == 2) {
+      // mesas / badlands / stony
+      return [uint256(80), 95, 95, 130, 120, 110];
+    } else if (class == 3) {
+      // desert / savanna
+      return [uint256(90), 95, 110, 130, 100, 120];
+    } else if (class == 4) {
+      // jungle / lush
+      return [uint256(100), 110, 100, 95, 110, 120];
+    } else if (class == 5) {
+      // ocean & rivers
+      return [uint256(120), 110, 90, 80, 60, 50];
+    } else if (class == 6) {
+      // deep-caves, nether, end, etc.
+      return [uint256(100), 100, 110, 120, 140, 160];
+    }
+
+    // neutral / default (plains, forest, …)
+    return [uint256(100), 100, 100, 100, 100, 100];
+  }
+
+  //  Simple grouping of the 163 biome ids into 7 classes.
+  //  TODO: this is a placeholder
+  function _biomeClass(uint8 id) private pure returns (uint8) {
+    // 0 neutral, 1 mountain, 2 mesa, 3 desert, 4 jungle,
+    // 5 water,   6 cave / nether / end
+    if (
+      id == 23 || id == 27 || id == 50 // frozen_peaks, jagged_peaks, stony_peaks
+        || id == 131 || id == 147 // scarlet_mountains, stony_spires
+    ) return 1;
+    if (
+      id == 0 || id == 63 || id == 93 // badlands, wooded_badlands, bryce_canyon
+    ) {
+      return 2;
+    }
+    if (
+      id == 14 || id == 41 || id == 109 // desert, savanna, hot_shrubland
+    ) {
+      return 3;
+    }
+    if (
+      id == 28 || id == 1 || id == 30 // jungle, bamboo_jungle, lush_caves
+    ) {
+      return 4;
+    }
+    if (
+      id == 35 || id == 6 || id == 57 // ocean, cold_ocean, warm_ocean
+    ) {
+      return 5;
+    }
+    if (
+      id >= 65 && id <= 78 // special cave biomes 65-78
+    ) {
+      return 6;
+    }
+    return 0; // neutral
+  }
+
+  //  TODO: this is a placeholder
+  function _positionMultipliers(Vec3 coord) private pure returns (uint256[6] memory) {
+    // depth (0-255)
+    int32 y = coord.y();
+    uint256 d = uint32(int32(SEA_LEVEL - y));
+    if (d < 0) d = 0;
+    if (d > 255) d = 255;
+
+    // base curve  (11-255)
+    uint256 base = 11 + (244 * uint256(uint32(d))) / (uint256(uint32(d)) + 32);
+
+    unchecked {
+      return [
+        // Coal – flip around mid-value (≈133) so it Decreases with depth
+        // 266 - base gives 255→11 (still stays ≥11)
+        uint256(266) - base,
+        // ¼ way from coal to iron
+        // (base + coal)/2  ==  (base + 266-base)/2  == 133
+        // but we want a bit steeper → ¾ blend
+        (base * 3 + (266 - base)) / 4,
+        // Iron – baseline
+        base,
+        // Gold – 1.5× baseline, cap at 65535
+        base * 3 / 2,
+        // Diamond – 2×
+        base * 2,
+        // Neptunium – 3×  (max 255*3 = 765 < 2¹⁶)
+        base * 3
+      ];
+    }
   }
 
   function burnOre(ObjectType self, uint256 amount) internal {
