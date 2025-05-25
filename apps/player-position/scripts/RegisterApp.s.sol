@@ -31,7 +31,9 @@ contract RegisterApp is Script {
       world.registerNamespace(appNamespaceId);
     }
 
-    metadataSystem.setResourceTag(appNamespaceId, "dust.appConfigUrl", bytes("http://localhost:5501/dust-app.json"));
+    metadataSystem.setResourceTag(
+      appNamespaceId, "dust.appConfigUrl", bytes("https://poshud-3f15a.web.app/dust-app.json")
+    );
 
     vm.stopBroadcast();
   }
