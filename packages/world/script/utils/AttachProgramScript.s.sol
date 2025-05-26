@@ -7,7 +7,7 @@ import { console } from "forge-std/console.sol";
 
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
 
-import { EntityId, EntityIdLib } from "../../src/EntityId.sol";
+import { EntityId, EntityTypeLib } from "../../src/EntityId.sol";
 
 import { ObjectTypes } from "../../src/ObjectType.sol";
 import { ProgramId } from "../../src/ProgramId.sol";
@@ -29,7 +29,7 @@ contract AttachProgramScript is Script {
     // Start broadcasting transactions from the deployer account
     vm.startBroadcast(deployerPrivateKey);
 
-    EntityId playerEntityId = EntityIdLib.encodePlayer(playerAddress);
+    EntityId playerEntityId = EntityTypeLib.encodePlayer(playerAddress);
 
     if (EntityProgram.get(target).exists()) {
       world.detachProgram(playerEntityId, target, "");

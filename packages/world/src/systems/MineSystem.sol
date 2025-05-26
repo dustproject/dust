@@ -106,7 +106,7 @@ contract MineSystem is System {
     require(minedType.isBlock(), "Object is not mineable");
 
     mined = mined.baseEntityId();
-    Vec3 baseCoord = mined.getPosition();
+    Vec3 baseCoord = mined._getPosition();
 
     if (minedType.isMachine()) {
       (EnergyData memory machineData,) = updateMachineEnergy(mined);

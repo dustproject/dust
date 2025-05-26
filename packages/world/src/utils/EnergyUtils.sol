@@ -61,7 +61,7 @@ function updateMachineEnergy(EntityId machine) returns (EnergyData memory, uint1
   (EnergyData memory energyData, uint128 energyDrained, uint128 depletedTime) = getLatestEnergyData(machine);
 
   if (energyDrained > 0) {
-    addEnergyToLocalPool(machine.getPosition(), energyDrained);
+    addEnergyToLocalPool(machine._getPosition(), energyDrained);
   }
 
   uint128 currentDepletedTime = Machine._getDepletedTime(machine);
@@ -77,7 +77,7 @@ function updateMachineEnergy(EntityId machine) returns (EnergyData memory, uint1
 /// @dev Used within systems before performing an action
 function updatePlayerEnergy(EntityId player) returns (EnergyData memory) {
   (EnergyData memory energyData, uint128 energyDrained,) = getLatestEnergyData(player);
-  Vec3 coord = player.getPosition();
+  Vec3 coord = player._getPosition();
 
   if (energyDrained > 0) {
     addEnergyToLocalPool(coord, energyDrained);
@@ -146,7 +146,7 @@ function addEnergyToLocalPool(Vec3 coord, uint128 numToAdd) returns (uint128) {
 }
 
 function transferEnergyToPool(EntityId entityId, uint128 amount) returns (uint128, uint128) {
-  Vec3 coord = entityId.getPosition();
+  Vec3 coord = entityId._getPosition();
   ObjectType objectType = entityId._getObjectType();
 
   uint128 newEntityEnergy;

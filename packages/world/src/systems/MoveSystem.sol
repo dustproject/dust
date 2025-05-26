@@ -17,7 +17,7 @@ contract MoveSystem is System {
   function move(EntityId caller, Vec3[] memory newCoords) public {
     caller.activate();
 
-    MoveLib.move(caller.getPosition(), newCoords);
+    MoveLib.move(caller._getPosition(), newCoords);
 
     notify(caller, MoveNotification({ moveCoords: newCoords }));
   }
@@ -25,7 +25,7 @@ contract MoveSystem is System {
   function moveDirections(EntityId caller, Direction[] memory directions) public {
     caller.activate();
 
-    Vec3 coord = caller.getPosition();
+    Vec3 coord = caller._getPosition();
 
     Vec3[] memory newCoords = new Vec3[](directions.length);
     for (uint256 i = 0; i < directions.length; i++) {

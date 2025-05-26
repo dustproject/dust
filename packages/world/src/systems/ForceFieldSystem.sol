@@ -144,7 +144,7 @@ contract ForceFieldSystem is System {
     ObjectType objectType = forceField._getObjectType();
     require(objectType == ObjectTypes.ForceField, "Invalid object type");
 
-    Vec3 forceFieldFragmentCoord = forceField.getPosition().toFragmentCoord();
+    Vec3 forceFieldFragmentCoord = forceField._getPosition().toFragmentCoord();
     require(forceFieldFragmentCoord != fragmentCoord, "Can't remove forcefield's fragment");
 
     EntityId fragment = EntityUtils.getFragmentAt(fragmentCoord);

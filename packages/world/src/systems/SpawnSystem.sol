@@ -153,7 +153,7 @@ contract SpawnSystem is System {
     ObjectType objectType = spawnTile._getObjectType();
     require(objectType == ObjectTypes.SpawnTile, "Not a spawn tile");
 
-    Vec3 spawnTileCoord = spawnTile.getPosition();
+    Vec3 spawnTileCoord = spawnTile._getPosition();
     require(spawnTileCoord.inSurroundingCube(spawnCoord, MAX_RESPAWN_HALF_WIDTH), "Spawn tile is too far away");
 
     (EntityId forceField,) = ForceFieldUtils.getForceField(spawnTileCoord);

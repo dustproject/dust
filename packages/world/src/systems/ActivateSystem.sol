@@ -12,7 +12,7 @@ import { ObjectTypes } from "../ObjectType.sol";
 import { checkWorldStatus } from "../Utils.sol";
 import { updateMachineEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
 
-import { EntityId, EntityIdLib } from "../EntityId.sol";
+import { EntityId, EntityTypeLib } from "../EntityId.sol";
 
 contract ActivateSystem is System {
   function activate(EntityId entityId) public {
@@ -32,7 +32,7 @@ contract ActivateSystem is System {
   }
 
   function activatePlayer(address playerAddress) public {
-    EntityId player = EntityIdLib.encodePlayer(playerAddress);
+    EntityId player = EntityTypeLib.encodePlayer(playerAddress);
     ObjectType objectType = player._getObjectType();
     require(objectType == ObjectTypes.Player, "Entity is not player");
     updatePlayerEnergy(player);

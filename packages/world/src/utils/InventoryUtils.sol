@@ -159,7 +159,7 @@ library InventoryUtils {
     if (toolData.massLeft <= massReduction) {
       removeEntityFromSlot(toolData.owner, toolData.slot);
       OreLib.burnOres(toolData.toolType);
-      burnToolEnergy(toolData.toolType, toolData.owner.getPosition());
+      burnToolEnergy(toolData.toolType, toolData.owner._getPosition());
     } else {
       Mass._setMass(toolData.tool, toolData.massLeft - massReduction);
     }

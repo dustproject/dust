@@ -59,7 +59,7 @@ contract HitMachineSystem is System {
 
     uint128 playerEnergyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, machineData.energy);
 
-    Vec3 forceFieldCoord = forceField.getPosition();
+    Vec3 forceFieldCoord = forceField._getPosition();
 
     // Return early if player died
     if (playerEnergyReduction > 0 && decreasePlayerEnergy(caller, callerCoord, playerEnergyReduction) == 0) {

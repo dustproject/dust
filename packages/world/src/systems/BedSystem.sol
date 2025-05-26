@@ -41,7 +41,7 @@ contract BedSystem is System {
     require(bed._getObjectType() == ObjectTypes.Bed, "Not a bed");
 
     bed = bed.baseEntityId();
-    Vec3 bedCoord = bed.getPosition();
+    Vec3 bedCoord = bed._getPosition();
 
     require(!BedPlayer._getPlayerEntityId(bed)._exists(), "Bed full");
 
@@ -69,7 +69,7 @@ contract BedSystem is System {
     EntityId bed = PlayerBed._getBedEntityId(caller);
     require(bed._exists(), "Player is not sleeping");
 
-    Vec3 bedCoord = bed.getPosition();
+    Vec3 bedCoord = bed._getPosition();
     require(bedCoord.inSurroundingCube(spawnCoord, MAX_RESPAWN_HALF_WIDTH), "Bed is too far away");
 
     require(!MoveLib._gravityApplies(spawnCoord), "Cannot spawn player here as gravity applies");
@@ -96,7 +96,7 @@ contract BedSystem is System {
     EntityId bed = PlayerBed._getBedEntityId(player);
     require(bed._exists(), "Player is not in a bed");
 
-    Vec3 bedCoord = bed.getPosition();
+    Vec3 bedCoord = bed._getPosition();
 
     require(bedCoord.inSurroundingCube(dropCoord, MAX_RESPAWN_HALF_WIDTH), "Drop location is too far from bed");
 

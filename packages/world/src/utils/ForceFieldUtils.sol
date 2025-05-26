@@ -27,9 +27,8 @@ library ForceFieldUtils {
     if (!fragment._exists()) return (EntityId.wrap(0), fragment);
 
     FragmentData memory fragmentData = Fragment._get(fragment);
-    return _isFragmentActive(fragmentData, fragmentData.forceField)
-      ? (fragmentData.forceField, fragment)
-      : (EntityId.wrap(0), fragment);
+    bool isActive = _isFragmentActive(fragmentData, fragmentData.forceField);
+    return isActive ? (fragmentData.forceField, fragment) : (EntityId.wrap(0), fragment);
   }
 
   /**

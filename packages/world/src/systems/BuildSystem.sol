@@ -82,7 +82,7 @@ contract BuildSystem is System {
     ObjectType buildObjectType = InventorySlot._getObjectType(caller, slot);
     require(!buildObjectType.isPassThrough(), "Cannot jump build on a pass-through block");
 
-    Vec3 coord = caller.getPosition();
+    Vec3 coord = caller._getPosition();
 
     Vec3[] memory moveCoords = new Vec3[](1);
     moveCoords[0] = coord + vec3(0, 1, 0);
