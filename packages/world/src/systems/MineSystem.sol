@@ -443,7 +443,6 @@ library RandomResourceLib {
   }
 
   function _getRandomOre(Vec3 coord) public view returns (ObjectType) {
-    uint256 randomSeed = NatureLib.getRandomSeed(coord);
     return OreLib.getRandomOre(coord);
   }
 
