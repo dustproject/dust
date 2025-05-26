@@ -760,7 +760,6 @@ contract ObjectTypeTest is DustTest {
     }
 
     {
-      assertTrue(ObjectTypes.UnrevealedOre.isOre(), "isOre");
       assertTrue(ObjectTypes.CoalOre.isOre(), "isOre");
       assertTrue(ObjectTypes.CopperOre.isOre(), "isOre");
       assertTrue(ObjectTypes.IronOre.isOre(), "isOre");
@@ -800,6 +799,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.WetFarmland.isOre(), "!isOre");
       assertFalse(ObjectTypes.Snow.isOre(), "!isOre");
       assertFalse(ObjectTypes.Ice.isOre(), "!isOre");
+      assertFalse(ObjectTypes.UnrevealedOre.isOre(), "!isOre");
       assertFalse(ObjectTypes.Gravel.isOre(), "!isOre");
       assertFalse(ObjectTypes.Sand.isOre(), "!isOre");
       assertFalse(ObjectTypes.RedSand.isOre(), "!isOre");

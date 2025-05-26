@@ -6,10 +6,10 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 
+import { DisabledExtraDrops } from "../codegen/tables/DisabledExtraDrops.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
-import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
-
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
+import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
 
 import { EntityOrientation } from "../codegen/tables/EntityOrientation.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
@@ -19,6 +19,8 @@ import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
+import { RandomLib } from "../RandomLib.sol";
+import { TreeLib } from "../TreeLib.sol";
 import { Math } from "../utils/Math.sol";
 import { ResourcePosition } from "../utils/Vec3Storage.sol";
 
@@ -53,7 +55,9 @@ import { ObjectAmount, ObjectType } from "../ObjectType.sol";
 import { MoveLib } from "./libraries/MoveLib.sol";
 
 import { NatureLib } from "../NatureLib.sol";
+
 import { ObjectTypes } from "../ObjectType.sol";
+import { OreLib } from "../OreLib.sol";
 
 import { ProgramId } from "../ProgramId.sol";
 import { IDetachProgramHook, IMineHook } from "../ProgramInterfaces.sol";
@@ -341,12 +345,105 @@ library MineLib {
 }
 
 library RandomResourceLib {
+  struct RandomDrop {
+    ObjectType objectType;
+    uint256[] distribution;
+  }
+
   function _getMineDrops(EntityId mined, ObjectType objectType, Vec3 coord) public view returns (ObjectAmount[] memory) {
-    return NatureLib.getMineDrops(mined, objectType, coord);
+    RandomDrop[] memory randomDrops = _getRandomDrops(mined, objectType);
+
+    ObjectAmount[] memory result = new ObjectAmount[](randomDrops.length + 1);
+
+    if (randomDrops.length > 0) {
+      uint256 randomSeed = NatureLib.getRandomSeed(coord);
+      for (uint256 i = 0; i < randomDrops.length; i++) {
+        RandomDrop memory drop = randomDrops[i];
+        (uint256 cap, uint256 remaining) = NatureLib.getCapAndRemaining(drop.objectType);
+        uint256[] memory weights = RandomLib.adjustWeights(drop.distribution, cap, remaining);
+        uint256 amount = RandomLib.selectByWeight(weights, randomSeed);
+        result[i] = ObjectAmount(drop.objectType, uint16(amount));
+      }
+    }
+
+    // If farmland, convert to dirt
+    if (objectType == ObjectTypes.Farmland || objectType == ObjectTypes.WetFarmland) {
+      objectType = ObjectTypes.Dirt;
+    }
+
+    // Add base type as a drop for all objects
+    result[result.length - 1] = ObjectAmount(objectType, 1);
+
+    return result;
+  }
+
+  function _getRandomDrops(EntityId mined, ObjectType objectType) private view returns (RandomDrop[] memory drops) {
+    if (!objectType.hasExtraDrops() || DisabledExtraDrops._get(mined)) {
+      return drops;
+    }
+
+    if (objectType == ObjectTypes.FescueGrass || objectType == ObjectTypes.SwitchGrass) {
+      uint256[] memory distribution = new uint256[](2);
+      distribution[0] = 43; // 0 seeds: 43%
+      distribution[1] = 57; // 1 seed:  57%
+
+      drops = new RandomDrop[](1);
+      drops[0] = RandomDrop(ObjectTypes.WheatSeed, distribution);
+      return drops;
+    }
+
+    if (objectType == ObjectTypes.Wheat) {
+      uint256[] memory distribution = new uint256[](4);
+      distribution[0] = 40; // 0 seeds: 40%
+      distribution[1] = 30; // 1 seed:  30%
+      distribution[2] = 20; // 2 seeds: 20%
+      distribution[3] = 10; // 3 seeds: 10%
+
+      drops = new RandomDrop[](1);
+      drops[0] = RandomDrop(ObjectTypes.WheatSeed, distribution);
+      return drops;
+    }
+
+    if (objectType == ObjectTypes.Melon) {
+      // Expected return 1.53
+      uint256[] memory distribution = new uint256[](4);
+      distribution[0] = 20; // 0 seeds: 20%
+      distribution[1] = 30; // 1 seed:  30%
+      distribution[2] = 27; // 2 seeds: 27%
+      distribution[3] = 23; // 3 seeds: 23%
+
+      drops = new RandomDrop[](1);
+      drops[0] = RandomDrop(ObjectTypes.MelonSeed, distribution);
+      return drops;
+    }
+
+    if (objectType == ObjectTypes.Pumpkin) {
+      // Expected return 1.53
+      uint256[] memory distribution = new uint256[](4);
+      distribution[0] = 20; // 0 seeds: 20%
+      distribution[1] = 30; // 1 seed:  30%
+      distribution[2] = 27; // 2 seeds: 27%
+      distribution[3] = 23; // 3 seeds: 23%
+
+      drops = new RandomDrop[](1);
+      drops[0] = RandomDrop(ObjectTypes.PumpkinSeed, distribution);
+      return drops;
+    }
+
+    if (objectType.isLeaf()) {
+      uint256 chance = TreeLib.getLeafDropChance(objectType);
+      uint256[] memory distribution = new uint256[](2);
+      distribution[0] = 100 - chance; // No sapling
+      distribution[1] = chance; // 1 sapling
+
+      drops = new RandomDrop[](1);
+      drops[0] = RandomDrop(objectType.getSapling(), distribution);
+      return drops;
+    }
   }
 
   function _getRandomOre(Vec3 coord) public view returns (ObjectType) {
-    return NatureLib.getRandomOre(coord);
+    return OreLib.getRandomOre(coord);
   }
 
   function _collapseRandomOre(EntityId entityId, Vec3 coord) public returns (ObjectType) {

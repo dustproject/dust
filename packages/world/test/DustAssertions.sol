@@ -47,7 +47,7 @@ abstract contract DustAssertions is MudTest, GasReporter {
   }
 
   function inventoryGetOreAmounts(EntityId owner) internal returns (ObjectAmount[] memory) {
-    ObjectType[7] memory ores = ObjectTypeLib.getOreTypes();
+    ObjectType[6] memory ores = ObjectTypeLib.getOreTypes();
 
     uint256 numOres = 0;
     for (uint256 i = 0; i < ores.length; i++) {

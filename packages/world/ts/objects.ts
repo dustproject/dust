@@ -825,7 +825,6 @@ export const categories: Record<string, Category> = {
   },
   Ore: {
     objects: [
-      "UnrevealedOre",
       "CoalOre",
       "CopperOre",
       "IronOre",

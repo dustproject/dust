@@ -18,8 +18,8 @@ import { CraftNotification, notify } from "../utils/NotifUtils.sol";
 import { CRAFT_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 
-import { NatureLib } from "../NatureLib.sol";
 import { ObjectType, ObjectTypes } from "../ObjectType.sol";
+import { OreLib } from "../OreLib.sol";
 import { Vec3 } from "../Vec3.sol";
 
 contract CraftSystem is System {
@@ -66,7 +66,7 @@ library CraftLib {
 
         // TODO: this should be removed once craftingTime is implemented
         if (recipeType == ObjectTypes.CoalOre) {
-          NatureLib.burnOre(recipeType, recipe.inputAmounts[i]);
+          OreLib.burnOre(recipeType, recipe.inputAmounts[i]);
         }
 
         InventoryUtils.removeObjectFromSlot(caller, inputs[currentInput].slot, amount);

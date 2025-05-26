@@ -11,8 +11,9 @@ import { burnToolEnergy } from "../utils/EnergyUtils.sol";
 import { Math } from "../utils/Math.sol";
 
 import { EntityId } from "../EntityId.sol";
-import { NatureLib } from "../NatureLib.sol";
+
 import { ObjectAmount, ObjectType, ObjectTypes } from "../ObjectType.sol";
+import { OreLib } from "../OreLib.sol";
 import { Vec3 } from "../Vec3.sol";
 
 struct SlotTransfer {
@@ -157,7 +158,7 @@ library InventoryUtils {
 
     if (toolData.massLeft <= massReduction) {
       removeEntityFromSlot(toolData.owner, toolData.slot);
-      NatureLib.burnOres(toolData.toolType);
+      OreLib.burnOres(toolData.toolType);
       burnToolEnergy(toolData.toolType, toolData.owner.getPosition());
     } else {
       Mass._setMass(toolData.tool, toolData.massLeft - massReduction);

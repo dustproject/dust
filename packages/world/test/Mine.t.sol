@@ -33,6 +33,7 @@ import {
   DEFAULT_WOODEN_TOOL_MULTIPLIER,
   MACHINE_ENERGY_DRAIN_RATE,
   MAX_ENTITY_INFLUENCE_HALF_WIDTH,
+  MAX_PLAYER_ENERGY,
   PLAYER_ENERGY_DRAIN_RATE,
   SPECIALIZED_WOODEN_TOOL_MULTIPLIER,
   TOOL_MINE_ENERGY_COST
@@ -132,6 +133,10 @@ contract MineTest is DustTest {
     ObjectType o = TerrainLib.getBlockType(mineCoord);
     assertEq(o, ObjectTypes.UnrevealedOre, "Didn't work");
     assertInventoryHasObject(aliceEntityId, ObjectTypes.UnrevealedOre, 0);
+    Energy.set(
+      aliceEntityId,
+      EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: MAX_PLAYER_ENERGY * 1000, drainRate: 0 })
+    );
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
     ObjectAmount[] memory oreAmounts = inventoryGetOreAmounts(aliceEntityId);
