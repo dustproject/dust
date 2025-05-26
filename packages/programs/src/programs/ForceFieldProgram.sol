@@ -17,8 +17,6 @@ import {
   IRemoveFragmentHook
 } from "@dust/world/src/ProgramInterfaces.sol";
 
-import { Owner } from "../codegen/tables/Owner.sol";
-
 import { DefaultProgram } from "./DefaultProgram.sol";
 
 contract ForceFieldProgram is

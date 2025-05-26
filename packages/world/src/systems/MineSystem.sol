@@ -131,6 +131,8 @@ contract MineSystem is System {
       _removeBlock(mined, minedType, baseCoord);
       _removeRelativeBlocks(mined, minedType, baseCoord);
       _handleDrop(caller, mined, minedType, baseCoord);
+      // It is fine to destroy the entity before requiring mines allowed,
+      // as machines can't be destroyed if they have energy
       _destroyEntity(caller, mined, minedType, baseCoord);
 
       notify(caller, MineNotification({ mineEntityId: mined, mineCoord: coord, mineObjectType: minedType }));

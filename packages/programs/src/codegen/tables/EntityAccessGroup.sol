@@ -23,17 +23,17 @@ import { EncodeArray } from "@latticexyz/store/src/tightcoder/EncodeArray.sol";
 // Import user types
 import { EntityId } from "@dust/world/src/EntityId.sol";
 
-library Owner {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "dfprograms_1", name: "Owner", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x7462646670726f6772616d735f3100004f776e65720000000000000000000000);
+library EntityAccessGroup {
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "dfprograms_1", name: "EntityAccessGrou", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x7462646670726f6772616d735f310000456e7469747941636365737347726f75);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0020010020000000000000000000000000000000000000000000000000000000);
 
   // Hex-encoded key schema of (bytes32)
   Schema constant _keySchema = Schema.wrap(0x002001005f000000000000000000000000000000000000000000000000000000);
-  // Hex-encoded value schema of (bytes32)
-  Schema constant _valueSchema = Schema.wrap(0x002001005f000000000000000000000000000000000000000000000000000000);
+  // Hex-encoded value schema of (uint256)
+  Schema constant _valueSchema = Schema.wrap(0x002001001f000000000000000000000000000000000000000000000000000000);
 
   /**
    * @notice Get the table's key field names.
@@ -41,7 +41,7 @@ library Owner {
    */
   function getKeyNames() internal pure returns (string[] memory keyNames) {
     keyNames = new string[](1);
-    keyNames[0] = "itemId";
+    keyNames[0] = "entityId";
   }
 
   /**
@@ -50,7 +50,7 @@ library Owner {
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
     fieldNames = new string[](1);
-    fieldNames[0] = "owner";
+    fieldNames[0] = "groupId";
   }
 
   /**
@@ -68,95 +68,95 @@ library Owner {
   }
 
   /**
-   * @notice Get owner.
+   * @notice Get groupId.
    */
-  function getOwner(bytes32 itemId) internal view returns (EntityId owner) {
+  function getGroupId(EntityId entityId) internal view returns (uint256 groupId) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return EntityId.wrap(bytes32(_blob));
+    return (uint256(bytes32(_blob)));
   }
 
   /**
-   * @notice Get owner.
+   * @notice Get groupId.
    */
-  function _getOwner(bytes32 itemId) internal view returns (EntityId owner) {
+  function _getGroupId(EntityId entityId) internal view returns (uint256 groupId) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return EntityId.wrap(bytes32(_blob));
+    return (uint256(bytes32(_blob)));
   }
 
   /**
-   * @notice Get owner.
+   * @notice Get groupId.
    */
-  function get(bytes32 itemId) internal view returns (EntityId owner) {
+  function get(EntityId entityId) internal view returns (uint256 groupId) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return EntityId.wrap(bytes32(_blob));
+    return (uint256(bytes32(_blob)));
   }
 
   /**
-   * @notice Get owner.
+   * @notice Get groupId.
    */
-  function _get(bytes32 itemId) internal view returns (EntityId owner) {
+  function _get(EntityId entityId) internal view returns (uint256 groupId) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return EntityId.wrap(bytes32(_blob));
+    return (uint256(bytes32(_blob)));
   }
 
   /**
-   * @notice Set owner.
+   * @notice Set groupId.
    */
-  function setOwner(bytes32 itemId, EntityId owner) internal {
+  function setGroupId(EntityId entityId, uint256 groupId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(EntityId.unwrap(owner)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((groupId)), _fieldLayout);
   }
 
   /**
-   * @notice Set owner.
+   * @notice Set groupId.
    */
-  function _setOwner(bytes32 itemId, EntityId owner) internal {
+  function _setGroupId(EntityId entityId, uint256 groupId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(EntityId.unwrap(owner)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((groupId)), _fieldLayout);
   }
 
   /**
-   * @notice Set owner.
+   * @notice Set groupId.
    */
-  function set(bytes32 itemId, EntityId owner) internal {
+  function set(EntityId entityId, uint256 groupId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(EntityId.unwrap(owner)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((groupId)), _fieldLayout);
   }
 
   /**
-   * @notice Set owner.
+   * @notice Set groupId.
    */
-  function _set(bytes32 itemId, EntityId owner) internal {
+  function _set(EntityId entityId, uint256 groupId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked(EntityId.unwrap(owner)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((groupId)), _fieldLayout);
   }
 
   /**
    * @notice Delete all data for given keys.
    */
-  function deleteRecord(bytes32 itemId) internal {
+  function deleteRecord(EntityId entityId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     StoreSwitch.deleteRecord(_tableId, _keyTuple);
   }
@@ -164,9 +164,9 @@ library Owner {
   /**
    * @notice Delete all data for given keys.
    */
-  function _deleteRecord(bytes32 itemId) internal {
+  function _deleteRecord(EntityId entityId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     StoreCore.deleteRecord(_tableId, _keyTuple, _fieldLayout);
   }
@@ -175,8 +175,8 @@ library Owner {
    * @notice Tightly pack static (fixed length) data using this table's schema.
    * @return The static data, encoded into a sequence of bytes.
    */
-  function encodeStatic(EntityId owner) internal pure returns (bytes memory) {
-    return abi.encodePacked(owner);
+  function encodeStatic(uint256 groupId) internal pure returns (bytes memory) {
+    return abi.encodePacked(groupId);
   }
 
   /**
@@ -185,8 +185,8 @@ library Owner {
    * @return The lengths of the dynamic fields (packed into a single bytes32 value).
    * @return The dynamic (variable length) data, encoded into a sequence of bytes.
    */
-  function encode(EntityId owner) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
-    bytes memory _staticData = encodeStatic(owner);
+  function encode(uint256 groupId) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
+    bytes memory _staticData = encodeStatic(groupId);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -197,9 +197,9 @@ library Owner {
   /**
    * @notice Encode keys as a bytes32 array using this table's field layout.
    */
-  function encodeKeyTuple(bytes32 itemId) internal pure returns (bytes32[] memory) {
+  function encodeKeyTuple(EntityId entityId) internal pure returns (bytes32[] memory) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = itemId;
+    _keyTuple[0] = EntityId.unwrap(entityId);
 
     return _keyTuple;
   }

@@ -8,33 +8,40 @@ import { EntityId, EntityIdLib } from "@dust/world/src/EntityId.sol";
 
 import { IAttachProgramHook, IDetachProgramHook } from "@dust/world/src/ProgramInterfaces.sol";
 
-import { AllowedCaller } from "../codegen/tables/AllowedCaller.sol";
-import { Owner } from "../codegen/tables/Owner.sol";
-
-import { SmartItem } from "../codegen/tables/SmartItem.sol";
-import { UniqueEntity } from "../codegen/tables/UniqueEntity.sol";
+import { AccessGroupCount } from "../codegen/tables/AccessGroupCount.sol";
+import { AccessGroupMember } from "../codegen/tables/AccessGroupMember.sol";
+import { AccessGroupOwner } from "../codegen/tables/AccessGroupOwner.sol";
+import { EntityAccessGroup } from "../codegen/tables/EntityAccessGroup.sol";
 
 abstract contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, WorldConsumer {
   constructor(IBaseWorld _world) WorldConsumer(_world) { }
 
   function onAttachProgram(EntityId caller, EntityId target, bytes memory) external onlyWorld {
-    uint256 uniqueEntity = UniqueEntity.get() + 1;
-    UniqueEntity.set(uniqueEntity);
-    bytes32 smartItemId = bytes32(uniqueEntity);
-    SmartItem.set(target, smartItemId);
-
-    Owner.set(smartItemId, caller);
-    AllowedCaller.set(smartItemId, caller, true);
+    uint256 groupId;
+    AccessGroupOwner.set(groupId, caller);
+    AccessGroupMember.set(groupId, caller, true);
+    EntityAccessGroup.set(target, groupId);
   }
 
   function onDetachProgram(EntityId caller, EntityId target, bytes memory) external onlyWorld {
-    // TODO: dont call require if force field has no energy, so we can still perform the cleanup
-    require(Owner.get(SmartItem.get(target)) == caller, "Only the owner can detach this program");
-    SmartItem.deleteRecord(target);
+    uint256 groupId = EntityAccessGroup.get(target);
+    require(_isSafeCall() || AccessGroupOwner.get(groupId) == caller, "Only the owner can detach this program");
+
+    EntityAccessGroup.deleteRecord(target);
   }
 
   function _isAllowed(EntityId target, EntityId caller) internal view returns (bool) {
-    return AllowedCaller.get(SmartItem.get(target), caller);
+    uint256 groupId = EntityAccessGroup.get(target);
+    return AccessGroupMember.get(groupId, caller);
+  }
+
+  // TODO: implement check for when the forcefield has no energy
+  function _isSafeCall() internal view returns (bool) {
+    return false;
+  }
+
+  function _getForceField(EntityId target) internal view returns (EntityId) {
+    // TODO: implement and extract to util
   }
 
   // We include a fallback function to prevent hooks not implemented

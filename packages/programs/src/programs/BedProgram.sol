@@ -17,6 +17,7 @@ contract BedProgram is ISleepHook, IWakeupHook, DefaultProgram {
   }
 
   function onWakeup(EntityId caller, EntityId target, bytes memory) external view onlyWorld {
+    // TODO: should we allow anyone to wake up from the bed?
     require(_isAllowed(target, caller), "Only approved callers can wake up from the bed");
   }
 }
