@@ -106,7 +106,7 @@ abstract contract DustAssertions is MudTest, GasReporter {
     Vec3 shardCoord = snapshotCoord.toLocalEnergyPoolShardCoord();
     snapshot.localPoolEnergy = LocalEnergyPool.get(shardCoord);
     (EntityId forceFieldEntityId,) = TestForceFieldUtils.getForceField(snapshotCoord);
-    snapshot.forceFieldEnergy = forceFieldEntityId._exists() ? Energy.getEnergy(forceFieldEntityId) : 0;
+    snapshot.forceFieldEnergy = forceFieldEntityId.exists() ? Energy.getEnergy(forceFieldEntityId) : 0;
     return snapshot;
   }
 
