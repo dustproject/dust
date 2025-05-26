@@ -85,12 +85,12 @@ contract SpawnSystem is System {
     Vec3 aboveCoord = spawnCoord + vec3(0, 1, 0);
 
     ObjectType spawnType = EntityUtils.getObjectTypeAt(spawnCoord);
-    if (spawnType.isNull() || !spawnType.isPassThrough() || EntityUtils.getMovableEntityAt(spawnCoord).exists()) {
+    if (spawnType.isNull() || !spawnType.isPassThrough() || EntityUtils.getMovableEntityAt(spawnCoord)._exists()) {
       return false;
     }
 
     ObjectType aboveType = EntityUtils.getObjectTypeAt(aboveCoord);
-    if (aboveType.isNull() || !aboveType.isPassThrough() || EntityUtils.getMovableEntityAt(aboveCoord).exists()) {
+    if (aboveType.isNull() || !aboveType.isPassThrough() || EntityUtils.getMovableEntityAt(aboveCoord)._exists()) {
       return false;
     }
 
@@ -99,7 +99,7 @@ contract SpawnSystem is System {
       belowType.isNull()
         || (
           belowType != ObjectTypes.Water && belowType.isPassThrough()
-            && !EntityUtils.getMovableEntityAt(belowCoord).exists()
+            && !EntityUtils.getMovableEntityAt(belowCoord)._exists()
         )
     ) {
       return false;
@@ -133,7 +133,7 @@ contract SpawnSystem is System {
     spawnCoord = vec3(spawnCoord.x(), y, spawnCoord.z());
 
     (EntityId forceField,) = ForceFieldUtils.getForceField(spawnCoord);
-    require(!forceField.exists(), "Cannot spawn in force field");
+    require(!forceField._exists(), "Cannot spawn in force field");
 
     // 30% of max player energy
     uint128 spawnEnergy = MAX_PLAYER_ENERGY * 3 / 10;
@@ -150,14 +150,14 @@ contract SpawnSystem is System {
   {
     checkWorldStatus();
     require(spawnEnergy <= MAX_PLAYER_ENERGY * 3 / 10, "Cannot spawn with more than 30% of max player energy");
-    ObjectType objectType = spawnTile.getObjectType();
+    ObjectType objectType = spawnTile._getObjectType();
     require(objectType == ObjectTypes.SpawnTile, "Not a spawn tile");
 
     Vec3 spawnTileCoord = spawnTile.getPosition();
     require(spawnTileCoord.inSurroundingCube(spawnCoord, MAX_RESPAWN_HALF_WIDTH), "Spawn tile is too far away");
 
     (EntityId forceField,) = ForceFieldUtils.getForceField(spawnTileCoord);
-    require(forceField.exists(), "Spawn tile is not inside a forcefield");
+    require(forceField._exists(), "Spawn tile is not inside a forcefield");
     (EnergyData memory machineData,) = updateMachineEnergy(forceField);
     require(machineData.energy >= spawnEnergy, "Not enough energy in spawn tile forcefield");
     Energy._setEnergy(forceField, machineData.energy - spawnEnergy);
@@ -165,7 +165,7 @@ contract SpawnSystem is System {
     EntityId player = _spawnPlayer(spawnCoord, spawnEnergy);
 
     bytes memory onSpawn = abi.encodeCall(ISpawnHook.onSpawn, (player, spawnTile, spawnEnergy, extraData));
-    spawnTile.getProgram().callOrRevert(onSpawn);
+    spawnTile._getProgram().callOrRevert(onSpawn);
 
     return player;
   }

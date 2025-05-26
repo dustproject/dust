@@ -36,7 +36,24 @@ library EntityIdLib {
     return ActivateLib._activate(self, caller, msg.sig);
   }
 
-  function requireCallerAllowed(EntityId self, address caller, ObjectType objectType) internal view {
+  function _validateCaller(EntityId self, address caller, ObjectType objectType) internal view {
+    if (objectType == ObjectTypes.Player) {
+      require(caller == self.getPlayerAddress(), "Caller not allowed");
+    } else {
+      address programAddress = self._getProgram()._getAddress();
+      require(caller == programAddress, "Caller not allowed");
+    }
+  }
+
+  function _validateCaller(EntityId self, address sender) internal view {
+    _validateCaller(self, sender, self._getObjectType());
+  }
+
+  function _validateCaller(EntityId self) internal view {
+    _validateCaller(self, WorldContextConsumerLib._msgSender());
+  }
+
+  function validateCaller(EntityId self, address caller, ObjectType objectType) internal view {
     if (objectType == ObjectTypes.Player) {
       require(caller == self.getPlayerAddress(), "Caller not allowed");
     } else {
@@ -45,8 +62,12 @@ library EntityIdLib {
     }
   }
 
-  function requireCallerAllowed(EntityId self, address sender) internal view {
-    requireCallerAllowed(self, sender, self.getObjectType());
+  function validateCaller(EntityId self, address caller) internal view {
+    validateCaller(self, caller, self.getObjectType());
+  }
+
+  function validateCaller(EntityId self) internal view {
+    validateCaller(self, WorldContextConsumerLib._msgSender());
   }
 
   function baseEntityId(EntityId self) internal view returns (EntityId) {
@@ -84,12 +105,24 @@ library EntityIdLib {
     return EntityPosition._get(self);
   }
 
-  function getProgram(EntityId self) internal view returns (ProgramId) {
+  function _getProgram(EntityId self) internal view returns (ProgramId) {
     return EntityProgram._get(self);
   }
 
-  function getObjectType(EntityId self) internal view returns (ObjectType) {
+  function getProgram(EntityId self) internal view returns (ProgramId) {
+    return EntityProgram.get(self);
+  }
+
+  function _getObjectType(EntityId self) internal view returns (ObjectType) {
     return EntityObjectType._get(self);
+  }
+
+  function getObjectType(EntityId self) internal view returns (ObjectType) {
+    return EntityObjectType.get(self);
+  }
+
+  function _exists(EntityId self) internal view returns (bool) {
+    return self.unwrap() != 0 && !self._getObjectType().isNull();
   }
 
   function exists(EntityId self) internal view returns (bool) {
@@ -136,14 +169,14 @@ library ActivateLib {
   function _activate(EntityId self, address caller, bytes4 sig) public returns (EnergyData memory) {
     checkWorldStatus();
 
-    ObjectType objectType = self.getObjectType();
+    ObjectType objectType = self._getObjectType();
     require(objectType.isActionAllowed(sig), "Action not allowed");
 
-    self.requireCallerAllowed(caller, objectType);
+    self._validateCaller(caller, objectType);
 
     EnergyData memory energyData;
     if (objectType == ObjectTypes.Player) {
-      require(!PlayerBed._getBedEntityId(self).exists(), "Player is sleeping");
+      require(!PlayerBed._getBedEntityId(self)._exists(), "Player is sleeping");
       energyData = updatePlayerEnergy(self);
     } else {
       EntityId forceField;

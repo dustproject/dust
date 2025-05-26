@@ -50,7 +50,7 @@ contract HitMachineSystem is System {
     uint128 callerEnergy = caller.activate().energy;
     (Vec3 callerCoord,) = caller.requireConnected(coord);
     (EntityId forceField,) = ForceFieldUtils.getForceField(coord);
-    require(forceField.exists(), "No force field at this location");
+    require(forceField._exists(), "No force field at this location");
 
     (EnergyData memory machineData,) = updateMachineEnergy(forceField);
     require(machineData.energy > 0, "Cannot hit depleted forcefield");
@@ -75,7 +75,7 @@ contract HitMachineSystem is System {
 
     addEnergyToLocalPool(forceFieldCoord, machineEnergyReduction + playerEnergyReduction);
 
-    ProgramId program = forceField.getProgram();
+    ProgramId program = forceField._getProgram();
     bytes memory onHit = abi.encodeCall(IHitHook.onHit, (caller, forceField, machineEnergyReduction, ""));
     // Don't revert and use a fixed amount of gas so the program can't prevent hitting
     program.call({ gas: SAFE_PROGRAM_GAS, hook: onHit });

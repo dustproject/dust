@@ -103,7 +103,7 @@ contract ForceFieldSystem is System {
     caller.activate();
     caller.requireAdjacentToFragment(fragmentCoord);
 
-    ObjectType objectType = forceField.getObjectType();
+    ObjectType objectType = forceField._getObjectType();
     require(objectType == ObjectTypes.ForceField, "Invalid object type");
 
     require(
@@ -141,7 +141,7 @@ contract ForceFieldSystem is System {
     caller.activate();
     caller.requireAdjacentToFragment(fragmentCoord);
 
-    ObjectType objectType = forceField.getObjectType();
+    ObjectType objectType = forceField._getObjectType();
     require(objectType == ObjectTypes.ForceField, "Invalid object type");
 
     Vec3 forceFieldFragmentCoord = forceField.getPosition().toFragmentCoord();
@@ -171,7 +171,7 @@ contract ForceFieldSystem is System {
   }
 
   function _callForceFieldHook(EntityId forceField, bytes memory hook) private {
-    ProgramId program = forceField.getProgram();
+    ProgramId program = forceField._getProgram();
     if (!program.exists()) {
       return;
     }

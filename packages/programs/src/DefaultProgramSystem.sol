@@ -10,7 +10,7 @@ import { AccessGroupMember } from "./codegen/tables/AccessGroupMember.sol";
 import { AccessGroupOwner } from "./codegen/tables/AccessGroupOwner.sol";
 import { EntityAccessGroup } from "./codegen/tables/EntityAccessGroup.sol";
 
-contract AccessGroupSystem is System {
+contract DefaultProgramSystem is System {
   function newAccessGroup(EntityId owner) external returns (uint256) {
     uint256 groupCount = AccessGroupCount.get();
 
@@ -26,17 +26,27 @@ contract AccessGroupSystem is System {
     return groupCount;
   }
 
+  function setAccessGroup(EntityId caller, EntityId target, uint256 groupId) external {
+    caller.validateCaller();
+    uint256 currentGroupId = EntityAccessGroup.get(target);
+    _requireOwner(currentGroupId, caller);
+    EntityAccessGroup.set(target, groupId);
+  }
+
   function setMembership(EntityId caller, uint256 groupId, EntityId member, bool allowed) public {
+    caller.validateCaller();
     // TODO: check the type of caller and that member player exists
     _requireOwner(groupId, caller);
     AccessGroupMember.set(groupId, member, allowed);
   }
 
   function setMembership(EntityId caller, uint256 groupId, address member, bool allowed) external {
+    caller.validateCaller();
     setMembership(caller, groupId, EntityIdLib.encodePlayer(member), allowed);
   }
 
   function setOwner(EntityId caller, uint256 groupId, EntityId newOwner) external {
+    caller.validateCaller();
     // TODO: check the type of caller
     _requireOwner(groupId, caller);
     AccessGroupOwner.set(groupId, newOwner);

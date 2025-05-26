@@ -6,12 +6,14 @@ pragma solidity >=0.8.24;
 import { EntityId } from "@dust/world/src/EntityId.sol";
 
 /**
- * @title IAccessGroupSystem
+ * @title IDefaultProgramSystem
  * @author MUD (https://mud.dev) by Lattice (https://lattice.xyz)
  * @dev This interface is automatically generated from the corresponding system contract. Do not edit manually.
  */
-interface IAccessGroupSystem {
+interface IDefaultProgramSystem {
   function dfprograms_1__newAccessGroup(EntityId owner) external returns (uint256);
+
+  function dfprograms_1__setAccessGroup(EntityId caller, EntityId target, uint256 groupId) external;
 
   function dfprograms_1__setMembership(EntityId caller, uint256 groupId, EntityId member, bool allowed) external;
 

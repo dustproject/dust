@@ -151,7 +151,7 @@ contract MineSystem is System {
     // If above is growable, the entity must exist as there are not growables in the base terrain
     (EntityId above, ObjectType aboveType) = EntityUtils.getBlockAt(aboveCoord);
     if (aboveType.isGrowable()) {
-      if (!above.exists()) {
+      if (!above._exists()) {
         EntityUtils.getOrCreateBlockAt(aboveCoord);
       }
       _removeGrowable(above, aboveType, aboveCoord);
@@ -178,7 +178,7 @@ contract MineSystem is System {
     EntityId above = EntityUtils.getMovableEntityAt(aboveCoord);
     // Note: currently it is not possible for the above player to not be the base entity,
     // but if we add other types of movable entities we should check that it is a base entity
-    if (above.exists()) {
+    if (above._exists()) {
       MoveLib.runGravity(aboveCoord);
     }
   }
@@ -206,7 +206,7 @@ contract MineSystem is System {
     }
 
     // Detach program if it exists
-    ProgramId program = mined.getProgram();
+    ProgramId program = mined._getProgram();
     if (program.exists()) {
       bytes memory onDetachProgram = abi.encodeCall(IDetachProgramHook.onDetachProgram, (caller, mined, ""));
       program.call({ gas: SAFE_PROGRAM_GAS, hook: onDetachProgram });
@@ -286,7 +286,7 @@ library MineLib {
   function _mineBed(EntityId bed, Vec3 bedCoord) public {
     // If there is a player sleeping in the mined bed, kill them
     EntityId sleepingPlayerId = BedPlayer._getPlayerEntityId(bed);
-    if (!sleepingPlayerId.exists()) {
+    if (!sleepingPlayerId._exists()) {
       return;
     }
 
@@ -308,7 +308,7 @@ library MineLib {
 
   function _requireMinesAllowed(EntityId caller, ObjectType objectType, Vec3 coord, bytes calldata extraData) public {
     (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
-    if (!forceField.exists()) {
+    if (!forceField._exists()) {
       return;
     }
 
@@ -318,9 +318,9 @@ library MineLib {
     }
 
     // We know fragment is active because its forcefield exists, so we can use its program
-    ProgramId program = fragment.getProgram();
+    ProgramId program = fragment._getProgram();
     if (!program.exists()) {
-      program = forceField.getProgram();
+      program = forceField._getProgram();
       if (!program.exists()) {
         return;
       }

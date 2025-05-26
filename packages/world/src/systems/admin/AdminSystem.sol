@@ -62,7 +62,7 @@ contract AdminSystem is System {
 
       ObjectType newObjectType = EntityUtils.safeGetObjectTypeAt(newCoord);
       require(newObjectType.isPassThrough(), "Cannot teleport to a non-passable block");
-      require(!EntityUtils.getMovableEntityAt(newCoord).exists(), "Cannot teleport where a player already exists");
+      require(!EntityUtils.getMovableEntityAt(newCoord)._exists(), "Cannot teleport where a player already exists");
 
       EntityUtils.setMovableEntityAt(newCoord, players[i]);
     }

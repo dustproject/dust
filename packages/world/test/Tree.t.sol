@@ -157,7 +157,7 @@ contract TreeTest is DustTest {
     for (int32 i = 0; i < height; i++) {
       Vec3 checkCoord = seedCoord + vec3(0, i, 0);
       (EntityId logEntityId, ObjectType logType) = TestEntityUtils.getBlockAt(checkCoord);
-      assertTrue(TestEntityUtils.exists(logEntityId), "Log entity doesn't exist");
+      assertTrue(logEntityId.exists(), "Log entity doesn't exist");
       assertEq(logType, ObjectTypes.OakLog, "Entity is not oak log");
     }
 

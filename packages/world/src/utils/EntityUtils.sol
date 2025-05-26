@@ -20,7 +20,7 @@ library EntityUtils {
   /// @dev Returns ObjectTypes.Null if the chunk is not explored yet.
   function getObjectTypeAt(Vec3 coord) internal view returns (ObjectType) {
     EntityId entityId = EntityIdLib.encodeBlock(coord);
-    ObjectType objectType = entityId.getObjectType();
+    ObjectType objectType = entityId._getObjectType();
 
     return objectType.isNull() ? TerrainLib._getBlockType(coord) : objectType;
   }
@@ -42,7 +42,7 @@ library EntityUtils {
 
   function getOrCreateBlockAt(Vec3 coord) internal returns (EntityId, ObjectType) {
     (EntityId entityId, ObjectType objectType) = getBlockAt(coord);
-    if (!entityId.exists()) {
+    if (!entityId._exists()) {
       _initEntity(entityId, objectType);
       EntityPosition._set(entityId, coord);
     }
@@ -53,7 +53,7 @@ library EntityUtils {
   function getOrCreatePlayer() internal returns (EntityId) {
     address playerAddress = WorldContextConsumerLib._msgSender();
     EntityId player = EntityIdLib.encodePlayer(playerAddress);
-    if (!player.exists()) {
+    if (!player._exists()) {
       _initEntity(player, ObjectTypes.Player);
     }
 
@@ -68,7 +68,7 @@ library EntityUtils {
     EntityId fragment = getFragmentAt(fragmentCoord);
 
     // Create a new fragment entity if needed
-    if (!fragment.exists()) {
+    if (!fragment._exists()) {
       _initEntity(fragment, ObjectTypes.Fragment);
       EntityPosition._set(fragment, fragmentCoord);
     }

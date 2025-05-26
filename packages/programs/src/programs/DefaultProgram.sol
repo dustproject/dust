@@ -8,6 +8,7 @@ import { EntityId, EntityIdLib } from "@dust/world/src/EntityId.sol";
 
 import { IAttachProgramHook, IDetachProgramHook } from "@dust/world/src/ProgramInterfaces.sol";
 
+import { defaultProgramSystem } from "../codegen/systems/DefaultProgramSystemLib.sol";
 import { AccessGroupCount } from "../codegen/tables/AccessGroupCount.sol";
 import { AccessGroupMember } from "../codegen/tables/AccessGroupMember.sol";
 import { AccessGroupOwner } from "../codegen/tables/AccessGroupOwner.sol";
@@ -17,7 +18,7 @@ abstract contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, Worl
   constructor(IBaseWorld _world) WorldConsumer(_world) { }
 
   function onAttachProgram(EntityId caller, EntityId target, bytes memory) external onlyWorld {
-    uint256 groupId;
+    uint256 groupId = defaultProgramSystem.newAccessGroup(caller);
     AccessGroupOwner.set(groupId, caller);
     AccessGroupMember.set(groupId, caller, true);
     EntityAccessGroup.set(target, groupId);
@@ -25,7 +26,7 @@ abstract contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, Worl
 
   function onDetachProgram(EntityId caller, EntityId target, bytes memory) external onlyWorld {
     uint256 groupId = EntityAccessGroup.get(target);
-    require(_isSafeCall() || AccessGroupOwner.get(groupId) == caller, "Only the owner can detach this program");
+    require(_isSafeCall(target) || AccessGroupOwner.get(groupId) == caller, "Only the owner can detach this program");
 
     EntityAccessGroup.deleteRecord(target);
   }
@@ -36,11 +37,11 @@ abstract contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, Worl
   }
 
   // TODO: implement check for when the forcefield has no energy
-  function _isSafeCall() internal view returns (bool) {
-    return false;
+  function _isSafeCall(EntityId target) internal view returns (bool) {
+    return !_isForceFieldActive(target);
   }
 
-  function _getForceField(EntityId target) internal view returns (EntityId) {
+  function _isForceFieldActive(EntityId target) internal view returns (bool) {
     // TODO: implement and extract to util
   }
 
