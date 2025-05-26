@@ -36,14 +36,14 @@ library OreLib {
 
     for (uint256 i = 0; i < oreTypes.length; i++) {
       (uint256 cap, uint256 remaining) = NatureLib.getCapAndRemaining(oreTypes[i]);
-      weights[i] = biomeMultipliers[i] * remaining / cap;
+      // We multiply by 1e18 to avoid precision loss in weight calculations
+      weights[i] = biomeMultipliers[i] * remaining * 1e18 / cap;
     }
 
     // Select ore based on availability
     return oreTypes[RandomLib.selectByWeight(weights, randomSeed)];
   }
 
-  /// @dev ore index order must match getOreTypes()
   function _getBiomeMultipliers(uint256 biomeIndex) public pure returns (uint256[6] memory) {
     // biomeIndex == 0: lush_caves
     if (biomeIndex == 0) return [uint256(1433781), 1173465, 1366742, 428359, 369632, 135];

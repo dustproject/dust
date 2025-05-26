@@ -6,7 +6,7 @@ import { DustTest, console } from "./DustTest.sol";
 import { ObjectType, ObjectTypeLib, ObjectTypes } from "../src/ObjectType.sol";
 
 contract ObjectTypeTest is DustTest {
-  function testCategories() public pure {
+  function testCategories() public {
     {
       assertTrue(ObjectTypes.Air.isNonSolid(), "isNonSolid");
       assertTrue(ObjectTypes.Water.isNonSolid(), "isNonSolid");
