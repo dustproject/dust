@@ -20,16 +20,7 @@ import { SpawnTileProgram } from "../src/programs/SpawnTileProgram.sol";
 bytes14 constant DEFAULT_NAMESPACE = "dfprograms_1";
 
 contract PostDeploy is Script {
-  function run(address worldAddress) external {
-    // Specify a store so that you can use tables directly in PostDeploy
-    StoreSwitch.setStoreAddress(worldAddress);
-
-    // Load the private key from the `PRIVATE_KEY` environment variable (in .env)
-    uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-
-    // Start broadcasting transactions from the deployer account
-    vm.startBroadcast(deployerPrivateKey);
-
+  function postDeploy(address worldAddress) internal {
     IWorld world = IWorld(worldAddress);
 
     // Create the programs
@@ -59,6 +50,32 @@ contract PostDeploy is Script {
       SpawnTileProgram spawnTileProgram = new SpawnTileProgram(world);
       world.registerSystem(spawnTileProgramId, spawnTileProgram, false);
     }
+  }
+
+  function run(address worldAddress) external {
+    // Specify a store so that you can use tables directly in PostDeploy
+    StoreSwitch.setStoreAddress(worldAddress);
+
+    // Load the private key from the `PRIVATE_KEY` environment variable (in .env)
+    uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+
+    // Start broadcasting transactions from the deployer account
+    vm.startBroadcast(deployerPrivateKey);
+
+    postDeploy(worldAddress);
+
+    vm.stopBroadcast();
+  }
+
+  // TODO: remove this once MUD supports PostDeploy with KMS: https://github.com/latticexyz/mud/issues/3716
+  function run(address worldAddress, address deployerAddress) external {
+    // Specify a store so that you can use tables directly in PostDeploy
+    StoreSwitch.setStoreAddress(worldAddress);
+
+    // Start broadcasting transactions from the deployer account
+    vm.startBroadcast(deployerAddress);
+
+    postDeploy(worldAddress);
 
     vm.stopBroadcast();
   }
