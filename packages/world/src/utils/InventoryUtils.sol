@@ -395,6 +395,8 @@ library InventoryUtils {
     public
     returns (SlotData[] memory fromSlotData)
   {
+    require(from != to, "Cannot transfer amounts to self");
+
     fromSlotData = new SlotData[](slotAmounts.length);
 
     for (uint256 i = 0; i < slotAmounts.length; i++) {
@@ -407,12 +409,10 @@ library InventoryUtils {
       require(!sourceSlot.objectType.isNull(), "Empty slot");
       fromSlotData[i] = SlotData(sourceSlot.entityId, sourceSlot.objectType, amount);
 
-      require(from != to, "Cannot transfer to self");
-
       if (sourceSlot.entityId.exists()) {
         // Entities are unique and always have amount=1
         require(amount == 1, "Entity transfer amount should be 1");
-        removeEntityFromSlot(from, slotFrom);
+        moveEntityFromSlot(from, slotFrom);
         addEntity(to, sourceSlot.entityId);
       } else {
         // Regular objects can be transferred in partial amounts

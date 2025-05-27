@@ -16,7 +16,7 @@ import { InventorySlot, InventorySlotData } from "../src/codegen/tables/Inventor
 import { Mass } from "../src/codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
-import { SlotTransfer, TestEntityUtils, TestInventoryUtils, ToolData } from "./utils/TestUtils.sol";
+import { SlotAmount, SlotTransfer, TestEntityUtils, TestInventoryUtils, ToolData } from "./utils/TestUtils.sol";
 
 contract InventoryUtilsTest is DustTest {
   function testMultipleTransferAll() public {
@@ -400,6 +400,42 @@ contract InventoryUtilsTest is DustTest {
     _verifyInventoryBitmapIntegrity(bob);
   }
 
+  // Fuzz test for transferring SlotAmounts between inventories
+  function testFuzzTransferAmountsBetweenInventories(uint16 amount, uint16 transferAmount) public {
+    // Bound inputs to reasonable values
+    vm.assume(amount > 0 && amount <= 99);
+    vm.assume(transferAmount > 0 && transferAmount <= amount);
+
+    // Setup players
+    (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
+    (, EntityId bob) = createTestPlayer(vec3(1, 0, 0));
+
+    // Add objects to alice
+    TestInventoryUtils.addObjectToSlot(alice, ObjectTypes.OakLog, amount, 0);
+
+    // Transfer to bob
+    SlotAmount[] memory amounts = new SlotAmount[](1);
+    amounts[0] = SlotAmount({ slot: 0, amount: transferAmount });
+
+    TestInventoryUtils.transfer(alice, bob, amounts);
+
+    // Verify amounts
+    if (transferAmount == amount) {
+      // Alice's inventory should be empty
+      assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 0, "Alice should have empty inventory");
+    } else {
+      uint16 aliceRemaining = InventorySlot.getAmount(alice, 0);
+      assertEq(aliceRemaining, amount - transferAmount, "Alice remaining amount mismatch");
+    }
+
+    uint16 bobAmount = InventorySlot.getAmount(bob, 0);
+    assertEq(bobAmount, transferAmount, "Bob received amount mismatch");
+
+    // Verify inventory integrity for both inventories
+    _verifyInventoryBitmapIntegrity(alice);
+    _verifyInventoryBitmapIntegrity(bob);
+  }
+
   // Fuzz test for entity transfers
   function testFuzzEntityTransfers(uint8 numEntities) public {
     // Bound input
@@ -423,6 +459,46 @@ contract InventoryUtilsTest is DustTest {
       transfers[0] = SlotTransfer({ slotFrom: i, slotTo: i, amount: 1 });
 
       TestInventoryUtils.transfer(alice, bob, transfers);
+    }
+
+    // Verify results
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 0, "Alice should have empty inventory");
+    assertEq(TestInventoryUtils.getOccupiedSlotCount(bob), numEntities, "Bob should have all entities");
+
+    // Verify inventory integrity
+    _verifyInventoryBitmapIntegrity(alice);
+    _verifyInventoryBitmapIntegrity(bob);
+
+    // Verify each entity is now in Bob's inventory and has correct mass
+    for (uint16 i = 0; i < numEntities; i++) {
+      TestInventoryUtils.findEntity(bob, entities[i]);
+      assertEq(Mass.getMass(entities[i]), masses[i], "Entity mass should match after transfer");
+    }
+  }
+
+  // Fuzz test for entity transfers with slot amounts
+  function testFuzzEntityAmountTransfers(uint8 numEntities) public {
+    // Bound input
+    vm.assume(numEntities > 0 && numEntities <= 10);
+
+    // Setup players
+    (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
+    (, EntityId bob) = createTestPlayer(vec3(1, 0, 0));
+
+    // Add entities to Alice
+    EntityId[] memory entities = new EntityId[](numEntities);
+    uint128[] memory masses = new uint128[](numEntities);
+    for (uint16 i = 0; i < numEntities; i++) {
+      entities[i] = TestInventoryUtils.addEntity(alice, ObjectTypes.IronPick);
+      masses[i] = Mass.getMass(entities[i]);
+    }
+
+    // Transfer all entities to Bob
+    for (uint16 i = 0; i < numEntities; i++) {
+      SlotAmount[] memory amounts = new SlotAmount[](1);
+      amounts[0] = SlotAmount({ slot: i, amount: 1 });
+
+      TestInventoryUtils.transfer(alice, bob, amounts);
     }
 
     // Verify results
