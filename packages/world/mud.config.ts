@@ -346,9 +346,16 @@ export default defineWorld({
     // ------------------------------------------------------------
     WorldStatus: {
       schema: {
-        inMaintenance: "bool",
+        isPaused: "bool",
       },
       key: [],
+    },
+    Moderators: {
+      schema: {
+        moderatorAddress: "address",
+        isModerator: "bool",
+      },
+      key: ["moderatorAddress"],
     },
     UniqueEntity: {
       schema: {

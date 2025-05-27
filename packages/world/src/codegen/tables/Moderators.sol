@@ -16,15 +16,15 @@ import { Schema } from "@latticexyz/store/src/Schema.sol";
 import { EncodedLengths, EncodedLengthsLib } from "@latticexyz/store/src/EncodedLengths.sol";
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
-library WorldStatus {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "WorldStatus", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x74620000000000000000000000000000576f726c645374617475730000000000);
+library Moderators {
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "Moderators", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x746200000000000000000000000000004d6f64657261746f7273000000000000);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0001010001000000000000000000000000000000000000000000000000000000);
 
-  // Hex-encoded key schema of ()
-  Schema constant _keySchema = Schema.wrap(0x0000000000000000000000000000000000000000000000000000000000000000);
+  // Hex-encoded key schema of (address)
+  Schema constant _keySchema = Schema.wrap(0x0014010061000000000000000000000000000000000000000000000000000000);
   // Hex-encoded value schema of (bool)
   Schema constant _valueSchema = Schema.wrap(0x0001010060000000000000000000000000000000000000000000000000000000);
 
@@ -33,7 +33,8 @@ library WorldStatus {
    * @return keyNames An array of strings with the names of key fields.
    */
   function getKeyNames() internal pure returns (string[] memory keyNames) {
-    keyNames = new string[](0);
+    keyNames = new string[](1);
+    keyNames[0] = "moderatorAddress";
   }
 
   /**
@@ -42,7 +43,7 @@ library WorldStatus {
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
     fieldNames = new string[](1);
-    fieldNames[0] = "isPaused";
+    fieldNames[0] = "isModerator";
   }
 
   /**
@@ -60,86 +61,95 @@ library WorldStatus {
   }
 
   /**
-   * @notice Get isPaused.
+   * @notice Get isModerator.
    */
-  function getIsPaused() internal view returns (bool isPaused) {
-    bytes32[] memory _keyTuple = new bytes32[](0);
+  function getIsModerator(address moderatorAddress) internal view returns (bool isModerator) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
   }
 
   /**
-   * @notice Get isPaused.
+   * @notice Get isModerator.
    */
-  function _getIsPaused() internal view returns (bool isPaused) {
-    bytes32[] memory _keyTuple = new bytes32[](0);
+  function _getIsModerator(address moderatorAddress) internal view returns (bool isModerator) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
   }
 
   /**
-   * @notice Get isPaused.
+   * @notice Get isModerator.
    */
-  function get() internal view returns (bool isPaused) {
-    bytes32[] memory _keyTuple = new bytes32[](0);
+  function get(address moderatorAddress) internal view returns (bool isModerator) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
   }
 
   /**
-   * @notice Get isPaused.
+   * @notice Get isModerator.
    */
-  function _get() internal view returns (bool isPaused) {
-    bytes32[] memory _keyTuple = new bytes32[](0);
+  function _get(address moderatorAddress) internal view returns (bool isModerator) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
   }
 
   /**
-   * @notice Set isPaused.
+   * @notice Set isModerator.
    */
-  function setIsPaused(bool isPaused) internal {
-    bytes32[] memory _keyTuple = new bytes32[](0);
+  function setIsModerator(address moderatorAddress, bool isModerator) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isPaused)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isModerator)), _fieldLayout);
   }
 
   /**
-   * @notice Set isPaused.
+   * @notice Set isModerator.
    */
-  function _setIsPaused(bool isPaused) internal {
-    bytes32[] memory _keyTuple = new bytes32[](0);
+  function _setIsModerator(address moderatorAddress, bool isModerator) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isPaused)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isModerator)), _fieldLayout);
   }
 
   /**
-   * @notice Set isPaused.
+   * @notice Set isModerator.
    */
-  function set(bool isPaused) internal {
-    bytes32[] memory _keyTuple = new bytes32[](0);
+  function set(address moderatorAddress, bool isModerator) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isPaused)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isModerator)), _fieldLayout);
   }
 
   /**
-   * @notice Set isPaused.
+   * @notice Set isModerator.
    */
-  function _set(bool isPaused) internal {
-    bytes32[] memory _keyTuple = new bytes32[](0);
+  function _set(address moderatorAddress, bool isModerator) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isPaused)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isModerator)), _fieldLayout);
   }
 
   /**
    * @notice Delete all data for given keys.
    */
-  function deleteRecord() internal {
-    bytes32[] memory _keyTuple = new bytes32[](0);
+  function deleteRecord(address moderatorAddress) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
     StoreSwitch.deleteRecord(_tableId, _keyTuple);
   }
@@ -147,8 +157,9 @@ library WorldStatus {
   /**
    * @notice Delete all data for given keys.
    */
-  function _deleteRecord() internal {
-    bytes32[] memory _keyTuple = new bytes32[](0);
+  function _deleteRecord(address moderatorAddress) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
     StoreCore.deleteRecord(_tableId, _keyTuple, _fieldLayout);
   }
@@ -157,8 +168,8 @@ library WorldStatus {
    * @notice Tightly pack static (fixed length) data using this table's schema.
    * @return The static data, encoded into a sequence of bytes.
    */
-  function encodeStatic(bool isPaused) internal pure returns (bytes memory) {
-    return abi.encodePacked(isPaused);
+  function encodeStatic(bool isModerator) internal pure returns (bytes memory) {
+    return abi.encodePacked(isModerator);
   }
 
   /**
@@ -167,8 +178,8 @@ library WorldStatus {
    * @return The lengths of the dynamic fields (packed into a single bytes32 value).
    * @return The dynamic (variable length) data, encoded into a sequence of bytes.
    */
-  function encode(bool isPaused) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
-    bytes memory _staticData = encodeStatic(isPaused);
+  function encode(bool isModerator) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
+    bytes memory _staticData = encodeStatic(isModerator);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -179,8 +190,9 @@ library WorldStatus {
   /**
    * @notice Encode keys as a bytes32 array using this table's field layout.
    */
-  function encodeKeyTuple() internal pure returns (bytes32[] memory) {
-    bytes32[] memory _keyTuple = new bytes32[](0);
+  function encodeKeyTuple(address moderatorAddress) internal pure returns (bytes32[] memory) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
     return _keyTuple;
   }
