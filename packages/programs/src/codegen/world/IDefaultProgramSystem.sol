@@ -19,5 +19,9 @@ interface IDefaultProgramSystem {
 
   function dfprograms_1__setMembership(EntityId caller, uint256 groupId, address member, bool allowed) external;
 
+  function dfprograms_1__setMembership(EntityId caller, EntityId target, EntityId member, bool allowed) external;
+
+  function dfprograms_1__setMembership(EntityId caller, EntityId target, address member, bool allowed) external;
+
   function dfprograms_1__setOwner(EntityId caller, uint256 groupId, EntityId newOwner) external;
 }

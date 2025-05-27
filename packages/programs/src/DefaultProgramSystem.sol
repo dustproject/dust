@@ -12,6 +12,8 @@ import { EntityAccessGroup } from "./codegen/tables/EntityAccessGroup.sol";
 
 contract DefaultProgramSystem is System {
   function newAccessGroup(EntityId owner) external returns (uint256) {
+    owner.validateCaller();
+
     uint256 newGroupId = AccessGroupCount.get() + 1;
 
     // Set the owner of the access group to the caller
@@ -40,8 +42,16 @@ contract DefaultProgramSystem is System {
   }
 
   function setMembership(EntityId caller, uint256 groupId, address member, bool allowed) external {
-    caller.validateCaller();
     setMembership(caller, groupId, EntityTypeLib.encodePlayer(member), allowed);
+  }
+
+  function setMembership(EntityId caller, EntityId target, EntityId member, bool allowed) public {
+    uint256 groupId = EntityAccessGroup.get(target);
+    setMembership(caller, groupId, member, allowed);
+  }
+
+  function setMembership(EntityId caller, EntityId target, address member, bool allowed) external {
+    setMembership(caller, target, EntityTypeLib.encodePlayer(member), allowed);
   }
 
   function setOwner(EntityId caller, uint256 groupId, EntityId newOwner) external {

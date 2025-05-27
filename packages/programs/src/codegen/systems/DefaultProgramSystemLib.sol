@@ -58,6 +58,18 @@ library DefaultProgramSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).setMembership(caller, groupId, member, allowed);
   }
 
+  function setMembership(DefaultProgramSystemType self, EntityId caller, EntityId target, EntityId member, bool allowed)
+    internal
+  {
+    return CallWrapper(self.toResourceId(), address(0)).setMembership(caller, target, member, allowed);
+  }
+
+  function setMembership(DefaultProgramSystemType self, EntityId caller, EntityId target, address member, bool allowed)
+    internal
+  {
+    return CallWrapper(self.toResourceId(), address(0)).setMembership(caller, target, member, allowed);
+  }
+
   function setOwner(DefaultProgramSystemType self, EntityId caller, uint256 groupId, EntityId newOwner) internal {
     return CallWrapper(self.toResourceId(), address(0)).setOwner(caller, groupId, newOwner);
   }
@@ -111,6 +123,32 @@ library DefaultProgramSystemLib {
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
+  function setMembership(CallWrapper memory self, EntityId caller, EntityId target, EntityId member, bool allowed)
+    internal
+  {
+    // if the contract calling this function is a root system, it should use `callAsRoot`
+    if (address(_world()) == address(this)) revert DefaultProgramSystemLib_CallingFromRootSystem();
+
+    bytes memory systemCall =
+      abi.encodeCall(_setMembership_EntityId_EntityId_EntityId_bool.setMembership, (caller, target, member, allowed));
+    self.from == address(0)
+      ? _world().call(self.systemId, systemCall)
+      : _world().callFrom(self.from, self.systemId, systemCall);
+  }
+
+  function setMembership(CallWrapper memory self, EntityId caller, EntityId target, address member, bool allowed)
+    internal
+  {
+    // if the contract calling this function is a root system, it should use `callAsRoot`
+    if (address(_world()) == address(this)) revert DefaultProgramSystemLib_CallingFromRootSystem();
+
+    bytes memory systemCall =
+      abi.encodeCall(_setMembership_EntityId_EntityId_address_bool.setMembership, (caller, target, member, allowed));
+    self.from == address(0)
+      ? _world().call(self.systemId, systemCall)
+      : _world().callFrom(self.from, self.systemId, systemCall);
+  }
+
   function setOwner(CallWrapper memory self, EntityId caller, uint256 groupId, EntityId newOwner) internal {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert DefaultProgramSystemLib_CallingFromRootSystem();
@@ -147,6 +185,22 @@ library DefaultProgramSystemLib {
   {
     bytes memory systemCall =
       abi.encodeCall(_setMembership_EntityId_uint256_address_bool.setMembership, (caller, groupId, member, allowed));
+    SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
+  }
+
+  function setMembership(RootCallWrapper memory self, EntityId caller, EntityId target, EntityId member, bool allowed)
+    internal
+  {
+    bytes memory systemCall =
+      abi.encodeCall(_setMembership_EntityId_EntityId_EntityId_bool.setMembership, (caller, target, member, allowed));
+    SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
+  }
+
+  function setMembership(RootCallWrapper memory self, EntityId caller, EntityId target, address member, bool allowed)
+    internal
+  {
+    bytes memory systemCall =
+      abi.encodeCall(_setMembership_EntityId_EntityId_address_bool.setMembership, (caller, target, member, allowed));
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
@@ -206,6 +260,14 @@ interface _setMembership_EntityId_uint256_EntityId_bool {
 
 interface _setMembership_EntityId_uint256_address_bool {
   function setMembership(EntityId caller, uint256 groupId, address member, bool allowed) external;
+}
+
+interface _setMembership_EntityId_EntityId_EntityId_bool {
+  function setMembership(EntityId caller, EntityId target, EntityId member, bool allowed) external;
+}
+
+interface _setMembership_EntityId_EntityId_address_bool {
+  function setMembership(EntityId caller, EntityId target, address member, bool allowed) external;
 }
 
 interface _setOwner_EntityId_uint256_EntityId {
