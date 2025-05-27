@@ -16,7 +16,6 @@ import { EntityPosition, ReverseMovablePosition } from "../utils/Vec3Storage.sol
 import { ObjectType } from "../ObjectType.sol";
 import { ObjectTypes } from "../ObjectType.sol";
 import { checkWorldStatus } from "../Utils.sol";
-import { updatePlayerEnergy } from "./EnergyUtils.sol";
 
 import { EntityUtils } from "./EntityUtils.sol";
 import { InventoryUtils } from "./InventoryUtils.sol";

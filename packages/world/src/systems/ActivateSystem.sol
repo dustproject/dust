@@ -32,6 +32,7 @@ contract ActivateSystem is System {
   }
 
   function activatePlayer(address playerAddress) public {
+    checkWorldStatus();
     EntityId player = EntityTypeLib.encodePlayer(playerAddress);
     ObjectType objectType = player._getObjectType();
     require(objectType == ObjectTypes.Player, "Entity is not player");
