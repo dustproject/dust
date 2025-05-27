@@ -29,7 +29,6 @@ import {
   decreaseFragmentDrainRate,
   transferEnergyToPool,
   updateMachineEnergy,
-  updatePlayerEnergy,
   updateSleepingPlayerEnergy
 } from "../utils/EnergyUtils.sol";
 
