@@ -13,11 +13,12 @@ import { Machine } from "@dust/world/src/codegen/tables/Machine.sol";
 
 import { IAttachProgramHook, IDetachProgramHook } from "@dust/world/src/ProgramInterfaces.sol";
 
-import { defaultProgramSystem } from "../codegen/systems/DefaultProgramSystemLib.sol";
 import { AccessGroupCount } from "../codegen/tables/AccessGroupCount.sol";
 import { AccessGroupMember } from "../codegen/tables/AccessGroupMember.sol";
 import { AccessGroupOwner } from "../codegen/tables/AccessGroupOwner.sol";
 import { EntityAccessGroup } from "../codegen/tables/EntityAccessGroup.sol";
+
+import { createAccessGroup } from "../createAccessGroup.sol";
 
 abstract contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, WorldConsumer {
   constructor(IBaseWorld _world) WorldConsumer(_world) { }
@@ -34,9 +35,7 @@ abstract contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, Worl
 
     // If the force field is not associated with an access group, create a new one
     if (groupId == 0) {
-      groupId = defaultProgramSystem.newAccessGroup(caller);
-      AccessGroupOwner.set(groupId, caller);
-      AccessGroupMember.set(groupId, caller, true);
+      groupId = createAccessGroup(caller);
     }
 
     EntityAccessGroup.set(target, groupId);

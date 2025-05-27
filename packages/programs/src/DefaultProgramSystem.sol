@@ -10,22 +10,12 @@ import { AccessGroupMember } from "./codegen/tables/AccessGroupMember.sol";
 import { AccessGroupOwner } from "./codegen/tables/AccessGroupOwner.sol";
 import { EntityAccessGroup } from "./codegen/tables/EntityAccessGroup.sol";
 
+import { createAccessGroup } from "./createAccessGroup.sol";
+
 contract DefaultProgramSystem is System {
   function newAccessGroup(EntityId owner) external returns (uint256) {
     owner.validateCaller();
-
-    uint256 newGroupId = AccessGroupCount.get() + 1;
-
-    // Set the owner of the access group to the caller
-    AccessGroupOwner.set(newGroupId, owner);
-
-    // Grant access to the caller
-    AccessGroupMember.set(newGroupId, owner, true);
-
-    // Increment the access group count
-    AccessGroupCount.set(newGroupId);
-
-    return newGroupId;
+    return createAccessGroup(owner);
   }
 
   function setAccessGroup(EntityId caller, EntityId target, uint256 groupId) external {
