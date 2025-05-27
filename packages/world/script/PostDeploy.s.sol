@@ -16,15 +16,6 @@ import { initRecipes } from "./initRecipes.sol";
 import { initTerrain } from "./initTerrain.sol";
 
 contract PostDeploy is Script {
-  function postDeploy(address worldAddress) internal {
-    RegisterSelectorHook registerSelectorHook = new RegisterSelectorHook();
-    IWorld(worldAddress).registerSystemHook(REGISTRATION_SYSTEM_ID, registerSelectorHook, BEFORE_CALL_SYSTEM);
-
-    initTerrain();
-    initObjects();
-    initRecipes();
-  }
-
   function run(address worldAddress) external {
     // Specify a store so that you can use tables directly in PostDeploy
     StoreSwitch.setStoreAddress(worldAddress);
@@ -51,5 +42,14 @@ contract PostDeploy is Script {
     postDeploy(worldAddress);
 
     vm.stopBroadcast();
+  }
+
+  function postDeploy(address worldAddress) internal {
+    RegisterSelectorHook registerSelectorHook = new RegisterSelectorHook();
+    IWorld(worldAddress).registerSystemHook(REGISTRATION_SYSTEM_ID, registerSelectorHook, BEFORE_CALL_SYSTEM);
+
+    initTerrain();
+    initObjects();
+    initRecipes();
   }
 }
