@@ -38,4 +38,11 @@ export default defineWorld({
       key: ["entityId"],
     },
   },
+  systems: {
+    DefaultProgramSystem: {
+      deploy: {
+        registerWorldFunctions: false,
+      },
+    },
+  },
 });
