@@ -2,7 +2,9 @@
 pragma solidity >=0.8.24;
 
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
+
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+import { PlayerBed } from "../codegen/tables/PlayerBed.sol";
 
 import { Fragment } from "../codegen/tables/Fragment.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
@@ -76,6 +78,8 @@ function updateMachineEnergy(EntityId machine) returns (EnergyData memory, uint1
 
 /// @dev Used within systems before performing an action
 function updatePlayerEnergy(EntityId player) returns (EnergyData memory) {
+  require(!PlayerBed._getBedEntityId(player).exists(), "Player is sleeping");
+
   (EnergyData memory energyData, uint128 energyDrained,) = getLatestEnergyData(player);
   Vec3 coord = player.getPosition();
 
@@ -181,7 +185,7 @@ function updateSleepingPlayerEnergy(EntityId player, EntityId bed, uint128 deple
 
   if (timeWithoutEnergy > 0) {
     uint128 totalEnergyDepleted = timeWithoutEnergy * PLAYER_ENERGY_DRAIN_RATE;
-    // No need to call updatePlayerEnergyLevel as drain rate is 0 if sleeping
+    // No need to call updatePlayerEnergy as drain rate is 0 if sleeping
     uint128 transferredToPool =
       playerEnergyData.energy < totalEnergyDepleted ? playerEnergyData.energy : totalEnergyDepleted;
 
@@ -189,7 +193,7 @@ function updateSleepingPlayerEnergy(EntityId player, EntityId bed, uint128 deple
     addEnergyToLocalPool(bedCoord, transferredToPool);
   }
 
-  // Set last updated so next time updatePlayerEnergyLevel is called it will drain from here
+  // Set last updated so next time updatePlayerEnergy is called it will drain from here
   playerEnergyData.lastUpdatedTime = uint128(block.timestamp);
   Energy._set(player, playerEnergyData);
   BedPlayer._setLastDepletedTime(bed, depletedTime);
