@@ -350,6 +350,13 @@ export default defineWorld({
       },
       key: [],
     },
+    Moderators: {
+      schema: {
+        moderatorAddress: "address",
+        isModerator: "bool",
+      },
+      key: ["moderatorAddress"],
+    },
     UniqueEntity: {
       schema: {
         value: "uint256",
