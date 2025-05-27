@@ -261,12 +261,18 @@ library InventoryUtils {
   }
 
   function removeEntityFromSlot(EntityId owner, uint16 slot) internal {
+    EntityId entity = moveEntityFromSlot(owner, slot);
+    Mass._deleteRecord(entity);
+  }
+
+  function moveEntityFromSlot(EntityId owner, uint16 slot) internal returns (EntityId) {
     EntityId entity = InventorySlot._getEntityId(owner, slot);
     require(entity.exists(), "Not an entity");
 
     clearBit(owner, slot);
     InventorySlot._deleteRecord(owner, slot);
-    Mass._deleteRecord(entity);
+    // Don't delete mass!
+    return entity;
   }
 
   function removeObject(EntityId owner, ObjectType objectType, uint16 amount) internal {
@@ -367,7 +373,8 @@ library InventoryUtils {
       if (sourceSlot.entityId.exists()) {
         // Entities are unique and always have amount=1
         require(amount == 1, "Entity transfer amount should be 1");
-        removeEntityFromSlot(from, slotFrom);
+        // Move entity without deleting mass
+        moveEntityFromSlot(from, slotFrom);
         addEntityToSlot(to, sourceSlot.entityId, slotTo);
       } else {
         // Regular objects can be transferred in partial amounts

@@ -411,8 +411,10 @@ contract InventoryUtilsTest is DustTest {
 
     // Add entities to Alice
     EntityId[] memory entities = new EntityId[](numEntities);
+    uint128[] memory masses = new uint128[](numEntities);
     for (uint16 i = 0; i < numEntities; i++) {
       entities[i] = TestInventoryUtils.addEntity(alice, ObjectTypes.IronPick);
+      masses[i] = Mass.getMass(entities[i]);
     }
 
     // Transfer all entities to Bob
@@ -431,9 +433,10 @@ contract InventoryUtilsTest is DustTest {
     _verifyInventoryBitmapIntegrity(alice);
     _verifyInventoryBitmapIntegrity(bob);
 
-    // Verify each entity is now in Bob's inventory
+    // Verify each entity is now in Bob's inventory and has correct mass
     for (uint16 i = 0; i < numEntities; i++) {
       TestInventoryUtils.findEntity(bob, entities[i]);
+      assertEq(Mass.getMass(entities[i]), masses[i], "Entity mass should match after transfer");
     }
   }
 
@@ -556,6 +559,17 @@ contract InventoryUtilsTest is DustTest {
 
         assertTrue(!slotData.objectType.isNull(), "Bit set but slot empty");
         assertTrue(slotData.amount > 0, "Slot amount is zero");
+
+        if (slotData.objectType.isTool()) {
+          assertTrue(slotData.amount == 1, "Tool slot should have amount 1");
+          assertTrue(slotData.entityId != EntityId.wrap(0), "Tool slot has zero entity id");
+        }
+
+        if (slotData.entityId != EntityId.wrap(0)) {
+          // if slot has an entity, it must have a valid mass
+          assertTrue(Mass.getMass(slotData.entityId) > 0, "Entity in slot has zero mass");
+        }
+
         ++actualCount;
       }
 
