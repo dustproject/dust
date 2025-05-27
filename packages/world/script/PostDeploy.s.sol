@@ -16,6 +16,15 @@ import { initRecipes } from "./initRecipes.sol";
 import { initTerrain } from "./initTerrain.sol";
 
 contract PostDeploy is Script {
+  function postDeploy(address worldAddress) internal {
+    RegisterSelectorHook registerSelectorHook = new RegisterSelectorHook();
+    IWorld(worldAddress).registerSystemHook(REGISTRATION_SYSTEM_ID, registerSelectorHook, BEFORE_CALL_SYSTEM);
+
+    initTerrain();
+    initObjects();
+    initRecipes();
+  }
+
   function run(address worldAddress) external {
     // Specify a store so that you can use tables directly in PostDeploy
     StoreSwitch.setStoreAddress(worldAddress);
@@ -26,12 +35,20 @@ contract PostDeploy is Script {
     // Start broadcasting transactions from the deployer account
     vm.startBroadcast(deployerPrivateKey);
 
-    RegisterSelectorHook registerSelectorHook = new RegisterSelectorHook();
-    IWorld(worldAddress).registerSystemHook(REGISTRATION_SYSTEM_ID, registerSelectorHook, BEFORE_CALL_SYSTEM);
+    postDeploy(worldAddress);
 
-    initTerrain();
-    initObjects();
-    initRecipes();
+    vm.stopBroadcast();
+  }
+
+  // TODO: remove this once MUD supports PostDeploy with KMS: https://github.com/latticexyz/mud/issues/3716
+  function run(address worldAddress, address deployerAddress) external {
+    // Specify a store so that you can use tables directly in PostDeploy
+    StoreSwitch.setStoreAddress(worldAddress);
+
+    // Start broadcasting transactions from the deployer account
+    vm.startBroadcast(deployerAddress);
+
+    postDeploy(worldAddress);
 
     vm.stopBroadcast();
   }
