@@ -43,9 +43,9 @@ contract TransferSystem is System {
       target = (callerIsFrom ? to : from);
     }
 
-    if (target.exists()) {
+    if (target._exists()) {
       caller.requireConnected(target);
-      ObjectType targetType = target.getObjectType();
+      ObjectType targetType = target._getObjectType();
       require(targetType != ObjectTypes.Player, "Cannot access another player's inventory");
       require(!targetType.isPassThrough(), "Cannot transfer directly to pass-through object");
     }
@@ -57,11 +57,11 @@ contract TransferSystem is System {
     (SlotData[] memory deposits, SlotData[] memory withdrawals) =
       target == to ? (fromSlotData, toSlotData) : (toSlotData, fromSlotData);
 
-    if (target.exists()) {
+    if (target._exists()) {
       bytes memory onTransfer =
         abi.encodeCall(ITransferHook.onTransfer, (caller, target, deposits, withdrawals, extraData));
 
-      target.getProgram().callOrRevert(onTransfer);
+      target._getProgram().callOrRevert(onTransfer);
     }
 
     notify(caller, TransferNotification({ transferEntityId: target, deposits: deposits, withdrawals: withdrawals }));

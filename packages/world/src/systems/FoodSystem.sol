@@ -33,7 +33,7 @@ contract FoodSystem is System {
 
     // Transfer overflow energy to local pool
     if (newEnergy > MAX_PLAYER_ENERGY) {
-      addEnergyToLocalPool(caller.getPosition(), newEnergy - MAX_PLAYER_ENERGY);
+      addEnergyToLocalPool(caller._getPosition(), newEnergy - MAX_PLAYER_ENERGY);
       newEnergy = MAX_PLAYER_ENERGY;
     }
 

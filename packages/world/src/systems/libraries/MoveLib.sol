@@ -113,14 +113,14 @@ library MoveLib {
       if (!newObjectType.isPassThrough()) {
         revert NonPassableBlock(newCoord.x(), newCoord.y(), newCoord.z(), newObjectType);
       }
-      require(!EntityUtils.getMovableEntityAt(newCoord).exists(), "Cannot move through a player");
+      require(!EntityUtils.getMovableEntityAt(newCoord)._exists(), "Cannot move through a player");
     }
   }
 
   function _gravityApplies(Vec3 playerCoord) internal view returns (bool) {
     Vec3 belowCoord = playerCoord - vec3(0, 1, 0);
     bool onSolidBlock = !EntityUtils.safeGetObjectTypeAt(belowCoord).isPassThrough()
-      || EntityUtils.getMovableEntityAt(belowCoord).exists();
+      || EntityUtils.getMovableEntityAt(belowCoord)._exists();
     return !onSolidBlock && EntityUtils.getObjectTypeAt(playerCoord) != ObjectTypes.Water;
   }
 
@@ -237,7 +237,7 @@ library MoveLib {
   function _handleAbove(EntityId player, Vec3 playerCoord) private {
     Vec3 aboveCoord = playerCoord + vec3(0, 2, 0);
     EntityId above = EntityUtils.getMovableEntityAt(aboveCoord);
-    if (!above.exists()) {
+    if (!above._exists()) {
       return;
     }
 

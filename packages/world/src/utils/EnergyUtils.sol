@@ -56,14 +56,14 @@ function getLatestEnergyData(EntityId entityId) view returns (EnergyData memory,
 }
 
 function updateMachineEnergy(EntityId machine) returns (EnergyData memory, uint128) {
-  if (!machine.exists()) {
+  if (!machine._exists()) {
     return (EnergyData(0, 0, 0), 0);
   }
 
   (EnergyData memory energyData, uint128 energyDrained, uint128 depletedTime) = getLatestEnergyData(machine);
 
   if (energyDrained > 0) {
-    addEnergyToLocalPool(machine.getPosition(), energyDrained);
+    addEnergyToLocalPool(machine._getPosition(), energyDrained);
   }
 
   uint128 currentDepletedTime = Machine._getDepletedTime(machine);
@@ -81,7 +81,7 @@ function updatePlayerEnergy(EntityId player) returns (EnergyData memory) {
   require(!PlayerBed._getBedEntityId(player).exists(), "Player is sleeping");
 
   (EnergyData memory energyData, uint128 energyDrained,) = getLatestEnergyData(player);
-  Vec3 coord = player.getPosition();
+  Vec3 coord = player._getPosition();
 
   if (energyDrained > 0) {
     addEnergyToLocalPool(coord, energyDrained);
@@ -122,7 +122,7 @@ function decreasePlayerEnergy(EntityId player, Vec3 playerCoord, uint128 amount)
 
 function increaseFragmentDrainRate(EntityId forceField, EntityId fragment, uint128 amount) returns (uint128) {
   uint128 depletedTime = 0;
-  if (forceField.exists()) {
+  if (forceField._exists()) {
     (EnergyData memory machineData, uint128 forceFieldDepletedTime) = updateMachineEnergy(forceField);
     Energy._setDrainRate(forceField, machineData.drainRate + amount);
     depletedTime = forceFieldDepletedTime;
@@ -133,7 +133,7 @@ function increaseFragmentDrainRate(EntityId forceField, EntityId fragment, uint1
 
 function decreaseFragmentDrainRate(EntityId forceField, EntityId fragment, uint128 amount) returns (uint128) {
   uint128 depletedTime = 0;
-  if (forceField.exists()) {
+  if (forceField._exists()) {
     (EnergyData memory machineData, uint128 forceFieldDepletedTime) = updateMachineEnergy(forceField);
     Energy._setDrainRate(forceField, machineData.drainRate - amount);
     depletedTime = forceFieldDepletedTime;
@@ -150,8 +150,8 @@ function addEnergyToLocalPool(Vec3 coord, uint128 numToAdd) returns (uint128) {
 }
 
 function transferEnergyToPool(EntityId entityId, uint128 amount) returns (uint128, uint128) {
-  Vec3 coord = entityId.getPosition();
-  ObjectType objectType = entityId.getObjectType();
+  Vec3 coord = entityId._getPosition();
+  ObjectType objectType = entityId._getObjectType();
 
   uint128 newEntityEnergy;
   if (objectType == ObjectTypes.Player) {

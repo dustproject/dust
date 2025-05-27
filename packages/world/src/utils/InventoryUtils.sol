@@ -92,7 +92,7 @@ library InventoryUtils {
   }
 
   function findEmptySlot(EntityId owner) internal view returns (uint16) {
-    uint16 maxSlots = owner.getObjectType().getMaxInventorySlots();
+    uint16 maxSlots = owner._getObjectType().getMaxInventorySlots();
 
     uint256 length = InventoryBitmap._length(owner);
 
@@ -116,11 +116,11 @@ library InventoryUtils {
 
   function getToolData(EntityId owner, uint16 slot) internal view returns (ToolData memory) {
     EntityId tool = InventorySlot._getEntityId(owner, slot);
-    if (!tool.exists()) {
+    if (!tool._exists()) {
       return ToolData(owner, tool, ObjectTypes.Null, slot, 0);
     }
 
-    ObjectType toolType = tool.getObjectType();
+    ObjectType toolType = tool._getObjectType();
     require(toolType.isTool(), "Inventory item is not a tool");
 
     return ToolData(owner, tool, toolType, slot, Mass._getMass(tool));
@@ -150,7 +150,7 @@ library InventoryUtils {
   }
 
   function reduceMass(ToolData memory toolData, uint128 massReduction) internal {
-    if (!toolData.tool.exists()) {
+    if (!toolData.tool._exists()) {
       return;
     }
 
@@ -159,7 +159,7 @@ library InventoryUtils {
     if (toolData.massLeft <= massReduction) {
       removeEntityFromSlot(toolData.owner, toolData.slot);
       OreLib.burnOres(toolData.toolType);
-      burnToolEnergy(toolData.toolType, toolData.owner.getPosition());
+      burnToolEnergy(toolData.toolType, toolData.owner._getPosition());
     } else {
       Mass._setMass(toolData.tool, toolData.massLeft - massReduction);
     }
@@ -168,7 +168,7 @@ library InventoryUtils {
   /* Inventory operations */
 
   function addEntity(EntityId owner, EntityId entityId) internal returns (uint16 slot) {
-    ObjectType objectType = entityId.getObjectType();
+    ObjectType objectType = entityId._getObjectType();
     require(!objectType.isNull(), "Entity must exist");
 
     slot = findEmptySlot(owner);
@@ -177,11 +177,11 @@ library InventoryUtils {
   }
 
   function addEntityToSlot(EntityId owner, EntityId entityId, uint16 slot) internal {
-    ObjectType objectType = entityId.getObjectType();
+    ObjectType objectType = entityId._getObjectType();
     require(!objectType.isNull(), "Entity must exist");
 
     // Check slot is within bounds for this entity type
-    uint16 maxSlots = owner.getObjectType().getMaxInventorySlots();
+    uint16 maxSlots = owner._getObjectType().getMaxInventorySlots();
     require(slot < maxSlots, "Slot exceeds entity's max inventory");
 
     InventorySlotData memory slotData = InventorySlot._get(owner, slot);
@@ -236,7 +236,7 @@ library InventoryUtils {
     require(stackable > 0, "Object type cannot be added to inventory");
 
     // Check slot is within bounds for this entity type
-    uint16 maxSlots = owner.getObjectType().getMaxInventorySlots();
+    uint16 maxSlots = owner._getObjectType().getMaxInventorySlots();
     require(maxSlots > 0, "Invalid slot");
     require(slot < maxSlots, "Slot exceeds entity's max inventory");
 
@@ -267,7 +267,7 @@ library InventoryUtils {
 
   function moveEntityFromSlot(EntityId owner, uint16 slot) internal returns (EntityId) {
     EntityId entity = InventorySlot._getEntityId(owner, slot);
-    require(entity.exists(), "Not an entity");
+    require(entity._exists(), "Not an entity");
 
     clearBit(owner, slot);
     InventorySlot._deleteRecord(owner, slot);
@@ -370,7 +370,7 @@ library InventoryUtils {
         toSlotData[toSlotDataLength++] = SlotData(sourceSlot.entityId, sourceSlot.objectType, amount);
       }
 
-      if (sourceSlot.entityId.exists()) {
+      if (sourceSlot.entityId._exists()) {
         // Entities are unique and always have amount=1
         require(amount == 1, "Entity transfer amount should be 1");
         // Move entity without deleting mass
@@ -409,7 +409,7 @@ library InventoryUtils {
       require(!sourceSlot.objectType.isNull(), "Empty slot");
       fromSlotData[i] = SlotData(sourceSlot.entityId, sourceSlot.objectType, amount);
 
-      if (sourceSlot.entityId.exists()) {
+      if (sourceSlot.entityId._exists()) {
         // Entities are unique and always have amount=1
         require(amount == 1, "Entity transfer amount should be 1");
         moveEntityFromSlot(from, slotFrom);
@@ -437,7 +437,7 @@ library InventoryUtils {
         uint16 slot = uint16(i * SLOTS_PER_WORD + bitIndex);
         InventorySlotData memory slotData = InventorySlot._get(from, slot);
 
-        if (slotData.entityId.exists()) {
+        if (slotData.entityId._exists()) {
           addEntity(to, slotData.entityId);
         } else {
           addObject(to, slotData.objectType, slotData.amount);

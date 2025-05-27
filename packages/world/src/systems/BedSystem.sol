@@ -38,15 +38,15 @@ contract BedSystem is System {
 
     (Vec3 callerCoord,) = caller.requireConnected(bed);
 
-    require(bed.getObjectType() == ObjectTypes.Bed, "Not a bed");
+    require(bed._getObjectType() == ObjectTypes.Bed, "Not a bed");
 
     bed = bed.baseEntityId();
-    Vec3 bedCoord = bed.getPosition();
+    Vec3 bedCoord = bed._getPosition();
 
-    require(!BedPlayer._getPlayerEntityId(bed).exists(), "Bed full");
+    require(!BedPlayer._getPlayerEntityId(bed)._exists(), "Bed full");
 
     (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
-    require(forceField.exists(), "Bed is not inside a forcefield");
+    require(forceField._exists(), "Bed is not inside a forcefield");
 
     uint128 depletedTime = increaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
     PlayerBed._setBedEntityId(caller, bed);
@@ -55,7 +55,7 @@ contract BedSystem is System {
     PlayerUtils.removePlayerFromGrid(caller, callerCoord);
 
     bytes memory onSleep = abi.encodeCall(ISleepHook.onSleep, (caller, bed, extraData));
-    bed.getProgram().callOrRevert(onSleep);
+    bed._getProgram().callOrRevert(onSleep);
 
     notify(caller, SleepNotification({ bed: bed, bedCoord: bedCoord }));
   }
@@ -64,12 +64,12 @@ contract BedSystem is System {
   function wakeup(EntityId caller, Vec3 spawnCoord, bytes calldata extraData) public {
     checkWorldStatus();
 
-    caller.requireCallerAllowed(_msgSender());
+    caller._validateCaller();
 
     EntityId bed = PlayerBed._getBedEntityId(caller);
-    require(bed.exists(), "Player is not sleeping");
+    require(bed._exists(), "Player is not sleeping");
 
-    Vec3 bedCoord = bed.getPosition();
+    Vec3 bedCoord = bed._getPosition();
     require(bedCoord.inSurroundingCube(spawnCoord, MAX_RESPAWN_HALF_WIDTH), "Bed is too far away");
 
     require(!MoveLib._gravityApplies(spawnCoord), "Cannot spawn player here as gravity applies");
@@ -85,7 +85,7 @@ contract BedSystem is System {
     PlayerUtils.addPlayerToGrid(caller, spawnCoord);
 
     bytes memory onWakeup = abi.encodeCall(IWakeupHook.onWakeup, (caller, bed, extraData));
-    bed.getProgram().callOrRevert(onWakeup);
+    bed._getProgram().callOrRevert(onWakeup);
 
     notify(caller, WakeupNotification({ bed: bed, bedCoord: bedCoord }));
   }
@@ -94,9 +94,9 @@ contract BedSystem is System {
     checkWorldStatus();
 
     EntityId bed = PlayerBed._getBedEntityId(player);
-    require(bed.exists(), "Player is not in a bed");
+    require(bed._exists(), "Player is not in a bed");
 
-    Vec3 bedCoord = bed.getPosition();
+    Vec3 bedCoord = bed._getPosition();
 
     require(bedCoord.inSurroundingCube(dropCoord, MAX_RESPAWN_HALF_WIDTH), "Drop location is too far from bed");
 

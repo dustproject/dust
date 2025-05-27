@@ -26,11 +26,19 @@ library ProgramIdLib {
     return ResourceId.wrap(self.unwrap());
   }
 
-  function getAddress(ProgramId self) internal view returns (address) {
+  function _getAddress(ProgramId self) internal view returns (address) {
     if (!self.exists()) {
       return address(0);
     }
     (address programAddress,) = Systems._get(self.toResourceId());
+    return programAddress;
+  }
+
+  function getAddress(ProgramId self) internal view returns (address) {
+    if (!self.exists()) {
+      return address(0);
+    }
+    (address programAddress,) = Systems.get(self.toResourceId());
     return programAddress;
   }
 

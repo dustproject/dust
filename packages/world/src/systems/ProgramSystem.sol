@@ -31,7 +31,7 @@ contract ProgramSystem is System {
   function attachProgram(EntityId caller, EntityId target, ProgramId program, bytes calldata extraData) public {
     caller.activate();
 
-    ObjectType targetType = target.getObjectType();
+    ObjectType targetType = target._getObjectType();
     require(targetType.isSmartEntity(), "Can only attach programs to smart entities");
 
     Vec3 validatorCoord;
@@ -44,7 +44,7 @@ contract ProgramSystem is System {
 
     target = target.baseEntityId();
 
-    require(!target.getProgram().exists(), "Existing program must be detached");
+    require(!target._getProgram().exists(), "Existing program must be detached");
 
     (address programAddress, bool publicAccess) = Systems._get(program.toResourceId());
     require(programAddress != address(0), "Program does not exist");
@@ -69,7 +69,7 @@ contract ProgramSystem is System {
     caller.activate();
 
     Vec3 forceFieldCoord;
-    if (target.getObjectType() == ObjectTypes.Fragment) {
+    if (target._getObjectType() == ObjectTypes.Fragment) {
       (, Vec3 fragmentCoord) = caller.requireAdjacentToFragment(target);
       forceFieldCoord = fragmentCoord.fromFragmentCoord();
     } else {
@@ -78,7 +78,7 @@ contract ProgramSystem is System {
 
     target = target.baseEntityId();
 
-    ProgramId program = target.getProgram();
+    ProgramId program = target._getProgram();
     require(program.exists(), "No program attached");
 
     bytes memory onDetachProgram = abi.encodeCall(IDetachProgramHook.onDetachProgram, (caller, target, extraData));
@@ -100,7 +100,7 @@ contract ProgramSystem is System {
   function _getValidatorProgram(Vec3 coord) internal returns (EntityId, ProgramId) {
     // Check if the forcefield (or fragment) allow the new program
     (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
-    if (!forceField.exists()) {
+    if (!forceField._exists()) {
       return (EntityId.wrap(0), ProgramId.wrap(0));
     }
 
@@ -111,12 +111,12 @@ contract ProgramSystem is System {
     }
 
     // Try to get program from fragment first, then from force field if needed
-    ProgramId program = fragment.getProgram();
+    ProgramId program = fragment._getProgram();
     EntityId validator = fragment;
 
     // If fragment has no program, try the force field
     if (!program.exists()) {
-      program = forceField.getProgram();
+      program = forceField._getProgram();
       validator = forceField;
 
       // If neither has a program, we're done

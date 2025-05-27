@@ -304,8 +304,8 @@ contract MineTest is DustTest {
     Vec3 topCoord = mineCoord + vec3(0, 1, 0);
     (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(mineCoord);
     (EntityId topEntityId,) = TestEntityUtils.getBlockAt(topCoord);
-    assertTrue(TestEntityUtils.exists(mineEntityId), "Mine entity does not exist");
-    assertTrue(TestEntityUtils.exists(topEntityId), "Top entity does not exist");
+    assertTrue(mineEntityId.exists(), "Mine entity does not exist");
+    assertTrue(topEntityId.exists(), "Top entity does not exist");
     assertEq(EntityObjectType.get(mineEntityId), mineObjectType, "Mine entity is not mine object type");
     assertEq(EntityObjectType.get(topEntityId), mineObjectType, "Top entity is not air");
     assertEq(Mass.getMass(mineEntityId), ObjectPhysics.getMass(mineObjectType), "Mine entity mass is not correct");
@@ -336,8 +336,8 @@ contract MineTest is DustTest {
 
     (mineEntityId,) = TestEntityUtils.getBlockAt(mineCoord);
     (topEntityId,) = TestEntityUtils.getBlockAt(topCoord);
-    assertTrue(TestEntityUtils.exists(mineEntityId), "Mine entity does not exist");
-    assertTrue(TestEntityUtils.exists(topEntityId), "Top entity does not exist");
+    assertTrue(mineEntityId.exists(), "Mine entity does not exist");
+    assertTrue(topEntityId.exists(), "Top entity does not exist");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
     vm.prank(alice);
@@ -359,8 +359,8 @@ contract MineTest is DustTest {
     Vec3 relativeCoord = mineCoord - vec3(1, 0, 0);
     (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(mineCoord);
     (EntityId relativeEntityId,) = TestEntityUtils.getBlockAt(relativeCoord);
-    assertTrue(TestEntityUtils.exists(mineEntityId), "Mine entity does not exist");
-    assertTrue(TestEntityUtils.exists(relativeEntityId), "Relative entity does not exist");
+    assertTrue(mineEntityId.exists(), "Mine entity does not exist");
+    assertTrue(relativeEntityId.exists(), "Relative entity does not exist");
     assertEq(EntityObjectType.get(mineEntityId), mineObjectType, "Mine entity is not mine object type");
     assertEq(EntityObjectType.get(relativeEntityId), mineObjectType, "Relative entity is not air");
     assertEq(Mass.getMass(mineEntityId), ObjectPhysics.getMass(mineObjectType), "Mine entity mass is not correct");
@@ -390,8 +390,8 @@ contract MineTest is DustTest {
 
     (mineEntityId,) = TestEntityUtils.getBlockAt(mineCoord);
     (relativeEntityId,) = TestEntityUtils.getBlockAt(relativeCoord);
-    assertTrue(TestEntityUtils.exists(mineEntityId), "Mine entity does not exist");
-    assertTrue(TestEntityUtils.exists(relativeEntityId), "Top entity does not exist");
+    assertTrue(mineEntityId.exists(), "Mine entity does not exist");
+    assertTrue(relativeEntityId.exists(), "Top entity does not exist");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
     vm.prank(alice);

@@ -60,7 +60,7 @@ contract SpawnTest is DustTest {
     startGasReport("randomSpawn");
     EntityId playerEntityId = world.randomSpawn(blockNumber, spawnCoord.y());
     endGasReport();
-    assertTrue(TestEntityUtils.exists(playerEntityId));
+    assertTrue(playerEntityId.exists());
 
     assertEq(
       Energy.getEnergy(playerEntityId), MAX_PLAYER_ENERGY * 3 / 10, "Player energy is not correct after random spawn"
@@ -118,7 +118,7 @@ contract SpawnTest is DustTest {
     startGasReport("spawn with spawn tile");
     EntityId playerEntityId = world.spawn(spawnTileEntityId, spawnCoord, 1, "");
     endGasReport();
-    assertTrue(TestEntityUtils.exists(playerEntityId));
+    assertTrue(playerEntityId.exists());
   }
 
   function testSpawnFailsIfNoSpawnTile() public {
@@ -313,7 +313,7 @@ contract SpawnTest is DustTest {
     // Create original player
     vm.prank(alice);
     EntityId playerEntityId = world.spawn(spawnTileEntityId, spawnCoord, 1, "");
-    assertTrue(TestEntityUtils.exists(playerEntityId));
+    assertTrue(playerEntityId.exists());
 
     // Kill player by depleting energy
     vm.warp(vm.getBlockTimestamp() + 1);
@@ -346,7 +346,7 @@ contract SpawnTest is DustTest {
     // First player spawns
     vm.prank(alice);
     EntityId aliceEntityId = world.spawn(spawnTileEntityId, spawnCoord, 1, "");
-    assertTrue(TestEntityUtils.exists(aliceEntityId));
+    assertTrue(aliceEntityId.exists());
 
     // Second player tries to spawn at the same coordinates
     vm.prank(bob);

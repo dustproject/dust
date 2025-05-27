@@ -18,7 +18,7 @@ import {
   PLAYER_ENERGY_DRAIN_RATE,
   REGION_SIZE
 } from "../src/Constants.sol";
-import { EntityId, EntityIdLib } from "../src/EntityId.sol";
+import { EntityId, EntityTypeLib } from "../src/EntityId.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
@@ -86,7 +86,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
   // Create a valid player that can perform actions
   function createTestPlayer(Vec3 coord) internal returns (address, EntityId) {
     address playerAddress = vm.randomAddress();
-    EntityId player = EntityIdLib.encodePlayer(playerAddress);
+    EntityId player = EntityTypeLib.encodePlayer(playerAddress);
 
     if (!TerrainLib._isChunkExplored(coord.toChunkCoord(), worldAddress)) {
       setupAirChunk(coord);
@@ -245,7 +245,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
       setupAirChunk(coord);
     }
 
-    EntityId entityId = EntityIdLib.encodeBlock(coord);
+    EntityId entityId = EntityTypeLib.encodeBlock(coord);
     EntityOrientation.set(entityId, orientation);
 
     EntityObjectType.set(entityId, objectType);
@@ -256,7 +256,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];
-      EntityId relativeEntityId = EntityIdLib.encodeBlock(relativeCoord);
+      EntityId relativeEntityId = EntityTypeLib.encodeBlock(relativeCoord);
       EntityObjectType.set(relativeEntityId, objectType);
       BaseEntity.set(relativeEntityId, entityId);
     }

@@ -9,7 +9,7 @@ import { Vec3, vec3 } from "../../Vec3.sol";
 
 import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
 
-import { EntityId, EntityIdLib } from "../../EntityId.sol";
+import { EntityId, EntityTypeLib } from "../../EntityId.sol";
 import { ObjectType } from "../../ObjectType.sol";
 
 import { ObjectTypes } from "../../ObjectType.sol";
@@ -45,10 +45,10 @@ contract AdminSystem is System {
   }
 
   function adminTeleportPlayer(address playerAddress, Vec3 finalCoord) public onlyAdmin {
-    EntityId player = EntityIdLib.encodePlayer(playerAddress);
+    EntityId player = EntityTypeLib.encodePlayer(playerAddress);
     player.activate();
 
-    Vec3[] memory playerCoords = ObjectTypes.Player.getRelativeCoords(player.getPosition());
+    Vec3[] memory playerCoords = ObjectTypes.Player.getRelativeCoords(player._getPosition());
     EntityId[] memory players = _getPlayerEntityIds(player, playerCoords);
     require(!MoveLib._gravityApplies(finalCoord), "Cannot teleport here as gravity applies");
 
@@ -62,7 +62,7 @@ contract AdminSystem is System {
 
       ObjectType newObjectType = EntityUtils.safeGetObjectTypeAt(newCoord);
       require(newObjectType.isPassThrough(), "Cannot teleport to a non-passable block");
-      require(!EntityUtils.getMovableEntityAt(newCoord).exists(), "Cannot teleport where a player already exists");
+      require(!EntityUtils.getMovableEntityAt(newCoord)._exists(), "Cannot teleport where a player already exists");
 
       EntityUtils.setMovableEntityAt(newCoord, players[i]);
     }

@@ -82,7 +82,7 @@ contract BuildSystem is System {
     ObjectType buildObjectType = InventorySlot._getObjectType(caller, slot);
     require(!buildObjectType.isPassThrough(), "Cannot jump build on a pass-through block");
 
-    Vec3 coord = caller.getPosition();
+    Vec3 coord = caller._getPosition();
 
     Vec3[] memory moveCoords = new Vec3[](1);
     moveCoords[0] = coord + vec3(0, 1, 0);
@@ -117,7 +117,7 @@ library BuildLib {
     require(terrainObjectType == ObjectTypes.Air, "Cannot build on a non-air block");
     require(InventoryUtils.isEmpty(terrain), "Cannot build where there are dropped objects");
     if (!buildType.isPassThrough()) {
-      require(!EntityUtils.getMovableEntityAt(coord).exists(), "Cannot build on a movable entity");
+      require(!EntityUtils.getMovableEntityAt(coord)._exists(), "Cannot build on a movable entity");
     }
 
     EntityObjectType._set(terrain, buildType);
@@ -165,17 +165,17 @@ library BuildLib {
 
       // If placing a forcefield, there should be no active forcefield at coord
       if (buildType == ObjectTypes.ForceField) {
-        require(!forceField.exists(), "Force field overlaps with another force field");
+        require(!forceField._exists(), "Force field overlaps with another force field");
         ForceFieldUtils.setupForceField(base, coord);
       }
 
-      if (forceField.exists()) {
+      if (forceField._exists()) {
         (EnergyData memory machineData,) = updateMachineEnergy(forceField);
         if (machineData.energy > 0) {
           // We know fragment is active because its forcefield exists, so we can use its program
-          ProgramId program = fragment.getProgram();
+          ProgramId program = fragment._getProgram();
           if (!program.exists()) {
-            program = forceField.getProgram();
+            program = forceField._getProgram();
           }
 
           bytes memory onBuild = abi.encodeCall(IBuildHook.onBuild, (caller, forceField, buildType, coord, extraData));

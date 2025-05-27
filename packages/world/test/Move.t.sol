@@ -14,7 +14,7 @@ import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 
 import { DustTest } from "./DustTest.sol";
 
-import { EntityId, EntityIdLib } from "../src/EntityId.sol";
+import { EntityId, EntityTypeLib } from "../src/EntityId.sol";
 import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
 import {
@@ -39,7 +39,7 @@ import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract MoveTest is DustTest {
   function _testMoveMultipleBlocks(address player, uint8 numBlocksToMove, bool overTerrain) internal {
-    EntityId playerEntityId = EntityIdLib.encodePlayer(player);
+    EntityId playerEntityId = EntityTypeLib.encodePlayer(player);
     Vec3 startingCoord = EntityPosition.get(playerEntityId);
     Vec3[] memory newCoords = new Vec3[](numBlocksToMove);
     for (uint32 i = 0; i < numBlocksToMove; i++) {

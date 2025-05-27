@@ -7,7 +7,7 @@ import { console } from "forge-std/console.sol";
 
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
 
-import { EntityId, EntityIdLib } from "../../src/EntityId.sol";
+import { EntityId, EntityTypeLib } from "../../src/EntityId.sol";
 import { ObjectTypes } from "../../src/ObjectType.sol";
 
 import { ensureAdminSystem } from "./ensureAdminSystem.sol";
@@ -27,7 +27,7 @@ contract GiveScript is Script {
 
     ensureAdminSystem(world);
 
-    EntityId playerEntityId = EntityIdLib.encodePlayer(playerAddress);
+    EntityId playerEntityId = EntityTypeLib.encodePlayer(playerAddress);
     world.adminAddToInventory(playerEntityId, ObjectTypes.OakLog, 99);
     world.adminAddToInventory(playerEntityId, ObjectTypes.Chest, 1);
     world.adminAddToInventory(playerEntityId, ObjectTypes.ForceField, 3);

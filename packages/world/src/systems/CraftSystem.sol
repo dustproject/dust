@@ -29,7 +29,7 @@ contract CraftSystem is System {
     require(recipe.inputTypes.length > 0, "Recipe not found");
 
     if (!recipe.stationTypeId.isNull()) {
-      require(station.getObjectType() == recipe.stationTypeId, "Invalid station");
+      require(station._getObjectType() == recipe.stationTypeId, "Invalid station");
       caller.requireConnected(station);
     }
 

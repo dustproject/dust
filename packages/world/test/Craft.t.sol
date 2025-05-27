@@ -264,7 +264,7 @@ contract CraftTest is DustTest {
     uint16[] memory toolSlots = TestInventoryUtils.getSlotsWithType(aliceEntityId, outputTypes[0]);
     assertEq(toolSlots.length, 1, "should have 1 tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
-    assertTrue(TestEntityUtils.exists(toolEntityId), "tool entity id should exist");
+    assertTrue(toolEntityId.exists(), "tool entity id should exist");
     ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
 
@@ -303,7 +303,7 @@ contract CraftTest is DustTest {
     uint16[] memory toolSlots = TestInventoryUtils.getSlotsWithType(aliceEntityId, outputTypes[0]);
     assertEq(toolSlots.length, 1, "should have 1 of the crafted tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
-    assertTrue(TestEntityUtils.exists(toolEntityId), "tool entity id should exist");
+    assertTrue(toolEntityId.exists(), "tool entity id should exist");
     ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
@@ -341,7 +341,7 @@ contract CraftTest is DustTest {
     uint16[] memory toolSlots = TestInventoryUtils.getSlotsWithType(aliceEntityId, outputTypes[0]);
     assertEq(toolSlots.length, 1, "should have 1 of the crafted tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
-    assertTrue(TestEntityUtils.exists(toolEntityId), "tool entity id should exist");
+    assertTrue(toolEntityId.exists(), "tool entity id should exist");
     ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
