@@ -346,7 +346,7 @@ export default defineWorld({
     // ------------------------------------------------------------
     WorldStatus: {
       schema: {
-        inMaintenance: "bool",
+        isPaused: "bool",
       },
       key: [],
     },

@@ -23,11 +23,11 @@ contract ModeratorSystem is System {
   }
 
   function pause() public onlyModerator {
-    WorldStatus._setInMaintenance(true);
+    WorldStatus._setIsPaused(true);
   }
 
   function unpause() public onlyAdmin {
-    WorldStatus._setInMaintenance(false);
+    WorldStatus._setIsPaused(false);
   }
 
   function addModerator(address moderator) public onlyAdmin {

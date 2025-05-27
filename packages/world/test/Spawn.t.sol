@@ -67,9 +67,9 @@ contract SpawnTest is DustTest {
     );
   }
 
-  function testRandomSpawnInMaintainance() public {
-    WorldStatus.setInMaintenance(true);
-    vm.expectRevert("DUST is in maintenance mode. Try again later");
+  function testRandomSpawnPaused() public {
+    WorldStatus.setIsPaused(true);
+    vm.expectRevert("DUST is paused. Try again later");
     world.randomSpawn(vm.getBlockNumber(), 0);
   }
 

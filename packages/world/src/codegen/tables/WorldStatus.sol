@@ -42,7 +42,7 @@ library WorldStatus {
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
     fieldNames = new string[](1);
-    fieldNames[0] = "inMaintenance";
+    fieldNames[0] = "isPaused";
   }
 
   /**
@@ -60,9 +60,9 @@ library WorldStatus {
   }
 
   /**
-   * @notice Get inMaintenance.
+   * @notice Get isPaused.
    */
-  function getInMaintenance() internal view returns (bool inMaintenance) {
+  function getIsPaused() internal view returns (bool isPaused) {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
@@ -70,9 +70,9 @@ library WorldStatus {
   }
 
   /**
-   * @notice Get inMaintenance.
+   * @notice Get isPaused.
    */
-  function _getInMaintenance() internal view returns (bool inMaintenance) {
+  function _getIsPaused() internal view returns (bool isPaused) {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
@@ -80,9 +80,9 @@ library WorldStatus {
   }
 
   /**
-   * @notice Get inMaintenance.
+   * @notice Get isPaused.
    */
-  function get() internal view returns (bool inMaintenance) {
+  function get() internal view returns (bool isPaused) {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
@@ -90,9 +90,9 @@ library WorldStatus {
   }
 
   /**
-   * @notice Get inMaintenance.
+   * @notice Get isPaused.
    */
-  function _get() internal view returns (bool inMaintenance) {
+  function _get() internal view returns (bool isPaused) {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
@@ -100,39 +100,39 @@ library WorldStatus {
   }
 
   /**
-   * @notice Set inMaintenance.
+   * @notice Set isPaused.
    */
-  function setInMaintenance(bool inMaintenance) internal {
+  function setIsPaused(bool isPaused) internal {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((inMaintenance)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isPaused)), _fieldLayout);
   }
 
   /**
-   * @notice Set inMaintenance.
+   * @notice Set isPaused.
    */
-  function _setInMaintenance(bool inMaintenance) internal {
+  function _setIsPaused(bool isPaused) internal {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((inMaintenance)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isPaused)), _fieldLayout);
   }
 
   /**
-   * @notice Set inMaintenance.
+   * @notice Set isPaused.
    */
-  function set(bool inMaintenance) internal {
+  function set(bool isPaused) internal {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((inMaintenance)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isPaused)), _fieldLayout);
   }
 
   /**
-   * @notice Set inMaintenance.
+   * @notice Set isPaused.
    */
-  function _set(bool inMaintenance) internal {
+  function _set(bool isPaused) internal {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((inMaintenance)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isPaused)), _fieldLayout);
   }
 
   /**
@@ -157,8 +157,8 @@ library WorldStatus {
    * @notice Tightly pack static (fixed length) data using this table's schema.
    * @return The static data, encoded into a sequence of bytes.
    */
-  function encodeStatic(bool inMaintenance) internal pure returns (bytes memory) {
-    return abi.encodePacked(inMaintenance);
+  function encodeStatic(bool isPaused) internal pure returns (bytes memory) {
+    return abi.encodePacked(isPaused);
   }
 
   /**
@@ -167,8 +167,8 @@ library WorldStatus {
    * @return The lengths of the dynamic fields (packed into a single bytes32 value).
    * @return The dynamic (variable length) data, encoded into a sequence of bytes.
    */
-  function encode(bool inMaintenance) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
-    bytes memory _staticData = encodeStatic(inMaintenance);
+  function encode(bool isPaused) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
+    bytes memory _staticData = encodeStatic(isPaused);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;

@@ -536,6 +536,21 @@ contract MineTest is DustTest {
     world.mine(aliceEntityId, mineCoord, "");
   }
 
+  function testMinePaused() public {
+    WorldStatus.setIsPaused(true);
+
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    Vec3 mineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
+    ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
+    ObjectPhysics.setMass(mineObjectType, playerHandMassReduction - 1);
+    assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
+
+    vm.prank(alice);
+    vm.expectRevert("DUST is paused. Try again later");
+    world.mine(aliceEntityId, mineCoord, "");
+  }
+
   function testMineAtChunkBoundary() public {
     (address alice, EntityId aliceEntityId,) = setupFlatChunkWithPlayer();
 
