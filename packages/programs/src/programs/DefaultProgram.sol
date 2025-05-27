@@ -23,7 +23,7 @@ abstract contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, Worl
   constructor(IBaseWorld _world) WorldConsumer(_world) { }
 
   function onAttachProgram(EntityId caller, EntityId target, bytes memory) external onlyWorld {
-    (EntityId forceField, EntityId fragment) = _getForceField(target);
+    (EntityId forceField,) = _getForceField(target);
 
     uint256 groupId;
 
@@ -54,7 +54,6 @@ abstract contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, Worl
     return AccessGroupMember.get(groupId, caller);
   }
 
-  // TODO: implement check for when the forcefield has no energy
   function _isSafeCall(EntityId target) internal view returns (bool) {
     return !_isProtected(target);
   }
@@ -62,7 +61,7 @@ abstract contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, Worl
   // TODO: extract to utils
   function _isProtected(EntityId target) internal view returns (bool) {
     (EntityId forceField,) = _getForceField(target);
-    return !forceField.exists() && Energy.getEnergy(forceField) != 0;
+    return forceField.exists() && Energy.getEnergy(forceField) != 0;
   }
 
   // TODO: extract to utils
