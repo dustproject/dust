@@ -20,36 +20,28 @@ contract PostDeploy is Script {
     // Specify a store so that you can use tables directly in PostDeploy
     StoreSwitch.setStoreAddress(worldAddress);
 
-    // Load the private key from the `PRIVATE_KEY` environment variable (in .env)
-    uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+    startBroadcast();
 
-    // Start broadcasting transactions from the deployer account
-    vm.startBroadcast(deployerPrivateKey);
-
-    postDeploy(worldAddress);
-
-    vm.stopBroadcast();
-  }
-
-  // TODO: remove this once MUD supports PostDeploy with KMS: https://github.com/latticexyz/mud/issues/3716
-  function run(address worldAddress, address deployerAddress) external {
-    // Specify a store so that you can use tables directly in PostDeploy
-    StoreSwitch.setStoreAddress(worldAddress);
-
-    // Start broadcasting transactions from the deployer account
-    vm.startBroadcast(deployerAddress);
-
-    postDeploy(worldAddress);
-
-    vm.stopBroadcast();
-  }
-
-  function postDeploy(address worldAddress) internal {
     RegisterSelectorHook registerSelectorHook = new RegisterSelectorHook();
     IWorld(worldAddress).registerSystemHook(REGISTRATION_SYSTEM_ID, registerSelectorHook, BEFORE_CALL_SYSTEM);
 
     initTerrain();
     initObjects();
     initRecipes();
+
+    vm.stopBroadcast();
+  }
+
+  function startBroadcast() internal {
+    // Start broadcasting transactions from the deployer account
+    address[] memory wallets = vm.getWallets();
+    if (wallets.length > 0) {
+      console.log("Using unlocked wallet %s", wallets[0]);
+      vm.startBroadcast(wallets[0]);
+    } else {
+      uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+      console.log("Using private key wallet %s", vm.addr(deployerPrivateKey));
+      vm.startBroadcast(deployerPrivateKey);
+    }
   }
 }
