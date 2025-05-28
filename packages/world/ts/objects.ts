@@ -889,7 +889,14 @@ export const categories: Record<string, Category> = {
     ],
   },
   SmartEntity: {
-    objects: ["ForceField", "Chest", "SpawnTile", "Bed", "Fragment"],
+    objects: [
+      "ForceField",
+      "Chest",
+      "SpawnTile",
+      "Bed",
+      "Fragment",
+      "TextSign",
+    ],
   },
   Station: {
     objects: ["Workbench", "Powerstone", "Furnace"],

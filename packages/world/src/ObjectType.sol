@@ -334,7 +334,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x1e000000000000000000000000000000000000), 1)
+        let bit := and(shr(self, 0x1e000001000000000000000000000000000000), 1)
         ok := bit
       }
 
@@ -813,8 +813,15 @@ library ObjectTypeLib {
     ];
   }
 
-  function getSmartEntityTypes() internal pure returns (ObjectType[5] memory) {
-    return [ObjectTypes.ForceField, ObjectTypes.Chest, ObjectTypes.SpawnTile, ObjectTypes.Bed, ObjectTypes.Fragment];
+  function getSmartEntityTypes() internal pure returns (ObjectType[6] memory) {
+    return [
+      ObjectTypes.ForceField,
+      ObjectTypes.Chest,
+      ObjectTypes.SpawnTile,
+      ObjectTypes.Bed,
+      ObjectTypes.Fragment,
+      ObjectTypes.TextSign
+    ];
   }
 
   function getStationTypes() internal pure returns (ObjectType[3] memory) {

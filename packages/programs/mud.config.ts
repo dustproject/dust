@@ -37,6 +37,13 @@ export default defineWorld({
       },
       key: ["entityId"],
     },
+    ContentURI: {
+      schema: {
+        entityId: "EntityId",
+        uri: "string",
+      },
+      key: ["entityId"],
+    },
   },
   systems: {
     DefaultProgramSystem: {
