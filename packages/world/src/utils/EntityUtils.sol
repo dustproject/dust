@@ -11,9 +11,9 @@ import { UniqueEntity } from "../codegen/tables/UniqueEntity.sol";
 import { TerrainLib } from "../systems/libraries/TerrainLib.sol";
 import { EntityPosition, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
 
+import { MAX_FLUID_LEVEL } from "../Constants.sol";
 import { EntityId, EntityTypeLib } from "../EntityId.sol";
 import { ObjectType, ObjectTypes } from "../ObjectType.sol";
-
 import { Vec3 } from "../Vec3.sol";
 
 library EntityUtils {
@@ -30,7 +30,7 @@ library EntityUtils {
     EntityId entityId = EntityTypeLib.encodeBlock(coord);
     ObjectType objectType = entityId._getObjectType();
     if (objectType.isNull() && TerrainLib._getBlockType(coord).spawnsWithFluid()) {
-      return 15;
+      return MAX_FLUID_LEVEL; // Default fluid level for uninitialized blocks
     }
 
     return EntityFluidLevel._get(entityId);
@@ -58,7 +58,7 @@ library EntityUtils {
       EntityPosition._set(entityId, coord);
 
       if (objectType.spawnsWithFluid()) {
-        EntityFluidLevel._set(entityId, 15);
+        EntityFluidLevel._set(entityId, MAX_FLUID_LEVEL); // Initialize fluid level for new blocks
       }
     }
 
