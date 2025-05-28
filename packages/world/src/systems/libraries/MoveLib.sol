@@ -188,7 +188,7 @@ library MoveLib {
       }
 
       if (!gravityApplies) {
-        if (fallHeight > PLAYER_SAFE_FALL_DISTANCE && EntityUtils.getObjectTypeAt(current) != ObjectTypes.Water) {
+        if (fallHeight > PLAYER_SAFE_FALL_DISTANCE && EntityUtils.getObjectTypeAt(next) != ObjectTypes.Water) {
           cost += PLAYER_FALL_ENERGY_COST * (fallHeight - PLAYER_SAFE_FALL_DISTANCE);
         }
         fallDamage = 0;
