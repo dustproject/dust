@@ -412,12 +412,10 @@ contract GravityTest is DustTest {
     // Water should prevent fall damage
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);
-    console.log(aliceEntityId.getPosition().toString());
-    console.log((newCoords[0] - vec3(0, 8, 0)).toString());
 
     // Verify player is not dead
     assertEq(aliceEntityId.getPosition(), newCoords[0] - vec3(0, 8, 0), "Final coord mismatch");
-    assertGt(Energy.getEnergy(aliceEntityId), 0, "Player should not have died from fall on water");
+    assertEq(Energy.getEnergy(aliceEntityId), 1, "Player energy mismatch");
     assertEq(Energy.getEnergy(aliceEntityId), initialEnergy - MOVE_ENERGY_COST, "Player shouldn't have died");
   }
 
