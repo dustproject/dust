@@ -8,6 +8,8 @@ import { EntityId, EntityTypeLib } from "@dust/world/src/EntityId.sol";
 import { AccessGroupCount } from "./codegen/tables/AccessGroupCount.sol";
 import { AccessGroupMember } from "./codegen/tables/AccessGroupMember.sol";
 import { AccessGroupOwner } from "./codegen/tables/AccessGroupOwner.sol";
+
+import { ContentURI } from "./codegen/tables/ContentURI.sol";
 import { EntityAccessGroup } from "./codegen/tables/EntityAccessGroup.sol";
 
 import { createAccessGroup } from "./createAccessGroup.sol";
@@ -48,6 +50,17 @@ contract DefaultProgramSystem is System {
     caller.validateCaller();
     _requireOwner(groupId, caller);
     AccessGroupOwner.set(groupId, newOwner);
+  }
+
+  function setContentURI(EntityId caller, EntityId target, string memory contentURI) external {
+    caller.validateCaller();
+    uint256 groupId = EntityAccessGroup.get(target);
+    _requireMember(groupId, caller);
+    ContentURI.set(target, contentURI);
+  }
+
+  function _requireMember(uint256 groupId, EntityId caller) private view {
+    require(AccessGroupMember.get(groupId, caller), "Caller is not a member of the access group");
   }
 
   function _requireOwner(uint256 groupId, EntityId caller) private view {

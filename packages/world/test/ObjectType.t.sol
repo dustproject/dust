@@ -1893,6 +1893,7 @@ contract ObjectTypeTest is DustTest {
       assertTrue(ObjectTypes.SpawnTile.isSmartEntity(), "isSmartEntity");
       assertTrue(ObjectTypes.Bed.isSmartEntity(), "isSmartEntity");
       assertTrue(ObjectTypes.Fragment.isSmartEntity(), "isSmartEntity");
+      assertTrue(ObjectTypes.TextSign.isSmartEntity(), "isSmartEntity");
       assertFalse(ObjectTypes.Null.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.Air.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.Water.isSmartEntity(), "!isSmartEntity");
@@ -2044,7 +2045,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Furnace.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.Workbench.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.Powerstone.isSmartEntity(), "!isSmartEntity");
-      assertFalse(ObjectTypes.TextSign.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.Torch.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.WoodenPick.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.CopperPick.isSmartEntity(), "!isSmartEntity");
