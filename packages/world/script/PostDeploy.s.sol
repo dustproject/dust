@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { Script } from "forge-std/Script.sol";
 import { console } from "forge-std/console.sol";
 
 import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
@@ -10,16 +9,19 @@ import { BEFORE_CALL_SYSTEM } from "@latticexyz/world/src/systemHookTypes.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 
+import { DustScript } from "./DustScript.sol";
+
 import { RegisterSelectorHook } from "./RegisterSelectorHook.sol";
 import { initObjects } from "./initObjects.sol";
 import { initRecipes } from "./initRecipes.sol";
 import { initTerrain } from "./initTerrain.sol";
 
-contract PostDeploy is Script {
+contract PostDeploy is DustScript {
   function run(address worldAddress) external {
     // Specify a store so that you can use tables directly in PostDeploy
     StoreSwitch.setStoreAddress(worldAddress);
 
+    // Start broadcasting transactions from the deployer account
     startBroadcast();
 
     RegisterSelectorHook registerSelectorHook = new RegisterSelectorHook();
@@ -30,18 +32,5 @@ contract PostDeploy is Script {
     initRecipes();
 
     vm.stopBroadcast();
-  }
-
-  function startBroadcast() internal {
-    // Start broadcasting transactions from the deployer account
-    address[] memory wallets = vm.getWallets();
-    if (wallets.length > 0) {
-      console.log("Using unlocked wallet %s", wallets[0]);
-      vm.startBroadcast(wallets[0]);
-    } else {
-      uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-      console.log("Using private key wallet %s", vm.addr(deployerPrivateKey));
-      vm.startBroadcast(deployerPrivateKey);
-    }
   }
 }
