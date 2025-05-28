@@ -566,7 +566,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x9fe0000000000000000000000004), 1)
+        let bit := and(shr(self, 0x80e0000000000000000000000004), 1)
         ok := bit
       }
     }
@@ -1133,19 +1133,8 @@ library ObjectTypeLib {
     return [ObjectTypes.ForceField];
   }
 
-  function getSpawnsWithFluidTypes() internal pure returns (ObjectType[10] memory) {
-    return [
-      ObjectTypes.Magma,
-      ObjectTypes.Water,
-      ObjectTypes.Coral,
-      ObjectTypes.SeaAnemone,
-      ObjectTypes.Algae,
-      ObjectTypes.HornCoralBlock,
-      ObjectTypes.FireCoralBlock,
-      ObjectTypes.TubeCoralBlock,
-      ObjectTypes.BubbleCoralBlock,
-      ObjectTypes.BrainCoralBlock
-    ];
+  function getSpawnsWithFluidTypes() internal pure returns (ObjectType[5] memory) {
+    return [ObjectTypes.Magma, ObjectTypes.Water, ObjectTypes.Coral, ObjectTypes.SeaAnemone, ObjectTypes.Algae];
   }
 
   // Specialized getters

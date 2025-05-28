@@ -1183,17 +1183,6 @@ export const categories: Record<string, Category> = {
   },
   SpawnsWithFluid: {
     checkName: "spawnsWithFluid",
-    objects: [
-      "Magma",
-      "Water",
-      "Coral",
-      "SeaAnemone",
-      "Algae",
-      "HornCoralBlock",
-      "FireCoralBlock",
-      "TubeCoralBlock",
-      "BubbleCoralBlock",
-      "BrainCoralBlock",
-    ],
+    objects: ["Magma", "Water", "Coral", "SeaAnemone", "Algae"],
   },
 } as const;
