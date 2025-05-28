@@ -115,6 +115,14 @@ export default defineWorld({
       },
       key: ["entityId"],
     },
+    // TODO: merge with object type?
+    EntityFluidLevel: {
+      schema: {
+        entityId: "EntityId",
+        level: "uint8",
+      },
+      key: ["entityId"],
+    },
     EntityPosition: {
       schema: {
         entityId: "EntityId",

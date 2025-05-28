@@ -655,7 +655,6 @@ export const categories: Record<string, Category> = {
   },
   Block: {
     objects: [
-      "Magma",
       "Stone",
       "Deepslate",
       "Granite",
@@ -1181,5 +1180,20 @@ export const categories: Record<string, Category> = {
   },
   Machine: {
     objects: ["ForceField"],
+  },
+  SpawnsWithFluid: {
+    checkName: "spawnsWithFluid",
+    objects: [
+      "Magma",
+      "Water",
+      "Coral",
+      "SeaAnemone",
+      "Algae",
+      "HornCoralBlock",
+      "FireCoralBlock",
+      "TubeCoralBlock",
+      "BubbleCoralBlock",
+      "BrainCoralBlock",
+    ],
   },
 } as const;

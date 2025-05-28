@@ -121,7 +121,7 @@ library MoveLib {
     Vec3 belowCoord = playerCoord - vec3(0, 1, 0);
     bool onSolidBlock = !EntityUtils.safeGetObjectTypeAt(belowCoord).isPassThrough()
       || EntityUtils.getMovableEntityAt(belowCoord)._exists();
-    return !onSolidBlock && EntityUtils.getObjectTypeAt(playerCoord) != ObjectTypes.Water;
+    return !onSolidBlock && EntityUtils.getFluidLevelAt(playerCoord) == 0;
   }
 
   function _computeGravityResult(Vec3 coord, uint16 initialFallHeight) private view returns (Vec3, uint128) {
@@ -133,7 +133,7 @@ library MoveLib {
     }
 
     // If currently on water, don't apply fall damage
-    if (EntityUtils.getObjectTypeAt(current) == ObjectTypes.Water) {
+    if (EntityUtils.getFluidLevelAt(current) > 0) {
       return (current, 0);
     }
 
@@ -188,7 +188,7 @@ library MoveLib {
       }
 
       if (!gravityApplies) {
-        if (fallHeight > PLAYER_SAFE_FALL_DISTANCE && EntityUtils.getObjectTypeAt(next) != ObjectTypes.Water) {
+        if (fallHeight > PLAYER_SAFE_FALL_DISTANCE && EntityUtils.getFluidLevelAt(next) == 0) {
           cost += PLAYER_FALL_ENERGY_COST * (fallHeight - PLAYER_SAFE_FALL_DISTANCE);
         }
         fallDamage = 0;

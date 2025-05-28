@@ -3,6 +3,7 @@ pragma solidity >=0.8.24;
 
 import { WorldContextConsumerLib } from "@latticexyz/world/src/WorldContext.sol";
 
+import { EntityFluidLevel } from "../codegen/tables/EntityFluidLevel.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
@@ -25,6 +26,16 @@ library EntityUtils {
     return objectType.isNull() ? TerrainLib._getBlockType(coord) : objectType;
   }
 
+  function getFluidLevelAt(Vec3 coord) internal view returns (uint8) {
+    EntityId entityId = EntityTypeLib.encodeBlock(coord);
+    ObjectType objectType = entityId._getObjectType();
+    if (objectType.isNull() && TerrainLib._getBlockType(coord).spawnsWithFluid()) {
+      return 15;
+    }
+
+    return EntityFluidLevel._get(entityId);
+  }
+
   /// @notice Get the object type id at a given coordinate.
   /// @dev Reverts if the chunk is not explored yet.
   function safeGetObjectTypeAt(Vec3 coord) internal view returns (ObjectType) {
@@ -45,6 +56,10 @@ library EntityUtils {
     if (!entityId._exists()) {
       _initEntity(entityId, objectType);
       EntityPosition._set(entityId, coord);
+
+      if (objectType.spawnsWithFluid()) {
+        EntityFluidLevel._set(entityId, 15);
+      }
     }
 
     return (entityId, objectType);
