@@ -91,7 +91,7 @@ contract BedSystem is System {
     EnergyData memory playerData = BedLib.removePlayerFromBed(player, bed, bedCoord);
     require(playerData.energy == 0, "Player is not dead");
 
-    BedLib.transferInventory(player, drop);
+    InventoryUtils.transferAll(player, drop);
   }
 }
 
@@ -122,9 +122,5 @@ library BedLib {
 
     Vec3 bedCoord = bed._getPosition();
     return (bed, bedCoord);
-  }
-
-  function transferInventory(EntityId player, EntityId bed) public {
-    InventoryUtils.transferAll(player, bed);
   }
 }

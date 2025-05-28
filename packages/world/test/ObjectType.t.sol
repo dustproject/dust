@@ -11,7 +11,7 @@ contract ObjectTypeTest is DustTest {
       assertTrue(ObjectTypes.Air.isNonSolid(), "isNonSolid");
       assertTrue(ObjectTypes.Water.isNonSolid(), "isNonSolid");
       assertFalse(ObjectTypes.Null.isNonSolid(), "!isNonSolid");
-      assertFalse(ObjectTypes.Magma.isNonSolid(), "!isNonSolid");
+      assertFalse(ObjectTypes.Lava.isNonSolid(), "!isNonSolid");
       assertFalse(ObjectTypes.Stone.isNonSolid(), "!isNonSolid");
       assertFalse(ObjectTypes.Bedrock.isNonSolid(), "!isNonSolid");
       assertFalse(ObjectTypes.Deepslate.isNonSolid(), "!isNonSolid");
@@ -203,7 +203,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isAny(), "!isAny");
       assertFalse(ObjectTypes.Air.isAny(), "!isAny");
       assertFalse(ObjectTypes.Water.isAny(), "!isAny");
-      assertFalse(ObjectTypes.Magma.isAny(), "!isAny");
+      assertFalse(ObjectTypes.Lava.isAny(), "!isAny");
       assertFalse(ObjectTypes.Stone.isAny(), "!isAny");
       assertFalse(ObjectTypes.Bedrock.isAny(), "!isAny");
       assertFalse(ObjectTypes.Deepslate.isAny(), "!isAny");
@@ -535,7 +535,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.Air.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.Water.isBlock(), "!isBlock");
-      assertFalse(ObjectTypes.Magma.isBlock(), "!isBlock");
+      assertFalse(ObjectTypes.Lava.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.Bedrock.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.AnyTerracotta.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.AnyLog.isBlock(), "!isBlock");
@@ -588,7 +588,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isTerracotta(), "!isTerracotta");
       assertFalse(ObjectTypes.Air.isTerracotta(), "!isTerracotta");
       assertFalse(ObjectTypes.Water.isTerracotta(), "!isTerracotta");
-      assertFalse(ObjectTypes.Magma.isTerracotta(), "!isTerracotta");
+      assertFalse(ObjectTypes.Lava.isTerracotta(), "!isTerracotta");
       assertFalse(ObjectTypes.Stone.isTerracotta(), "!isTerracotta");
       assertFalse(ObjectTypes.Bedrock.isTerracotta(), "!isTerracotta");
       assertFalse(ObjectTypes.Deepslate.isTerracotta(), "!isTerracotta");
@@ -769,7 +769,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isOre(), "!isOre");
       assertFalse(ObjectTypes.Air.isOre(), "!isOre");
       assertFalse(ObjectTypes.Water.isOre(), "!isOre");
-      assertFalse(ObjectTypes.Magma.isOre(), "!isOre");
+      assertFalse(ObjectTypes.Lava.isOre(), "!isOre");
       assertFalse(ObjectTypes.Stone.isOre(), "!isOre");
       assertFalse(ObjectTypes.Bedrock.isOre(), "!isOre");
       assertFalse(ObjectTypes.Deepslate.isOre(), "!isOre");
@@ -959,7 +959,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isLog(), "!isLog");
       assertFalse(ObjectTypes.Air.isLog(), "!isLog");
       assertFalse(ObjectTypes.Water.isLog(), "!isLog");
-      assertFalse(ObjectTypes.Magma.isLog(), "!isLog");
+      assertFalse(ObjectTypes.Lava.isLog(), "!isLog");
       assertFalse(ObjectTypes.Stone.isLog(), "!isLog");
       assertFalse(ObjectTypes.Bedrock.isLog(), "!isLog");
       assertFalse(ObjectTypes.Deepslate.isLog(), "!isLog");
@@ -1151,7 +1151,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.Air.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.Water.isLeaf(), "!isLeaf");
-      assertFalse(ObjectTypes.Magma.isLeaf(), "!isLeaf");
+      assertFalse(ObjectTypes.Lava.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.Stone.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.Bedrock.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.Deepslate.isLeaf(), "!isLeaf");
@@ -1335,7 +1335,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isPlank(), "!isPlank");
       assertFalse(ObjectTypes.Air.isPlank(), "!isPlank");
       assertFalse(ObjectTypes.Water.isPlank(), "!isPlank");
-      assertFalse(ObjectTypes.Magma.isPlank(), "!isPlank");
+      assertFalse(ObjectTypes.Lava.isPlank(), "!isPlank");
       assertFalse(ObjectTypes.Stone.isPlank(), "!isPlank");
       assertFalse(ObjectTypes.Bedrock.isPlank(), "!isPlank");
       assertFalse(ObjectTypes.Deepslate.isPlank(), "!isPlank");
@@ -1518,7 +1518,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.Air.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.Water.isSeed(), "!isSeed");
-      assertFalse(ObjectTypes.Magma.isSeed(), "!isSeed");
+      assertFalse(ObjectTypes.Lava.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.Stone.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.Bedrock.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.Deepslate.isSeed(), "!isSeed");
@@ -1711,7 +1711,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isSapling(), "!isSapling");
       assertFalse(ObjectTypes.Air.isSapling(), "!isSapling");
       assertFalse(ObjectTypes.Water.isSapling(), "!isSapling");
-      assertFalse(ObjectTypes.Magma.isSapling(), "!isSapling");
+      assertFalse(ObjectTypes.Lava.isSapling(), "!isSapling");
       assertFalse(ObjectTypes.Stone.isSapling(), "!isSapling");
       assertFalse(ObjectTypes.Bedrock.isSapling(), "!isSapling");
       assertFalse(ObjectTypes.Deepslate.isSapling(), "!isSapling");
@@ -1897,7 +1897,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.Air.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.Water.isSmartEntity(), "!isSmartEntity");
-      assertFalse(ObjectTypes.Magma.isSmartEntity(), "!isSmartEntity");
+      assertFalse(ObjectTypes.Lava.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.Stone.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.Bedrock.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.Deepslate.isSmartEntity(), "!isSmartEntity");
@@ -2082,7 +2082,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isStation(), "!isStation");
       assertFalse(ObjectTypes.Air.isStation(), "!isStation");
       assertFalse(ObjectTypes.Water.isStation(), "!isStation");
-      assertFalse(ObjectTypes.Magma.isStation(), "!isStation");
+      assertFalse(ObjectTypes.Lava.isStation(), "!isStation");
       assertFalse(ObjectTypes.Stone.isStation(), "!isStation");
       assertFalse(ObjectTypes.Bedrock.isStation(), "!isStation");
       assertFalse(ObjectTypes.Deepslate.isStation(), "!isStation");
@@ -2273,7 +2273,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isPick(), "!isPick");
       assertFalse(ObjectTypes.Air.isPick(), "!isPick");
       assertFalse(ObjectTypes.Water.isPick(), "!isPick");
-      assertFalse(ObjectTypes.Magma.isPick(), "!isPick");
+      assertFalse(ObjectTypes.Lava.isPick(), "!isPick");
       assertFalse(ObjectTypes.Stone.isPick(), "!isPick");
       assertFalse(ObjectTypes.Bedrock.isPick(), "!isPick");
       assertFalse(ObjectTypes.Deepslate.isPick(), "!isPick");
@@ -2461,7 +2461,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isAxe(), "!isAxe");
       assertFalse(ObjectTypes.Air.isAxe(), "!isAxe");
       assertFalse(ObjectTypes.Water.isAxe(), "!isAxe");
-      assertFalse(ObjectTypes.Magma.isAxe(), "!isAxe");
+      assertFalse(ObjectTypes.Lava.isAxe(), "!isAxe");
       assertFalse(ObjectTypes.Stone.isAxe(), "!isAxe");
       assertFalse(ObjectTypes.Bedrock.isAxe(), "!isAxe");
       assertFalse(ObjectTypes.Deepslate.isAxe(), "!isAxe");
@@ -2644,7 +2644,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isHoe(), "!isHoe");
       assertFalse(ObjectTypes.Air.isHoe(), "!isHoe");
       assertFalse(ObjectTypes.Water.isHoe(), "!isHoe");
-      assertFalse(ObjectTypes.Magma.isHoe(), "!isHoe");
+      assertFalse(ObjectTypes.Lava.isHoe(), "!isHoe");
       assertFalse(ObjectTypes.Stone.isHoe(), "!isHoe");
       assertFalse(ObjectTypes.Bedrock.isHoe(), "!isHoe");
       assertFalse(ObjectTypes.Deepslate.isHoe(), "!isHoe");
@@ -2834,7 +2834,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isWhacker(), "!isWhacker");
       assertFalse(ObjectTypes.Air.isWhacker(), "!isWhacker");
       assertFalse(ObjectTypes.Water.isWhacker(), "!isWhacker");
-      assertFalse(ObjectTypes.Magma.isWhacker(), "!isWhacker");
+      assertFalse(ObjectTypes.Lava.isWhacker(), "!isWhacker");
       assertFalse(ObjectTypes.Stone.isWhacker(), "!isWhacker");
       assertFalse(ObjectTypes.Bedrock.isWhacker(), "!isWhacker");
       assertFalse(ObjectTypes.Deepslate.isWhacker(), "!isWhacker");
@@ -3023,7 +3023,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isOreBar(), "!isOreBar");
       assertFalse(ObjectTypes.Air.isOreBar(), "!isOreBar");
       assertFalse(ObjectTypes.Water.isOreBar(), "!isOreBar");
-      assertFalse(ObjectTypes.Magma.isOreBar(), "!isOreBar");
+      assertFalse(ObjectTypes.Lava.isOreBar(), "!isOreBar");
       assertFalse(ObjectTypes.Stone.isOreBar(), "!isOreBar");
       assertFalse(ObjectTypes.Bedrock.isOreBar(), "!isOreBar");
       assertFalse(ObjectTypes.Deepslate.isOreBar(), "!isOreBar");
@@ -3210,7 +3210,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isFood(), "!isFood");
       assertFalse(ObjectTypes.Air.isFood(), "!isFood");
       assertFalse(ObjectTypes.Water.isFood(), "!isFood");
-      assertFalse(ObjectTypes.Magma.isFood(), "!isFood");
+      assertFalse(ObjectTypes.Lava.isFood(), "!isFood");
       assertFalse(ObjectTypes.Stone.isFood(), "!isFood");
       assertFalse(ObjectTypes.Bedrock.isFood(), "!isFood");
       assertFalse(ObjectTypes.Deepslate.isFood(), "!isFood");
@@ -3396,7 +3396,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isFuel(), "!isFuel");
       assertFalse(ObjectTypes.Air.isFuel(), "!isFuel");
       assertFalse(ObjectTypes.Water.isFuel(), "!isFuel");
-      assertFalse(ObjectTypes.Magma.isFuel(), "!isFuel");
+      assertFalse(ObjectTypes.Lava.isFuel(), "!isFuel");
       assertFalse(ObjectTypes.Stone.isFuel(), "!isFuel");
       assertFalse(ObjectTypes.Bedrock.isFuel(), "!isFuel");
       assertFalse(ObjectTypes.Deepslate.isFuel(), "!isFuel");
@@ -3584,7 +3584,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isPlayer(), "!isPlayer");
       assertFalse(ObjectTypes.Air.isPlayer(), "!isPlayer");
       assertFalse(ObjectTypes.Water.isPlayer(), "!isPlayer");
-      assertFalse(ObjectTypes.Magma.isPlayer(), "!isPlayer");
+      assertFalse(ObjectTypes.Lava.isPlayer(), "!isPlayer");
       assertFalse(ObjectTypes.Stone.isPlayer(), "!isPlayer");
       assertFalse(ObjectTypes.Bedrock.isPlayer(), "!isPlayer");
       assertFalse(ObjectTypes.Deepslate.isPlayer(), "!isPlayer");
@@ -3802,7 +3802,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.hasExtraDrops(), "!hasExtraDrops");
       assertFalse(ObjectTypes.Air.hasExtraDrops(), "!hasExtraDrops");
       assertFalse(ObjectTypes.Water.hasExtraDrops(), "!hasExtraDrops");
-      assertFalse(ObjectTypes.Magma.hasExtraDrops(), "!hasExtraDrops");
+      assertFalse(ObjectTypes.Lava.hasExtraDrops(), "!hasExtraDrops");
       assertFalse(ObjectTypes.Stone.hasExtraDrops(), "!hasExtraDrops");
       assertFalse(ObjectTypes.Bedrock.hasExtraDrops(), "!hasExtraDrops");
       assertFalse(ObjectTypes.Deepslate.hasExtraDrops(), "!hasExtraDrops");
@@ -4000,7 +4000,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.hasAxeMultiplier(), "!hasAxeMultiplier");
       assertFalse(ObjectTypes.Air.hasAxeMultiplier(), "!hasAxeMultiplier");
       assertFalse(ObjectTypes.Water.hasAxeMultiplier(), "!hasAxeMultiplier");
-      assertFalse(ObjectTypes.Magma.hasAxeMultiplier(), "!hasAxeMultiplier");
+      assertFalse(ObjectTypes.Lava.hasAxeMultiplier(), "!hasAxeMultiplier");
       assertFalse(ObjectTypes.Stone.hasAxeMultiplier(), "!hasAxeMultiplier");
       assertFalse(ObjectTypes.Bedrock.hasAxeMultiplier(), "!hasAxeMultiplier");
       assertFalse(ObjectTypes.Deepslate.hasAxeMultiplier(), "!hasAxeMultiplier");
@@ -4191,7 +4191,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.Air.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.Water.hasPickMultiplier(), "!hasPickMultiplier");
-      assertFalse(ObjectTypes.Magma.hasPickMultiplier(), "!hasPickMultiplier");
+      assertFalse(ObjectTypes.Lava.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.Bedrock.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.Grass.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.Dirt.hasPickMultiplier(), "!hasPickMultiplier");
@@ -4375,7 +4375,7 @@ contract ObjectTypeTest is DustTest {
       assertTrue(ObjectTypes.Torch.isPassThrough(), "isPassThrough");
       assertTrue(ObjectTypes.BambooBush.isPassThrough(), "isPassThrough");
       assertFalse(ObjectTypes.Null.isPassThrough(), "!isPassThrough");
-      assertFalse(ObjectTypes.Magma.isPassThrough(), "!isPassThrough");
+      assertFalse(ObjectTypes.Lava.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.Stone.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.Bedrock.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.Deepslate.isPassThrough(), "!isPassThrough");
@@ -4534,7 +4534,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.Air.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.Water.isGrowable(), "!isGrowable");
-      assertFalse(ObjectTypes.Magma.isGrowable(), "!isGrowable");
+      assertFalse(ObjectTypes.Lava.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.Stone.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.Bedrock.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.Deepslate.isGrowable(), "!isGrowable");
@@ -4732,7 +4732,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isUniqueObject(), "!isUniqueObject");
       assertFalse(ObjectTypes.Air.isUniqueObject(), "!isUniqueObject");
       assertFalse(ObjectTypes.Water.isUniqueObject(), "!isUniqueObject");
-      assertFalse(ObjectTypes.Magma.isUniqueObject(), "!isUniqueObject");
+      assertFalse(ObjectTypes.Lava.isUniqueObject(), "!isUniqueObject");
       assertFalse(ObjectTypes.Stone.isUniqueObject(), "!isUniqueObject");
       assertFalse(ObjectTypes.Bedrock.isUniqueObject(), "!isUniqueObject");
       assertFalse(ObjectTypes.Deepslate.isUniqueObject(), "!isUniqueObject");
@@ -4915,7 +4915,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isTool(), "!isTool");
       assertFalse(ObjectTypes.Air.isTool(), "!isTool");
       assertFalse(ObjectTypes.Water.isTool(), "!isTool");
-      assertFalse(ObjectTypes.Magma.isTool(), "!isTool");
+      assertFalse(ObjectTypes.Lava.isTool(), "!isTool");
       assertFalse(ObjectTypes.Stone.isTool(), "!isTool");
       assertFalse(ObjectTypes.Bedrock.isTool(), "!isTool");
       assertFalse(ObjectTypes.Deepslate.isTool(), "!isTool");
@@ -5089,7 +5089,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isTillable(), "!isTillable");
       assertFalse(ObjectTypes.Air.isTillable(), "!isTillable");
       assertFalse(ObjectTypes.Water.isTillable(), "!isTillable");
-      assertFalse(ObjectTypes.Magma.isTillable(), "!isTillable");
+      assertFalse(ObjectTypes.Lava.isTillable(), "!isTillable");
       assertFalse(ObjectTypes.Stone.isTillable(), "!isTillable");
       assertFalse(ObjectTypes.Bedrock.isTillable(), "!isTillable");
       assertFalse(ObjectTypes.Deepslate.isTillable(), "!isTillable");
@@ -5276,7 +5276,7 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Null.isMachine(), "!isMachine");
       assertFalse(ObjectTypes.Air.isMachine(), "!isMachine");
       assertFalse(ObjectTypes.Water.isMachine(), "!isMachine");
-      assertFalse(ObjectTypes.Magma.isMachine(), "!isMachine");
+      assertFalse(ObjectTypes.Lava.isMachine(), "!isMachine");
       assertFalse(ObjectTypes.Stone.isMachine(), "!isMachine");
       assertFalse(ObjectTypes.Bedrock.isMachine(), "!isMachine");
       assertFalse(ObjectTypes.Deepslate.isMachine(), "!isMachine");
@@ -5460,7 +5460,7 @@ contract ObjectTypeTest is DustTest {
     }
 
     {
-      assertTrue(ObjectTypes.Magma.spawnsWithFluid(), "spawnsWithFluid");
+      assertTrue(ObjectTypes.Lava.spawnsWithFluid(), "spawnsWithFluid");
       assertTrue(ObjectTypes.Water.spawnsWithFluid(), "spawnsWithFluid");
       assertTrue(ObjectTypes.Coral.spawnsWithFluid(), "spawnsWithFluid");
       assertTrue(ObjectTypes.SeaAnemone.spawnsWithFluid(), "spawnsWithFluid");

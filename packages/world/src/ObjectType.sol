@@ -129,7 +129,7 @@ library ObjectTypes {
   ObjectType constant BrainCoralBlock = ObjectType.wrap(108);
   ObjectType constant Snow = ObjectType.wrap(109);
   ObjectType constant Ice = ObjectType.wrap(110);
-  ObjectType constant Magma = ObjectType.wrap(111);
+  ObjectType constant Lava = ObjectType.wrap(111);
   ObjectType constant SpiderWeb = ObjectType.wrap(112);
   ObjectType constant Bone = ObjectType.wrap(113);
   ObjectType constant CoalOre = ObjectType.wrap(114);
@@ -1134,7 +1134,7 @@ library ObjectTypeLib {
   }
 
   function getSpawnsWithFluidTypes() internal pure returns (ObjectType[5] memory) {
-    return [ObjectTypes.Magma, ObjectTypes.Water, ObjectTypes.Coral, ObjectTypes.SeaAnemone, ObjectTypes.Algae];
+    return [ObjectTypes.Lava, ObjectTypes.Water, ObjectTypes.Coral, ObjectTypes.SeaAnemone, ObjectTypes.Algae];
   }
 
   // Specialized getters

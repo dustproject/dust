@@ -19,6 +19,7 @@ import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/
 
 import {
   CHUNK_SIZE,
+  MAX_FLUID_LEVEL,
   MAX_PLAYER_GLIDES,
   MAX_PLAYER_JUMPS,
   MOVE_ENERGY_COST,
@@ -657,9 +658,9 @@ contract MoveTest is DustTest {
 
     // Create a path with different block types
     Vec3[] memory path = new Vec3[](3);
-    path[0] = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
-    path[1] = vec3(playerCoord.x() + 2, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
-    path[2] = vec3(playerCoord.x() + 3, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
+    path[0] = playerCoord + vec3(1, 0, 0);
+    path[1] = playerCoord + vec3(2, 0, 0);
+    path[2] = playerCoord + vec3(3, 0, 0);
 
     // Set block types
     setTerrainAtCoord(path[0], ObjectTypes.Water);
@@ -688,5 +689,99 @@ contract MoveTest is DustTest {
     vm.prank(alice);
     vm.expectRevert("Cannot move through a player");
     world.move(aliceEntityId, newCoords);
+  }
+
+  // Water/Fluid interaction tests
+  function testGravityDoesNotApplyInWater() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupWaterChunkWithPlayer();
+
+    // Verify player is in water
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(playerCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Player should be in water");
+
+    // Move vertically underwater - no gravity should apply
+    Vec3[] memory newCoords = new Vec3[](3);
+    newCoords[0] = playerCoord + vec3(0, 1, 0);
+    newCoords[1] = playerCoord + vec3(0, 2, 0);
+    newCoords[2] = playerCoord + vec3(0, 3, 0);
+
+    vm.prank(alice);
+    world.move(aliceEntityId, newCoords);
+
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
+    assertEq(finalCoord, newCoords[2], "Player should reach final position");
+  }
+
+  function testMoveThroughDifferentFluidLevels() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Create path with water and non-water blocks
+    Vec3[] memory path = new Vec3[](4);
+    path[0] = playerCoord + vec3(1, 0, 0); // Air
+    path[1] = playerCoord + vec3(2, 0, 0); // Water
+    path[2] = playerCoord + vec3(3, 0, 0); // Water
+    path[3] = playerCoord + vec3(4, 0, 0); // Air
+
+    // Set up terrain
+    setObjectAtCoord(path[0], ObjectTypes.Air);
+    setObjectAtCoord(path[1], ObjectTypes.Water);
+    setObjectAtCoord(path[2], ObjectTypes.Water);
+    setObjectAtCoord(path[3], ObjectTypes.Air);
+
+    // Also set ground beneath
+    for (uint256 i = 0; i < path.length; i++) {
+      setObjectAtCoord(path[i] - vec3(0, 1, 0), ObjectTypes.Stone);
+    }
+
+    vm.prank(alice);
+    world.move(aliceEntityId, path);
+
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
+    assertEq(finalCoord, path[3], "Player should reach final position");
+  }
+
+  function testFluidLevelWithSpawnsWithFluidBlocks() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Test movement through blocks that spawn with fluid
+    ObjectType[4] memory fluidBlocks = [ObjectTypes.Water, ObjectTypes.Coral, ObjectTypes.SeaAnemone, ObjectTypes.Algae];
+
+    for (uint256 i = 0; i < fluidBlocks.length; i++) {
+      Vec3 testCoord = playerCoord + vec3(int32(int256(i + 1)), 0, 0);
+      setObjectAtCoord(testCoord, fluidBlocks[i]);
+
+      // Verify fluid level
+      uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(testCoord);
+      assertEq(fluidLevel, MAX_FLUID_LEVEL, "Block should have max fluid level");
+    }
+
+    // Move through all these blocks
+    Vec3[] memory newCoords = new Vec3[](fluidBlocks.length);
+    for (uint256 i = 0; i < fluidBlocks.length; i++) {
+      newCoords[i] = playerCoord + vec3(int32(int256(i + 1)), 0, 0);
+    }
+
+    vm.prank(alice);
+    world.move(aliceEntityId, newCoords);
+
+    // Should successfully move through all fluid blocks
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
+    assertEq(finalCoord, newCoords[newCoords.length - 1], "Player should move through fluid blocks");
+  }
+
+  function testJumpingInWater() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupWaterChunkWithPlayer();
+
+    // Try to jump up in water (should work without gravity)
+    Vec3[] memory jumpPath = new Vec3[](3);
+    jumpPath[0] = playerCoord + vec3(0, 1, 0);
+    jumpPath[1] = playerCoord + vec3(0, 2, 0);
+    jumpPath[2] = playerCoord + vec3(0, 3, 0);
+
+    vm.prank(alice);
+    world.move(aliceEntityId, jumpPath);
+
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
+    assertEq(finalCoord, jumpPath[2], "Player should be able to jump/swim up in water");
   }
 }
