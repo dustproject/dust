@@ -2,16 +2,15 @@
 pragma solidity >=0.8.24;
 
 import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
-import { Script } from "forge-std/Script.sol";
 import { console } from "forge-std/console.sol";
 
-import { IWorld } from "../src/codegen/world/IWorld.sol";
-
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
-
 import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
+import { DustScript } from "@dust/world/script/DustScript.sol";
+
+import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { BedProgram } from "../src/programs/BedProgram.sol";
 import { ChestProgram } from "../src/programs/ChestProgram.sol";
 import { ForceFieldProgram } from "../src/programs/ForceFieldProgram.sol";
@@ -19,36 +18,14 @@ import { SpawnTileProgram } from "../src/programs/SpawnTileProgram.sol";
 
 bytes14 constant DEFAULT_NAMESPACE = "dfprograms_1";
 
-contract PostDeploy is Script {
+contract PostDeploy is DustScript {
   function run(address worldAddress) external {
     // Specify a store so that you can use tables directly in PostDeploy
     StoreSwitch.setStoreAddress(worldAddress);
 
-    // Load the private key from the `PRIVATE_KEY` environment variable (in .env)
-    uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-
     // Start broadcasting transactions from the deployer account
-    vm.startBroadcast(deployerPrivateKey);
+    startBroadcast();
 
-    postDeploy(worldAddress);
-
-    vm.stopBroadcast();
-  }
-
-  // TODO: remove this once MUD supports PostDeploy with KMS: https://github.com/latticexyz/mud/issues/3716
-  function run(address worldAddress, address deployerAddress) external {
-    // Specify a store so that you can use tables directly in PostDeploy
-    StoreSwitch.setStoreAddress(worldAddress);
-
-    // Start broadcasting transactions from the deployer account
-    vm.startBroadcast(deployerAddress);
-
-    postDeploy(worldAddress);
-
-    vm.stopBroadcast();
-  }
-
-  function postDeploy(address worldAddress) internal {
     IWorld world = IWorld(worldAddress);
 
     // Create the programs
@@ -78,5 +55,7 @@ contract PostDeploy is Script {
       SpawnTileProgram spawnTileProgram = new SpawnTileProgram(world);
       world.registerSystem(spawnTileProgramId, spawnTileProgram, false);
     }
+
+    vm.stopBroadcast();
   }
 }
