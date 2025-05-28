@@ -732,10 +732,6 @@ contract MineTest is DustTest {
     // This will set initial fluid level to max
     setObjectAtCoord(algaeCoord, ObjectTypes.Algae);
 
-    // Initialize the entity so it gets a fluid level
-    (EntityId algaeEntityId,) = TestEntityUtils.getOrCreateBlockAt(algaeCoord);
-    EntityFluidLevel._set(algaeEntityId, MAX_FLUID_LEVEL);
-
     // Verify fluid level is set
     uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(algaeCoord);
     assertEq(fluidLevel, MAX_FLUID_LEVEL, "Algae should have max fluid level");

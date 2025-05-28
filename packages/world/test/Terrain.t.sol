@@ -289,7 +289,7 @@ contract TerrainTest is DustTest {
 
     // Verify the entity hasn't been initialized yet
     EntityId entityId = EntityTypeLib.encodeBlock(waterCoord);
-    assertFalse(entityId._exists(), "Water block should not be initialized as entity yet");
+    assertFalse(entityId.exists(), "Water block should not be initialized as entity yet");
   }
 
   function testGetFluidLevelForNonWaterTerrainBlocks() public {

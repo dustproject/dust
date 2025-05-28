@@ -728,11 +728,6 @@ contract MoveTest is DustTest {
     setObjectAtCoord(path[2], ObjectTypes.Water);
     setObjectAtCoord(path[3], ObjectTypes.Air);
 
-    // Also set ground beneath
-    for (uint256 i = 0; i < path.length; i++) {
-      setObjectAtCoord(path[i] - vec3(0, 1, 0), ObjectTypes.Stone);
-    }
-
     vm.prank(alice);
     world.move(aliceEntityId, path);
 
