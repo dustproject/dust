@@ -5465,6 +5465,11 @@ contract ObjectTypeTest is DustTest {
       assertTrue(ObjectTypes.Coral.spawnsWithFluid(), "spawnsWithFluid");
       assertTrue(ObjectTypes.SeaAnemone.spawnsWithFluid(), "spawnsWithFluid");
       assertTrue(ObjectTypes.Algae.spawnsWithFluid(), "spawnsWithFluid");
+      assertTrue(ObjectTypes.HornCoralBlock.spawnsWithFluid(), "spawnsWithFluid");
+      assertTrue(ObjectTypes.FireCoralBlock.spawnsWithFluid(), "spawnsWithFluid");
+      assertTrue(ObjectTypes.TubeCoralBlock.spawnsWithFluid(), "spawnsWithFluid");
+      assertTrue(ObjectTypes.BubbleCoralBlock.spawnsWithFluid(), "spawnsWithFluid");
+      assertTrue(ObjectTypes.BrainCoralBlock.spawnsWithFluid(), "spawnsWithFluid");
       assertFalse(ObjectTypes.Null.spawnsWithFluid(), "!spawnsWithFluid");
       assertFalse(ObjectTypes.Air.spawnsWithFluid(), "!spawnsWithFluid");
       assertFalse(ObjectTypes.Stone.spawnsWithFluid(), "!spawnsWithFluid");
@@ -5562,11 +5567,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.VinesBush.spawnsWithFluid(), "!spawnsWithFluid");
       assertFalse(ObjectTypes.IvyVine.spawnsWithFluid(), "!spawnsWithFluid");
       assertFalse(ObjectTypes.HempBush.spawnsWithFluid(), "!spawnsWithFluid");
-      assertFalse(ObjectTypes.HornCoralBlock.spawnsWithFluid(), "!spawnsWithFluid");
-      assertFalse(ObjectTypes.FireCoralBlock.spawnsWithFluid(), "!spawnsWithFluid");
-      assertFalse(ObjectTypes.TubeCoralBlock.spawnsWithFluid(), "!spawnsWithFluid");
-      assertFalse(ObjectTypes.BubbleCoralBlock.spawnsWithFluid(), "!spawnsWithFluid");
-      assertFalse(ObjectTypes.BrainCoralBlock.spawnsWithFluid(), "!spawnsWithFluid");
       assertFalse(ObjectTypes.SpiderWeb.spawnsWithFluid(), "!spawnsWithFluid");
       assertFalse(ObjectTypes.Bone.spawnsWithFluid(), "!spawnsWithFluid");
       assertFalse(ObjectTypes.GoldenMushroom.spawnsWithFluid(), "!spawnsWithFluid");
