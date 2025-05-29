@@ -15,6 +15,7 @@ import { BedProgram } from "../src/programs/BedProgram.sol";
 import { ChestProgram } from "../src/programs/ChestProgram.sol";
 import { ForceFieldProgram } from "../src/programs/ForceFieldProgram.sol";
 import { SpawnTileProgram } from "../src/programs/SpawnTileProgram.sol";
+import { TextSignProgram } from "../src/programs/TextSignProgram.sol";
 
 bytes14 constant DEFAULT_NAMESPACE = "dfprograms_1";
 
@@ -54,6 +55,12 @@ contract PostDeploy is DustScript {
     if (Systems.getSystem(spawnTileProgramId) == address(0)) {
       SpawnTileProgram spawnTileProgram = new SpawnTileProgram(world);
       world.registerSystem(spawnTileProgramId, spawnTileProgram, false);
+    }
+    ResourceId textSignProgramId =
+      WorldResourceIdLib.encode({ typeId: RESOURCE_SYSTEM, namespace: DEFAULT_NAMESPACE, name: "TextSignProgram" });
+    if (Systems.getSystem(textSignProgramId) == address(0)) {
+      TextSignProgram textSignProgram = new TextSignProgram(world);
+      world.registerSystem(textSignProgramId, textSignProgram, false);
     }
 
     vm.stopBroadcast();
