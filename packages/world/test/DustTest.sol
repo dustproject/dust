@@ -14,6 +14,7 @@ import { Direction } from "../src/codegen/common.sol";
 import {
   CHUNK_SIZE,
   DEFAULT_MINE_ENERGY_COST,
+  MAX_FLUID_LEVEL,
   MAX_PLAYER_ENERGY,
   PLAYER_ENERGY_DRAIN_RATE,
   REGION_SIZE
@@ -26,6 +27,7 @@ import { ObjectTypes } from "../src/ObjectType.sol";
 import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
+import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
@@ -180,33 +182,16 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     }
   }
 
-  function _getAirChunk() internal pure returns (uint8[][][] memory chunk) {
-    chunk = _getChunk(ObjectTypes.Air);
-  }
-
   function setupAirChunk(Vec3 coord) internal {
-    uint8[][][] memory chunk = _getAirChunk();
-    uint8 biome = 1;
-    bool isSurface = true;
-    bytes memory encodedChunk = encodeChunk(biome, isSurface, chunk);
-    Vec3 chunkCoord = coord.toChunkCoord();
-    Vec3 regionCoord = chunkCoord.floorDiv(REGION_SIZE / CHUNK_SIZE);
-    RegionMerkleRoot.set(regionCoord.x(), regionCoord.z(), TerrainLib._getChunkLeafHash(chunkCoord, encodedChunk));
-    bytes32[] memory merkleProof = new bytes32[](0);
-
-    world.exploreChunk(chunkCoord, encodedChunk, merkleProof);
-
-    Vec3 shardCoord = coord.toLocalEnergyPoolShardCoord();
-    LocalEnergyPool.set(shardCoord, 1e18);
+    setupChunk(coord, 1, ObjectTypes.Air);
   }
 
   function _getWaterChunk() internal pure returns (uint8[][][] memory chunk) {
     chunk = _getChunk(ObjectTypes.Water);
   }
 
-  function setupWaterChunk(Vec3 coord) internal {
-    uint8[][][] memory chunk = _getWaterChunk();
-    uint8 biome = 2;
+  function setupChunk(Vec3 coord, uint8 biome, ObjectType objectType) internal {
+    uint8[][][] memory chunk = _getChunk(objectType);
     bool isSurface = true;
     bytes memory encodedChunk = encodeChunk(biome, isSurface, chunk);
     Vec3 chunkCoord = coord.toChunkCoord();
@@ -218,6 +203,10 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
 
     Vec3 shardCoord = coord.toLocalEnergyPoolShardCoord();
     LocalEnergyPool.set(shardCoord, 1e18);
+  }
+
+  function setupWaterChunk(Vec3 coord) internal {
+    setupChunk(coord, 2, ObjectTypes.Water);
   }
 
   function setTerrainAtCoord(Vec3 coord, ObjectType objectType) internal {
@@ -251,6 +240,9 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     EntityObjectType.set(entityId, objectType);
     EntityPosition.set(entityId, coord);
     Mass.set(entityId, ObjectPhysics.getMass(objectType));
+    if (objectType.spawnsWithFluid()) {
+      EntityFluidLevel.set(entityId, MAX_FLUID_LEVEL);
+    }
 
     Vec3[] memory coords = objectType.getRelativeCoords(coord, orientation);
     // Only iterate through relative schema coords
@@ -270,7 +262,9 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
 
   function setupWaterChunkWithPlayer() internal returns (address, EntityId, Vec3) {
     setupWaterChunk(vec3(0, 0, 0));
-    return spawnPlayerOnAirChunk(vec3(0, 1, 0));
+    Vec3 spawnCoord = vec3(0, 1, 0);
+    (address alice, EntityId aliceEntityId) = createTestPlayer(spawnCoord);
+    return (alice, aliceEntityId, spawnCoord);
   }
 
   function spawnPlayerOnAirChunk(Vec3 spawnCoord) internal returns (address, EntityId, Vec3) {

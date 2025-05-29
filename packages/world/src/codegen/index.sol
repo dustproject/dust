@@ -7,6 +7,7 @@ import { ObjectPhysics, ObjectPhysicsData } from "./tables/ObjectPhysics.sol";
 import { Recipes, RecipesData } from "./tables/Recipes.sol";
 import { InitialEnergyPool } from "./tables/InitialEnergyPool.sol";
 import { EntityObjectType } from "./tables/EntityObjectType.sol";
+import { EntityFluidLevel } from "./tables/EntityFluidLevel.sol";
 import { EntityPosition, EntityPositionData } from "./tables/EntityPosition.sol";
 import { EntityOrientation } from "./tables/EntityOrientation.sol";
 import { Mass } from "./tables/Mass.sol";

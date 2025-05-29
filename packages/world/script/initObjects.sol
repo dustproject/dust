@@ -114,7 +114,6 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.BrainCoralBlock, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Snow, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Ice, ObjectPhysicsData({ mass: 200000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.Magma, ObjectPhysicsData({ mass: 500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.SpiderWeb, ObjectPhysicsData({ mass: 300000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Bone, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.CoalOre, ObjectPhysicsData({ mass: 50000000000000000, energy: 0 }));

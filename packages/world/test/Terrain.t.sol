@@ -4,17 +4,25 @@ pragma solidity >=0.8.24;
 import { DustTest } from "./DustTest.sol";
 
 import {
-  CHUNK_SIZE, INITIAL_ENERGY_PER_VEGETATION, INITIAL_LOCAL_ENERGY_BUFFER, REGION_SIZE
+  CHUNK_SIZE,
+  INITIAL_ENERGY_PER_VEGETATION,
+  INITIAL_LOCAL_ENERGY_BUFFER,
+  MAX_FLUID_LEVEL,
+  REGION_SIZE
 } from "../src/Constants.sol";
+import { EntityId, EntityTypeLib } from "../src/EntityId.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 import { ObjectTypes } from "../src/ObjectType.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 
+import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
 import { RegionMerkleRoot } from "../src/codegen/tables/RegionMerkleRoot.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { BIOME_PADDING, SURFACE_PADDING, TerrainLib, VERSION_PADDING } from "../src/systems/libraries/TerrainLib.sol";
 import { InitialEnergyPool, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 import { MockChunk, MockVegetation } from "./mockData.sol";
+
+import { TestEntityUtils } from "./utils/TestUtils.sol";
 import { encodeChunk } from "./utils/encodeChunk.sol";
 
 contract TerrainTest is DustTest {
@@ -266,5 +274,90 @@ contract TerrainTest is DustTest {
   function testExploreRegionEnergy_Fail_InvalidMerkleProof() public {
     vm.expectRevert("Invalid merkle proof");
     IWorld(worldAddress).exploreRegionEnergy(vec3(0, 0, 0), 100, new bytes32[](0));
+  }
+
+  // Fluid level tests
+  function testGetFluidLevelForTerrainWaterBlocks() public {
+    // Setup a test chunk with water blocks
+    Vec3 chunkCoord = vec3(0, 0, 0);
+    setupWaterChunk(chunkCoord);
+
+    // Test that water blocks in terrain (not initialized as entities) return fluid level 15
+    Vec3 waterCoord = chunkCoord.mul(CHUNK_SIZE) + vec3(8, 10, 8);
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(waterCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Water terrain block should have max fluid level");
+
+    // Verify the entity hasn't been initialized yet
+    EntityId entityId = EntityTypeLib.encodeBlock(waterCoord);
+    assertFalse(entityId.exists(), "Water block should not be initialized as entity yet");
+  }
+
+  function testGetFluidLevelForNonWaterTerrainBlocks() public {
+    // Setup a flat chunk
+    Vec3 chunkCoord = vec3(0, 0, 0);
+    setupFlatChunk(chunkCoord);
+
+    // Test that non-water blocks return fluid level 0
+    Vec3 grassCoord = chunkCoord.mul(CHUNK_SIZE) + vec3(8, 12, 8);
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(grassCoord);
+    assertEq(fluidLevel, 0, "Non-water terrain block should have 0 fluid level");
+  }
+
+  function testGetFluidLevelForAllSpawnsWithFluidTypes() public {
+    setupAirChunk(vec3(0, 0, 0));
+
+    // Test all object types that spawn with fluid
+    ObjectType[5] memory fluidObjects =
+      [ObjectTypes.Water, ObjectTypes.Lava, ObjectTypes.Coral, ObjectTypes.SeaAnemone, ObjectTypes.Algae];
+
+    for (uint256 i = 0; i < fluidObjects.length; i++) {
+      Vec3 coord = vec3(int32(int256(i)), 0, 0);
+      setTerrainAtCoord(coord, fluidObjects[i]);
+
+      uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(coord);
+      assertEq(fluidLevel, MAX_FLUID_LEVEL, "Terrain should have max fluid level");
+    }
+  }
+
+  function testFluidLevelAfterEntityInitialization() public {
+    // Setup water chunk
+    Vec3 chunkCoord = vec3(0, 0, 0);
+    setupWaterChunk(chunkCoord);
+
+    Vec3 waterCoord = chunkCoord.mul(CHUNK_SIZE) + vec3(8, 10, 8);
+
+    // Initialize the entity by calling getOrCreateBlockAt
+    (EntityId entityId, ObjectType objectType) = TestEntityUtils.getOrCreateBlockAt(waterCoord);
+
+    assertEq(objectType, ObjectTypes.Water, "Should be water block");
+    assertTrue(entityId.exists(), "Entity should now exist");
+
+    // Check fluid level is still 15 after initialization
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(waterCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Water entity should maintain max fluid level");
+
+    // Verify it's stored in the table
+    uint8 storedLevel = EntityFluidLevel.get(entityId);
+    assertEq(storedLevel, MAX_FLUID_LEVEL, "Stored fluid level should be max");
+  }
+
+  function testNonFluidBlocksDoNotGetFluidLevel() public {
+    Vec3 chunkCoord = vec3(0, 0, 0);
+    setupFlatChunk(chunkCoord);
+
+    Vec3 dirtCoord = vec3(0, 0, 0);
+
+    // Initialize a dirt block entity
+    (EntityId entityId, ObjectType objectType) = TestEntityUtils.getOrCreateBlockAt(dirtCoord);
+
+    assertEq(objectType, ObjectTypes.Dirt, "Should be dirt block");
+
+    // Check fluid level is 0
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(dirtCoord);
+    assertEq(fluidLevel, 0, "Dirt block should have 0 fluid level");
+
+    // Verify no fluid level is stored in the table (defaults to 0)
+    uint8 storedLevel = EntityFluidLevel.get(entityId);
+    assertEq(storedLevel, 0, "No fluid level should be stored for dirt");
   }
 }

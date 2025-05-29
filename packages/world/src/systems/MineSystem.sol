@@ -11,6 +11,7 @@ import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
 
+import { EntityFluidLevel } from "../codegen/tables/EntityFluidLevel.sol";
 import { EntityOrientation } from "../codegen/tables/EntityOrientation.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
@@ -171,7 +172,8 @@ contract MineSystem is System {
       return;
     }
 
-    EntityObjectType._set(entityId, ObjectTypes.Air);
+    ObjectType replacementType = EntityFluidLevel._get(entityId) > 0 ? ObjectTypes.Water : ObjectTypes.Air;
+    EntityObjectType._set(entityId, replacementType);
 
     Vec3 aboveCoord = coord + vec3(0, 1, 0);
     EntityId above = EntityUtils.getMovableEntityAt(aboveCoord);

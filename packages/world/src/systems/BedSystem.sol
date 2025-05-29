@@ -41,16 +41,12 @@ contract BedSystem is System {
     require(bed._getObjectType() == ObjectTypes.Bed, "Not a bed");
 
     bed = bed.baseEntityId();
-    Vec3 bedCoord = bed._getPosition();
 
     require(!BedPlayer._getPlayerEntityId(bed)._exists(), "Bed full");
 
-    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
-    require(forceField._exists(), "Bed is not inside a forcefield");
+    Vec3 bedCoord = bed._getPosition();
 
-    uint128 depletedTime = increaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
-    PlayerBed._setBedEntityId(caller, bed);
-    BedPlayer._set(bed, caller, depletedTime);
+    BedLib.addPlayerToBed(caller, bed, bedCoord);
 
     PlayerUtils.removePlayerFromGrid(caller, callerCoord);
 
@@ -66,22 +62,14 @@ contract BedSystem is System {
 
     caller._validateCaller();
 
-    EntityId bed = PlayerBed._getBedEntityId(caller);
-    require(bed._exists(), "Player is not sleeping");
-
-    Vec3 bedCoord = bed._getPosition();
+    (EntityId bed, Vec3 bedCoord) = BedLib.getPlayerBed(caller);
     require(bedCoord.inSurroundingCube(spawnCoord, MAX_RESPAWN_HALF_WIDTH), "Bed is too far away");
 
     require(!MoveLib._gravityApplies(spawnCoord), "Cannot spawn player here as gravity applies");
 
-    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
-
-    uint128 depletedTime = decreaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
-
-    EnergyData memory playerData = BedLib.updateSleepingPlayer(caller, bed, depletedTime, bedCoord);
+    EnergyData memory playerData = BedLib.removePlayerFromBed(caller, bed, bedCoord);
     require(playerData.energy > 0, "Player died while sleeping");
 
-    PlayerUtils.removePlayerFromBed(caller, bed);
     PlayerUtils.addPlayerToGrid(caller, spawnCoord);
 
     bytes memory onWakeup = abi.encodeCall(IWakeupHook.onWakeup, (caller, bed, extraData));
@@ -93,38 +81,46 @@ contract BedSystem is System {
   function removeDeadPlayerFromBed(EntityId player, Vec3 dropCoord) public {
     checkWorldStatus();
 
-    EntityId bed = PlayerBed._getBedEntityId(player);
-    require(bed._exists(), "Player is not in a bed");
-
-    Vec3 bedCoord = bed._getPosition();
+    (EntityId bed, Vec3 bedCoord) = BedLib.getPlayerBed(player);
 
     require(bedCoord.inSurroundingCube(dropCoord, MAX_RESPAWN_HALF_WIDTH), "Drop location is too far from bed");
 
     (EntityId drop, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(dropCoord);
     require(objectType.isPassThrough(), "Cannot drop items on a non-passable block");
 
-    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
-
-    uint128 depletedTime = decreaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
-    EnergyData memory playerData = BedLib.updateSleepingPlayer(player, bed, depletedTime, bedCoord);
+    EnergyData memory playerData = BedLib.removePlayerFromBed(player, bed, bedCoord);
     require(playerData.energy == 0, "Player is not dead");
 
-    BedLib.transferInventory(player, drop);
-
-    PlayerUtils.removePlayerFromBed(player, bed);
+    InventoryUtils.transferAll(player, drop);
   }
 }
 
 // To avoid reaching bytecode size limit
 library BedLib {
-  function transferInventory(EntityId player, EntityId bed) public {
-    InventoryUtils.transferAll(player, bed);
+  function addPlayerToBed(EntityId caller, EntityId bed, Vec3 bedCoord) public {
+    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
+    require(forceField._exists(), "Bed is not inside a forcefield");
+
+    uint128 depletedTime = increaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
+    PlayerBed._setBedEntityId(caller, bed);
+    BedPlayer._set(bed, caller, depletedTime);
   }
 
-  function updateSleepingPlayer(EntityId player, EntityId bed, uint128 depletedTime, Vec3 bedCoord)
-    public
-    returns (EnergyData memory)
-  {
-    return updateSleepingPlayerEnergy(player, bed, depletedTime, bedCoord);
+  function removePlayerFromBed(EntityId caller, EntityId bed, Vec3 bedCoord) public returns (EnergyData memory) {
+    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
+    uint128 depletedTime = decreaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
+
+    EnergyData memory playerData = updateSleepingPlayerEnergy(caller, bed, depletedTime, bedCoord);
+
+    PlayerUtils.removePlayerFromBed(caller, bed);
+    return playerData;
+  }
+
+  function getPlayerBed(EntityId player) public view returns (EntityId, Vec3) {
+    EntityId bed = PlayerBed._getBedEntityId(player);
+    require(bed._exists(), "Player is not in a bed");
+
+    Vec3 bedCoord = bed._getPosition();
+    return (bed, bedCoord);
   }
 }

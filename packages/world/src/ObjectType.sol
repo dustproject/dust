@@ -129,7 +129,7 @@ library ObjectTypes {
   ObjectType constant BrainCoralBlock = ObjectType.wrap(108);
   ObjectType constant Snow = ObjectType.wrap(109);
   ObjectType constant Ice = ObjectType.wrap(110);
-  ObjectType constant Magma = ObjectType.wrap(111);
+  ObjectType constant Lava = ObjectType.wrap(111);
   ObjectType constant SpiderWeb = ObjectType.wrap(112);
   ObjectType constant Bone = ObjectType.wrap(113);
   ObjectType constant CoalOre = ObjectType.wrap(114);
@@ -246,7 +246,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x1fffffffffffffffffffffffffffffffffffff0), 1)
+        let bit := and(shr(self, 0x1ffffffffff7ffffffffffffffffffffffffff0), 1)
         ok := bit
       }
     }
@@ -561,6 +561,28 @@ library ObjectTypeLib {
     }
   }
 
+  function spawnsWithFluid(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      // IDs in [0..255]
+      {
+        let bit := and(shr(self, 0x9fe0000000000000000000000004), 1)
+        ok := bit
+      }
+    }
+  }
+
+  function isWaterloggable(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      // IDs in [0..255]
+      {
+        let bit := and(shr(self, 0xe0000000000000000000000000), 1)
+        ok := bit
+      }
+    }
+  }
+
   // Category getters
   function getNonSolidTypes() internal pure returns (ObjectType[2] memory) {
     return [ObjectTypes.Air, ObjectTypes.Water];
@@ -570,9 +592,8 @@ library ObjectTypeLib {
     return [ObjectTypes.AnyPlank, ObjectTypes.AnyLog, ObjectTypes.AnyLeaf, ObjectTypes.AnyTerracotta];
   }
 
-  function getBlockTypes() internal pure returns (ObjectType[149] memory) {
+  function getBlockTypes() internal pure returns (ObjectType[148] memory) {
     return [
-      ObjectTypes.Magma,
       ObjectTypes.Stone,
       ObjectTypes.Deepslate,
       ObjectTypes.Granite,
@@ -1121,6 +1142,25 @@ library ObjectTypeLib {
 
   function getMachineTypes() internal pure returns (ObjectType[1] memory) {
     return [ObjectTypes.ForceField];
+  }
+
+  function getSpawnsWithFluidTypes() internal pure returns (ObjectType[10] memory) {
+    return [
+      ObjectTypes.Lava,
+      ObjectTypes.Water,
+      ObjectTypes.Coral,
+      ObjectTypes.SeaAnemone,
+      ObjectTypes.Algae,
+      ObjectTypes.HornCoralBlock,
+      ObjectTypes.FireCoralBlock,
+      ObjectTypes.TubeCoralBlock,
+      ObjectTypes.BubbleCoralBlock,
+      ObjectTypes.BrainCoralBlock
+    ];
+  }
+
+  function getWaterloggableTypes() internal pure returns (ObjectType[3] memory) {
+    return [ObjectTypes.Coral, ObjectTypes.SeaAnemone, ObjectTypes.Algae];
   }
 
   // Specialized getters

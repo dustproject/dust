@@ -33,6 +33,7 @@ import {
   DEFAULT_WOODEN_TOOL_MULTIPLIER,
   MACHINE_ENERGY_DRAIN_RATE,
   MAX_ENTITY_INFLUENCE_HALF_WIDTH,
+  MAX_FLUID_LEVEL,
   MAX_PLAYER_ENERGY,
   PLAYER_ENERGY_DRAIN_RATE,
   SPECIALIZED_WOODEN_TOOL_MULTIPLIER,
@@ -40,7 +41,8 @@ import {
 } from "../src/Constants.sol";
 import { ObjectAmount, ObjectType, ObjectTypes } from "../src/ObjectType.sol";
 
-import { EntityId } from "../src/EntityId.sol";
+import { EntityId, EntityTypeLib } from "../src/EntityId.sol";
+import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
 
 import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
@@ -719,5 +721,100 @@ contract MineTest is DustTest {
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
 
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+  }
+
+  // Water/fluid tests for mining
+  function testMineUnderwaterBlockReplacesWithWater() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupWaterChunkWithPlayer();
+
+    // Place an algae block underwater
+    Vec3 algaeCoord = playerCoord + vec3(1, 0, 0);
+    // This will set initial fluid level to max
+    setObjectAtCoord(algaeCoord, ObjectTypes.Algae);
+
+    // Verify fluid level is set
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(algaeCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Algae should have max fluid level");
+
+    // Mine the algae
+    vm.prank(alice);
+    world.mineUntilDestroyed(aliceEntityId, algaeCoord, "");
+
+    // Check that the block is replaced with water, not air
+    (EntityId minedEntityId, ObjectType minedType) = TestEntityUtils.getBlockAt(algaeCoord);
+    assertEq(minedType, ObjectTypes.Water, "Mined underwater block should be replaced with water");
+    assertEq(EntityObjectType.get(minedEntityId), ObjectTypes.Water, "Entity should be water");
+
+    // Fluid level should still be max
+    fluidLevel = TestEntityUtils.getFluidLevelAt(algaeCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Water replacement should have max fluid level");
+  }
+
+  function testMineDryBlockReplacedWithAir() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Place a algae block in air
+    Vec3 algaeCoord = playerCoord + vec3(1, 0, 0);
+    setObjectAtCoord(algaeCoord, ObjectTypes.Algae);
+
+    (EntityId algaeEntityId,) = TestEntityUtils.getBlockAt(algaeCoord);
+    EntityFluidLevel.set(algaeEntityId, 0); // Set fluid level to 0 to simulate dry block
+
+    // Mine the algae
+    vm.prank(alice);
+    world.mineUntilDestroyed(aliceEntityId, algaeCoord, "");
+
+    // Check that the block is replaced with air
+    (EntityId minedEntityId, ObjectType minedType) = TestEntityUtils.getBlockAt(algaeCoord);
+    assertEq(minedType, ObjectTypes.Air, "Mined dry block should be replaced with air");
+    assertEq(EntityObjectType.get(minedEntityId), ObjectTypes.Air, "Entity should be air");
+  }
+
+  function testMineBlockWithFluidFromTerrain() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupWaterChunkWithPlayer();
+
+    // Find a water block from terrain that hasn't been initialized as entity
+    Vec3 waterCoord = playerCoord + vec3(2, 0, 0);
+
+    // Place a mineable block there
+    setTerrainAtCoord(waterCoord, ObjectTypes.Algae);
+
+    // Verify fluid level comes from terrain type
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(waterCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Algae should have max fluid level from terrain");
+
+    vm.prank(alice);
+    world.mineUntilDestroyed(aliceEntityId, waterCoord, "");
+
+    // Should be replaced with water
+    (, ObjectType minedType) = TestEntityUtils.getBlockAt(waterCoord);
+    assertEq(minedType, ObjectTypes.Water, "Should be replaced with water");
+  }
+
+  function testMineBlockThatSpawnsWithFluidNonTerrain() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Test each block type that spawns with fluid
+    ObjectType[3] memory fluidBlocks = [ObjectTypes.Coral, ObjectTypes.SeaAnemone, ObjectTypes.Algae];
+
+    for (uint256 i = 0; i < fluidBlocks.length; i++) {
+      Vec3 blockCoord = playerCoord + vec3(int32(int256(i + 1)), 0, 0);
+      ObjectType blockType = fluidBlocks[i];
+
+      // Place the block
+      setObjectAtCoord(blockCoord, blockType);
+
+      // Verify it has fluid level
+      uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(blockCoord);
+      assertEq(fluidLevel, MAX_FLUID_LEVEL, "Block that spawns with fluid should have max level");
+
+      // Mine it
+      vm.prank(alice);
+      world.mineUntilDestroyed(aliceEntityId, blockCoord, "");
+
+      // Should be replaced with water (except for water itself which becomes air)
+      (, ObjectType minedType) = TestEntityUtils.getBlockAt(blockCoord);
+      assertEq(minedType, ObjectTypes.Water, "Blocks with fluid should be replaced with water when mined");
+    }
   }
 }

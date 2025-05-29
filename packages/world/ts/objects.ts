@@ -9,7 +9,7 @@ export const objectNames = [
   "Null",
   "Air",
   "Water",
-  "Magma",
+  "Lava",
   "Stone",
   "Bedrock",
   "Deepslate",
@@ -370,7 +370,7 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   { name: "BrainCoralBlock", mass: 37500000000000000n },
   { name: "Snow", mass: 300000000000000n },
   { name: "Ice", mass: 200000000000000n },
-  { name: "Magma", mass: 500000000000000n },
+  { name: "Lava" },
   { name: "SpiderWeb", mass: 300000000000000n },
   { name: "Bone", mass: 37500000000000000n },
 
@@ -655,7 +655,6 @@ export const categories: Record<string, Category> = {
   },
   Block: {
     objects: [
-      "Magma",
       "Stone",
       "Deepslate",
       "Granite",
@@ -1181,5 +1180,23 @@ export const categories: Record<string, Category> = {
   },
   Machine: {
     objects: ["ForceField"],
+  },
+  SpawnsWithFluid: {
+    checkName: "spawnsWithFluid",
+    objects: [
+      "Lava",
+      "Water",
+      "Coral",
+      "SeaAnemone",
+      "Algae",
+      "HornCoralBlock",
+      "FireCoralBlock",
+      "TubeCoralBlock",
+      "BubbleCoralBlock",
+      "BrainCoralBlock",
+    ],
+  },
+  Waterloggable: {
+    objects: ["Coral", "SeaAnemone", "Algae"],
   },
 } as const;

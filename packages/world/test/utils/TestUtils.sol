@@ -84,6 +84,18 @@ library TestEntityUtils {
   function getFragmentAt(Vec3 fragmentCoord) public asWorld returns (EntityId) {
     return EntityUtils.getFragmentAt(fragmentCoord);
   }
+
+  function getFluidLevelAt(Vec3 coord) public asWorld returns (uint8) {
+    return EntityUtils.getFluidLevelAt(coord);
+  }
+
+  function getOrCreateBlockAt(Vec3 coord) public asWorld returns (EntityId, ObjectType) {
+    return EntityUtils.getOrCreateBlockAt(coord);
+  }
+
+  function createUniqueEntity(ObjectType objectType) public asWorld returns (EntityId) {
+    return EntityUtils.createUniqueEntity(objectType);
+  }
 }
 
 library TestPlayerUtils {

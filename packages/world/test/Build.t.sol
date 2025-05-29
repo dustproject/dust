@@ -19,14 +19,16 @@ import { DustTest } from "./DustTest.sol";
 
 import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
-import { BUILD_ENERGY_COST, CHUNK_SIZE, MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "../src/Constants.sol";
+import { BUILD_ENERGY_COST, CHUNK_SIZE, MAX_ENTITY_INFLUENCE_HALF_WIDTH, MAX_FLUID_LEVEL } from "../src/Constants.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
 import { NonPassableBlock } from "../src/systems/libraries/MoveLib.sol";
 
+import { EntityId, EntityTypeLib } from "../src/EntityId.sol";
 import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
+import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
@@ -290,7 +292,7 @@ contract BuildTest is DustTest {
     uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot build on a non-air block");
+    vm.expectRevert("Can only build on air or water");
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
     setObjectAtCoord(buildCoord, ObjectTypes.TextSign);
@@ -298,11 +300,11 @@ contract BuildTest is DustTest {
     Vec3 topCoord = buildCoord + vec3(0, 1, 0);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot build on a non-air block");
+    vm.expectRevert("Can only build on air or water");
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
     vm.prank(alice);
-    vm.expectRevert("Cannot build on a non-air block");
+    vm.expectRevert("Can only build on air or water");
     world.build(aliceEntityId, topCoord, inventorySlot, "");
   }
 
@@ -502,5 +504,163 @@ contract BuildTest is DustTest {
     vm.prank(alice);
     vm.expectRevert("Player is sleeping");
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
+  }
+
+  // Water building tests
+  function testBuildWaterloggableBlockOnWaterTerrain() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupWaterChunkWithPlayer();
+
+    // Find a water block from terrain
+    Vec3 buildCoord = vec3(playerCoord.x() + 1, playerCoord.y(), playerCoord.z());
+    assertEq(TerrainLib.getBlockType(buildCoord), ObjectTypes.Water, "Build coord should be water from terrain");
+
+    // Verify it has fluid level from terrain
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(buildCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Water should have max fluid level");
+
+    // Algae is waterloggable
+    ObjectType buildObjectType = ObjectTypes.Algae;
+    TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
+
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
+
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
+
+    vm.prank(alice);
+    startGasReport("build waterloggable block on water terrain");
+    world.build(aliceEntityId, buildCoord, inventorySlot, "");
+    endGasReport();
+
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity should be algae");
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
+
+    // Waterloggable blocks should maintain fluid level
+    fluidLevel = TestEntityUtils.getFluidLevelAt(buildCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Waterloggable block should maintain water's fluid level");
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+    assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
+  }
+
+  function testBuildNonWaterloggableBlockOnWaterTerrain() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupWaterChunkWithPlayer();
+
+    Vec3 buildCoord = vec3(playerCoord.x() + 1, playerCoord.y(), playerCoord.z());
+    assertEq(TerrainLib.getBlockType(buildCoord), ObjectTypes.Water, "Build coord should be water from terrain");
+
+    // Grass is NOT waterloggable (it's solid)
+    ObjectType buildObjectType = ObjectTypes.Grass;
+    TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
+
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
+
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
+
+    vm.prank(alice);
+    startGasReport("build non-waterloggable block on water terrain");
+    world.build(aliceEntityId, buildCoord, inventorySlot, "");
+    endGasReport();
+
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity should be grass");
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
+
+    // Non-waterloggable blocks should remove fluid level
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(buildCoord);
+    assertEq(fluidLevel, 0, "Non-waterloggable block should have no fluid level");
+
+    // Verify the fluid level was deleted from storage
+    uint8 storedLevel = EntityFluidLevel._get(buildEntityId);
+    assertEq(storedLevel, 0, "Fluid level should be deleted from storage");
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+    assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
+  }
+
+  function testBuildWaterloggableBlockOnWaterNonTerrain() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    // Create a water block as entity (not terrain)
+    Vec3 buildCoord = vec3(playerCoord.x() + 1, playerCoord.y(), playerCoord.z());
+    setObjectAtCoord(buildCoord, ObjectTypes.Water);
+
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(buildCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Water entity should have max fluid level");
+
+    ObjectType buildObjectType = ObjectTypes.Algae;
+    TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
+
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
+
+    vm.prank(alice);
+    startGasReport("build waterloggable block on water non-terrain");
+    world.build(aliceEntityId, buildCoord, inventorySlot, "");
+    endGasReport();
+
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity should be algae");
+
+    // Waterloggable blocks should maintain fluid level
+    fluidLevel = TestEntityUtils.getFluidLevelAt(buildCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Waterloggable block should maintain water's fluid level");
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+  }
+
+  function testBuildNonWaterloggableBlockOnWaterNonTerrain() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    Vec3 buildCoord = vec3(playerCoord.x() + 1, playerCoord.y(), playerCoord.z());
+    setObjectAtCoord(buildCoord, ObjectTypes.Water);
+
+    ObjectType buildObjectType = ObjectTypes.Grass;
+    TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
+
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
+
+    vm.prank(alice);
+    startGasReport("build non-waterloggable block on water non-terrain");
+    world.build(aliceEntityId, buildCoord, inventorySlot, "");
+    endGasReport();
+
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity should be grass");
+
+    // Non-waterloggable blocks should remove fluid level
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(buildCoord);
+    assertEq(fluidLevel, 0, "Non-waterloggable block should have no fluid level");
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+  }
+
+  function testJumpBuildOnWater() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupWaterChunkWithPlayer();
+
+    // Player is in water, try to jump build
+    ObjectType buildObjectType = ObjectTypes.Stone;
+    TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
+
+    vm.prank(alice);
+    world.jumpBuild(aliceEntityId, inventorySlot, "");
+
+    // Verify player moved up
+    Vec3 newPlayerCoord = EntityPosition.get(aliceEntityId);
+    assertEq(newPlayerCoord, playerCoord + vec3(0, 1, 0), "Player should move up");
+
+    // Verify block was built at original position
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(playerCoord);
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity should be stone");
+
+    // Non-waterloggable block should remove fluid
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(playerCoord);
+    assertEq(fluidLevel, 0, "Stone should have no fluid level");
   }
 }

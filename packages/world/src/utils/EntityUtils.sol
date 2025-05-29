@@ -3,6 +3,7 @@ pragma solidity >=0.8.24;
 
 import { WorldContextConsumerLib } from "@latticexyz/world/src/WorldContext.sol";
 
+import { EntityFluidLevel } from "../codegen/tables/EntityFluidLevel.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
@@ -10,9 +11,9 @@ import { UniqueEntity } from "../codegen/tables/UniqueEntity.sol";
 import { TerrainLib } from "../systems/libraries/TerrainLib.sol";
 import { EntityPosition, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
 
+import { MAX_FLUID_LEVEL } from "../Constants.sol";
 import { EntityId, EntityTypeLib } from "../EntityId.sol";
 import { ObjectType, ObjectTypes } from "../ObjectType.sol";
-
 import { Vec3 } from "../Vec3.sol";
 
 library EntityUtils {
@@ -23,6 +24,16 @@ library EntityUtils {
     ObjectType objectType = entityId._getObjectType();
 
     return objectType.isNull() ? TerrainLib._getBlockType(coord) : objectType;
+  }
+
+  function getFluidLevelAt(Vec3 coord) internal view returns (uint8) {
+    EntityId entityId = EntityTypeLib.encodeBlock(coord);
+    ObjectType objectType = entityId._getObjectType();
+    if (objectType.isNull() && TerrainLib._getBlockType(coord).spawnsWithFluid()) {
+      return MAX_FLUID_LEVEL; // Default fluid level for uninitialized blocks
+    }
+
+    return EntityFluidLevel._get(entityId);
   }
 
   /// @notice Get the object type id at a given coordinate.
@@ -45,6 +56,10 @@ library EntityUtils {
     if (!entityId._exists()) {
       _initEntity(entityId, objectType);
       EntityPosition._set(entityId, coord);
+
+      if (objectType.spawnsWithFluid()) {
+        EntityFluidLevel._set(entityId, MAX_FLUID_LEVEL); // Initialize fluid level for new blocks
+      }
     }
 
     return (entityId, objectType);
