@@ -290,7 +290,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x9fc00000000000000), 1)
+        let bit := and(shr(self, 0xffc00000000000000), 1)
         ok := bit
       }
     }
@@ -787,7 +787,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function getLeafTypes() internal pure returns (ObjectType[8] memory) {
+  function getLeafTypes() internal pure returns (ObjectType[10] memory) {
     return [
       ObjectTypes.OakLeaf,
       ObjectTypes.BirchLeaf,
@@ -796,7 +796,9 @@ library ObjectTypeLib {
       ObjectTypes.SpruceLeaf,
       ObjectTypes.AcaciaLeaf,
       ObjectTypes.DarkOakLeaf,
-      ObjectTypes.MangroveLeaf
+      ObjectTypes.MangroveLeaf,
+      ObjectTypes.AzaleaLeaf,
+      ObjectTypes.FloweringAzaleaLeaf
     ];
   }
 
