@@ -370,7 +370,7 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   { name: "BrainCoralBlock", mass: 37500000000000000n },
   { name: "Snow", mass: 300000000000000n },
   { name: "Ice", mass: 200000000000000n },
-  { name: "Lava", mass: 500000000000000n },
+  { name: "Lava" },
   { name: "SpiderWeb", mass: 300000000000000n },
   { name: "Bone", mass: 37500000000000000n },
 
@@ -1184,5 +1184,8 @@ export const categories: Record<string, Category> = {
   SpawnsWithFluid: {
     checkName: "spawnsWithFluid",
     objects: ["Lava", "Water", "Coral", "SeaAnemone", "Algae"],
+  },
+  Waterloggable: {
+    objects: ["Coral", "SeaAnemone", "Algae"],
   },
 } as const;

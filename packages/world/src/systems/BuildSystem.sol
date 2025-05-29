@@ -5,6 +5,7 @@ import { System } from "@latticexyz/world/src/System.sol";
 
 import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
+import { EntityFluidLevel } from "../codegen/tables/EntityFluidLevel.sol";
 
 import { DisabledExtraDrops } from "../codegen/tables/DisabledExtraDrops.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
@@ -113,12 +114,19 @@ library BuildLib {
   }
 
   function _addBlock(ObjectType buildType, Vec3 coord) internal returns (EntityId) {
-    (EntityId terrain, ObjectType terrainObjectType) = EntityUtils.getOrCreateBlockAt(coord);
-    require(terrainObjectType == ObjectTypes.Air, "Cannot build on a non-air block");
-    require(InventoryUtils.isEmpty(terrain), "Cannot build where there are dropped objects");
-    if (!buildType.isPassThrough()) {
-      require(!EntityUtils.getMovableEntityAt(coord)._exists(), "Cannot build on a movable entity");
+    (EntityId terrain, ObjectType terrainType) = EntityUtils.getOrCreateBlockAt(coord);
+
+    require(terrainType == ObjectTypes.Water || terrainType == ObjectTypes.Air, "Can only build on air or water");
+
+    if (terrainType == ObjectTypes.Water && !buildType.isWaterloggable()) {
+      EntityFluidLevel._deleteRecord(terrain);
     }
+
+    require(InventoryUtils.isEmpty(terrain), "Cannot build where there are dropped objects");
+
+    require(
+      buildType.isPassThrough() || !EntityUtils.getMovableEntityAt(coord)._exists(), "Cannot build on a movable entity"
+    );
 
     EntityObjectType._set(terrain, buildType);
 

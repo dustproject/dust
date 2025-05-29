@@ -572,6 +572,17 @@ library ObjectTypeLib {
     }
   }
 
+  function isWaterloggable(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      // IDs in [0..255]
+      {
+        let bit := and(shr(self, 0xe0000000000000000000000000), 1)
+        ok := bit
+      }
+    }
+  }
+
   // Category getters
   function getNonSolidTypes() internal pure returns (ObjectType[2] memory) {
     return [ObjectTypes.Air, ObjectTypes.Water];
@@ -1135,6 +1146,10 @@ library ObjectTypeLib {
 
   function getSpawnsWithFluidTypes() internal pure returns (ObjectType[5] memory) {
     return [ObjectTypes.Lava, ObjectTypes.Water, ObjectTypes.Coral, ObjectTypes.SeaAnemone, ObjectTypes.Algae];
+  }
+
+  function getWaterloggableTypes() internal pure returns (ObjectType[3] memory) {
+    return [ObjectTypes.Coral, ObjectTypes.SeaAnemone, ObjectTypes.Algae];
   }
 
   // Specialized getters

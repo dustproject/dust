@@ -290,7 +290,7 @@ contract BuildTest is DustTest {
     uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot build on a non-air block");
+    vm.expectRevert("Can only build on air or water");
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
     setObjectAtCoord(buildCoord, ObjectTypes.TextSign);
@@ -298,11 +298,11 @@ contract BuildTest is DustTest {
     Vec3 topCoord = buildCoord + vec3(0, 1, 0);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot build on a non-air block");
+    vm.expectRevert("Can only build on air or water");
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
     vm.prank(alice);
-    vm.expectRevert("Cannot build on a non-air block");
+    vm.expectRevert("Can only build on air or water");
     world.build(aliceEntityId, topCoord, inventorySlot, "");
   }
 
