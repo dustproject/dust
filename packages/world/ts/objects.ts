@@ -1183,7 +1183,18 @@ export const categories: Record<string, Category> = {
   },
   SpawnsWithFluid: {
     checkName: "spawnsWithFluid",
-    objects: ["Lava", "Water", "Coral", "SeaAnemone", "Algae"],
+    objects: [
+      "Lava",
+      "Water",
+      "Coral",
+      "SeaAnemone",
+      "Algae",
+      "HornCoralBlock",
+      "FireCoralBlock",
+      "TubeCoralBlock",
+      "BubbleCoralBlock",
+      "BrainCoralBlock",
+    ],
   },
   Waterloggable: {
     objects: ["Coral", "SeaAnemone", "Algae"],
