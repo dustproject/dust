@@ -1143,8 +1143,6 @@ contract ObjectTypeTest is DustTest {
       assertTrue(ObjectTypes.SpruceLeaf.isLeaf(), "isLeaf");
       assertTrue(ObjectTypes.AcaciaLeaf.isLeaf(), "isLeaf");
       assertTrue(ObjectTypes.DarkOakLeaf.isLeaf(), "isLeaf");
-      assertTrue(ObjectTypes.AzaleaLeaf.isLeaf(), "isLeaf");
-      assertTrue(ObjectTypes.FloweringAzaleaLeaf.isLeaf(), "isLeaf");
       assertTrue(ObjectTypes.MangroveLeaf.isLeaf(), "isLeaf");
       assertFalse(ObjectTypes.Null.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.Air.isLeaf(), "!isLeaf");
@@ -1216,6 +1214,8 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.DarkOakLog.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.MangroveLog.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.AnyLeaf.isLeaf(), "!isLeaf");
+      assertFalse(ObjectTypes.AzaleaLeaf.isLeaf(), "!isLeaf");
+      assertFalse(ObjectTypes.FloweringAzaleaLeaf.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.MangroveRoots.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.MuddyMangroveRoots.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.AzaleaFlower.isLeaf(), "!isLeaf");

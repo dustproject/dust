@@ -854,8 +854,6 @@ export const categories: Record<string, Category> = {
       "SpruceLeaf",
       "AcaciaLeaf",
       "DarkOakLeaf",
-      "AzaleaLeaf",
-      "FloweringAzaleaLeaf",
       "MangroveLeaf",
     ],
   },
