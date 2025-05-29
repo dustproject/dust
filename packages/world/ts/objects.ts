@@ -857,8 +857,6 @@ export const categories: Record<string, Category> = {
       "AzaleaLeaf",
       "FloweringAzaleaLeaf",
       "MangroveLeaf",
-      "MangroveRoots",
-      "MuddyMangroveRoots",
     ],
   },
   Plank: {
@@ -952,8 +950,6 @@ export const categories: Record<string, Category> = {
       "AzaleaLeaf",
       "FloweringAzaleaLeaf",
       "MangroveLeaf",
-      "MangroveRoots",
-      "MuddyMangroveRoots",
       "GoldenMushroom",
       "RedMushroom",
       "CoffeeBush",

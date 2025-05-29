@@ -290,7 +290,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x3ffc00000000000000), 1)
+        let bit := and(shr(self, 0xffc00000000000000), 1)
         ok := bit
       }
     }
@@ -459,7 +459,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x1ffffc003ffc00000000000000), 1)
+        let bit := and(shr(self, 0x1ffffc000ffc00000000000000), 1)
         ok := bit
       }
     }
@@ -766,7 +766,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function getLeafTypes() internal pure returns (ObjectType[12] memory) {
+  function getLeafTypes() internal pure returns (ObjectType[10] memory) {
     return [
       ObjectTypes.OakLeaf,
       ObjectTypes.BirchLeaf,
@@ -777,9 +777,7 @@ library ObjectTypeLib {
       ObjectTypes.DarkOakLeaf,
       ObjectTypes.AzaleaLeaf,
       ObjectTypes.FloweringAzaleaLeaf,
-      ObjectTypes.MangroveLeaf,
-      ObjectTypes.MangroveRoots,
-      ObjectTypes.MuddyMangroveRoots
+      ObjectTypes.MangroveLeaf
     ];
   }
 
@@ -874,7 +872,7 @@ library ObjectTypeLib {
     return [ObjectTypes.Player];
   }
 
-  function getExtraDropsTypes() internal pure returns (ObjectType[31] memory) {
+  function getExtraDropsTypes() internal pure returns (ObjectType[29] memory) {
     return [
       ObjectTypes.OakLeaf,
       ObjectTypes.BirchLeaf,
@@ -886,8 +884,6 @@ library ObjectTypeLib {
       ObjectTypes.AzaleaLeaf,
       ObjectTypes.FloweringAzaleaLeaf,
       ObjectTypes.MangroveLeaf,
-      ObjectTypes.MangroveRoots,
-      ObjectTypes.MuddyMangroveRoots,
       ObjectTypes.GoldenMushroom,
       ObjectTypes.RedMushroom,
       ObjectTypes.CoffeeBush,
