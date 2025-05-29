@@ -290,7 +290,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x3ffc00000000000000), 1)
+        let bit := and(shr(self, 0x9fc00000000000000), 1)
         ok := bit
       }
     }
@@ -459,7 +459,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x1ffffc003ffc00000000000000), 1)
+        let bit := and(shr(self, 0xd00c0009fc00000000000000), 1)
         ok := bit
       }
     }
@@ -787,7 +787,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function getLeafTypes() internal pure returns (ObjectType[12] memory) {
+  function getLeafTypes() internal pure returns (ObjectType[8] memory) {
     return [
       ObjectTypes.OakLeaf,
       ObjectTypes.BirchLeaf,
@@ -796,11 +796,7 @@ library ObjectTypeLib {
       ObjectTypes.SpruceLeaf,
       ObjectTypes.AcaciaLeaf,
       ObjectTypes.DarkOakLeaf,
-      ObjectTypes.AzaleaLeaf,
-      ObjectTypes.FloweringAzaleaLeaf,
-      ObjectTypes.MangroveLeaf,
-      ObjectTypes.MangroveRoots,
-      ObjectTypes.MuddyMangroveRoots
+      ObjectTypes.MangroveLeaf
     ];
   }
 
@@ -895,7 +891,7 @@ library ObjectTypeLib {
     return [ObjectTypes.Player];
   }
 
-  function getExtraDropsTypes() internal pure returns (ObjectType[31] memory) {
+  function getExtraDropsTypes() internal pure returns (ObjectType[13] memory) {
     return [
       ObjectTypes.OakLeaf,
       ObjectTypes.BirchLeaf,
@@ -904,30 +900,12 @@ library ObjectTypeLib {
       ObjectTypes.SpruceLeaf,
       ObjectTypes.AcaciaLeaf,
       ObjectTypes.DarkOakLeaf,
-      ObjectTypes.AzaleaLeaf,
-      ObjectTypes.FloweringAzaleaLeaf,
       ObjectTypes.MangroveLeaf,
-      ObjectTypes.MangroveRoots,
-      ObjectTypes.MuddyMangroveRoots,
-      ObjectTypes.GoldenMushroom,
-      ObjectTypes.RedMushroom,
-      ObjectTypes.CoffeeBush,
-      ObjectTypes.StrawberryBush,
-      ObjectTypes.RaspberryBush,
       ObjectTypes.Wheat,
-      ObjectTypes.CottonBush,
       ObjectTypes.Pumpkin,
       ObjectTypes.Melon,
-      ObjectTypes.RedMushroomBlock,
-      ObjectTypes.BrownMushroomBlock,
-      ObjectTypes.MushroomStem,
-      ObjectTypes.BambooBush,
-      ObjectTypes.Cactus,
       ObjectTypes.FescueGrass,
-      ObjectTypes.SwitchGrass,
-      ObjectTypes.VinesBush,
-      ObjectTypes.IvyVine,
-      ObjectTypes.HempBush
+      ObjectTypes.SwitchGrass
     ];
   }
 
