@@ -65,7 +65,7 @@ contract BuildSystem is System {
     _updateInventory(caller, slot, slotType);
 
     // Note: we call this after the build state has been updated, to prevent re-entrancy attacks
-    BuildLib._requireBuildsAllowed(caller, base, buildType, coords, extraData);
+    _requireBuildsAllowed(caller, base, buildType, coords, extraData);
 
     notify(caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectType: buildType }));
 
@@ -114,6 +114,40 @@ contract BuildSystem is System {
       InventoryUtils.addObjectToSlot(caller, ObjectTypes.Bucket, 1, slot);
     }
   }
+
+  function _requireBuildsAllowed(
+    EntityId caller,
+    EntityId base,
+    ObjectType buildType,
+    Vec3[] memory coords,
+    bytes calldata extraData
+  ) internal {
+    for (uint256 i = 0; i < coords.length; i++) {
+      Vec3 coord = coords[i];
+      (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
+
+      // If placing a forcefield, there should be no active forcefield at coord
+      if (buildType == ObjectTypes.ForceField) {
+        require(!forceField._exists(), "Force field overlaps with another force field");
+        ForceFieldUtils.setupForceField(base, coord);
+      }
+
+      if (forceField._exists()) {
+        (EnergyData memory machineData,) = updateMachineEnergy(forceField);
+        if (machineData.energy > 0) {
+          // We know fragment is active because its forcefield exists, so we can use its program
+          ProgramId program = fragment._getProgram();
+          if (!program.exists()) {
+            program = forceField._getProgram();
+          }
+
+          bytes memory onBuild = abi.encodeCall(IBuildHook.onBuild, (caller, forceField, buildType, coord, extraData));
+
+          program.callOrRevert(onBuild);
+        }
+      }
+    }
+  }
 }
 
 library BuildLib {
@@ -148,7 +182,7 @@ library BuildLib {
     (EntityId terrain, ObjectType terrainType) = EntityUtils.getOrCreateBlockAt(coord);
 
     if (buildType == ObjectTypes.Water) {
-      _validateWaterBuild(terrainType);
+      _validateWaterBuild(terrainType, coord);
     } else {
       _validateBlockBuild(terrainType, buildType, coord, terrain);
     }
@@ -158,8 +192,17 @@ library BuildLib {
     return terrain;
   }
 
-  function _validateWaterBuild(ObjectType terrainType) internal pure {
-    require(terrainType == ObjectTypes.Air || terrainType == ObjectTypes.Water, "Can only build water on air or water");
+  function _validateWaterBuild(ObjectType terrainType, Vec3 coord) internal view {
+    if (terrainType == ObjectTypes.Water) {
+      // Allow building water on water only if fluid level < MAX
+      uint8 currentFluidLevel = EntityUtils.getFluidLevelAt(coord);
+      require(currentFluidLevel < MAX_FLUID_LEVEL, "Water is already at max level");
+    } else {
+      require(
+        terrainType == ObjectTypes.Air || terrainType.isWaterloggable(),
+        "Can only build water on air or waterloggable blocks"
+      );
+    }
   }
 
   function _validateBlockBuild(ObjectType terrainType, ObjectType buildType, Vec3 coord, EntityId terrain)
@@ -175,9 +218,9 @@ library BuildLib {
   }
 
   function _applyTerrainModifications(EntityId terrain, ObjectType terrainType, ObjectType buildType) internal {
-    // Handle water placement
     if (buildType == ObjectTypes.Water) {
       EntityFluidLevel._set(terrain, MAX_FLUID_LEVEL);
+      // Only set water block type if the terrain is air
       if (terrainType == ObjectTypes.Air) {
         EntityObjectType._set(terrain, ObjectTypes.Water);
       }
@@ -203,40 +246,6 @@ library BuildLib {
       SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildType.getTimeToGrow());
     } else if (buildType.hasExtraDrops()) {
       DisabledExtraDrops._set(base, true);
-    }
-  }
-
-  function _requireBuildsAllowed(
-    EntityId caller,
-    EntityId base,
-    ObjectType buildType,
-    Vec3[] memory coords,
-    bytes calldata extraData
-  ) public {
-    for (uint256 i = 0; i < coords.length; i++) {
-      Vec3 coord = coords[i];
-      (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
-
-      // If placing a forcefield, there should be no active forcefield at coord
-      if (buildType == ObjectTypes.ForceField) {
-        require(!forceField._exists(), "Force field overlaps with another force field");
-        ForceFieldUtils.setupForceField(base, coord);
-      }
-
-      if (forceField._exists()) {
-        (EnergyData memory machineData,) = updateMachineEnergy(forceField);
-        if (machineData.energy > 0) {
-          // We know fragment is active because its forcefield exists, so we can use its program
-          ProgramId program = fragment._getProgram();
-          if (!program.exists()) {
-            program = forceField._getProgram();
-          }
-
-          bytes memory onBuild = abi.encodeCall(IBuildHook.onBuild, (caller, forceField, buildType, coord, extraData));
-
-          program.callOrRevert(onBuild);
-        }
-      }
     }
   }
 }
