@@ -5,11 +5,13 @@ import { Energy } from "../../codegen/tables/Energy.sol";
 import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
 
 import {
+  LAVA_MOVE_ENERGY_COST,
   MAX_PLAYER_GLIDES,
   MAX_PLAYER_JUMPS,
   MOVE_ENERGY_COST,
   PLAYER_ENERGY_DRAIN_RATE,
   PLAYER_FALL_ENERGY_COST,
+  PLAYER_LAVA_ENERGY_DRAIN_RATE,
   PLAYER_SAFE_FALL_DISTANCE,
   PLAYER_SWIM_ENERGY_DRAIN_RATE
 } from "../../Constants.sol";
@@ -36,8 +38,8 @@ library MoveLib {
     for (uint256 i = 0; i < newBaseCoords.length; i++) {
       Vec3 next = newBaseCoords[i];
       _requireValidMove(current, next);
+      totalCost += _getMoveCost(next);
       current = next;
-      totalCost += MOVE_ENERGY_COST;
 
       if (totalCost >= currentEnergy) {
         totalCost = currentEnergy;
@@ -183,7 +185,6 @@ library MoveLib {
         ++fallHeight;
         glides = 0;
       } else {
-        // For all other moves, apply regular move cost
         if (dy > 0) {
           ++jumps;
           require(jumps <= MAX_PLAYER_JUMPS, "Cannot jump more than 3 blocks");
@@ -191,8 +192,7 @@ library MoveLib {
           ++glides;
           require(glides <= MAX_PLAYER_GLIDES, "Cannot glide more than 10 blocks");
         }
-
-        cost += MOVE_ENERGY_COST;
+        cost += _getMoveCost(next);
       }
 
       if (!gravityApplies) {
@@ -235,8 +235,15 @@ library MoveLib {
   }
 
   function _updatePlayerDrainRate(EntityId player, Vec3 finalCoord) private {
-    ObjectType topType = EntityUtils.getObjectTypeAt(finalCoord + vec3(0, 1, 0));
-    uint128 drainRate = topType == ObjectTypes.Water ? PLAYER_SWIM_ENERGY_DRAIN_RATE : PLAYER_ENERGY_DRAIN_RATE;
+    uint128 drainRate;
+    if (EntityUtils.getObjectTypeAt(finalCoord) == ObjectTypes.Lava) {
+      drainRate = PLAYER_LAVA_ENERGY_DRAIN_RATE;
+    } else if (EntityUtils.getObjectTypeAt(finalCoord + vec3(0, 1, 0)) == ObjectTypes.Water) {
+      drainRate = PLAYER_SWIM_ENERGY_DRAIN_RATE;
+    } else {
+      drainRate = PLAYER_ENERGY_DRAIN_RATE;
+    }
+
     Energy._setDrainRate(player, drainRate);
   }
 
@@ -264,5 +271,11 @@ library MoveLib {
 
   function _isFluid(Vec3 coord) internal view returns (bool) {
     return EntityUtils.getFluidLevelAt(coord) > 0;
+  }
+
+  function _getMoveCost(Vec3 coord) internal view returns (uint128) {
+    Vec3 belowCoord = coord - vec3(0, 1, 0);
+    ObjectType belowType = EntityUtils.getObjectTypeAt(belowCoord);
+    return belowType == ObjectTypes.Lava ? LAVA_MOVE_ENERGY_COST : MOVE_ENERGY_COST;
   }
 }
