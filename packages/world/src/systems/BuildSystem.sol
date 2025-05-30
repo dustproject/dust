@@ -129,9 +129,6 @@ contract BuildSystem is System {
   }
 
   function _getBuildType(ObjectType slotType) internal pure returns (ObjectType) {
-    if (slotType == ObjectTypes.WaterBucket) {
-      return ObjectTypes.Water;
-    }
     require(slotType.isBlock(), "Cannot build non-block object");
     return slotType;
   }
@@ -229,36 +226,11 @@ library BuildLib {
   function _addBlock(ObjectType buildType, Vec3 coord) internal returns (EntityId) {
     (EntityId terrain, ObjectType terrainType) = EntityUtils.getOrCreateBlockAt(coord);
 
-    if (buildType == ObjectTypes.Water) {
-      _validateWaterBuild(terrainType, coord);
-    } else {
-      _validateBlockBuild(terrainType, buildType, coord, terrain);
-    }
+    _validateBlockBuild(terrainType, buildType, coord, terrain);
 
-    _applyTerrainModifications(terrain, terrainType, buildType);
+    _applyTerrainModifications(terrain, buildType);
 
     return terrain;
-  }
-
-  /**
-   * @dev Validates that water can be placed at the given location
-   *
-   * Water placement follows these rules:
-   * - If placing on existing water: Only allowed if current fluid level < MAX_FLUID_LEVEL
-   *   This allows "topping off" partially filled water blocks
-   * - If placing on other terrain: Only allowed on Air or waterloggable blocks
-   *   Waterloggable blocks can contain water while maintaining their type
-   */
-  function _validateWaterBuild(ObjectType terrainType, Vec3 coord) internal view {
-    if (terrainType == ObjectTypes.Water) {
-      uint8 currentFluidLevel = EntityUtils.getFluidLevelAt(coord);
-      require(currentFluidLevel < MAX_FLUID_LEVEL, "Water is already at max level");
-    } else {
-      require(
-        terrainType == ObjectTypes.Air || terrainType.isWaterloggable(),
-        "Can only build water on air or waterloggable blocks"
-      );
-    }
   }
 
   /**
@@ -267,7 +239,7 @@ library BuildLib {
    * Block placement validation checks:
    * 1. Terrain compatibility: Block can only be placed on Air or Water
    *    - Air: Standard empty space placement
-   *    - Water: Allows underwater building (block will displace water if not waterloggable)
+   *    - Water: Allows underwater building (block will NOT displace water if not waterloggable, will revert back to water on mine)
    *
    * 2. For non-passthrough blocks (solid blocks like stone, wood):
    *    - No dropped items: Cannot build where items are lying on the ground
@@ -288,36 +260,14 @@ library BuildLib {
 
   /**
    * @dev Applies terrain modifications when placing a block (sets object type, handles water interactions)
-   *
-   * Modification logic by build type:
-   *
-   * If building Water:
-   * - Always sets fluid level to MAX_FLUID_LEVEL (creates a full water source)
-   * - If terrain is Air: Changes terrain type to Water
-   * - If terrain is waterloggable: Keeps original terrain type (waterlogged state)
-   *
-   * If building other blocks:
-   * - If current terrain is Water AND block is NOT waterloggable:
-   *   - Removes fluid level record (water is displaced/destroyed)
-   * - Sets terrain to the new block type
-   *
-   * This creates the game mechanics where:
-   * - Water fills spaces completely when placed
    * - Waterloggable blocks can coexist with water
-   * - Non-waterloggable blocks displace water when placed
+   * - Non-waterloggable blocks DO NOT remove water level when placed, so they will revert back to water when mined
    */
-  function _applyTerrainModifications(EntityId terrain, ObjectType terrainType, ObjectType buildType) internal {
-    if (buildType == ObjectTypes.Water) {
-      EntityFluidLevel._set(terrain, MAX_FLUID_LEVEL);
-      if (terrainType == ObjectTypes.Air) {
-        EntityObjectType._set(terrain, ObjectTypes.Water);
-      }
-      return;
-    }
-
-    if (terrainType == ObjectTypes.Water && !buildType.isWaterloggable()) {
-      EntityFluidLevel._deleteRecord(terrain);
-    }
+  function _applyTerrainModifications(EntityId terrain, ObjectType buildType) internal {
+    // NOTE: until we solve water conservation, we do not remove water when placing a non-waterloggable block
+    // if (terrainType == ObjectTypes.Water && !buildType.isWaterloggable()) {
+    //   EntityFluidLevel._deleteRecord(terrain);
+    // }
 
     EntityObjectType._set(terrain, buildType);
   }
