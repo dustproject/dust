@@ -29,7 +29,7 @@ import { BuildNotification, MoveNotification, notify } from "../utils/NotifUtils
 import { MoveLib } from "./libraries/MoveLib.sol";
 import { TerrainLib } from "./libraries/TerrainLib.sol";
 
-import { BUILD_ENERGY_COST } from "../Constants.sol";
+import { BUILD_ENERGY_COST, MAX_FLUID_LEVEL } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectType, ObjectTypes } from "../ObjectType.sol";
 
@@ -51,8 +51,7 @@ contract BuildSystem is System {
   ) public returns (EntityId) {
     uint128 callerEnergy = caller.activate().energy;
     caller.requireConnected(coord);
-    ObjectType buildType = InventorySlot._getObjectType(caller, slot);
-    require(buildType.isBlock(), "Cannot build non-block object");
+    ObjectType buildType = _getBuildType(caller, slot);
 
     // If player died, return early
     bool playerDied = BuildLib._handleEnergyReduction(caller, callerEnergy);
@@ -62,9 +61,7 @@ contract BuildSystem is System {
 
     (EntityId base, Vec3[] memory coords) = BuildLib._addBlocks(coord, buildType, orientation);
 
-    BuildLib._handleBuildType(base, buildType, coord);
-
-    InventoryUtils.removeObjectFromSlot(caller, slot, 1);
+    _updateInventory(caller, slot, buildType);
 
     // Note: we call this after the build state has been updated, to prevent re-entrancy attacks
     BuildLib._requireBuildsAllowed(caller, base, buildType, coords, extraData);
@@ -97,6 +94,26 @@ contract BuildSystem is System {
   function jumpBuild(EntityId caller, uint16 slot, bytes calldata extraData) public returns (EntityId) {
     return jumpBuildWithOrientation(caller, slot, Orientation.wrap(0), extraData);
   }
+
+  function _getBuildType(EntityId caller, uint16 slot) internal view returns (ObjectType) {
+    ObjectType buildType = InventorySlot._getObjectType(caller, slot);
+    if (buildType == ObjectTypes.WaterBucket) {
+      return ObjectTypes.Water;
+    }
+
+    require(buildType.isBlock(), "Cannot build non-block object");
+
+    return buildType;
+  }
+
+  function _updateInventory(EntityId caller, uint16 slot, ObjectType buildType) internal {
+    InventoryUtils.removeObjectFromSlot(caller, slot, 1);
+
+    // If the build type is water, we need to add an empty bucket back to the inventory
+    if (buildType == ObjectTypes.Water) {
+      InventoryUtils.addObjectToSlot(caller, ObjectTypes.Bucket, 1, slot);
+    }
+  }
 }
 
 library BuildLib {
@@ -105,59 +122,88 @@ library BuildLib {
     return callerEnergy == 0;
   }
 
-  function _handleBuildType(EntityId base, ObjectType buildType, Vec3 coord) public {
-    if (buildType.isGrowable()) {
-      _handleGrowable(base, buildType, coord);
-    } else if (buildType.hasExtraDrops()) {
-      DisabledExtraDrops._set(base, true);
-    }
-  }
-
-  function _addBlock(ObjectType buildType, Vec3 coord) internal returns (EntityId) {
-    (EntityId terrain, ObjectType terrainType) = EntityUtils.getOrCreateBlockAt(coord);
-
-    require(terrainType == ObjectTypes.Water || terrainType == ObjectTypes.Air, "Can only build on air or water");
-
-    if (terrainType == ObjectTypes.Water && !buildType.isWaterloggable()) {
-      EntityFluidLevel._deleteRecord(terrain);
-    }
-
-    require(InventoryUtils.isEmpty(terrain), "Cannot build where there are dropped objects");
-
-    require(
-      buildType.isPassThrough() || !EntityUtils.getMovableEntityAt(coord)._exists(), "Cannot build on a movable entity"
-    );
-
-    EntityObjectType._set(terrain, buildType);
-
-    return terrain;
-  }
-
   function _addBlocks(Vec3 baseCoord, ObjectType buildType, Orientation orientation)
     public
     returns (EntityId, Vec3[] memory)
   {
     Vec3[] memory coords = buildType.getRelativeCoords(baseCoord, orientation);
+
     EntityId base = _addBlock(buildType, baseCoord);
     EntityOrientation._set(base, orientation);
+
     uint128 mass = ObjectPhysics._getMass(buildType);
     Mass._setMass(base, mass);
+
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
-      Vec3 relativeCoord = coords[i];
-      EntityId relative = _addBlock(buildType, relativeCoord);
+      EntityId relative = _addBlock(buildType, coords[i]);
       BaseEntity._set(relative, base);
     }
+
+    _handleSpecialBlockTypes(base, buildType, baseCoord);
     return (base, coords);
   }
 
-  function _handleGrowable(EntityId base, ObjectType buildType, Vec3 baseCoord) public {
-    ObjectType belowType = EntityUtils.getObjectTypeAt(baseCoord - vec3(0, 1, 0));
-    require(buildType.isPlantableOn(belowType), "Cannot plant on this block");
+  function _addBlock(ObjectType buildType, Vec3 coord) internal returns (EntityId) {
+    (EntityId terrain, ObjectType terrainType) = EntityUtils.getOrCreateBlockAt(coord);
 
-    removeEnergyFromLocalPool(baseCoord, buildType.getGrowableEnergy());
+    if (buildType == ObjectTypes.Water) {
+      _validateWaterBuild(terrainType);
+    } else {
+      _validateBlockBuild(terrainType, buildType, coord, terrain);
+    }
 
-    SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildType.getTimeToGrow());
+    _applyTerrainModifications(terrain, terrainType, buildType);
+
+    return terrain;
+  }
+
+  function _validateWaterBuild(ObjectType terrainType) internal pure {
+    require(terrainType == ObjectTypes.Air || terrainType == ObjectTypes.Water, "Can only build water on air or water");
+  }
+
+  function _validateBlockBuild(ObjectType terrainType, ObjectType buildType, Vec3 coord, EntityId terrain)
+    internal
+    view
+  {
+    require(terrainType == ObjectTypes.Water || terrainType == ObjectTypes.Air, "Can only build on air or water");
+
+    if (!buildType.isPassThrough()) {
+      require(InventoryUtils.isEmpty(terrain), "Cannot build where there are dropped objects");
+      require(!EntityUtils.getMovableEntityAt(coord)._exists(), "Cannot build on a movable entity");
+    }
+  }
+
+  function _applyTerrainModifications(EntityId terrain, ObjectType terrainType, ObjectType buildType) internal {
+    // Handle water placement
+    if (buildType == ObjectTypes.Water) {
+      EntityFluidLevel._set(terrain, MAX_FLUID_LEVEL);
+      if (terrainType == ObjectTypes.Air) {
+        EntityObjectType._set(terrain, ObjectTypes.Water);
+      }
+      return;
+    }
+
+    // Handle water removal when placing non-waterloggable blocks
+    if (terrainType == ObjectTypes.Water && !buildType.isWaterloggable()) {
+      EntityFluidLevel._deleteRecord(terrain);
+    }
+
+    // Set the new block type
+    EntityObjectType._set(terrain, buildType);
+  }
+
+  function _handleSpecialBlockTypes(EntityId base, ObjectType buildType, Vec3 coord) public {
+    if (buildType.isGrowable()) {
+      ObjectType belowType = EntityUtils.getObjectTypeAt(coord - vec3(0, 1, 0));
+      require(buildType.isPlantableOn(belowType), "Cannot plant on this block");
+
+      removeEnergyFromLocalPool(coord, buildType.getGrowableEnergy());
+
+      SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildType.getTimeToGrow());
+    } else if (buildType.hasExtraDrops()) {
+      DisabledExtraDrops._set(base, true);
+    }
   }
 
   function _requireBuildsAllowed(
