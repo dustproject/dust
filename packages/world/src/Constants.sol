@@ -26,6 +26,8 @@ uint8 constant MAX_FLUID_LEVEL = 15; // Maximum fluid level for water and lava
 // ------------------------------------------------------------
 uint128 constant MAX_PLAYER_ENERGY = 817600000000000000;
 uint128 constant PLAYER_ENERGY_DRAIN_RATE = 1351851852000;
+// TODO: placeholder
+uint128 constant PLAYER_SWIM_ENERGY_DRAIN_RATE = PLAYER_ENERGY_DRAIN_RATE * 2;
 
 uint128 constant MACHINE_ENERGY_DRAIN_RATE = 9488203935;
 

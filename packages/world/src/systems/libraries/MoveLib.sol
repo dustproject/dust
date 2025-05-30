@@ -8,8 +8,10 @@ import {
   MAX_PLAYER_GLIDES,
   MAX_PLAYER_JUMPS,
   MOVE_ENERGY_COST,
+  PLAYER_ENERGY_DRAIN_RATE,
   PLAYER_FALL_ENERGY_COST,
-  PLAYER_SAFE_FALL_DISTANCE
+  PLAYER_SAFE_FALL_DISTANCE,
+  PLAYER_SWIM_ENERGY_DRAIN_RATE
 } from "../../Constants.sol";
 import { EntityId } from "../../EntityId.sol";
 import { ObjectType } from "../../ObjectType.sol";
@@ -45,6 +47,8 @@ library MoveLib {
 
     _setPlayerPosition(playerEntityIds, current);
 
+    _updatePlayerDrainRate(player, current);
+
     if (totalCost > 0) {
       decreasePlayerEnergy(player, current, totalCost);
       addEnergyToLocalPool(current, totalCost);
@@ -67,6 +71,8 @@ library MoveLib {
 
     _setPlayerPosition(playerEntityIds, finalCoord);
 
+    _updatePlayerDrainRate(player, finalCoord);
+
     if (totalCost > 0) {
       decreasePlayerEnergy(player, finalCoord, totalCost);
       addEnergyToLocalPool(finalCoord, totalCost);
@@ -88,6 +94,8 @@ library MoveLib {
     _setPlayerPosition(playerEntityIds, finalCoord);
 
     uint128 currentEnergy = updatePlayerEnergy(player).energy;
+
+    _updatePlayerDrainRate(player, finalCoord);
 
     if (totalCost > currentEnergy) {
       totalCost = currentEnergy;
@@ -224,6 +232,12 @@ library MoveLib {
     for (uint256 i = 0; i < playerCoords.length; i++) {
       EntityUtils.setMovableEntityAt(playerCoords[i], playerEntityIds[i]);
     }
+  }
+
+  function _updatePlayerDrainRate(EntityId player, Vec3 finalCoord) private {
+    ObjectType topType = EntityUtils.getObjectTypeAt(finalCoord + vec3(0, 1, 0));
+    uint128 drainRate = topType == ObjectTypes.Water ? PLAYER_SWIM_ENERGY_DRAIN_RATE : PLAYER_ENERGY_DRAIN_RATE;
+    Energy._setDrainRate(player, drainRate);
   }
 
   function _getEntityIds(Vec3[] memory playerCoords) private view returns (EntityId[] memory) {
