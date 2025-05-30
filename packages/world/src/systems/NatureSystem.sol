@@ -77,7 +77,6 @@ contract NatureSystem is System {
     (EntityId seed, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(coord);
     require(objectType.isGrowable(), "Not growable");
     require(SeedGrowth._getFullyGrownAt(seed) <= block.timestamp, "Seed cannot be grown yet");
-    // TODO: should we do proximity checks?
     NatureLib.growSeed(coord, seed, objectType);
   }
 }
