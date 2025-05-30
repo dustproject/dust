@@ -51,7 +51,8 @@ contract BuildSystem is System {
   ) public returns (EntityId) {
     uint128 callerEnergy = caller.activate().energy;
     caller.requireConnected(coord);
-    ObjectType buildType = _getBuildType(caller, slot);
+    ObjectType slotType = InventorySlot._getObjectType(caller, slot);
+    ObjectType buildType = _getBuildType(slotType);
 
     // If player died, return early
     bool playerDied = BuildLib._handleEnergyReduction(caller, callerEnergy);
@@ -61,7 +62,7 @@ contract BuildSystem is System {
 
     (EntityId base, Vec3[] memory coords) = BuildLib._addBlocks(coord, buildType, orientation);
 
-    _updateInventory(caller, slot, buildType);
+    _updateInventory(caller, slot, slotType);
 
     // Note: we call this after the build state has been updated, to prevent re-entrancy attacks
     BuildLib._requireBuildsAllowed(caller, base, buildType, coords, extraData);
@@ -95,22 +96,21 @@ contract BuildSystem is System {
     return jumpBuildWithOrientation(caller, slot, Orientation.wrap(0), extraData);
   }
 
-  function _getBuildType(EntityId caller, uint16 slot) internal view returns (ObjectType) {
-    ObjectType buildType = InventorySlot._getObjectType(caller, slot);
-    if (buildType == ObjectTypes.WaterBucket) {
+  function _getBuildType(ObjectType slotType) internal pure returns (ObjectType) {
+    if (slotType == ObjectTypes.WaterBucket) {
       return ObjectTypes.Water;
     }
 
-    require(buildType.isBlock(), "Cannot build non-block object");
+    require(slotType.isBlock(), "Cannot build non-block object");
 
-    return buildType;
+    return slotType;
   }
 
-  function _updateInventory(EntityId caller, uint16 slot, ObjectType buildType) internal {
+  function _updateInventory(EntityId caller, uint16 slot, ObjectType slotType) internal {
     InventoryUtils.removeObjectFromSlot(caller, slot, 1);
 
     // If the build type is water, we need to add an empty bucket back to the inventory
-    if (buildType == ObjectTypes.Water) {
+    if (slotType == ObjectTypes.WaterBucket) {
       InventoryUtils.addObjectToSlot(caller, ObjectTypes.Bucket, 1, slot);
     }
   }
