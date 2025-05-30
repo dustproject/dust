@@ -37,7 +37,6 @@ import { ProgramId } from "../ProgramId.sol";
 import { IBuildHook } from "../ProgramInterfaces.sol";
 import { Orientation, Vec3, vec3 } from "../Vec3.sol";
 
-// Build context to reduce stack usage
 struct BuildContext {
   EntityId caller;
   Vec3 coord;
@@ -185,16 +184,13 @@ contract BuildSystem is System {
 
 library BuildLib {
   function _executeBuild(BuildContext memory ctx) public returns (EntityId, Vec3[] memory) {
-    // Handle energy
     (ctx.callerEnergy,) = transferEnergyToPool(ctx.caller, Math.min(ctx.callerEnergy, BUILD_ENERGY_COST));
     if (ctx.callerEnergy == 0) {
       return (EntityId.wrap(0), new Vec3[](0));
     }
 
-    // Update inventory
     _updateInventory(ctx);
 
-    // Add blocks
     return _addBlocks(ctx);
   }
 
