@@ -1,5 +1,5 @@
 import { type Hex, getAddress, toHex } from "viem";
-import type { Vec3 } from "./vec3";
+import type { ReadonlyVec3 } from "./vec3";
 
 import { packVec3, unpackVec3 } from "./vec3";
 
@@ -35,16 +35,16 @@ function decode(entityId: EntityId): { entityType: EntityType; data: bigint } {
   return { entityType, data };
 }
 
-function encodeCoord(entityType: EntityType, coord: Vec3): EntityId {
+function encodeCoord(entityType: EntityType, coord: ReadonlyVec3): EntityId {
   const packedCoord = packVec3(coord);
   return encode(entityType, packedCoord << (ENTITY_ID_BITS - VEC3_BITS));
 }
 
-export function encodeBlock(coord: Vec3): EntityId {
+export function encodeBlock(coord: ReadonlyVec3): EntityId {
   return encodeCoord(EntityTypes.Block, coord);
 }
 
-export function encodeFragment(coord: Vec3): EntityId {
+export function encodeFragment(coord: ReadonlyVec3): EntityId {
   return encodeCoord(EntityTypes.Fragment, coord);
 }
 
@@ -56,7 +56,7 @@ export function encodePlayer(player: Hex): EntityId {
   );
 }
 
-export function decodePosition(entityId: EntityId): Vec3 {
+export function decodePosition(entityId: EntityId): ReadonlyVec3 {
   const { entityType, data } = decode(entityId);
   if (entityType === EntityTypes.Block || entityType === EntityTypes.Fragment) {
     return unpackVec3(data >> (ENTITY_ID_BITS - VEC3_BITS));
