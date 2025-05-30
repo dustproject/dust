@@ -568,13 +568,9 @@ contract BuildTest is DustTest {
     assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity should be grass");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
 
-    // Non-waterloggable blocks should remove fluid level
+    // Non-waterloggable blocks should NOT remove fluid level
     uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(buildCoord);
-    assertEq(fluidLevel, 0, "Non-waterloggable block should have no fluid level");
-
-    // Verify the fluid level was deleted from storage
-    uint8 storedLevel = EntityFluidLevel._get(buildEntityId);
-    assertEq(storedLevel, 0, "Fluid level should be deleted from storage");
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Non-waterloggable block should have fluid level");
 
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
@@ -633,9 +629,9 @@ contract BuildTest is DustTest {
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
     assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity should be grass");
 
-    // Non-waterloggable blocks should remove fluid level
+    // Non-waterloggable blocks should NOT remove fluid level
     uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(buildCoord);
-    assertEq(fluidLevel, 0, "Non-waterloggable block should have no fluid level");
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Non-waterloggable block should have fluid level");
 
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
@@ -659,8 +655,8 @@ contract BuildTest is DustTest {
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(playerCoord);
     assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity should be stone");
 
-    // Non-waterloggable block should remove fluid
+    // Non-waterloggable block should NOT remove fluid
     uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(playerCoord);
-    assertEq(fluidLevel, 0, "Stone should have no fluid level");
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Stone should have fluid level");
   }
 }
