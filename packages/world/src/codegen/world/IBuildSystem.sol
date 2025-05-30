@@ -22,12 +22,12 @@ interface IBuildSystem {
     bytes calldata extraData
   ) external returns (EntityId);
 
+  function jumpBuild(EntityId caller, uint16 slot, bytes calldata extraData) external returns (EntityId);
+
   function jumpBuildWithOrientation(
     EntityId caller,
     uint16 slot,
     Orientation orientation,
     bytes calldata extraData
   ) external returns (EntityId);
-
-  function jumpBuild(EntityId caller, uint16 slot, bytes calldata extraData) external returns (EntityId);
 }

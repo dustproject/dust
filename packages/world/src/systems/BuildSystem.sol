@@ -37,6 +37,17 @@ import { ProgramId } from "../ProgramId.sol";
 import { IBuildHook } from "../ProgramInterfaces.sol";
 import { Orientation, Vec3, vec3 } from "../Vec3.sol";
 
+// Build context to reduce stack usage
+struct BuildContext {
+  EntityId caller;
+  Vec3 coord;
+  uint16 slot;
+  Orientation orientation;
+  uint128 callerEnergy;
+  ObjectType slotType;
+  ObjectType buildType;
+}
+
 contract BuildSystem is System {
   function build(EntityId caller, Vec3 coord, uint16 slot, bytes calldata extraData) public returns (EntityId) {
     return buildWithOrientation(caller, coord, slot, Orientation.wrap(0), extraData);
@@ -51,130 +62,162 @@ contract BuildSystem is System {
   ) public returns (EntityId) {
     uint128 callerEnergy = caller.activate().energy;
     caller.requireConnected(coord);
-    ObjectType slotType = InventorySlot._getObjectType(caller, slot);
-    ObjectType buildType = _getBuildType(slotType);
 
-    // If player died, return early
-    bool playerDied = BuildLib._handleEnergyReduction(caller, callerEnergy);
-    if (playerDied) {
-      return EntityId.wrap(0);
-    }
+    BuildContext memory ctx = _buildContext(caller, coord, slot, orientation, callerEnergy);
 
-    (EntityId base, Vec3[] memory coords) = BuildLib._addBlocks(coord, buildType, orientation);
-
-    _updateInventory(caller, slot, slotType);
-
-    // Note: we call this after the build state has been updated, to prevent re-entrancy attacks
-    _requireBuildsAllowed(caller, base, buildType, coords, extraData);
-
-    notify(caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectType: buildType }));
-
-    return base;
-  }
-
-  function jumpBuildWithOrientation(EntityId caller, uint16 slot, Orientation orientation, bytes calldata extraData)
-    public
-    returns (EntityId)
-  {
-    caller.activate();
-
-    ObjectType buildObjectType = InventorySlot._getObjectType(caller, slot);
-    require(!buildObjectType.isPassThrough(), "Cannot jump build on a pass-through block");
-
-    Vec3 coord = caller._getPosition();
-
-    Vec3[] memory moveCoords = new Vec3[](1);
-    moveCoords[0] = coord + vec3(0, 1, 0);
-    MoveLib.moveWithoutGravity(coord, moveCoords);
-
-    notify(caller, MoveNotification({ moveCoords: moveCoords }));
-
-    return buildWithOrientation(caller, coord, slot, orientation, extraData);
+    return _build(ctx, extraData);
   }
 
   function jumpBuild(EntityId caller, uint16 slot, bytes calldata extraData) public returns (EntityId) {
     return jumpBuildWithOrientation(caller, slot, Orientation.wrap(0), extraData);
   }
 
+  function jumpBuildWithOrientation(EntityId caller, uint16 slot, Orientation orientation, bytes calldata extraData)
+    public
+    returns (EntityId)
+  {
+    uint128 callerEnergy = caller.activate().energy;
+    Vec3 coord = caller._getPosition();
+
+    BuildContext memory ctx = _buildContext(caller, coord, slot, orientation, callerEnergy);
+
+    require(!ctx.buildType.isPassThrough(), "Cannot jump build on a pass-through block");
+
+    // Jump movement
+    Vec3[] memory moveCoords = new Vec3[](1);
+    moveCoords[0] = coord + vec3(0, 1, 0);
+    MoveLib.moveWithoutGravity(coord, moveCoords);
+    notify(caller, MoveNotification({ moveCoords: moveCoords }));
+
+    return _build(ctx, extraData);
+  }
+
+  function _build(BuildContext memory ctx, bytes calldata extraData) internal returns (EntityId) {
+    (EntityId base, Vec3[] memory coords) = BuildLib._executeBuild(ctx);
+
+    if (coords.length == 0) {
+      return base;
+    }
+
+    _handleSpecialBlockTypes(base, ctx.buildType, ctx.coord);
+
+    _requireBuildsAllowed(ctx, base, coords, extraData);
+
+    notify(
+      ctx.caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectType: ctx.buildType })
+    );
+
+    return base;
+  }
+
+  function _buildContext(EntityId caller, Vec3 coord, uint16 slot, Orientation orientation, uint128 callerEnergy)
+    internal
+    view
+    returns (BuildContext memory)
+  {
+    ObjectType slotType = InventorySlot._getObjectType(caller, slot);
+    ObjectType buildType = _getBuildType(slotType);
+
+    return BuildContext({
+      caller: caller,
+      coord: coord,
+      slot: slot,
+      orientation: orientation,
+      callerEnergy: callerEnergy,
+      slotType: slotType,
+      buildType: buildType
+    });
+  }
+
   function _getBuildType(ObjectType slotType) internal pure returns (ObjectType) {
     if (slotType == ObjectTypes.WaterBucket) {
       return ObjectTypes.Water;
     }
-
     require(slotType.isBlock(), "Cannot build non-block object");
-
     return slotType;
   }
 
-  function _updateInventory(EntityId caller, uint16 slot, ObjectType slotType) internal {
-    InventoryUtils.removeObjectFromSlot(caller, slot, 1);
+  function _handleSpecialBlockTypes(EntityId base, ObjectType buildType, Vec3 coord) internal {
+    if (buildType.isGrowable()) {
+      ObjectType belowType = EntityUtils.getObjectTypeAt(coord - vec3(0, 1, 0));
+      require(buildType.isPlantableOn(belowType), "Cannot plant on this block");
 
-    // If the build type is water, we need to add an empty bucket back to the inventory
-    if (slotType == ObjectTypes.WaterBucket) {
-      InventoryUtils.addObjectToSlot(caller, ObjectTypes.Bucket, 1, slot);
+      removeEnergyFromLocalPool(coord, buildType.getGrowableEnergy());
+
+      SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildType.getTimeToGrow());
+    } else if (buildType.hasExtraDrops()) {
+      DisabledExtraDrops._set(base, true);
     }
   }
 
-  function _requireBuildsAllowed(
-    EntityId caller,
-    EntityId base,
-    ObjectType buildType,
-    Vec3[] memory coords,
-    bytes calldata extraData
-  ) internal {
+  function _requireBuildsAllowed(BuildContext memory ctx, EntityId base, Vec3[] memory coords, bytes calldata extraData)
+    internal
+  {
     for (uint256 i = 0; i < coords.length; i++) {
       Vec3 coord = coords[i];
       (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
 
-      // If placing a forcefield, there should be no active forcefield at coord
-      if (buildType == ObjectTypes.ForceField) {
+      if (ctx.buildType == ObjectTypes.ForceField) {
         require(!forceField._exists(), "Force field overlaps with another force field");
         ForceFieldUtils.setupForceField(base, coord);
       }
 
-      if (forceField._exists()) {
-        (EnergyData memory machineData,) = updateMachineEnergy(forceField);
-        if (machineData.energy > 0) {
-          // We know fragment is active because its forcefield exists, so we can use its program
-          ProgramId program = fragment._getProgram();
-          if (!program.exists()) {
-            program = forceField._getProgram();
-          }
-
-          bytes memory onBuild = abi.encodeCall(IBuildHook.onBuild, (caller, forceField, buildType, coord, extraData));
-
-          program.callOrRevert(onBuild);
-        }
+      if (!forceField._exists()) {
+        continue;
       }
+
+      (EnergyData memory machineData,) = updateMachineEnergy(forceField);
+      if (machineData.energy == 0) {
+        continue;
+      }
+
+      ProgramId program = fragment._getProgram();
+      if (!program.exists()) {
+        program = forceField._getProgram();
+      }
+
+      program.callOrRevert(
+        abi.encodeCall(IBuildHook.onBuild, (ctx.caller, forceField, ctx.buildType, coord, extraData))
+      );
     }
   }
 }
 
 library BuildLib {
-  function _handleEnergyReduction(EntityId caller, uint128 callerEnergy) public returns (bool) {
-    (callerEnergy,) = transferEnergyToPool(caller, Math.min(callerEnergy, BUILD_ENERGY_COST));
-    return callerEnergy == 0;
+  function _executeBuild(BuildContext memory ctx) public returns (EntityId, Vec3[] memory) {
+    // Handle energy
+    (ctx.callerEnergy,) = transferEnergyToPool(ctx.caller, Math.min(ctx.callerEnergy, BUILD_ENERGY_COST));
+    if (ctx.callerEnergy == 0) {
+      return (EntityId.wrap(0), new Vec3[](0));
+    }
+
+    // Update inventory
+    _updateInventory(ctx);
+
+    // Add blocks
+    return _addBlocks(ctx);
   }
 
-  function _addBlocks(Vec3 baseCoord, ObjectType buildType, Orientation orientation)
-    public
-    returns (EntityId, Vec3[] memory)
-  {
-    Vec3[] memory coords = buildType.getRelativeCoords(baseCoord, orientation);
+  function _updateInventory(BuildContext memory ctx) internal {
+    InventoryUtils.removeObjectFromSlot(ctx.caller, ctx.slot, 1);
+    if (ctx.slotType == ObjectTypes.WaterBucket) {
+      InventoryUtils.addObjectToSlot(ctx.caller, ObjectTypes.Bucket, 1, ctx.slot);
+    }
+  }
 
-    EntityId base = _addBlock(buildType, baseCoord);
-    EntityOrientation._set(base, orientation);
+  function _addBlocks(BuildContext memory ctx) internal returns (EntityId, Vec3[] memory) {
+    Vec3[] memory coords = ctx.buildType.getRelativeCoords(ctx.coord, ctx.orientation);
 
-    uint128 mass = ObjectPhysics._getMass(buildType);
-    Mass._setMass(base, mass);
+    EntityId base = _addBlock(ctx.buildType, ctx.coord);
+    EntityOrientation._set(base, ctx.orientation);
+    Mass._setMass(base, ObjectPhysics._getMass(ctx.buildType));
 
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
-      EntityId relative = _addBlock(buildType, coords[i]);
+      EntityId relative = _addBlock(ctx.buildType, coords[i]);
       BaseEntity._set(relative, base);
     }
 
-    _handleSpecialBlockTypes(base, buildType, baseCoord);
     return (base, coords);
   }
 
@@ -194,7 +237,6 @@ library BuildLib {
 
   function _validateWaterBuild(ObjectType terrainType, Vec3 coord) internal view {
     if (terrainType == ObjectTypes.Water) {
-      // Allow building water on water only if fluid level < MAX
       uint8 currentFluidLevel = EntityUtils.getFluidLevelAt(coord);
       require(currentFluidLevel < MAX_FLUID_LEVEL, "Water is already at max level");
     } else {
@@ -220,32 +262,16 @@ library BuildLib {
   function _applyTerrainModifications(EntityId terrain, ObjectType terrainType, ObjectType buildType) internal {
     if (buildType == ObjectTypes.Water) {
       EntityFluidLevel._set(terrain, MAX_FLUID_LEVEL);
-      // Only set water block type if the terrain is air
       if (terrainType == ObjectTypes.Air) {
         EntityObjectType._set(terrain, ObjectTypes.Water);
       }
       return;
     }
 
-    // Handle water removal when placing non-waterloggable blocks
     if (terrainType == ObjectTypes.Water && !buildType.isWaterloggable()) {
       EntityFluidLevel._deleteRecord(terrain);
     }
 
-    // Set the new block type
     EntityObjectType._set(terrain, buildType);
-  }
-
-  function _handleSpecialBlockTypes(EntityId base, ObjectType buildType, Vec3 coord) public {
-    if (buildType.isGrowable()) {
-      ObjectType belowType = EntityUtils.getObjectTypeAt(coord - vec3(0, 1, 0));
-      require(buildType.isPlantableOn(belowType), "Cannot plant on this block");
-
-      removeEnergyFromLocalPool(coord, buildType.getGrowableEnergy());
-
-      SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildType.getTimeToGrow());
-    } else if (buildType.hasExtraDrops()) {
-      DisabledExtraDrops._set(base, true);
-    }
   }
 }

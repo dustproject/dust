@@ -839,7 +839,7 @@ contract BuildTest is DustTest {
     // Jump build gets the object type from slot (WaterBucket) which is not pass-through
     // So this should pass the initial check but fail when trying to build water
     vm.prank(alice);
-    vm.expectRevert("Cannot build on a movable entity");
+    vm.expectRevert("Cannot jump build on a pass-through block");
     world.jumpBuild(aliceEntityId, slot, "");
   }
 
@@ -944,22 +944,19 @@ contract BuildTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.WaterBucket, 3);
 
     // Water on coral
+    uint16 slot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WaterBucket);
     vm.prank(alice);
-    world.build(
-      aliceEntityId, coralCoord, TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WaterBucket), ""
-    );
+    world.build(aliceEntityId, coralCoord, slot, "");
 
     // Water on sea anemone
+    slot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WaterBucket);
     vm.prank(alice);
-    world.build(
-      aliceEntityId, anemonCoord, TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WaterBucket), ""
-    );
+    world.build(aliceEntityId, anemonCoord, slot, "");
 
     // Water on algae
+    slot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WaterBucket);
     vm.prank(alice);
-    world.build(
-      aliceEntityId, algaeCoord, TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WaterBucket), ""
-    );
+    world.build(aliceEntityId, algaeCoord, slot, "");
 
     // Verify all blocks maintained their original type
     assertEq(TestEntityUtils.getObjectTypeAt(coralCoord), ObjectTypes.Coral, "Coral should remain");
@@ -980,7 +977,7 @@ contract BuildTest is DustTest {
     // Create water with partial fluid level
     setObjectAtCoord(waterCoord, ObjectTypes.Water);
     (EntityId waterEntityId,) = TestEntityUtils.getOrCreateBlockAt(waterCoord);
-    EntityFluidLevel._set(waterEntityId, 7); // Half full
+    EntityFluidLevel.set(waterEntityId, 7); // Half full
 
     // Verify it's partial
     assertEq(TestEntityUtils.getFluidLevelAt(waterCoord), 7, "Water should be half full");
@@ -1036,7 +1033,7 @@ contract BuildTest is DustTest {
       // Create water with specific fluid level
       setObjectAtCoord(waterCoord, ObjectTypes.Water);
       (EntityId waterEntityId,) = TestEntityUtils.getOrCreateBlockAt(waterCoord);
-      EntityFluidLevel._set(waterEntityId, fluidLevels[i]);
+      EntityFluidLevel.set(waterEntityId, fluidLevels[i]);
 
       // Add water bucket
       TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.WaterBucket, 1);
