@@ -12,6 +12,7 @@ import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 import { Direction } from "../src/codegen/common.sol";
 
 import {
+  CHUNK_COMMIT_EXPIRY_BLOCKS,
   CHUNK_SIZE,
   DEFAULT_MINE_ENERGY_COST,
   MAX_FLUID_LEVEL,
@@ -295,5 +296,18 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     EntityId forceFieldEntityId = setupForceField(coord, energyData);
     Machine.setDepletedTime(forceFieldEntityId, depletedTime);
     return forceFieldEntityId;
+  }
+
+  function newCommit(address commiterAddress, EntityId commiter, Vec3 coord, bytes32 blockHash) internal {
+    // Set up chunk commitment for randomness when mining grass
+    Vec3 chunkCoord = coord.toChunkCoord();
+
+    vm.roll(vm.getBlockNumber() + CHUNK_COMMIT_EXPIRY_BLOCKS);
+    vm.prank(commiterAddress);
+    world.chunkCommit(commiter, chunkCoord);
+    // Move forward 2 blocks to make the commitment valid
+    vm.roll(vm.getBlockNumber() + 2);
+
+    vm.setBlockhash(vm.getBlockNumber() - 1, blockHash);
   }
 }

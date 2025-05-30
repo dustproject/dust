@@ -509,6 +509,17 @@ library ObjectTypeLib {
     }
   }
 
+  function isLandbound(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      // IDs in [0..255]
+      {
+        let bit := and(shr(self, 0x1ffc000000000100000000000000000000000), 1)
+        ok := bit
+      }
+    }
+  }
+
   function isUniqueObject(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
@@ -1055,6 +1066,23 @@ library ObjectTypeLib {
 
   function getGrowableTypes() internal pure returns (ObjectType[11] memory) {
     return [
+      ObjectTypes.WheatSeed,
+      ObjectTypes.PumpkinSeed,
+      ObjectTypes.MelonSeed,
+      ObjectTypes.OakSapling,
+      ObjectTypes.BirchSapling,
+      ObjectTypes.JungleSapling,
+      ObjectTypes.SakuraSapling,
+      ObjectTypes.AcaciaSapling,
+      ObjectTypes.SpruceSapling,
+      ObjectTypes.DarkOakSapling,
+      ObjectTypes.MangroveSapling
+    ];
+  }
+
+  function getLandboundTypes() internal pure returns (ObjectType[12] memory) {
+    return [
+      ObjectTypes.Wheat,
       ObjectTypes.WheatSeed,
       ObjectTypes.PumpkinSeed,
       ObjectTypes.MelonSeed,

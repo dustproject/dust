@@ -108,12 +108,7 @@ contract MineSystem is System {
     mined = mined.baseEntityId();
     Vec3 baseCoord = mined._getPosition();
 
-    if (minedType.isMachine()) {
-      (EnergyData memory machineData,) = updateMachineEnergy(mined);
-      require(machineData.energy == 0, "Cannot mine a machine that has energy");
-    } else if (minedType == ObjectTypes.UnrevealedOre) {
-      minedType = RandomResourceLib._collapseRandomOre(mined, coord);
-    }
+    minedType = _prepareBlock(mined, minedType, coord);
 
     (uint128 massLeft, bool canMine) =
       MineLib._applyMassReduction(caller, callerEnergy, toolSlot, minedType, Mass._getMass(mined));
@@ -127,13 +122,19 @@ contract MineSystem is System {
       // The block was fully mined
       Mass._deleteRecord(mined);
 
-      _handleGrowable(caller, baseCoord);
+      // Handle landbound and growable blocks on top of the mined block
+      _handleAbove(caller, baseCoord);
+
+      // Remove the block and all relative blocks
       _removeBlock(mined, minedType, baseCoord);
       _removeRelativeBlocks(mined, minedType, baseCoord);
+
+      // Handle drops
       _handleDrop(caller, mined, minedType, baseCoord);
+
       // It is fine to destroy the entity before requiring mines allowed,
       // as machines can't be destroyed if they have energy
-      _destroyEntity(caller, mined, minedType, baseCoord);
+      _cleanupEntity(caller, mined, minedType, baseCoord);
 
       notify(caller, MineNotification({ mineEntityId: mined, mineCoord: coord, mineObjectType: minedType }));
     } else {
@@ -145,24 +146,23 @@ contract MineSystem is System {
     return mined;
   }
 
-  function _handleGrowable(EntityId caller, Vec3 coord) internal {
-    // Remove growables on top of this block
-    Vec3 aboveCoord = coord + vec3(0, 1, 0);
-    // If above is growable, the entity must exist as there are not growables in the base terrain
-    (EntityId above, ObjectType aboveType) = EntityUtils.getBlockAt(aboveCoord);
-    if (aboveType.isGrowable()) {
-      if (!above._exists()) {
-        EntityUtils.getOrCreateBlockAt(aboveCoord);
-      }
-      _removeGrowable(above, aboveType, aboveCoord);
-      _handleDrop(caller, above, aboveType, aboveCoord);
+  function _prepareBlock(EntityId mined, ObjectType minedType, Vec3 coord) internal returns (ObjectType) {
+    if (minedType.isMachine()) {
+      (EnergyData memory machineData,) = updateMachineEnergy(mined);
+      require(machineData.energy == 0, "Cannot mine a machine that has energy");
+      return minedType;
     }
-  }
 
-  function _removeGrowable(EntityId entityId, ObjectType objectType, Vec3 coord) internal {
-    EntityObjectType._set(entityId, ObjectTypes.Air);
-    require(SeedGrowth._getFullyGrownAt(entityId) > block.timestamp, "Cannot mine fully grown seed");
-    addEnergyToLocalPool(coord, objectType.getGrowableEnergy());
+    if (minedType == ObjectTypes.UnrevealedOre) {
+      return RandomResourceLib._collapseRandomOre(mined, coord);
+    }
+
+    if (minedType.isGrowable() && SeedGrowth._getFullyGrownAt(mined) <= block.timestamp) {
+      // If the seed is fully grown, grow it
+      return NatureLib.growSeed(coord, mined, minedType);
+    }
+
+    return minedType;
   }
 
   function _removeBlock(EntityId entityId, ObjectType objectType, Vec3 coord) internal {
@@ -198,7 +198,39 @@ contract MineSystem is System {
     }
   }
 
-  function _destroyEntity(EntityId caller, EntityId mined, ObjectType minedType, Vec3 baseCoord) internal {
+  function _handleAbove(EntityId caller, Vec3 coord) internal {
+    // Remove growables on top of this block
+    Vec3 aboveCoord = coord + vec3(0, 1, 0);
+
+    (EntityId above, ObjectType aboveType) = EntityUtils.getBlockAt(aboveCoord);
+    bool isGrowable = aboveType.isGrowable();
+    bool isLandbound = aboveType.isLandbound();
+
+    if (!isGrowable && !isLandbound) {
+      return;
+    }
+
+    if (!above._exists()) {
+      EntityUtils.getOrCreateBlockAt(aboveCoord);
+    }
+
+    if (isGrowable && SeedGrowth._getFullyGrownAt(above) <= block.timestamp) {
+      // If the seed is fully grown, grow it and don't remove it yet
+      aboveType = NatureLib.growSeed(aboveCoord, above, aboveType);
+    }
+
+    if (isLandbound) {
+      _removeBlock(above, aboveType, aboveCoord);
+      _handleDrop(caller, above, aboveType, aboveCoord);
+    }
+  }
+
+  function _removeGrowable(EntityId entityId, ObjectType objectType, Vec3 coord) internal {
+    EntityObjectType._set(entityId, ObjectTypes.Air);
+    addEnergyToLocalPool(coord, objectType.getGrowableEnergy());
+  }
+
+  function _cleanupEntity(EntityId caller, EntityId mined, ObjectType minedType, Vec3 baseCoord) internal {
     if (minedType == ObjectTypes.Bed) {
       MineLib._mineBed(mined, baseCoord);
     } else if (minedType.isMachine()) {
@@ -223,9 +255,7 @@ contract MineSystem is System {
     for (uint256 i = 0; i < result.length; i++) {
       (ObjectType dropType, uint128 amount) = (result[i].objectType, result[i].amount);
 
-      if (amount == 0) {
-        continue;
-      }
+      if (amount == 0) continue;
 
       InventoryUtils.addObject(caller, dropType, amount);
 

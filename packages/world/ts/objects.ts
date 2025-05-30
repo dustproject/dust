@@ -1110,6 +1110,25 @@ export const categories: Record<string, Category> = {
       "MangroveSapling",
     ],
   },
+
+  // Objects that will be mined if they are on top of the block being mined
+  Landbound: {
+    objects: [
+      "Wheat",
+      "WheatSeed",
+      "PumpkinSeed",
+      "MelonSeed",
+      "OakSapling",
+      "BirchSapling",
+      "JungleSapling",
+      "SakuraSapling",
+      "AcaciaSapling",
+      "SpruceSapling",
+      "DarkOakSapling",
+      "MangroveSapling",
+    ],
+  },
+
   UniqueObject: {
     objects: [
       "WoodenPick",

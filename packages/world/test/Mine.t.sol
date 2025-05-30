@@ -7,7 +7,9 @@ import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
+
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
+import { SeedGrowth } from "../src/codegen/tables/SeedGrowth.sol";
 
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 
@@ -166,6 +168,144 @@ contract MineTest is DustTest {
     assertEq(ResourceCount.get(ObjectTypes.UnrevealedOre), 1, "Total resource count was not updated");
 
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+  }
+
+  function testMineImmatureSeed() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    Vec3 farmlandCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
+    setObjectAtCoord(farmlandCoord, ObjectTypes.WetFarmland);
+
+    Vec3 seedCoord = farmlandCoord + vec3(0, 1, 0);
+
+    // Add wheat seeds to inventory
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+
+    // Check initial local energy pool
+    uint16 seedSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+
+    // Plant wheat seeds
+    vm.prank(alice);
+    world.build(aliceEntityId, seedCoord, seedSlot, "");
+
+    // Verify seeds were planted
+    (EntityId cropEntityId,) = TestEntityUtils.getBlockAt(seedCoord);
+    assertTrue(cropEntityId.exists(), "Crop entity doesn't exist after planting");
+    assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.WheatSeed, "Wheat seeds were not planted correctly");
+
+    // Verify build time was set
+    uint128 fullyGrownAt = SeedGrowth.getFullyGrownAt(cropEntityId);
+    assertEq(
+      fullyGrownAt, uint128(block.timestamp) + ObjectTypes.WheatSeed.getTimeToGrow(), "Incorrect fullyGrownAt set"
+    );
+
+    // Attempt to mine the not grown seed
+    vm.prank(alice);
+    startGasReport("mine immature seed with hand");
+    world.mineUntilDestroyed(aliceEntityId, seedCoord, "");
+    endGasReport();
+
+    // Verify seeds were added to inventory
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 0);
+  }
+
+  function testMineMatureSeed() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    Vec3 farmlandCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
+    setObjectAtCoord(farmlandCoord, ObjectTypes.WetFarmland);
+
+    // Set seed count to 1 so we can grow it
+    ResourceCount.set(ObjectTypes.WheatSeed, 1);
+    // Add wheat seeds to inventory
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+
+    Vec3 cropCoord = farmlandCoord + vec3(0, 1, 0);
+
+    uint16 seedSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+
+    // Plant wheat seeds
+    vm.prank(alice);
+    world.build(aliceEntityId, cropCoord, seedSlot, "");
+
+    // Verify seeds were planted
+    (EntityId cropEntityId,) = TestEntityUtils.getBlockAt(cropCoord);
+    assertTrue(cropEntityId.exists(), "Crop entity doesn't exist after planting");
+
+    // Get growth time required for the crop
+    uint128 fullyGrownAt = SeedGrowth.getFullyGrownAt(cropEntityId);
+
+    // Advance time beyond the growth period but don't grow it manually
+    vm.warp(fullyGrownAt);
+
+    // Set up chunk commitment for randomness when mining
+    newCommit(alice, aliceEntityId, cropCoord, bytes32(0));
+
+    // Check local energy pool before harvesting
+    uint128 initialLocalEnergy = LocalEnergyPool.get(farmlandCoord.toLocalEnergyPoolShardCoord());
+
+    // Harvest the crop
+    vm.prank(alice);
+    world.mineUntilDestroyed(aliceEntityId, farmlandCoord + vec3(0, 1, 0), "");
+
+    // Verify drops
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 0);
+
+    // Verify crop no longer exists
+    assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
+    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seed was removed from circulation");
+
+    // Verify local energy pool hasn't changed (energy not returned since crop was fully grown)
+    // NOTE: player's energy is not reduced as currently wheat has 0 mass
+    assertEq(
+      LocalEnergyPool.get(farmlandCoord.toLocalEnergyPoolShardCoord()),
+      initialLocalEnergy,
+      "Local energy pool shouldn't change after harvesting mature crop"
+    );
+  }
+
+  function testMineBelowGrowable() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    Vec3 farmlandCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
+    setObjectAtCoord(farmlandCoord, ObjectTypes.WetFarmland);
+
+    // Set seed count to 1 so we can grow it
+    ResourceCount.set(ObjectTypes.WheatSeed, 1);
+    // Add wheat seeds to inventory
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+
+    Vec3 cropCoord = farmlandCoord + vec3(0, 1, 0);
+
+    uint16 seedSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+
+    // Plant wheat seeds
+    vm.prank(alice);
+    world.build(aliceEntityId, cropCoord, seedSlot, "");
+
+    // Verify seeds were planted
+    (EntityId cropEntityId,) = TestEntityUtils.getBlockAt(cropCoord);
+    assertTrue(cropEntityId.exists(), "Crop entity doesn't exist after planting");
+
+    // Get growth time required for the crop
+    uint128 fullyGrownAt = SeedGrowth.getFullyGrownAt(cropEntityId);
+
+    // Advance time beyond the growth period but don't grow it manually
+    vm.warp(fullyGrownAt);
+
+    // Set up chunk commitment for randomness when mining
+    newCommit(alice, aliceEntityId, cropCoord, bytes32(0));
+
+    // Harvest the crop
+    vm.prank(alice);
+    world.mineUntilDestroyed(aliceEntityId, farmlandCoord, "");
+
+    // Verify drops
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 0);
+
+    // Verify crop no longer exists
+    assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
+    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seed was removed from circulation");
   }
 
   function testMineResourceTypeIsFixedAfterPartialMine() public {

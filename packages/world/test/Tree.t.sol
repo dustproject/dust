@@ -37,21 +37,6 @@ import { DustTest } from "./DustTest.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract TreeTest is DustTest {
-  function newCommit(address commiterAddress, EntityId commiter, Vec3 coord, bytes32 blockHash) internal {
-    // Set up chunk commitment for randomness when mining grass
-    Vec3 chunkCoord = coord.toChunkCoord();
-
-    vm.roll(vm.getBlockNumber() + CHUNK_COMMIT_EXPIRY_BLOCKS);
-    vm.prank(commiterAddress);
-    world.chunkCommit(commiter, chunkCoord);
-    // Move forward 2 blocks to make the commitment valid
-    vm.roll(vm.getBlockNumber() + 2);
-
-    vm.setBlockhash(vm.getBlockNumber() - 1, blockHash);
-  }
-
-  // Tree tests
-
   function testPlantTree() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
     Vec3 dirtCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
