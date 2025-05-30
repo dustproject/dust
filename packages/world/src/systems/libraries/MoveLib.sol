@@ -236,7 +236,7 @@ library MoveLib {
 
   function _updatePlayerDrainRate(EntityId player, Vec3 finalCoord) private {
     uint128 drainRate;
-    if (EntityUtils.getObjectTypeAt(finalCoord) == ObjectTypes.Lava) {
+    if (EntityUtils.getObjectTypeAt(finalCoord - vec3(0, 1, 0)) == ObjectTypes.Lava) {
       drainRate = PLAYER_LAVA_ENERGY_DRAIN_RATE;
     } else if (EntityUtils.getObjectTypeAt(finalCoord + vec3(0, 1, 0)) == ObjectTypes.Water) {
       drainRate = PLAYER_SWIM_ENERGY_DRAIN_RATE;
