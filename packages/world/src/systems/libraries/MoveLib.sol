@@ -238,7 +238,7 @@ library MoveLib {
     uint128 drainRate;
     if (EntityUtils.getObjectTypeAt(finalCoord - vec3(0, 1, 0)) == ObjectTypes.Lava) {
       drainRate = PLAYER_LAVA_ENERGY_DRAIN_RATE;
-    } else if (EntityUtils.getObjectTypeAt(finalCoord + vec3(0, 1, 0)) == ObjectTypes.Water) {
+    } else if (_isFluid(finalCoord + vec3(0, 1, 0))) {
       drainRate = PLAYER_SWIM_ENERGY_DRAIN_RATE;
     } else {
       drainRate = PLAYER_ENERGY_DRAIN_RATE;
