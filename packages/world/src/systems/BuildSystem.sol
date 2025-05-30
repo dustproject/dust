@@ -136,6 +136,9 @@ contract BuildSystem is System {
     return slotType;
   }
 
+  /**
+   * @dev Handles special initialization for specific block types (growables, extra drops)
+   */
   function _handleSpecialBlockTypes(EntityId base, ObjectType buildType, Vec3 coord) internal {
     if (buildType.isGrowable()) {
       ObjectType belowType = EntityUtils.getObjectTypeAt(coord - vec3(0, 1, 0));
@@ -149,6 +152,9 @@ contract BuildSystem is System {
     }
   }
 
+  /**
+   * @dev Validates builds against force fields and calls build hooks for programs
+   */
   function _requireBuildsAllowed(BuildContext memory ctx, EntityId base, Vec3[] memory coords, bytes calldata extraData)
     internal
   {
@@ -194,6 +200,9 @@ library BuildLib {
     return _addBlocks(ctx);
   }
 
+  /**
+   * @dev Updates inventory after a successful build (removes item, handles water bucket)
+   */
   function _updateInventory(BuildContext memory ctx) internal {
     InventoryUtils.removeObjectFromSlot(ctx.caller, ctx.slot, 1);
     if (ctx.slotType == ObjectTypes.WaterBucket) {
@@ -231,6 +240,15 @@ library BuildLib {
     return terrain;
   }
 
+  /**
+   * @dev Validates that water can be placed at the given location
+   *
+   * Water placement follows these rules:
+   * - If placing on existing water: Only allowed if current fluid level < MAX_FLUID_LEVEL
+   *   This allows "topping off" partially filled water blocks
+   * - If placing on other terrain: Only allowed on Air or waterloggable blocks
+   *   Waterloggable blocks can contain water while maintaining their type
+   */
   function _validateWaterBuild(ObjectType terrainType, Vec3 coord) internal view {
     if (terrainType == ObjectTypes.Water) {
       uint8 currentFluidLevel = EntityUtils.getFluidLevelAt(coord);
@@ -243,6 +261,19 @@ library BuildLib {
     }
   }
 
+  /**
+   * @dev Validates that a non-water block can be placed at the given location
+   *
+   * Block placement validation checks:
+   * 1. Terrain compatibility: Block can only be placed on Air or Water
+   *    - Air: Standard empty space placement
+   *    - Water: Allows underwater building (block will displace water if not waterloggable)
+   *
+   * 2. For non-passthrough blocks (solid blocks like stone, wood):
+   *    - No dropped items: Cannot build where items are lying on the ground
+   *    - No entities: Cannot build where a movable entity (player, mob) exists
+   *    Passthrough blocks (like torches, fescue grass) skip these checks
+   */
   function _validateBlockBuild(ObjectType terrainType, ObjectType buildType, Vec3 coord, EntityId terrain)
     internal
     view
@@ -255,6 +286,26 @@ library BuildLib {
     }
   }
 
+  /**
+   * @dev Applies terrain modifications when placing a block (sets object type, handles water interactions)
+   *
+   * Modification logic by build type:
+   *
+   * If building Water:
+   * - Always sets fluid level to MAX_FLUID_LEVEL (creates a full water source)
+   * - If terrain is Air: Changes terrain type to Water
+   * - If terrain is waterloggable: Keeps original terrain type (waterlogged state)
+   *
+   * If building other blocks:
+   * - If current terrain is Water AND block is NOT waterloggable:
+   *   - Removes fluid level record (water is displaced/destroyed)
+   * - Sets terrain to the new block type
+   *
+   * This creates the game mechanics where:
+   * - Water fills spaces completely when placed
+   * - Waterloggable blocks can coexist with water
+   * - Non-waterloggable blocks displace water when placed
+   */
   function _applyTerrainModifications(EntityId terrain, ObjectType terrainType, ObjectType buildType) internal {
     if (buildType == ObjectTypes.Water) {
       EntityFluidLevel._set(terrain, MAX_FLUID_LEVEL);
