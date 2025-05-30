@@ -202,14 +202,24 @@ contract MineSystem is System {
     // Remove growables on top of this block
     Vec3 aboveCoord = coord + vec3(0, 1, 0);
 
-    (EntityId above, ObjectType aboveType) = EntityUtils.getOrCreateBlockAt(aboveCoord);
+    (EntityId above, ObjectType aboveType) = EntityUtils.getBlockAt(aboveCoord);
+    bool isGrowable = aboveType.isGrowable();
+    bool isLandbound = aboveType.isLandbound();
 
-    if (aboveType.isGrowable() && SeedGrowth._getFullyGrownAt(above) <= block.timestamp) {
+    if (!isGrowable && !isLandbound) {
+      return;
+    }
+
+    if (!above._exists()) {
+      EntityUtils.getOrCreateBlockAt(aboveCoord);
+    }
+
+    if (isGrowable && SeedGrowth._getFullyGrownAt(above) <= block.timestamp) {
       // If the seed is fully grown, grow it and don't remove it yet
       aboveType = NatureLib.growSeed(aboveCoord, above, aboveType);
     }
 
-    if (aboveType.isLandbound()) {
+    if (isLandbound) {
       _removeBlock(above, aboveType, aboveCoord);
       _handleDrop(caller, above, aboveType, aboveCoord);
     }
