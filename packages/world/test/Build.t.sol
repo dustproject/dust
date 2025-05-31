@@ -550,30 +550,16 @@ contract BuildTest is DustTest {
     Vec3 buildCoord = vec3(playerCoord.x() + 1, playerCoord.y(), playerCoord.z());
     assertEq(TerrainLib.getBlockType(buildCoord), ObjectTypes.Water, "Build coord should be water from terrain");
 
-    // Grass is NOT waterloggable (it's solid)
-    ObjectType buildObjectType = ObjectTypes.Grass;
+    // Torch is NOT waterloggable (it's solid)
+    ObjectType buildObjectType = ObjectTypes.Torch;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
-    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
-
     vm.prank(alice);
-    startGasReport("build non-waterloggable block on water terrain");
+    vm.expectRevert("Cannot build on water with non-waterloggable block");
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
-    endGasReport();
-
-    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity should be grass");
-    assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
-
-    // Non-waterloggable blocks should NOT remove fluid level
-    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(buildCoord);
-    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Non-waterloggable block should have fluid level");
-
-    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
-    assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
   }
 
   function testBuildWaterloggableBlockOnWaterNonTerrain() public {
