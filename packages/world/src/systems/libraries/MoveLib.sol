@@ -168,19 +168,18 @@ library MoveLib {
     uint16 glides = 0;
     uint16 fallHeight = 0;
 
-    bool gravityApplies = false;
-    uint128 fallDamage = 0;
+    bool currentHasGravity = _gravityApplies(current);
 
     for (uint256 i = 0; i < newBaseCoords.length && cost < currentEnergy; i++) {
       Vec3 next = newBaseCoords[i];
       _requireValidMove(current, next);
 
-      gravityApplies = _gravityApplies(next);
+      bool nextHasGravity = _gravityApplies(next);
 
       int32 dy = next.y() - current.y();
 
       // Only count as fall when gravity doesn't apply in current coord
-      if (dy < 0 && _gravityApplies(current)) {
+      if (dy < 0 && currentHasGravity) {
         // For falls, cost will be computed upon landing
         ++fallHeight;
         glides = 0;
@@ -188,29 +187,35 @@ library MoveLib {
         if (dy > 0) {
           ++jumps;
           require(jumps <= MAX_PLAYER_JUMPS, "Cannot jump more than 3 blocks");
-        } else if (gravityApplies) {
+        } else if (nextHasGravity) {
           ++glides;
           require(glides <= MAX_PLAYER_GLIDES, "Cannot glide more than 10 blocks");
         }
+
         cost += _getMoveCost(next);
       }
 
-      if (!gravityApplies) {
-        if (fallHeight > PLAYER_SAFE_FALL_DISTANCE && !_isFluid(next)) {
-          cost += PLAYER_FALL_ENERGY_COST * (fallHeight - PLAYER_SAFE_FALL_DISTANCE);
+      if (!nextHasGravity) {
+        if (fallHeight > 0) {
+          cost += _getMoveCost(next);
+
+          if (fallHeight > PLAYER_SAFE_FALL_DISTANCE && !_isFluid(next)) {
+            cost += PLAYER_FALL_ENERGY_COST * (fallHeight - PLAYER_SAFE_FALL_DISTANCE);
+          }
         }
-        fallDamage = 0;
         fallHeight = 0;
         jumps = 0;
         glides = 0;
       }
 
+      currentHasGravity = nextHasGravity;
       current = next;
     }
 
     // If gravity still applies after last path move, run gravity all the way down,
     // taking into account the current fallHeight
-    if (gravityApplies) {
+    if (currentHasGravity) {
+      uint128 fallDamage;
       (current, fallDamage) = _computeGravityResult(current, fallHeight);
       cost += fallDamage;
     }
