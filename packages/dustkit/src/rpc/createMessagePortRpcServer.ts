@@ -1,6 +1,6 @@
 import { type RpcRequest, RpcResponse, type RpcSchema } from "ox";
 import { MethodNotSupportedError } from "ox/RpcResponse";
-import { initMessage } from "./getMessagePortRpcClient";
+import { initMessage } from "./createMessagePort";
 
 // Ideally we'd have one `onRequest` handler, but unfortunately I couldn't figure out how
 // to get strong types, where narrowing on the RPC method would also narrow the params and
@@ -23,7 +23,8 @@ export function createMessagePortRpcServer<schema extends RpcSchema.Generic>(
 
     const [port] = event.ports;
     if (!port) {
-      return console.warn(`Got "${initMessage}" message with no message port.`);
+      console.warn(`Got "${initMessage}" message with no message port.`);
+      return;
     }
 
     port.addEventListener(
@@ -55,11 +56,11 @@ export function createMessagePortRpcServer<schema extends RpcSchema.Generic>(
       },
     );
 
-    port.start();
-    port.postMessage("ready");
-
     connectedPort?.close();
     connectedPort = port;
+
+    port.start();
+    port.postMessage("ready");
   }
 
   window.addEventListener("message", onMessage);

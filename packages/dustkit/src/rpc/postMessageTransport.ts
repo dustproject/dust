@@ -7,25 +7,28 @@ import {
   type UrlRequiredErrorType,
   createTransport,
 } from "viem";
-import type { MessagePortRpcClient } from "./getMessagePortRpcClient";
+import {
+  type PostMessageRpcClient,
+  getPostMessageRpcClient,
+} from "./getPostMessageRpcClient";
 
-export type MessagePortTransportConfig = {
-  /** The key of the MessagePort transport. */
+export type PostMessageTransportConfig = {
+  /** The key of the PostMessage transport. */
   key?: TransportConfig["key"] | undefined;
   /** Methods to include or exclude from executing RPC requests. */
   methods?: TransportConfig["methods"] | undefined;
-  /** The name of the MessagePort transport. */
+  /** The name of the PostMessage transport. */
   name?: TransportConfig["name"] | undefined;
   /** The max number of times to retry. */
   retryCount?: TransportConfig["retryCount"] | undefined;
   /** The base delay (in ms) between retries. */
   retryDelay?: TransportConfig["retryDelay"] | undefined;
-  /** The timeout (in ms) for async MessagePort requests. Default: 10_000 */
+  /** The timeout (in ms) for async PostMessage requests. Default: 10_000 */
   timeout?: TransportConfig["timeout"] | undefined;
 };
 
-export type MessagePortTransport<schema extends RpcSchema.Generic> = Transport<
-  "messagePort",
+export type PostMessageTransport<schema extends RpcSchema.Generic> = Transport<
+  "postMessage",
   // biome-ignore lint/complexity/noBannedTypes: not needed yet
   {},
   // @ts-ignore I can't get this to comply with Viem's `EIP1193RequestFn`. I tried to convert the Ox `RpcSchema` to a Viem `RpcSchema`, but then calling the `request` function doesn't narrow types based on `method`.
@@ -42,21 +45,22 @@ export type MessagePortTransport<schema extends RpcSchema.Generic> = Transport<
   ) => Promise<RpcSchema.ExtractReturnType<schema, method>>
 >;
 
-export type MessagePortTransportErrorType =
+export type PostMessageTransportErrorType =
   | CreateTransportErrorType
   | UrlRequiredErrorType;
 
 /**
  * @description Creates an IPC transport that connects to a JSON-RPC API.
  */
-export function messagePort<schema extends RpcSchema.Generic>(
-  rpcClientPromise: Promise<MessagePortRpcClient>,
-  config: MessagePortTransportConfig = {},
-): MessagePortTransport<schema> {
+export function postMessageTransport<schema extends RpcSchema.Generic>(
+  target: Window,
+  // TODO: targetOrigin
+  config: PostMessageTransportConfig = {},
+): PostMessageTransport<schema> {
   const {
-    key = "messagePort",
+    key = "postMessage",
     methods,
-    name = "MessagePort JSON-RPC",
+    name = "PostMessage JSON-RPC",
     retryDelay,
   } = config;
   return ({ retryCount: retryCount_, timeout: timeout_ }) => {
@@ -68,34 +72,24 @@ export function messagePort<schema extends RpcSchema.Generic>(
         methods,
         name,
         async request({ method, params }) {
-          console.info(
-            "waiting for rpc client before sending rpc request",
-            method,
-            params,
-          );
-          const rpcClient = await rpcClientPromise;
-
           const body = { method, params };
-          console.info("sending rpc request", method, params);
+          const rpcClient = await getPostMessageRpcClient(target);
           const { error, result } = await rpcClient.requestAsync({
             body,
             timeout,
           });
-
-          if (error) {
+          if (error)
             throw new RpcRequestError({
               body,
               error,
               url: rpcClient.socket.targetOrigin,
             });
-          }
-
           return result;
         },
         retryCount,
         retryDelay,
         timeout,
-        type: "messagePort",
+        type: "postMessage",
       },
       {},
     );
