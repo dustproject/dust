@@ -1344,7 +1344,7 @@ export const categories: Record<string, Category> = {
       "SpawnTile",
       // "Bed",
       "TextSign",
-      // "Torch",
+      "Torch",
     ],
   },
 } as const;

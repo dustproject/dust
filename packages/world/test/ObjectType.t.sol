@@ -5933,6 +5933,7 @@ contract ObjectTypeTest is DustTest {
       assertTrue(ObjectTypes.Chest.isWaterloggable(), "isWaterloggable");
       assertTrue(ObjectTypes.SpawnTile.isWaterloggable(), "isWaterloggable");
       assertTrue(ObjectTypes.TextSign.isWaterloggable(), "isWaterloggable");
+      assertTrue(ObjectTypes.Torch.isWaterloggable(), "isWaterloggable");
       assertFalse(ObjectTypes.Null.isWaterloggable(), "!isWaterloggable");
       assertFalse(ObjectTypes.Air.isWaterloggable(), "!isWaterloggable");
       assertFalse(ObjectTypes.Water.isWaterloggable(), "!isWaterloggable");
@@ -5992,7 +5993,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MangroveSapling.isWaterloggable(), "!isWaterloggable");
       assertFalse(ObjectTypes.Furnace.isWaterloggable(), "!isWaterloggable");
       assertFalse(ObjectTypes.Bed.isWaterloggable(), "!isWaterloggable");
-      assertFalse(ObjectTypes.Torch.isWaterloggable(), "!isWaterloggable");
       assertFalse(ObjectTypes.WoodenPick.isWaterloggable(), "!isWaterloggable");
       assertFalse(ObjectTypes.CopperPick.isWaterloggable(), "!isWaterloggable");
       assertFalse(ObjectTypes.IronPick.isWaterloggable(), "!isWaterloggable");

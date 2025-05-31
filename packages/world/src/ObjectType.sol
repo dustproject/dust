@@ -588,7 +588,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x6e003ffffe5fe00000003fffffffff8dfffff0), 1)
+        let bit := and(shr(self, 0x16e003ffffe5fe00000003fffffffff8dfffff0), 1)
         ok := bit
       }
     }
@@ -1167,7 +1167,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function getWaterloggableTypes() internal pure returns (ObjectType[97] memory) {
+  function getWaterloggableTypes() internal pure returns (ObjectType[98] memory) {
     return [
       ObjectTypes.Stone,
       ObjectTypes.Deepslate,
@@ -1265,7 +1265,8 @@ library ObjectTypeLib {
       ObjectTypes.ForceField,
       ObjectTypes.Chest,
       ObjectTypes.SpawnTile,
-      ObjectTypes.TextSign
+      ObjectTypes.TextSign,
+      ObjectTypes.Torch
     ];
   }
 
