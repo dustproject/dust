@@ -13,7 +13,8 @@ import {
   PLAYER_FALL_ENERGY_COST,
   PLAYER_LAVA_ENERGY_DRAIN_RATE,
   PLAYER_SAFE_FALL_DISTANCE,
-  PLAYER_SWIM_ENERGY_DRAIN_RATE
+  PLAYER_SWIM_ENERGY_DRAIN_RATE,
+  WATER_MOVE_ENERGY_COST
 } from "../../Constants.sol";
 import { EntityId } from "../../EntityId.sol";
 import { ObjectType } from "../../ObjectType.sol";
@@ -183,6 +184,11 @@ library MoveLib {
         // For falls, cost will be computed upon landing
         ++fallHeight;
         glides = 0;
+
+        // If landing, apply normal move cost
+        if (!nextHasGravity) {
+          cost += _getMoveCost(next);
+        }
       } else {
         if (dy > 0) {
           ++jumps;
@@ -196,12 +202,9 @@ library MoveLib {
       }
 
       if (!nextHasGravity) {
-        if (fallHeight > 0) {
-          cost += _getMoveCost(next);
-
-          if (fallHeight > PLAYER_SAFE_FALL_DISTANCE && !_isFluid(next)) {
-            cost += PLAYER_FALL_ENERGY_COST * (fallHeight - PLAYER_SAFE_FALL_DISTANCE);
-          }
+        // If landing after a long fall, apply fall damage
+        if (fallHeight > PLAYER_SAFE_FALL_DISTANCE && !_isFluid(next)) {
+          cost += PLAYER_FALL_ENERGY_COST * (fallHeight - PLAYER_SAFE_FALL_DISTANCE);
         }
         fallHeight = 0;
         jumps = 0;
@@ -279,8 +282,13 @@ library MoveLib {
   }
 
   function _getMoveCost(Vec3 coord) internal view returns (uint128) {
-    Vec3 belowCoord = coord - vec3(0, 1, 0);
-    ObjectType belowType = EntityUtils.getObjectTypeAt(belowCoord);
-    return belowType == ObjectTypes.Lava ? LAVA_MOVE_ENERGY_COST : MOVE_ENERGY_COST;
+    ObjectType belowType = EntityUtils.getObjectTypeAt(coord - vec3(0, 1, 0));
+    if (belowType == ObjectTypes.Water) {
+      return WATER_MOVE_ENERGY_COST;
+    } else if (belowType == ObjectTypes.Lava) {
+      return LAVA_MOVE_ENERGY_COST;
+    }
+
+    return MOVE_ENERGY_COST;
   }
 }

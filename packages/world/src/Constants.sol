@@ -41,6 +41,7 @@ uint128 constant TILL_ENERGY_COST = 255500000000000;
 uint128 constant CRAFT_ENERGY_COST = 255500000000000;
 uint128 constant MOVE_ENERGY_COST = 25550000000000;
 // TODO: placeholder
+uint128 constant WATER_MOVE_ENERGY_COST = MOVE_ENERGY_COST * 3;
 uint128 constant LAVA_MOVE_ENERGY_COST = MOVE_ENERGY_COST * 10;
 uint128 constant PLAYER_FALL_ENERGY_COST = MAX_PLAYER_ENERGY / 25; // This makes it so, with full energy, you die from a 25 block fall
 
