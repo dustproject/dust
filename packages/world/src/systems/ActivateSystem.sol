@@ -12,15 +12,15 @@ import { ObjectTypes } from "../ObjectType.sol";
 import { checkWorldStatus } from "../Utils.sol";
 import { updateMachineEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
 
-import { EntityId, EntityIdLib } from "../EntityId.sol";
+import { EntityId, EntityTypeLib } from "../EntityId.sol";
 
 contract ActivateSystem is System {
   function activate(EntityId entityId) public {
     checkWorldStatus();
 
-    require(entityId.exists(), "Entity does not exist");
+    require(entityId._exists(), "Entity does not exist");
     EntityId base = entityId.baseEntityId();
-    ObjectType objectType = base.getObjectType();
+    ObjectType objectType = base._getObjectType();
     require(!objectType.isNull(), "Entity has no object type");
 
     if (objectType == ObjectTypes.Player) {
@@ -32,8 +32,9 @@ contract ActivateSystem is System {
   }
 
   function activatePlayer(address playerAddress) public {
-    EntityId player = EntityIdLib.encodePlayer(playerAddress);
-    ObjectType objectType = player.getObjectType();
+    checkWorldStatus();
+    EntityId player = EntityTypeLib.encodePlayer(playerAddress);
+    ObjectType objectType = player._getObjectType();
     require(objectType == ObjectTypes.Player, "Entity is not player");
     updatePlayerEnergy(player);
   }

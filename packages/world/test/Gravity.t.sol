@@ -10,9 +10,6 @@ import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
-import { Inventory } from "../src/codegen/tables/Inventory.sol";
-import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
-
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
@@ -142,14 +139,19 @@ contract GravityTest is DustTest {
     setTerrainAtCoord(mineCoord - vec3(0, 2, 0), ObjectTypes.Air);
     setTerrainAtCoord(mineCoord - vec3(0, 3, 0), ObjectTypes.Air);
     setTerrainAtCoord(mineCoord - vec3(0, 4, 0), ObjectTypes.Air);
-    setTerrainAtCoord(mineCoord - vec3(0, 5, 0), ObjectTypes.Water);
-    setTerrainAtCoord(mineCoord - vec3(0, 6, 0), ObjectTypes.Dirt);
+    setTerrainAtCoord(mineCoord - vec3(0, 5, 0), ObjectTypes.Air);
+    setTerrainAtCoord(mineCoord - vec3(0, 6, 0), ObjectTypes.Air);
+    setTerrainAtCoord(mineCoord - vec3(0, 7, 0), ObjectTypes.Air);
+    setTerrainAtCoord(mineCoord - vec3(0, 8, 0), ObjectTypes.Water);
+    setTerrainAtCoord(mineCoord - vec3(0, 9, 0), ObjectTypes.Dirt);
 
     // Water should prevent fall damage
     vm.prank(alice);
     world.mine(aliceEntityId, mineCoord, "");
 
-    // Verify player is dead
+    // Verify player is not dead
+    assertEq(aliceEntityId.getPosition(), mineCoord - vec3(0, 8, 0), "Final coord mismatch");
+    assertGt(Energy.getEnergy(aliceEntityId), 0, "Player should not have died from fall on water");
     assertEq(Energy.getEnergy(aliceEntityId), initialEnergy - DEFAULT_MINE_ENERGY_COST, "Player shouldn't have died");
   }
 
@@ -340,6 +342,81 @@ contract GravityTest is DustTest {
 
     // Verify player is dead
     assertPlayerIsDead(aliceEntityId, playerCoord);
+  }
+
+  function testMoveFallOnWater() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Set player energy to exactly enough for a mine, but not for a fall
+    uint128 initialEnergy = MOVE_ENERGY_COST + 1;
+    Energy.set(
+      aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: initialEnergy, drainRate: 0 })
+    );
+
+    // Set up destination with a deep pit
+    Vec3[] memory newCoords = new Vec3[](1);
+    newCoords[0] = playerCoord + vec3(0, 0, 1);
+
+    // Set up a deep pit underneath
+    setTerrainAtCoord(newCoords[0] - vec3(0, 1, 0), ObjectTypes.Air);
+    setTerrainAtCoord(newCoords[0] - vec3(0, 2, 0), ObjectTypes.Air);
+    setTerrainAtCoord(newCoords[0] - vec3(0, 3, 0), ObjectTypes.Air);
+    setTerrainAtCoord(newCoords[0] - vec3(0, 4, 0), ObjectTypes.Air);
+    setTerrainAtCoord(newCoords[0] - vec3(0, 5, 0), ObjectTypes.Air);
+    setTerrainAtCoord(newCoords[0] - vec3(0, 6, 0), ObjectTypes.Air);
+    setTerrainAtCoord(newCoords[0] - vec3(0, 7, 0), ObjectTypes.Air);
+    setTerrainAtCoord(newCoords[0] - vec3(0, 8, 0), ObjectTypes.Water);
+    setTerrainAtCoord(newCoords[0] - vec3(0, 9, 0), ObjectTypes.Dirt);
+
+    // Water should prevent fall damage
+    vm.prank(alice);
+    world.move(aliceEntityId, newCoords);
+
+    // Verify player is not dead
+    assertEq(aliceEntityId.getPosition(), newCoords[0] - vec3(0, 8, 0), "Final coord mismatch");
+    assertGt(Energy.getEnergy(aliceEntityId), 0, "Player should not have died from fall on water");
+    assertEq(Energy.getEnergy(aliceEntityId), initialEnergy - MOVE_ENERGY_COST, "Player shouldn't have died");
+  }
+
+  function testMoveFallOnWaterFullPath() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Set player energy to exactly enough for a mine, but not for a fall
+    uint128 initialEnergy = MOVE_ENERGY_COST + 1;
+    Energy.set(
+      aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: initialEnergy, drainRate: 0 })
+    );
+
+    // Set up destination with a deep pit
+    Vec3[] memory newCoords = new Vec3[](9);
+    newCoords[0] = playerCoord + vec3(0, 0, 1);
+    newCoords[1] = newCoords[0] - vec3(0, 1, 0);
+    newCoords[2] = newCoords[0] - vec3(0, 2, 0);
+    newCoords[3] = newCoords[0] - vec3(0, 3, 0);
+    newCoords[4] = newCoords[0] - vec3(0, 4, 0);
+    newCoords[5] = newCoords[0] - vec3(0, 5, 0);
+    newCoords[6] = newCoords[0] - vec3(0, 6, 0);
+    newCoords[7] = newCoords[0] - vec3(0, 7, 0);
+    newCoords[8] = newCoords[0] - vec3(0, 8, 0);
+
+    // Set up a deep pit underneath
+    setTerrainAtCoord(newCoords[1], ObjectTypes.Air);
+    setTerrainAtCoord(newCoords[2], ObjectTypes.Air);
+    setTerrainAtCoord(newCoords[3], ObjectTypes.Air);
+    setTerrainAtCoord(newCoords[4], ObjectTypes.Air);
+    setTerrainAtCoord(newCoords[5], ObjectTypes.Air);
+    setTerrainAtCoord(newCoords[6], ObjectTypes.Air);
+    setTerrainAtCoord(newCoords[7], ObjectTypes.Air);
+    setTerrainAtCoord(newCoords[8], ObjectTypes.Water);
+
+    // Water should prevent fall damage
+    vm.prank(alice);
+    world.move(aliceEntityId, newCoords);
+
+    // Verify player is not dead
+    assertEq(aliceEntityId.getPosition(), newCoords[0] - vec3(0, 8, 0), "Final coord mismatch");
+    assertEq(Energy.getEnergy(aliceEntityId), 1, "Player energy mismatch");
+    assertEq(Energy.getEnergy(aliceEntityId), initialEnergy - MOVE_ENERGY_COST, "Player shouldn't have died");
   }
 
   function testMoveFailsIfGravityOutsideExploredChunk() public {

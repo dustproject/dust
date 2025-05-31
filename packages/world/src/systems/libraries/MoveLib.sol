@@ -113,15 +113,15 @@ library MoveLib {
       if (!newObjectType.isPassThrough()) {
         revert NonPassableBlock(newCoord.x(), newCoord.y(), newCoord.z(), newObjectType);
       }
-      require(!EntityUtils.getMovableEntityAt(newCoord).exists(), "Cannot move through a player");
+      require(!EntityUtils.getMovableEntityAt(newCoord)._exists(), "Cannot move through a player");
     }
   }
 
   function _gravityApplies(Vec3 playerCoord) internal view returns (bool) {
     Vec3 belowCoord = playerCoord - vec3(0, 1, 0);
     bool onSolidBlock = !EntityUtils.safeGetObjectTypeAt(belowCoord).isPassThrough()
-      || EntityUtils.getMovableEntityAt(belowCoord).exists();
-    return !onSolidBlock && EntityUtils.getObjectTypeAt(playerCoord) != ObjectTypes.Water;
+      || EntityUtils.getMovableEntityAt(belowCoord)._exists();
+    return !onSolidBlock && !_isFluid(playerCoord);
   }
 
   function _computeGravityResult(Vec3 coord, uint16 initialFallHeight) private view returns (Vec3, uint128) {
@@ -133,7 +133,7 @@ library MoveLib {
     }
 
     // If currently on water, don't apply fall damage
-    if (EntityUtils.getObjectTypeAt(current) == ObjectTypes.Water) {
+    if (_isFluid(current)) {
       return (current, 0);
     }
 
@@ -188,7 +188,7 @@ library MoveLib {
       }
 
       if (!gravityApplies) {
-        if (fallHeight > PLAYER_SAFE_FALL_DISTANCE && EntityUtils.getObjectTypeAt(current) != ObjectTypes.Water) {
+        if (fallHeight > PLAYER_SAFE_FALL_DISTANCE && !_isFluid(next)) {
           cost += PLAYER_FALL_ENERGY_COST * (fallHeight - PLAYER_SAFE_FALL_DISTANCE);
         }
         fallDamage = 0;
@@ -237,7 +237,7 @@ library MoveLib {
   function _handleAbove(EntityId player, Vec3 playerCoord) private {
     Vec3 aboveCoord = playerCoord + vec3(0, 2, 0);
     EntityId above = EntityUtils.getMovableEntityAt(aboveCoord);
-    if (!above.exists()) {
+    if (!above._exists()) {
       return;
     }
 
@@ -246,5 +246,9 @@ library MoveLib {
     if (above != player) {
       runGravity(aboveCoord);
     }
+  }
+
+  function _isFluid(Vec3 coord) internal view returns (bool) {
+    return EntityUtils.getFluidLevelAt(coord) > 0;
   }
 }

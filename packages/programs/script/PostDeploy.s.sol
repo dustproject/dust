@@ -2,33 +2,30 @@
 pragma solidity >=0.8.24;
 
 import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
-import { Script } from "forge-std/Script.sol";
 import { console } from "forge-std/console.sol";
 
-import { IWorld } from "../src/codegen/world/IWorld.sol";
-
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
-
 import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
+import { DustScript } from "@dust/world/script/DustScript.sol";
+
+import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { BedProgram } from "../src/programs/BedProgram.sol";
 import { ChestProgram } from "../src/programs/ChestProgram.sol";
 import { ForceFieldProgram } from "../src/programs/ForceFieldProgram.sol";
 import { SpawnTileProgram } from "../src/programs/SpawnTileProgram.sol";
+import { TextSignProgram } from "../src/programs/TextSignProgram.sol";
 
 bytes14 constant DEFAULT_NAMESPACE = "dfprograms_1";
 
-contract PostDeploy is Script {
+contract PostDeploy is DustScript {
   function run(address worldAddress) external {
     // Specify a store so that you can use tables directly in PostDeploy
     StoreSwitch.setStoreAddress(worldAddress);
 
-    // Load the private key from the `PRIVATE_KEY` environment variable (in .env)
-    uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-
     // Start broadcasting transactions from the deployer account
-    vm.startBroadcast(deployerPrivateKey);
+    startBroadcast();
 
     IWorld world = IWorld(worldAddress);
 
@@ -58,6 +55,12 @@ contract PostDeploy is Script {
     if (Systems.getSystem(spawnTileProgramId) == address(0)) {
       SpawnTileProgram spawnTileProgram = new SpawnTileProgram(world);
       world.registerSystem(spawnTileProgramId, spawnTileProgram, false);
+    }
+    ResourceId textSignProgramId =
+      WorldResourceIdLib.encode({ typeId: RESOURCE_SYSTEM, namespace: DEFAULT_NAMESPACE, name: "TextSignProgram" });
+    if (Systems.getSystem(textSignProgramId) == address(0)) {
+      TextSignProgram textSignProgram = new TextSignProgram(world);
+      world.registerSystem(textSignProgramId, textSignProgram, false);
     }
 
     vm.stopBroadcast();

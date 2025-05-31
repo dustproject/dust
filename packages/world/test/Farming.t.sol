@@ -37,19 +37,6 @@ import { DustTest } from "./DustTest.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract FarmingTest is DustTest {
-  function newCommit(address commiterAddress, EntityId commiter, Vec3 coord, bytes32 blockHash) internal {
-    // Set up chunk commitment for randomness when mining grass
-    Vec3 chunkCoord = coord.toChunkCoord();
-
-    vm.roll(vm.getBlockNumber() + CHUNK_COMMIT_EXPIRY_BLOCKS);
-    vm.prank(commiterAddress);
-    world.chunkCommit(commiter, chunkCoord);
-    // Move forward 2 blocks to make the commitment valid
-    vm.roll(vm.getBlockNumber() + 2);
-
-    vm.setBlockhash(vm.getBlockNumber() - 1, blockHash);
-  }
-
   function testTillDirt() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
@@ -66,7 +53,7 @@ contract FarmingTest is DustTest {
     endGasReport();
 
     (EntityId dirtEntityId,) = TestEntityUtils.getBlockAt(dirtCoord);
-    assertTrue(TestEntityUtils.exists(dirtEntityId), "Dirt entity doesn't exist after tilling");
+    assertTrue(dirtEntityId.exists(), "Dirt entity doesn't exist after tilling");
     assertEq(EntityObjectType.get(dirtEntityId), ObjectTypes.Farmland, "Dirt was not converted to farmland");
 
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
@@ -78,7 +65,7 @@ contract FarmingTest is DustTest {
     Vec3 grassCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
     setTerrainAtCoord(grassCoord, ObjectTypes.Grass);
     (EntityId grassEntityId,) = TestEntityUtils.getBlockAt(grassCoord);
-    assertFalse(TestEntityUtils.exists(grassEntityId), "Grass entity already exists");
+    assertFalse(grassEntityId.exists(), "Grass entity already exists");
 
     TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenHoe);
 
@@ -89,7 +76,7 @@ contract FarmingTest is DustTest {
     world.till(aliceEntityId, grassCoord, 0);
     endGasReport();
 
-    assertTrue(TestEntityUtils.exists(grassEntityId), "Grass entity doesn't exist after tilling");
+    assertTrue(grassEntityId.exists(), "Grass entity doesn't exist after tilling");
     assertEq(EntityObjectType.get(grassEntityId), ObjectTypes.Farmland, "Grass was not converted to farmland");
 
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
@@ -114,7 +101,7 @@ contract FarmingTest is DustTest {
       world.till(aliceEntityId, testCoord, 0);
 
       (EntityId farmlandEntityId,) = TestEntityUtils.getBlockAt(testCoord);
-      assertTrue(TestEntityUtils.exists(farmlandEntityId), "Farmland entity doesn't exist after tilling");
+      assertTrue(farmlandEntityId.exists(), "Farmland entity doesn't exist after tilling");
       assertEq(EntityObjectType.get(farmlandEntityId), ObjectTypes.Farmland, "Dirt was not converted to farmland");
     }
   }
@@ -197,7 +184,7 @@ contract FarmingTest is DustTest {
     // Check initial local energy pool
     uint128 initialLocalEnergy = LocalEnergyPool.get(farmlandCoord.toLocalEnergyPoolShardCoord());
 
-    uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+    uint16 seedSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WheatSeed);
 
     // Plant wheat seeds
     vm.prank(alice);
@@ -205,7 +192,7 @@ contract FarmingTest is DustTest {
 
     // Verify seeds were planted
     (EntityId cropEntityId,) = TestEntityUtils.getBlockAt(farmlandCoord + vec3(0, 1, 0));
-    assertTrue(TestEntityUtils.exists(cropEntityId), "Crop entity doesn't exist after planting");
+    assertTrue(cropEntityId.exists(), "Crop entity doesn't exist after planting");
     assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.WheatSeed, "Wheat seeds were not planted correctly");
 
     assertEq(
@@ -235,7 +222,7 @@ contract FarmingTest is DustTest {
     Vec3 dirtCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
     setTerrainAtCoord(dirtCoord, ObjectTypes.Dirt);
 
-    uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+    uint16 seedSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WheatSeed);
 
     vm.prank(alice);
     vm.expectRevert("Cannot plant on this block");
@@ -245,7 +232,7 @@ contract FarmingTest is DustTest {
     Vec3 farmlandCoord = vec3(playerCoord.x() + 2, 0, playerCoord.z());
     setTerrainAtCoord(farmlandCoord, ObjectTypes.Farmland);
 
-    seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+    seedSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WheatSeed);
 
     vm.prank(alice);
     vm.expectRevert("Cannot plant on this block");
@@ -264,7 +251,7 @@ contract FarmingTest is DustTest {
 
     Vec3 cropCoord = farmlandCoord + vec3(0, 1, 0);
 
-    uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+    uint16 seedSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WheatSeed);
 
     // Plant wheat seeds
     vm.prank(alice);
@@ -272,7 +259,7 @@ contract FarmingTest is DustTest {
 
     // Verify seeds were planted
     (EntityId cropEntityId,) = TestEntityUtils.getBlockAt(cropCoord);
-    assertTrue(TestEntityUtils.exists(cropEntityId), "Crop entity doesn't exist after planting");
+    assertTrue(cropEntityId.exists(), "Crop entity doesn't exist after planting");
 
     // Get growth time required for the crop
     uint128 fullyGrownAt = SeedGrowth.getFullyGrownAt(cropEntityId);
@@ -320,7 +307,7 @@ contract FarmingTest is DustTest {
 
     Vec3 cropCoord = farmlandCoord + vec3(0, 1, 0);
 
-    uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+    uint16 seedSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WheatSeed);
 
     // Plant wheat seeds
     vm.prank(alice);
@@ -328,7 +315,7 @@ contract FarmingTest is DustTest {
 
     // Verify seeds were planted
     (EntityId cropEntityId,) = TestEntityUtils.getBlockAt(cropCoord);
-    assertTrue(TestEntityUtils.exists(cropEntityId), "Crop entity doesn't exist after planting");
+    assertTrue(cropEntityId.exists(), "Crop entity doesn't exist after planting");
 
     // Get growth time required for the crop
     uint128 fullyGrownAt = SeedGrowth.getFullyGrownAt(cropEntityId);
@@ -408,7 +395,7 @@ contract FarmingTest is DustTest {
 
     Vec3 cropCoord = farmlandCoord + vec3(0, 1, 0);
     // Plant wheat seeds
-    uint16 seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+    uint16 seedSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WheatSeed);
     vm.prank(alice);
     world.build(aliceEntityId, cropCoord, seedSlot, "");
 
@@ -432,7 +419,7 @@ contract FarmingTest is DustTest {
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 0);
 
     // Reset test by planting again
-    seedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+    seedSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WheatSeed);
     vm.prank(alice);
     world.build(aliceEntityId, cropCoord, seedSlot, "");
 

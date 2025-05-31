@@ -24,12 +24,11 @@ library ForceFieldUtils {
   function getForceField(Vec3 coord) internal view returns (EntityId, EntityId) {
     Vec3 fragmentCoord = coord.toFragmentCoord();
     EntityId fragment = EntityUtils.getFragmentAt(fragmentCoord);
-    if (!fragment.exists()) return (EntityId.wrap(0), fragment);
+    if (!fragment._exists()) return (EntityId.wrap(0), fragment);
 
     FragmentData memory fragmentData = Fragment._get(fragment);
-    return _isFragmentActive(fragmentData, fragmentData.forceField)
-      ? (fragmentData.forceField, fragment)
-      : (EntityId.wrap(0), fragment);
+    bool isActive = _isFragmentActive(fragmentData, fragmentData.forceField);
+    return isActive ? (fragmentData.forceField, fragment) : (EntityId.wrap(0), fragment);
   }
 
   /**
@@ -58,7 +57,7 @@ library ForceFieldUtils {
    * @dev Check if the forcefield is active (exists and hasn't been destroyed)
    */
   function isForceFieldActive(EntityId forceField) internal view returns (bool) {
-    return forceField.exists() && Machine._getCreatedAt(forceField) > 0;
+    return forceField._exists() && Machine._getCreatedAt(forceField) > 0;
   }
 
   /**
@@ -73,7 +72,7 @@ library ForceFieldUtils {
    * @dev Add a fragment to an existing forcefield
    */
   function addFragment(EntityId forceField, EntityId fragment) internal {
-    require(!fragment.getProgram().exists(), "Can't expand into a fragment with a program");
+    require(!fragment._getProgram().exists(), "Can't expand into a fragment with a program");
 
     FragmentData memory fragmentData = Fragment._get(fragment);
     require(!_isFragmentActive(fragmentData, fragmentData.forceField), "Fragment already belongs to a forcefield");
@@ -90,7 +89,7 @@ library ForceFieldUtils {
    * @dev Remove a fragment from a forcefield
    */
   function removeFragment(EntityId forceField, EntityId fragment) internal {
-    require(!fragment.getProgram().exists(), "Can't remove a fragment with a program");
+    require(!fragment._getProgram().exists(), "Can't remove a fragment with a program");
 
     (EnergyData memory machineData,) = updateMachineEnergy(forceField);
     Energy._setDrainRate(
@@ -103,7 +102,7 @@ library ForceFieldUtils {
    * @dev Check if a fragment is active in a specific forcefield
    */
   function _isFragmentActive(FragmentData memory fragmentData, EntityId forceField) private view returns (bool) {
-    return forceField.exists() && fragmentData.forceField == forceField
+    return forceField._exists() && fragmentData.forceField == forceField
       && fragmentData.forceFieldCreatedAt == Machine._getCreatedAt(forceField);
   }
 }

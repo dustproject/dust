@@ -14,7 +14,6 @@ import { BedPlayer, BedPlayerData } from "../src/codegen/tables/BedPlayer.sol";
 import { Fragment } from "../src/codegen/tables/Fragment.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
-import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { Machine } from "../src/codegen/tables/Machine.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
@@ -430,8 +429,6 @@ contract BedTest is DustTest {
     assertInventoryHasObject(aliceEntityId, ObjectTypes.IronPick, 1);
     assertInventoryHasObject(bedEntityId, ObjectTypes.Grass, 0);
     assertInventoryHasObject(bedEntityId, ObjectTypes.IronPick, 0);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 2, "Wrong number of occupied inventory slots");
-    assertEq(Inventory.lengthOccupiedSlots(bedEntityId), 0, "Wrong number of occupied inventory slots");
 
     vm.prank(alice);
     world.sleep(aliceEntityId, bedEntityId, "");
@@ -440,8 +437,6 @@ contract BedTest is DustTest {
     assertInventoryHasObject(aliceEntityId, ObjectTypes.IronPick, 1);
     assertInventoryHasObject(bedEntityId, ObjectTypes.Grass, 0);
     assertInventoryHasObject(bedEntityId, ObjectTypes.IronPick, 0);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 2, "Wrong number of occupied inventory slots");
-    assertEq(Inventory.lengthOccupiedSlots(bedEntityId), 0, "Wrong number of occupied inventory slots");
 
     uint128 timeDelta = 1000 seconds;
     vm.warp(vm.getBlockTimestamp() + timeDelta);
@@ -454,8 +449,6 @@ contract BedTest is DustTest {
     assertInventoryHasObject(aliceEntityId, ObjectTypes.IronPick, 1);
     assertInventoryHasObject(bedEntityId, ObjectTypes.Grass, 0);
     assertInventoryHasObject(bedEntityId, ObjectTypes.IronPick, 0);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 2, "Wrong number of occupied inventory slots");
-    assertEq(Inventory.lengthOccupiedSlots(bedEntityId), 0, "Wrong number of occupied inventory slots");
 
     EnergyData memory ffEnergyData = Energy.get(forcefieldEntityId);
     assertEq(
@@ -475,8 +468,6 @@ contract BedTest is DustTest {
     assertInventoryHasObject(aliceEntityId, ObjectTypes.IronPick, 1);
     assertInventoryHasObject(bedEntityId, ObjectTypes.Grass, 0);
     assertInventoryHasObject(bedEntityId, ObjectTypes.IronPick, 0);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 2, "Wrong number of occupied inventory slots");
-    assertEq(Inventory.lengthOccupiedSlots(bedEntityId), 0, "Wrong number of occupied inventory slots");
 
     BedPlayerData memory bedPlayerData = BedPlayer.get(bedEntityId);
     assertEq(bedPlayerData.playerEntityId.unwrap(), aliceEntityId.unwrap(), "Bed's player entity is not alice");

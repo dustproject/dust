@@ -12,11 +12,8 @@ import { Vec3, vec3 } from "../src/Vec3.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
-import { Inventory } from "../src/codegen/tables/Inventory.sol";
-
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
-import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
@@ -27,7 +24,7 @@ import { EntityId } from "../src/EntityId.sol";
 
 import { ObjectAmount, ObjectType, ObjectTypeLib, ObjectTypes } from "../src/ObjectType.sol";
 import { ProgramId } from "../src/ProgramId.sol";
-import { TestForceFieldUtils } from "./utils/TestUtils.sol";
+import { TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 import { encodeChunk } from "./utils/encodeChunk.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
@@ -40,45 +37,36 @@ abstract contract DustAssertions is MudTest, GasReporter {
     uint128 forceFieldEnergy;
   }
 
-  function getObjectAmount(EntityId owner, ObjectType objectType) internal view returns (uint16) {
-    uint16[] memory slots = InventoryTypeSlots.get(owner, objectType);
-    if (slots.length == 0) {
-      return 0;
-    }
-
-    uint16 total;
-    for (uint256 i; i < slots.length; i++) {
-      total += InventorySlot.getAmount(owner, slots[i]);
-    }
-
-    return total;
+  function getObjectAmount(EntityId owner, ObjectType objectType) internal returns (uint16) {
+    uint256 total = TestInventoryUtils.countObjectsOfType(owner, objectType);
+    return uint16(total);
   }
 
-  function inventoryHasObjectType(EntityId ownerEntityId, ObjectType objectType) internal view returns (bool) {
-    return InventoryTypeSlots.length(ownerEntityId, objectType) > 0;
+  function inventoryHasObjectType(EntityId ownerEntityId, ObjectType objectType) internal returns (bool) {
+    return getObjectAmount(ownerEntityId, objectType) > 0;
   }
 
-  function inventoryGetOreAmounts(EntityId owner) internal view returns (ObjectAmount[] memory) {
-    ObjectType[7] memory ores = ObjectTypeLib.getOreTypes();
+  function inventoryGetOreAmounts(EntityId owner) internal returns (ObjectAmount[] memory) {
+    ObjectType[6] memory ores = ObjectTypeLib.getOreTypes();
 
     uint256 numOres = 0;
     for (uint256 i = 0; i < ores.length; i++) {
-      if (InventoryTypeSlots.length(owner, ores[i]) > 0) numOres++;
+      if (TestInventoryUtils.hasObjectType(owner, ores[i])) numOres++;
     }
 
     ObjectAmount[] memory oreAmounts = new ObjectAmount[](numOres);
+    uint256 index = 0;
     for (uint256 i = 0; i < ores.length; i++) {
       uint256 count = getObjectAmount(owner, ores[i]);
       if (count > 0) {
-        oreAmounts[numOres - 1] = ObjectAmount(ores[i], uint16(count));
-        numOres--;
+        oreAmounts[index++] = ObjectAmount(ores[i], uint16(count));
       }
     }
 
     return oreAmounts;
   }
 
-  function assertInventoryHasObject(EntityId owner, ObjectType objectType, uint16 amount) internal view {
+  function assertInventoryHasObject(EntityId owner, ObjectType objectType, uint16 amount) internal {
     uint256 actualAmount = getObjectAmount(owner, objectType);
     assertEq(actualAmount, amount, "Inventory object amount is not correct");
   }
@@ -92,19 +80,22 @@ abstract contract DustAssertions is MudTest, GasReporter {
     assertEq(actualAmount, amount, "Inventory object amount is not correct");
   }
 
-  function assertInventoryHasEntity(EntityId owner, EntityId entityId, uint16 amount) internal view {
-    uint16[] memory slots = InventoryTypeSlots.get(owner, EntityObjectType.get(entityId));
-    bool found;
-    if (slots.length > 0) {
-      for (uint256 i; i < slots.length; i++) {
-        if (entityId == InventorySlot.getEntityId(owner, slots[i])) {
-          found = true;
-          break;
-        }
+  function assertInventoryHasEntity(EntityId owner, EntityId entityId, uint16 amount) internal {
+    uint16[] memory slots = TestInventoryUtils.getSlotsWithType(owner, EntityObjectType.get(entityId));
+    if (slots.length == 0) {
+      assertTrue(amount == 0, "Inventory entity not found");
+      return;
+    }
+
+    for (uint256 i = 0; i < slots.length; i++) {
+      uint16 slot = slots[i];
+      if (InventorySlot.getEntityId(owner, slot) == entityId) {
+        assertTrue(amount == 1, "Inventory entity found");
+        return;
       }
     }
 
-    assertEq(found ? 1 : 0, amount, "Inventory entity doesn't match");
+    assertTrue(amount == 0, "Inventory entity not found");
   }
 
   function getEnergyDataSnapshot(EntityId playerEntityId) internal returns (EnergyDataSnapshot memory) {

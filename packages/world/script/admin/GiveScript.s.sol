@@ -7,7 +7,7 @@ import { console } from "forge-std/console.sol";
 
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
 
-import { EntityId, EntityIdLib } from "../../src/EntityId.sol";
+import { EntityId, EntityTypeLib } from "../../src/EntityId.sol";
 import { ObjectTypes } from "../../src/ObjectType.sol";
 
 import { ensureAdminSystem } from "./ensureAdminSystem.sol";
@@ -27,9 +27,11 @@ contract GiveScript is Script {
 
     ensureAdminSystem(world);
 
-    EntityId playerEntityId = EntityIdLib.encodePlayer(playerAddress);
+    EntityId playerEntityId = EntityTypeLib.encodePlayer(playerAddress);
     world.adminAddToInventory(playerEntityId, ObjectTypes.OakLog, 99);
     world.adminAddToInventory(playerEntityId, ObjectTypes.Chest, 1);
+    world.adminAddToInventory(playerEntityId, ObjectTypes.MelonSmoothie, 99);
+    world.adminAddToInventory(playerEntityId, ObjectTypes.Torch, 99);
     world.adminAddToInventory(playerEntityId, ObjectTypes.ForceField, 3);
     world.adminAddToInventory(playerEntityId, ObjectTypes.TextSign, 1);
     world.adminAddToInventory(playerEntityId, ObjectTypes.Workbench, 1);
@@ -40,7 +42,6 @@ contract GiveScript is Script {
     world.adminAddToInventory(playerEntityId, ObjectTypes.Bucket, 1);
     world.adminAddToInventory(playerEntityId, ObjectTypes.WaterBucket, 3);
     world.adminAddToInventory(playerEntityId, ObjectTypes.OakSapling, 10);
-    world.adminAddToInventory(playerEntityId, ObjectTypes.SpruceSapling, 10);
     world.adminAddToInventory(playerEntityId, ObjectTypes.Battery, 10);
     world.adminAddToInventory(playerEntityId, ObjectTypes.Wheat, 99);
     world.adminAddToolToInventory(playerEntityId, ObjectTypes.WoodenHoe);

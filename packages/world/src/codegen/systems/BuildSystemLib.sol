@@ -61,6 +61,15 @@ library BuildSystemLib {
       CallWrapper(self.toResourceId(), address(0)).buildWithOrientation(caller, coord, slot, orientation, extraData);
   }
 
+  function jumpBuild(
+    BuildSystemType self,
+    EntityId caller,
+    uint16 slot,
+    bytes memory extraData
+  ) internal returns (EntityId) {
+    return CallWrapper(self.toResourceId(), address(0)).jumpBuild(caller, slot, extraData);
+  }
+
   function jumpBuildWithOrientation(
     BuildSystemType self,
     EntityId caller,
@@ -71,15 +80,6 @@ library BuildSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).jumpBuildWithOrientation(caller, slot, orientation, extraData);
   }
 
-  function jumpBuild(
-    BuildSystemType self,
-    EntityId caller,
-    uint16 slot,
-    bytes memory extraData
-  ) internal returns (EntityId) {
-    return CallWrapper(self.toResourceId(), address(0)).jumpBuild(caller, slot, extraData);
-  }
-
   function build(
     CallWrapper memory self,
     EntityId caller,
@@ -120,6 +120,23 @@ library BuildSystemLib {
     return abi.decode(result, (EntityId));
   }
 
+  function jumpBuild(
+    CallWrapper memory self,
+    EntityId caller,
+    uint16 slot,
+    bytes memory extraData
+  ) internal returns (EntityId) {
+    // if the contract calling this function is a root system, it should use `callAsRoot`
+    if (address(_world()) == address(this)) revert BuildSystemLib_CallingFromRootSystem();
+
+    bytes memory systemCall = abi.encodeCall(_jumpBuild_EntityId_uint16_bytes.jumpBuild, (caller, slot, extraData));
+
+    bytes memory result = self.from == address(0)
+      ? _world().call(self.systemId, systemCall)
+      : _world().callFrom(self.from, self.systemId, systemCall);
+    return abi.decode(result, (EntityId));
+  }
+
   function jumpBuildWithOrientation(
     CallWrapper memory self,
     EntityId caller,
@@ -134,23 +151,6 @@ library BuildSystemLib {
       _jumpBuildWithOrientation_EntityId_uint16_Orientation_bytes.jumpBuildWithOrientation,
       (caller, slot, orientation, extraData)
     );
-
-    bytes memory result = self.from == address(0)
-      ? _world().call(self.systemId, systemCall)
-      : _world().callFrom(self.from, self.systemId, systemCall);
-    return abi.decode(result, (EntityId));
-  }
-
-  function jumpBuild(
-    CallWrapper memory self,
-    EntityId caller,
-    uint16 slot,
-    bytes memory extraData
-  ) internal returns (EntityId) {
-    // if the contract calling this function is a root system, it should use `callAsRoot`
-    if (address(_world()) == address(this)) revert BuildSystemLib_CallingFromRootSystem();
-
-    bytes memory systemCall = abi.encodeCall(_jumpBuild_EntityId_uint16_bytes.jumpBuild, (caller, slot, extraData));
 
     bytes memory result = self.from == address(0)
       ? _world().call(self.systemId, systemCall)
@@ -188,6 +188,18 @@ library BuildSystemLib {
     return abi.decode(result, (EntityId));
   }
 
+  function jumpBuild(
+    RootCallWrapper memory self,
+    EntityId caller,
+    uint16 slot,
+    bytes memory extraData
+  ) internal returns (EntityId) {
+    bytes memory systemCall = abi.encodeCall(_jumpBuild_EntityId_uint16_bytes.jumpBuild, (caller, slot, extraData));
+
+    bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
+    return abi.decode(result, (EntityId));
+  }
+
   function jumpBuildWithOrientation(
     RootCallWrapper memory self,
     EntityId caller,
@@ -199,18 +211,6 @@ library BuildSystemLib {
       _jumpBuildWithOrientation_EntityId_uint16_Orientation_bytes.jumpBuildWithOrientation,
       (caller, slot, orientation, extraData)
     );
-
-    bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
-    return abi.decode(result, (EntityId));
-  }
-
-  function jumpBuild(
-    RootCallWrapper memory self,
-    EntityId caller,
-    uint16 slot,
-    bytes memory extraData
-  ) internal returns (EntityId) {
-    bytes memory systemCall = abi.encodeCall(_jumpBuild_EntityId_uint16_bytes.jumpBuild, (caller, slot, extraData));
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
     return abi.decode(result, (EntityId));
@@ -268,6 +268,10 @@ interface _buildWithOrientation_EntityId_Vec3_uint16_Orientation_bytes {
   ) external;
 }
 
+interface _jumpBuild_EntityId_uint16_bytes {
+  function jumpBuild(EntityId caller, uint16 slot, bytes memory extraData) external;
+}
+
 interface _jumpBuildWithOrientation_EntityId_uint16_Orientation_bytes {
   function jumpBuildWithOrientation(
     EntityId caller,
@@ -275,10 +279,6 @@ interface _jumpBuildWithOrientation_EntityId_uint16_Orientation_bytes {
     Orientation orientation,
     bytes memory extraData
   ) external;
-}
-
-interface _jumpBuild_EntityId_uint16_bytes {
-  function jumpBuild(EntityId caller, uint16 slot, bytes memory extraData) external;
 }
 
 using BuildSystemLib for BuildSystemType global;

@@ -6,11 +6,12 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 
+import { DisabledExtraDrops } from "../codegen/tables/DisabledExtraDrops.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
 
-import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
-
+import { EntityFluidLevel } from "../codegen/tables/EntityFluidLevel.sol";
 import { EntityOrientation } from "../codegen/tables/EntityOrientation.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
@@ -19,6 +20,8 @@ import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
+import { RandomLib } from "../RandomLib.sol";
+import { TreeLib } from "../TreeLib.sol";
 import { Math } from "../utils/Math.sol";
 import { ResourcePosition } from "../utils/Vec3Storage.sol";
 
@@ -27,7 +30,6 @@ import {
   decreaseFragmentDrainRate,
   transferEnergyToPool,
   updateMachineEnergy,
-  updatePlayerEnergy,
   updateSleepingPlayerEnergy
 } from "../utils/EnergyUtils.sol";
 
@@ -53,7 +55,9 @@ import { ObjectAmount, ObjectType } from "../ObjectType.sol";
 import { MoveLib } from "./libraries/MoveLib.sol";
 
 import { NatureLib } from "../NatureLib.sol";
+
 import { ObjectTypes } from "../ObjectType.sol";
+import { OreLib } from "../OreLib.sol";
 
 import { ProgramId } from "../ProgramId.sol";
 import { IDetachProgramHook, IMineHook } from "../ProgramInterfaces.sol";
@@ -102,14 +106,9 @@ contract MineSystem is System {
     require(minedType.isBlock(), "Object is not mineable");
 
     mined = mined.baseEntityId();
-    Vec3 baseCoord = mined.getPosition();
+    Vec3 baseCoord = mined._getPosition();
 
-    if (minedType.isMachine()) {
-      (EnergyData memory machineData,) = updateMachineEnergy(mined);
-      require(machineData.energy == 0, "Cannot mine a machine that has energy");
-    } else if (minedType == ObjectTypes.UnrevealedOre) {
-      minedType = RandomResourceLib._collapseRandomOre(mined, coord);
-    }
+    minedType = _prepareBlock(mined, minedType, coord);
 
     (uint128 massLeft, bool canMine) =
       MineLib._applyMassReduction(caller, callerEnergy, toolSlot, minedType, Mass._getMass(mined));
@@ -123,11 +122,19 @@ contract MineSystem is System {
       // The block was fully mined
       Mass._deleteRecord(mined);
 
-      _handleGrowable(caller, baseCoord);
+      // Handle landbound and growable blocks on top of the mined block
+      _handleAbove(caller, baseCoord);
+
+      // Remove the block and all relative blocks
       _removeBlock(mined, minedType, baseCoord);
       _removeRelativeBlocks(mined, minedType, baseCoord);
+
+      // Handle drops
       _handleDrop(caller, mined, minedType, baseCoord);
-      _destroyEntity(caller, mined, minedType, baseCoord);
+
+      // It is fine to destroy the entity before requiring mines allowed,
+      // as machines can't be destroyed if they have energy
+      _cleanupEntity(caller, mined, minedType, baseCoord);
 
       notify(caller, MineNotification({ mineEntityId: mined, mineCoord: coord, mineObjectType: minedType }));
     } else {
@@ -139,24 +146,23 @@ contract MineSystem is System {
     return mined;
   }
 
-  function _handleGrowable(EntityId caller, Vec3 coord) internal {
-    // Remove growables on top of this block
-    Vec3 aboveCoord = coord + vec3(0, 1, 0);
-    // If above is growable, the entity must exist as there are not growables in the base terrain
-    (EntityId above, ObjectType aboveType) = EntityUtils.getBlockAt(aboveCoord);
-    if (aboveType.isGrowable()) {
-      if (!above.exists()) {
-        EntityUtils.getOrCreateBlockAt(aboveCoord);
-      }
-      _removeGrowable(above, aboveType, aboveCoord);
-      _handleDrop(caller, above, aboveType, aboveCoord);
+  function _prepareBlock(EntityId mined, ObjectType minedType, Vec3 coord) internal returns (ObjectType) {
+    if (minedType.isMachine()) {
+      (EnergyData memory machineData,) = updateMachineEnergy(mined);
+      require(machineData.energy == 0, "Cannot mine a machine that has energy");
+      return minedType;
     }
-  }
 
-  function _removeGrowable(EntityId entityId, ObjectType objectType, Vec3 coord) internal {
-    EntityObjectType._set(entityId, ObjectTypes.Air);
-    require(SeedGrowth._getFullyGrownAt(entityId) > block.timestamp, "Cannot mine fully grown seed");
-    addEnergyToLocalPool(coord, objectType.getGrowableEnergy());
+    if (minedType == ObjectTypes.UnrevealedOre) {
+      return RandomResourceLib._collapseRandomOre(mined, coord);
+    }
+
+    if (minedType.isGrowable() && SeedGrowth._getFullyGrownAt(mined) <= block.timestamp) {
+      // If the seed is fully grown, grow it
+      return NatureLib.growSeed(coord, mined, minedType);
+    }
+
+    return minedType;
   }
 
   function _removeBlock(EntityId entityId, ObjectType objectType, Vec3 coord) internal {
@@ -166,13 +172,14 @@ contract MineSystem is System {
       return;
     }
 
-    EntityObjectType._set(entityId, ObjectTypes.Air);
+    ObjectType replacementType = EntityFluidLevel._get(entityId) > 0 ? ObjectTypes.Water : ObjectTypes.Air;
+    EntityObjectType._set(entityId, replacementType);
 
     Vec3 aboveCoord = coord + vec3(0, 1, 0);
     EntityId above = EntityUtils.getMovableEntityAt(aboveCoord);
     // Note: currently it is not possible for the above player to not be the base entity,
     // but if we add other types of movable entities we should check that it is a base entity
-    if (above.exists()) {
+    if (above._exists()) {
       MoveLib.runGravity(aboveCoord);
     }
   }
@@ -191,7 +198,39 @@ contract MineSystem is System {
     }
   }
 
-  function _destroyEntity(EntityId caller, EntityId mined, ObjectType minedType, Vec3 baseCoord) internal {
+  function _handleAbove(EntityId caller, Vec3 coord) internal {
+    // Remove growables on top of this block
+    Vec3 aboveCoord = coord + vec3(0, 1, 0);
+
+    (EntityId above, ObjectType aboveType) = EntityUtils.getBlockAt(aboveCoord);
+    bool isGrowable = aboveType.isGrowable();
+    bool isLandbound = aboveType.isLandbound();
+
+    if (!isGrowable && !isLandbound) {
+      return;
+    }
+
+    if (!above._exists()) {
+      EntityUtils.getOrCreateBlockAt(aboveCoord);
+    }
+
+    if (isGrowable && SeedGrowth._getFullyGrownAt(above) <= block.timestamp) {
+      // If the seed is fully grown, grow it and don't remove it yet
+      aboveType = NatureLib.growSeed(aboveCoord, above, aboveType);
+    }
+
+    if (isLandbound) {
+      _removeBlock(above, aboveType, aboveCoord);
+      _handleDrop(caller, above, aboveType, aboveCoord);
+    }
+  }
+
+  function _removeGrowable(EntityId entityId, ObjectType objectType, Vec3 coord) internal {
+    EntityObjectType._set(entityId, ObjectTypes.Air);
+    addEnergyToLocalPool(coord, objectType.getGrowableEnergy());
+  }
+
+  function _cleanupEntity(EntityId caller, EntityId mined, ObjectType minedType, Vec3 baseCoord) internal {
     if (minedType == ObjectTypes.Bed) {
       MineLib._mineBed(mined, baseCoord);
     } else if (minedType.isMachine()) {
@@ -200,7 +239,7 @@ contract MineSystem is System {
     }
 
     // Detach program if it exists
-    ProgramId program = mined.getProgram();
+    ProgramId program = mined._getProgram();
     if (program.exists()) {
       bytes memory onDetachProgram = abi.encodeCall(IDetachProgramHook.onDetachProgram, (caller, mined, ""));
       program.call({ gas: SAFE_PROGRAM_GAS, hook: onDetachProgram });
@@ -216,9 +255,7 @@ contract MineSystem is System {
     for (uint256 i = 0; i < result.length; i++) {
       (ObjectType dropType, uint128 amount) = (result[i].objectType, result[i].amount);
 
-      if (amount == 0) {
-        continue;
-      }
+      if (amount == 0) continue;
 
       InventoryUtils.addObject(caller, dropType, amount);
 
@@ -280,7 +317,7 @@ library MineLib {
   function _mineBed(EntityId bed, Vec3 bedCoord) public {
     // If there is a player sleeping in the mined bed, kill them
     EntityId sleepingPlayerId = BedPlayer._getPlayerEntityId(bed);
-    if (!sleepingPlayerId.exists()) {
+    if (!sleepingPlayerId._exists()) {
       return;
     }
 
@@ -302,7 +339,7 @@ library MineLib {
 
   function _requireMinesAllowed(EntityId caller, ObjectType objectType, Vec3 coord, bytes calldata extraData) public {
     (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
-    if (!forceField.exists()) {
+    if (!forceField._exists()) {
       return;
     }
 
@@ -312,9 +349,9 @@ library MineLib {
     }
 
     // We know fragment is active because its forcefield exists, so we can use its program
-    ProgramId program = fragment.getProgram();
+    ProgramId program = fragment._getProgram();
     if (!program.exists()) {
-      program = forceField.getProgram();
+      program = forceField._getProgram();
       if (!program.exists()) {
         return;
       }
@@ -341,12 +378,105 @@ library MineLib {
 }
 
 library RandomResourceLib {
+  struct RandomDrop {
+    ObjectType objectType;
+    uint256[] distribution;
+  }
+
   function _getMineDrops(EntityId mined, ObjectType objectType, Vec3 coord) public view returns (ObjectAmount[] memory) {
-    return NatureLib.getMineDrops(mined, objectType, coord);
+    RandomDrop[] memory randomDrops = _getRandomDrops(mined, objectType);
+
+    ObjectAmount[] memory result = new ObjectAmount[](randomDrops.length + 1);
+
+    if (randomDrops.length > 0) {
+      uint256 randomSeed = NatureLib.getRandomSeed(coord);
+      for (uint256 i = 0; i < randomDrops.length; i++) {
+        RandomDrop memory drop = randomDrops[i];
+        (uint256 cap, uint256 remaining) = NatureLib.getCapAndRemaining(drop.objectType);
+        uint256[] memory weights = RandomLib.adjustWeights(drop.distribution, cap, remaining);
+        uint256 amount = RandomLib.selectByWeight(weights, randomSeed);
+        result[i] = ObjectAmount(drop.objectType, uint16(amount));
+      }
+    }
+
+    // If farmland, convert to dirt
+    if (objectType == ObjectTypes.Farmland || objectType == ObjectTypes.WetFarmland) {
+      objectType = ObjectTypes.Dirt;
+    }
+
+    // Add base type as a drop for all objects
+    result[result.length - 1] = ObjectAmount(objectType, 1);
+
+    return result;
+  }
+
+  function _getRandomDrops(EntityId mined, ObjectType objectType) private view returns (RandomDrop[] memory drops) {
+    if (!objectType.hasExtraDrops() || DisabledExtraDrops._get(mined)) {
+      return drops;
+    }
+
+    if (objectType == ObjectTypes.FescueGrass || objectType == ObjectTypes.SwitchGrass) {
+      uint256[] memory distribution = new uint256[](2);
+      distribution[0] = 43; // 0 seeds: 43%
+      distribution[1] = 57; // 1 seed:  57%
+
+      drops = new RandomDrop[](1);
+      drops[0] = RandomDrop(ObjectTypes.WheatSeed, distribution);
+      return drops;
+    }
+
+    if (objectType == ObjectTypes.Wheat) {
+      uint256[] memory distribution = new uint256[](4);
+      distribution[0] = 40; // 0 seeds: 40%
+      distribution[1] = 30; // 1 seed:  30%
+      distribution[2] = 20; // 2 seeds: 20%
+      distribution[3] = 10; // 3 seeds: 10%
+
+      drops = new RandomDrop[](1);
+      drops[0] = RandomDrop(ObjectTypes.WheatSeed, distribution);
+      return drops;
+    }
+
+    if (objectType == ObjectTypes.Melon) {
+      // Expected return 1.53
+      uint256[] memory distribution = new uint256[](4);
+      distribution[0] = 20; // 0 seeds: 20%
+      distribution[1] = 30; // 1 seed:  30%
+      distribution[2] = 27; // 2 seeds: 27%
+      distribution[3] = 23; // 3 seeds: 23%
+
+      drops = new RandomDrop[](1);
+      drops[0] = RandomDrop(ObjectTypes.MelonSeed, distribution);
+      return drops;
+    }
+
+    if (objectType == ObjectTypes.Pumpkin) {
+      // Expected return 1.53
+      uint256[] memory distribution = new uint256[](4);
+      distribution[0] = 20; // 0 seeds: 20%
+      distribution[1] = 30; // 1 seed:  30%
+      distribution[2] = 27; // 2 seeds: 27%
+      distribution[3] = 23; // 3 seeds: 23%
+
+      drops = new RandomDrop[](1);
+      drops[0] = RandomDrop(ObjectTypes.PumpkinSeed, distribution);
+      return drops;
+    }
+
+    if (objectType.isLeaf()) {
+      uint256 chance = TreeLib.getLeafDropChance(objectType);
+      uint256[] memory distribution = new uint256[](2);
+      distribution[0] = 100 - chance; // No sapling
+      distribution[1] = chance; // 1 sapling
+
+      drops = new RandomDrop[](1);
+      drops[0] = RandomDrop(objectType.getSapling(), distribution);
+      return drops;
+    }
   }
 
   function _getRandomOre(Vec3 coord) public view returns (ObjectType) {
-    return NatureLib.getRandomOre(coord);
+    return OreLib.getRandomOre(coord);
   }
 
   function _collapseRandomOre(EntityId entityId, Vec3 coord) public returns (ObjectType) {

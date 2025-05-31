@@ -14,7 +14,6 @@ import { ObjectType } from "../ObjectType.sol";
 import { ObjectTypes } from "../ObjectType.sol";
 import { Vec3 } from "../Vec3.sol";
 
-// TODO: should we have an "emptyBucket()" function or should we allow placing water in the build system?
 contract BucketSystem is System {
   function fillBucket(EntityId caller, Vec3 waterCoord, uint16 bucketSlot) external {
     caller.activate();

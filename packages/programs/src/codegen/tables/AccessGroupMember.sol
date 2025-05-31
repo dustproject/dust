@@ -23,15 +23,15 @@ import { EncodeArray } from "@latticexyz/store/src/tightcoder/EncodeArray.sol";
 // Import user types
 import { EntityId } from "@dust/world/src/EntityId.sol";
 
-library AllowedCaller {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "dfprograms_1", name: "AllowedCaller", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x7462646670726f6772616d735f310000416c6c6f77656443616c6c6572000000);
+library AccessGroupMember {
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "dfprograms_1", name: "AccessGroupMembe", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x7462646670726f6772616d735f31000041636365737347726f75704d656d6265);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0001010001000000000000000000000000000000000000000000000000000000);
 
-  // Hex-encoded key schema of (bytes32, bytes32)
-  Schema constant _keySchema = Schema.wrap(0x004002005f5f0000000000000000000000000000000000000000000000000000);
+  // Hex-encoded key schema of (uint256, bytes32)
+  Schema constant _keySchema = Schema.wrap(0x004002001f5f0000000000000000000000000000000000000000000000000000);
   // Hex-encoded value schema of (bool)
   Schema constant _valueSchema = Schema.wrap(0x0001010060000000000000000000000000000000000000000000000000000000);
 
@@ -41,8 +41,8 @@ library AllowedCaller {
    */
   function getKeyNames() internal pure returns (string[] memory keyNames) {
     keyNames = new string[](2);
-    keyNames[0] = "itemId";
-    keyNames[1] = "caller";
+    keyNames[0] = "groupId";
+    keyNames[1] = "member";
   }
 
   /**
@@ -51,7 +51,7 @@ library AllowedCaller {
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
     fieldNames = new string[](1);
-    fieldNames[0] = "allowed";
+    fieldNames[0] = "hasAccess";
   }
 
   /**
@@ -69,104 +69,104 @@ library AllowedCaller {
   }
 
   /**
-   * @notice Get allowed.
+   * @notice Get hasAccess.
    */
-  function getAllowed(bytes32 itemId, EntityId caller) internal view returns (bool allowed) {
+  function getHasAccess(uint256 groupId, EntityId member) internal view returns (bool hasAccess) {
     bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = itemId;
-    _keyTuple[1] = EntityId.unwrap(caller);
+    _keyTuple[0] = bytes32(uint256(groupId));
+    _keyTuple[1] = EntityId.unwrap(member);
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
   }
 
   /**
-   * @notice Get allowed.
+   * @notice Get hasAccess.
    */
-  function _getAllowed(bytes32 itemId, EntityId caller) internal view returns (bool allowed) {
+  function _getHasAccess(uint256 groupId, EntityId member) internal view returns (bool hasAccess) {
     bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = itemId;
-    _keyTuple[1] = EntityId.unwrap(caller);
+    _keyTuple[0] = bytes32(uint256(groupId));
+    _keyTuple[1] = EntityId.unwrap(member);
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
   }
 
   /**
-   * @notice Get allowed.
+   * @notice Get hasAccess.
    */
-  function get(bytes32 itemId, EntityId caller) internal view returns (bool allowed) {
+  function get(uint256 groupId, EntityId member) internal view returns (bool hasAccess) {
     bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = itemId;
-    _keyTuple[1] = EntityId.unwrap(caller);
+    _keyTuple[0] = bytes32(uint256(groupId));
+    _keyTuple[1] = EntityId.unwrap(member);
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
   }
 
   /**
-   * @notice Get allowed.
+   * @notice Get hasAccess.
    */
-  function _get(bytes32 itemId, EntityId caller) internal view returns (bool allowed) {
+  function _get(uint256 groupId, EntityId member) internal view returns (bool hasAccess) {
     bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = itemId;
-    _keyTuple[1] = EntityId.unwrap(caller);
+    _keyTuple[0] = bytes32(uint256(groupId));
+    _keyTuple[1] = EntityId.unwrap(member);
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
   }
 
   /**
-   * @notice Set allowed.
+   * @notice Set hasAccess.
    */
-  function setAllowed(bytes32 itemId, EntityId caller, bool allowed) internal {
+  function setHasAccess(uint256 groupId, EntityId member, bool hasAccess) internal {
     bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = itemId;
-    _keyTuple[1] = EntityId.unwrap(caller);
+    _keyTuple[0] = bytes32(uint256(groupId));
+    _keyTuple[1] = EntityId.unwrap(member);
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((allowed)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((hasAccess)), _fieldLayout);
   }
 
   /**
-   * @notice Set allowed.
+   * @notice Set hasAccess.
    */
-  function _setAllowed(bytes32 itemId, EntityId caller, bool allowed) internal {
+  function _setHasAccess(uint256 groupId, EntityId member, bool hasAccess) internal {
     bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = itemId;
-    _keyTuple[1] = EntityId.unwrap(caller);
+    _keyTuple[0] = bytes32(uint256(groupId));
+    _keyTuple[1] = EntityId.unwrap(member);
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((allowed)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((hasAccess)), _fieldLayout);
   }
 
   /**
-   * @notice Set allowed.
+   * @notice Set hasAccess.
    */
-  function set(bytes32 itemId, EntityId caller, bool allowed) internal {
+  function set(uint256 groupId, EntityId member, bool hasAccess) internal {
     bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = itemId;
-    _keyTuple[1] = EntityId.unwrap(caller);
+    _keyTuple[0] = bytes32(uint256(groupId));
+    _keyTuple[1] = EntityId.unwrap(member);
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((allowed)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((hasAccess)), _fieldLayout);
   }
 
   /**
-   * @notice Set allowed.
+   * @notice Set hasAccess.
    */
-  function _set(bytes32 itemId, EntityId caller, bool allowed) internal {
+  function _set(uint256 groupId, EntityId member, bool hasAccess) internal {
     bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = itemId;
-    _keyTuple[1] = EntityId.unwrap(caller);
+    _keyTuple[0] = bytes32(uint256(groupId));
+    _keyTuple[1] = EntityId.unwrap(member);
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((allowed)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((hasAccess)), _fieldLayout);
   }
 
   /**
    * @notice Delete all data for given keys.
    */
-  function deleteRecord(bytes32 itemId, EntityId caller) internal {
+  function deleteRecord(uint256 groupId, EntityId member) internal {
     bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = itemId;
-    _keyTuple[1] = EntityId.unwrap(caller);
+    _keyTuple[0] = bytes32(uint256(groupId));
+    _keyTuple[1] = EntityId.unwrap(member);
 
     StoreSwitch.deleteRecord(_tableId, _keyTuple);
   }
@@ -174,10 +174,10 @@ library AllowedCaller {
   /**
    * @notice Delete all data for given keys.
    */
-  function _deleteRecord(bytes32 itemId, EntityId caller) internal {
+  function _deleteRecord(uint256 groupId, EntityId member) internal {
     bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = itemId;
-    _keyTuple[1] = EntityId.unwrap(caller);
+    _keyTuple[0] = bytes32(uint256(groupId));
+    _keyTuple[1] = EntityId.unwrap(member);
 
     StoreCore.deleteRecord(_tableId, _keyTuple, _fieldLayout);
   }
@@ -186,8 +186,8 @@ library AllowedCaller {
    * @notice Tightly pack static (fixed length) data using this table's schema.
    * @return The static data, encoded into a sequence of bytes.
    */
-  function encodeStatic(bool allowed) internal pure returns (bytes memory) {
-    return abi.encodePacked(allowed);
+  function encodeStatic(bool hasAccess) internal pure returns (bytes memory) {
+    return abi.encodePacked(hasAccess);
   }
 
   /**
@@ -196,8 +196,8 @@ library AllowedCaller {
    * @return The lengths of the dynamic fields (packed into a single bytes32 value).
    * @return The dynamic (variable length) data, encoded into a sequence of bytes.
    */
-  function encode(bool allowed) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
-    bytes memory _staticData = encodeStatic(allowed);
+  function encode(bool hasAccess) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
+    bytes memory _staticData = encodeStatic(hasAccess);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -208,10 +208,10 @@ library AllowedCaller {
   /**
    * @notice Encode keys as a bytes32 array using this table's field layout.
    */
-  function encodeKeyTuple(bytes32 itemId, EntityId caller) internal pure returns (bytes32[] memory) {
+  function encodeKeyTuple(uint256 groupId, EntityId member) internal pure returns (bytes32[] memory) {
     bytes32[] memory _keyTuple = new bytes32[](2);
-    _keyTuple[0] = itemId;
-    _keyTuple[1] = EntityId.unwrap(caller);
+    _keyTuple[0] = bytes32(uint256(groupId));
+    _keyTuple[1] = EntityId.unwrap(member);
 
     return _keyTuple;
   }

@@ -9,7 +9,7 @@ export const objectNames = [
   "Null",
   "Air",
   "Water",
-  "Magma",
+  "Lava",
   "Stone",
   "Bedrock",
   "Deepslate",
@@ -370,17 +370,17 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   { name: "BrainCoralBlock", mass: 37500000000000000n },
   { name: "Snow", mass: 300000000000000n },
   { name: "Ice", mass: 200000000000000n },
-  { name: "Magma", mass: 500000000000000n },
+  { name: "Lava" },
   { name: "SpiderWeb", mass: 300000000000000n },
   { name: "Bone", mass: 37500000000000000n },
 
   // Non terrain
-  { name: "CoalOre", mass: 540000000000000000n },
-  { name: "CopperOre", mass: 675000000000000000n },
+  { name: "CoalOre", mass: 50000000000000000n },
+  { name: "CopperOre", mass: 175000000000000000n },
   { name: "IronOre", mass: 675000000000000000n },
   { name: "GoldOre", mass: 1600000000000000000n },
   { name: "DiamondOre", mass: 5000000000000000000n },
-  { name: "NeptuniumOre", mass: 5000000000000000000n },
+  { name: "NeptuniumOre", mass: 5500000000000000000n },
   {
     name: "TextSign",
     mass: 18000000000000000n,
@@ -399,11 +399,11 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   { name: "AcaciaPlanks", mass: 4500000000000000n },
   { name: "DarkOakPlanks", mass: 4500000000000000n },
   { name: "MangrovePlanks", mass: 4500000000000000n },
-  { name: "CopperBlock", mass: 6075000000000000000n },
+  { name: "CopperBlock", mass: 1575000000000000000n },
   { name: "IronBlock", mass: 6075000000000000000n },
   { name: "GoldBlock", mass: 14400000000000000000n },
   { name: "DiamondBlock", mass: 45000000000000000000n },
-  { name: "NeptuniumBlock", mass: 45000000000000000000n },
+  { name: "NeptuniumBlock", mass: 49500000000000000000n },
   {
     name: "WheatSeed",
     growableEnergy: 4300000000000000n,
@@ -541,7 +541,7 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   },
   {
     name: "CopperPick",
-    mass: 2034000000000000000n,
+    mass: 534000000000000000n,
     plankAmount: 2,
     oreAmount: ["CopperOre", 3],
   },
@@ -565,14 +565,14 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   },
   {
     name: "NeptuniumPick",
-    mass: 15009000000000000000n,
+    mass: 16509000000000000000n,
     plankAmount: 2,
     oreAmount: ["NeptuniumOre", 3],
   },
   { name: "WoodenAxe", mass: 22500000000000000n, plankAmount: 5 },
   {
     name: "CopperAxe",
-    mass: 2034000000000000000n,
+    mass: 534000000000000000n,
     plankAmount: 2,
     oreAmount: ["CopperOre", 3],
   },
@@ -596,14 +596,14 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   },
   {
     name: "NeptuniumAxe",
-    mass: 15009000000000000000n,
+    mass: 16509000000000000000n,
     plankAmount: 2,
     oreAmount: ["NeptuniumOre", 3],
   },
   { name: "WoodenWhacker", mass: 36000000000000000n, plankAmount: 8 },
   {
     name: "CopperWhacker",
-    mass: 4059000000000000000n,
+    mass: 1059000000000000000n,
     plankAmount: 2,
     oreAmount: ["CopperOre", 6],
   },
@@ -617,7 +617,7 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   { name: "GoldBar", mass: 1600000000000000000n },
   { name: "IronBar", mass: 675000000000000000n },
   { name: "Diamond", mass: 5000000000000000000n },
-  { name: "NeptuniumBar", mass: 5000000000000000000n },
+  { name: "NeptuniumBar", mass: 5500000000000000000n },
   { name: "Bucket", mass: 13500000000000000n },
   { name: "WaterBucket", mass: 13500000000000000n },
   { name: "WheatSlop", energy: 68800000000000000n },
@@ -655,7 +655,6 @@ export const categories: Record<string, Category> = {
   },
   Block: {
     objects: [
-      "Magma",
       "Stone",
       "Deepslate",
       "Granite",
@@ -825,7 +824,6 @@ export const categories: Record<string, Category> = {
   },
   Ore: {
     objects: [
-      "UnrevealedOre",
       "CoalOre",
       "CopperOre",
       "IronOre",
@@ -855,11 +853,9 @@ export const categories: Record<string, Category> = {
       "SpruceLeaf",
       "AcaciaLeaf",
       "DarkOakLeaf",
+      "MangroveLeaf",
       "AzaleaLeaf",
       "FloweringAzaleaLeaf",
-      "MangroveLeaf",
-      "MangroveRoots",
-      "MuddyMangroveRoots",
     ],
   },
   Plank: {
@@ -890,7 +886,14 @@ export const categories: Record<string, Category> = {
     ],
   },
   SmartEntity: {
-    objects: ["ForceField", "Chest", "SpawnTile", "Bed", "Fragment"],
+    objects: [
+      "ForceField",
+      "Chest",
+      "SpawnTile",
+      "Bed",
+      "Fragment",
+      "TextSign",
+    ],
   },
   Station: {
     objects: ["Workbench", "Powerstone", "Furnace"],
@@ -943,30 +946,12 @@ export const categories: Record<string, Category> = {
       "SpruceLeaf",
       "AcaciaLeaf",
       "DarkOakLeaf",
-      "AzaleaLeaf",
-      "FloweringAzaleaLeaf",
       "MangroveLeaf",
-      "MangroveRoots",
-      "MuddyMangroveRoots",
-      "GoldenMushroom",
-      "RedMushroom",
-      "CoffeeBush",
-      "StrawberryBush",
-      "RaspberryBush",
       "Wheat",
-      "CottonBush",
       "Pumpkin",
       "Melon",
-      "RedMushroomBlock",
-      "BrownMushroomBlock",
-      "MushroomStem",
-      "BambooBush",
-      "Cactus",
       "FescueGrass",
       "SwitchGrass",
-      "VinesBush",
-      "IvyVine",
-      "HempBush",
     ],
   },
   AxeMultiplier: {
@@ -1125,6 +1110,25 @@ export const categories: Record<string, Category> = {
       "MangroveSapling",
     ],
   },
+
+  // Objects that will be mined if they are on top of the block being mined
+  Landbound: {
+    objects: [
+      "Wheat",
+      "WheatSeed",
+      "PumpkinSeed",
+      "MelonSeed",
+      "OakSapling",
+      "BirchSapling",
+      "JungleSapling",
+      "SakuraSapling",
+      "AcaciaSapling",
+      "SpruceSapling",
+      "DarkOakSapling",
+      "MangroveSapling",
+    ],
+  },
+
   UniqueObject: {
     objects: [
       "WoodenPick",
@@ -1175,5 +1179,23 @@ export const categories: Record<string, Category> = {
   },
   Machine: {
     objects: ["ForceField"],
+  },
+  SpawnsWithFluid: {
+    checkName: "spawnsWithFluid",
+    objects: [
+      "Lava",
+      "Water",
+      "Coral",
+      "SeaAnemone",
+      "Algae",
+      "HornCoralBlock",
+      "FireCoralBlock",
+      "TubeCoralBlock",
+      "BubbleCoralBlock",
+      "BrainCoralBlock",
+    ],
+  },
+  Waterloggable: {
+    objects: ["Coral", "SeaAnemone", "Algae"],
   },
 } as const;

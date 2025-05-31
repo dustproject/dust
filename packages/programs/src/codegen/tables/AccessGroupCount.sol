@@ -20,9 +20,9 @@ import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 
 import { EncodeArray } from "@latticexyz/store/src/tightcoder/EncodeArray.sol";
 
-library UniqueEntity {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "dfprograms_1", name: "UniqueEntity", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x7462646670726f6772616d735f310000556e69717565456e7469747900000000);
+library AccessGroupCount {
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "dfprograms_1", name: "AccessGroupCount", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x7462646670726f6772616d735f31000041636365737347726f7570436f756e74);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0020010020000000000000000000000000000000000000000000000000000000);
@@ -46,7 +46,7 @@ library UniqueEntity {
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
     fieldNames = new string[](1);
-    fieldNames[0] = "value";
+    fieldNames[0] = "count";
   }
 
   /**
@@ -64,9 +64,9 @@ library UniqueEntity {
   }
 
   /**
-   * @notice Get value.
+   * @notice Get count.
    */
-  function getValue() internal view returns (uint256 value) {
+  function getCount() internal view returns (uint256 count) {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
@@ -74,9 +74,9 @@ library UniqueEntity {
   }
 
   /**
-   * @notice Get value.
+   * @notice Get count.
    */
-  function _getValue() internal view returns (uint256 value) {
+  function _getCount() internal view returns (uint256 count) {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
@@ -84,9 +84,9 @@ library UniqueEntity {
   }
 
   /**
-   * @notice Get value.
+   * @notice Get count.
    */
-  function get() internal view returns (uint256 value) {
+  function get() internal view returns (uint256 count) {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
@@ -94,9 +94,9 @@ library UniqueEntity {
   }
 
   /**
-   * @notice Get value.
+   * @notice Get count.
    */
-  function _get() internal view returns (uint256 value) {
+  function _get() internal view returns (uint256 count) {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
@@ -104,39 +104,39 @@ library UniqueEntity {
   }
 
   /**
-   * @notice Set value.
+   * @notice Set count.
    */
-  function setValue(uint256 value) internal {
+  function setCount(uint256 count) internal {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((value)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((count)), _fieldLayout);
   }
 
   /**
-   * @notice Set value.
+   * @notice Set count.
    */
-  function _setValue(uint256 value) internal {
+  function _setCount(uint256 count) internal {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((value)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((count)), _fieldLayout);
   }
 
   /**
-   * @notice Set value.
+   * @notice Set count.
    */
-  function set(uint256 value) internal {
+  function set(uint256 count) internal {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((value)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((count)), _fieldLayout);
   }
 
   /**
-   * @notice Set value.
+   * @notice Set count.
    */
-  function _set(uint256 value) internal {
+  function _set(uint256 count) internal {
     bytes32[] memory _keyTuple = new bytes32[](0);
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((value)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((count)), _fieldLayout);
   }
 
   /**
@@ -161,8 +161,8 @@ library UniqueEntity {
    * @notice Tightly pack static (fixed length) data using this table's schema.
    * @return The static data, encoded into a sequence of bytes.
    */
-  function encodeStatic(uint256 value) internal pure returns (bytes memory) {
-    return abi.encodePacked(value);
+  function encodeStatic(uint256 count) internal pure returns (bytes memory) {
+    return abi.encodePacked(count);
   }
 
   /**
@@ -171,8 +171,8 @@ library UniqueEntity {
    * @return The lengths of the dynamic fields (packed into a single bytes32 value).
    * @return The dynamic (variable length) data, encoded into a sequence of bytes.
    */
-  function encode(uint256 value) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
-    bytes memory _staticData = encodeStatic(value);
+  function encode(uint256 count) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
+    bytes memory _staticData = encodeStatic(count);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;

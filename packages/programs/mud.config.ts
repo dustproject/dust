@@ -2,37 +2,54 @@ import { defineWorld } from "@latticexyz/world";
 
 export default defineWorld({
   namespace: "dfprograms_1",
+  codegen: {
+    generateSystemLibraries: true,
+  },
   userTypes: {
     EntityId: { filePath: "@dust/world/src/EntityId.sol", type: "bytes32" },
   },
   tables: {
-    SmartItem: {
+    AccessGroupCount: {
+      schema: {
+        count: "uint256",
+      },
+      key: [],
+    },
+    AccessGroupOwner: {
+      schema: {
+        groupId: "uint256",
+        owner: "EntityId",
+      },
+      key: ["groupId"],
+    },
+    AccessGroupMember: {
+      schema: {
+        groupId: "uint256",
+        member: "EntityId",
+        hasAccess: "bool",
+      },
+      key: ["groupId", "member"],
+    },
+    EntityAccessGroup: {
       schema: {
         entityId: "EntityId",
-        itemId: "bytes32",
+        groupId: "uint256",
       },
       key: ["entityId"],
     },
-    Owner: {
+    ContentURI: {
       schema: {
-        itemId: "bytes32",
-        owner: "EntityId",
+        entityId: "EntityId",
+        uri: "string",
       },
-      key: ["itemId"],
+      key: ["entityId"],
     },
-    AllowedCaller: {
-      schema: {
-        itemId: "bytes32",
-        caller: "EntityId",
-        allowed: "bool",
+  },
+  systems: {
+    DefaultProgramSystem: {
+      deploy: {
+        registerWorldFunctions: false,
       },
-      key: ["itemId", "caller"],
-    },
-    UniqueEntity: {
-      schema: {
-        value: "uint256",
-      },
-      key: [],
     },
   },
 });

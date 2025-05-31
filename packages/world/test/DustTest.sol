@@ -12,13 +12,15 @@ import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 import { Direction } from "../src/codegen/common.sol";
 
 import {
+  CHUNK_COMMIT_EXPIRY_BLOCKS,
   CHUNK_SIZE,
   DEFAULT_MINE_ENERGY_COST,
+  MAX_FLUID_LEVEL,
   MAX_PLAYER_ENERGY,
   PLAYER_ENERGY_DRAIN_RATE,
   REGION_SIZE
 } from "../src/Constants.sol";
-import { EntityId, EntityIdLib } from "../src/EntityId.sol";
+import { EntityId, EntityTypeLib } from "../src/EntityId.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
@@ -26,14 +28,13 @@ import { ObjectTypes } from "../src/ObjectType.sol";
 import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
+import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
 import { EntityOrientation } from "../src/codegen/tables/EntityOrientation.sol";
-import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 
-import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
 import { Machine } from "../src/codegen/tables/Machine.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
@@ -88,7 +89,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
   // Create a valid player that can perform actions
   function createTestPlayer(Vec3 coord) internal returns (address, EntityId) {
     address playerAddress = vm.randomAddress();
-    EntityId player = EntityIdLib.encodePlayer(playerAddress);
+    EntityId player = EntityTypeLib.encodePlayer(playerAddress);
 
     if (!TerrainLib._isChunkExplored(coord.toChunkCoord(), worldAddress)) {
       setupAirChunk(coord);
@@ -182,33 +183,16 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     }
   }
 
-  function _getAirChunk() internal pure returns (uint8[][][] memory chunk) {
-    chunk = _getChunk(ObjectTypes.Air);
-  }
-
   function setupAirChunk(Vec3 coord) internal {
-    uint8[][][] memory chunk = _getAirChunk();
-    uint8 biome = 1;
-    bool isSurface = true;
-    bytes memory encodedChunk = encodeChunk(biome, isSurface, chunk);
-    Vec3 chunkCoord = coord.toChunkCoord();
-    Vec3 regionCoord = chunkCoord.floorDiv(REGION_SIZE / CHUNK_SIZE);
-    RegionMerkleRoot.set(regionCoord.x(), regionCoord.z(), TerrainLib._getChunkLeafHash(chunkCoord, encodedChunk));
-    bytes32[] memory merkleProof = new bytes32[](0);
-
-    world.exploreChunk(chunkCoord, encodedChunk, merkleProof);
-
-    Vec3 shardCoord = coord.toLocalEnergyPoolShardCoord();
-    LocalEnergyPool.set(shardCoord, 1e18);
+    setupChunk(coord, 1, ObjectTypes.Air);
   }
 
   function _getWaterChunk() internal pure returns (uint8[][][] memory chunk) {
     chunk = _getChunk(ObjectTypes.Water);
   }
 
-  function setupWaterChunk(Vec3 coord) internal {
-    uint8[][][] memory chunk = _getWaterChunk();
-    uint8 biome = 2;
+  function setupChunk(Vec3 coord, uint8 biome, ObjectType objectType) internal {
+    uint8[][][] memory chunk = _getChunk(objectType);
     bool isSurface = true;
     bytes memory encodedChunk = encodeChunk(biome, isSurface, chunk);
     Vec3 chunkCoord = coord.toChunkCoord();
@@ -220,6 +204,10 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
 
     Vec3 shardCoord = coord.toLocalEnergyPoolShardCoord();
     LocalEnergyPool.set(shardCoord, 1e18);
+  }
+
+  function setupWaterChunk(Vec3 coord) internal {
+    setupChunk(coord, 2, ObjectTypes.Water);
   }
 
   function setTerrainAtCoord(Vec3 coord, ObjectType objectType) internal {
@@ -247,18 +235,21 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
       setupAirChunk(coord);
     }
 
-    EntityId entityId = EntityIdLib.encodeBlock(coord);
+    EntityId entityId = EntityTypeLib.encodeBlock(coord);
     EntityOrientation.set(entityId, orientation);
 
     EntityObjectType.set(entityId, objectType);
     EntityPosition.set(entityId, coord);
     Mass.set(entityId, ObjectPhysics.getMass(objectType));
+    if (objectType.spawnsWithFluid()) {
+      EntityFluidLevel.set(entityId, MAX_FLUID_LEVEL);
+    }
 
     Vec3[] memory coords = objectType.getRelativeCoords(coord, orientation);
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];
-      EntityId relativeEntityId = EntityIdLib.encodeBlock(relativeCoord);
+      EntityId relativeEntityId = EntityTypeLib.encodeBlock(relativeCoord);
       EntityObjectType.set(relativeEntityId, objectType);
       BaseEntity.set(relativeEntityId, entityId);
     }
@@ -272,7 +263,9 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
 
   function setupWaterChunkWithPlayer() internal returns (address, EntityId, Vec3) {
     setupWaterChunk(vec3(0, 0, 0));
-    return spawnPlayerOnAirChunk(vec3(0, 1, 0));
+    Vec3 spawnCoord = vec3(0, 1, 0);
+    (address alice, EntityId aliceEntityId) = createTestPlayer(spawnCoord);
+    return (alice, aliceEntityId, spawnCoord);
   }
 
   function spawnPlayerOnAirChunk(Vec3 spawnCoord) internal returns (address, EntityId, Vec3) {
@@ -305,16 +298,16 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     return forceFieldEntityId;
   }
 
-  // Helper function to find the inventory slot with a specific object type
-  function findInventorySlotWithObjectType(EntityId entityId, ObjectType objectType) internal view returns (uint8) {
-    uint256 numSlots = Inventory.lengthOccupiedSlots(entityId);
-    for (uint8 i = 0; i < numSlots; i++) {
-      // Assuming 36 inventory slots
-      ObjectType slotObjectType = InventorySlot.getObjectType(entityId, Inventory.getItemOccupiedSlots(entityId, i));
-      if (slotObjectType == objectType) {
-        return i;
-      }
-    }
-    revert("Object type not found in inventory");
+  function newCommit(address commiterAddress, EntityId commiter, Vec3 coord, bytes32 blockHash) internal {
+    // Set up chunk commitment for randomness when mining grass
+    Vec3 chunkCoord = coord.toChunkCoord();
+
+    vm.roll(vm.getBlockNumber() + CHUNK_COMMIT_EXPIRY_BLOCKS);
+    vm.prank(commiterAddress);
+    world.chunkCommit(commiter, chunkCoord);
+    // Move forward 2 blocks to make the commitment valid
+    vm.roll(vm.getBlockNumber() + 2);
+
+    vm.setBlockhash(vm.getBlockNumber() - 1, blockHash);
   }
 }

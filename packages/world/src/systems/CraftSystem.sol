@@ -18,8 +18,8 @@ import { CraftNotification, notify } from "../utils/NotifUtils.sol";
 import { CRAFT_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 
-import { NatureLib } from "../NatureLib.sol";
 import { ObjectType, ObjectTypes } from "../ObjectType.sol";
+import { OreLib } from "../OreLib.sol";
 import { Vec3 } from "../Vec3.sol";
 
 contract CraftSystem is System {
@@ -29,7 +29,7 @@ contract CraftSystem is System {
     require(recipe.inputTypes.length > 0, "Recipe not found");
 
     if (!recipe.stationTypeId.isNull()) {
-      require(station.getObjectType() == recipe.stationTypeId, "Invalid station");
+      require(station._getObjectType() == recipe.stationTypeId, "Invalid station");
       caller.requireConnected(station);
     }
 
@@ -66,7 +66,7 @@ library CraftLib {
 
         // TODO: this should be removed once craftingTime is implemented
         if (recipeType == ObjectTypes.CoalOre) {
-          NatureLib.burnOre(recipeType, recipe.inputAmounts[i]);
+          OreLib.burnOre(recipeType, recipe.inputAmounts[i]);
         }
 
         InventoryUtils.removeObjectFromSlot(caller, inputs[currentInput].slot, amount);

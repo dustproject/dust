@@ -36,7 +36,24 @@ library EntityIdLib {
     return ActivateLib._activate(self, caller, msg.sig);
   }
 
-  function requireCallerAllowed(EntityId self, address caller, ObjectType objectType) internal view {
+  function _validateCaller(EntityId self, address caller, ObjectType objectType) internal view {
+    if (objectType == ObjectTypes.Player) {
+      require(caller == self.getPlayerAddress(), "Caller not allowed");
+    } else {
+      address programAddress = self._getProgram()._getAddress();
+      require(caller == programAddress, "Caller not allowed");
+    }
+  }
+
+  function _validateCaller(EntityId self, address sender) internal view {
+    _validateCaller(self, sender, self._getObjectType());
+  }
+
+  function _validateCaller(EntityId self) internal view {
+    _validateCaller(self, WorldContextConsumerLib._msgSender());
+  }
+
+  function validateCaller(EntityId self, address caller, ObjectType objectType) internal view {
     if (objectType == ObjectTypes.Player) {
       require(caller == self.getPlayerAddress(), "Caller not allowed");
     } else {
@@ -45,8 +62,12 @@ library EntityIdLib {
     }
   }
 
-  function requireCallerAllowed(EntityId self, address sender) internal view {
-    requireCallerAllowed(self, sender, self.getObjectType());
+  function validateCaller(EntityId self, address caller) internal view {
+    validateCaller(self, caller, self.getObjectType());
+  }
+
+  function validateCaller(EntityId self) internal view {
+    validateCaller(self, WorldContextConsumerLib._msgSender());
   }
 
   function baseEntityId(EntityId self) internal view returns (EntityId) {
@@ -56,40 +77,60 @@ library EntityIdLib {
 
   // TODO: add pipe connections
   function requireConnected(EntityId self, EntityId other) internal view returns (Vec3, Vec3) {
-    Vec3 otherCoord = other.getPosition();
+    Vec3 otherCoord = other._getPosition();
     return requireConnected(self, otherCoord);
   }
 
   function requireConnected(EntityId self, Vec3 otherCoord) internal view returns (Vec3, Vec3) {
-    Vec3 selfCoord = self.getPosition();
+    Vec3 selfCoord = self._getPosition();
     require(selfCoord.inSurroundingCube(otherCoord, MAX_ENTITY_INFLUENCE_HALF_WIDTH), "Entity is too far");
     return (selfCoord, otherCoord);
   }
 
   function requireAdjacentToFragment(EntityId self, EntityId fragment) internal view returns (Vec3, Vec3) {
-    return requireAdjacentToFragment(self, fragment.getPosition());
+    return requireAdjacentToFragment(self, fragment._getPosition());
   }
 
   function requireAdjacentToFragment(EntityId self, Vec3 fragmentCoord) internal view returns (Vec3, Vec3) {
-    Vec3 selfFragmentCoord = self.getPosition().toFragmentCoord();
+    Vec3 selfFragmentCoord = self._getPosition().toFragmentCoord();
     require(selfFragmentCoord.inSurroundingCube(fragmentCoord, 1), "Fragment is too far");
     return (selfFragmentCoord, fragmentCoord);
   }
 
-  function getPosition(EntityId self) internal view returns (Vec3) {
-    (EntityType entityType, bytes31 data) = EntityTypeLib.decode(self);
+  function _getPosition(EntityId self) internal view returns (Vec3) {
+    (EntityType entityType, Vec3 coord) = EntityTypeLib._decodeCoord(self);
     if (entityType == EntityTypes.Block || entityType == EntityTypes.Fragment) {
-      return Vec3.wrap(uint96(uint256(bytes32(data) >> 160)));
+      return coord;
     }
     return EntityPosition._get(self);
   }
 
-  function getProgram(EntityId self) internal view returns (ProgramId) {
+  function getPosition(EntityId self) internal view returns (Vec3) {
+    (EntityType entityType, Vec3 coord) = EntityTypeLib._decodeCoord(self);
+    if (entityType == EntityTypes.Block || entityType == EntityTypes.Fragment) {
+      return coord;
+    }
+    return EntityPosition.get(self);
+  }
+
+  function _getProgram(EntityId self) internal view returns (ProgramId) {
     return EntityProgram._get(self);
   }
 
-  function getObjectType(EntityId self) internal view returns (ObjectType) {
+  function getProgram(EntityId self) internal view returns (ProgramId) {
+    return EntityProgram.get(self);
+  }
+
+  function _getObjectType(EntityId self) internal view returns (ObjectType) {
     return EntityObjectType._get(self);
+  }
+
+  function getObjectType(EntityId self) internal view returns (ObjectType) {
+    return EntityObjectType.get(self);
+  }
+
+  function _exists(EntityId self) internal view returns (bool) {
+    return self.unwrap() != 0 && !self._getObjectType().isNull();
   }
 
   function exists(EntityId self) internal view returns (bool) {
@@ -100,27 +141,8 @@ library EntityIdLib {
     return EntityId.unwrap(self);
   }
 
-  function encodeBlock(Vec3 coord) internal pure returns (EntityId) {
-    return _encodeCoord(EntityTypes.Block, coord);
-  }
-
-  function encodeFragment(Vec3 coord) internal pure returns (EntityId) {
-    return _encodeCoord(EntityTypes.Fragment, coord);
-  }
-
-  function encodePlayer(address player) internal pure returns (EntityId) {
-    return EntityTypes.Player.encode(bytes20(player));
-  }
-
   function getPlayerAddress(EntityId self) internal pure returns (address) {
-    (EntityType entityType, bytes31 data) = EntityTypeLib.decode(self);
-    require(entityType == EntityTypes.Player, "Entity is not a player");
-
-    return address(bytes20(data));
-  }
-
-  function _encodeCoord(EntityType entityType, Vec3 coord) private pure returns (EntityId) {
-    return entityType.encode(bytes12(coord.unwrap()));
+    return self.decodePlayer();
   }
 }
 
@@ -136,21 +158,21 @@ library ActivateLib {
   function _activate(EntityId self, address caller, bytes4 sig) public returns (EnergyData memory) {
     checkWorldStatus();
 
-    ObjectType objectType = self.getObjectType();
+    ObjectType objectType = self._getObjectType();
     require(objectType.isActionAllowed(sig), "Action not allowed");
 
-    self.requireCallerAllowed(caller, objectType);
+    self._validateCaller(caller, objectType);
 
     EnergyData memory energyData;
     if (objectType == ObjectTypes.Player) {
-      require(!PlayerBed._getBedEntityId(self).exists(), "Player is sleeping");
+      require(!PlayerBed._getBedEntityId(self)._exists(), "Player is sleeping");
       energyData = updatePlayerEnergy(self);
     } else {
       EntityId forceField;
       if (objectType == ObjectTypes.ForceField) {
         forceField = self;
       } else {
-        (forceField,) = ForceFieldUtils.getForceField(self.getPosition());
+        (forceField,) = ForceFieldUtils.getForceField(self._getPosition());
       }
 
       (energyData,) = updateMachineEnergy(forceField);
@@ -183,6 +205,45 @@ library EntityTypeLib {
     EntityType entityType = EntityType.wrap(bytes1(_self));
     return (entityType, bytes31(_self << 8));
   }
+
+  function encodeBlock(Vec3 coord) internal pure returns (EntityId) {
+    return _encodeCoord(EntityTypes.Block, coord);
+  }
+
+  function encodeFragment(Vec3 coord) internal pure returns (EntityId) {
+    return _encodeCoord(EntityTypes.Fragment, coord);
+  }
+
+  function encodePlayer(address player) internal pure returns (EntityId) {
+    return EntityTypes.Player.encode(bytes20(player));
+  }
+
+  function decodeBlock(EntityId self) internal pure returns (Vec3) {
+    (EntityType entityType, Vec3 coord) = _decodeCoord(self);
+    require(entityType == EntityTypes.Block, "Entity is not a block");
+    return coord;
+  }
+
+  function decodeFragment(EntityId self) internal pure returns (Vec3) {
+    (EntityType entityType, Vec3 coord) = _decodeCoord(self);
+    require(entityType == EntityTypes.Fragment, "Entity is not a fragment");
+    return coord;
+  }
+
+  function decodePlayer(EntityId self) internal pure returns (address) {
+    (EntityType entityType, bytes31 data) = decode(self);
+    require(entityType == EntityTypes.Player, "Entity is not a player");
+    return address(bytes20(data));
+  }
+
+  function _encodeCoord(EntityType entityType, Vec3 coord) private pure returns (EntityId) {
+    return entityType.encode(bytes12(coord.unwrap()));
+  }
+
+  function _decodeCoord(EntityId self) internal pure returns (EntityType, Vec3) {
+    (EntityType entityType, bytes31 data) = decode(self);
+    return (entityType, Vec3.wrap(uint96(uint256(bytes32(data) >> 160))));
+  }
 }
 
 function typeEq(EntityType self, EntityType other) pure returns (bool) {
@@ -192,5 +253,6 @@ function typeEq(EntityType self, EntityType other) pure returns (bool) {
 using EntityIdLib for EntityId global;
 using { eq as ==, neq as != } for EntityId global;
 
-using EntityTypeLib for EntityType global;
+using EntityTypeLib for EntityType;
+using EntityTypeLib for EntityId;
 using { typeEq as == } for EntityType global;

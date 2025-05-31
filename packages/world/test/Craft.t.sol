@@ -9,10 +9,8 @@ import { console } from "forge-std/console.sol";
 import { EntityId } from "../src/EntityId.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
-import { Inventory } from "../src/codegen/tables/Inventory.sol";
-
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
-import { InventoryTypeSlots } from "../src/codegen/tables/InventoryTypeSlots.sol";
+
 import { LocalEnergyPool } from "../src/codegen/tables/LocalEnergyPool.sol";
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 
@@ -86,7 +84,7 @@ contract CraftTest is DustTest {
   }
 
   function testCraftMultipleInputsSingleOutput() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
     ObjectType[] memory inputTypes = new ObjectType[](2);
     inputTypes[0] = ObjectTypes.Stone;
@@ -263,12 +261,13 @@ contract CraftTest is DustTest {
 
     assertInventoryHasObject(aliceEntityId, inputObjectType, 0);
     assertInventoryHasObject(aliceEntityId, outputTypes[0], 1);
-    uint16[] memory toolSlots = InventoryTypeSlots.get(aliceEntityId, outputTypes[0]);
+    uint16[] memory toolSlots = TestInventoryUtils.getSlotsWithType(aliceEntityId, outputTypes[0]);
     assertEq(toolSlots.length, 1, "should have 1 tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
-    assertTrue(TestEntityUtils.exists(toolEntityId), "tool entity id should exist");
+    assertTrue(toolEntityId.exists(), "tool entity id should exist");
     ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
+
     assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
     assertEq(Mass.get(toolEntityId), ObjectPhysics.getMass(outputTypes[0]), "mass should be equal to tool mass");
 
@@ -301,10 +300,10 @@ contract CraftTest is DustTest {
     world.craft(aliceEntityId, recipeId, inputs);
 
     assertInventoryHasObject(aliceEntityId, inputObjectType, 5);
-    uint16[] memory toolSlots = InventoryTypeSlots.get(aliceEntityId, outputTypes[0]);
+    uint16[] memory toolSlots = TestInventoryUtils.getSlotsWithType(aliceEntityId, outputTypes[0]);
     assertEq(toolSlots.length, 1, "should have 1 of the crafted tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
-    assertTrue(TestEntityUtils.exists(toolEntityId), "tool entity id should exist");
+    assertTrue(toolEntityId.exists(), "tool entity id should exist");
     ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
@@ -339,10 +338,10 @@ contract CraftTest is DustTest {
     world.craft(aliceEntityId, recipeId, inputs);
 
     assertInventoryHasObject(aliceEntityId, inputObjectType, 5);
-    uint16[] memory toolSlots = InventoryTypeSlots.get(aliceEntityId, outputTypes[0]);
+    uint16[] memory toolSlots = TestInventoryUtils.getSlotsWithType(aliceEntityId, outputTypes[0]);
     assertEq(toolSlots.length, 1, "should have 1 of the crafted tool");
     EntityId toolEntityId = InventorySlot.getEntityId(aliceEntityId, toolSlots[0]);
-    assertTrue(TestEntityUtils.exists(toolEntityId), "tool entity id should exist");
+    assertTrue(toolEntityId.exists(), "tool entity id should exist");
     ObjectType toolObjectType = EntityObjectType.get(toolEntityId);
     assertEq(toolObjectType, outputTypes[0], "tool object type should be equal to expected output object type");
     assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
@@ -486,11 +485,6 @@ contract CraftTest is DustTest {
 
     TestInventoryUtils.addObject(
       aliceEntityId, ObjectTypes.OakLog, ObjectTypes.Player.getMaxInventorySlots() * ObjectTypes.OakLog.getStackable()
-    );
-    assertEq(
-      Inventory.lengthOccupiedSlots(aliceEntityId),
-      ObjectTypes.Player.getMaxInventorySlots(),
-      "Wrong number of occupied inventory slots"
     );
 
     SlotAmount[] memory inputs = new SlotAmount[](1);

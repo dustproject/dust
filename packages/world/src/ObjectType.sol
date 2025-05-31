@@ -129,7 +129,7 @@ library ObjectTypes {
   ObjectType constant BrainCoralBlock = ObjectType.wrap(108);
   ObjectType constant Snow = ObjectType.wrap(109);
   ObjectType constant Ice = ObjectType.wrap(110);
-  ObjectType constant Magma = ObjectType.wrap(111);
+  ObjectType constant Lava = ObjectType.wrap(111);
   ObjectType constant SpiderWeb = ObjectType.wrap(112);
   ObjectType constant Bone = ObjectType.wrap(113);
   ObjectType constant CoalOre = ObjectType.wrap(114);
@@ -246,7 +246,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x1fffffffffffffffffffffffffffffffffffff0), 1)
+        let bit := and(shr(self, 0x1ffffffffff7ffffffffffffffffffffffffff0), 1)
         ok := bit
       }
     }
@@ -268,7 +268,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0xfc0000000000000000000040000000), 1)
+        let bit := and(shr(self, 0xfc0000000000000000000000000000), 1)
         ok := bit
       }
     }
@@ -290,7 +290,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x3ffc00000000000000), 1)
+        let bit := and(shr(self, 0xffc00000000000000), 1)
         ok := bit
       }
     }
@@ -334,7 +334,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x1e000000000000000000000000000000000000), 1)
+        let bit := and(shr(self, 0x1e000001000000000000000000000000000000), 1)
         ok := bit
       }
 
@@ -459,7 +459,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x1ffffc003ffc00000000000000), 1)
+        let bit := and(shr(self, 0xd00c0009fc00000000000000), 1)
         ok := bit
       }
     }
@@ -504,6 +504,17 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0x1ffc000000000000000000000000000000000), 1)
+        ok := bit
+      }
+    }
+  }
+
+  function isLandbound(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      // IDs in [0..255]
+      {
+        let bit := and(shr(self, 0x1ffc000000000100000000000000000000000), 1)
         ok := bit
       }
     }
@@ -561,6 +572,28 @@ library ObjectTypeLib {
     }
   }
 
+  function spawnsWithFluid(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      // IDs in [0..255]
+      {
+        let bit := and(shr(self, 0x9fe0000000000000000000000004), 1)
+        ok := bit
+      }
+    }
+  }
+
+  function isWaterloggable(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      // IDs in [0..255]
+      {
+        let bit := and(shr(self, 0xe0000000000000000000000000), 1)
+        ok := bit
+      }
+    }
+  }
+
   // Category getters
   function getNonSolidTypes() internal pure returns (ObjectType[2] memory) {
     return [ObjectTypes.Air, ObjectTypes.Water];
@@ -570,9 +603,8 @@ library ObjectTypeLib {
     return [ObjectTypes.AnyPlank, ObjectTypes.AnyLog, ObjectTypes.AnyLeaf, ObjectTypes.AnyTerracotta];
   }
 
-  function getBlockTypes() internal pure returns (ObjectType[149] memory) {
+  function getBlockTypes() internal pure returns (ObjectType[148] memory) {
     return [
-      ObjectTypes.Magma,
       ObjectTypes.Stone,
       ObjectTypes.Deepslate,
       ObjectTypes.Granite,
@@ -742,9 +774,8 @@ library ObjectTypeLib {
     ];
   }
 
-  function getOreTypes() internal pure returns (ObjectType[7] memory) {
+  function getOreTypes() internal pure returns (ObjectType[6] memory) {
     return [
-      ObjectTypes.UnrevealedOre,
       ObjectTypes.CoalOre,
       ObjectTypes.CopperOre,
       ObjectTypes.IronOre,
@@ -767,7 +798,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function getLeafTypes() internal pure returns (ObjectType[12] memory) {
+  function getLeafTypes() internal pure returns (ObjectType[10] memory) {
     return [
       ObjectTypes.OakLeaf,
       ObjectTypes.BirchLeaf,
@@ -776,11 +807,9 @@ library ObjectTypeLib {
       ObjectTypes.SpruceLeaf,
       ObjectTypes.AcaciaLeaf,
       ObjectTypes.DarkOakLeaf,
-      ObjectTypes.AzaleaLeaf,
-      ObjectTypes.FloweringAzaleaLeaf,
       ObjectTypes.MangroveLeaf,
-      ObjectTypes.MangroveRoots,
-      ObjectTypes.MuddyMangroveRoots
+      ObjectTypes.AzaleaLeaf,
+      ObjectTypes.FloweringAzaleaLeaf
     ];
   }
 
@@ -814,8 +843,15 @@ library ObjectTypeLib {
     ];
   }
 
-  function getSmartEntityTypes() internal pure returns (ObjectType[5] memory) {
-    return [ObjectTypes.ForceField, ObjectTypes.Chest, ObjectTypes.SpawnTile, ObjectTypes.Bed, ObjectTypes.Fragment];
+  function getSmartEntityTypes() internal pure returns (ObjectType[6] memory) {
+    return [
+      ObjectTypes.ForceField,
+      ObjectTypes.Chest,
+      ObjectTypes.SpawnTile,
+      ObjectTypes.Bed,
+      ObjectTypes.Fragment,
+      ObjectTypes.TextSign
+    ];
   }
 
   function getStationTypes() internal pure returns (ObjectType[3] memory) {
@@ -868,7 +904,7 @@ library ObjectTypeLib {
     return [ObjectTypes.Player];
   }
 
-  function getExtraDropsTypes() internal pure returns (ObjectType[31] memory) {
+  function getExtraDropsTypes() internal pure returns (ObjectType[13] memory) {
     return [
       ObjectTypes.OakLeaf,
       ObjectTypes.BirchLeaf,
@@ -877,30 +913,12 @@ library ObjectTypeLib {
       ObjectTypes.SpruceLeaf,
       ObjectTypes.AcaciaLeaf,
       ObjectTypes.DarkOakLeaf,
-      ObjectTypes.AzaleaLeaf,
-      ObjectTypes.FloweringAzaleaLeaf,
       ObjectTypes.MangroveLeaf,
-      ObjectTypes.MangroveRoots,
-      ObjectTypes.MuddyMangroveRoots,
-      ObjectTypes.GoldenMushroom,
-      ObjectTypes.RedMushroom,
-      ObjectTypes.CoffeeBush,
-      ObjectTypes.StrawberryBush,
-      ObjectTypes.RaspberryBush,
       ObjectTypes.Wheat,
-      ObjectTypes.CottonBush,
       ObjectTypes.Pumpkin,
       ObjectTypes.Melon,
-      ObjectTypes.RedMushroomBlock,
-      ObjectTypes.BrownMushroomBlock,
-      ObjectTypes.MushroomStem,
-      ObjectTypes.BambooBush,
-      ObjectTypes.Cactus,
       ObjectTypes.FescueGrass,
-      ObjectTypes.SwitchGrass,
-      ObjectTypes.VinesBush,
-      ObjectTypes.IvyVine,
-      ObjectTypes.HempBush
+      ObjectTypes.SwitchGrass
     ];
   }
 
@@ -1062,6 +1080,23 @@ library ObjectTypeLib {
     ];
   }
 
+  function getLandboundTypes() internal pure returns (ObjectType[12] memory) {
+    return [
+      ObjectTypes.Wheat,
+      ObjectTypes.WheatSeed,
+      ObjectTypes.PumpkinSeed,
+      ObjectTypes.MelonSeed,
+      ObjectTypes.OakSapling,
+      ObjectTypes.BirchSapling,
+      ObjectTypes.JungleSapling,
+      ObjectTypes.SakuraSapling,
+      ObjectTypes.AcaciaSapling,
+      ObjectTypes.SpruceSapling,
+      ObjectTypes.DarkOakSapling,
+      ObjectTypes.MangroveSapling
+    ];
+  }
+
   function getUniqueObjectTypes() internal pure returns (ObjectType[21] memory) {
     return [
       ObjectTypes.WoodenPick,
@@ -1115,6 +1150,25 @@ library ObjectTypeLib {
 
   function getMachineTypes() internal pure returns (ObjectType[1] memory) {
     return [ObjectTypes.ForceField];
+  }
+
+  function getSpawnsWithFluidTypes() internal pure returns (ObjectType[10] memory) {
+    return [
+      ObjectTypes.Lava,
+      ObjectTypes.Water,
+      ObjectTypes.Coral,
+      ObjectTypes.SeaAnemone,
+      ObjectTypes.Algae,
+      ObjectTypes.HornCoralBlock,
+      ObjectTypes.FireCoralBlock,
+      ObjectTypes.TubeCoralBlock,
+      ObjectTypes.BubbleCoralBlock,
+      ObjectTypes.BrainCoralBlock
+    ];
+  }
+
+  function getWaterloggableTypes() internal pure returns (ObjectType[3] memory) {
+    return [ObjectTypes.Coral, ObjectTypes.SeaAnemone, ObjectTypes.Algae];
   }
 
   // Specialized getters

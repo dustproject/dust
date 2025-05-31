@@ -7,7 +7,6 @@ import { console } from "forge-std/console.sol";
 import { EntityId } from "../src/EntityId.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
-import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
@@ -20,14 +19,16 @@ import { DustTest } from "./DustTest.sol";
 
 import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
-import { BUILD_ENERGY_COST, CHUNK_SIZE, MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "../src/Constants.sol";
+import { BUILD_ENERGY_COST, CHUNK_SIZE, MAX_ENTITY_INFLUENCE_HALF_WIDTH, MAX_FLUID_LEVEL } from "../src/Constants.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
 import { NonPassableBlock } from "../src/systems/libraries/MoveLib.sol";
 
+import { EntityId, EntityTypeLib } from "../src/EntityId.sol";
 import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
+import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
@@ -38,13 +39,13 @@ contract BuildTest is DustTest {
     Vec3 buildCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
     assertEq(TerrainLib.getBlockType(buildCoord), ObjectTypes.Air, "Build coord is not air");
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertFalse(TestEntityUtils.exists(buildEntityId), "Build entity already exists");
+    assertFalse(buildEntityId.exists(), "Build entity already exists");
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
@@ -69,11 +70,11 @@ contract BuildTest is DustTest {
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertTrue(TestEntityUtils.exists(buildEntityId), "Build entity does not exist");
+    assertTrue(buildEntityId.exists(), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
@@ -100,11 +101,11 @@ contract BuildTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
     (EntityId topEntityId,) = TestEntityUtils.getBlockAt(topCoord);
-    assertTrue(TestEntityUtils.exists(topEntityId), "Top entity does not exist");
+    assertTrue(topEntityId.exists(), "Top entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the TextSign object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
@@ -133,15 +134,13 @@ contract BuildTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
     (EntityId negativeXEntity,) = TestEntityUtils.getBlockAt(negativeXCoord);
-    assertTrue(TestEntityUtils.exists(negativeXEntity), "NegativeX entity does not exist");
+    assertTrue(negativeXEntity.exists(), "NegativeX entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the TextSign object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
-
-    Vec3[] memory relative = buildObjectType.getRelativeCoords(buildCoord, Orientation.wrap(1));
 
     vm.prank(alice);
     startGasReport("build multi-size");
@@ -166,7 +165,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
@@ -196,7 +195,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 4);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
     world.build(aliceEntityId, bobCoord, inventorySlot, "");
@@ -234,7 +233,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
     vm.expectRevert("Cannot jump build on a pass-through block");
@@ -249,7 +248,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     setObjectAtCoord(playerCoord + vec3(0, 2, 0), ObjectTypes.Grass);
 
@@ -271,7 +270,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
     vm.expectRevert("Cannot move through a player");
@@ -286,14 +285,14 @@ contract BuildTest is DustTest {
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertTrue(TestEntityUtils.exists(buildEntityId), "Build entity does not exist");
+    assertTrue(buildEntityId.exists(), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot build on a non-air block");
+    vm.expectRevert("Can only build on air or water");
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
     setObjectAtCoord(buildCoord, ObjectTypes.TextSign);
@@ -301,11 +300,11 @@ contract BuildTest is DustTest {
     Vec3 topCoord = buildCoord + vec3(0, 1, 0);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot build on a non-air block");
+    vm.expectRevert("Can only build on air or water");
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
     vm.prank(alice);
-    vm.expectRevert("Cannot build on a non-air block");
+    vm.expectRevert("Can only build on air or water");
     world.build(aliceEntityId, topCoord, inventorySlot, "");
   }
 
@@ -319,7 +318,7 @@ contract BuildTest is DustTest {
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
     vm.expectRevert("Cannot build on a movable entity");
@@ -342,11 +341,11 @@ contract BuildTest is DustTest {
     ObjectType buildObjectType = ObjectTypes.GoldBar;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertTrue(TestEntityUtils.exists(buildEntityId), "Build entity does not exist");
+    assertTrue(buildEntityId.exists(), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the GoldBar object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
     vm.expectRevert("Cannot build non-block object");
@@ -361,13 +360,13 @@ contract BuildTest is DustTest {
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertTrue(TestEntityUtils.exists(buildEntityId), "Build entity does not exist");
+    assertTrue(buildEntityId.exists(), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     TestInventoryUtils.addObject(airEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
     vm.expectRevert("Cannot build where there are dropped objects");
@@ -382,7 +381,7 @@ contract BuildTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
     vm.expectRevert("Entity is too far");
@@ -403,11 +402,11 @@ contract BuildTest is DustTest {
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertTrue(TestEntityUtils.exists(buildEntityId), "Build entity does not exist");
+    assertTrue(buildEntityId.exists(), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     Energy.set(aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1, drainRate: 0 }));
 
@@ -428,11 +427,11 @@ contract BuildTest is DustTest {
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertTrue(TestEntityUtils.exists(buildEntityId), "Build entity does not exist");
+    assertTrue(buildEntityId.exists(), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 
     // Find the inventory slot with the Grass object
-    uint8 inventorySlot = findInventorySlotWithObjectType(aliceEntityId, buildObjectType);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     // Set player energy to exactly enough for one build operation
     uint128 exactEnergy = BUILD_ENERGY_COST;
@@ -458,11 +457,11 @@ contract BuildTest is DustTest {
     setObjectAtCoord(buildCoord, ObjectTypes.Air);
     ObjectType buildObjectType = ObjectTypes.Grass;
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertTrue(TestEntityUtils.exists(buildEntityId), "Build entity does not exist");
+    assertTrue(buildEntityId.exists(), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
 
     // Use a slot that doesn't have the required object
-    uint8 inventorySlot = 0; // assuming slot 0 is empty or has another item
+    uint16 inventorySlot = 0; // assuming slot 0 is empty or has another item
 
     vm.prank(alice);
     vm.expectRevert("Cannot build non-block object");
@@ -476,11 +475,11 @@ contract BuildTest is DustTest {
     setObjectAtCoord(buildCoord, ObjectTypes.Air);
     ObjectType buildObjectType = ObjectTypes.Grass;
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertTrue(TestEntityUtils.exists(buildEntityId), "Build entity does not exist");
+    assertTrue(buildEntityId.exists(), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
 
     // Use any slot for this test
-    uint8 inventorySlot = 0;
+    uint16 inventorySlot = 0;
 
     vm.expectRevert("Caller not allowed");
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
@@ -493,11 +492,11 @@ contract BuildTest is DustTest {
     setObjectAtCoord(buildCoord, ObjectTypes.Air);
     ObjectType buildObjectType = ObjectTypes.Grass;
     (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
-    assertTrue(TestEntityUtils.exists(buildEntityId), "Build entity does not exist");
+    assertTrue(buildEntityId.exists(), "Build entity does not exist");
     assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
 
     // Use any slot for this test
-    uint8 inventorySlot = 0;
+    uint16 inventorySlot = 0;
 
     EntityId bed = setObjectAtCoord(vec3(0, 0, 0), ObjectTypes.Bed, Orientation.wrap(44));
     PlayerBed.setBedEntityId(aliceEntityId, bed);
@@ -505,5 +504,159 @@ contract BuildTest is DustTest {
     vm.prank(alice);
     vm.expectRevert("Player is sleeping");
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
+  }
+
+  // Water building tests
+  function testBuildWaterloggableBlockOnWaterTerrain() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupWaterChunkWithPlayer();
+
+    // Find a water block from terrain
+    Vec3 buildCoord = vec3(playerCoord.x() + 1, playerCoord.y(), playerCoord.z());
+    assertEq(TerrainLib.getBlockType(buildCoord), ObjectTypes.Water, "Build coord should be water from terrain");
+
+    // Verify it has fluid level from terrain
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(buildCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Water should have max fluid level");
+
+    // Algae is waterloggable
+    ObjectType buildObjectType = ObjectTypes.Algae;
+    TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
+
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
+
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
+
+    vm.prank(alice);
+    startGasReport("build waterloggable block on water terrain");
+    world.build(aliceEntityId, buildCoord, inventorySlot, "");
+    endGasReport();
+
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity should be algae");
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
+
+    // Waterloggable blocks should maintain fluid level
+    fluidLevel = TestEntityUtils.getFluidLevelAt(buildCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Waterloggable block should maintain water's fluid level");
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+    assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
+  }
+
+  function testBuildNonWaterloggableBlockOnWaterTerrain() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupWaterChunkWithPlayer();
+
+    Vec3 buildCoord = vec3(playerCoord.x() + 1, playerCoord.y(), playerCoord.z());
+    assertEq(TerrainLib.getBlockType(buildCoord), ObjectTypes.Water, "Build coord should be water from terrain");
+
+    // Grass is NOT waterloggable (it's solid)
+    ObjectType buildObjectType = ObjectTypes.Grass;
+    TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
+
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
+
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
+
+    vm.prank(alice);
+    startGasReport("build non-waterloggable block on water terrain");
+    world.build(aliceEntityId, buildCoord, inventorySlot, "");
+    endGasReport();
+
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity should be grass");
+    assertInventoryHasObject(aliceEntityId, buildObjectType, 0);
+
+    // Non-waterloggable blocks should NOT remove fluid level
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(buildCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Non-waterloggable block should have fluid level");
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+    assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
+  }
+
+  function testBuildWaterloggableBlockOnWaterNonTerrain() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    // Create a water block as entity (not terrain)
+    Vec3 buildCoord = vec3(playerCoord.x() + 1, playerCoord.y(), playerCoord.z());
+    setObjectAtCoord(buildCoord, ObjectTypes.Water);
+
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(buildCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Water entity should have max fluid level");
+
+    ObjectType buildObjectType = ObjectTypes.Algae;
+    TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
+
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
+
+    vm.prank(alice);
+    startGasReport("build waterloggable block on water non-terrain");
+    world.build(aliceEntityId, buildCoord, inventorySlot, "");
+    endGasReport();
+
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity should be algae");
+
+    // Waterloggable blocks should maintain fluid level
+    fluidLevel = TestEntityUtils.getFluidLevelAt(buildCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Waterloggable block should maintain water's fluid level");
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+  }
+
+  function testBuildNonWaterloggableBlockOnWaterNonTerrain() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    Vec3 buildCoord = vec3(playerCoord.x() + 1, playerCoord.y(), playerCoord.z());
+    setObjectAtCoord(buildCoord, ObjectTypes.Water);
+
+    ObjectType buildObjectType = ObjectTypes.Grass;
+    TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
+
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
+
+    vm.prank(alice);
+    startGasReport("build non-waterloggable block on water non-terrain");
+    world.build(aliceEntityId, buildCoord, inventorySlot, "");
+    endGasReport();
+
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(buildCoord);
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity should be grass");
+
+    // Non-waterloggable blocks should NOT remove fluid level
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(buildCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Non-waterloggable block should have fluid level");
+
+    assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+  }
+
+  function testJumpBuildOnWater() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupWaterChunkWithPlayer();
+
+    // Player is in water, try to jump build
+    ObjectType buildObjectType = ObjectTypes.Stone;
+    TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
+
+    vm.prank(alice);
+    world.jumpBuild(aliceEntityId, inventorySlot, "");
+
+    // Verify player moved up
+    Vec3 newPlayerCoord = EntityPosition.get(aliceEntityId);
+    assertEq(newPlayerCoord, playerCoord + vec3(0, 1, 0), "Player should move up");
+
+    // Verify block was built at original position
+    (EntityId buildEntityId,) = TestEntityUtils.getBlockAt(playerCoord);
+    assertEq(EntityObjectType.get(buildEntityId), buildObjectType, "Build entity should be stone");
+
+    // Non-waterloggable block should NOT remove fluid
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(playerCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Stone should have fluid level");
   }
 }

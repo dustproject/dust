@@ -33,7 +33,7 @@ contract MachineSystem is System {
 
     machine = machine.baseEntityId();
 
-    ObjectType objectType = machine.getObjectType();
+    ObjectType objectType = machine._getObjectType();
     require(objectType.isMachine(), "Can only fuel machines");
 
     uint16 fuelAmount = 0;
@@ -51,7 +51,7 @@ contract MachineSystem is System {
 
     Energy._setEnergy(machine, newEnergyLevel);
 
-    ProgramId program = machine.getProgram();
+    ProgramId program = machine._getProgram();
     program.callOrRevert(abi.encodeCall(IFuelHook.onFuel, (caller, machine, fuelAmount, extraData)));
 
     notify(caller, FuelMachineNotification({ machine: machine, fuelAmount: fuelAmount }));

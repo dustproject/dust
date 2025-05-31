@@ -4,11 +4,12 @@ pragma solidity >=0.8.24;
 import { console } from "forge-std/console.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
-import { Inventory } from "../src/codegen/tables/Inventory.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
+
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
+import { SeedGrowth } from "../src/codegen/tables/SeedGrowth.sol";
 
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 
@@ -34,13 +35,16 @@ import {
   DEFAULT_WOODEN_TOOL_MULTIPLIER,
   MACHINE_ENERGY_DRAIN_RATE,
   MAX_ENTITY_INFLUENCE_HALF_WIDTH,
+  MAX_FLUID_LEVEL,
+  MAX_PLAYER_ENERGY,
   PLAYER_ENERGY_DRAIN_RATE,
   SPECIALIZED_WOODEN_TOOL_MULTIPLIER,
   TOOL_MINE_ENERGY_COST
 } from "../src/Constants.sol";
 import { ObjectAmount, ObjectType, ObjectTypes } from "../src/ObjectType.sol";
 
-import { EntityId } from "../src/EntityId.sol";
+import { EntityId, EntityTypeLib } from "../src/EntityId.sol";
+import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
 
 import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
@@ -133,6 +137,10 @@ contract MineTest is DustTest {
     ObjectType o = TerrainLib.getBlockType(mineCoord);
     assertEq(o, ObjectTypes.UnrevealedOre, "Didn't work");
     assertInventoryHasObject(aliceEntityId, ObjectTypes.UnrevealedOre, 0);
+    Energy.set(
+      aliceEntityId,
+      EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: MAX_PLAYER_ENERGY * 1000, drainRate: 0 })
+    );
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
     ObjectAmount[] memory oreAmounts = inventoryGetOreAmounts(aliceEntityId);
@@ -153,7 +161,6 @@ contract MineTest is DustTest {
     assertEq(objectType, ObjectTypes.Air, "Entity should be air");
     assertEq(Mass.getMass(mineEntityId), 0, "Mine entity mass is not 0");
     assertInventoryHasObject(aliceEntityId, ObjectTypes.UnrevealedOre, 0);
-    assertEq(Inventory.lengthOccupiedSlots(aliceEntityId), 1, "Wrong number of occupied inventory slots");
     oreAmounts = inventoryGetOreAmounts(aliceEntityId);
     assertEq(oreAmounts.length, 1, "No ores in inventory");
     assertEq(oreAmounts[0].amount, 1, "Did not get exactly one ore");
@@ -161,6 +168,144 @@ contract MineTest is DustTest {
     assertEq(ResourceCount.get(ObjectTypes.UnrevealedOre), 1, "Total resource count was not updated");
 
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+  }
+
+  function testMineImmatureSeed() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    Vec3 farmlandCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
+    setObjectAtCoord(farmlandCoord, ObjectTypes.WetFarmland);
+
+    Vec3 seedCoord = farmlandCoord + vec3(0, 1, 0);
+
+    // Add wheat seeds to inventory
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+
+    // Check initial local energy pool
+    uint16 seedSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+
+    // Plant wheat seeds
+    vm.prank(alice);
+    world.build(aliceEntityId, seedCoord, seedSlot, "");
+
+    // Verify seeds were planted
+    (EntityId cropEntityId,) = TestEntityUtils.getBlockAt(seedCoord);
+    assertTrue(cropEntityId.exists(), "Crop entity doesn't exist after planting");
+    assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.WheatSeed, "Wheat seeds were not planted correctly");
+
+    // Verify build time was set
+    uint128 fullyGrownAt = SeedGrowth.getFullyGrownAt(cropEntityId);
+    assertEq(
+      fullyGrownAt, uint128(block.timestamp) + ObjectTypes.WheatSeed.getTimeToGrow(), "Incorrect fullyGrownAt set"
+    );
+
+    // Attempt to mine the not grown seed
+    vm.prank(alice);
+    startGasReport("mine immature seed with hand");
+    world.mineUntilDestroyed(aliceEntityId, seedCoord, "");
+    endGasReport();
+
+    // Verify seeds were added to inventory
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 0);
+  }
+
+  function testMineMatureSeed() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    Vec3 farmlandCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
+    setObjectAtCoord(farmlandCoord, ObjectTypes.WetFarmland);
+
+    // Set seed count to 1 so we can grow it
+    ResourceCount.set(ObjectTypes.WheatSeed, 1);
+    // Add wheat seeds to inventory
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+
+    Vec3 cropCoord = farmlandCoord + vec3(0, 1, 0);
+
+    uint16 seedSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+
+    // Plant wheat seeds
+    vm.prank(alice);
+    world.build(aliceEntityId, cropCoord, seedSlot, "");
+
+    // Verify seeds were planted
+    (EntityId cropEntityId,) = TestEntityUtils.getBlockAt(cropCoord);
+    assertTrue(cropEntityId.exists(), "Crop entity doesn't exist after planting");
+
+    // Get growth time required for the crop
+    uint128 fullyGrownAt = SeedGrowth.getFullyGrownAt(cropEntityId);
+
+    // Advance time beyond the growth period but don't grow it manually
+    vm.warp(fullyGrownAt);
+
+    // Set up chunk commitment for randomness when mining
+    newCommit(alice, aliceEntityId, cropCoord, bytes32(0));
+
+    // Check local energy pool before harvesting
+    uint128 initialLocalEnergy = LocalEnergyPool.get(farmlandCoord.toLocalEnergyPoolShardCoord());
+
+    // Harvest the crop
+    vm.prank(alice);
+    world.mineUntilDestroyed(aliceEntityId, farmlandCoord + vec3(0, 1, 0), "");
+
+    // Verify drops
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 0);
+
+    // Verify crop no longer exists
+    assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
+    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seed was removed from circulation");
+
+    // Verify local energy pool hasn't changed (energy not returned since crop was fully grown)
+    // NOTE: player's energy is not reduced as currently wheat has 0 mass
+    assertEq(
+      LocalEnergyPool.get(farmlandCoord.toLocalEnergyPoolShardCoord()),
+      initialLocalEnergy,
+      "Local energy pool shouldn't change after harvesting mature crop"
+    );
+  }
+
+  function testMineBelowGrowable() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    Vec3 farmlandCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
+    setObjectAtCoord(farmlandCoord, ObjectTypes.WetFarmland);
+
+    // Set seed count to 1 so we can grow it
+    ResourceCount.set(ObjectTypes.WheatSeed, 1);
+    // Add wheat seeds to inventory
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+
+    Vec3 cropCoord = farmlandCoord + vec3(0, 1, 0);
+
+    uint16 seedSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WheatSeed);
+
+    // Plant wheat seeds
+    vm.prank(alice);
+    world.build(aliceEntityId, cropCoord, seedSlot, "");
+
+    // Verify seeds were planted
+    (EntityId cropEntityId,) = TestEntityUtils.getBlockAt(cropCoord);
+    assertTrue(cropEntityId.exists(), "Crop entity doesn't exist after planting");
+
+    // Get growth time required for the crop
+    uint128 fullyGrownAt = SeedGrowth.getFullyGrownAt(cropEntityId);
+
+    // Advance time beyond the growth period but don't grow it manually
+    vm.warp(fullyGrownAt);
+
+    // Set up chunk commitment for randomness when mining
+    newCommit(alice, aliceEntityId, cropCoord, bytes32(0));
+
+    // Harvest the crop
+    vm.prank(alice);
+    world.mineUntilDestroyed(aliceEntityId, farmlandCoord, "");
+
+    // Verify drops
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 0);
+
+    // Verify crop no longer exists
+    assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
+    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seed was removed from circulation");
   }
 
   function testMineResourceTypeIsFixedAfterPartialMine() public {
@@ -301,8 +446,8 @@ contract MineTest is DustTest {
     Vec3 topCoord = mineCoord + vec3(0, 1, 0);
     (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(mineCoord);
     (EntityId topEntityId,) = TestEntityUtils.getBlockAt(topCoord);
-    assertTrue(TestEntityUtils.exists(mineEntityId), "Mine entity does not exist");
-    assertTrue(TestEntityUtils.exists(topEntityId), "Top entity does not exist");
+    assertTrue(mineEntityId.exists(), "Mine entity does not exist");
+    assertTrue(topEntityId.exists(), "Top entity does not exist");
     assertEq(EntityObjectType.get(mineEntityId), mineObjectType, "Mine entity is not mine object type");
     assertEq(EntityObjectType.get(topEntityId), mineObjectType, "Top entity is not air");
     assertEq(Mass.getMass(mineEntityId), ObjectPhysics.getMass(mineObjectType), "Mine entity mass is not correct");
@@ -325,7 +470,7 @@ contract MineTest is DustTest {
 
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
 
-    uint16 signSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.TextSign);
+    uint16 signSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.TextSign);
 
     // Mine again but with a non-base coord
     vm.prank(alice);
@@ -333,8 +478,8 @@ contract MineTest is DustTest {
 
     (mineEntityId,) = TestEntityUtils.getBlockAt(mineCoord);
     (topEntityId,) = TestEntityUtils.getBlockAt(topCoord);
-    assertTrue(TestEntityUtils.exists(mineEntityId), "Mine entity does not exist");
-    assertTrue(TestEntityUtils.exists(topEntityId), "Top entity does not exist");
+    assertTrue(mineEntityId.exists(), "Mine entity does not exist");
+    assertTrue(topEntityId.exists(), "Top entity does not exist");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
     vm.prank(alice);
@@ -356,8 +501,8 @@ contract MineTest is DustTest {
     Vec3 relativeCoord = mineCoord - vec3(1, 0, 0);
     (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(mineCoord);
     (EntityId relativeEntityId,) = TestEntityUtils.getBlockAt(relativeCoord);
-    assertTrue(TestEntityUtils.exists(mineEntityId), "Mine entity does not exist");
-    assertTrue(TestEntityUtils.exists(relativeEntityId), "Relative entity does not exist");
+    assertTrue(mineEntityId.exists(), "Mine entity does not exist");
+    assertTrue(relativeEntityId.exists(), "Relative entity does not exist");
     assertEq(EntityObjectType.get(mineEntityId), mineObjectType, "Mine entity is not mine object type");
     assertEq(EntityObjectType.get(relativeEntityId), mineObjectType, "Relative entity is not air");
     assertEq(Mass.getMass(mineEntityId), ObjectPhysics.getMass(mineObjectType), "Mine entity mass is not correct");
@@ -379,7 +524,7 @@ contract MineTest is DustTest {
 
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
 
-    uint16 bedSlot = findInventorySlotWithObjectType(aliceEntityId, ObjectTypes.Bed);
+    uint16 bedSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.Bed);
 
     // Mine again but with a non-base coord
     vm.prank(alice);
@@ -387,8 +532,8 @@ contract MineTest is DustTest {
 
     (mineEntityId,) = TestEntityUtils.getBlockAt(mineCoord);
     (relativeEntityId,) = TestEntityUtils.getBlockAt(relativeCoord);
-    assertTrue(TestEntityUtils.exists(mineEntityId), "Mine entity does not exist");
-    assertTrue(TestEntityUtils.exists(relativeEntityId), "Top entity does not exist");
+    assertTrue(mineEntityId.exists(), "Mine entity does not exist");
+    assertTrue(relativeEntityId.exists(), "Top entity does not exist");
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
     vm.prank(alice);
@@ -488,11 +633,6 @@ contract MineTest is DustTest {
     TestInventoryUtils.addObject(
       aliceEntityId, mineObjectType, ObjectTypes.Player.getMaxInventorySlots() * mineObjectType.getStackable()
     );
-    assertEq(
-      Inventory.lengthOccupiedSlots(aliceEntityId),
-      ObjectTypes.Player.getMaxInventorySlots(),
-      "Wrong number of occupied inventory slots"
-    );
 
     vm.prank(alice);
     vm.expectRevert("Inventory is full");
@@ -535,6 +675,21 @@ contract MineTest is DustTest {
 
     vm.prank(alice);
     vm.expectRevert("Cannot mine a machine that has energy");
+    world.mine(aliceEntityId, mineCoord, "");
+  }
+
+  function testMinePaused() public {
+    WorldStatus.setIsPaused(true);
+
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    Vec3 mineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
+    ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
+    ObjectPhysics.setMass(mineObjectType, playerHandMassReduction - 1);
+    assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
+
+    vm.prank(alice);
+    vm.expectRevert("DUST is paused. Try again later");
     world.mine(aliceEntityId, mineCoord, "");
   }
 
@@ -628,7 +783,7 @@ contract MineTest is DustTest {
       uint128 pickMass = ObjectPhysics.getMass(ObjectTypes.WoodenPick);
       uint128 stoneMass = ObjectPhysics.getMass(stoneType);
       EntityId tool = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenPick);
-      uint16 slot = TestInventoryUtils.getEntitySlot(aliceEntityId, tool);
+      uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, tool);
       vm.prank(alice);
       world.mine(aliceEntityId, stoneCoord, slot, "");
 
@@ -650,7 +805,7 @@ contract MineTest is DustTest {
       setObjectAtCoord(logCoord, logType);
 
       EntityId tool = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenAxe);
-      uint16 slot = TestInventoryUtils.getEntitySlot(aliceEntityId, tool);
+      uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, tool);
       vm.prank(alice);
       world.mine(aliceEntityId, logCoord, slot, "");
 
@@ -669,7 +824,7 @@ contract MineTest is DustTest {
       uint128 axeMass = ObjectPhysics.getMass(ObjectTypes.WoodenAxe);
       uint128 stoneMass = ObjectPhysics.getMass(stoneType);
       EntityId tool = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenAxe);
-      uint16 slot = TestInventoryUtils.getEntitySlot(aliceEntityId, tool);
+      uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, tool);
       vm.prank(alice);
       world.mine(aliceEntityId, stoneCoord, slot, "");
 
@@ -684,7 +839,7 @@ contract MineTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     EntityId tool = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.NeptuniumPick);
-    uint16 slot = TestInventoryUtils.getEntitySlot(aliceEntityId, tool);
+    uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, tool);
 
     Vec3 mineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
     ObjectType mineObjectType = ObjectTypes.SpawnTile;
@@ -706,5 +861,100 @@ contract MineTest is DustTest {
     assertInventoryHasObject(aliceEntityId, mineObjectType, 1);
 
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+  }
+
+  // Water/fluid tests for mining
+  function testMineUnderwaterBlockReplacesWithWater() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupWaterChunkWithPlayer();
+
+    // Place an algae block underwater
+    Vec3 algaeCoord = playerCoord + vec3(1, 0, 0);
+    // This will set initial fluid level to max
+    setObjectAtCoord(algaeCoord, ObjectTypes.Algae);
+
+    // Verify fluid level is set
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(algaeCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Algae should have max fluid level");
+
+    // Mine the algae
+    vm.prank(alice);
+    world.mineUntilDestroyed(aliceEntityId, algaeCoord, "");
+
+    // Check that the block is replaced with water, not air
+    (EntityId minedEntityId, ObjectType minedType) = TestEntityUtils.getBlockAt(algaeCoord);
+    assertEq(minedType, ObjectTypes.Water, "Mined underwater block should be replaced with water");
+    assertEq(EntityObjectType.get(minedEntityId), ObjectTypes.Water, "Entity should be water");
+
+    // Fluid level should still be max
+    fluidLevel = TestEntityUtils.getFluidLevelAt(algaeCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Water replacement should have max fluid level");
+  }
+
+  function testMineDryBlockReplacedWithAir() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Place a algae block in air
+    Vec3 algaeCoord = playerCoord + vec3(1, 0, 0);
+    setObjectAtCoord(algaeCoord, ObjectTypes.Algae);
+
+    (EntityId algaeEntityId,) = TestEntityUtils.getBlockAt(algaeCoord);
+    EntityFluidLevel.set(algaeEntityId, 0); // Set fluid level to 0 to simulate dry block
+
+    // Mine the algae
+    vm.prank(alice);
+    world.mineUntilDestroyed(aliceEntityId, algaeCoord, "");
+
+    // Check that the block is replaced with air
+    (EntityId minedEntityId, ObjectType minedType) = TestEntityUtils.getBlockAt(algaeCoord);
+    assertEq(minedType, ObjectTypes.Air, "Mined dry block should be replaced with air");
+    assertEq(EntityObjectType.get(minedEntityId), ObjectTypes.Air, "Entity should be air");
+  }
+
+  function testMineBlockWithFluidFromTerrain() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupWaterChunkWithPlayer();
+
+    // Find a water block from terrain that hasn't been initialized as entity
+    Vec3 waterCoord = playerCoord + vec3(2, 0, 0);
+
+    // Place a mineable block there
+    setTerrainAtCoord(waterCoord, ObjectTypes.Algae);
+
+    // Verify fluid level comes from terrain type
+    uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(waterCoord);
+    assertEq(fluidLevel, MAX_FLUID_LEVEL, "Algae should have max fluid level from terrain");
+
+    vm.prank(alice);
+    world.mineUntilDestroyed(aliceEntityId, waterCoord, "");
+
+    // Should be replaced with water
+    (, ObjectType minedType) = TestEntityUtils.getBlockAt(waterCoord);
+    assertEq(minedType, ObjectTypes.Water, "Should be replaced with water");
+  }
+
+  function testMineBlockThatSpawnsWithFluidNonTerrain() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Test each block type that spawns with fluid
+    ObjectType[3] memory fluidBlocks = [ObjectTypes.Coral, ObjectTypes.SeaAnemone, ObjectTypes.Algae];
+
+    for (uint256 i = 0; i < fluidBlocks.length; i++) {
+      Vec3 blockCoord = playerCoord + vec3(int32(int256(i + 1)), 0, 0);
+      ObjectType blockType = fluidBlocks[i];
+
+      // Place the block
+      setObjectAtCoord(blockCoord, blockType);
+
+      // Verify it has fluid level
+      uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(blockCoord);
+      assertEq(fluidLevel, MAX_FLUID_LEVEL, "Block that spawns with fluid should have max level");
+
+      // Mine it
+      vm.prank(alice);
+      world.mineUntilDestroyed(aliceEntityId, blockCoord, "");
+
+      // Should be replaced with water (except for water itself which becomes air)
+      (, ObjectType minedType) = TestEntityUtils.getBlockAt(blockCoord);
+      assertEq(minedType, ObjectTypes.Water, "Blocks with fluid should be replaced with water when mined");
+    }
   }
 }

@@ -13,7 +13,6 @@ import { Machine } from "../../src/codegen/tables/Machine.sol";
 
 import { EntityObjectType } from "../../src/codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../../src/codegen/tables/InventorySlot.sol";
-import { InventoryTypeSlots } from "../../src/codegen/tables/InventoryTypeSlots.sol";
 
 import { ObjectType } from "../../src/ObjectType.sol";
 
@@ -24,7 +23,7 @@ import {
 
 import { EntityUtils } from "../../src/utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../../src/utils/ForceFieldUtils.sol";
-import { InventoryUtils, SlotTransfer, ToolData } from "../../src/utils/InventoryUtils.sol";
+import { InventoryUtils, SlotAmount, SlotTransfer, ToolData } from "../../src/utils/InventoryUtils.sol";
 import { PlayerUtils } from "../../src/utils/PlayerUtils.sol";
 
 Vm constant vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
@@ -86,8 +85,16 @@ library TestEntityUtils {
     return EntityUtils.getFragmentAt(fragmentCoord);
   }
 
-  function exists(EntityId self) public asWorld returns (bool) {
-    return self.exists();
+  function getFluidLevelAt(Vec3 coord) public asWorld returns (uint8) {
+    return EntityUtils.getFluidLevelAt(coord);
+  }
+
+  function getOrCreateBlockAt(Vec3 coord) public asWorld returns (EntityId, ObjectType) {
+    return EntityUtils.getOrCreateBlockAt(coord);
+  }
+
+  function createUniqueEntity(ObjectType objectType) public asWorld returns (EntityId) {
+    return EntityUtils.createUniqueEntity(objectType);
   }
 }
 
@@ -169,6 +176,10 @@ library TestInventoryUtils {
     InventoryUtils.transfer(fromEntityId, toEntityId, transfers);
   }
 
+  function transfer(EntityId fromEntityId, EntityId toEntityId, SlotAmount[] memory amounts) public asWorld {
+    InventoryUtils.transfer(fromEntityId, toEntityId, amounts);
+  }
+
   function removeObjectFromSlot(EntityId ownerEntityId, uint16 slot, uint16 numObjectsToRemove) public asWorld {
     InventoryUtils.removeObjectFromSlot(ownerEntityId, slot, numObjectsToRemove);
   }
@@ -181,17 +192,32 @@ library TestInventoryUtils {
     return toolData.use(useMassMax, multiplier);
   }
 
-  function getEntitySlot(EntityId owner, EntityId entityId) public asWorld returns (uint16) {
-    ObjectType objectType = entityId.getObjectType();
-    uint16[] memory slots = InventoryTypeSlots._get(owner, objectType);
-    for (uint256 i = 0; i < slots.length; i++) {
-      EntityId slotEntityId = InventorySlot._getEntityId(owner, slots[i]);
+  function findEntity(EntityId owner, EntityId entityId) public asWorld returns (uint16) {
+    return InventoryUtils.findEntity(owner, entityId);
+  }
 
-      if (slotEntityId == entityId) {
-        return slots[i];
-      }
-    }
-    revert("Entity not found in owner's inventory");
+  function findObjectType(EntityId owner, ObjectType objectType) public asWorld returns (uint16) {
+    return InventoryUtils.findObjectType(owner, objectType);
+  }
+
+  function getOccupiedSlotCount(EntityId owner) public asWorld returns (uint256 count) {
+    return InventoryUtils.getOccupiedSlotCount(owner);
+  }
+
+  function countObjectsOfType(EntityId owner, ObjectType objectType) public asWorld returns (uint256 total) {
+    return InventoryUtils.countObjectsOfType(owner, objectType);
+  }
+
+  function hasObjectType(EntityId ownerEntityId, ObjectType objectType) public asWorld returns (bool) {
+    return InventoryUtils.hasObjectType(ownerEntityId, objectType);
+  }
+
+  function getSlotsWithType(EntityId ownerEntityId, ObjectType objectType)
+    public
+    asWorld
+    returns (uint16[] memory slots)
+  {
+    return InventoryUtils.getSlotsWithType(ownerEntityId, objectType);
   }
 }
 

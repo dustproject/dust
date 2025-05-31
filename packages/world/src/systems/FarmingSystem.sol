@@ -30,7 +30,7 @@ contract FarmingSystem is System {
     require(objectType.isTillable(), "Not tillable");
 
     // If player died, return early
-    callerEnergy = FarmingLib._processEnergyReduction(caller, callerEnergy);
+    (callerEnergy,) = transferEnergyToPool(caller, Math.min(callerEnergy, TILL_ENERGY_COST));
     if (callerEnergy == 0) {
       return;
     }
@@ -40,12 +40,5 @@ contract FarmingSystem is System {
     toolData.use(type(uint128).max, 1);
 
     EntityObjectType._set(farmland, ObjectTypes.Farmland);
-  }
-}
-
-library FarmingLib {
-  function _processEnergyReduction(EntityId caller, uint128 callerEnergy) public returns (uint128) {
-    (callerEnergy,) = transferEnergyToPool(caller, Math.min(callerEnergy, TILL_ENERGY_COST));
-    return callerEnergy;
   }
 }
