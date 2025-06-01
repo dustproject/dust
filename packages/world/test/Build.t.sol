@@ -550,8 +550,8 @@ contract BuildTest is DustTest {
     Vec3 buildCoord = vec3(playerCoord.x() + 1, playerCoord.y(), playerCoord.z());
     assertEq(TerrainLib.getBlockType(buildCoord), ObjectTypes.Water, "Build coord should be water from terrain");
 
-    // Torch is NOT waterloggable (it's solid)
-    ObjectType buildObjectType = ObjectTypes.Torch;
+    // FescueGrass is NOT waterloggable
+    ObjectType buildObjectType = ObjectTypes.FescueGrass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
     assertInventoryHasObject(aliceEntityId, buildObjectType, 1);
 

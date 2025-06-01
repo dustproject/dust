@@ -335,7 +335,7 @@ contract MoveTest is DustTest {
     );
 
     uint128 playerEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
-    assertEq(playerEnergyLost, MOVE_ENERGY_COST + PLAYER_FALL_ENERGY_COST, "Player energy lost is incorrect");
+    assertEq(playerEnergyLost, MOVE_ENERGY_COST * 2 + PLAYER_FALL_ENERGY_COST, "Player energy lost is incorrect");
   }
 
   function testMoveThroughWater() public {

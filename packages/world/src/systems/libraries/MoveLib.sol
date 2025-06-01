@@ -282,11 +282,12 @@ library MoveLib {
   }
 
   function _getMoveCost(Vec3 coord) internal view returns (uint128) {
-    ObjectType belowType = EntityUtils.getObjectTypeAt(coord - vec3(0, 1, 0));
-    if (belowType == ObjectTypes.Water) {
-      return WATER_MOVE_ENERGY_COST;
-    } else if (belowType == ObjectTypes.Lava) {
+    if (EntityUtils.getObjectTypeAt(coord - vec3(0, 1, 0)) == ObjectTypes.Lava) {
       return LAVA_MOVE_ENERGY_COST;
+    }
+
+    if (EntityUtils.getObjectTypeAt(coord) == ObjectTypes.Water) {
+      return WATER_MOVE_ENERGY_COST;
     }
 
     return MOVE_ENERGY_COST;
