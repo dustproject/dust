@@ -130,30 +130,27 @@ library MoveLib {
 
   function _gravityApplies(Vec3 playerCoord) internal view returns (bool) {
     Vec3 belowCoord = playerCoord - vec3(0, 1, 0);
-    bool onSolidBlock = !EntityUtils.safeGetObjectTypeAt(belowCoord).isPassThrough()
-      || EntityUtils.getMovableEntityAt(belowCoord)._exists();
-    return !onSolidBlock && !_isFluid(playerCoord);
+    return EntityUtils.safeGetObjectTypeAt(belowCoord).isPassThrough()
+      && !EntityUtils.getMovableEntityAt(belowCoord)._exists() && !_isFluid(playerCoord);
   }
 
   function _computeGravityResult(Vec3 coord, uint16 initialFallHeight) private view returns (Vec3, uint128) {
     uint16 currentFallHeight = initialFallHeight;
     Vec3 current = coord;
+
     while (_gravityApplies(current)) {
       current = current - vec3(0, 1, 0);
-      currentFallHeight++;
+      unchecked {
+        ++currentFallHeight;
+      }
     }
 
-    // If currently on water, don't apply fall damage
-    if (_isFluid(current)) {
+    // If currently on water or under the safe fall threshold, don't apply fall damage
+    if (currentFallHeight <= PLAYER_SAFE_FALL_DISTANCE || _isFluid(current)) {
       return (current, 0);
     }
 
-    uint128 cost = 0;
-    if (currentFallHeight > PLAYER_SAFE_FALL_DISTANCE) {
-      cost = PLAYER_FALL_ENERGY_COST * (currentFallHeight - PLAYER_SAFE_FALL_DISTANCE);
-    }
-
-    return (current, cost);
+    return (current, PLAYER_FALL_ENERGY_COST * (currentFallHeight - PLAYER_SAFE_FALL_DISTANCE));
   }
 
   /**
@@ -226,12 +223,15 @@ library MoveLib {
     return (current, cost);
   }
 
-  function _removePlayerPosition(Vec3 playerCoord) private returns (EntityId[] memory) {
+  function _removePlayerPosition(Vec3 playerCoord) internal returns (EntityId[] memory) {
     Vec3[] memory playerCoords = ObjectTypes.Player.getRelativeCoords(playerCoord);
-    EntityId[] memory playerEntityIds = _getEntityIds(playerCoords);
-    for (uint256 i = 0; i < playerCoords.length; i++) {
+    EntityId[] memory playerEntityIds = new EntityId[](playerCoords.length);
+
+    for (uint256 i; i < playerCoords.length; ++i) {
+      playerEntityIds[i] = EntityUtils.getMovableEntityAt(playerCoords[i]);
       ReverseMovablePosition._deleteRecord(playerCoords[i]);
     }
+
     return playerEntityIds;
   }
 
@@ -255,26 +255,15 @@ library MoveLib {
     Energy._setDrainRate(player, drainRate);
   }
 
-  function _getEntityIds(Vec3[] memory playerCoords) private view returns (EntityId[] memory) {
-    EntityId[] memory entityIds = new EntityId[](playerCoords.length);
-    for (uint256 i = 0; i < playerCoords.length; i++) {
-      entityIds[i] = EntityUtils.getMovableEntityAt(playerCoords[i]);
-    }
-    return entityIds;
-  }
-
   function _handleAbove(EntityId player, Vec3 playerCoord) private {
     Vec3 aboveCoord = playerCoord + vec3(0, 2, 0);
     EntityId above = EntityUtils.getMovableEntityAt(aboveCoord);
-    if (!above._exists()) {
+
+    if (!above._exists() || above.baseEntityId() == player) {
       return;
     }
 
-    above = above.baseEntityId();
-
-    if (above != player) {
-      runGravity(aboveCoord);
-    }
+    runGravity(aboveCoord);
   }
 
   function _isFluid(Vec3 coord) internal view returns (bool) {
