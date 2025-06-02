@@ -342,7 +342,7 @@ contract BedTest is DustTest {
     assertEq(depletedTime, playerDrainTime + initialTimestamp, "Forcefield depletedTime was not computed correctly");
 
     // Check that the player energy was drained during the playerDrainTime seconds that the forcefield was off
-    assertEq(Energy.getEnergy(aliceEntityId), 1, "Player energy was not drained");
+    assertEq(Energy.getEnergy(aliceEntityId), 0, "Player energy was not drained");
   }
 
   function testRemoveDeadPlayerFromBed() public {
