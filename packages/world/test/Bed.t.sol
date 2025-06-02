@@ -295,7 +295,7 @@ contract BedTest is DustTest {
     );
   }
 
-  function testWakeupFailsIfPlayerDied() public {
+  function testWakeupIfPlayerDied() public {
     (address alice, EntityId aliceEntityId, Vec3 coord) = setupFlatChunkWithPlayer();
 
     Vec3 bedCoord = coord - vec3(2, 0, 0);
@@ -332,21 +332,17 @@ contract BedTest is DustTest {
 
     // Wakeup in the original coord
     vm.prank(alice);
-    vm.expectRevert("Player died while sleeping");
     world.wakeup(aliceEntityId, coord, "");
-
-    TestEnergyUtils.updateMachineEnergy(forcefieldEntityId);
 
     EnergyData memory ffEnergyData = Energy.get(forcefieldEntityId);
     uint128 depletedTime = Machine.getDepletedTime(forcefieldEntityId);
     assertEq(ffEnergyData.energy, 0, "Forcefield energy wasn't drained correctly");
-    assertEq(
-      ffEnergyData.drainRate,
-      MACHINE_ENERGY_DRAIN_RATE + PLAYER_ENERGY_DRAIN_RATE,
-      "Forcefield drain rate does not include player"
-    );
-    // The forcefield had 0 energy for 500 seconds
+    assertEq(ffEnergyData.drainRate, MACHINE_ENERGY_DRAIN_RATE, "Forcefield drain rate was not restored");
+    // The forcefield had 0 energy for playerDrainTime seconds
     assertEq(depletedTime, playerDrainTime + initialTimestamp, "Forcefield depletedTime was not computed correctly");
+
+    // Check that the player energy was drained during the playerDrainTime seconds that the forcefield was off
+    assertEq(Energy.getEnergy(aliceEntityId), 0, "Player energy was not drained");
   }
 
   function testRemoveDeadPlayerFromBed() public {
