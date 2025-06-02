@@ -19,13 +19,16 @@ import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/
 
 import {
   CHUNK_SIZE,
+  LAVA_MOVE_ENERGY_COST,
   MAX_FLUID_LEVEL,
   MAX_PLAYER_GLIDES,
   MAX_PLAYER_JUMPS,
   MOVE_ENERGY_COST,
   PLAYER_ENERGY_DRAIN_RATE,
   PLAYER_FALL_ENERGY_COST,
-  PLAYER_SAFE_FALL_DISTANCE
+  PLAYER_LAVA_ENERGY_DRAIN_RATE,
+  PLAYER_SAFE_FALL_DISTANCE,
+  PLAYER_SWIM_ENERGY_DRAIN_RATE
 } from "../src/Constants.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
@@ -130,6 +133,63 @@ contract MoveTest is DustTest {
   function testMoveHundredBlocksNonTerrain() public {
     (address alice,,) = setupAirChunkWithPlayer();
     _testMoveMultipleBlocks(alice, 100, false);
+  }
+
+  function testMoveOverLava() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    Vec3[] memory newCoords = new Vec3[](2);
+    newCoords[0] = playerCoord + vec3(0, 0, 1);
+    newCoords[1] = playerCoord + vec3(0, 0, 2);
+
+    for (uint8 i = 0; i < newCoords.length; i++) {
+      setObjectAtCoord(newCoords[i] - vec3(0, 1, 0), ObjectTypes.Lava);
+    }
+
+    EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
+    vm.prank(alice);
+    startGasReport("move over lava");
+    world.move(aliceEntityId, newCoords);
+    endGasReport();
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
+    assertEq(finalCoord, newCoords[newCoords.length - 1], "Player did not move to new coords");
+
+    uint128 energyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+    assertEq(LAVA_MOVE_ENERGY_COST * newCoords.length, energyLost, "Player energy lost is not equal to lava move cost");
+
+    assertEq(Energy.getDrainRate(aliceEntityId), PLAYER_LAVA_ENERGY_DRAIN_RATE, "Player drain rate is not correct");
+
+    newCoords = new Vec3[](1);
+    newCoords[0] = finalCoord + vec3(0, 0, 1);
+
+    vm.prank(alice);
+    world.move(aliceEntityId, newCoords);
+
+    // Drain rate should go back to normal
+    assertEq(Energy.getDrainRate(aliceEntityId), PLAYER_ENERGY_DRAIN_RATE, "Player drain rate was not restored");
+  }
+
+  function testDrainRateUpdateSwimming() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    Vec3[] memory newCoords = new Vec3[](1);
+    newCoords[0] = playerCoord + vec3(0, 0, 1);
+
+    setObjectAtCoord(newCoords[0] + vec3(0, 1, 0), ObjectTypes.Water);
+
+    vm.prank(alice);
+    world.move(aliceEntityId, newCoords);
+
+    // Expect the player to be in water and have a different drain rate
+    assertEq(Energy.getDrainRate(aliceEntityId), PLAYER_SWIM_ENERGY_DRAIN_RATE, "Player drain rate is not correct");
+
+    newCoords[0] = newCoords[0] + vec3(0, 0, 1);
+
+    vm.prank(alice);
+    world.move(aliceEntityId, newCoords);
+
+    // Drain rate should go back to normal
+    assertEq(Energy.getDrainRate(aliceEntityId), PLAYER_ENERGY_DRAIN_RATE, "Player drain rate was not restored");
   }
 
   function testMoveJump() public {
@@ -275,7 +335,7 @@ contract MoveTest is DustTest {
     );
 
     uint128 playerEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
-    assertEq(playerEnergyLost, MOVE_ENERGY_COST + PLAYER_FALL_ENERGY_COST, "Player energy lost is incorrect");
+    assertEq(playerEnergyLost, MOVE_ENERGY_COST * 2 + PLAYER_FALL_ENERGY_COST, "Player energy lost is incorrect");
   }
 
   function testMoveThroughWater() public {

@@ -239,7 +239,7 @@ library BuildLib {
    * Block placement validation checks:
    * 1. Terrain compatibility: Block can only be placed on Air or Water
    *    - Air: Standard empty space placement
-   *    - Water: Allows underwater building (block will NOT displace water if not waterloggable, will revert back to water on mine)
+   *    - Water: Allows underwater building (ONLY waterloggable blocks)
    *
    * 2. For non-passthrough blocks (solid blocks like stone, wood):
    *    - No dropped items: Cannot build where items are lying on the ground
@@ -250,7 +250,11 @@ library BuildLib {
     internal
     view
   {
-    require(terrainType == ObjectTypes.Water || terrainType == ObjectTypes.Air, "Can only build on air or water");
+    if (terrainType == ObjectTypes.Water) {
+      require(buildType.isWaterloggable(), "Cannot build on water with non-waterloggable block");
+    } else {
+      require(terrainType == ObjectTypes.Air, "Can only build on air or water");
+    }
 
     if (!buildType.isPassThrough()) {
       require(InventoryUtils.isEmpty(terrain), "Cannot build where there are dropped objects");
@@ -264,7 +268,7 @@ library BuildLib {
    * - Non-waterloggable blocks DO NOT remove water level when placed, so they will revert back to water when mined
    */
   function _applyTerrainModifications(EntityId terrain, ObjectType buildType) internal {
-    // NOTE: until we solve water conservation, we do not remove water when placing a non-waterloggable block
+    // NOTE: until we solve water conservation, we do not remove fluid level, instead we only allow waterloggable blocks
     // if (terrainType == ObjectTypes.Water && !buildType.isWaterloggable()) {
     //   EntityFluidLevel._deleteRecord(terrain);
     // }

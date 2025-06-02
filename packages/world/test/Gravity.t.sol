@@ -18,7 +18,13 @@ import { DustTest } from "./DustTest.sol";
 
 import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
-import { CHUNK_SIZE, DEFAULT_MINE_ENERGY_COST, MOVE_ENERGY_COST, PLAYER_FALL_ENERGY_COST } from "../src/Constants.sol";
+import {
+  CHUNK_SIZE,
+  DEFAULT_MINE_ENERGY_COST,
+  MOVE_ENERGY_COST,
+  PLAYER_FALL_ENERGY_COST,
+  WATER_MOVE_ENERGY_COST
+} from "../src/Constants.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
@@ -382,7 +388,7 @@ contract GravityTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
     // Set player energy to exactly enough for a mine, but not for a fall
-    uint128 initialEnergy = MOVE_ENERGY_COST + 1;
+    uint128 initialEnergy = MOVE_ENERGY_COST + WATER_MOVE_ENERGY_COST + 1;
     Energy.set(
       aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: initialEnergy, drainRate: 0 })
     );
@@ -416,7 +422,6 @@ contract GravityTest is DustTest {
     // Verify player is not dead
     assertEq(aliceEntityId.getPosition(), newCoords[0] - vec3(0, 8, 0), "Final coord mismatch");
     assertEq(Energy.getEnergy(aliceEntityId), 1, "Player energy mismatch");
-    assertEq(Energy.getEnergy(aliceEntityId), initialEnergy - MOVE_ENERGY_COST, "Player shouldn't have died");
   }
 
   function testMoveFailsIfGravityOutsideExploredChunk() public {
