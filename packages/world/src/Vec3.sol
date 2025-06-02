@@ -2,6 +2,7 @@
 pragma solidity >=0.8.24;
 
 import { LibString } from "solady/utils/LibString.sol";
+import { SafeCastLib } from "solady/utils/SafeCastLib.sol";
 
 import { CHUNK_SIZE, FRAGMENT_SIZE, REGION_SIZE } from "./Constants.sol";
 import { Orientation } from "./Orientation.sol";
@@ -88,6 +89,7 @@ function getDirectionVector(Direction direction) pure returns (Vec3) {
 
 library Vec3Lib {
   using LibString for *;
+  using SafeCastLib for *;
   using Math for *;
 
   function unwrap(Vec3 self) internal pure returns (uint96) {
@@ -131,10 +133,19 @@ library Vec3Lib {
     return vec3(x(a) * scalar, y(a) * scalar, z(a) * scalar);
   }
 
+  function mul(Vec3 a, uint256 scalar) internal pure returns (Vec3) {
+    return a.mul(scalar.toInt32());
+  }
+
   function div(Vec3 a, int32 scalar) internal pure returns (Vec3) {
     require(scalar != 0, "Division by zero");
     (int32 ax, int32 ay, int32 az) = a.xyz();
     return vec3(ax / scalar, ay / scalar, az / scalar);
+  }
+
+  function div(Vec3 a, uint256 scalar) internal pure returns (Vec3) {
+    require(scalar != 0, "Division by zero");
+    return a.div(scalar.toInt32());
   }
 
   function mod(Vec3 a, int32 scalar) internal pure returns (Vec3) {
@@ -165,6 +176,13 @@ library Vec3Lib {
     (int32 bx, int32 by, int32 bz) = b.xyz();
 
     return Math.max(ax.dist(bx), ay.dist(by), az.dist(bz));
+  }
+
+  function absDelta(Vec3 a, Vec3 b) internal pure returns (Vec3) {
+    (int32 ax, int32 ay, int32 az) = a.xyz();
+    (int32 bx, int32 by, int32 bz) = b.xyz();
+
+    return vec3(ax.dist(bx).toInt32(), ay.dist(by).toInt32(), az.dist(bz).toInt32());
   }
 
   function clamp(Vec3 self, Vec3 min, Vec3 max) internal pure returns (Vec3) {

@@ -2,6 +2,7 @@
 pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
+import { console } from "forge-std/console.sol";
 
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
@@ -100,7 +101,9 @@ contract MineSystem is System {
 
   function _mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) internal returns (EntityId) {
     uint128 callerEnergy = caller.activate().energy;
-    caller.requireConnected(coord);
+    (Vec3 callerCoord,) = caller.requireConnected(coord);
+    // TODO: we use callerCoord + vec3(0,1,0) which supports players, but other entities might have different shapes
+    _requireReachable(caller, callerCoord + vec3(0, 1, 0), coord);
 
     (EntityId mined, ObjectType minedType) = EntityUtils.getOrCreateBlockAt(coord);
     require(minedType.isBlock(), "Object is not mineable");
@@ -145,6 +148,103 @@ contract MineSystem is System {
 
     return mined;
   }
+
+  function _requireReachable(EntityId caller, Vec3 start, Vec3 end) internal view {
+    if (start == end) return;
+
+    int32[3] memory p = start.toArray();
+    int32[3] memory q = end.toArray();
+
+    int32[3] memory delta;
+    int32[3] memory step;
+
+    unchecked {
+      for (uint8 i; i < 3; ++i) {
+        int32 diff = q[i] - p[i];
+        delta[i] = diff < 0 ? -diff : diff;
+        step[i] = diff > 0 ? int32(1) : (diff < 0 ? int32(-1) : int32(0));
+      }
+    }
+
+    // dominant axis
+    uint8 dom = 0;
+    if (delta[1] > delta[0]) dom = 1;
+    if (delta[2] > delta[dom]) dom = 2;
+
+    // map the two non-dominant axes
+    uint8 a1 = (dom + 1) % 3;
+    uint8 a2 = (dom + 2) % 3;
+
+    // doubled deltas
+    int32[3] memory twoD = [delta[0] << 1, delta[1] << 1, delta[2] << 1];
+    int32 twoDdom = twoD[dom];
+
+    // error terms for a1 / a2
+    int32 err1 = twoD[a1] - delta[dom];
+    int32 err2 = twoD[a2] - delta[dom];
+
+    // walk
+    while (p[dom] != q[dom]) {
+      p[dom] += step[dom];
+
+      // axis a1
+      if (err1 > 0) {
+        p[a1] += step[a1];
+        err1 -= twoDdom;
+      }
+      err1 += twoD[a1];
+
+      // axis a2
+      if (err2 > 0) {
+        p[a2] += step[a2];
+        err2 -= twoDdom;
+      }
+      err2 += twoD[a2];
+
+      Vec3 cur = vec3(p[0], p[1], p[2]);
+      ObjectType ot = EntityUtils.getObjectTypeAt(cur);
+      EntityId e = EntityUtils.getMovableEntityAt(cur);
+      require(ot.isNonSolid() && (e == caller || !e.exists()), "Path blocked");
+    }
+  }
+
+  // function _requireReachable(EntityId caller, Vec3 start, Vec3 end) internal view {
+  //   Vec3 delta = start.absDelta(end);
+  //
+  //   int32 sx = start.x() < end.x() ? int32(1) : -1;
+  //   int32 sy = start.y() < end.y() ? int32(1) : -1;
+  //   int32 sz = start.z() < end.z() ? int32(1) : -1;
+  //
+  //   int256 ax = 2 * delta.x();
+  //   int256 ay = 2 * delta.y();
+  //   int256 az = 2 * delta.z();
+  //
+  //   Vec3 current = start;
+  //   // We stop before the final cell
+  //   while (current != end) {
+  //     // choose the axis that brings us closest to the line
+  //     if (ax >= ay && ax >= az) {
+  //       // X dominates
+  //       current = current + vec3(sx, 0, 0);
+  //       ax -= ay;
+  //       ax -= az;
+  //     } else if (ay >= ax && ay >= az) {
+  //       // Y dominates
+  //       current = current + vec3(0, sy, 0);
+  //       ay -= ax;
+  //       ay -= az;
+  //     } else {
+  //       // Z dominates
+  //       current = current + vec3(0, 0, sz);
+  //       az -= ax;
+  //       az -= ay;
+  //     }
+  //
+  //     ObjectType objectType = EntityUtils.getObjectTypeAt(current);
+  //     EntityId entity = EntityUtils.getMovableEntityAt(current);
+  //     require(objectType.isNonSolid() && (entity == caller || !entity.exists()), "Path blocked");
+  //   }
+  // }
 
   function _prepareBlock(EntityId mined, ObjectType minedType, Vec3 coord) internal returns (ObjectType) {
     if (minedType.isMachine()) {
