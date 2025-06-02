@@ -34,7 +34,9 @@ jobs:
 
       - name: Run tests in packages/world
         working-directory: packages/world
-        run: GAS_REPORTER_ENABLED=true pnpm mud test --forgeOptions='-vvv' | pnpm gas-report --stdin
+        run: |
+          set -o pipefail
+          GAS_REPORTER_ENABLED=true pnpm mud test --forgeOptions='-vvv' | pnpm gas-report --stdin
 
       - name: Run ts tests in packages/world
         working-directory: packages/world
