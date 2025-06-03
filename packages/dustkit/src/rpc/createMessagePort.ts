@@ -1,4 +1,7 @@
-import { MessagePortTargetClosedBeforeReadyError } from "./errors";
+import {
+  MessagePortTargetClosedBeforeReadyError,
+  MessagePortUnexpectedReadyMessageError,
+} from "./errors";
 
 // TODO: replace with envelope that contains optional context
 export const initMessage = "dustkit:messagePort";
@@ -22,7 +25,7 @@ export async function createMessagePort({
         if (event.data === "ready") {
           resolve(channel.port1);
         } else {
-          reject(new Error("Unexpected first message from MessagePort."));
+          reject(new MessagePortUnexpectedReadyMessageError());
         }
       },
       { once: true },
