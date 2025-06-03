@@ -155,8 +155,6 @@ contract BedTest is DustTest {
     // Building a bed does not increase the drain rate
     assertEq(Fragment.getExtraDrainRate(fragment), 0);
 
-    attachTestProgram(bedEntityId);
-
     vm.prank(alice);
     world.sleep(aliceEntityId, bedEntityId, "");
 
@@ -182,6 +180,152 @@ contract BedTest is DustTest {
     assertEq(Fragment.getExtraDrainRate(fragment), 0);
   }
 
+  function testSleepInDepletedForcefield() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupFlatChunkWithPlayer();
+
+    Vec3 bedCoord = coord - vec3(2, 0, 0);
+
+    uint128 initialPlayerEnergy = Energy.getEnergy(aliceEntityId);
+
+    // Set the forcefield's energy to 0
+    uint128 initialForcefieldEnergy = 0;
+
+    uint128 initialTimestamp = uint128(vm.getBlockTimestamp());
+
+    // Set forcefield
+    EntityId forcefieldEntityId = setupForceField(
+      bedCoord,
+      EnergyData({
+        energy: initialForcefieldEnergy,
+        lastUpdatedTime: initialTimestamp,
+        drainRate: MACHINE_ENERGY_DRAIN_RATE
+      })
+    );
+
+    EntityId bedEntityId = createBed(bedCoord);
+
+    vm.prank(alice);
+    world.sleep(aliceEntityId, bedEntityId, "");
+
+    uint128 timeDelta = 100 seconds;
+    vm.warp(vm.getBlockTimestamp() + timeDelta);
+
+    // Wakeup in the original coord
+    vm.prank(alice);
+    world.wakeup(aliceEntityId, coord, "");
+
+    EnergyData memory ffEnergyData = Energy.get(forcefieldEntityId);
+    uint128 depletedTime = Machine.getDepletedTime(forcefieldEntityId);
+    assertEq(ffEnergyData.energy, 0, "Forcefield energy should be 0");
+    assertEq(ffEnergyData.drainRate, MACHINE_ENERGY_DRAIN_RATE, "Forcefield drain rate was not restored");
+    // The forcefield had 0 energy for 100 seconds
+    assertEq(depletedTime, initialTimestamp + timeDelta, "Forcefield depletedTime was not computed correctly");
+
+    // Check that the player energy was drained during the time they slept
+    assertEq(
+      Energy.getEnergy(aliceEntityId),
+      initialPlayerEnergy - PLAYER_ENERGY_DRAIN_RATE * timeDelta,
+      "Player energy was not drained"
+    );
+  }
+
+  function testSleepInChargedAndDepletedForcefield() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupFlatChunkWithPlayer();
+
+    Vec3 bedCoord = coord - vec3(2, 0, 0);
+
+    uint128 initialPlayerEnergy = Energy.getEnergy(aliceEntityId);
+
+    // Set the forcefield's energy to 0
+    uint128 initialForcefieldEnergy = 100 * MACHINE_ENERGY_DRAIN_RATE;
+
+    uint128 initialTimestamp = uint128(vm.getBlockTimestamp());
+
+    // Set forcefield
+    EntityId forcefieldEntityId = setupForceField(
+      bedCoord,
+      EnergyData({
+        energy: initialForcefieldEnergy,
+        lastUpdatedTime: initialTimestamp,
+        drainRate: MACHINE_ENERGY_DRAIN_RATE
+      })
+    );
+
+    // First deplete the forcefield
+    uint128 timeDelta = initialForcefieldEnergy / MACHINE_ENERGY_DRAIN_RATE;
+    vm.warp(vm.getBlockTimestamp() + timeDelta);
+
+    EntityId bedEntityId = createBed(bedCoord);
+
+    vm.prank(alice);
+    world.sleep(aliceEntityId, bedEntityId, "");
+
+    uint128 sleepTimeDelta = 100 seconds;
+    vm.warp(vm.getBlockTimestamp() + sleepTimeDelta);
+
+    // Wakeup in the original coord
+    vm.prank(alice);
+    world.wakeup(aliceEntityId, coord, "");
+
+    EnergyData memory ffEnergyData = Energy.get(forcefieldEntityId);
+    uint128 depletedTime = Machine.getDepletedTime(forcefieldEntityId);
+    assertEq(ffEnergyData.energy, 0, "Forcefield energy should be 0");
+    assertEq(ffEnergyData.drainRate, MACHINE_ENERGY_DRAIN_RATE, "Forcefield drain rate was not restored");
+    // The forcefield had 0 energy while the player slept
+    assertEq(depletedTime, initialTimestamp + sleepTimeDelta, "Forcefield depletedTime was not computed correctly");
+
+    // Check that the player energy was drained during the time they slept
+    assertEq(
+      Energy.getEnergy(aliceEntityId),
+      initialPlayerEnergy - PLAYER_ENERGY_DRAIN_RATE * (timeDelta + sleepTimeDelta),
+      "Player energy was not drained"
+    );
+  }
+
+  function testSleepInDepletedForcefieldFatal() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupFlatChunkWithPlayer();
+
+    Vec3 bedCoord = coord - vec3(2, 0, 0);
+
+    uint128 initialPlayerEnergy = Energy.getEnergy(aliceEntityId);
+
+    // Set the forcefield's energy to 0
+    uint128 initialForcefieldEnergy = 0;
+
+    uint128 initialTimestamp = uint128(vm.getBlockTimestamp());
+
+    // Set forcefield
+    EntityId forcefieldEntityId = setupForceField(
+      bedCoord,
+      EnergyData({
+        energy: initialForcefieldEnergy,
+        lastUpdatedTime: initialTimestamp,
+        drainRate: MACHINE_ENERGY_DRAIN_RATE
+      })
+    );
+
+    EntityId bedEntityId = createBed(bedCoord);
+
+    vm.prank(alice);
+    world.sleep(aliceEntityId, bedEntityId, "");
+
+    uint128 timeDelta = initialPlayerEnergy / PLAYER_ENERGY_DRAIN_RATE + 1;
+    vm.warp(vm.getBlockTimestamp() + timeDelta);
+
+    // Wakeup in the original coord
+    vm.prank(alice);
+    world.wakeup(aliceEntityId, coord, "");
+
+    EnergyData memory ffEnergyData = Energy.get(forcefieldEntityId);
+    uint128 depletedTime = Machine.getDepletedTime(forcefieldEntityId);
+    assertEq(ffEnergyData.energy, 0, "Forcefield energy should be 0");
+    assertEq(ffEnergyData.drainRate, MACHINE_ENERGY_DRAIN_RATE, "Forcefield drain rate was not restored");
+    // The forcefield had 0 energy for 100 seconds
+    assertEq(depletedTime, initialTimestamp + timeDelta, "Forcefield depletedTime was not computed correctly");
+
+    assertPlayerIsDead(aliceEntityId, coord);
+  }
+
   function testWakeupWithDepletedForcefield() public {
     (address alice, EntityId aliceEntityId, Vec3 coord) = setupFlatChunkWithPlayer();
 
@@ -205,8 +349,6 @@ contract BedTest is DustTest {
     );
 
     EntityId bedEntityId = createBed(bedCoord);
-
-    attachTestProgram(bedEntityId);
 
     vm.prank(alice);
     world.sleep(aliceEntityId, bedEntityId, "");
@@ -258,8 +400,6 @@ contract BedTest is DustTest {
     );
 
     EntityId bedEntityId = createBed(bedCoord);
-
-    attachTestProgram(bedEntityId);
 
     vm.prank(alice);
     world.sleep(aliceEntityId, bedEntityId, "");
@@ -319,8 +459,6 @@ contract BedTest is DustTest {
 
     EntityId bedEntityId = createBed(bedCoord);
 
-    attachTestProgram(bedEntityId);
-
     vm.prank(alice);
     world.sleep(aliceEntityId, bedEntityId, "");
 
@@ -369,8 +507,6 @@ contract BedTest is DustTest {
 
     EntityId bedEntityId = createBed(bedCoord);
 
-    attachTestProgram(bedEntityId);
-
     vm.prank(alice);
     world.sleep(aliceEntityId, bedEntityId, "");
 
@@ -414,8 +550,6 @@ contract BedTest is DustTest {
     );
 
     EntityId bedEntityId = createBed(bedCoord);
-
-    attachTestProgram(bedEntityId);
 
     // Give objects to the player to test that transfers work
     TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Grass, 1);
