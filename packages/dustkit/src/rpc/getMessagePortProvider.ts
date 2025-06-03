@@ -8,14 +8,19 @@ import { MessagePortTargetClosedBeforeReadyError } from "./errors";
 
 // TODO: add health check, recreate port if closed? (see https://github.com/whatwg/html/issues/1766)
 
-export function getMessagePortProvider<schema extends RpcSchema.Generic>({
+export function getMessagePortProvider<
+  schema extends RpcSchema.Generic,
+  context = undefined,
+>({
   target,
   targetOrigin = "*",
-}: CreateMessagePortOptions): Provider.Provider<undefined, schema> {
+  context,
+}: CreateMessagePortOptions<context>): Provider.Provider<undefined, schema> {
   const portPromise = pRetry(
-    () => createMessagePort({ target, targetOrigin }),
+    () => createMessagePort({ target, targetOrigin, context }),
     {
       retries: 10,
+      minTimeout: 100,
       shouldRetry(error) {
         if (error instanceof MessagePortTargetClosedBeforeReadyError) {
           return false;
@@ -28,7 +33,7 @@ export function getMessagePortProvider<schema extends RpcSchema.Generic>({
   const requestStore = RpcRequest.createStore<RpcSchema.Generic>();
   const provider = Provider.from({
     async request(args) {
-      const port = await portPromise;
+      const { port, context } = await portPromise;
       const request = requestStore.prepare(args);
 
       // TODO: timeout/retry?

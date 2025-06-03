@@ -1,6 +1,6 @@
 import { type RpcRequest, RpcResponse, type RpcSchema } from "ox";
 import { MethodNotSupportedError } from "ox/RpcResponse";
-import { initMessage } from "./createMessagePort";
+import { anyInitialMessage } from "./common";
 import { debug } from "./debug";
 
 // Ideally we'd have one `onRequest` handler, but unfortunately I couldn't figure out how
@@ -10,8 +10,11 @@ import { debug } from "./debug";
 // Instead, we have a map of `handlers`, where each RPC method is implemented as its own
 // handler function.
 
-export function createMessagePortRpcServer<schema extends RpcSchema.Generic>(
-  handlers: {
+export function createMessagePortRpcServer<
+  schema extends RpcSchema.Generic,
+  context = undefined,
+>(
+  createHandlers: (options: { context: context }) => {
     [method in RpcSchema.ExtractMethodName<schema>]?: (
       params: RpcSchema.ExtractParams<schema, method>,
     ) => Promise<RpcSchema.ExtractReturnType<schema, method>>;
@@ -20,13 +23,15 @@ export function createMessagePortRpcServer<schema extends RpcSchema.Generic>(
   let connectedPort: MessagePort | undefined;
 
   function onMessage(event: MessageEvent) {
-    if (event.data !== initMessage) return;
+    if (!anyInitialMessage.allows(event.data)) return;
 
     const [port] = event.ports;
     if (!port) {
-      console.warn(`Got "${initMessage}" message with no message port.`);
+      console.warn("Got initial message with no message port.");
       return;
     }
+
+    const handlers = createHandlers({ context: event.data.context as never });
 
     port.addEventListener(
       "message",
@@ -61,7 +66,7 @@ export function createMessagePortRpcServer<schema extends RpcSchema.Generic>(
     connectedPort = port;
 
     port.start();
-    port.postMessage("ready");
+    port.postMessage(event.data);
   }
 
   window.addEventListener("message", onMessage);

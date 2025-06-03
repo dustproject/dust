@@ -11,16 +11,17 @@ import { zeroHash } from "viem";
 
 const dustClientProvider = getMessagePortProvider<ClientRpcSchema>({
   target: window.opener ?? window.parent,
+  context: undefined,
 });
 
 export function App() {
   useEffect(() => {
-    return createMessagePortRpcServer<AppRpcSchema>({
+    return createMessagePortRpcServer<AppRpcSchema>(() => ({
       async dustApp_init(params) {
         console.info("client asked this app to initialize with", params);
         return { success: true };
       },
-    });
+    }));
   }, []);
 
   return (

@@ -3,11 +3,12 @@ import {
   encodeSystemCalls,
   encodeSystemCallsFrom,
 } from "@latticexyz/world/internal";
+import type { AppConfig } from "dustkit";
 import {
   type ClientRpcSchema,
   createMessagePortRpcServer,
 } from "dustkit/internal";
-import { type Hex, isHex } from "viem";
+import { type Address, type Hex, isHex } from "viem";
 import { sendUserOperation } from "viem/account-abstraction";
 import { waitForTransactionReceipt, writeContract } from "viem/actions";
 import { getAction } from "viem/utils";
@@ -19,9 +20,23 @@ export function createClientRpcServer({
   worldAddress,
 }: { sessionClient?: SessionClient; worldAddress: Hex }) {
   console.info("setting up client rpc server", { sessionClient, worldAddress });
-  const close = createMessagePortRpcServer<ClientRpcSchema>({
+  const close = createMessagePortRpcServer<
+    ClientRpcSchema,
+    {
+      appId: string;
+      appConfig: AppConfig;
+      userAddress: Address;
+      via?: {
+        entity: Hex;
+        program: Hex;
+      };
+    }
+  >(({ context }) => ({
     async dustClient_setWaypoint(waypoint) {
-      console.info("app asked for waypoint", waypoint);
+      console.info("app asked for waypoint", {
+        appId: context.appId,
+        waypoint,
+      });
     },
     async dustClient_systemCall(systemCalls) {
       if (!sessionClient) {
@@ -105,7 +120,7 @@ export function createClientRpcServer({
     // async dustClient_getPlayerPosition() {
     //   // TODO
     // },
-  });
+  }));
 
   return () => {
     console.info("closing client rpc server", {
