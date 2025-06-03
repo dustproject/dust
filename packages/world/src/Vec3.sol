@@ -178,11 +178,11 @@ library Vec3Lib {
     return Math.max(ax.dist(bx), ay.dist(by), az.dist(bz));
   }
 
-  function absDelta(Vec3 a, Vec3 b) internal pure returns (Vec3) {
+  function absDelta(Vec3 a, Vec3 b) internal pure returns (uint64, uint64, uint64) {
     (int32 ax, int32 ay, int32 az) = a.xyz();
     (int32 bx, int32 by, int32 bz) = b.xyz();
 
-    return vec3(ax.dist(bx).toInt32(), ay.dist(by).toInt32(), az.dist(bz).toInt32());
+    return (uint64(ax.dist(bx)), uint64(ay.dist(by)), uint64(az.dist(bz)));
   }
 
   function clamp(Vec3 self, Vec3 min, Vec3 max) internal pure returns (Vec3) {
