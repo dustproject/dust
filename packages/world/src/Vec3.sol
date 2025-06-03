@@ -219,7 +219,6 @@ library Vec3Lib {
   }
 
   function inSphere(Vec3 self, Vec3 other, uint256 radius) internal pure returns (bool) {
-    // Calculate the squared distance to avoid expensive square root operation
     Vec3 d = other - self;
     // TODO: should probably use direct subtraction of components to avoid overflow issues
     return uint256(int256(d.x()) ** 2 + int256(d.y()) ** 2 + int256(d.z()) ** 2) <= radius * radius;
