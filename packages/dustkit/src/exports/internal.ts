@@ -19,16 +19,4 @@ export {
   type MessagePortTransportErrorType,
 } from "../rpc/messagePort";
 
-export {
-  getPostMessageRpcClient,
-  type PostMessageRpcClient,
-} from "../rpc/getPostMessageRpcClient";
-export { createPostMessageRpcServer } from "../rpc/createPostMessageRpcServer";
-export {
-  postMessageTransport,
-  type PostMessageTransport,
-  type PostMessageTransportConfig,
-  type PostMessageTransportErrorType,
-} from "../rpc/postMessageTransport";
-
 export { getMessagePortProvider } from "../rpc/getMessagePortProvider";
