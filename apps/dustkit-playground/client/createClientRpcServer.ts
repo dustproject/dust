@@ -99,12 +99,12 @@ export function createClientRpcServer({
         receipt,
       };
     },
-    async dustClient_getSlots() {
-      // TODO
-    },
-    async dustClient_getPlayerPosition() {
-      // TODO
-    },
+    // async dustClient_getSlots() {
+    //   // TODO
+    // },
+    // async dustClient_getPlayerPosition() {
+    //   // TODO
+    // },
   });
 
   return () => {

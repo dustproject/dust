@@ -11,7 +11,7 @@ import { initMessage } from "./createMessagePort";
 
 export function createMessagePortRpcServer<schema extends RpcSchema.Generic>(
   handlers: {
-    [method in RpcSchema.ExtractMethodName<schema>]: (
+    [method in RpcSchema.ExtractMethodName<schema>]?: (
       params: RpcSchema.ExtractParams<schema, method>,
     ) => Promise<RpcSchema.ExtractReturnType<schema, method>>;
   },

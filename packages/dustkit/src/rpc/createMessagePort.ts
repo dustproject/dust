@@ -1,3 +1,5 @@
+import { createTimeout } from "../createTimeout";
+
 // TODO: replace with envelope that contains optional context
 export const initMessage = "dustkit:messagePort";
 
@@ -33,9 +35,13 @@ export async function createMessagePort({
     console.info("establishing MessagePortProvider with", targetOrigin);
     target.postMessage(initMessage, targetOrigin, [channel.port2]);
 
-    timeout.addEventListener("abort", () => {
-      // TODO: clean up message channel/ports?
-      reject(timeout.reason);
-    });
+    timeout.addEventListener(
+      "abort",
+      () => {
+        // TODO: clean up message channel/ports?
+        reject(timeout.reason);
+      },
+      { once: true },
+    );
   });
 }
