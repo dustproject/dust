@@ -1,14 +1,13 @@
 import type { SystemCalls } from "@latticexyz/world/internal";
 import type { RpcSchema } from "ox";
-import type { Abi, Address, Hex, OneOf, TransactionReceipt } from "viem";
+import type { Abi, Hex, OneOf, TransactionReceipt } from "viem";
 import type { UserOperationReceipt } from "viem/account-abstraction";
-import type { AppConfig } from "../apps/appConfig";
-import type { EntityId, ProgramId } from "../common";
+import type { EntityId } from "../common";
 
 export type ClientRpcSchema = RpcSchema.From<
   | {
       Request: {
-        method: "dustClient_setWaypoint";
+        method: "setWaypoint";
         params: {
           entity: EntityId;
           label: string;
@@ -18,7 +17,7 @@ export type ClientRpcSchema = RpcSchema.From<
     }
   | {
       Request: {
-        method: "dustClient_getSlots";
+        method: "getSlots";
         params: {
           entity: EntityId;
           objectType: number;
@@ -35,7 +34,7 @@ export type ClientRpcSchema = RpcSchema.From<
     }
   | {
       Request: {
-        method: "dustClient_systemCall";
+        method: "systemCall";
         params: SystemCalls<readonly Abi[]>;
       };
       ReturnType: OneOf<
@@ -51,7 +50,7 @@ export type ClientRpcSchema = RpcSchema.From<
     }
   | {
       Request: {
-        method: "dustClient_getPlayerPosition";
+        method: "getPlayerPosition";
         params: {
           entity: EntityId;
         };
@@ -63,17 +62,3 @@ export type ClientRpcSchema = RpcSchema.From<
       };
     }
 >;
-
-export type AppRpcSchema = RpcSchema.From<{
-  Request: {
-    method: "dustApp_init";
-    params: {
-      appConfig: AppConfig;
-      userAddress: Address;
-      via?: {
-        entity: EntityId;
-        program: ProgramId;
-      };
-    };
-  };
-}>;

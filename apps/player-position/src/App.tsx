@@ -1,16 +1,13 @@
-import {
-  type AppRpcSchema,
-  type ClientRpcSchema,
-  createMessagePortRpcServer,
-  getMessagePortProvider,
-} from "dustkit/internal";
+import { useQuery } from "@tanstack/react-query";
+import { connectDustClient } from "dustkit/internal";
 import { useEffect, useState } from "react";
 
-const dustClientProvider = getMessagePortProvider<ClientRpcSchema>({
-  target: window.opener ?? window.parent,
-});
-
 export function App() {
+  const { data: dustClient } = useQuery({
+    queryKey: ["dust-client"],
+    queryFn: connectDustClient,
+  });
+
   const [playerPosition, setPlayerPosition] = useState<{
     x: number;
     y: number;
@@ -18,18 +15,11 @@ export function App() {
   } | null>(null);
 
   useEffect(() => {
-    return createMessagePortRpcServer<AppRpcSchema>({
-      async dustApp_init(params) {
-        console.info("client asked this app to initialize with", params);
-        return { success: true };
-      },
-    });
-  }, []);
-
-  useEffect(() => {
     async function updatePlayerPosition() {
-      const position = await dustClientProvider.request({
-        method: "dustClient_getPlayerPosition",
+      if (!dustClient) return;
+
+      const position = await dustClient.provider.request({
+        method: "getPlayerPosition",
         params: {
           entity: "0x",
         },
@@ -41,7 +31,7 @@ export function App() {
 
     const timer = setInterval(updatePlayerPosition, 100);
     return () => clearInterval(timer);
-  }, []);
+  }, [dustClient]);
 
   return (
     <div

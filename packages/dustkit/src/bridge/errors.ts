@@ -5,9 +5,9 @@ export class MessagePortTargetClosedBeforeReadyError extends Error {
   }
 }
 
-export class MessagePortUnexpectedReadyMessageError extends Error {
+export class MessagePortUnexpectedInitialMessageError extends Error {
   constructor() {
-    super("Unexpected ready message from MessagePort.");
-    this.name = "MessagePortUnexpectedReadyMessageError";
+    super("Unexpected initial message from MessagePort.");
+    this.name = "MessagePortUnexpectedInitialMessageError";
   }
 }

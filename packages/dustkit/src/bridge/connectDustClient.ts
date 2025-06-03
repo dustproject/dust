@@ -1,21 +1,21 @@
 import { Provider, RpcRequest, RpcResponse, type RpcSchema } from "ox";
 import pRetry from "p-retry";
-import {
-  type CreateMessagePortOptions,
-  createMessagePort,
-} from "./createMessagePort";
+import { appContextShape } from "./common";
+import { createMessagePort } from "./createMessagePort";
 import { MessagePortTargetClosedBeforeReadyError } from "./errors";
+import type { ClientRpcSchema } from "./schemas";
 
 // TODO: add health check, recreate port if closed? (see https://github.com/whatwg/html/issues/1766)
 
-export function getMessagePortProvider<schema extends RpcSchema.Generic>({
-  target,
-  targetOrigin = "*",
-}: CreateMessagePortOptions): Provider.Provider<undefined, schema> {
-  const portPromise = pRetry(
-    () => createMessagePort({ target, targetOrigin }),
+export async function connectDustClient(): Promise<{
+  readonly appContext: typeof appContextShape.infer;
+  readonly provider: Provider.Provider<undefined, ClientRpcSchema>;
+}> {
+  const { port, initialMessage } = await pRetry(
+    () => createMessagePort({ target: window.opener ?? window.parent }),
     {
       retries: 10,
+      minTimeout: 100,
       shouldRetry(error) {
         if (error instanceof MessagePortTargetClosedBeforeReadyError) {
           return false;
@@ -25,10 +25,12 @@ export function getMessagePortProvider<schema extends RpcSchema.Generic>({
     },
   );
 
+  const appContext = appContextShape.assert(initialMessage.context);
+
   const requestStore = RpcRequest.createStore<RpcSchema.Generic>();
   const provider = Provider.from({
+    appContext,
     async request(args) {
-      const port = await portPromise;
       const request = requestStore.prepare(args);
 
       // TODO: timeout/retry?
@@ -49,5 +51,8 @@ export function getMessagePortProvider<schema extends RpcSchema.Generic>({
     },
   });
 
-  return provider as never;
+  return {
+    appContext,
+    provider,
+  };
 }
