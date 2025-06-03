@@ -41,11 +41,9 @@
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",
-    "@wagmi/core": "^2.16.7",
-    "viem": "2.23.2"
+    "viem": "2.30.5"
   },
   "peerDependencies": {
-    "@wagmi/core": "2.x",
     "viem": "2.x"
   }
 }
