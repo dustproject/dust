@@ -2,10 +2,10 @@
 pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
-import { console } from "forge-std/console.sol";
 
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
+import { SafeCastLib } from "solady/utils/SafeCastLib.sol";
 
 import { DisabledExtraDrops } from "../codegen/tables/DisabledExtraDrops.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
@@ -65,6 +65,7 @@ import { IDetachProgramHook, IMineHook } from "../ProgramInterfaces.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
 
 contract MineSystem is System {
+  using SafeCastLib for *;
   using Math for *;
 
   function getRandomOreType(Vec3 coord) external view returns (ObjectType) {
@@ -152,99 +153,64 @@ contract MineSystem is System {
   function _requireReachable(EntityId caller, Vec3 start, Vec3 end) internal view {
     if (start == end) return;
 
-    int32[3] memory p = start.toArray();
-    int32[3] memory q = end.toArray();
+    Vec3 diff = end - start;
 
-    int32[3] memory delta;
-    int32[3] memory step;
+    // Absolute differences (distances)
+    int32[3] memory distance =
+      [Math.abs(diff.x()).toInt32(), Math.abs(diff.y()).toInt32(), Math.abs(diff.z()).toInt32()];
 
-    unchecked {
-      for (uint8 i; i < 3; ++i) {
-        int32 diff = q[i] - p[i];
-        delta[i] = diff < 0 ? -diff : diff;
-        step[i] = diff > 0 ? int32(1) : (diff < 0 ? int32(-1) : int32(0));
+    // Step direction for each axis (-1, 0, or 1)
+    int32[3] memory stepDir = [int32(Math.sign(diff.x())), Math.sign(diff.y()), Math.sign(diff.z())];
+
+    // Find the dominant axis (axis with longest distance)
+    uint8 dominantAxis = 0;
+    if (distance[1] > distance[0]) dominantAxis = 1;
+    if (distance[2] > distance[dominantAxis]) dominantAxis = 2;
+
+    // Map the two non-dominant axes
+    uint8 minorAxis1 = (dominantAxis + 1) % 3;
+    uint8 minorAxis2 = (dominantAxis + 2) % 3;
+
+    // Pre-calculate doubled distances for Bresenham error calculation
+    int32[3] memory doubleDistance = [distance[0] << 1, distance[1] << 1, distance[2] << 1];
+    int32 doubleDominantDist = doubleDistance[dominantAxis];
+
+    // Initialize Bresenham error terms for the minor axes
+    int32 errorMinor1 = doubleDistance[minorAxis1] - distance[dominantAxis];
+    int32 errorMinor2 = doubleDistance[minorAxis2] - distance[dominantAxis];
+
+    // Current position (will be updated as we traverse)
+    int32[3] memory currentPos = start.toArray();
+    int32[3] memory endPos = end.toArray();
+
+    // Traverse along the line
+    while (currentPos[dominantAxis] != endPos[dominantAxis]) {
+      // Step along dominant axis
+      currentPos[dominantAxis] += stepDir[dominantAxis];
+
+      // Update position along first minor axis if needed
+      if (errorMinor1 > 0) {
+        currentPos[minorAxis1] += stepDir[minorAxis1];
+        errorMinor1 -= doubleDominantDist;
       }
-    }
+      errorMinor1 += doubleDistance[minorAxis1];
 
-    // dominant axis
-    uint8 dom = 0;
-    if (delta[1] > delta[0]) dom = 1;
-    if (delta[2] > delta[dom]) dom = 2;
-
-    // map the two non-dominant axes
-    uint8 a1 = (dom + 1) % 3;
-    uint8 a2 = (dom + 2) % 3;
-
-    // doubled deltas
-    int32[3] memory twoD = [delta[0] << 1, delta[1] << 1, delta[2] << 1];
-    int32 twoDdom = twoD[dom];
-
-    // error terms for a1 / a2
-    int32 err1 = twoD[a1] - delta[dom];
-    int32 err2 = twoD[a2] - delta[dom];
-
-    // walk
-    while (p[dom] != q[dom]) {
-      p[dom] += step[dom];
-
-      // axis a1
-      if (err1 > 0) {
-        p[a1] += step[a1];
-        err1 -= twoDdom;
+      // Update position along second minor axis if needed
+      if (errorMinor2 > 0) {
+        currentPos[minorAxis2] += stepDir[minorAxis2];
+        errorMinor2 -= doubleDominantDist;
       }
-      err1 += twoD[a1];
+      errorMinor2 += doubleDistance[minorAxis2];
 
-      // axis a2
-      if (err2 > 0) {
-        p[a2] += step[a2];
-        err2 -= twoDdom;
-      }
-      err2 += twoD[a2];
-
-      Vec3 cur = vec3(p[0], p[1], p[2]);
-      ObjectType ot = EntityUtils.getObjectTypeAt(cur);
-      EntityId e = EntityUtils.getMovableEntityAt(cur);
-      require(ot.isNonSolid() && (e == caller || !e.exists()), "Path blocked");
+      _requireEmpty(caller, vec3(currentPos[0], currentPos[1], currentPos[2]));
     }
   }
 
-  // function _requireReachable(EntityId caller, Vec3 start, Vec3 end) internal view {
-  //   Vec3 delta = start.absDelta(end);
-  //
-  //   int32 sx = start.x() < end.x() ? int32(1) : -1;
-  //   int32 sy = start.y() < end.y() ? int32(1) : -1;
-  //   int32 sz = start.z() < end.z() ? int32(1) : -1;
-  //
-  //   int256 ax = 2 * delta.x();
-  //   int256 ay = 2 * delta.y();
-  //   int256 az = 2 * delta.z();
-  //
-  //   Vec3 current = start;
-  //   // We stop before the final cell
-  //   while (current != end) {
-  //     // choose the axis that brings us closest to the line
-  //     if (ax >= ay && ax >= az) {
-  //       // X dominates
-  //       current = current + vec3(sx, 0, 0);
-  //       ax -= ay;
-  //       ax -= az;
-  //     } else if (ay >= ax && ay >= az) {
-  //       // Y dominates
-  //       current = current + vec3(0, sy, 0);
-  //       ay -= ax;
-  //       ay -= az;
-  //     } else {
-  //       // Z dominates
-  //       current = current + vec3(0, 0, sz);
-  //       az -= ax;
-  //       az -= ay;
-  //     }
-  //
-  //     ObjectType objectType = EntityUtils.getObjectTypeAt(current);
-  //     EntityId entity = EntityUtils.getMovableEntityAt(current);
-  //     require(objectType.isNonSolid() && (entity == caller || !entity.exists()), "Path blocked");
-  //   }
-  // }
+  // Check if coord is blocked
+  function _requireEmpty(EntityId caller, Vec3 coord) internal view {
+    (EntityId entity, ObjectType objectType) = EntityUtils.getBlockAt(coord);
+    require((entity == caller || !entity._exists()) || objectType.isNonSolid(), "Block is not empty");
+  }
 
   function _prepareBlock(EntityId mined, ObjectType minedType, Vec3 coord) internal returns (ObjectType) {
     if (minedType.isMachine()) {
