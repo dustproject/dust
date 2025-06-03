@@ -93,7 +93,7 @@ library EntityIdLib {
 
   function requireAdjacentToFragment(EntityId self, Vec3 fragmentCoord) internal view returns (Vec3, Vec3) {
     Vec3 selfFragmentCoord = self._getPosition().toFragmentCoord();
-    require(selfFragmentCoord.inSphere(fragmentCoord, 1), "Fragment is too far");
+    require(selfFragmentCoord.inSurroundingCube(fragmentCoord, 1), "Fragment is too far");
     return (selfFragmentCoord, fragmentCoord);
   }
 

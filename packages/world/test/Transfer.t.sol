@@ -661,8 +661,8 @@ contract TransferTest is DustTest {
   }
 
   function testTransferWithinChestInventory() public {
-    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
-    Vec3 chestCoord = vec3(0, 0, 0);
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupAirChunkWithPlayer();
+    Vec3 chestCoord = coord + vec3(1, 0, 0);
     EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
 
     ObjectType transferObjectType = ObjectTypes.Grass;
@@ -682,8 +682,8 @@ contract TransferTest is DustTest {
   }
 
   function testTransferWithinChestInventoryFailsIfProgramReverts() public {
-    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
-    Vec3 chestCoord = vec3(0, 0, 0);
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupAirChunkWithPlayer();
+    Vec3 chestCoord = coord + vec3(1, 0, 0);
     EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
 
     ObjectType transferObjectType = ObjectTypes.Grass;

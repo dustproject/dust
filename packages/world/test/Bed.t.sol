@@ -89,10 +89,10 @@ contract BedTest is DustTest {
   }
 
   function testSleepFailsIfNoBed() public {
-    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupAirChunkWithPlayer();
 
     // Use a random entity for (non) bed
-    EntityId bedEntityId = randomEntityId();
+    (EntityId bedEntityId,) = TestEntityUtils.getBlockAt(coord + vec3(1, 0, 0));
 
     vm.prank(alice);
     vm.expectRevert("Not a bed");
