@@ -83,7 +83,7 @@ library EntityIdLib {
 
   function requireConnected(EntityId self, Vec3 otherCoord) internal view returns (Vec3, Vec3) {
     Vec3 selfCoord = self._getPosition();
-    require(selfCoord.inSurroundingCube(otherCoord, MAX_ENTITY_INFLUENCE_HALF_WIDTH), "Entity is too far");
+    require(selfCoord.inSphere(otherCoord, MAX_ENTITY_INFLUENCE_HALF_WIDTH), "Entity is too far");
     return (selfCoord, otherCoord);
   }
 
@@ -93,7 +93,7 @@ library EntityIdLib {
 
   function requireAdjacentToFragment(EntityId self, Vec3 fragmentCoord) internal view returns (Vec3, Vec3) {
     Vec3 selfFragmentCoord = self._getPosition().toFragmentCoord();
-    require(selfFragmentCoord.inSurroundingCube(fragmentCoord, 1), "Fragment is too far");
+    require(selfFragmentCoord.inSphere(fragmentCoord, 1), "Fragment is too far");
     return (selfFragmentCoord, fragmentCoord);
   }
 
