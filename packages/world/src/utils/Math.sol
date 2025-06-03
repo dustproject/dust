@@ -23,4 +23,14 @@ library Math {
   function divUp(uint128 a, uint128 b) internal pure returns (uint128) {
     return uint128(FixedPointMathLib.divUp(a, b));
   }
+
+  function abs(int256 a) internal pure returns (uint256) {
+    return FixedPointMathLib.abs(a);
+  }
+
+  function sign(int256 x) external pure returns (int8) {
+    unchecked {
+      return int8(((0 < x) ? 1 : 0) - ((x < 0) ? 1 : 0));
+    }
+  }
 }

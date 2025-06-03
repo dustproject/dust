@@ -5,6 +5,7 @@ import { System } from "@latticexyz/world/src/System.sol";
 
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
+import { SafeCastLib } from "solady/utils/SafeCastLib.sol";
 
 import { DisabledExtraDrops } from "../codegen/tables/DisabledExtraDrops.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
@@ -64,6 +65,7 @@ import { IDetachProgramHook, IMineHook } from "../ProgramInterfaces.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
 
 contract MineSystem is System {
+  using SafeCastLib for *;
   using Math for *;
 
   function getRandomOreType(Vec3 coord) external view returns (ObjectType) {
@@ -101,6 +103,7 @@ contract MineSystem is System {
   function _mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) internal returns (EntityId) {
     uint128 callerEnergy = caller.activate().energy;
     caller.requireConnected(coord);
+    _requireReachable(caller, coord);
 
     (EntityId mined, ObjectType minedType) = EntityUtils.getOrCreateBlockAt(coord);
     require(minedType.isBlock(), "Object is not mineable");
@@ -265,6 +268,19 @@ contract MineSystem is System {
         ResourceCount._set(dropType, ResourceCount._get(dropType) + amount);
       }
     }
+  }
+
+  function _requireReachable(EntityId caller, Vec3 coord) private view {
+    Vec3[6] memory neighbors = coord.neighbors6();
+    for (uint256 i = 0; i < neighbors.length; i++) {
+      Vec3 neighbor = neighbors[i];
+      ObjectType objectType = EntityUtils.getObjectTypeAt(neighbor);
+      EntityId entity = EntityUtils.getMovableEntityAt(neighbor);
+      bool isEmpty = objectType.isNonSolid() && (entity == caller || !entity._exists());
+      if (isEmpty) return;
+    }
+
+    revert("Coordinate is not reachable");
   }
 }
 

@@ -704,7 +704,7 @@ contract MineTest is DustTest {
     Vec3 mineCoord = vec3(CHUNK_SIZE, FLAT_CHUNK_GRASS_LEVEL, CHUNK_SIZE);
 
     vm.prank(alice);
-    vm.expectRevert("Chunk not explored yet");
+    vm.expectRevert("Coordinate is not reachable");
     world.mine(aliceEntityId, mineCoord, "");
   }
 
