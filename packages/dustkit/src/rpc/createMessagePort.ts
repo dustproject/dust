@@ -29,7 +29,7 @@ export async function createMessagePort({
           reject(new MessagePortUnexpectedReadyMessageError());
         }
       },
-      { once: true },
+      { once: true, signal: timeout },
     );
     channel.port1.start();
     debug("establishing MessagePortProvider with", targetOrigin);

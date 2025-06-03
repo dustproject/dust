@@ -1,20 +1,8 @@
-import { useSessionClient } from "@latticexyz/entrykit/internal";
 import { type AppRpcSchema, getMessagePortProvider } from "dustkit/internal";
-import { useEffect } from "react";
 import { useAccount } from "wagmi";
-import { getWorldAddress } from "./common";
-import { createClientRpcServer } from "./createClientRpcServer";
 
 export function AppPane() {
   const { address: userAddress } = useAccount();
-
-  const { data: sessionClient } = useSessionClient();
-  const worldAddress = getWorldAddress();
-
-  useEffect(() => {
-    if (!sessionClient) return;
-    return createClientRpcServer({ sessionClient, worldAddress });
-  }, [sessionClient, worldAddress]);
 
   const url = new URL(
     import.meta.env.VITE_DUSTKIT_APP_URL,
@@ -32,23 +20,36 @@ export function AppPane() {
         }
 
         console.info("setting up app provider");
+        const target = event.currentTarget.contentWindow!;
         const appProvider = getMessagePortProvider<AppRpcSchema>({
-          target: event.currentTarget.contentWindow!,
+          target,
           targetOrigin: url.origin,
         });
 
         console.info("sending init");
-        const res = await appProvider.request({
-          method: "dustApp_init",
-          params: {
-            appConfig: {
-              name: "Playground",
-              startUrl: "/",
+        try {
+          const res = await appProvider.request({
+            method: "dustApp_init",
+            params: {
+              appConfig: {
+                name: "Playground",
+                startUrl: "/",
+              },
+              userAddress,
             },
-            userAddress,
-          },
-        });
-        console.info("got init reply", res);
+          });
+          if (target.closed) {
+            console.info("ignoring reply after unmount", res);
+            return;
+          }
+          console.info("got init reply", res);
+        } catch (error) {
+          if (target.closed) {
+            console.info("ignoring error after unmount", error);
+            return;
+          }
+          throw error;
+        }
       }}
     />
   );

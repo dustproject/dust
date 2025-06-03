@@ -1,11 +1,20 @@
 import { AccountButton, useSessionClient } from "@latticexyz/entrykit/internal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppPane } from "./AppPane";
+import { getWorldAddress } from "./common";
+import { createClientRpcServer } from "./createClientRpcServer";
 
 export function Game() {
   const { data: sessionClient, status: sessionClientStatus } =
     useSessionClient();
   const [appOpen, setAppOpen] = useState(false);
+
+  const worldAddress = getWorldAddress();
+
+  useEffect(() => {
+    if (!sessionClient) return;
+    return createClientRpcServer({ sessionClient, worldAddress });
+  }, [sessionClient, worldAddress]);
 
   return (
     <div>

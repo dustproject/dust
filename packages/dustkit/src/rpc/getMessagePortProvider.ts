@@ -15,7 +15,7 @@ export function getMessagePortProvider<schema extends RpcSchema.Generic>({
   const portPromise = pRetry(
     () => createMessagePort({ target, targetOrigin }),
     {
-      retries: 3,
+      retries: 10,
       shouldRetry(error) {
         if (error instanceof MessagePortTargetClosedBeforeReadyError) {
           return false;
