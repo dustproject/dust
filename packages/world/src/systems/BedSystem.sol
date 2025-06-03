@@ -65,10 +65,19 @@ contract BedSystem is System {
     (EntityId bed, Vec3 bedCoord) = BedLib.getPlayerBed(caller);
     require(bedCoord.inSurroundingCube(spawnCoord, MAX_RESPAWN_HALF_WIDTH), "Bed is too far away");
 
-    require(!MoveLib._gravityApplies(spawnCoord), "Cannot spawn player here as gravity applies");
-
     EnergyData memory playerData = BedLib.removePlayerFromBed(caller, bed, bedCoord);
-    require(playerData.energy > 0, "Player died while sleeping");
+    if (playerData.energy == 0) {
+      // Player died while sleeping
+
+      (EntityId drop, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(spawnCoord);
+      require(objectType.isPassThrough(), "Cannot drop items on a non-passable block");
+
+      InventoryUtils.transferAll(caller, drop);
+
+      return;
+    }
+
+    require(!MoveLib._gravityApplies(spawnCoord), "Cannot spawn player here as gravity applies");
 
     PlayerUtils.addPlayerToGrid(caller, spawnCoord);
 
