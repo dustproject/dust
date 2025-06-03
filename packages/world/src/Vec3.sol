@@ -200,7 +200,7 @@ library Vec3Lib {
 
     // Positive and negative directions along each axis
     for (uint8 i = 0; i < 6; i++) {
-      result[i] = a.getNeighbor(Direction(i)); // +x
+      result[i] = a.getNeighbor(Direction(i));
     }
 
     return result;

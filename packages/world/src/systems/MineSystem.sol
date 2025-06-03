@@ -102,9 +102,8 @@ contract MineSystem is System {
 
   function _mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) internal returns (EntityId) {
     uint128 callerEnergy = caller.activate().energy;
-    (Vec3 callerCoord,) = caller.requireConnected(coord);
-    // TODO: we use callerCoord + vec3(0,1,0) which supports players, but other entities might have different shapes
-    ReachabilityLib._requireReachable(caller, callerCoord + vec3(0, 1, 0), coord);
+    caller.requireConnected(coord);
+    _requireReachable(caller, coord);
 
     (EntityId mined, ObjectType minedType) = EntityUtils.getOrCreateBlockAt(coord);
     require(minedType.isBlock(), "Object is not mineable");
@@ -269,6 +268,19 @@ contract MineSystem is System {
         ResourceCount._set(dropType, ResourceCount._get(dropType) + amount);
       }
     }
+  }
+
+  function _requireReachable(EntityId caller, Vec3 coord) private view {
+    Vec3[6] memory neighbors = coord.neighbors6();
+    for (uint256 i = 0; i < neighbors.length; i++) {
+      Vec3 neighbor = neighbors[i];
+      ObjectType objectType = EntityUtils.getObjectTypeAt(neighbor);
+      EntityId entity = EntityUtils.getMovableEntityAt(neighbor);
+      bool isEmpty = objectType.isNonSolid() && (entity == caller || !entity._exists());
+      if (isEmpty) return;
+    }
+
+    revert("Coordinate is not reachable");
   }
 }
 
@@ -502,64 +514,5 @@ library RandomResourceLib {
     uint256 count = ResourceCount._get(objectType);
     ResourcePosition._set(objectType, count, coord);
     ResourceCount._set(objectType, count + 1);
-  }
-}
-
-library ReachabilityLib {
-  uint64 constant FP = 1 << 24; // 24-bit fixed-point scale
-
-  function _requireReachable(EntityId caller, Vec3 start, Vec3 end) public view {
-    if (start == end) return;
-
-    // signed & absolute deltas
-    Vec3 d = end - start;
-    Vec3 step = vec3(Math.sign(d.x()), Math.sign(d.y()), Math.sign(d.z()));
-
-    (uint64 tDx, uint64 tDy, uint64 tDz) = _getIncrements(start, end);
-
-    uint64 tX = tDx >> 1; // half-voxel start offset
-    uint64 tY = tDy >> 1;
-    uint64 tZ = tDz >> 1;
-
-    // walk the ray one voxel at a time
-    (int32 x, int32 y, int32 z) = start.xyz();
-
-    while (x != end.x() || y != end.y() || z != end.z()) {
-      if (tX <= tY && tX <= tZ) {
-        x += step.x();
-        tX += tDx;
-      } else if (tY <= tZ) {
-        y += step.y();
-        tY += tDy;
-      } else {
-        z += step.z();
-        tZ += tDz;
-      }
-
-      Vec3 current = vec3(x, y, z);
-      if (current == end) break; // do not test the target
-
-      _requireNotBlocked(caller, current);
-    }
-  }
-
-  function _getIncrements(Vec3 start, Vec3 end) internal pure returns (uint64, uint64, uint64) {
-    (uint64 ax, uint64 ay, uint64 az) = start.absDelta(end);
-
-    // dominant delta  (Chebyshev distance)
-    uint64 dom = uint64(Math.max(ax, ay, az));
-
-    // fixed-point increments  (three divs, once)
-    return (
-      ax == 0 ? type(uint64).max : (dom * FP) / ax,
-      ay == 0 ? type(uint64).max : (dom * FP) / ay,
-      az == 0 ? type(uint64).max : (dom * FP) / az
-    );
-  }
-
-  // Check if coord is blocked
-  function _requireNotBlocked(EntityId caller, Vec3 coord) private view {
-    (EntityId entity, ObjectType objectType) = EntityUtils.getBlockAt(coord);
-    require(objectType.isNonSolid() && (entity == caller || !entity._exists()), "Path blocked");
   }
 }
