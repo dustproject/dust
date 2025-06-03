@@ -1,7 +1,8 @@
 import { type RpcRequest, RpcResponse, type RpcSchema } from "ox";
 import { MethodNotSupportedError } from "ox/RpcResponse";
-import { anyInitialMessage } from "./common";
+import { type appContextShape, initialMessageShape, version } from "./common";
 import { debug } from "./debug";
+import type { ClientRpcSchema } from "./schemas";
 
 // Ideally we'd have one `onRequest` handler, but unfortunately I couldn't figure out how
 // to get strong types, where narrowing on the RPC method would also narrow the params and
@@ -10,20 +11,26 @@ import { debug } from "./debug";
 // Instead, we have a map of `handlers`, where each RPC method is implemented as its own
 // handler function.
 
-export function createMessagePortRpcServer<
-  schema extends RpcSchema.Generic,
-  context = undefined,
->(
-  createHandlers: (options: { context: context }) => {
+export function connectDustApp<
+  schema extends RpcSchema.Generic = ClientRpcSchema,
+>({
+  target,
+  appContext,
+  handlers,
+}: {
+  target: Window;
+  appContext: typeof appContextShape.infer;
+  handlers: {
     [method in RpcSchema.ExtractMethodName<schema>]?: (
       params: RpcSchema.ExtractParams<schema, method>,
     ) => Promise<RpcSchema.ExtractReturnType<schema, method>>;
-  },
-): () => void {
+  };
+}): () => void {
   let connectedPort: MessagePort | undefined;
 
-  function onMessage(event: MessageEvent) {
-    if (!anyInitialMessage.allows(event.data)) return;
+  function onWindowMessage(event: MessageEvent) {
+    if (event.source !== target) return;
+    if (!initialMessageShape.allows(event.data)) return;
 
     const [port] = event.ports;
     if (!port) {
@@ -31,7 +38,11 @@ export function createMessagePortRpcServer<
       return;
     }
 
-    const handlers = createHandlers({ context: event.data.context as never });
+    if (event.data.dustkit !== version) {
+      console.warn(
+        `"${appContext.config.name}" app's DustKit version (${event.data.dustkit}) did not match client's DustKit version (${version}). This may lead to unexpected behavior.`,
+      );
+    }
 
     port.addEventListener(
       "message",
@@ -62,16 +73,22 @@ export function createMessagePortRpcServer<
       },
     );
 
+    // close existing port and replace with new one
     connectedPort?.close();
     connectedPort = port;
 
     port.start();
-    port.postMessage(event.data);
+    port.postMessage(
+      initialMessageShape.from({
+        dustkit: version,
+        context: appContext,
+      }),
+    );
   }
 
-  window.addEventListener("message", onMessage);
+  window.addEventListener("message", onWindowMessage);
   return () => {
-    window.removeEventListener("message", onMessage);
+    window.removeEventListener("message", onWindowMessage);
     connectedPort?.close();
   };
 }

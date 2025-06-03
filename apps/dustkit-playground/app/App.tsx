@@ -1,28 +1,14 @@
 import defaultProgramAbi from "@dust/programs/out/DefaultProgram.sol/DefaultProgram.abi";
 import { resourceToHex } from "@latticexyz/common";
-import {
-  type AppRpcSchema,
-  type ClientRpcSchema,
-  createMessagePortRpcServer,
-  getMessagePortProvider,
-} from "dustkit/internal";
-import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { connectDustClient } from "dustkit/internal";
 import { zeroHash } from "viem";
 
-const dustClientProvider = getMessagePortProvider<ClientRpcSchema>({
-  target: window.opener ?? window.parent,
-  context: undefined,
-});
-
 export function App() {
-  useEffect(() => {
-    return createMessagePortRpcServer<AppRpcSchema>(() => ({
-      async dustApp_init(params) {
-        console.info("client asked this app to initialize with", params);
-        return { success: true };
-      },
-    }));
-  }, []);
+  const dustClient = useQuery({
+    queryKey: ["dust-client"],
+    queryFn: connectDustClient,
+  });
 
   return (
     <div>
@@ -31,7 +17,7 @@ export function App() {
         <button
           type="button"
           onClick={async () => {
-            await dustClientProvider.request({
+            await dustClient.data?.provider.request({
               method: "dustClient_setWaypoint",
               params: {
                 entity: "0x",
@@ -45,7 +31,7 @@ export function App() {
         <button
           type="button"
           onClick={async () => {
-            await dustClientProvider.request({
+            await dustClient.data?.provider.request({
               method: "dustClient_systemCall",
               params: [
                 {

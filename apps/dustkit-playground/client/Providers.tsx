@@ -14,14 +14,14 @@ export type Props = {
 export function Providers({ children }: Props) {
   const worldAddress = getWorldAddress();
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <WagmiProvider config={wagmiConfig}>
         <EntryKitProvider
           config={defineConfig({ chainId, worldAddress, theme: "dark" })}
         >
           {children}
         </EntryKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+      </WagmiProvider>
+    </QueryClientProvider>
   );
 }
