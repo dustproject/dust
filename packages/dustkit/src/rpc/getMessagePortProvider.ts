@@ -1,16 +1,29 @@
 import { Provider, RpcRequest, RpcResponse, type RpcSchema } from "ox";
+import pRetry from "p-retry";
 import {
   type CreateMessagePortOptions,
   createMessagePort,
 } from "./createMessagePort";
+import { MessagePortTargetClosedBeforeReadyError } from "./errors";
+
+// TODO: add health check, recreate port if closed? (see https://github.com/whatwg/html/issues/1766)
 
 export function getMessagePortProvider<schema extends RpcSchema.Generic>({
   target,
   targetOrigin = "*",
 }: CreateMessagePortOptions): Provider.Provider<undefined, schema> {
-  const portPromise = createMessagePort({ target, targetOrigin })
-    .catch(() => createMessagePort({ target, targetOrigin }))
-    .catch(() => createMessagePort({ target, targetOrigin }));
+  const portPromise = pRetry(
+    () => createMessagePort({ target, targetOrigin }),
+    {
+      retries: 3,
+      shouldRetry(error) {
+        if (error instanceof MessagePortTargetClosedBeforeReadyError) {
+          return false;
+        }
+        return true;
+      },
+    },
+  );
 
   const requestStore = RpcRequest.createStore<RpcSchema.Generic>();
   const provider = Provider.from({

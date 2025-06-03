@@ -1,11 +1,7 @@
-import { createTimeout } from "../createTimeout";
+import { MessagePortTargetClosedBeforeReadyError } from "./errors";
 
 // TODO: replace with envelope that contains optional context
 export const initMessage = "dustkit:messagePort";
-
-// TODO: configurable timeout
-// TODO: retry with backoff
-// TODO: add health check, recreate port if closed (see https://github.com/whatwg/html/issues/1766)
 
 export type CreateMessagePortOptions = {
   target: Window;
@@ -38,8 +34,11 @@ export async function createMessagePort({
     timeout.addEventListener(
       "abort",
       () => {
-        // TODO: clean up message channel/ports?
-        reject(timeout.reason);
+        if (target.closed) {
+          reject(new MessagePortTargetClosedBeforeReadyError());
+        } else {
+          reject(timeout.reason);
+        }
       },
       { once: true },
     );
