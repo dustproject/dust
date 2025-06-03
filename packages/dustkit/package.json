@@ -35,10 +35,12 @@
     "@latticexyz/world": "2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97",
     "@latticexyz/world-module-metadata": "2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97",
     "arktype": "^2.1.15",
+    "debug": "^4.4.1",
     "ox": "^0.6.10",
     "p-retry": "^6.2.1"
   },
   "devDependencies": {
+    "@types/debug": "^4.1.12",
     "@wagmi/core": "^2.16.7",
     "viem": "2.23.2"
   },

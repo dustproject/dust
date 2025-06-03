@@ -1,6 +1,7 @@
 import { type RpcRequest, RpcResponse, type RpcSchema } from "ox";
 import { MethodNotSupportedError } from "ox/RpcResponse";
 import { initMessage } from "./createMessagePort";
+import { debug } from "./debug";
 
 // Ideally we'd have one `onRequest` handler, but unfortunately I couldn't figure out how
 // to get strong types, where narrowing on the RPC method would also narrow the params and
@@ -31,7 +32,7 @@ export function createMessagePortRpcServer<schema extends RpcSchema.Generic>(
       "message",
       async (event: MessageEvent<RpcRequest.RpcRequest>) => {
         const { jsonrpc, id, method, params } = event.data;
-        console.info("got rpc request", { id, method, params });
+        debug("got rpc request", { id, method, params });
         try {
           const handler =
             handlers[method as RpcSchema.ExtractMethodName<schema>];
@@ -39,14 +40,14 @@ export function createMessagePortRpcServer<schema extends RpcSchema.Generic>(
           if (!handler) throw new MethodNotSupportedError();
 
           const result = await handler(params);
-          console.info("got result", { id, method, params, result });
+          debug("got result", { id, method, params, result });
           port.postMessage({
             jsonrpc,
             id,
             result,
           } satisfies RpcResponse.RpcResponse);
         } catch (error) {
-          console.info("got error", { id, method, params, error });
+          debug("got error", { id, method, params, error });
           port.postMessage({
             jsonrpc,
             id,

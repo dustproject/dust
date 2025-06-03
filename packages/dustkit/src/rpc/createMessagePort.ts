@@ -1,3 +1,4 @@
+import { debug } from "./debug";
 import {
   MessagePortTargetClosedBeforeReadyError,
   MessagePortUnexpectedReadyMessageError,
@@ -21,7 +22,7 @@ export async function createMessagePort({
     channel.port1.addEventListener(
       "message",
       function onMessage(event) {
-        console.info("Got message from port", event);
+        debug("Got message from port", event);
         if (event.data === "ready") {
           resolve(channel.port1);
         } else {
@@ -31,7 +32,7 @@ export async function createMessagePort({
       { once: true },
     );
     channel.port1.start();
-    console.info("establishing MessagePortProvider with", targetOrigin);
+    debug("establishing MessagePortProvider with", targetOrigin);
     target.postMessage(initMessage, targetOrigin, [channel.port2]);
 
     timeout.addEventListener(

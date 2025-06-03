@@ -223,6 +223,9 @@ importers:
       arktype:
         specifier: ^2.1.15
         version: 2.1.16
+      debug:
+        specifier: ^4.4.1
+        version: 4.4.1
       ox:
         specifier: ^0.6.10
         version: 0.6.12(typescript@5.8.3)(zod@3.23.8)
@@ -230,6 +233,9 @@ importers:
         specifier: ^6.2.1
         version: 6.2.1
     devDependencies:
+      '@types/debug':
+        specifier: ^4.1.12
+        version: 4.1.12
       '@wagmi/core':
         specifier: ^2.16.7
         version: 2.16.7(@tanstack/query-core@5.74.4)(@types/react@19.1.2)(react@18.3.1)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.3.1))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))
@@ -3793,6 +3799,15 @@ packages:
 
   debug@4.4.0:
     resolution: {integrity: sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==}
+    engines: {node: '>=6.0'}
+    peerDependencies:
+      supports-color: '*'
+    peerDependenciesMeta:
+      supports-color:
+        optional: true
+
+  debug@4.4.1:
+    resolution: {integrity: sha512-KcKCqiftBJcZr++7ykoDIEwSa3XWowTfNPo92BYxjXiyYEVrUQh2aLyhxBCwww+heortUFxEJYcRzosstTEBYQ==}
     engines: {node: '>=6.0'}
     peerDependencies:
       supports-color: '*'
@@ -7410,7 +7425,7 @@ snapshots:
   '@latticexyz/abi-ts@2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97':
     dependencies:
       chalk: 5.4.1
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.1
       glob: 10.4.5
       yargs: 17.7.2
     transitivePeerDependencies:
@@ -7419,7 +7434,7 @@ snapshots:
   '@latticexyz/block-logs-stream@2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)':
     dependencies:
       '@latticexyz/common': 2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.1
       rxjs: 7.5.5
       viem: 2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8)
     transitivePeerDependencies:
@@ -7432,7 +7447,7 @@ snapshots:
   '@latticexyz/block-logs-stream@2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.30.5(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)':
     dependencies:
       '@latticexyz/common': 2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.30.5(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.1
       rxjs: 7.5.5
       viem: 2.30.5(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8)
     transitivePeerDependencies:
@@ -7445,7 +7460,7 @@ snapshots:
   '@latticexyz/block-logs-stream@2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)':
     dependencies:
       '@latticexyz/common': 2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.1
       rxjs: 7.5.5
       viem: 2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8)
     transitivePeerDependencies:
@@ -7476,7 +7491,7 @@ snapshots:
       asn1.js: 5.4.1
       chalk: 5.4.1
       chokidar: 3.6.0
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.1
       dotenv: 16.4.7
       execa: 9.5.2
       find-up: 6.3.0
@@ -7541,7 +7556,7 @@ snapshots:
       asn1.js: 5.4.1
       chalk: 5.4.1
       chokidar: 3.6.0
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.1
       dotenv: 16.4.7
       execa: 9.5.2
       find-up: 6.3.0
@@ -7590,7 +7605,7 @@ snapshots:
       '@latticexyz/schema-type': 2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
       '@solidity-parser/parser': 0.16.2
       abitype: 1.0.6(typescript@5.8.3)(zod@3.23.8)
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.1
       execa: 9.5.2
       p-queue: 7.4.1
       p-retry: 5.1.2
@@ -7610,7 +7625,7 @@ snapshots:
       '@latticexyz/schema-type': 2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97(typescript@5.8.3)(viem@2.30.5(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
       '@solidity-parser/parser': 0.16.2
       abitype: 1.0.6(typescript@5.8.3)(zod@3.23.8)
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.1
       execa: 9.5.2
       p-queue: 7.4.1
       p-retry: 5.1.2
@@ -7630,7 +7645,7 @@ snapshots:
       '@latticexyz/schema-type': 2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
       '@solidity-parser/parser': 0.16.2
       abitype: 1.0.6(typescript@5.8.3)(zod@3.23.8)
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.1
       execa: 9.5.2
       p-queue: 7.4.1
       p-retry: 5.1.2
@@ -8369,7 +8384,7 @@ snapshots:
       '@latticexyz/schema-type': 2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
       abitype: 1.0.6(typescript@5.8.3)(zod@3.23.8)
       arktype: 2.0.0-beta.6
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.1
     optionalDependencies:
       viem: 2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8)
     transitivePeerDependencies:
@@ -8388,7 +8403,7 @@ snapshots:
       '@latticexyz/schema-type': 2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97(typescript@5.8.3)(viem@2.30.5(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
       abitype: 1.0.6(typescript@5.8.3)(zod@3.23.8)
       arktype: 2.0.0-beta.6
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.1
     optionalDependencies:
       viem: 2.30.5(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8)
     transitivePeerDependencies:
@@ -8407,7 +8422,7 @@ snapshots:
       '@latticexyz/schema-type': 2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
       abitype: 1.0.6(typescript@5.8.3)(zod@3.23.8)
       arktype: 2.0.0-beta.6
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.1
     optionalDependencies:
       viem: 2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8)
     transitivePeerDependencies:
@@ -8553,7 +8568,7 @@ snapshots:
       '@latticexyz/store': 2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
       abitype: 1.0.6(typescript@5.8.3)(zod@3.23.8)
       arktype: 2.0.0-beta.6
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.1
     optionalDependencies:
       viem: 2.23.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8)
     transitivePeerDependencies:
@@ -8574,7 +8589,7 @@ snapshots:
       '@latticexyz/store': 2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.30.5(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
       abitype: 1.0.6(typescript@5.8.3)(zod@3.23.8)
       arktype: 2.0.0-beta.6
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.1
     optionalDependencies:
       viem: 2.30.5(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8)
     transitivePeerDependencies:
@@ -8595,7 +8610,7 @@ snapshots:
       '@latticexyz/store': 2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
       abitype: 1.0.6(typescript@5.8.3)(zod@3.23.8)
       arktype: 2.0.0-beta.6
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.1
     optionalDependencies:
       viem: 2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8)
     transitivePeerDependencies:
@@ -8737,7 +8752,7 @@ snapshots:
     dependencies:
       '@ethereumjs/tx': 4.2.0
       '@types/debug': 4.1.12
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.1
       semver: 7.7.1
       superstruct: 1.0.4
     transitivePeerDependencies:
@@ -12976,6 +12991,10 @@ snapshots:
       ms: 2.1.3
     optionalDependencies:
       supports-color: 5.5.0
+
+  debug@4.4.1:
+    dependencies:
+      ms: 2.1.3
 
   decamelize@1.2.0: {}
 
