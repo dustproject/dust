@@ -63,7 +63,7 @@ library EntityIdLib {
   }
 
   function validateCaller(EntityId self, address caller) internal view {
-    validateCaller(self, caller, self._getObjectType());
+    validateCaller(self, caller, self.getObjectType());
   }
 
   function validateCaller(EntityId self) internal view {
@@ -82,9 +82,9 @@ library EntityIdLib {
   }
 
   function requireConnected(EntityId self, Vec3 otherCoord) internal view returns (Vec3, Vec3) {
-    Vec3 coord = self._getPosition();
-    Vec3 selfCoord = self._getObjectType() == ObjectTypes.Player ? coord + vec3(0, 1, 0) : coord;
-    require(selfCoord.inSphere(otherCoord, MAX_ENTITY_INFLUENCE_HALF_WIDTH), "Entity is too far");
+    Vec3 selfCoord = self._getPosition();
+    Vec3 coord = self._getObjectType() == ObjectTypes.Player ? selfCoord + vec3(0, 1, 0) : selfCoord;
+    require(coord.inSphere(otherCoord, MAX_ENTITY_INFLUENCE_HALF_WIDTH), "Entity is too far");
     return (selfCoord, otherCoord);
   }
 
