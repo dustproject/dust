@@ -17,7 +17,7 @@ import { updateMachineEnergy, updatePlayerEnergy } from "./utils/EnergyUtils.sol
 import { ForceFieldUtils } from "./utils/ForceFieldUtils.sol";
 import { EntityPosition } from "./utils/Vec3Storage.sol";
 
-import { MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "./Constants.sol";
+import { MAX_ENTITY_INFLUENCE_RADIUS } from "./Constants.sol";
 import { ObjectType } from "./ObjectType.sol";
 
 import { ObjectTypes } from "./ObjectType.sol";
@@ -75,17 +75,20 @@ library EntityIdLib {
     return EntityId.unwrap(_base) == 0 ? self : _base;
   }
 
+  function requireInRange(EntityId self, Vec3 otherCoord, uint256 range) internal view returns (Vec3, Vec3) {
+    Vec3 selfCoord = self._getPosition();
+    Vec3 coord = self._getObjectType() == ObjectTypes.Player ? selfCoord + vec3(0, 1, 0) : selfCoord;
+    require(coord.inSphere(otherCoord, range), "Entity is too far");
+    return (selfCoord, coord);
+  }
+
   // TODO: add pipe connections
   function requireConnected(EntityId self, EntityId other) internal view returns (Vec3, Vec3) {
-    Vec3 otherCoord = other._getPosition();
-    return requireConnected(self, otherCoord);
+    return requireConnected(self, other._getPosition());
   }
 
   function requireConnected(EntityId self, Vec3 otherCoord) internal view returns (Vec3, Vec3) {
-    Vec3 selfCoord = self._getPosition();
-    Vec3 coord = self._getObjectType() == ObjectTypes.Player ? selfCoord + vec3(0, 1, 0) : selfCoord;
-    require(coord.inSphere(otherCoord, MAX_ENTITY_INFLUENCE_HALF_WIDTH), "Entity is too far");
-    return (selfCoord, otherCoord);
+    return requireInRange(self, otherCoord, MAX_ENTITY_INFLUENCE_RADIUS);
   }
 
   function requireAdjacentToFragment(EntityId self, EntityId fragment) internal view returns (Vec3, Vec3) {

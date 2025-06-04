@@ -34,7 +34,7 @@ import {
   DEFAULT_MINE_ENERGY_COST,
   DEFAULT_WOODEN_TOOL_MULTIPLIER,
   MACHINE_ENERGY_DRAIN_RATE,
-  MAX_ENTITY_INFLUENCE_HALF_WIDTH,
+  MAX_ENTITY_INFLUENCE_RADIUS,
   MAX_FLUID_LEVEL,
   MAX_PLAYER_ENERGY,
   PLAYER_ENERGY_DRAIN_RATE,
@@ -572,7 +572,7 @@ contract MineTest is DustTest {
   function testMineFailsIfInvalidCoord() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    Vec3 mineCoord = playerCoord + vec3(int32(MAX_ENTITY_INFLUENCE_HALF_WIDTH) + 1, 0, 0);
+    Vec3 mineCoord = playerCoord + vec3(int32(MAX_ENTITY_INFLUENCE_RADIUS) + 1, 0, 0);
     ObjectType mineObjectType = ObjectTypes.Dirt;
     setObjectAtCoord(mineCoord, mineObjectType);
 

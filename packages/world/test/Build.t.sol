@@ -19,7 +19,7 @@ import { DustTest } from "./DustTest.sol";
 
 import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
-import { BUILD_ENERGY_COST, CHUNK_SIZE, MAX_ENTITY_INFLUENCE_HALF_WIDTH, MAX_FLUID_LEVEL } from "../src/Constants.sol";
+import { BUILD_ENERGY_COST, CHUNK_SIZE, MAX_ENTITY_INFLUENCE_RADIUS, MAX_FLUID_LEVEL } from "../src/Constants.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
@@ -376,7 +376,7 @@ contract BuildTest is DustTest {
   function testBuildFailsIfInvalidCoord() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    Vec3 buildCoord = playerCoord + vec3(int32(MAX_ENTITY_INFLUENCE_HALF_WIDTH) + 1, 0, 0);
+    Vec3 buildCoord = playerCoord + vec3(int32(MAX_ENTITY_INFLUENCE_RADIUS) + 1, 0, 0);
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
 

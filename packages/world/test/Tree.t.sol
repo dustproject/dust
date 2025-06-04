@@ -20,7 +20,7 @@ import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 import {
   BUILD_ENERGY_COST,
   CHUNK_COMMIT_EXPIRY_BLOCKS,
-  MAX_ENTITY_INFLUENCE_HALF_WIDTH,
+  MAX_ENTITY_INFLUENCE_RADIUS,
   TILL_ENERGY_COST
 } from "../src/Constants.sol";
 

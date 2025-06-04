@@ -44,6 +44,7 @@ import {
   DEFAULT_MINE_ENERGY_COST,
   DEFAULT_ORE_TOOL_MULTIPLIER,
   DEFAULT_WOODEN_TOOL_MULTIPLIER,
+  MAX_PICKUP_RADIUS,
   PLAYER_ENERGY_DRAIN_RATE,
   SAFE_PROGRAM_GAS,
   SPECIALIZED_ORE_TOOL_MULTIPLIER,
@@ -102,7 +103,7 @@ contract MineSystem is System {
 
   function _mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) internal returns (EntityId) {
     uint128 callerEnergy = caller.activate().energy;
-    caller.requireConnected(coord);
+    (Vec3 callerCoord,) = caller.requireConnected(coord);
     MineLib._requireReachable(caller, coord);
 
     (EntityId mined, ObjectType minedType) = EntityUtils.getOrCreateBlockAt(coord);
@@ -126,14 +127,14 @@ contract MineSystem is System {
       Mass._deleteRecord(mined);
 
       // Handle landbound and growable blocks on top of the mined block
-      _handleAbove(caller, baseCoord);
+      _handleAbove(caller, callerCoord, baseCoord);
 
       // Remove the block and all relative blocks
       _removeBlock(mined, minedType, baseCoord);
       _removeRelativeBlocks(mined, minedType, baseCoord);
 
       // Handle drops
-      _handleDrop(caller, mined, minedType, baseCoord);
+      _handleDrop(caller, callerCoord, mined, minedType, baseCoord);
 
       // It is fine to destroy the entity before requiring mines allowed,
       // as machines can't be destroyed if they have energy
@@ -201,7 +202,7 @@ contract MineSystem is System {
     }
   }
 
-  function _handleAbove(EntityId caller, Vec3 coord) internal {
+  function _handleAbove(EntityId caller, Vec3 callerCoord, Vec3 coord) internal {
     // Remove growables on top of this block
     Vec3 aboveCoord = coord + vec3(0, 1, 0);
 
@@ -224,7 +225,7 @@ contract MineSystem is System {
 
     if (isLandbound) {
       _removeBlock(above, aboveType, aboveCoord);
-      _handleDrop(caller, above, aboveType, aboveCoord);
+      _handleDrop(caller, callerCoord, above, aboveType, aboveCoord);
     }
   }
 
@@ -251,16 +252,18 @@ contract MineSystem is System {
     }
   }
 
-  function _handleDrop(EntityId caller, EntityId mined, ObjectType minedType, Vec3 coord) internal {
+  function _handleDrop(EntityId caller, Vec3 callerCoord, EntityId mined, ObjectType minedType, Vec3 coord) internal {
     // Get drops with all metadata for resource tracking
     ObjectAmount[] memory result = RandomResourceLib._getMineDrops(mined, minedType, coord);
+
+    EntityId inventoryEntity = callerCoord.inSphere(coord, MAX_PICKUP_RADIUS) ? caller : mined;
 
     for (uint256 i = 0; i < result.length; i++) {
       (ObjectType dropType, uint128 amount) = (result[i].objectType, result[i].amount);
 
       if (amount == 0) continue;
 
-      InventoryUtils.addObject(caller, dropType, amount);
+      InventoryUtils.addObject(inventoryEntity, dropType, amount);
 
       // Track mined resource count for seeds
       // TODO: could make it more general like .isCappedResource() or something

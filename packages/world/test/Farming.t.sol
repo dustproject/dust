@@ -21,7 +21,7 @@ import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 import {
   BUILD_ENERGY_COST,
   CHUNK_COMMIT_EXPIRY_BLOCKS,
-  MAX_ENTITY_INFLUENCE_HALF_WIDTH,
+  MAX_ENTITY_INFLUENCE_RADIUS,
   TILL_ENERGY_COST
 } from "../src/Constants.sol";
 
@@ -142,7 +142,7 @@ contract FarmingTest is DustTest {
   function testTillFailsIfTooFar() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    Vec3 dirtCoord = vec3(playerCoord.x() + int32(MAX_ENTITY_INFLUENCE_HALF_WIDTH) + 1, 0, playerCoord.z());
+    Vec3 dirtCoord = vec3(playerCoord.x() + int32(MAX_ENTITY_INFLUENCE_RADIUS) + 1, 0, playerCoord.z());
     setTerrainAtCoord(dirtCoord, ObjectTypes.Dirt);
 
     TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenHoe);
