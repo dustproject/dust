@@ -2,6 +2,7 @@
 pragma solidity >=0.8.24;
 
 import { LibString } from "solady/utils/LibString.sol";
+import { SafeCastLib } from "solady/utils/SafeCastLib.sol";
 
 import { CHUNK_SIZE, FRAGMENT_SIZE, REGION_SIZE } from "./Constants.sol";
 import { Orientation } from "./Orientation.sol";
@@ -88,6 +89,7 @@ function getDirectionVector(Direction direction) pure returns (Vec3) {
 
 library Vec3Lib {
   using LibString for *;
+  using SafeCastLib for *;
   using Math for *;
 
   function unwrap(Vec3 self) internal pure returns (uint96) {
@@ -131,10 +133,19 @@ library Vec3Lib {
     return vec3(x(a) * scalar, y(a) * scalar, z(a) * scalar);
   }
 
+  function mul(Vec3 a, uint256 scalar) internal pure returns (Vec3) {
+    return a.mul(scalar.toInt32());
+  }
+
   function div(Vec3 a, int32 scalar) internal pure returns (Vec3) {
     require(scalar != 0, "Division by zero");
     (int32 ax, int32 ay, int32 az) = a.xyz();
     return vec3(ax / scalar, ay / scalar, az / scalar);
+  }
+
+  function div(Vec3 a, uint256 scalar) internal pure returns (Vec3) {
+    require(scalar != 0, "Division by zero");
+    return a.div(scalar.toInt32());
   }
 
   function mod(Vec3 a, int32 scalar) internal pure returns (Vec3) {
@@ -167,6 +178,13 @@ library Vec3Lib {
     return Math.max(ax.dist(bx), ay.dist(by), az.dist(bz));
   }
 
+  function absDelta(Vec3 a, Vec3 b) internal pure returns (uint64, uint64, uint64) {
+    (int32 ax, int32 ay, int32 az) = a.xyz();
+    (int32 bx, int32 by, int32 bz) = b.xyz();
+
+    return (uint64(ax.dist(bx)), uint64(ay.dist(by)), uint64(az.dist(bz)));
+  }
+
   function clamp(Vec3 self, Vec3 min, Vec3 max) internal pure returns (Vec3) {
     if (self < min) return min;
     if (max < self) return max;
@@ -182,7 +200,7 @@ library Vec3Lib {
 
     // Positive and negative directions along each axis
     for (uint8 i = 0; i < 6; i++) {
-      result[i] = a.getNeighbor(Direction(i)); // +x
+      result[i] = a.getNeighbor(Direction(i));
     }
 
     return result;
@@ -216,6 +234,12 @@ library Vec3Lib {
 
   function inSurroundingCube(Vec3 self, Vec3 other, uint256 radius) internal pure returns (bool) {
     return chebyshevDistance(self, other) <= radius;
+  }
+
+  function inSphere(Vec3 self, Vec3 other, uint256 radius) internal pure returns (bool) {
+    Vec3 d = other - self;
+    // TODO: should probably use direct subtraction of components to avoid overflow issues
+    return uint256(int256(d.x()) ** 2 + int256(d.y()) ** 2 + int256(d.z()) ** 2) <= radius * radius;
   }
 
   // Function to get the new Vec3 based on the direction

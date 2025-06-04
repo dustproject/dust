@@ -23,7 +23,7 @@ import { ObjectType } from "./ObjectType.sol";
 import { ObjectTypes } from "./ObjectType.sol";
 import { ProgramId } from "./ProgramId.sol";
 import { checkWorldStatus } from "./Utils.sol";
-import { Vec3 } from "./Vec3.sol";
+import { Vec3, vec3 } from "./Vec3.sol";
 
 type EntityId is bytes32;
 
@@ -83,7 +83,8 @@ library EntityIdLib {
 
   function requireConnected(EntityId self, Vec3 otherCoord) internal view returns (Vec3, Vec3) {
     Vec3 selfCoord = self._getPosition();
-    require(selfCoord.inSurroundingCube(otherCoord, MAX_ENTITY_INFLUENCE_HALF_WIDTH), "Entity is too far");
+    Vec3 coord = self._getObjectType() == ObjectTypes.Player ? selfCoord + vec3(0, 1, 0) : selfCoord;
+    require(coord.inSphere(otherCoord, MAX_ENTITY_INFLUENCE_HALF_WIDTH), "Entity is too far");
     return (selfCoord, otherCoord);
   }
 
@@ -204,6 +205,10 @@ library EntityTypeLib {
     bytes32 _self = self.unwrap();
     EntityType entityType = EntityType.wrap(bytes1(_self));
     return (entityType, bytes31(_self << 8));
+  }
+
+  function getEntityType(EntityId self) internal pure returns (EntityType) {
+    return EntityType.wrap(bytes1(self.unwrap()));
   }
 
   function encodeBlock(Vec3 coord) internal pure returns (EntityId) {
