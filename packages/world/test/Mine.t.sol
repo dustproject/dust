@@ -622,23 +622,6 @@ contract MineTest is DustTest {
     assertPlayerIsDead(aliceEntityId, playerCoord);
   }
 
-  function testMineFailsIfInventoryFull() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
-
-    Vec3 mineCoord = playerCoord + vec3(1, 0, 0);
-    ObjectType mineObjectType = ObjectTypes.Dirt;
-    ObjectPhysics.setMass(mineObjectType, playerHandMassReduction - 1);
-    setObjectAtCoord(mineCoord, mineObjectType);
-
-    TestInventoryUtils.addObject(
-      aliceEntityId, mineObjectType, ObjectTypes.Player.getMaxInventorySlots() * mineObjectType.getStackable()
-    );
-
-    vm.prank(alice);
-    vm.expectRevert("Inventory is full");
-    world.mine(aliceEntityId, mineCoord, "");
-  }
-
   function testMineFailsIfNoPlayer() public {
     (, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
@@ -734,8 +717,12 @@ contract MineTest is DustTest {
     setObjectAtCoord(mineCoord, ObjectTypes.Grass);
 
     vm.prank(alice);
-    vm.expectRevert("Inventory is full");
     world.mineUntilDestroyed(aliceEntityId, mineCoord, "");
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Dirt, ObjectTypes.Player.getMaxInventorySlots());
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Grass, 0);
+
+    (EntityId mined,) = TestEntityUtils.getBlockAt(mineCoord);
+    assertInventoryHasObject(mined, ObjectTypes.Grass, 1);
   }
 
   function testMineWithInvalidCoordinates() public {
