@@ -39,21 +39,21 @@
     "test:js": "vitest"
   },
   "dependencies": {
-    "@latticexyz/config": "2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97",
-    "@latticexyz/schema-type": "2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97",
-    "@latticexyz/store": "2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97",
-    "@latticexyz/world": "2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97",
-    "@latticexyz/world-consumer": "2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97",
+    "@latticexyz/config": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
+    "@latticexyz/schema-type": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
+    "@latticexyz/store": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
+    "@latticexyz/world": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
+    "@latticexyz/world-consumer": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
     "@openzeppelin/contracts": "^4.9.6",
     "solady": "^0.1.12",
     "viem": "2.30.6"
   },
   "devDependencies": {
-    "@latticexyz/gas-report": "2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97",
+    "@latticexyz/gas-report": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
     "forge-std": "https://github.com/foundry-rs/forge-std.git#3b20d60d14b343ee4f908cb8079495c07f5e8981",
     "solhint": "^3.4.1",
-    "solhint-config-mud": "2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97",
-    "solhint-plugin-mud": "2.2.22-98707edd061dabe30900f1b1b8b52f9fd72add97",
+    "solhint-config-mud": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
+    "solhint-plugin-mud": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3",
     "vitest": "^3.1.3"
