@@ -20,7 +20,7 @@ import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
-import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "../src/Constants.sol";
+import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_RADIUS } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
 
 import { ObjectType } from "../src/ObjectType.sol";
@@ -343,7 +343,7 @@ contract InventoryTest is DustTest {
   function testPickupFailsIfInvalidCoord() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    Vec3 pickupCoord = playerCoord + vec3(int32(MAX_ENTITY_INFLUENCE_HALF_WIDTH) + 1, 1, 0);
+    Vec3 pickupCoord = playerCoord + vec3(int32(MAX_ENTITY_INFLUENCE_RADIUS) + 1, 1, 0);
     EntityId airEntityId = setObjectAtCoord(pickupCoord, ObjectTypes.Air);
     ObjectType transferObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(airEntityId, transferObjectType, 1);
@@ -361,7 +361,7 @@ contract InventoryTest is DustTest {
   function testDropFailsIfInvalidCoord() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    Vec3 dropCoord = playerCoord + vec3(int32(MAX_ENTITY_INFLUENCE_HALF_WIDTH) + 1, 1, 0);
+    Vec3 dropCoord = playerCoord + vec3(int32(MAX_ENTITY_INFLUENCE_RADIUS) + 1, 1, 0);
     setObjectAtCoord(dropCoord, ObjectTypes.Air);
     ObjectType transferObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, transferObjectType, 1);

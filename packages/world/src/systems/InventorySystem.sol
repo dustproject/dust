@@ -5,6 +5,7 @@ import { System } from "@latticexyz/world/src/System.sol";
 
 import { Action } from "../codegen/common.sol";
 
+import { MAX_PICKUP_RADIUS } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
 import { ObjectTypes } from "../ObjectType.sol";
@@ -30,7 +31,7 @@ contract InventorySystem is System {
 
   function pickup(EntityId caller, SlotTransfer[] memory slotTransfers, Vec3 coord) public {
     caller.activate();
-    caller.requireConnected(coord);
+    caller.requireInRange(coord, MAX_PICKUP_RADIUS);
 
     (EntityId entityId, ObjectType objectType) = EntityUtils.getBlockAt(coord);
     require(objectType.isPassThrough(), "Cannot pickup from a non-passable block");
@@ -40,7 +41,7 @@ contract InventorySystem is System {
 
   function pickupAll(EntityId caller, Vec3 coord) public {
     caller.activate();
-    caller.requireConnected(coord);
+    caller.requireInRange(coord, MAX_PICKUP_RADIUS);
 
     (EntityId entityId, ObjectType objectType) = EntityUtils.getBlockAt(coord);
     require(objectType.isPassThrough(), "Cannot pickup from a non-passable block");

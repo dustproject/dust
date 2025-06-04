@@ -44,6 +44,7 @@ import {
   DEFAULT_MINE_ENERGY_COST,
   DEFAULT_ORE_TOOL_MULTIPLIER,
   DEFAULT_WOODEN_TOOL_MULTIPLIER,
+  MAX_PICKUP_RADIUS,
   PLAYER_ENERGY_DRAIN_RATE,
   SAFE_PROGRAM_GAS,
   SPECIALIZED_ORE_TOOL_MULTIPLIER,
@@ -251,16 +252,21 @@ contract MineSystem is System {
     }
   }
 
-  function _handleDrop(EntityId caller, EntityId mined, ObjectType minedType, Vec3 coord) internal {
+  function _handleDrop(EntityId caller, EntityId mined, ObjectType minedType, Vec3 minedCoord) internal {
     // Get drops with all metadata for resource tracking
-    ObjectAmount[] memory result = RandomResourceLib._getMineDrops(mined, minedType, coord);
+    ObjectAmount[] memory result = RandomResourceLib._getMineDrops(mined, minedType, minedCoord);
 
     for (uint256 i = 0; i < result.length; i++) {
       (ObjectType dropType, uint128 amount) = (result[i].objectType, result[i].amount);
 
       if (amount == 0) continue;
 
-      InventoryUtils.addObject(caller, dropType, amount);
+      try InventoryUtils.addObject(caller, dropType, amount) {
+        // added to inventory successfully
+      } catch {
+        // If that fails, drop the object on the ground
+        InventoryUtils.addObject(mined, dropType, amount);
+      }
 
       // Track mined resource count for seeds
       // TODO: could make it more general like .isCappedResource() or something

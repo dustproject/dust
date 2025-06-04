@@ -12,7 +12,7 @@ import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
-import { MAX_ENTITY_INFLUENCE_HALF_WIDTH } from "../src/Constants.sol";
+import { MAX_ENTITY_INFLUENCE_RADIUS } from "../src/Constants.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
 import { ObjectTypes } from "../src/ObjectType.sol";
@@ -95,7 +95,7 @@ contract BucketTest is DustTest {
   function testFillBucketFailsIfTooFar() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupWaterChunkWithPlayer();
 
-    Vec3 waterCoord = vec3(playerCoord.x() + int32(MAX_ENTITY_INFLUENCE_HALF_WIDTH) + 1, 0, playerCoord.z());
+    Vec3 waterCoord = vec3(playerCoord.x() + int32(MAX_ENTITY_INFLUENCE_RADIUS) + 1, 0, playerCoord.z());
 
     TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Bucket, 1);
 
@@ -133,7 +133,7 @@ contract BucketTest is DustTest {
   function testWetFarmlandFailsIfTooFar() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    Vec3 farmlandCoord = vec3(playerCoord.x() + int32(MAX_ENTITY_INFLUENCE_HALF_WIDTH) + 1, 0, playerCoord.z());
+    Vec3 farmlandCoord = vec3(playerCoord.x() + int32(MAX_ENTITY_INFLUENCE_RADIUS) + 1, 0, playerCoord.z());
     setObjectAtCoord(farmlandCoord, ObjectTypes.Farmland);
 
     TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.WaterBucket, 1);

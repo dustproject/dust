@@ -34,7 +34,7 @@ import {
   DEFAULT_MINE_ENERGY_COST,
   DEFAULT_WOODEN_TOOL_MULTIPLIER,
   MACHINE_ENERGY_DRAIN_RATE,
-  MAX_ENTITY_INFLUENCE_HALF_WIDTH,
+  MAX_ENTITY_INFLUENCE_RADIUS,
   MAX_FLUID_LEVEL,
   MAX_PLAYER_ENERGY,
   PLAYER_ENERGY_DRAIN_RATE,
@@ -572,7 +572,7 @@ contract MineTest is DustTest {
   function testMineFailsIfInvalidCoord() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    Vec3 mineCoord = playerCoord + vec3(int32(MAX_ENTITY_INFLUENCE_HALF_WIDTH) + 1, 0, 0);
+    Vec3 mineCoord = playerCoord + vec3(int32(MAX_ENTITY_INFLUENCE_RADIUS) + 1, 0, 0);
     ObjectType mineObjectType = ObjectTypes.Dirt;
     setObjectAtCoord(mineCoord, mineObjectType);
 
@@ -620,23 +620,6 @@ contract MineTest is DustTest {
     world.mine(aliceEntityId, mineCoord, "");
 
     assertPlayerIsDead(aliceEntityId, playerCoord);
-  }
-
-  function testMineFailsIfInventoryFull() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
-
-    Vec3 mineCoord = playerCoord + vec3(1, 0, 0);
-    ObjectType mineObjectType = ObjectTypes.Dirt;
-    ObjectPhysics.setMass(mineObjectType, playerHandMassReduction - 1);
-    setObjectAtCoord(mineCoord, mineObjectType);
-
-    TestInventoryUtils.addObject(
-      aliceEntityId, mineObjectType, ObjectTypes.Player.getMaxInventorySlots() * mineObjectType.getStackable()
-    );
-
-    vm.prank(alice);
-    vm.expectRevert("Inventory is full");
-    world.mine(aliceEntityId, mineCoord, "");
   }
 
   function testMineFailsIfNoPlayer() public {
@@ -734,8 +717,12 @@ contract MineTest is DustTest {
     setObjectAtCoord(mineCoord, ObjectTypes.Grass);
 
     vm.prank(alice);
-    vm.expectRevert("Inventory is full");
     world.mineUntilDestroyed(aliceEntityId, mineCoord, "");
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Dirt, ObjectTypes.Player.getMaxInventorySlots());
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Grass, 0);
+
+    (EntityId mined,) = TestEntityUtils.getBlockAt(mineCoord);
+    assertInventoryHasObject(mined, ObjectTypes.Grass, 1);
   }
 
   function testMineWithInvalidCoordinates() public {
