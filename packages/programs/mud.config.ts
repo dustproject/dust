@@ -37,10 +37,10 @@ export default defineWorld({
       },
       key: ["entityId"],
     },
-    ContentURI: {
+    TextSignContent: {
       schema: {
         entityId: "EntityId",
-        uri: "string",
+        content: "string",
       },
       key: ["entityId"],
     },

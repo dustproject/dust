@@ -263,6 +263,9 @@ importers:
       '@openzeppelin/contracts':
         specifier: ^4.9.6
         version: 4.9.6
+      dustkit:
+        specifier: workspace:*
+        version: link:../dustkit
       solady:
         specifier: ^0.1.12
         version: 0.1.12

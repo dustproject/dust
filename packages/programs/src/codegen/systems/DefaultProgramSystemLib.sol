@@ -74,10 +74,10 @@ library DefaultProgramSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).setOwner(caller, groupId, newOwner);
   }
 
-  function setContentURI(DefaultProgramSystemType self, EntityId caller, EntityId target, string memory contentURI)
+  function setTextSignContent(DefaultProgramSystemType self, EntityId caller, EntityId target, string memory content)
     internal
   {
-    return CallWrapper(self.toResourceId(), address(0)).setContentURI(caller, target, contentURI);
+    return CallWrapper(self.toResourceId(), address(0)).setTextSignContent(caller, target, content);
   }
 
   function newAccessGroup(CallWrapper memory self, EntityId owner) internal returns (uint256) {
@@ -165,12 +165,14 @@ library DefaultProgramSystemLib {
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
-  function setContentURI(CallWrapper memory self, EntityId caller, EntityId target, string memory contentURI) internal {
+  function setTextSignContent(CallWrapper memory self, EntityId caller, EntityId target, string memory content)
+    internal
+  {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert DefaultProgramSystemLib_CallingFromRootSystem();
 
     bytes memory systemCall =
-      abi.encodeCall(_setContentURI_EntityId_EntityId_string.setContentURI, (caller, target, contentURI));
+      abi.encodeCall(_setTextSignContent_EntityId_EntityId_string.setTextSignContent, (caller, target, content));
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
@@ -226,11 +228,11 @@ library DefaultProgramSystemLib {
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
-  function setContentURI(RootCallWrapper memory self, EntityId caller, EntityId target, string memory contentURI)
+  function setTextSignContent(RootCallWrapper memory self, EntityId caller, EntityId target, string memory content)
     internal
   {
     bytes memory systemCall =
-      abi.encodeCall(_setContentURI_EntityId_EntityId_string.setContentURI, (caller, target, contentURI));
+      abi.encodeCall(_setTextSignContent_EntityId_EntityId_string.setTextSignContent, (caller, target, content));
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
@@ -299,8 +301,8 @@ interface _setOwner_EntityId_uint256_EntityId {
   function setOwner(EntityId caller, uint256 groupId, EntityId newOwner) external;
 }
 
-interface _setContentURI_EntityId_EntityId_string {
-  function setContentURI(EntityId caller, EntityId target, string memory contentURI) external;
+interface _setTextSignContent_EntityId_EntityId_string {
+  function setTextSignContent(EntityId caller, EntityId target, string memory content) external;
 }
 
 using DefaultProgramSystemLib for DefaultProgramSystemType global;

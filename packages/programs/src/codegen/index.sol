@@ -7,6 +7,5 @@ import { AccessGroupCount } from "./tables/AccessGroupCount.sol";
 
 import { AccessGroupMember } from "./tables/AccessGroupMember.sol";
 import { AccessGroupOwner } from "./tables/AccessGroupOwner.sol";
-
-import { ContentURI } from "./tables/ContentURI.sol";
 import { EntityAccessGroup } from "./tables/EntityAccessGroup.sol";
+import { TextSignContent } from "./tables/TextSignContent.sol";
