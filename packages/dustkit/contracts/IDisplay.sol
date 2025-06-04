@@ -9,8 +9,5 @@ import { EntityId } from "@dust/world/src/EntityId.sol";
  * - target is the entity for which the function is being called
  */
 interface IDisplay {
-  function getContentURI(EntityId caller, EntityId target, bytes memory extraData)
-    external
-    view
-    returns (string memory);
+  function contentURI(EntityId caller, EntityId target, bytes memory extraData) external view returns (string memory);
 }

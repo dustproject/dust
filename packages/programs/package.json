@@ -31,6 +31,7 @@
     "@latticexyz/world": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
     "@latticexyz/world-consumer": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
     "@openzeppelin/contracts": "^4.9.6",
+    "dustkit": "workspace:*",
     "solady": "^0.1.12"
   },
   "devDependencies": {

@@ -23,9 +23,9 @@ import { EncodeArray } from "@latticexyz/store/src/tightcoder/EncodeArray.sol";
 // Import user types
 import { EntityId } from "@dust/world/src/EntityId.sol";
 
-library ContentURI {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "dfprograms_1", name: "ContentURI", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x7462646670726f6772616d735f310000436f6e74656e74555249000000000000);
+library TextSignContent {
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "dfprograms_1", name: "TextSignContent", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x7462646670726f6772616d735f310000546578745369676e436f6e74656e7400);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0000000100000000000000000000000000000000000000000000000000000000);

@@ -5,15 +5,19 @@ import { IBaseWorld } from "@latticexyz/world-consumer/src/experimental/WorldCon
 
 import { EntityId } from "@dust/world/src/EntityId.sol";
 
-import { IDisplay } from "../ClientProgramInterfaces.sol";
-import { ContentURI } from "../codegen/tables/ContentURI.sol";
+import { IDisplay } from "dustkit/IDisplay.sol";
 
+import { TextSignContent } from "../codegen/tables/TextSignContent.sol";
 import { DefaultProgram } from "./DefaultProgram.sol";
 
 contract TextSignProgram is IDisplay, DefaultProgram {
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
 
-  function getContentURI(EntityId, EntityId target, bytes memory) external view returns (string memory) {
-    return ContentURI.get(target);
+  function contentURI(EntityId, EntityId target, bytes memory) external view returns (string memory) {
+    string memory content = TextSignContent.get(target);
+    if (bytes(content).length == 0) {
+      return "";
+    }
+    return string.concat("data:text/plain;charset=utf-8,", content);
   }
 }
