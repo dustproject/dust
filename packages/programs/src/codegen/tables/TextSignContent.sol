@@ -50,7 +50,7 @@ library TextSignContent {
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
     fieldNames = new string[](1);
-    fieldNames[0] = "uri";
+    fieldNames[0] = "content";
   }
 
   /**
@@ -68,9 +68,9 @@ library TextSignContent {
   }
 
   /**
-   * @notice Get uri.
+   * @notice Get content.
    */
-  function getUri(EntityId entityId) internal view returns (string memory uri) {
+  function getContent(EntityId entityId) internal view returns (string memory content) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -79,9 +79,9 @@ library TextSignContent {
   }
 
   /**
-   * @notice Get uri.
+   * @notice Get content.
    */
-  function _getUri(EntityId entityId) internal view returns (string memory uri) {
+  function _getContent(EntityId entityId) internal view returns (string memory content) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -90,9 +90,9 @@ library TextSignContent {
   }
 
   /**
-   * @notice Get uri.
+   * @notice Get content.
    */
-  function get(EntityId entityId) internal view returns (string memory uri) {
+  function get(EntityId entityId) internal view returns (string memory content) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -101,9 +101,9 @@ library TextSignContent {
   }
 
   /**
-   * @notice Get uri.
+   * @notice Get content.
    */
-  function _get(EntityId entityId) internal view returns (string memory uri) {
+  function _get(EntityId entityId) internal view returns (string memory content) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -112,49 +112,49 @@ library TextSignContent {
   }
 
   /**
-   * @notice Set uri.
+   * @notice Set content.
    */
-  function setUri(EntityId entityId, string memory uri) internal {
+  function setContent(EntityId entityId, string memory content) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreSwitch.setDynamicField(_tableId, _keyTuple, 0, bytes((uri)));
+    StoreSwitch.setDynamicField(_tableId, _keyTuple, 0, bytes((content)));
   }
 
   /**
-   * @notice Set uri.
+   * @notice Set content.
    */
-  function _setUri(EntityId entityId, string memory uri) internal {
+  function _setContent(EntityId entityId, string memory content) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreCore.setDynamicField(_tableId, _keyTuple, 0, bytes((uri)));
+    StoreCore.setDynamicField(_tableId, _keyTuple, 0, bytes((content)));
   }
 
   /**
-   * @notice Set uri.
+   * @notice Set content.
    */
-  function set(EntityId entityId, string memory uri) internal {
+  function set(EntityId entityId, string memory content) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreSwitch.setDynamicField(_tableId, _keyTuple, 0, bytes((uri)));
+    StoreSwitch.setDynamicField(_tableId, _keyTuple, 0, bytes((content)));
   }
 
   /**
-   * @notice Set uri.
+   * @notice Set content.
    */
-  function _set(EntityId entityId, string memory uri) internal {
+  function _set(EntityId entityId, string memory content) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
-    StoreCore.setDynamicField(_tableId, _keyTuple, 0, bytes((uri)));
+    StoreCore.setDynamicField(_tableId, _keyTuple, 0, bytes((content)));
   }
 
   /**
-   * @notice Get the length of uri.
+   * @notice Get the length of content.
    */
-  function lengthUri(EntityId entityId) internal view returns (uint256) {
+  function lengthContent(EntityId entityId) internal view returns (uint256) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -165,9 +165,9 @@ library TextSignContent {
   }
 
   /**
-   * @notice Get the length of uri.
+   * @notice Get the length of content.
    */
-  function _lengthUri(EntityId entityId) internal view returns (uint256) {
+  function _lengthContent(EntityId entityId) internal view returns (uint256) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -178,7 +178,7 @@ library TextSignContent {
   }
 
   /**
-   * @notice Get the length of uri.
+   * @notice Get the length of content.
    */
   function length(EntityId entityId) internal view returns (uint256) {
     bytes32[] memory _keyTuple = new bytes32[](1);
@@ -191,7 +191,7 @@ library TextSignContent {
   }
 
   /**
-   * @notice Get the length of uri.
+   * @notice Get the length of content.
    */
   function _length(EntityId entityId) internal view returns (uint256) {
     bytes32[] memory _keyTuple = new bytes32[](1);
@@ -204,10 +204,10 @@ library TextSignContent {
   }
 
   /**
-   * @notice Get an item of uri.
+   * @notice Get an item of content.
    * @dev Reverts with Store_IndexOutOfBounds if `_index` is out of bounds for the array.
    */
-  function getItemUri(EntityId entityId, uint256 _index) internal view returns (string memory) {
+  function getItemContent(EntityId entityId, uint256 _index) internal view returns (string memory) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -218,10 +218,10 @@ library TextSignContent {
   }
 
   /**
-   * @notice Get an item of uri.
+   * @notice Get an item of content.
    * @dev Reverts with Store_IndexOutOfBounds if `_index` is out of bounds for the array.
    */
-  function _getItemUri(EntityId entityId, uint256 _index) internal view returns (string memory) {
+  function _getItemContent(EntityId entityId, uint256 _index) internal view returns (string memory) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -232,7 +232,7 @@ library TextSignContent {
   }
 
   /**
-   * @notice Get an item of uri.
+   * @notice Get an item of content.
    * @dev Reverts with Store_IndexOutOfBounds if `_index` is out of bounds for the array.
    */
   function getItem(EntityId entityId, uint256 _index) internal view returns (string memory) {
@@ -246,7 +246,7 @@ library TextSignContent {
   }
 
   /**
-   * @notice Get an item of uri.
+   * @notice Get an item of content.
    * @dev Reverts with Store_IndexOutOfBounds if `_index` is out of bounds for the array.
    */
   function _getItem(EntityId entityId, uint256 _index) internal view returns (string memory) {
@@ -260,9 +260,9 @@ library TextSignContent {
   }
 
   /**
-   * @notice Push a slice to uri.
+   * @notice Push a slice to content.
    */
-  function pushUri(EntityId entityId, string memory _slice) internal {
+  function pushContent(EntityId entityId, string memory _slice) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -270,9 +270,9 @@ library TextSignContent {
   }
 
   /**
-   * @notice Push a slice to uri.
+   * @notice Push a slice to content.
    */
-  function _pushUri(EntityId entityId, string memory _slice) internal {
+  function _pushContent(EntityId entityId, string memory _slice) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -280,7 +280,7 @@ library TextSignContent {
   }
 
   /**
-   * @notice Push a slice to uri.
+   * @notice Push a slice to content.
    */
   function push(EntityId entityId, string memory _slice) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
@@ -290,7 +290,7 @@ library TextSignContent {
   }
 
   /**
-   * @notice Push a slice to uri.
+   * @notice Push a slice to content.
    */
   function _push(EntityId entityId, string memory _slice) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
@@ -300,9 +300,9 @@ library TextSignContent {
   }
 
   /**
-   * @notice Pop a slice from uri.
+   * @notice Pop a slice from content.
    */
-  function popUri(EntityId entityId) internal {
+  function popContent(EntityId entityId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -310,9 +310,9 @@ library TextSignContent {
   }
 
   /**
-   * @notice Pop a slice from uri.
+   * @notice Pop a slice from content.
    */
-  function _popUri(EntityId entityId) internal {
+  function _popContent(EntityId entityId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -320,7 +320,7 @@ library TextSignContent {
   }
 
   /**
-   * @notice Pop a slice from uri.
+   * @notice Pop a slice from content.
    */
   function pop(EntityId entityId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
@@ -330,7 +330,7 @@ library TextSignContent {
   }
 
   /**
-   * @notice Pop a slice from uri.
+   * @notice Pop a slice from content.
    */
   function _pop(EntityId entityId) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
@@ -340,9 +340,9 @@ library TextSignContent {
   }
 
   /**
-   * @notice Update a slice of uri at `_index`.
+   * @notice Update a slice of content at `_index`.
    */
-  function updateUri(EntityId entityId, uint256 _index, string memory _slice) internal {
+  function updateContent(EntityId entityId, uint256 _index, string memory _slice) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -353,9 +353,9 @@ library TextSignContent {
   }
 
   /**
-   * @notice Update a slice of uri at `_index`.
+   * @notice Update a slice of content at `_index`.
    */
-  function _updateUri(EntityId entityId, uint256 _index, string memory _slice) internal {
+  function _updateContent(EntityId entityId, uint256 _index, string memory _slice) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(entityId);
 
@@ -366,7 +366,7 @@ library TextSignContent {
   }
 
   /**
-   * @notice Update a slice of uri at `_index`.
+   * @notice Update a slice of content at `_index`.
    */
   function update(EntityId entityId, uint256 _index, string memory _slice) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
@@ -379,7 +379,7 @@ library TextSignContent {
   }
 
   /**
-   * @notice Update a slice of uri at `_index`.
+   * @notice Update a slice of content at `_index`.
    */
   function _update(EntityId entityId, uint256 _index, string memory _slice) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
@@ -415,10 +415,10 @@ library TextSignContent {
    * @notice Tightly pack dynamic data lengths using this table's schema.
    * @return _encodedLengths The lengths of the dynamic fields (packed into a single bytes32 value).
    */
-  function encodeLengths(string memory uri) internal pure returns (EncodedLengths _encodedLengths) {
+  function encodeLengths(string memory content) internal pure returns (EncodedLengths _encodedLengths) {
     // Lengths are effectively checked during copy by 2**40 bytes exceeding gas limits
     unchecked {
-      _encodedLengths = EncodedLengthsLib.pack(bytes(uri).length);
+      _encodedLengths = EncodedLengthsLib.pack(bytes(content).length);
     }
   }
 
@@ -426,8 +426,8 @@ library TextSignContent {
    * @notice Tightly pack dynamic (variable length) data using this table's schema.
    * @return The dynamic data, encoded into a sequence of bytes.
    */
-  function encodeDynamic(string memory uri) internal pure returns (bytes memory) {
-    return abi.encodePacked(bytes((uri)));
+  function encodeDynamic(string memory content) internal pure returns (bytes memory) {
+    return abi.encodePacked(bytes((content)));
   }
 
   /**
@@ -436,10 +436,10 @@ library TextSignContent {
    * @return The lengths of the dynamic fields (packed into a single bytes32 value).
    * @return The dynamic (variable length) data, encoded into a sequence of bytes.
    */
-  function encode(string memory uri) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
+  function encode(string memory content) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
     bytes memory _staticData;
-    EncodedLengths _encodedLengths = encodeLengths(uri);
-    bytes memory _dynamicData = encodeDynamic(uri);
+    EncodedLengths _encodedLengths = encodeLengths(content);
+    bytes memory _dynamicData = encodeDynamic(content);
 
     return (_staticData, _encodedLengths, _dynamicData);
   }
