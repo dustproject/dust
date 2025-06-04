@@ -5,6 +5,8 @@ import { IBaseWorld } from "@latticexyz/world-consumer/src/experimental/WorldCon
 
 import { EntityId } from "@dust/world/src/EntityId.sol";
 
+import { LibString } from "solady/utils/LibString.sol";
+
 import { IDisplay } from "dustkit/IDisplay.sol";
 
 import { TextSignContent } from "../codegen/tables/TextSignContent.sol";
@@ -18,6 +20,6 @@ contract TextSignProgram is IDisplay, DefaultProgram {
     if (bytes(content).length == 0) {
       return "";
     }
-    return string.concat("data:text/plain;charset=utf-8,", content);
+    return string.concat("data:text/plain;charset=utf-8,", LibString.encodeURIComponent(content));
   }
 }
