@@ -275,7 +275,7 @@ library MoveLib {
       return LAVA_MOVE_ENERGY_COST;
     }
 
-    if (EntityUtils.getObjectTypeAt(coord) == ObjectTypes.Water) {
+    if (EntityUtils.getFluidLevelAt(coord) > 0) {
       return WATER_MOVE_ENERGY_COST;
     }
 

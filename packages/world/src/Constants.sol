@@ -27,8 +27,8 @@ uint8 constant MAX_FLUID_LEVEL = 15; // Maximum fluid level for water and lava
 // ------------------------------------------------------------
 uint128 constant MAX_PLAYER_ENERGY = 817600000000000000;
 uint128 constant PLAYER_ENERGY_DRAIN_RATE = 1351851852000;
-uint128 constant PLAYER_SWIM_ENERGY_DRAIN_RATE = PLAYER_ENERGY_DRAIN_RATE * 3;
-uint128 constant PLAYER_LAVA_ENERGY_DRAIN_RATE = PLAYER_ENERGY_DRAIN_RATE * 10;
+uint128 constant PLAYER_SWIM_ENERGY_DRAIN_RATE = MAX_PLAYER_ENERGY / 5 minutes; // 5 minutes to drain all energy if fully submerged
+uint128 constant PLAYER_LAVA_ENERGY_DRAIN_RATE = MAX_PLAYER_ENERGY / 10 seconds; // 10 seconds to drain all energy if standing on lava
 
 uint128 constant MACHINE_ENERGY_DRAIN_RATE = 9488203935;
 
@@ -40,9 +40,9 @@ uint128 constant BUILD_ENERGY_COST = 255500000000000;
 uint128 constant TILL_ENERGY_COST = 255500000000000;
 uint128 constant CRAFT_ENERGY_COST = 255500000000000;
 uint128 constant MOVE_ENERGY_COST = 25550000000000;
-uint128 constant WATER_MOVE_ENERGY_COST = MOVE_ENERGY_COST * 3;
-uint128 constant LAVA_MOVE_ENERGY_COST = MOVE_ENERGY_COST * 10;
-uint128 constant PLAYER_FALL_ENERGY_COST = MAX_PLAYER_ENERGY / 25; // This makes it so, with full energy, you die from a 25 block fall
+uint128 constant WATER_MOVE_ENERGY_COST = MAX_PLAYER_ENERGY / 4000; // 4000 moves in water to die
+uint128 constant LAVA_MOVE_ENERGY_COST = MAX_PLAYER_ENERGY / 10; // 10 moves on lava to die
+uint128 constant PLAYER_FALL_ENERGY_COST = MAX_PLAYER_ENERGY / 25; // This makes it so, with full energy, you die from a 25 + 3 block fall
 
 uint128 constant DEFAULT_ORE_TOOL_MULTIPLIER = 3;
 uint128 constant DEFAULT_WOODEN_TOOL_MULTIPLIER = 10;
