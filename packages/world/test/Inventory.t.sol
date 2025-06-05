@@ -16,7 +16,7 @@ import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 
-import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
+import { TerrainLib } from "../src/utils/TerrainLib.sol";
 
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
@@ -25,7 +25,7 @@ import { EntityId } from "../src/EntityId.sol";
 
 import { ObjectType } from "../src/ObjectType.sol";
 
-import { ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectTypes } from "../src/codegen/ObjectTypes.sol";
 
 import { SlotAmount, SlotTransfer } from "../src/utils/InventoryUtils.sol";
 

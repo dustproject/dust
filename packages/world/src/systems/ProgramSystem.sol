@@ -19,9 +19,8 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { SAFE_PROGRAM_GAS } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
-import { ObjectType } from "../ObjectType.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
+import { ObjectType, ObjectTypes } from "../ObjectType.sol";
 
 import { ProgramId } from "../ProgramId.sol";
 import { IAttachProgramHook, IDetachProgramHook, IProgramValidator } from "../ProgramInterfaces.sol";

@@ -16,7 +16,7 @@ import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
-import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
+import { TerrainLib } from "../src/utils/TerrainLib.sol";
 
 import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 

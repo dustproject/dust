@@ -14,8 +14,9 @@ import { PlayerBed } from "../codegen/tables/PlayerBed.sol";
 import { EntityPosition, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
 
 import { ObjectType } from "../ObjectType.sol";
-import { ObjectTypes } from "../ObjectType.sol";
+
 import { checkWorldStatus } from "../Utils.sol";
+import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 
 import { EntityUtils } from "./EntityUtils.sol";
 import { InventoryUtils } from "./InventoryUtils.sol";

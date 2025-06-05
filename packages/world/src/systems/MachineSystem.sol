@@ -17,9 +17,7 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { MACHINE_ENERGY_DRAIN_RATE } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
-import { ObjectType } from "../ObjectType.sol";
-
-import { ObjectTypes } from "../ObjectType.sol";
+import { ObjectType, ObjectTypes } from "../ObjectType.sol";
 
 import { ProgramId } from "../ProgramId.sol";
 import { IFuelHook } from "../ProgramInterfaces.sol";

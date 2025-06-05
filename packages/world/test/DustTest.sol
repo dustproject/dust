@@ -23,7 +23,7 @@ import {
 import { EntityId, EntityTypeLib } from "../src/EntityId.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
-import { ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectTypes } from "../src/codegen/ObjectTypes.sol";
 
 import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
@@ -43,7 +43,7 @@ import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
 import { RegionMerkleRoot } from "../src/codegen/tables/RegionMerkleRoot.sol";
 
-import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
+import { TerrainLib } from "../src/utils/TerrainLib.sol";
 
 import { encodeChunk } from "./utils/encodeChunk.sol";
 

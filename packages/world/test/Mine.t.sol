@@ -48,7 +48,7 @@ import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
 
 import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
-import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
+import { TerrainLib } from "../src/utils/TerrainLib.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract MineTest is DustTest {

@@ -4,7 +4,6 @@ import {
   objects,
   objectsByName,
 } from "../objects";
-import { getOrientation } from "../orientation";
 
 // Build minimal sliding windows over sorted ids
 function buildSlidingWindows(ids: number[]): { start: number; mask: bigint }[] {
@@ -86,35 +85,17 @@ function renderObjectAmount([objectType, amount]: ObjectAmount): string {
 }
 
 // Template for the Solidity file
-function generateObjectTypeSol(): string {
+function generateObjectTypeLibSol(): string {
   return `// SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { IMachineSystem } from "./codegen/world/IMachineSystem.sol";
-import { ITransferSystem } from "./codegen/world/ITransferSystem.sol";
-import { Vec3, vec3 } from "./Vec3.sol";
-import { Orientation } from "./Orientation.sol";
+import { IMachineSystem } from "./world/IMachineSystem.sol";
+import { ITransferSystem } from "./world/ITransferSystem.sol";
+import { Vec3, vec3 } from "../Vec3.sol";
+import { Orientation } from "../Orientation.sol";
+import { ObjectType, ObjectAmount } from "../ObjectType.sol";
+import { ObjectTypes } from "./ObjectTypes.sol";
 
-type ObjectType is uint16;
-
-// Structs
-struct ObjectAmount {
-  ObjectType objectType;
-  uint16 amount;
-}
-
-// ------------------------------------------------------------
-// Object Types
-// ------------------------------------------------------------
-library ObjectTypes {
-${objects
-  .map((obj) => {
-    return `  ObjectType constant ${obj.name} = ObjectType.wrap(${obj.id});`;
-  })
-  .join("\n")}
-}
-
-// ------------------------------------------------------------
 library ObjectTypeLib {
   function unwrap(ObjectType self) internal pure returns (uint16) {
     return ObjectType.unwrap(self);
@@ -317,19 +298,7 @@ ${Object.entries(categories)
       || (self == ObjectTypes.AnyLeaf && other.isLeaf());
   }
 }
-
-function eq(ObjectType self, ObjectType other) pure returns (bool) {
-  return ObjectType.unwrap(self) == ObjectType.unwrap(other);
-}
-
-function neq(ObjectType self, ObjectType other) pure returns (bool) {
-  return ObjectType.unwrap(self) != ObjectType.unwrap(other);
-}
-
-using { eq as ==, neq as != } for ObjectType global;
-
-using ObjectTypeLib for ObjectType global;
 `;
 }
 
-console.info(generateObjectTypeSol());
+console.info(generateObjectTypeLibSol());

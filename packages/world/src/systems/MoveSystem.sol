@@ -9,9 +9,9 @@ import { EnergyData } from "../codegen/tables/Energy.sol";
 import { EntityId } from "../EntityId.sol";
 import { Vec3 } from "../Vec3.sol";
 
+import { MoveLib } from "../utils/MoveLib.sol";
 import { MoveNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
-import { MoveLib } from "./libraries/MoveLib.sol";
 
 contract MoveSystem is System {
   function move(EntityId caller, Vec3[] memory newCoords) public {

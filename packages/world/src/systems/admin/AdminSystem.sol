@@ -12,12 +12,13 @@ import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
 import { EntityId, EntityTypeLib } from "../../EntityId.sol";
 import { ObjectType } from "../../ObjectType.sol";
 
-import { ObjectTypes } from "../../ObjectType.sol";
+import { ObjectTypes } from "../../codegen/ObjectTypes.sol";
 
 import { EntityUtils } from "../../utils/EntityUtils.sol";
 import { InventoryUtils } from "../../utils/InventoryUtils.sol";
+
+import { MoveLib } from "../../utils/MoveLib.sol";
 import { PlayerUtils } from "../../utils/PlayerUtils.sol";
-import { MoveLib } from "../libraries/MoveLib.sol";
 
 contract AdminSystem is System {
   modifier onlyAdmin() {

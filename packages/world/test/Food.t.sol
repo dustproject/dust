@@ -15,8 +15,9 @@ import { LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 import { MAX_PLAYER_ENERGY } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
 import { ObjectType } from "../src/ObjectType.sol";
-import { ObjectTypes } from "../src/ObjectType.sol";
+
 import { Vec3, vec3 } from "../src/Vec3.sol";
+import { ObjectTypes } from "../src/codegen/ObjectTypes.sol";
 
 contract FoodTest is DustTest {
   function testEatFood() public {

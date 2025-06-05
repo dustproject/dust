@@ -26,7 +26,7 @@ import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { SleepNotification, WakeupNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
-import { MoveLib } from "./libraries/MoveLib.sol";
+import { MoveLib } from "../utils/MoveLib.sol";
 
 import { EntityId } from "../EntityId.sol";
 import { ISleepHook, IWakeupHook } from "../ProgramInterfaces.sol";

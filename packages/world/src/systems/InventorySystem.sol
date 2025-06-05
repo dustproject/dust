@@ -8,12 +8,13 @@ import { Action } from "../codegen/common.sol";
 import { MAX_PICKUP_RADIUS } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
-import { ObjectTypes } from "../ObjectType.sol";
+
 import { Vec3 } from "../Vec3.sol";
+import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils, SlotAmount, SlotTransfer } from "../utils/InventoryUtils.sol";
 import { DropNotification, PickupNotification, notify } from "../utils/NotifUtils.sol";
-import { TerrainLib } from "./libraries/TerrainLib.sol";
+import { TerrainLib } from "../utils/TerrainLib.sol";
 
 contract InventorySystem is System {
   function drop(EntityId caller, SlotAmount[] memory slots, Vec3 coord) public {

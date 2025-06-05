@@ -18,8 +18,9 @@ import { EntityPosition } from "./Vec3Storage.sol";
 import { MAX_ENTITY_INFLUENCE_RADIUS } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
-import { ObjectTypes } from "../ObjectType.sol";
+
 import { ProgramId } from "../ProgramId.sol";
+import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 
 import { checkWorldStatus } from "../Utils.sol";
 import { Vec3, vec3 } from "../Vec3.sol";

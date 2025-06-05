@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { CHUNK_SIZE } from "../../Constants.sol";
-
-import { ObjectType } from "../../ObjectType.sol";
-import { ObjectTypes } from "../../ObjectType.sol";
-import { Vec3, vec3 } from "../../Vec3.sol";
-import { SSTORE2 } from "../../utils/SSTORE2.sol";
 import { WorldContextConsumerLib } from "@latticexyz/world/src/WorldContext.sol";
+
+import { CHUNK_SIZE } from "../Constants.sol";
+import { ObjectType } from "../ObjectType.sol";
+import { Vec3, vec3 } from "../Vec3.sol";
+import { SSTORE2 } from "./SSTORE2.sol";
+
+import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 
 uint256 constant VERSION_PADDING = 1;
 uint256 constant BIOME_PADDING = 1;

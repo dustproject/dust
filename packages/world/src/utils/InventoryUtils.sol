@@ -1,18 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { LibBit } from "solady/utils/LibBit.sol";
+
+import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 import { InventoryBitmap } from "../codegen/tables/InventoryBitmap.sol";
 import { InventorySlot, InventorySlotData } from "../codegen/tables/InventorySlot.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
-import { LibBit } from "solady/utils/LibBit.sol";
 
 import { burnToolEnergy } from "../utils/EnergyUtils.sol";
 import { Math } from "../utils/MathLib.sol";
 
 import { EntityId } from "../EntityId.sol";
 
-import { ObjectAmount, ObjectType, ObjectTypes } from "../ObjectType.sol";
+import { ObjectAmount, ObjectType } from "../ObjectType.sol";
 
 import { Vec3 } from "../Vec3.sol";
 import { OreLib } from "./OreLib.sol";

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { Energy } from "../../codegen/tables/Energy.sol";
-import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
+import { Energy } from "../codegen/tables/Energy.sol";
+import { ReverseMovablePosition } from "./Vec3Storage.sol";
 
 import {
   LAVA_MOVE_ENERGY_COST,
@@ -15,15 +15,13 @@ import {
   PLAYER_SAFE_FALL_DISTANCE,
   PLAYER_SWIM_ENERGY_DRAIN_RATE,
   WATER_MOVE_ENERGY_COST
-} from "../../Constants.sol";
-import { EntityId } from "../../EntityId.sol";
-import { ObjectType } from "../../ObjectType.sol";
+} from "../Constants.sol";
+import { EntityId } from "../EntityId.sol";
+import { ObjectType, ObjectTypes } from "../ObjectType.sol";
 
-import { ObjectTypes } from "../../ObjectType.sol";
-
-import { Vec3, vec3 } from "../../Vec3.sol";
-import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../../utils/EnergyUtils.sol";
-import { EntityUtils } from "../../utils/EntityUtils.sol";
+import { Vec3, vec3 } from "../Vec3.sol";
+import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
+import { EntityUtils } from "../utils/EntityUtils.sol";
 
 error NonPassableBlock(int32 x, int32 y, int32 z, ObjectType objectType);
 

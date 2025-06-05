@@ -2,7 +2,7 @@
 pragma solidity >=0.8.24;
 
 import { CHUNK_SIZE } from "../../src/Constants.sol";
-import { BIOME_PADDING, SURFACE_PADDING, VERSION_PADDING } from "../../src/systems/libraries/TerrainLib.sol";
+import { BIOME_PADDING, SURFACE_PADDING, VERSION_PADDING } from "../../src/utils/TerrainLib.sol";
 
 function encodeChunk(uint8 biome, bool isSurface, uint8[][][] memory chunk) pure returns (bytes memory encodedChunk) {
   bytes1 version = bytes1(uint8(0));

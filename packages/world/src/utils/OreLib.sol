@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { ObjectTypeLib } from "../codegen/ObjectTypeLib.sol";
+import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 
-import { TerrainLib } from "../systems/libraries/TerrainLib.sol";
+import { TerrainLib } from "./TerrainLib.sol";
 import { ChunkCommitment } from "./Vec3Storage.sol";
 
 import {
@@ -16,7 +18,7 @@ import {
   MAX_IRON,
   MAX_NEPTUNIUM
 } from "../Constants.sol";
-import { ObjectAmount, ObjectType, ObjectTypeLib, ObjectTypes } from "../ObjectType.sol";
+import { ObjectAmount, ObjectType } from "../ObjectType.sol";
 
 import { Vec3, vec3 } from "../Vec3.sol";
 import { NatureLib } from "./NatureLib.sol";

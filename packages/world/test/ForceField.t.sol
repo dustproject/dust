@@ -21,15 +21,16 @@ import { Machine } from "../src/codegen/tables/Machine.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 import { DustTest, console } from "./DustTest.sol";
 
-import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
+import { TerrainLib } from "../src/utils/TerrainLib.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
 import { FRAGMENT_SIZE, MACHINE_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
 import { ObjectType } from "../src/ObjectType.sol";
-import { ObjectTypes } from "../src/ObjectType.sol";
+
 import { ProgramId } from "../src/ProgramId.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
+import { ObjectTypes } from "../src/codegen/ObjectTypes.sol";
 
 contract TestForceFieldProgram is System {
   // Just for testing, real programs should use tables

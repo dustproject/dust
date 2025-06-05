@@ -12,13 +12,14 @@ import {
 } from "../src/Constants.sol";
 import { EntityId, EntityTypeLib } from "../src/EntityId.sol";
 import { ObjectType } from "../src/ObjectType.sol";
-import { ObjectTypes } from "../src/ObjectType.sol";
+
 import { Vec3, vec3 } from "../src/Vec3.sol";
+import { ObjectTypes } from "../src/codegen/ObjectTypes.sol";
 
 import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
 import { RegionMerkleRoot } from "../src/codegen/tables/RegionMerkleRoot.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
-import { BIOME_PADDING, SURFACE_PADDING, TerrainLib, VERSION_PADDING } from "../src/systems/libraries/TerrainLib.sol";
+import { BIOME_PADDING, SURFACE_PADDING, TerrainLib, VERSION_PADDING } from "../src/utils/TerrainLib.sol";
 import { InitialEnergyPool, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 import { MockChunk, MockVegetation } from "./mockData.sol";
 

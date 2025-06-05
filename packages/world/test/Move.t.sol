@@ -32,13 +32,13 @@ import {
 } from "../src/Constants.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
-import { ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectTypes } from "../src/codegen/ObjectTypes.sol";
 
 import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 
-import { NonPassableBlock } from "../src/systems/libraries/MoveLib.sol";
-import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
+import { NonPassableBlock } from "../src/utils/MoveLib.sol";
+import { TerrainLib } from "../src/utils/TerrainLib.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract MoveTest is DustTest {

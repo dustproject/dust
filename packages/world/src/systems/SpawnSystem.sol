@@ -23,8 +23,8 @@ import {
 } from "../Constants.sol";
 import { ObjectType } from "../ObjectType.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
 import { checkWorldStatus } from "../Utils.sol";
+import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 
 import { Vec3, vec3 } from "../Vec3.sol";
 import { removeEnergyFromLocalPool, updateMachineEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
@@ -32,9 +32,9 @@ import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { SpawnNotification, notify } from "../utils/NotifUtils.sol";
 
+import { MoveLib } from "../utils/MoveLib.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
-import { MoveLib } from "./libraries/MoveLib.sol";
-import { TerrainLib } from "./libraries/TerrainLib.sol";
+import { TerrainLib } from "../utils/TerrainLib.sol";
 
 import { EntityId } from "../EntityId.sol";
 import { ISpawnHook } from "../ProgramInterfaces.sol";

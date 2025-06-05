@@ -26,8 +26,8 @@ import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { Math } from "../utils/MathLib.sol";
 import { BuildNotification, MoveNotification, notify } from "../utils/NotifUtils.sol";
 
-import { MoveLib } from "./libraries/MoveLib.sol";
-import { TerrainLib } from "./libraries/TerrainLib.sol";
+import { MoveLib } from "../utils/MoveLib.sol";
+import { TerrainLib } from "../utils/TerrainLib.sol";
 
 import { BUILD_ENERGY_COST, MAX_FLUID_LEVEL } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";

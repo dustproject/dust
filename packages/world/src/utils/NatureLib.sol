@@ -3,11 +3,12 @@ pragma solidity >=0.8.24;
 
 import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
 
+import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 
-import { TerrainLib } from "../systems/libraries/TerrainLib.sol";
+import { TerrainLib } from "./TerrainLib.sol";
 
 import { addEnergyToLocalPool } from "./EnergyUtils.sol";
 import { EntityUtils } from "./EntityUtils.sol";
@@ -33,7 +34,7 @@ import {
   MAX_SPRUCE_SAPLING,
   MAX_WHEAT_SEED
 } from "../Constants.sol";
-import { ObjectAmount, ObjectType, ObjectTypeLib, ObjectTypes } from "../ObjectType.sol";
+import { ObjectAmount, ObjectType } from "../ObjectType.sol";
 
 import { EntityId } from "../EntityId.sol";
 

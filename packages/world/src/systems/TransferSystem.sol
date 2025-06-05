@@ -11,7 +11,7 @@ import { TransferNotification, notify } from "../utils/NotifUtils.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
+import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 
 import { ITransferHook } from "../ProgramInterfaces.sol";
 import { Vec3 } from "../Vec3.sol";

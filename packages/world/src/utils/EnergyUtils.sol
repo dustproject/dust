@@ -19,7 +19,7 @@ import { PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
+import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 
 import { Vec3 } from "../Vec3.sol";
 

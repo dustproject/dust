@@ -8,14 +8,15 @@ import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { UniqueEntity } from "../codegen/tables/UniqueEntity.sol";
-import { TerrainLib } from "../systems/libraries/TerrainLib.sol";
+import { TerrainLib } from "../utils/TerrainLib.sol";
 import { EntityPosition, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
 
 import { MAX_FLUID_LEVEL } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 
-import { ObjectType, ObjectTypes } from "../ObjectType.sol";
+import { ObjectType } from "../ObjectType.sol";
 import { Vec3 } from "../Vec3.sol";
+import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 import { EntityTypeLib } from "./EntityIdLib.sol";
 
 library EntityUtils {

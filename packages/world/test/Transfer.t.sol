@@ -30,12 +30,12 @@ import { DustTest } from "./DustTest.sol";
 import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_RADIUS } from "../src/Constants.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
-import { ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectTypes } from "../src/codegen/ObjectTypes.sol";
 
 import { Orientation } from "../src/Orientation.sol";
 import { ProgramId } from "../src/ProgramId.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
-import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
+import { TerrainLib } from "../src/utils/TerrainLib.sol";
 
 import { SlotData, SlotTransfer } from "../src/utils/InventoryUtils.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";

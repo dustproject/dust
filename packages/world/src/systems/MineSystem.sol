@@ -54,11 +54,11 @@ import {
 
 import { EntityId } from "../EntityId.sol";
 import { ObjectAmount, ObjectType } from "../ObjectType.sol";
-import { MoveLib } from "./libraries/MoveLib.sol";
+import { MoveLib } from "../utils/MoveLib.sol";
 
 import { NatureLib } from "../utils/NatureLib.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
+import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 import { OreLib } from "../utils/OreLib.sol";
 
 import { ProgramId } from "../ProgramId.sol";

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectTypes } from "../src/codegen/ObjectTypes.sol";
 import { ObjectPhysics, ObjectPhysicsData } from "../src/codegen/tables/ObjectPhysics.sol";
 
 function initObjects() {

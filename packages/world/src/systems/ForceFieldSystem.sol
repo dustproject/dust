@@ -18,10 +18,11 @@ import { SAFE_PROGRAM_GAS } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 
 import { ObjectType } from "../ObjectType.sol";
-import { ObjectTypes } from "../ObjectType.sol";
+
 import { ProgramId } from "../ProgramId.sol";
 import { IAddFragmentHook, IRemoveFragmentHook } from "../ProgramInterfaces.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
+import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 
 contract ForceFieldSystem is System {
   /**

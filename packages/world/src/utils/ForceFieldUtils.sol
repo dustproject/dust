@@ -4,6 +4,7 @@ pragma solidity >=0.8.24;
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
 
+import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Fragment, FragmentData } from "../codegen/tables/Fragment.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
@@ -14,7 +15,6 @@ import { EntityPosition } from "../utils/Vec3Storage.sol";
 
 import { MACHINE_ENERGY_DRAIN_RATE } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
-import { ObjectTypes } from "../ObjectType.sol";
 import { Vec3 } from "../Vec3.sol";
 
 library ForceFieldUtils {
