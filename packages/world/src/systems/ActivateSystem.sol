@@ -7,7 +7,7 @@ import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 
 import { ObjectType } from "../ObjectType.sol";
 
-import { ObjectTypes } from "../codegen/ObjectTypes.sol";
+import { ObjectTypes } from "../ObjectType.sol";
 
 import { checkWorldStatus } from "../Utils.sol";
 import { updateMachineEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";

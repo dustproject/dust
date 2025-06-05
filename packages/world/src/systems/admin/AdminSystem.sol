@@ -12,7 +12,7 @@ import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
 import { EntityId, EntityTypeLib } from "../../EntityId.sol";
 import { ObjectType } from "../../ObjectType.sol";
 
-import { ObjectTypes } from "../../codegen/ObjectTypes.sol";
+import { ObjectTypes } from "../../ObjectType.sol";
 
 import { EntityUtils } from "../../utils/EntityUtils.sol";
 import { InventoryUtils } from "../../utils/InventoryUtils.sol";

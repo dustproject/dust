@@ -6,7 +6,7 @@ import { DustTest, console } from "./DustTest.sol";
 import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import { EntityId } from "../src/EntityId.sol";
-import { ObjectTypes } from "../src/codegen/ObjectTypes.sol";
+import { ObjectTypes } from "../src/ObjectType.sol";
 
 import { Orientation } from "../src/Orientation.sol";
 import { Vec3, Vec3Lib, vec3 } from "../src/Vec3.sol";

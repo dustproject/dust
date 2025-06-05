@@ -3,7 +3,7 @@ pragma solidity >=0.8.24;
 
 import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
 
-import { ObjectTypes } from "../codegen/ObjectTypes.sol";
+import { ObjectTypes } from "../ObjectType.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";

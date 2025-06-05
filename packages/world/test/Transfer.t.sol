@@ -30,7 +30,7 @@ import { DustTest } from "./DustTest.sol";
 import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_RADIUS } from "../src/Constants.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
-import { ObjectTypes } from "../src/codegen/ObjectTypes.sol";
+import { ObjectTypes } from "../src/ObjectType.sol";
 
 import { Orientation } from "../src/Orientation.sol";
 import { ProgramId } from "../src/ProgramId.sol";

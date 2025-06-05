@@ -19,8 +19,8 @@ import { MAX_ENTITY_INFLUENCE_RADIUS } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
 
+import { ObjectTypes } from "../ObjectType.sol";
 import { ProgramId } from "../ProgramId.sol";
-import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 
 import { checkWorldStatus } from "../Utils.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
@@ -28,54 +28,8 @@ import { ProgramIdLib } from "./ProgramIdLib.sol";
 
 type EntityType is bytes1;
 
-function eq(EntityType self, EntityType other) pure returns (bool) {
-  return EntityType.unwrap(self) == EntityType.unwrap(other);
-}
-
-function neq(EntityType self, EntityType other) pure returns (bool) {
-  return EntityType.unwrap(self) != EntityType.unwrap(other);
-}
-
-using { eq as ==, neq as != } for EntityType global;
-
 library EntityIdLib {
-  // Higher-order implementation functions (private)
-  function _validateCallerImpl(
-    EntityId self,
-    address caller,
-    ObjectType objectType,
-    function(EntityId) internal view returns (ProgramId) getProgramFn,
-    function(ProgramId) internal view returns (address) getAddressFn
-  ) private view {
-    if (objectType == ObjectTypes.Player) {
-      require(caller == EntityTypeLib.decodePlayer(self), "Caller not allowed");
-    } else {
-      address programAddress = getAddressFn(getProgramFn(self));
-      require(caller == programAddress, "Caller not allowed");
-    }
-  }
-
-  function _getPositionImpl(EntityId self, function(EntityId) internal view returns (Vec3) getEntityPositionFn)
-    private
-    view
-    returns (Vec3)
-  {
-    (EntityType entityType, Vec3 coord) = EntityTypeLib._decodeCoord(self);
-    if (entityType == EntityTypes.Block || entityType == EntityTypes.Fragment) {
-      return coord;
-    }
-    return getEntityPositionFn(self);
-  }
-
-  function _existsImpl(EntityId self, function(EntityId) internal view returns (ObjectType) getObjectTypeFn)
-    private
-    view
-    returns (bool)
-  {
-    return EntityId.unwrap(self) != 0 && !getObjectTypeFn(self).isNull();
-  }
-
-  // Root (public table access) methods
+  // Non-root (public table access) methods
   function validateCaller(EntityId self, address caller, ObjectType objectType) internal view {
     _validateCallerImpl(self, caller, objectType, getProgram, ProgramIdLib.getAddress);
   }
@@ -104,7 +58,7 @@ library EntityIdLib {
     return _existsImpl(self, getObjectType);
   }
 
-  // Non-root (internal table access) methods
+  // Root (internal table access) methods
   function _validateCaller(EntityId self, address caller, ObjectType objectType) internal view {
     _validateCallerImpl(self, caller, objectType, _getProgram, ProgramIdLib._getAddress);
   }
@@ -133,7 +87,6 @@ library EntityIdLib {
     return _existsImpl(self, _getObjectType);
   }
 
-  // Other methods that don't have duplication
   function activate(EntityId self) internal returns (EnergyData memory) {
     address caller = WorldContextConsumerLib._msgSender();
     return ActivateLib._activate(self, caller, msg.sig);
@@ -176,10 +129,46 @@ library EntityIdLib {
   function getPlayerAddress(EntityId self) internal pure returns (address) {
     return EntityTypeLib.decodePlayer(self);
   }
+
+  // Higher-order implementation functions (private)
+  function _validateCallerImpl(
+    EntityId self,
+    address caller,
+    ObjectType objectType,
+    function(EntityId) internal view returns (ProgramId) getProgramFn,
+    function(ProgramId) internal view returns (address) getAddressFn
+  ) private view {
+    if (objectType == ObjectTypes.Player) {
+      require(caller == EntityTypeLib.decodePlayer(self), "Caller not allowed");
+    } else {
+      address programAddress = getAddressFn(getProgramFn(self));
+      require(caller == programAddress, "Caller not allowed");
+    }
+  }
+
+  function _getPositionImpl(EntityId self, function(EntityId) internal view returns (Vec3) getEntityPositionFn)
+    private
+    view
+    returns (Vec3)
+  {
+    (EntityType entityType, Vec3 coord) = EntityTypeLib._decodeCoord(self);
+    if (entityType == EntityTypes.Block || entityType == EntityTypes.Fragment) {
+      return coord;
+    }
+    return getEntityPositionFn(self);
+  }
+
+  function _existsImpl(EntityId self, function(EntityId) internal view returns (ObjectType) getObjectTypeFn)
+    private
+    view
+    returns (bool)
+  {
+    return EntityId.unwrap(self) != 0 && !getObjectTypeFn(self).isNull();
+  }
 }
 
 library ActivateLib {
-  function _activate(EntityId self, address caller, bytes4 sig) internal returns (EnergyData memory) {
+  function _activate(EntityId self, address caller, bytes4 sig) public returns (EnergyData memory) {
     checkWorldStatus();
 
     ObjectType objectType = EntityIdLib._getObjectType(self);
@@ -273,3 +262,13 @@ library EntityTypeLib {
     return (entityType, Vec3.wrap(uint96(uint256(bytes32(data) >> 160))));
   }
 }
+
+function eq(EntityType self, EntityType other) pure returns (bool) {
+  return EntityType.unwrap(self) == EntityType.unwrap(other);
+}
+
+function neq(EntityType self, EntityType other) pure returns (bool) {
+  return EntityType.unwrap(self) != EntityType.unwrap(other);
+}
+
+using { eq as ==, neq as != } for EntityType global;

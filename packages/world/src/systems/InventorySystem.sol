@@ -9,8 +9,8 @@ import { MAX_PICKUP_RADIUS } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
 
+import { ObjectTypes } from "../ObjectType.sol";
 import { Vec3 } from "../Vec3.sol";
-import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils, SlotAmount, SlotTransfer } from "../utils/InventoryUtils.sol";
 import { DropNotification, PickupNotification, notify } from "../utils/NotifUtils.sol";

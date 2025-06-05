@@ -19,8 +19,8 @@ import { TILL_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
 
+import { ObjectTypes } from "../ObjectType.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
-import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 
 contract FarmingSystem is System {
   function till(EntityId caller, Vec3 coord, uint16 toolSlot) external {

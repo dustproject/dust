@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import "./codegen/ObjectTypeLib.sol";
-import "./codegen/ObjectTypes.sol";
-
-import { IMachineSystem } from "./codegen/world/IMachineSystem.sol";
-import { ITransferSystem } from "./codegen/world/ITransferSystem.sol";
+import { ObjectTypeLib } from "./codegen/ObjectTypeLib.sol";
+import "./codegen/ObjectTypes.sol" as ObjectTypes;
 
 type ObjectType is uint16;
 
@@ -24,5 +21,4 @@ function neq(ObjectType self, ObjectType other) pure returns (bool) {
 }
 
 using { eq as ==, neq as != } for ObjectType global;
-
 using ObjectTypeLib for ObjectType global;

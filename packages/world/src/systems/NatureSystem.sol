@@ -17,7 +17,7 @@ import { ChunkCommitment, ResourcePosition } from "../utils/Vec3Storage.sol";
 import { CHUNK_COMMIT_EXPIRY_BLOCKS, CHUNK_COMMIT_HALF_WIDTH, RESPAWN_ORE_BLOCK_RANGE } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
-import { ObjectTypes } from "../codegen/ObjectTypes.sol";
+import { ObjectTypes } from "../ObjectType.sol";
 
 import { NatureLib } from "../utils/NatureLib.sol";
 

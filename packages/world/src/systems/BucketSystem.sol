@@ -12,8 +12,8 @@ import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
 
+import { ObjectTypes } from "../ObjectType.sol";
 import { Vec3 } from "../Vec3.sol";
-import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 
 contract BucketSystem is System {
   function fillBucket(EntityId caller, Vec3 waterCoord, uint16 bucketSlot) external {

@@ -22,7 +22,7 @@ import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/
 import { BUILD_ENERGY_COST, CHUNK_SIZE, MAX_ENTITY_INFLUENCE_RADIUS, MAX_FLUID_LEVEL } from "../src/Constants.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
-import { ObjectTypes } from "../src/codegen/ObjectTypes.sol";
+import { ObjectTypes } from "../src/ObjectType.sol";
 import { NonPassableBlock } from "../src/utils/MoveLib.sol";
 
 import { EntityId, EntityTypeLib } from "../src/EntityId.sol";

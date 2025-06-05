@@ -13,8 +13,8 @@ import {
 import { EntityId, EntityTypeLib } from "../src/EntityId.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
+import { ObjectTypes } from "../src/ObjectType.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
-import { ObjectTypes } from "../src/codegen/ObjectTypes.sol";
 
 import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
 import { RegionMerkleRoot } from "../src/codegen/tables/RegionMerkleRoot.sol";

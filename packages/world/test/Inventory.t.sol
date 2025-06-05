@@ -25,7 +25,7 @@ import { EntityId } from "../src/EntityId.sol";
 
 import { ObjectType } from "../src/ObjectType.sol";
 
-import { ObjectTypes } from "../src/codegen/ObjectTypes.sol";
+import { ObjectTypes } from "../src/ObjectType.sol";
 
 import { SlotAmount, SlotTransfer } from "../src/utils/InventoryUtils.sol";
 

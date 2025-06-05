@@ -23,8 +23,8 @@ import {
 } from "../Constants.sol";
 import { ObjectType } from "../ObjectType.sol";
 
+import { ObjectTypes } from "../ObjectType.sol";
 import { checkWorldStatus } from "../Utils.sol";
-import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 
 import { Vec3, vec3 } from "../Vec3.sol";
 import { removeEnergyFromLocalPool, updateMachineEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";

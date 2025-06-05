@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { ObjectTypes } from "../ObjectType.sol";
 import { ObjectTypeLib } from "../codegen/ObjectTypeLib.sol";
-import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 

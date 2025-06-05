@@ -94,7 +94,7 @@ import { ITransferSystem } from "./world/ITransferSystem.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
 import { Orientation } from "../Orientation.sol";
 import { ObjectType, ObjectAmount } from "../ObjectType.sol";
-import { ObjectTypes } from "./ObjectTypes.sol";
+import { ObjectTypes } from "../ObjectType.sol";
 
 library ObjectTypeLib {
   function unwrap(ObjectType self) internal pure returns (uint16) {

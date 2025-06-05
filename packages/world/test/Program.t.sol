@@ -19,7 +19,7 @@ import { DustTest } from "./DustTest.sol";
 import { CHUNK_SIZE } from "../src/Constants.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
-import { ObjectTypes } from "../src/codegen/ObjectTypes.sol";
+import { ObjectTypes } from "../src/ObjectType.sol";
 
 import { ProgramId } from "../src/ProgramId.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";

@@ -7,13 +7,11 @@ pragma solidity >=0.8.24;
 
 import { ObjectType } from "../ObjectType.sol";
 
-library ObjectTypes {
 ${objects
   .map((obj) => {
-    return `  ObjectType constant ${obj.name} = ObjectType.wrap(${obj.id});`;
+    return `ObjectType constant ${obj.name} = ObjectType.wrap(${obj.id});`;
   })
   .join("\n")}
-}
 `;
 }
 

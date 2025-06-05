@@ -4,7 +4,7 @@ pragma solidity >=0.8.24;
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
 
-import { ObjectTypes } from "../codegen/ObjectTypes.sol";
+import { ObjectTypes } from "../ObjectType.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { Fragment, FragmentData } from "../codegen/tables/Fragment.sol";
 import { Machine } from "../codegen/tables/Machine.sol";

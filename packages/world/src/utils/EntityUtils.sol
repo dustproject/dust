@@ -15,8 +15,9 @@ import { MAX_FLUID_LEVEL } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 
 import { ObjectType } from "../ObjectType.sol";
+
+import { ObjectTypes } from "../ObjectType.sol";
 import { Vec3 } from "../Vec3.sol";
-import { ObjectTypes } from "../codegen/ObjectTypes.sol";
 import { EntityTypeLib } from "./EntityIdLib.sol";
 
 library EntityUtils {

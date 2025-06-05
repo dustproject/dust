@@ -32,7 +32,7 @@ import {
 } from "../src/Constants.sol";
 import { ObjectType } from "../src/ObjectType.sol";
 
-import { ObjectTypes } from "../src/codegen/ObjectTypes.sol";
+import { ObjectTypes } from "../src/ObjectType.sol";
 
 import { Orientation } from "../src/Orientation.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
