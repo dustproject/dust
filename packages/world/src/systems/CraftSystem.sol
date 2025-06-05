@@ -19,8 +19,9 @@ import { CRAFT_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 
 import { ObjectType, ObjectTypes } from "../ObjectType.sol";
-import { OreLib } from "../OreLib.sol";
+
 import { Vec3 } from "../Vec3.sol";
+import { OreLib } from "../utils/OreLib.sol";
 
 contract CraftSystem is System {
   function craftWithStation(EntityId caller, EntityId station, bytes32 recipeId, SlotAmount[] memory inputs) public {

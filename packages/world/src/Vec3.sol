@@ -8,7 +8,7 @@ import { CHUNK_SIZE, FRAGMENT_SIZE, REGION_SIZE } from "./Constants.sol";
 import { Orientation } from "./Orientation.sol";
 import { Direction } from "./codegen/common.sol";
 
-import { Math } from "./utils/Math.sol";
+import { Math } from "./utils/MathLib.sol";
 
 // Vec3 stores 3 packed int32 values (x, y, z)
 type Vec3 is uint96;

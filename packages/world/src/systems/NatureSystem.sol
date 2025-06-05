@@ -19,7 +19,7 @@ import { EntityId } from "../EntityId.sol";
 import { ObjectType } from "../ObjectType.sol";
 import { ObjectTypes } from "../ObjectType.sol";
 
-import { NatureLib } from "../NatureLib.sol";
+import { NatureLib } from "../utils/NatureLib.sol";
 
 import { Vec3, vec3 } from "../Vec3.sol";
 

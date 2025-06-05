@@ -18,7 +18,7 @@ import {
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 
 import { InventoryUtils, ToolData } from "../utils/InventoryUtils.sol";
-import { Math } from "../utils/Math.sol";
+import { Math } from "../utils/MathLib.sol";
 import { HitMachineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 

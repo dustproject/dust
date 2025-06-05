@@ -10,7 +10,7 @@ import { ObjectType, ObjectTypes } from "../src/ObjectType.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 
 import { InventoryBitmap } from "../src/codegen/tables/InventoryBitmap.sol";
-import { Math } from "../src/utils/Math.sol";
+import { Math } from "../src/utils/MathLib.sol";
 
 import { InventorySlot, InventorySlotData } from "../src/codegen/tables/InventorySlot.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";

@@ -12,7 +12,7 @@ import { addEnergyToLocalPool, transferEnergyToPool } from "../utils/EnergyUtils
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils, ToolData } from "../utils/InventoryUtils.sol";
 
-import { Math } from "../utils/Math.sol";
+import { Math } from "../utils/MathLib.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { TILL_ENERGY_COST } from "../Constants.sol";

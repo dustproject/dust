@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { BurnedResourceCount } from "./codegen/tables/BurnedResourceCount.sol";
+import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
 
-import { EntityObjectType } from "./codegen/tables/EntityObjectType.sol";
-import { ObjectPhysics } from "./codegen/tables/ObjectPhysics.sol";
-import { ResourceCount } from "./codegen/tables/ResourceCount.sol";
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
+import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
+import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 
-import { TerrainLib } from "./systems/libraries/TerrainLib.sol";
+import { TerrainLib } from "../systems/libraries/TerrainLib.sol";
 
-import { addEnergyToLocalPool } from "./utils/EnergyUtils.sol";
-import { EntityUtils } from "./utils/EntityUtils.sol";
-import { ChunkCommitment } from "./utils/Vec3Storage.sol";
+import { addEnergyToLocalPool } from "./EnergyUtils.sol";
+import { EntityUtils } from "./EntityUtils.sol";
+import { ChunkCommitment } from "./Vec3Storage.sol";
 
 import {
   CHUNK_COMMIT_EXPIRY_BLOCKS,
@@ -32,13 +32,13 @@ import {
   MAX_SAKURA_SAPLING,
   MAX_SPRUCE_SAPLING,
   MAX_WHEAT_SEED
-} from "./Constants.sol";
-import { ObjectAmount, ObjectType, ObjectTypeLib, ObjectTypes } from "./ObjectType.sol";
+} from "../Constants.sol";
+import { ObjectAmount, ObjectType, ObjectTypeLib, ObjectTypes } from "../ObjectType.sol";
 
-import { EntityId } from "./EntityId.sol";
+import { EntityId } from "../EntityId.sol";
 
+import { Vec3, vec3 } from "../Vec3.sol";
 import { TreeData, TreeLib } from "./TreeLib.sol";
-import { Vec3, vec3 } from "./Vec3.sol";
 
 library NatureLib {
   function getRandomSeed(Vec3 coord) internal view returns (uint256) {

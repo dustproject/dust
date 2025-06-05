@@ -21,8 +21,10 @@ import { ReverseMovablePosition as _ReverseMovablePosition } from "../codegen/ta
 import { SurfaceChunkByIndex as _SurfaceChunkByIndex } from "../codegen/tables/SurfaceChunkByIndex.sol";
 
 import { EntityId } from "../EntityId.sol";
+
 import { ObjectType } from "../ObjectType.sol";
 import { Vec3 } from "../Vec3.sol";
+import { EntityIdLib } from "./EntityIdLib.sol";
 
 /// @dev Library to get and set Vec3s in tables. It only support schemas of <single key> -> Vec3 and Vec3 -> <single value>
 library Vec3Storage {

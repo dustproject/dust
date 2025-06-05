@@ -8,13 +8,14 @@ import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { LibBit } from "solady/utils/LibBit.sol";
 
 import { burnToolEnergy } from "../utils/EnergyUtils.sol";
-import { Math } from "../utils/Math.sol";
+import { Math } from "../utils/MathLib.sol";
 
 import { EntityId } from "../EntityId.sol";
 
 import { ObjectAmount, ObjectType, ObjectTypes } from "../ObjectType.sol";
-import { OreLib } from "../OreLib.sol";
+
 import { Vec3 } from "../Vec3.sol";
+import { OreLib } from "./OreLib.sol";
 
 struct SlotTransfer {
   uint16 slotFrom;

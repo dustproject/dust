@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { BurnedResourceCount } from "./codegen/tables/BurnedResourceCount.sol";
-import { ResourceCount } from "./codegen/tables/ResourceCount.sol";
+import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
+import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 
-import { TerrainLib } from "./systems/libraries/TerrainLib.sol";
-import { ChunkCommitment } from "./utils/Vec3Storage.sol";
+import { TerrainLib } from "../systems/libraries/TerrainLib.sol";
+import { ChunkCommitment } from "./Vec3Storage.sol";
 
 import {
   CHUNK_COMMIT_EXPIRY_BLOCKS,
@@ -15,12 +15,12 @@ import {
   MAX_GOLD,
   MAX_IRON,
   MAX_NEPTUNIUM
-} from "./Constants.sol";
-import { ObjectAmount, ObjectType, ObjectTypeLib, ObjectTypes } from "./ObjectType.sol";
+} from "../Constants.sol";
+import { ObjectAmount, ObjectType, ObjectTypeLib, ObjectTypes } from "../ObjectType.sol";
 
+import { Vec3, vec3 } from "../Vec3.sol";
 import { NatureLib } from "./NatureLib.sol";
 import { RandomLib } from "./RandomLib.sol";
-import { Vec3, vec3 } from "./Vec3.sol";
 
 library OreLib {
   function getRandomOre(Vec3 coord) internal view returns (ObjectType) {

@@ -23,7 +23,7 @@ import { removeEnergyFromLocalPool, transferEnergyToPool, updateMachineEnergy } 
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
-import { Math } from "../utils/Math.sol";
+import { Math } from "../utils/MathLib.sol";
 import { BuildNotification, MoveNotification, notify } from "../utils/NotifUtils.sol";
 
 import { MoveLib } from "./libraries/MoveLib.sol";

@@ -21,9 +21,9 @@ import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
-import { RandomLib } from "../RandomLib.sol";
-import { TreeLib } from "../TreeLib.sol";
-import { Math } from "../utils/Math.sol";
+import { Math } from "../utils/MathLib.sol";
+import { RandomLib } from "../utils/RandomLib.sol";
+import { TreeLib } from "../utils/TreeLib.sol";
 import { ResourcePosition } from "../utils/Vec3Storage.sol";
 
 import {
@@ -56,10 +56,10 @@ import { EntityId } from "../EntityId.sol";
 import { ObjectAmount, ObjectType } from "../ObjectType.sol";
 import { MoveLib } from "./libraries/MoveLib.sol";
 
-import { NatureLib } from "../NatureLib.sol";
+import { NatureLib } from "../utils/NatureLib.sol";
 
 import { ObjectTypes } from "../ObjectType.sol";
-import { OreLib } from "../OreLib.sol";
+import { OreLib } from "../utils/OreLib.sol";
 
 import { ProgramId } from "../ProgramId.sol";
 import { IDetachProgramHook, IMineHook } from "../ProgramInterfaces.sol";
