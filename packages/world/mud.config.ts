@@ -227,6 +227,14 @@ export default defineWorld({
       },
       key: ["x", "y", "z"],
     },
+    MoveCount: {
+      schema: {
+        entityId: "EntityId",
+        blockNumber: "uint256",
+        count: "uint256",
+      },
+      key: ["entityId", "blockNumber"],
+    },
     // ------------------------------------------------------------
     // Player
     // ------------------------------------------------------------

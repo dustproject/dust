@@ -44,6 +44,9 @@ uint128 constant WATER_MOVE_ENERGY_COST = MAX_PLAYER_ENERGY / 4000; // 4000 move
 uint128 constant LAVA_MOVE_ENERGY_COST = MAX_PLAYER_ENERGY / 10; // 10 moves on lava to die
 uint128 constant PLAYER_FALL_ENERGY_COST = MAX_PLAYER_ENERGY / 25; // This makes it so, with full energy, you die from a 25 + 3 block fall
 
+uint256 constant MAX_MOVES_PER_BLOCK = 30;
+uint256 constant MAX_WATER_MOVES_PER_BLOCK = 20;
+
 uint128 constant DEFAULT_ORE_TOOL_MULTIPLIER = 3;
 uint128 constant DEFAULT_WOODEN_TOOL_MULTIPLIER = 10;
 uint128 constant SPECIALIZED_ORE_TOOL_MULTIPLIER = 9;
