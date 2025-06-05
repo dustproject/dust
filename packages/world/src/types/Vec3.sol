@@ -4,11 +4,13 @@ pragma solidity >=0.8.24;
 import { LibString } from "solady/utils/LibString.sol";
 import { SafeCastLib } from "solady/utils/SafeCastLib.sol";
 
-import { CHUNK_SIZE, FRAGMENT_SIZE, REGION_SIZE } from "./Constants.sol";
-import { Orientation } from "./Orientation.sol";
-import { Direction } from "./codegen/common.sol";
+import { Direction } from "../codegen/common.sol";
 
-import { Math } from "./utils/MathLib.sol";
+import { Math } from "../utils/MathLib.sol";
+
+import { CHUNK_SIZE, FRAGMENT_SIZE, REGION_SIZE } from "../Constants.sol";
+
+import { Orientation } from "./Orientation.sol";
 
 // Vec3 stores 3 packed int32 values (x, y, z)
 type Vec3 is uint96;
@@ -50,41 +52,6 @@ function sub(Vec3 a, Vec3 b) pure returns (Vec3) {
   (int32 ax, int32 ay, int32 az) = a.xyz();
   (int32 bx, int32 by, int32 bz) = b.xyz();
   return vec3(ax - bx, ay - by, az - bz);
-}
-
-function getDirectionVector(Direction direction) pure returns (Vec3) {
-  if (direction == Direction.PositiveX) return vec3(1, 0, 0);
-  if (direction == Direction.NegativeX) return vec3(-1, 0, 0);
-  if (direction == Direction.PositiveY) return vec3(0, 1, 0);
-  if (direction == Direction.NegativeY) return vec3(0, -1, 0);
-  if (direction == Direction.PositiveZ) return vec3(0, 0, 1);
-  if (direction == Direction.NegativeZ) return vec3(0, 0, -1);
-
-  if (direction == Direction.PositiveXPositiveY) return vec3(1, 1, 0);
-  if (direction == Direction.PositiveXNegativeY) return vec3(1, -1, 0);
-  if (direction == Direction.NegativeXPositiveY) return vec3(-1, 1, 0);
-  if (direction == Direction.NegativeXNegativeY) return vec3(-1, -1, 0);
-
-  if (direction == Direction.PositiveXPositiveZ) return vec3(1, 0, 1);
-  if (direction == Direction.PositiveXNegativeZ) return vec3(1, 0, -1);
-  if (direction == Direction.NegativeXPositiveZ) return vec3(-1, 0, 1);
-  if (direction == Direction.NegativeXNegativeZ) return vec3(-1, 0, -1);
-
-  if (direction == Direction.PositiveYPositiveZ) return vec3(0, 1, 1);
-  if (direction == Direction.PositiveYNegativeZ) return vec3(0, 1, -1);
-  if (direction == Direction.NegativeYPositiveZ) return vec3(0, -1, 1);
-  if (direction == Direction.NegativeYNegativeZ) return vec3(0, -1, -1);
-
-  if (direction == Direction.PositiveXPositiveYPositiveZ) return vec3(1, 1, 1);
-  if (direction == Direction.PositiveXPositiveYNegativeZ) return vec3(1, 1, -1);
-  if (direction == Direction.PositiveXNegativeYPositiveZ) return vec3(1, -1, 1);
-  if (direction == Direction.PositiveXNegativeYNegativeZ) return vec3(1, -1, -1);
-  if (direction == Direction.NegativeXPositiveYPositiveZ) return vec3(-1, 1, 1);
-  if (direction == Direction.NegativeXPositiveYNegativeZ) return vec3(-1, 1, -1);
-  if (direction == Direction.NegativeXNegativeYPositiveZ) return vec3(-1, -1, 1);
-  if (direction == Direction.NegativeXNegativeYNegativeZ) return vec3(-1, -1, -1);
-
-  revert("Invalid direction");
 }
 
 library Vec3Lib {
@@ -192,7 +159,7 @@ library Vec3Lib {
   }
 
   function getNeighbor(Vec3 self, Direction direction) internal pure returns (Vec3) {
-    return self + getDirectionVector(direction);
+    return self + _getDirectionVector(direction);
   }
 
   function neighbors6(Vec3 a) internal pure returns (Vec3[6] memory) {
@@ -244,7 +211,7 @@ library Vec3Lib {
 
   // Function to get the new Vec3 based on the direction
   function transform(Vec3 self, Direction direction) internal pure returns (Vec3) {
-    return self + getDirectionVector(direction);
+    return self + _getDirectionVector(direction);
   }
 
   function inVonNeumannNeighborhood(Vec3 center, Vec3 checkCoord) internal pure returns (bool) {
@@ -274,6 +241,41 @@ library Vec3Lib {
   }
 
   // ======== Helper Functions ========
+
+  function _getDirectionVector(Direction direction) private pure returns (Vec3) {
+    if (direction == Direction.PositiveX) return vec3(1, 0, 0);
+    if (direction == Direction.NegativeX) return vec3(-1, 0, 0);
+    if (direction == Direction.PositiveY) return vec3(0, 1, 0);
+    if (direction == Direction.NegativeY) return vec3(0, -1, 0);
+    if (direction == Direction.PositiveZ) return vec3(0, 0, 1);
+    if (direction == Direction.NegativeZ) return vec3(0, 0, -1);
+
+    if (direction == Direction.PositiveXPositiveY) return vec3(1, 1, 0);
+    if (direction == Direction.PositiveXNegativeY) return vec3(1, -1, 0);
+    if (direction == Direction.NegativeXPositiveY) return vec3(-1, 1, 0);
+    if (direction == Direction.NegativeXNegativeY) return vec3(-1, -1, 0);
+
+    if (direction == Direction.PositiveXPositiveZ) return vec3(1, 0, 1);
+    if (direction == Direction.PositiveXNegativeZ) return vec3(1, 0, -1);
+    if (direction == Direction.NegativeXPositiveZ) return vec3(-1, 0, 1);
+    if (direction == Direction.NegativeXNegativeZ) return vec3(-1, 0, -1);
+
+    if (direction == Direction.PositiveYPositiveZ) return vec3(0, 1, 1);
+    if (direction == Direction.PositiveYNegativeZ) return vec3(0, 1, -1);
+    if (direction == Direction.NegativeYPositiveZ) return vec3(0, -1, 1);
+    if (direction == Direction.NegativeYNegativeZ) return vec3(0, -1, -1);
+
+    if (direction == Direction.PositiveXPositiveYPositiveZ) return vec3(1, 1, 1);
+    if (direction == Direction.PositiveXPositiveYNegativeZ) return vec3(1, 1, -1);
+    if (direction == Direction.PositiveXNegativeYPositiveZ) return vec3(1, -1, 1);
+    if (direction == Direction.PositiveXNegativeYNegativeZ) return vec3(1, -1, -1);
+    if (direction == Direction.NegativeXPositiveYPositiveZ) return vec3(-1, 1, 1);
+    if (direction == Direction.NegativeXPositiveYNegativeZ) return vec3(-1, 1, -1);
+    if (direction == Direction.NegativeXNegativeYPositiveZ) return vec3(-1, -1, 1);
+    if (direction == Direction.NegativeXNegativeYNegativeZ) return vec3(-1, -1, -1);
+
+    revert("Invalid direction");
+  }
 
   // Floor division (integer division that rounds down)
   function _floorDiv(int32 a, int32 b) private pure returns (int32) {

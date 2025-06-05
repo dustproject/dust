@@ -4,8 +4,8 @@ pragma solidity >=0.8.24;
 import { WorldContextConsumerLib } from "@latticexyz/world/src/WorldContext.sol";
 
 import { CHUNK_SIZE } from "../Constants.sol";
-import { ObjectType, ObjectTypes } from "../ObjectType.sol";
-import { Vec3, vec3 } from "../Vec3.sol";
+import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
+import { Vec3, vec3 } from "../types/Vec3.sol";
 import { SSTORE2 } from "./SSTORE2.sol";
 
 uint256 constant VERSION_PADDING = 1;

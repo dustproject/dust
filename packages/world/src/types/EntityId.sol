@@ -11,22 +11,32 @@ import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
 import { PlayerBed } from "../codegen/tables/PlayerBed.sol";
 
-import { updateMachineEnergy, updatePlayerEnergy } from "./EnergyUtils.sol";
-import { ForceFieldUtils } from "./ForceFieldUtils.sol";
-import { EntityPosition } from "./Vec3Storage.sol";
+import { updateMachineEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
+import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
+import { EntityPosition } from "../utils/Vec3Storage.sol";
 
 import { MAX_ENTITY_INFLUENCE_RADIUS } from "../Constants.sol";
-import { EntityId } from "../EntityId.sol";
-import { ObjectType } from "../ObjectType.sol";
+import { ObjectType } from "./ObjectType.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
-import { ProgramId } from "../ProgramId.sol";
+import { ObjectTypes } from "./ObjectType.sol";
+import { ProgramId } from "./ProgramId.sol";
 
 import { checkWorldStatus } from "../Utils.sol";
-import { Vec3, vec3 } from "../Vec3.sol";
-import { ProgramIdLib } from "./ProgramIdLib.sol";
+
+import { ProgramIdLib } from "./ProgramId.sol";
+import { Vec3, vec3 } from "./Vec3.sol";
+
+type EntityId is bytes32;
 
 type EntityType is bytes1;
+
+function eq(EntityId self, EntityId other) pure returns (bool) {
+  return EntityId.unwrap(self) == EntityId.unwrap(other);
+}
+
+function neq(EntityId self, EntityId other) pure returns (bool) {
+  return EntityId.unwrap(self) != EntityId.unwrap(other);
+}
 
 library EntityIdLib {
   // Non-root (public table access) methods
@@ -272,3 +282,9 @@ function neq(EntityType self, EntityType other) pure returns (bool) {
 }
 
 using { eq as ==, neq as != } for EntityType global;
+
+using EntityIdLib for EntityId global;
+using { eq as ==, neq as != } for EntityId global;
+
+using EntityTypeLib for EntityType;
+using EntityTypeLib for EntityId;

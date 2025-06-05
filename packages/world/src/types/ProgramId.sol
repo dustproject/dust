@@ -6,11 +6,14 @@ import { ResourceId } from "@latticexyz/world/src/WorldResourceId.sol";
 import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
 import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 
-import { EntityId } from "../EntityId.sol";
-import { ObjectType } from "../ObjectType.sol";
+import { EntityId } from "./EntityId.sol";
+import { ObjectType } from "./ObjectType.sol";
 
-import { ProgramId } from "../ProgramId.sol";
-import { Vec3 } from "../Vec3.sol";
+type ProgramId is bytes32;
+
+function eq(ProgramId a, ProgramId b) pure returns (bool) {
+  return ProgramId.unwrap(a) == ProgramId.unwrap(b);
+}
 
 library ProgramIdLib {
   function unwrap(ProgramId self) internal pure returns (bytes32) {
@@ -91,3 +94,6 @@ library ProgramIdLib {
     return WorldContextProviderLib.appendContext({ callData: hook, msgSender: address(0), msgValue: 0 });
   }
 }
+
+using { eq as == } for ProgramId global;
+using ProgramIdLib for ProgramId global;

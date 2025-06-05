@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { ObjectTypeLib } from "./codegen/ObjectTypeLib.sol";
-import "./codegen/ObjectTypes.sol" as ObjectTypes;
+import { ObjectTypeLib } from "../codegen/ObjectTypeLib.sol";
+import "../codegen/ObjectTypes.sol" as ObjectTypes;
 
 type ObjectType is uint16;
 
