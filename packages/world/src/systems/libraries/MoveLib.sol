@@ -159,7 +159,8 @@ library MoveLib {
     bool currentHasGravity = _gravityApplies(current);
 
     for (uint256 i = 0; i < newBaseCoords.length; i++) {
-      if (cost >= currentEnergy || currentMoveUnits >= Constants.MAX_MOVE_UNITS_PER_BLOCK) break;
+      require(currentMoveUnits < Constants.MAX_MOVE_UNITS_PER_BLOCK, "Move limit exceeded");
+      if (cost >= currentEnergy) break;
 
       Vec3 next = newBaseCoords[i];
 
@@ -267,12 +268,12 @@ library MoveLib {
   }
 
   function _getMoveCost(Vec3 coord) internal view returns (uint128 energyCost, uint128 moveUnitCost) {
-    if (EntityUtils.getObjectTypeAt(coord - vec3(0, 1, 0)) == ObjectTypes.Lava) {
+    Vec3 belowCoord = coord - vec3(0, 1, 0);
+    if (EntityUtils.getObjectTypeAt(belowCoord) == ObjectTypes.Lava) {
       return (Constants.LAVA_MOVE_ENERGY_COST, Constants.MOVING_UNIT_COST);
     }
 
-    // TODO: should we instead check below coord?
-    if (EntityUtils.getFluidLevelAt(coord) > 0) {
+    if (EntityUtils.getFluidLevelAt(belowCoord) > 0) {
       return (Constants.WATER_MOVE_ENERGY_COST, Constants.SWIMMING_UNIT_COST);
     }
 
