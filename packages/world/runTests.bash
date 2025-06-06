@@ -12,8 +12,8 @@ run_tests() {
 
 run_gas_reporter() {
   forge_opts="-vvv $*"
-  echo "Running command: GAS_REPORTER_ENABLED=true pnpm mud test ${common_args[*]} --forgeOptions='$forge_opts' | pnpm gas-report --stdin"
-  GAS_REPORTER_ENABLED=true pnpm mud test "${common_args[@]}" --forgeOptions="$forge_opts" | pnpm gas-report --stdin
+  echo "Running command: GAS_REPORTER_ENABLED=true pnpm mud test ${common_args[*]} --forgeOptions='$forge_opts' | pnpm gas-report --save gas-report.json --stdin"
+  GAS_REPORTER_ENABLED=true pnpm mud test "${common_args[@]}" --forgeOptions="$forge_opts" | pnpm gas-report --save gas-report.json --stdin
 }
 
 # Parse args, separate --with-gas
@@ -32,5 +32,4 @@ if $with_gas; then
 else
   run_tests "${args[@]}"
 fi
-
 
