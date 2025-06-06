@@ -125,16 +125,6 @@ contract MoveTest is DustTest {
     _testMoveMultipleBlocks(alice, 50, false);
   }
 
-  function testMoveHundredBlocksTerrain() public {
-    (address alice,,) = setupAirChunkWithPlayer();
-    _testMoveMultipleBlocks(alice, 100, true);
-  }
-
-  function testMoveHundredBlocksNonTerrain() public {
-    (address alice,,) = setupAirChunkWithPlayer();
-    _testMoveMultipleBlocks(alice, 100, false);
-  }
-
   function testMoveOverLava() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 

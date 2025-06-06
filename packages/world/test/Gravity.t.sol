@@ -387,13 +387,13 @@ contract GravityTest is DustTest {
   function testMoveFallOnWaterFullPath() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
-    // Set player energy to exactly enough for a mine, but not for a fall
+    // Set player energy to exactly enough moving and landing on water
     uint128 initialEnergy = MOVE_ENERGY_COST + WATER_MOVE_ENERGY_COST + 1;
     Energy.set(
       aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: initialEnergy, drainRate: 0 })
     );
 
-    // Set up destination with a deep pit
+    // Set up destination with a deep pit that ends in water
     Vec3[] memory newCoords = new Vec3[](9);
     newCoords[0] = playerCoord + vec3(0, 0, 1);
     newCoords[1] = newCoords[0] - vec3(0, 1, 0);
