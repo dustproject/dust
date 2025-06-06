@@ -22,6 +22,8 @@ uint256 constant CHUNK_COMMIT_HALF_WIDTH = 2;
 uint256 constant RESPAWN_ORE_BLOCK_RANGE = 10;
 uint8 constant MAX_FLUID_LEVEL = 15; // Maximum fluid level for water and lava
 
+uint128 constant BLOCK_TIME = 2 seconds;
+
 // ------------------------------------------------------------
 // Values To Tune
 // ------------------------------------------------------------
@@ -45,9 +47,9 @@ uint128 constant LAVA_MOVE_ENERGY_COST = MAX_PLAYER_ENERGY / 10; // 10 moves on 
 uint128 constant PLAYER_FALL_ENERGY_COST = MAX_PLAYER_ENERGY / 25; // This makes it so, with full energy, you die from a 25 + 3 block fall
 
 uint128 constant MAX_MOVE_UNITS_PER_BLOCK = 1e18;
-// TODO: placeholders, adjust to client speed
-uint128 constant WALKING_MOVE_UNIT_COST = MAX_MOVE_UNITS_PER_BLOCK / 50;
-uint128 constant SWIMMING_MOVE_UNIT_COST = MAX_MOVE_UNITS_PER_BLOCK / 10;
+uint128 constant MAX_MOVE_UNITS_PER_SECOND = MAX_MOVE_UNITS_PER_BLOCK / BLOCK_TIME; // 1e18 move units per second
+uint128 constant MOVING_UNIT_COST = MAX_MOVE_UNITS_PER_SECOND / 25; // 25 blocks per second
+uint128 constant SWIMMING_UNIT_COST = MAX_MOVE_UNITS_PER_SECOND / 5; // 5 blocks per second
 
 uint128 constant DEFAULT_ORE_TOOL_MULTIPLIER = 3;
 uint128 constant DEFAULT_WOODEN_TOOL_MULTIPLIER = 10;
