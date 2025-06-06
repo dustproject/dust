@@ -134,12 +134,16 @@ library MoveLib {
       }
     }
 
+    // We don't count move units as we are not moving, just falling
+    (uint128 moveCost,) = _getMoveCost(current);
     // If currently on water or under the safe fall threshold, don't apply fall damage
     if (currentFallHeight <= Constants.PLAYER_SAFE_FALL_DISTANCE || _isFluid(current)) {
-      return (current, 0);
+      return (current, moveCost);
     }
 
-    return (current, Constants.PLAYER_FALL_ENERGY_COST * (currentFallHeight - Constants.PLAYER_SAFE_FALL_DISTANCE));
+    return (
+      current, moveCost + Constants.PLAYER_FALL_ENERGY_COST * (currentFallHeight - Constants.PLAYER_SAFE_FALL_DISTANCE)
+    );
   }
 
   /**
