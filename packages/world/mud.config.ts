@@ -227,11 +227,11 @@ export default defineWorld({
       },
       key: ["x", "y", "z"],
     },
-    MoveCount: {
+    MoveUnits: {
       schema: {
         entityId: "EntityId",
         blockNumber: "uint256",
-        count: "uint256",
+        units: "uint128",
       },
       key: ["entityId", "blockNumber"],
     },

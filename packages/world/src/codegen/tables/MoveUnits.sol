@@ -19,17 +19,17 @@ import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 // Import user types
 import { EntityId } from "../../EntityId.sol";
 
-library MoveCount {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "MoveCount", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x746200000000000000000000000000004d6f7665436f756e7400000000000000);
+library MoveUnits {
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "MoveUnits", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x746200000000000000000000000000004d6f7665556e69747300000000000000);
 
   FieldLayout constant _fieldLayout =
-    FieldLayout.wrap(0x0020010020000000000000000000000000000000000000000000000000000000);
+    FieldLayout.wrap(0x0010010010000000000000000000000000000000000000000000000000000000);
 
   // Hex-encoded key schema of (bytes32, uint256)
   Schema constant _keySchema = Schema.wrap(0x004002005f1f0000000000000000000000000000000000000000000000000000);
-  // Hex-encoded value schema of (uint256)
-  Schema constant _valueSchema = Schema.wrap(0x002001001f000000000000000000000000000000000000000000000000000000);
+  // Hex-encoded value schema of (uint128)
+  Schema constant _valueSchema = Schema.wrap(0x001001000f000000000000000000000000000000000000000000000000000000);
 
   /**
    * @notice Get the table's key field names.
@@ -47,7 +47,7 @@ library MoveCount {
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
     fieldNames = new string[](1);
-    fieldNames[0] = "count";
+    fieldNames[0] = "units";
   }
 
   /**
@@ -65,95 +65,95 @@ library MoveCount {
   }
 
   /**
-   * @notice Get count.
+   * @notice Get units.
    */
-  function getCount(EntityId entityId, uint256 blockNumber) internal view returns (uint256 count) {
+  function getUnits(EntityId entityId, uint256 blockNumber) internal view returns (uint128 units) {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(entityId);
     _keyTuple[1] = bytes32(uint256(blockNumber));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return (uint256(bytes32(_blob)));
+    return (uint128(bytes16(_blob)));
   }
 
   /**
-   * @notice Get count.
+   * @notice Get units.
    */
-  function _getCount(EntityId entityId, uint256 blockNumber) internal view returns (uint256 count) {
+  function _getUnits(EntityId entityId, uint256 blockNumber) internal view returns (uint128 units) {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(entityId);
     _keyTuple[1] = bytes32(uint256(blockNumber));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return (uint256(bytes32(_blob)));
+    return (uint128(bytes16(_blob)));
   }
 
   /**
-   * @notice Get count.
+   * @notice Get units.
    */
-  function get(EntityId entityId, uint256 blockNumber) internal view returns (uint256 count) {
+  function get(EntityId entityId, uint256 blockNumber) internal view returns (uint128 units) {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(entityId);
     _keyTuple[1] = bytes32(uint256(blockNumber));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return (uint256(bytes32(_blob)));
+    return (uint128(bytes16(_blob)));
   }
 
   /**
-   * @notice Get count.
+   * @notice Get units.
    */
-  function _get(EntityId entityId, uint256 blockNumber) internal view returns (uint256 count) {
+  function _get(EntityId entityId, uint256 blockNumber) internal view returns (uint128 units) {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(entityId);
     _keyTuple[1] = bytes32(uint256(blockNumber));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return (uint256(bytes32(_blob)));
+    return (uint128(bytes16(_blob)));
   }
 
   /**
-   * @notice Set count.
+   * @notice Set units.
    */
-  function setCount(EntityId entityId, uint256 blockNumber, uint256 count) internal {
+  function setUnits(EntityId entityId, uint256 blockNumber, uint128 units) internal {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(entityId);
     _keyTuple[1] = bytes32(uint256(blockNumber));
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((count)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((units)), _fieldLayout);
   }
 
   /**
-   * @notice Set count.
+   * @notice Set units.
    */
-  function _setCount(EntityId entityId, uint256 blockNumber, uint256 count) internal {
+  function _setUnits(EntityId entityId, uint256 blockNumber, uint128 units) internal {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(entityId);
     _keyTuple[1] = bytes32(uint256(blockNumber));
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((count)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((units)), _fieldLayout);
   }
 
   /**
-   * @notice Set count.
+   * @notice Set units.
    */
-  function set(EntityId entityId, uint256 blockNumber, uint256 count) internal {
+  function set(EntityId entityId, uint256 blockNumber, uint128 units) internal {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(entityId);
     _keyTuple[1] = bytes32(uint256(blockNumber));
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((count)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((units)), _fieldLayout);
   }
 
   /**
-   * @notice Set count.
+   * @notice Set units.
    */
-  function _set(EntityId entityId, uint256 blockNumber, uint256 count) internal {
+  function _set(EntityId entityId, uint256 blockNumber, uint128 units) internal {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(entityId);
     _keyTuple[1] = bytes32(uint256(blockNumber));
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((count)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((units)), _fieldLayout);
   }
 
   /**
@@ -182,8 +182,8 @@ library MoveCount {
    * @notice Tightly pack static (fixed length) data using this table's schema.
    * @return The static data, encoded into a sequence of bytes.
    */
-  function encodeStatic(uint256 count) internal pure returns (bytes memory) {
-    return abi.encodePacked(count);
+  function encodeStatic(uint128 units) internal pure returns (bytes memory) {
+    return abi.encodePacked(units);
   }
 
   /**
@@ -192,8 +192,8 @@ library MoveCount {
    * @return The lengths of the dynamic fields (packed into a single bytes32 value).
    * @return The dynamic (variable length) data, encoded into a sequence of bytes.
    */
-  function encode(uint256 count) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
-    bytes memory _staticData = encodeStatic(count);
+  function encode(uint128 units) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
+    bytes memory _staticData = encodeStatic(units);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
