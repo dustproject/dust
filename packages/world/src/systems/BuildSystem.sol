@@ -83,9 +83,10 @@ contract BuildSystem is System {
     require(!ctx.buildType.isPassThrough(), "Cannot jump build on a pass-through block");
 
     // Jump movement
+    MoveLib.jump(coord);
+
     Vec3[] memory moveCoords = new Vec3[](1);
     moveCoords[0] = coord + vec3(0, 1, 0);
-    MoveLib.moveWithoutGravity(coord, moveCoords);
     notify(caller, MoveNotification({ moveCoords: moveCoords }));
 
     return _build(ctx, extraData);

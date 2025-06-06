@@ -19,7 +19,7 @@ import { EntityUtils } from "../../utils/EntityUtils.sol";
 error NonPassableBlock(int32 x, int32 y, int32 z, ObjectType objectType);
 
 library MoveLib {
-  function moveWithoutGravity(Vec3 playerCoord, Vec3[] memory newBaseCoords) public {
+  function jump(Vec3 playerCoord) public {
     EntityId[] memory playerEntityIds = _removePlayerPosition(playerCoord);
     EntityId player = playerEntityIds[0];
 
@@ -27,31 +27,22 @@ library MoveLib {
 
     uint128 currentEnergy = Energy._getEnergy(player);
 
-    uint128 totalCost;
-    Vec3 current = playerCoord;
-    for (uint256 i = 0; i < newBaseCoords.length; i++) {
-      Vec3 next = newBaseCoords[i];
-      _requireValidMove(current, next);
-      (uint128 cost,) = _getMoveCost(next);
-      totalCost += cost;
-      current = next;
+    Vec3 above = playerCoord + vec3(0, 1, 0);
+    _requireValidMove(playerCoord, above);
+    (uint128 totalCost,) = _getMoveCost(above);
 
-      if (totalCost >= currentEnergy) {
-        totalCost = currentEnergy;
-        break;
-      }
+    if (totalCost >= currentEnergy) {
+      totalCost = currentEnergy;
     }
 
-    _setPlayerPosition(playerEntityIds, current);
+    _setPlayerPosition(playerEntityIds, above);
 
-    _updatePlayerDrainRate(player, current);
+    _updatePlayerDrainRate(player, above);
 
     if (totalCost > 0) {
-      decreasePlayerEnergy(player, current, totalCost);
-      addEnergyToLocalPool(current, totalCost);
+      decreasePlayerEnergy(player, above, totalCost);
+      addEnergyToLocalPool(above, totalCost);
     }
-
-    _handleAbove(player, playerCoord);
   }
 
   function move(Vec3 playerCoord, Vec3[] memory newBaseCoords) public {
