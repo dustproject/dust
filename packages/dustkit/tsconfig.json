@@ -1,7 +1,9 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "outDir": "dist",
+    // enable exactOptionalPropertyTypes to match arktype's default
+    "exactOptionalPropertyTypes": true
   },
   "include": ["src", "mud.config.ts", "out"]
 }
