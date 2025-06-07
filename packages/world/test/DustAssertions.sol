@@ -136,11 +136,11 @@ abstract contract DustAssertions is MudTest, GasReporter {
   }
 
   function assertEq(Vec3 a, Vec3 b, string memory err) internal pure {
-    assertTrue(a == b, err);
+    assertEq(a.toString(), b.toString(), err);
   }
 
   function assertEq(Vec3 a, Vec3 b) internal pure {
-    assertTrue(a == b);
+    assertEq(a.toString(), b.toString());
   }
 
   function assertEq(EntityId a, EntityId b, string memory err) internal pure {
