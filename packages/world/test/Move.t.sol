@@ -115,14 +115,14 @@ contract MoveTest is DustTest {
     _testMoveMultipleBlocks(alice, 10, false);
   }
 
-  function testMoveFiftyBlocksTerrain() public {
+  function testMoveMaxBlocksTerrain() public {
     (address alice,,) = setupAirChunkWithPlayer();
-    _testMoveMultipleBlocks(alice, 50, true);
+    _testMoveMultipleBlocks(alice, 24, true);
   }
 
-  function testMoveFiftyBlocksNonTerrain() public {
+  function testMoveMaxBlocksNonTerrain() public {
     (address alice,,) = setupAirChunkWithPlayer();
-    _testMoveMultipleBlocks(alice, 50, false);
+    _testMoveMultipleBlocks(alice, 24, false);
   }
 
   function testMoveOverLava() public {
@@ -295,7 +295,7 @@ contract MoveTest is DustTest {
     uint128 playerEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     // Fall damage is greater than the move energy cost
     assertGt(PLAYER_FALL_ENERGY_COST, MOVE_ENERGY_COST, "Fall energy cost is not greater than the move energy cost");
-    assertEq(playerEnergyLost, MOVE_ENERGY_COST, "Player energy lost is not greater than the move energy cost");
+    assertEq(playerEnergyLost, MOVE_ENERGY_COST * 2, "Player energy lost is move + landing energy cost");
   }
 
   function testMoveFallDamage() public {
@@ -436,7 +436,7 @@ contract MoveTest is DustTest {
     }
 
     vm.prank(alice);
-    vm.expectRevert("Cannot glide more than 10 blocks");
+    vm.expectRevert("Cannot glide more than 5 blocks");
     world.move(aliceEntityId, newCoords);
   }
 
@@ -487,7 +487,7 @@ contract MoveTest is DustTest {
   }
 
   function testMoveFailsIfInvalidCoord() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
     Vec3[] memory newCoords = new Vec3[](2);
     newCoords[0] = playerCoord + vec3(0, 0, 1);
@@ -497,11 +497,10 @@ contract MoveTest is DustTest {
     vm.expectRevert("New coord is too far from old coord");
     world.move(aliceEntityId, newCoords);
 
-    uint256 pathLength = uint256(int256(playerCoord.x()));
+    uint256 pathLength = uint256(int256(playerCoord.x())) + 1;
     newCoords = new Vec3[](pathLength);
-    newCoords[0] = playerCoord - vec3(1, 0, 0);
     for (uint32 i = 0; i < pathLength; i++) {
-      newCoords[i] = (playerCoord - vec3(1, 0, 0).mul(int32(i)));
+      newCoords[i] = (playerCoord - vec3(1, 0, 0).mul(int32(i) + 1));
     }
 
     vm.prank(alice);
@@ -833,26 +832,34 @@ contract MoveTest is DustTest {
   function testWalkMoveUnits() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
-    // Player can walk up to 50 blocks per Ethereum block
-    // Try to move 51 blocks, should only move 50
-    Vec3[] memory newCoords = new Vec3[](51);
+    // Player can walk up to 24 blocks per Ethereum block
+    // Try to move 24 blocks, the next move should revert in the same block
+    Vec3[] memory newCoords = new Vec3[](24);
+
+    Vec3 belowCoord;
 
     for (uint32 i = 0; i < newCoords.length; i++) {
       newCoords[i] = playerCoord + vec3(0, 0, int32(i) + 1);
-
-      Vec3 belowCoord = newCoords[i] - vec3(0, 1, 0);
-      Vec3 aboveCoord = newCoords[i] + vec3(0, 1, 0);
-      setTerrainAtCoord(newCoords[i], ObjectTypes.Air);
-      setTerrainAtCoord(aboveCoord, ObjectTypes.Air);
+      belowCoord = newCoords[i] - vec3(0, 1, 0);
       setTerrainAtCoord(belowCoord, ObjectTypes.Grass);
     }
 
+    // This should work
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);
 
+    newCoords = new Vec3[](1);
+    newCoords[0] = playerCoord + vec3(0, 0, 25);
+
+    belowCoord = newCoords[0] - vec3(0, 1, 0);
+    setTerrainAtCoord(belowCoord, ObjectTypes.Grass);
+
+    vm.prank(alice);
+    vm.expectRevert("Move limit exceeded");
+    world.move(aliceEntityId, newCoords);
+
     Vec3 finalCoord = EntityPosition.get(aliceEntityId);
-    // Should have moved exactly 50 blocks (stopped at index 49)
-    assertEq(finalCoord, playerCoord + vec3(0, 0, 50), "Player should have moved exactly 50 blocks");
+    assertEq(finalCoord, playerCoord + vec3(0, 0, 24), "Player should have moved 24 blocks");
 
     // Move to next block and verify can move again
     vm.roll(block.number + 1);
@@ -871,35 +878,43 @@ contract MoveTest is DustTest {
   function testWaterMoveUnits() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupWaterChunkWithPlayer();
 
-    // Player can swim up to 10 blocks per Ethereum block in water
-    // Try to move 11 blocks, should only move 10
-    Vec3[] memory newCoords = new Vec3[](11);
-    for (uint32 i = 0; i < 11; i++) {
+    // Player can swim up to ~21 blocks per Ethereum block in water
+    // Try to move 21 blocks, the next one should revert in the same block
+    Vec3[] memory newCoords = new Vec3[](21);
+
+    Vec3 belowCoord;
+
+    for (uint32 i = 0; i < newCoords.length; i++) {
       newCoords[i] = playerCoord + vec3(0, 0, int32(i) + 1);
+      belowCoord = newCoords[i] - vec3(0, 1, 0);
+      setTerrainAtCoord(newCoords[i], ObjectTypes.Water);
+      setTerrainAtCoord(belowCoord, ObjectTypes.Water);
     }
 
+    // This should work
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);
 
-    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
-    // Should have moved exactly 10 blocks (stopped at index 9)
-    assertEq(finalCoord, playerCoord + vec3(0, 0, 10), "Player should have moved exactly 10 blocks in water");
+    newCoords = new Vec3[](1);
+    newCoords[0] = playerCoord + vec3(0, 0, 22);
 
-    // Verify can't move more in same block
-    Vec3[] memory extraMove = new Vec3[](1);
-    extraMove[0] = finalCoord + vec3(0, 0, 1);
+    belowCoord = newCoords[0] - vec3(0, 1, 0);
+    setTerrainAtCoord(newCoords[0], ObjectTypes.Water);
+    setTerrainAtCoord(belowCoord, ObjectTypes.Water);
 
     vm.prank(alice);
-    world.move(aliceEntityId, extraMove);
+    vm.expectRevert("Move limit exceeded");
+    world.move(aliceEntityId, newCoords);
 
-    // Should still be at same position
-    assertEq(EntityPosition.get(aliceEntityId), finalCoord, "Player should not be able to move beyond water limit");
+    Vec3 finalCoord = EntityPosition.get(aliceEntityId);
+    // Should have moved 21 blocks
+    assertEq(finalCoord, playerCoord + vec3(0, 0, 21), "Player should have moved exactly 21 blocks in water");
 
     // Move to next block and verify can move again
     vm.roll(block.number + 1);
 
     vm.prank(alice);
-    world.move(aliceEntityId, extraMove);
+    world.move(aliceEntityId, newCoords);
 
     assertEq(
       EntityPosition.get(aliceEntityId), finalCoord + vec3(0, 0, 1), "Player should be able to move in new block"

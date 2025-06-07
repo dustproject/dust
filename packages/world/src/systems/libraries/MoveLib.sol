@@ -163,7 +163,6 @@ library MoveLib {
     bool currentHasGravity = _gravityApplies(current);
 
     for (uint256 i = 0; i < newBaseCoords.length; i++) {
-      require(currentMoveUnits < Constants.MAX_MOVE_UNITS_PER_BLOCK, "Move limit exceeded");
       if (cost >= currentEnergy) break;
 
       Vec3 next = newBaseCoords[i];
@@ -192,12 +191,14 @@ library MoveLib {
           require(jumps <= Constants.MAX_PLAYER_JUMPS, "Cannot jump more than 3 blocks");
         } else if (nextHasGravity) {
           ++glides;
-          require(glides <= Constants.MAX_PLAYER_GLIDES, "Cannot glide more than 10 blocks");
+          require(glides <= Constants.MAX_PLAYER_GLIDES, "Cannot glide more than 5 blocks");
         }
         (uint128 moveCost, uint128 moveUnits) = _getMoveCost(next);
         cost += moveCost;
         currentMoveUnits += moveUnits;
       }
+
+      require(currentMoveUnits <= Constants.MAX_MOVE_UNITS_PER_BLOCK, "Move limit exceeded");
 
       if (!nextHasGravity) {
         // If landing after a long fall, apply fall damage
