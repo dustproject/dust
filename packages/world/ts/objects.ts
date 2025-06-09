@@ -1347,4 +1347,7 @@ export const categories: Record<string, Category> = {
       "Torch",
     ],
   },
+  PreferredSpawn: {
+    objects: ["Dirt", "Grass", "Sand", "Stone"],
+  },
 } as const;

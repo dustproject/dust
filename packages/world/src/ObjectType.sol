@@ -594,6 +594,17 @@ library ObjectTypeLib {
     }
   }
 
+  function isPreferredSpawn(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      // IDs in [0..255]
+      {
+        let bit := and(shr(self, 0x100600010), 1)
+        ok := bit
+      }
+    }
+  }
+
   // Category getters
   function getNonSolidTypes() internal pure returns (ObjectType[2] memory) {
     return [ObjectTypes.Air, ObjectTypes.Water];
@@ -1268,6 +1279,10 @@ library ObjectTypeLib {
       ObjectTypes.TextSign,
       ObjectTypes.Torch
     ];
+  }
+
+  function getPreferredSpawnTypes() internal pure returns (ObjectType[4] memory) {
+    return [ObjectTypes.Dirt, ObjectTypes.Grass, ObjectTypes.Sand, ObjectTypes.Stone];
   }
 
   // Specialized getters

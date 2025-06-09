@@ -9,7 +9,7 @@ uint16 constant MAX_PLAYER_JUMPS = 3;
 uint16 constant MAX_PLAYER_GLIDES = 10;
 uint16 constant PLAYER_SAFE_FALL_DISTANCE = 3;
 
-uint256 constant SPAWN_BLOCK_RANGE = 10;
+uint256 constant SPAWN_BLOCK_RANGE = 20;
 
 int32 constant FRAGMENT_SIZE = 8; // 8x8x8 (3D)
 int32 constant CHUNK_SIZE = 16; // 16x16x16 (3D)

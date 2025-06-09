@@ -44,13 +44,10 @@ contract SpawnTest is DustTest {
     address alice = vm.randomAddress();
 
     // Explore chunk at (0, 0, 0)
-    setupAirChunk(vec3(0, 0, 0));
+    setupFlatChunk(vec3(0, 0, 0));
 
     vm.prank(alice);
-    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice) + vec3(0, 1, 0);
-
-    // Set below entity to dirt so gravity doesn't apply
-    setObjectAtCoord(spawnCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
+    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice);
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
@@ -58,7 +55,7 @@ contract SpawnTest is DustTest {
 
     vm.prank(alice);
     startGasReport("randomSpawn");
-    EntityId playerEntityId = world.randomSpawn(blockNumber, spawnCoord.y());
+    EntityId playerEntityId = world.randomSpawn(blockNumber, spawnCoord);
     endGasReport();
     assertTrue(playerEntityId.exists());
 
@@ -70,14 +67,13 @@ contract SpawnTest is DustTest {
   function testRandomSpawnPaused() public {
     WorldStatus.setIsPaused(true);
     vm.expectRevert("DUST is paused. Try again later");
-    world.randomSpawn(vm.getBlockNumber(), 0);
+    world.randomSpawn(vm.getBlockNumber(), vec3(0, 0, 0));
   }
 
   function testRandomSpawnFailsDueToOldBlock() public {
-    uint256 pastBlock = vm.getBlockNumber() - 11;
-    int32 y = 1;
-    vm.expectRevert("Can only choose past 10 blocks");
-    world.randomSpawn(pastBlock, y);
+    uint256 pastBlock = vm.getBlockNumber() - 21;
+    vm.expectRevert("Can only choose past 20 blocks");
+    world.randomSpawn(pastBlock, vec3(0, 0, 0));
   }
 
   function testSpawnTile() public {
@@ -119,6 +115,17 @@ contract SpawnTest is DustTest {
     EntityId playerEntityId = world.spawn(spawnTileEntityId, spawnCoord, 1, "");
     endGasReport();
     assertTrue(playerEntityId.exists());
+  }
+
+  function testSpawnFailsIfNoValidSpawnCoord() public {
+    uint256 blockNumber = vm.getBlockNumber() - 5;
+    address alice = vm.randomAddress();
+
+    setupAirChunk(vec3(0, 0, 0));
+
+    vm.prank(alice);
+    vm.expectRevert("No valid spawn coord found in chunk");
+    world.getRandomSpawnCoord(blockNumber, alice);
   }
 
   function testSpawnFailsIfNoSpawnTile() public {
@@ -244,7 +251,7 @@ contract SpawnTest is DustTest {
 
   function testRandomSpawnAfterDeath() public {
     // This should setup a player with energy
-    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+    (address alice, EntityId aliceEntityId,) = setupFlatChunkWithPlayer();
 
     // Drain energy from player
     vm.warp(vm.getBlockTimestamp() + (MAX_PLAYER_ENERGY / PLAYER_ENERGY_DRAIN_RATE) + 1);
@@ -252,31 +259,25 @@ contract SpawnTest is DustTest {
     uint256 blockNumber = vm.getBlockNumber() - 5;
 
     vm.prank(alice);
-    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice) + vec3(0, 1, 0);
-
-    // Set below entity to dirt so gravity doesn't apply
-    setObjectAtCoord(spawnCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
+    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice);
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
     LocalEnergyPool.set(shardCoord, MAX_PLAYER_ENERGY);
 
     vm.prank(alice);
-    EntityId playerEntityId = world.randomSpawn(blockNumber, spawnCoord.y());
+    EntityId playerEntityId = world.randomSpawn(blockNumber, spawnCoord);
     assertEq(playerEntityId, aliceEntityId, "Player entity doesn't match");
   }
 
   function testRandomSpawnFailsIfNotDead() public {
     // This should setup a player with energy
-    (address alice,,) = setupAirChunkWithPlayer();
+    (address alice,,) = setupFlatChunkWithPlayer();
 
     uint256 blockNumber = vm.getBlockNumber() - 5;
 
     vm.prank(alice);
-    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice) + vec3(0, 1, 0);
-
-    // Set below entity to dirt so gravity doesn't apply
-    setObjectAtCoord(spawnCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
+    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice);
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
@@ -285,7 +286,7 @@ contract SpawnTest is DustTest {
     // Spawn player should fail as the player has energy
     vm.prank(alice);
     vm.expectRevert("Player already spawned");
-    world.randomSpawn(blockNumber, spawnCoord.y());
+    world.randomSpawn(blockNumber, spawnCoord);
   }
 
   function testSpawnRespawn() public {
