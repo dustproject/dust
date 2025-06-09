@@ -26,6 +26,6 @@ export const appContextShape = type({
     },
   ],
   userAddress: hex,
-  worldAddress: hex,
   chainId: "number.integer",
+  worldAddress: hex,
 });
