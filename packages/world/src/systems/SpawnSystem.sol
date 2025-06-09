@@ -42,19 +42,50 @@ import { ISpawnHook } from "../ProgramInterfaces.sol";
 contract SpawnSystem is System {
   using LibPRNG for LibPRNG.PRNG;
 
-  function getAllRandomSpawnChunks(address sender)
+  function getAllRandomSpawnCoords(address sender)
     public
     view
-    returns (Vec3[] memory spawnChunks, uint256[] memory blockNumbers)
+    returns (Vec3[] memory spawnCoords, uint256[] memory blockNumbers)
   {
-    spawnChunks = new Vec3[](SPAWN_BLOCK_RANGE);
-    blockNumbers = new uint256[](SPAWN_BLOCK_RANGE);
+    Vec3[] memory validSpawnCoords = new Vec3[](SPAWN_BLOCK_RANGE);
+    uint256[] memory validBlockNumbers = new uint256[](SPAWN_BLOCK_RANGE);
+    uint256 validCount = 0;
     for (uint256 i = 0; i < SPAWN_BLOCK_RANGE; i++) {
       uint256 blockNumber = block.number - (i + 1);
-      spawnChunks[i] = getRandomSpawnChunk(blockNumber, sender);
-      blockNumbers[i] = blockNumber;
+      (Vec3 spawnCoord, bool valid) = getRandomSpawnCoord(blockNumber, sender);
+      if (valid) {
+        validSpawnCoords[validCount] = spawnCoord;
+        validBlockNumbers[validCount] = blockNumber;
+        validCount++;
+      }
     }
-    return (spawnChunks, blockNumbers);
+    // Only return the valid spawn coords and block numbers
+    spawnCoords = new Vec3[](validCount);
+    blockNumbers = new uint256[](validCount);
+    for (uint256 i = 0; i < validCount; i++) {
+      spawnCoords[i] = validSpawnCoords[i];
+      blockNumbers[i] = validBlockNumbers[i];
+    }
+    return (spawnCoords, blockNumbers);
+  }
+
+  function getRandomSpawnCoord(uint256 blockNumber, address sender) public view returns (Vec3 spawnCoord, bool valid) {
+    Vec3 spawnChunk = getRandomSpawnChunk(blockNumber, sender);
+    spawnCoord = spawnChunk.mul(CHUNK_SIZE);
+    // Loop through the chunk and find a valid spawn coord
+    for (int32 x = 0; x < CHUNK_SIZE; x++) {
+      // Start from the top of the chunk and work down
+      for (int32 y = CHUNK_SIZE - 1; y >= 0; y--) {
+        for (int32 z = 0; z < CHUNK_SIZE; z++) {
+          Vec3 spawnCoordCandidate = spawnCoord + vec3(x, y, z);
+          if (isValidSpawn(spawnCoordCandidate)) {
+            return (spawnCoordCandidate, true);
+          }
+        }
+      }
+    }
+
+    return (spawnCoord, false);
   }
 
   function getRandomSpawnChunk(uint256 blockNumber, address sender) public view returns (Vec3 chunk) {
