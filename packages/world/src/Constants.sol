@@ -6,7 +6,7 @@ uint32 constant MAX_PICKUP_RADIUS = 6;
 uint32 constant MAX_RESPAWN_HALF_WIDTH = 10;
 
 uint16 constant MAX_PLAYER_JUMPS = 3;
-uint16 constant MAX_PLAYER_GLIDES = 5;
+uint16 constant MAX_PLAYER_GLIDES = 10;
 uint16 constant PLAYER_SAFE_FALL_DISTANCE = 3;
 
 uint256 constant SPAWN_BLOCK_RANGE = 10;
@@ -48,8 +48,8 @@ uint128 constant PLAYER_FALL_ENERGY_COST = MAX_PLAYER_ENERGY / 25; // This makes
 
 uint128 constant MAX_MOVE_UNITS_PER_BLOCK = 1e18;
 uint128 constant MAX_MOVE_UNITS_PER_SECOND = MAX_MOVE_UNITS_PER_BLOCK / BLOCK_TIME; // 1e18 move units per second
-uint128 constant MOVING_UNIT_COST = MAX_MOVE_UNITS_PER_SECOND / 12; // 12 blocks per second
-uint128 constant SWIMMING_UNIT_COST = MAX_MOVE_UNITS_PER_SECOND * 10 / 108; // 10,8 blocks per second (90% of walking speed)
+uint128 constant MOVING_UNIT_COST = MAX_MOVE_UNITS_PER_SECOND / 15; // 15 blocks per second
+uint128 constant SWIMMING_UNIT_COST = MAX_MOVE_UNITS_PER_SECOND * 10 / 135; // 13,5 blocks per second (90% of walking speed)
 
 uint128 constant DEFAULT_ORE_TOOL_MULTIPLIER = 3;
 uint128 constant DEFAULT_WOODEN_TOOL_MULTIPLIER = 10;
