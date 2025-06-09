@@ -71,8 +71,8 @@ contract SpawnTest is DustTest {
   }
 
   function testRandomSpawnFailsDueToOldBlock() public {
-    uint256 pastBlock = vm.getBlockNumber() - 11;
-    vm.expectRevert("Can only choose past 10 blocks");
+    uint256 pastBlock = vm.getBlockNumber() - 21;
+    vm.expectRevert("Can only choose past 20 blocks");
     world.randomSpawn(pastBlock, vec3(0, 0, 0));
   }
 
@@ -115,6 +115,17 @@ contract SpawnTest is DustTest {
     EntityId playerEntityId = world.spawn(spawnTileEntityId, spawnCoord, 1, "");
     endGasReport();
     assertTrue(playerEntityId.exists());
+  }
+
+  function testSpawnFailsIfNoValidSpawnCoord() public {
+    uint256 blockNumber = vm.getBlockNumber() - 5;
+    address alice = vm.randomAddress();
+
+    setupAirChunk(vec3(0, 0, 0));
+
+    vm.prank(alice);
+    vm.expectRevert("No valid spawn coord found in chunk");
+    world.getRandomSpawnCoord(blockNumber, alice);
   }
 
   function testSpawnFailsIfNoSpawnTile() public {

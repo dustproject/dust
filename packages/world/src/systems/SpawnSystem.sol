@@ -118,7 +118,7 @@ contract SpawnSystem is System {
   function randomSpawn(uint256 blockNumber, Vec3 spawnCoord) public returns (EntityId) {
     checkWorldStatus();
     require(
-      blockNumber < block.number && blockNumber >= block.number - SPAWN_BLOCK_RANGE, "Can only choose past 10 blocks"
+      blockNumber < block.number && blockNumber >= block.number - SPAWN_BLOCK_RANGE, "Can only choose past 20 blocks"
     );
 
     Vec3 spawnChunk = getRandomSpawnChunk(blockNumber, _msgSender());
