@@ -39,13 +39,6 @@ struct RootCallWrapper {
 library SpawnSystemLib {
   error SpawnSystemLib_CallingFromRootSystem();
 
-  function getAllRandomSpawnCoords(
-    SpawnSystemType self,
-    address sender
-  ) internal view returns (Vec3[] memory spawnCoords, uint256[] memory blockNumbers) {
-    return CallWrapper(self.toResourceId(), address(0)).getAllRandomSpawnCoords(sender);
-  }
-
   function getRandomSpawnCoord(
     SpawnSystemType self,
     uint256 blockNumber,
@@ -78,24 +71,6 @@ library SpawnSystemLib {
     bytes memory extraData
   ) internal returns (EntityId) {
     return CallWrapper(self.toResourceId(), address(0)).spawn(spawnTile, spawnCoord, spawnEnergy, extraData);
-  }
-
-  function getAllRandomSpawnCoords(
-    CallWrapper memory self,
-    address sender
-  ) internal view returns (Vec3[] memory spawnCoords, uint256[] memory blockNumbers) {
-    // if the contract calling this function is a root system, it should use `callAsRoot`
-    if (address(_world()) == address(this)) revert SpawnSystemLib_CallingFromRootSystem();
-
-    bytes memory systemCall = abi.encodeCall(_getAllRandomSpawnCoords_address.getAllRandomSpawnCoords, (sender));
-    bytes memory worldCall = self.from == address(0)
-      ? abi.encodeCall(IWorldCall.call, (self.systemId, systemCall))
-      : abi.encodeCall(IWorldCall.callFrom, (self.from, self.systemId, systemCall));
-    (bool success, bytes memory returnData) = address(_world()).staticcall(worldCall);
-    if (!success) revertWithBytes(returnData);
-
-    bytes memory result = abi.decode(returnData, (bytes));
-    return abi.decode(result, (Vec3[], uint256[]));
   }
 
   function getRandomSpawnCoord(
@@ -250,10 +225,6 @@ library SpawnSystemLib {
  *
  * Each interface is uniquely named based on the function name and parameters to prevent collisions.
  */
-
-interface _getAllRandomSpawnCoords_address {
-  function getAllRandomSpawnCoords(address sender) external;
-}
 
 interface _getRandomSpawnCoord_uint256_address {
   function getRandomSpawnCoord(uint256 blockNumber, address sender) external;

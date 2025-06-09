@@ -42,22 +42,6 @@ import { ISpawnHook } from "../ProgramInterfaces.sol";
 contract SpawnSystem is System {
   using LibPRNG for LibPRNG.PRNG;
 
-  function getAllRandomSpawnCoords(address sender)
-    public
-    view
-    returns (Vec3[] memory spawnCoords, uint256[] memory blockNumbers)
-  {
-    spawnCoords = new Vec3[](SPAWN_BLOCK_RANGE);
-    blockNumbers = new uint256[](SPAWN_BLOCK_RANGE);
-    for (uint256 i = 0; i < SPAWN_BLOCK_RANGE; i++) {
-      uint256 blockNumber = block.number - (i + 1);
-      // TODO: try/catch
-      spawnCoords[i] = getRandomSpawnCoord(blockNumber, sender);
-      blockNumbers[i] = blockNumber;
-    }
-    return (spawnCoords, blockNumbers);
-  }
-
   function getRandomSpawnCoord(uint256 blockNumber, address sender) public view returns (Vec3 spawnCoord) {
     Vec3 spawnChunk = getRandomSpawnChunk(blockNumber, sender);
     spawnCoord = spawnChunk.mul(CHUNK_SIZE);

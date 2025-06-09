@@ -12,10 +12,6 @@ import { EntityId } from "../../EntityId.sol";
  * @dev This interface is automatically generated from the corresponding system contract. Do not edit manually.
  */
 interface ISpawnSystem {
-  function getAllRandomSpawnCoords(
-    address sender
-  ) external view returns (Vec3[] memory spawnCoords, uint256[] memory blockNumbers);
-
   function getRandomSpawnCoord(uint256 blockNumber, address sender) external view returns (Vec3 spawnCoord);
 
   function getRandomSpawnChunk(uint256 blockNumber, address sender) external view returns (Vec3 chunk);
