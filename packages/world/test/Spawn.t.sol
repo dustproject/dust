@@ -58,7 +58,7 @@ contract SpawnTest is DustTest {
 
     vm.prank(alice);
     startGasReport("randomSpawn");
-    EntityId playerEntityId = world.randomSpawn(blockNumber, spawnCoord.y());
+    EntityId playerEntityId = world.randomSpawn(blockNumber, spawnCoord);
     endGasReport();
     assertTrue(playerEntityId.exists());
 
@@ -70,14 +70,13 @@ contract SpawnTest is DustTest {
   function testRandomSpawnPaused() public {
     WorldStatus.setIsPaused(true);
     vm.expectRevert("DUST is paused. Try again later");
-    world.randomSpawn(vm.getBlockNumber(), 0);
+    world.randomSpawn(vm.getBlockNumber(), vec3(0, 0, 0));
   }
 
   function testRandomSpawnFailsDueToOldBlock() public {
     uint256 pastBlock = vm.getBlockNumber() - 11;
-    int32 y = 1;
     vm.expectRevert("Can only choose past 10 blocks");
-    world.randomSpawn(pastBlock, y);
+    world.randomSpawn(pastBlock, vec3(0, 0, 0));
   }
 
   function testSpawnTile() public {
@@ -262,7 +261,7 @@ contract SpawnTest is DustTest {
     LocalEnergyPool.set(shardCoord, MAX_PLAYER_ENERGY);
 
     vm.prank(alice);
-    EntityId playerEntityId = world.randomSpawn(blockNumber, spawnCoord.y());
+    EntityId playerEntityId = world.randomSpawn(blockNumber, spawnCoord);
     assertEq(playerEntityId, aliceEntityId, "Player entity doesn't match");
   }
 
@@ -285,7 +284,7 @@ contract SpawnTest is DustTest {
     // Spawn player should fail as the player has energy
     vm.prank(alice);
     vm.expectRevert("Player already spawned");
-    world.randomSpawn(blockNumber, spawnCoord.y());
+    world.randomSpawn(blockNumber, spawnCoord);
   }
 
   function testSpawnRespawn() public {

@@ -153,12 +153,12 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     return (alice, aliceEntityId, coord);
   }
 
-  function randomSpawnPlayer(int32 y) internal returns (address, EntityId, Vec3) {
+  function randomSpawnPlayer(Vec3 spawnCoord) internal returns (address, EntityId, Vec3) {
     uint256 blockNumber = block.number - 5;
 
     address alice = vm.randomAddress();
     vm.prank(alice);
-    EntityId aliceEntityId = world.randomSpawn(blockNumber, y);
+    EntityId aliceEntityId = world.randomSpawn(blockNumber, spawnCoord);
 
     Vec3 playerCoord = EntityPosition.get(aliceEntityId);
 
