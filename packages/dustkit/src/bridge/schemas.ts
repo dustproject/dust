@@ -62,22 +62,3 @@ export type ClientRpcSchema = RpcSchema.From<
       };
     }
 >;
-<<<<<<< HEAD:packages/dustkit/src/bridge/schemas.ts
-=======
-
-export type AppRpcSchema = RpcSchema.From<{
-  Request: {
-    method: "dustApp_init";
-    params: {
-      appConfig: AppConfig;
-      chainId: number;
-      worldAddress: Address;
-      userAddress: Address;
-      via?: {
-        entity: EntityId;
-        program: ProgramId;
-      };
-    };
-  };
-}>;
->>>>>>> a82659a (pass world address):packages/dustkit/src/rpc/schemas.ts
