@@ -191,7 +191,7 @@ library MoveLib {
           require(jumps <= Constants.MAX_PLAYER_JUMPS, "Cannot jump more than 3 blocks");
         } else if (nextHasGravity) {
           ++glides;
-          require(glides <= Constants.MAX_PLAYER_GLIDES, "Cannot glide more than 5 blocks");
+          require(glides <= Constants.MAX_PLAYER_GLIDES, "Cannot glide more than 10 blocks");
         }
         (uint128 moveCost, uint128 moveUnits) = _getMoveCost(next);
         cost += moveCost;
