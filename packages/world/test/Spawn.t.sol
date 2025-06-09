@@ -47,7 +47,7 @@ contract SpawnTest is DustTest {
     setupFlatChunk(vec3(0, 0, 0));
 
     vm.prank(alice);
-    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice) + vec3(0, 1, 0);
+    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice);
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
@@ -240,7 +240,7 @@ contract SpawnTest is DustTest {
 
   function testRandomSpawnAfterDeath() public {
     // This should setup a player with energy
-    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+    (address alice, EntityId aliceEntityId,) = setupFlatChunkWithPlayer();
 
     // Drain energy from player
     vm.warp(vm.getBlockTimestamp() + (MAX_PLAYER_ENERGY / PLAYER_ENERGY_DRAIN_RATE) + 1);
@@ -248,10 +248,7 @@ contract SpawnTest is DustTest {
     uint256 blockNumber = vm.getBlockNumber() - 5;
 
     vm.prank(alice);
-    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice) + vec3(0, 1, 0);
-
-    // Set below entity to dirt so gravity doesn't apply
-    setObjectAtCoord(spawnCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
+    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice);
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
@@ -264,15 +261,12 @@ contract SpawnTest is DustTest {
 
   function testRandomSpawnFailsIfNotDead() public {
     // This should setup a player with energy
-    (address alice,,) = setupAirChunkWithPlayer();
+    (address alice,,) = setupFlatChunkWithPlayer();
 
     uint256 blockNumber = vm.getBlockNumber() - 5;
 
     vm.prank(alice);
-    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice) + vec3(0, 1, 0);
-
-    // Set below entity to dirt so gravity doesn't apply
-    setObjectAtCoord(spawnCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
+    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice);
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
