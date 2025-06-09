@@ -47,29 +47,18 @@ contract SpawnSystem is System {
     view
     returns (Vec3[] memory spawnCoords, uint256[] memory blockNumbers)
   {
-    Vec3[] memory validSpawnCoords = new Vec3[](SPAWN_BLOCK_RANGE);
-    uint256[] memory validBlockNumbers = new uint256[](SPAWN_BLOCK_RANGE);
-    uint256 validCount = 0;
+    spawnCoords = new Vec3[](SPAWN_BLOCK_RANGE);
+    blockNumbers = new uint256[](SPAWN_BLOCK_RANGE);
     for (uint256 i = 0; i < SPAWN_BLOCK_RANGE; i++) {
       uint256 blockNumber = block.number - (i + 1);
-      (Vec3 spawnCoord, bool valid) = getRandomSpawnCoord(blockNumber, sender);
-      if (valid) {
-        validSpawnCoords[validCount] = spawnCoord;
-        validBlockNumbers[validCount] = blockNumber;
-        validCount++;
-      }
-    }
-    // Only return the valid spawn coords and block numbers
-    spawnCoords = new Vec3[](validCount);
-    blockNumbers = new uint256[](validCount);
-    for (uint256 i = 0; i < validCount; i++) {
-      spawnCoords[i] = validSpawnCoords[i];
-      blockNumbers[i] = validBlockNumbers[i];
+      // TODO: try/catch
+      spawnCoords[i] = getRandomSpawnCoord(blockNumber, sender);
+      blockNumbers[i] = blockNumber;
     }
     return (spawnCoords, blockNumbers);
   }
 
-  function getRandomSpawnCoord(uint256 blockNumber, address sender) public view returns (Vec3 spawnCoord, bool valid) {
+  function getRandomSpawnCoord(uint256 blockNumber, address sender) public view returns (Vec3 spawnCoord) {
     Vec3 spawnChunk = getRandomSpawnChunk(blockNumber, sender);
     spawnCoord = spawnChunk.mul(CHUNK_SIZE);
     // Loop through the chunk and find a valid spawn coord
@@ -79,13 +68,13 @@ contract SpawnSystem is System {
         for (int32 z = 0; z < CHUNK_SIZE; z++) {
           Vec3 spawnCoordCandidate = spawnCoord + vec3(x, y, z);
           if (isValidSpawn(spawnCoordCandidate)) {
-            return (spawnCoordCandidate, true);
+            return spawnCoordCandidate;
           }
         }
       }
     }
 
-    return (spawnCoord, false);
+    revert("No valid spawn coord found in chunk");
   }
 
   function getRandomSpawnChunk(uint256 blockNumber, address sender) public view returns (Vec3 chunk) {
