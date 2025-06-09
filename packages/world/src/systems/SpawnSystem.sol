@@ -107,8 +107,8 @@ contract SpawnSystem is System {
     if (
       belowType.isNull()
         || (
-          belowType != ObjectTypes.Water && belowType.isPassThrough()
-            && !EntityUtils.getMovableEntityAt(belowCoord)._exists()
+          belowType.isPassThrough() && !EntityUtils.getMovableEntityAt(belowCoord)._exists()
+            && EntityUtils.getFluidLevelAt(belowCoord) == 0
         )
     ) {
       return false;

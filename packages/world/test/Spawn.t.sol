@@ -44,13 +44,10 @@ contract SpawnTest is DustTest {
     address alice = vm.randomAddress();
 
     // Explore chunk at (0, 0, 0)
-    setupAirChunk(vec3(0, 0, 0));
+    setupFlatChunk(vec3(0, 0, 0));
 
     vm.prank(alice);
     Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice) + vec3(0, 1, 0);
-
-    // Set below entity to dirt so gravity doesn't apply
-    setObjectAtCoord(spawnCoord - vec3(0, 1, 0), ObjectTypes.Dirt);
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
