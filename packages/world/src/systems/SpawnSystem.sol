@@ -59,11 +59,9 @@ contract SpawnSystem is System {
           if (!isValidSpawn(spawnCoordCandidate)) continue;
             if (EntityUtils.getObjectTypeAt(belowCoord).isPreferredSpawn()) {
               return spawnCoordCandidate;
-            } else {
-              if (!backupSpawnCoordFound) {
+            } else if (!backupSpawnCoordFound) {
                 backupSpawnCoord = spawnCoordCandidate;
                 backupSpawnCoordFound = true;
-              }
             }
           }
         }
