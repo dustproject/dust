@@ -45,17 +45,31 @@ contract SpawnSystem is System {
   function getRandomSpawnCoord(uint256 blockNumber, address sender) public view returns (Vec3 spawnCoord) {
     Vec3 spawnChunk = getRandomSpawnChunk(blockNumber, sender);
     spawnCoord = spawnChunk.mul(CHUNK_SIZE);
+
+    Vec3 backupSpawnCoord = vec3(0, 0, 0);
+    bool backupSpawnCoordFound = false;
+
     // Loop through the chunk and find a valid spawn coord
     for (int32 x = 0; x < CHUNK_SIZE; x++) {
       // Start from the top of the chunk and work down
       for (int32 y = CHUNK_SIZE - 1; y >= 0; y--) {
         for (int32 z = 0; z < CHUNK_SIZE; z++) {
           Vec3 spawnCoordCandidate = spawnCoord + vec3(x, y, z);
+          Vec3 belowCoord = spawnCoordCandidate - vec3(0, 1, 0);
           if (isValidSpawn(spawnCoordCandidate)) {
-            return spawnCoordCandidate;
+            if (EntityUtils.getObjectTypeAt(belowCoord).isPreferredSpawn()) {
+              return spawnCoordCandidate;
+            } else {
+              backupSpawnCoord = spawnCoordCandidate;
+              backupSpawnCoordFound = true;
+            }
           }
         }
       }
+    }
+
+    if (backupSpawnCoordFound) {
+      return backupSpawnCoord;
     }
 
     revert("No valid spawn coord found in chunk");
