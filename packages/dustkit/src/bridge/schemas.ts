@@ -72,6 +72,7 @@ export type AppRpcSchema = RpcSchema.From<{
       appConfig: AppConfig;
       worldAddress: Address;
       userAddress: Address;
+      chainId: number;
       via?: {
         entity: EntityId;
         program: ProgramId;
