@@ -55,14 +55,14 @@ contract SpawnSystem is System {
       for (int32 y = CHUNK_SIZE - 1; y >= 0; y--) {
         for (int32 z = 0; z < CHUNK_SIZE; z++) {
           Vec3 spawnCoordCandidate = spawnCoord + vec3(x, y, z);
-          Vec3 belowCoord = spawnCoordCandidate - vec3(0, 1, 0);
           if (!isValidSpawn(spawnCoordCandidate)) continue;
-            if (EntityUtils.getObjectTypeAt(belowCoord).isPreferredSpawn()) {
-              return spawnCoordCandidate;
-            } else if (!backupSpawnCoordFound) {
-                backupSpawnCoord = spawnCoordCandidate;
-                backupSpawnCoordFound = true;
-            }
+
+          Vec3 belowCoord = spawnCoordCandidate - vec3(0, 1, 0);
+          if (EntityUtils.getObjectTypeAt(belowCoord).isPreferredSpawn()) {
+            return spawnCoordCandidate;
+          } else if (!backupSpawnCoordFound) {
+            backupSpawnCoord = spawnCoordCandidate;
+            backupSpawnCoordFound = true;
           }
         }
       }
