@@ -39,31 +39,27 @@ struct RootCallWrapper {
 library SpawnSystemLib {
   error SpawnSystemLib_CallingFromRootSystem();
 
-  function getAllRandomSpawnCoords(
+  function getAllRandomSpawnChunks(
     SpawnSystemType self,
     address sender
-  ) internal view returns (Vec3[] memory spawnCoords, uint256[] memory blockNumbers) {
-    return CallWrapper(self.toResourceId(), address(0)).getAllRandomSpawnCoords(sender);
+  ) internal view returns (Vec3[] memory spawnChunks, uint256[] memory blockNumbers) {
+    return CallWrapper(self.toResourceId(), address(0)).getAllRandomSpawnChunks(sender);
   }
 
-  function getRandomSpawnCoord(
+  function getRandomSpawnChunk(
     SpawnSystemType self,
     uint256 blockNumber,
     address sender
-  ) internal view returns (Vec3 spawnCoord) {
-    return CallWrapper(self.toResourceId(), address(0)).getRandomSpawnCoord(blockNumber, sender);
+  ) internal view returns (Vec3 chunk) {
+    return CallWrapper(self.toResourceId(), address(0)).getRandomSpawnChunk(blockNumber, sender);
   }
 
   function isValidSpawn(SpawnSystemType self, Vec3 spawnCoord) internal view returns (bool) {
     return CallWrapper(self.toResourceId(), address(0)).isValidSpawn(spawnCoord);
   }
 
-  function getValidSpawnY(SpawnSystemType self, Vec3 spawnCoordCandidate) internal view returns (Vec3 spawnCoord) {
-    return CallWrapper(self.toResourceId(), address(0)).getValidSpawnY(spawnCoordCandidate);
-  }
-
-  function randomSpawn(SpawnSystemType self, uint256 blockNumber, int32 y) internal returns (EntityId) {
-    return CallWrapper(self.toResourceId(), address(0)).randomSpawn(blockNumber, y);
+  function randomSpawn(SpawnSystemType self, uint256 blockNumber, Vec3 spawnCoord) internal returns (EntityId) {
+    return CallWrapper(self.toResourceId(), address(0)).randomSpawn(blockNumber, spawnCoord);
   }
 
   function spawn(
@@ -76,14 +72,14 @@ library SpawnSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).spawn(spawnTile, spawnCoord, spawnEnergy, extraData);
   }
 
-  function getAllRandomSpawnCoords(
+  function getAllRandomSpawnChunks(
     CallWrapper memory self,
     address sender
-  ) internal view returns (Vec3[] memory spawnCoords, uint256[] memory blockNumbers) {
+  ) internal view returns (Vec3[] memory spawnChunks, uint256[] memory blockNumbers) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert SpawnSystemLib_CallingFromRootSystem();
 
-    bytes memory systemCall = abi.encodeCall(_getAllRandomSpawnCoords_address.getAllRandomSpawnCoords, (sender));
+    bytes memory systemCall = abi.encodeCall(_getAllRandomSpawnChunks_address.getAllRandomSpawnChunks, (sender));
     bytes memory worldCall = self.from == address(0)
       ? abi.encodeCall(IWorldCall.call, (self.systemId, systemCall))
       : abi.encodeCall(IWorldCall.callFrom, (self.from, self.systemId, systemCall));
@@ -94,16 +90,16 @@ library SpawnSystemLib {
     return abi.decode(result, (Vec3[], uint256[]));
   }
 
-  function getRandomSpawnCoord(
+  function getRandomSpawnChunk(
     CallWrapper memory self,
     uint256 blockNumber,
     address sender
-  ) internal view returns (Vec3 spawnCoord) {
+  ) internal view returns (Vec3 chunk) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert SpawnSystemLib_CallingFromRootSystem();
 
     bytes memory systemCall = abi.encodeCall(
-      _getRandomSpawnCoord_uint256_address.getRandomSpawnCoord,
+      _getRandomSpawnChunk_uint256_address.getRandomSpawnChunk,
       (blockNumber, sender)
     );
     bytes memory worldCall = self.from == address(0)
@@ -131,26 +127,11 @@ library SpawnSystemLib {
     return abi.decode(result, (bool));
   }
 
-  function getValidSpawnY(CallWrapper memory self, Vec3 spawnCoordCandidate) internal view returns (Vec3 spawnCoord) {
+  function randomSpawn(CallWrapper memory self, uint256 blockNumber, Vec3 spawnCoord) internal returns (EntityId) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert SpawnSystemLib_CallingFromRootSystem();
 
-    bytes memory systemCall = abi.encodeCall(_getValidSpawnY_Vec3.getValidSpawnY, (spawnCoordCandidate));
-    bytes memory worldCall = self.from == address(0)
-      ? abi.encodeCall(IWorldCall.call, (self.systemId, systemCall))
-      : abi.encodeCall(IWorldCall.callFrom, (self.from, self.systemId, systemCall));
-    (bool success, bytes memory returnData) = address(_world()).staticcall(worldCall);
-    if (!success) revertWithBytes(returnData);
-
-    bytes memory result = abi.decode(returnData, (bytes));
-    return abi.decode(result, (Vec3));
-  }
-
-  function randomSpawn(CallWrapper memory self, uint256 blockNumber, int32 y) internal returns (EntityId) {
-    // if the contract calling this function is a root system, it should use `callAsRoot`
-    if (address(_world()) == address(this)) revert SpawnSystemLib_CallingFromRootSystem();
-
-    bytes memory systemCall = abi.encodeCall(_randomSpawn_uint256_int32.randomSpawn, (blockNumber, y));
+    bytes memory systemCall = abi.encodeCall(_randomSpawn_uint256_Vec3.randomSpawn, (blockNumber, spawnCoord));
 
     bytes memory result = self.from == address(0)
       ? _world().call(self.systemId, systemCall)
@@ -179,8 +160,8 @@ library SpawnSystemLib {
     return abi.decode(result, (EntityId));
   }
 
-  function randomSpawn(RootCallWrapper memory self, uint256 blockNumber, int32 y) internal returns (EntityId) {
-    bytes memory systemCall = abi.encodeCall(_randomSpawn_uint256_int32.randomSpawn, (blockNumber, y));
+  function randomSpawn(RootCallWrapper memory self, uint256 blockNumber, Vec3 spawnCoord) internal returns (EntityId) {
+    bytes memory systemCall = abi.encodeCall(_randomSpawn_uint256_Vec3.randomSpawn, (blockNumber, spawnCoord));
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
     return abi.decode(result, (EntityId));
@@ -240,24 +221,20 @@ library SpawnSystemLib {
  * Each interface is uniquely named based on the function name and parameters to prevent collisions.
  */
 
-interface _getAllRandomSpawnCoords_address {
-  function getAllRandomSpawnCoords(address sender) external;
+interface _getAllRandomSpawnChunks_address {
+  function getAllRandomSpawnChunks(address sender) external;
 }
 
-interface _getRandomSpawnCoord_uint256_address {
-  function getRandomSpawnCoord(uint256 blockNumber, address sender) external;
+interface _getRandomSpawnChunk_uint256_address {
+  function getRandomSpawnChunk(uint256 blockNumber, address sender) external;
 }
 
 interface _isValidSpawn_Vec3 {
   function isValidSpawn(Vec3 spawnCoord) external;
 }
 
-interface _getValidSpawnY_Vec3 {
-  function getValidSpawnY(Vec3 spawnCoordCandidate) external;
-}
-
-interface _randomSpawn_uint256_int32 {
-  function randomSpawn(uint256 blockNumber, int32 y) external;
+interface _randomSpawn_uint256_Vec3 {
+  function randomSpawn(uint256 blockNumber, Vec3 spawnCoord) external;
 }
 
 interface _spawn_EntityId_Vec3_uint128_bytes {
