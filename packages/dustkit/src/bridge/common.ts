@@ -4,7 +4,7 @@ import packageJson from "../../package.json";
 import { appConfig } from "../apps/appConfig";
 
 export const hex = type("string").narrow(
-  (input, ctx): input is Hex => isHex(input) || ctx.mustBe("a hex string")
+  (input, ctx): input is Hex => isHex(input) || ctx.mustBe("a hex string"),
 );
 
 export const version = packageJson.version;
