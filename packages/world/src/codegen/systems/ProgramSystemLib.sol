@@ -39,6 +39,16 @@ struct RootCallWrapper {
 library ProgramSystemLib {
   error ProgramSystemLib_CallingFromRootSystem();
 
+  function updateProgram(
+    ProgramSystemType self,
+    EntityId caller,
+    EntityId target,
+    ProgramId newProgram,
+    bytes memory extraData
+  ) internal {
+    return CallWrapper(self.toResourceId(), address(0)).updateProgram(caller, target, newProgram, extraData);
+  }
+
   function attachProgram(
     ProgramSystemType self,
     EntityId caller,
@@ -51,6 +61,25 @@ library ProgramSystemLib {
 
   function detachProgram(ProgramSystemType self, EntityId caller, EntityId target, bytes memory extraData) internal {
     return CallWrapper(self.toResourceId(), address(0)).detachProgram(caller, target, extraData);
+  }
+
+  function updateProgram(
+    CallWrapper memory self,
+    EntityId caller,
+    EntityId target,
+    ProgramId newProgram,
+    bytes memory extraData
+  ) internal {
+    // if the contract calling this function is a root system, it should use `callAsRoot`
+    if (address(_world()) == address(this)) revert ProgramSystemLib_CallingFromRootSystem();
+
+    bytes memory systemCall = abi.encodeCall(
+      _updateProgram_EntityId_EntityId_ProgramId_bytes.updateProgram,
+      (caller, target, newProgram, extraData)
+    );
+    self.from == address(0)
+      ? _world().call(self.systemId, systemCall)
+      : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
   function attachProgram(
@@ -83,6 +112,20 @@ library ProgramSystemLib {
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
+  }
+
+  function updateProgram(
+    RootCallWrapper memory self,
+    EntityId caller,
+    EntityId target,
+    ProgramId newProgram,
+    bytes memory extraData
+  ) internal {
+    bytes memory systemCall = abi.encodeCall(
+      _updateProgram_EntityId_EntityId_ProgramId_bytes.updateProgram,
+      (caller, target, newProgram, extraData)
+    );
+    SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
   function attachProgram(
@@ -149,6 +192,10 @@ library ProgramSystemLib {
  *
  * Each interface is uniquely named based on the function name and parameters to prevent collisions.
  */
+
+interface _updateProgram_EntityId_EntityId_ProgramId_bytes {
+  function updateProgram(EntityId caller, EntityId target, ProgramId newProgram, bytes memory extraData) external;
+}
 
 interface _attachProgram_EntityId_EntityId_ProgramId_bytes {
   function attachProgram(EntityId caller, EntityId target, ProgramId program, bytes memory extraData) external;

@@ -12,6 +12,8 @@ import { ProgramId } from "../../types/ProgramId.sol";
  * @dev This interface is automatically generated from the corresponding system contract. Do not edit manually.
  */
 interface IProgramSystem {
+  function updateProgram(EntityId caller, EntityId target, ProgramId newProgram, bytes calldata extraData) external;
+
   function attachProgram(EntityId caller, EntityId target, ProgramId program, bytes calldata extraData) external;
 
   function detachProgram(EntityId caller, EntityId target, bytes calldata extraData) external;

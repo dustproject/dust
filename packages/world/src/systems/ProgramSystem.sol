@@ -27,24 +27,73 @@ import { ProgramId } from "../types/ProgramId.sol";
 import { Vec3 } from "../types/Vec3.sol";
 
 contract ProgramSystem is System {
+  function updateProgram(EntityId caller, EntityId target, ProgramId newProgram, bytes calldata extraData) public {
+    caller.activate();
+
+    // Validate and prepare target
+    Vec3 validatorCoord = _getValidatorCoord(caller, target);
+    target = _validateTarget(target);
+
+    // Detach existing program if any
+    ProgramId existingProgram = target._getProgram();
+    if (existingProgram.exists()) {
+      _detachProgram(caller, target, existingProgram, validatorCoord, extraData);
+    }
+
+    // Attach new program
+    _attachProgram(caller, target, newProgram, validatorCoord, extraData);
+  }
+
   function attachProgram(EntityId caller, EntityId target, ProgramId program, bytes calldata extraData) public {
     caller.activate();
 
-    ObjectType targetType = target._getObjectType();
-    require(targetType.isSmartEntity(), "Can only attach programs to smart entities");
-
-    Vec3 validatorCoord;
-    if (targetType == ObjectTypes.Fragment) {
-      (, Vec3 fragmentCoord) = caller.requireAdjacentToFragment(target);
-      validatorCoord = fragmentCoord.fromFragmentCoord();
-    } else {
-      (, validatorCoord) = caller.requireConnected(target);
-    }
-
-    target = target.baseEntityId();
+    // Validate and prepare target
+    Vec3 validatorCoord = _getValidatorCoord(caller, target);
+    target = _validateTarget(target);
 
     require(!target._getProgram().exists(), "Existing program must be detached");
 
+    _attachProgram(caller, target, program, validatorCoord, extraData);
+  }
+
+  function detachProgram(EntityId caller, EntityId target, bytes calldata extraData) public {
+    caller.activate();
+
+    // Validate and prepare target
+    Vec3 validatorCoord = _getValidatorCoord(caller, target);
+    target = _validateTarget(target);
+
+    ProgramId program = target._getProgram();
+    require(program.exists(), "No program attached");
+
+    _detachProgram(caller, target, program, validatorCoord, extraData);
+  }
+
+  function _validateTarget(EntityId target) internal view returns (EntityId) {
+    ObjectType targetType = target._getObjectType();
+    require(targetType.isSmartEntity(), "Target is not a smart entity");
+    return target.baseEntityId();
+  }
+
+  function _getValidatorCoord(EntityId caller, EntityId target) internal view returns (Vec3) {
+    ObjectType targetType = target._getObjectType();
+
+    if (targetType == ObjectTypes.Fragment) {
+      (, Vec3 fragmentCoord) = caller.requireAdjacentToFragment(target);
+      return fragmentCoord.fromFragmentCoord();
+    } else {
+      (, Vec3 coord) = caller.requireConnected(target);
+      return coord;
+    }
+  }
+
+  function _attachProgram(
+    EntityId caller,
+    EntityId target,
+    ProgramId program,
+    Vec3 validatorCoord,
+    bytes calldata extraData
+  ) internal {
     (address programAddress, bool publicAccess) = Systems._get(program.toResourceId());
     require(programAddress != address(0), "Program does not exist");
     require(!publicAccess, "Program system must be private");
@@ -64,26 +113,17 @@ contract ProgramSystem is System {
     notify(caller, AttachProgramNotification({ attachedTo: target, programSystemId: program.toResourceId() }));
   }
 
-  function detachProgram(EntityId caller, EntityId target, bytes calldata extraData) public {
-    caller.activate();
-
-    Vec3 forceFieldCoord;
-    if (target._getObjectType() == ObjectTypes.Fragment) {
-      (, Vec3 fragmentCoord) = caller.requireAdjacentToFragment(target);
-      forceFieldCoord = fragmentCoord.fromFragmentCoord();
-    } else {
-      (, forceFieldCoord) = caller.requireConnected(target);
-    }
-
-    target = target.baseEntityId();
-
-    ProgramId program = target._getProgram();
-    require(program.exists(), "No program attached");
-
+  function _detachProgram(
+    EntityId caller,
+    EntityId target,
+    ProgramId program,
+    Vec3 forceFieldCoord,
+    bytes calldata extraData
+  ) internal {
     bytes memory onDetachProgram = abi.encodeCall(IDetachProgramHook.onDetachProgram, (caller, target, extraData));
 
     (EntityId forceField,) = ForceFieldUtils.getForceField(forceFieldCoord);
-    // If forcefield doesn't have energy, allow the program
+    // If forcefield doesn't have energy, allow detachment
     (EnergyData memory machineData,) = updateMachineEnergy(forceField);
     if (machineData.energy > 0) {
       program.callOrRevert(onDetachProgram);
