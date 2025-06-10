@@ -17,6 +17,7 @@ import {
   IRemoveFragmentHook
 } from "@dust/world/src/ProgramInterfaces.sol";
 
+import { AccessGroupOwner } from "../codegen/tables/AccessGroupOwner.sol";
 import { DefaultProgram } from "./DefaultProgram.sol";
 
 contract ForceFieldProgram is
@@ -39,6 +40,10 @@ contract ForceFieldProgram is
   ) external view onlyWorld {
     // Allow all programs
     // TODO: should we add a method to restrict programs?
+  }
+
+  function _canDetach(EntityId caller, uint256 groupId) internal view override returns (bool) {
+    return AccessGroupOwner.get(groupId) == caller;
   }
 
   function onFuel(EntityId caller, EntityId target, uint16 fuelAmount, bytes memory extraData) external view onlyWorld {
