@@ -31,6 +31,8 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
     // If the force field is associated with an access group, use that groupId
     if (forceField.exists()) {
       groupId = EntityAccessGroup.get(forceField);
+      // When a forcefield exists, only members can attach programs
+      require(AccessGroupMember.get(groupId, ctx.caller), "Only members can attach programs when forcefield exists");
     }
 
     // If the force field is not associated with an access group, create a new one
@@ -43,11 +45,13 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
 
   function onDetachProgram(Hooks.DetachProgramContext calldata ctx) external onlyWorld {
     uint256 groupId = EntityAccessGroup.get(ctx.target);
-    require(
-      _isSafeCall(ctx.target) || AccessGroupOwner.get(groupId) == ctx.caller, "Only the owner can detach this program"
-    );
+    require(_isSafeCall(ctx.target) || _canDetach(ctx.caller, groupId), "Caller not authorized to detach this program");
 
     EntityAccessGroup.deleteRecord(ctx.target);
+  }
+
+  function _canDetach(EntityId caller, uint256 groupId) internal view virtual returns (bool) {
+    return AccessGroupMember.get(groupId, caller);
   }
 
   function _isAllowed(EntityId target, EntityId caller) internal view returns (bool) {

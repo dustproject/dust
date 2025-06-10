@@ -1,9 +1,0 @@
-{
-  "$schema": "../../../packages/dustkit/json-schemas/app-config.json",
-  "name": "Position",
-  "startUrl": "/",
-  "defaultSize": {
-    "width": 150,
-    "height": 50
-  }
-}

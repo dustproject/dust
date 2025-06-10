@@ -10,6 +10,7 @@ import { Vec3 } from "@dust/world/src/Vec3.sol";
 
 import "@dust/world/src/ProgramHooks.sol" as Hooks;
 
+import { AccessGroupOwner } from "../codegen/tables/AccessGroupOwner.sol";
 import { DefaultProgram } from "./DefaultProgram.sol";
 
 contract ForceFieldProgram is
@@ -46,5 +47,10 @@ contract ForceFieldProgram is
 
   function onMine(Hooks.MineContext calldata ctx) external view onlyWorld {
     require(_isAllowed(ctx.target, ctx.caller), "Only approved callers can mine in the force field");
+  }
+
+  // Override the default program attachment logic to only allow the owner of the access group to detach forcefield programs
+  function _canDetach(EntityId caller, uint256 groupId) internal view override returns (bool) {
+    return AccessGroupOwner.get(groupId) == caller;
   }
 }
