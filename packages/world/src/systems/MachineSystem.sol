@@ -21,8 +21,8 @@ import { ObjectType } from "../ObjectType.sol";
 
 import { ObjectTypes } from "../ObjectType.sol";
 
+import "../ProgramHooks.sol" as Hooks;
 import { ProgramId } from "../ProgramId.sol";
-import { IFuelHook } from "../ProgramInterfaces.sol";
 import { Vec3 } from "../Vec3.sol";
 
 contract MachineSystem is System {
@@ -52,7 +52,12 @@ contract MachineSystem is System {
     Energy._setEnergy(machine, newEnergyLevel);
 
     ProgramId program = machine._getProgram();
-    program.callOrRevert(abi.encodeCall(IFuelHook.onFuel, (caller, machine, fuelAmount, extraData)));
+    program.callOrRevert(
+      abi.encodeCall(
+        Hooks.IFuel.onFuel,
+        (Hooks.FuelContext({ caller: caller, target: machine, fuelAmount: fuelAmount, extraData: extraData }))
+      )
+    );
 
     notify(caller, FuelMachineNotification({ machine: machine, fuelAmount: fuelAmount }));
   }

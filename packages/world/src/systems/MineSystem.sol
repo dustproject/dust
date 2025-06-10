@@ -61,8 +61,8 @@ import { NatureLib } from "../NatureLib.sol";
 import { ObjectTypes } from "../ObjectType.sol";
 import { OreLib } from "../OreLib.sol";
 
+import "../ProgramHooks.sol" as Hooks;
 import { ProgramId } from "../ProgramId.sol";
-import { IDetachProgramHook, IMineHook } from "../ProgramInterfaces.sol";
 import { Vec3, vec3 } from "../Vec3.sol";
 
 contract MineSystem is System {
@@ -245,7 +245,10 @@ contract MineSystem is System {
     // Detach program if it exists
     ProgramId program = mined._getProgram();
     if (program.exists()) {
-      bytes memory onDetachProgram = abi.encodeCall(IDetachProgramHook.onDetachProgram, (caller, mined, ""));
+      bytes memory onDetachProgram = abi.encodeCall(
+        Hooks.IDetachProgram.onDetachProgram,
+        (Hooks.DetachProgramContext({ caller: caller, target: mined, extraData: "" }))
+      );
       program.call({ gas: SAFE_PROGRAM_GAS, hook: onDetachProgram });
 
       EntityProgram._deleteRecord(mined);
@@ -379,7 +382,18 @@ library MineLib {
       }
     }
 
-    bytes memory onMine = abi.encodeCall(IMineHook.onMine, (caller, forceField, objectType, coord, extraData));
+    bytes memory onMine = abi.encodeCall(
+      Hooks.IMine.onMine,
+      (
+        Hooks.MineContext({
+          caller: caller,
+          target: forceField,
+          objectType: objectType,
+          coord: coord,
+          extraData: extraData
+        })
+      )
+    );
 
     program.callOrRevert(onMine);
   }

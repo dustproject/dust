@@ -5,19 +5,19 @@ import { IBaseWorld } from "@latticexyz/world-consumer/src/experimental/WorldCon
 
 import { EntityId } from "@dust/world/src/EntityId.sol";
 
-import { ISleepHook, IWakeupHook } from "@dust/world/src/ProgramInterfaces.sol";
+import "@dust/world/src/ProgramHooks.sol" as Hooks;
 
 import { DefaultProgram } from "./DefaultProgram.sol";
 
-contract BedProgram is ISleepHook, IWakeupHook, DefaultProgram {
+contract BedProgram is Hooks.ISleep, Hooks.IWakeup, DefaultProgram {
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
 
-  function onSleep(EntityId caller, EntityId target, bytes memory) external view onlyWorld {
-    require(_isAllowed(target, caller), "Only approved callers can sleep in the bed");
+  function onSleep(Hooks.SleepContext calldata ctx) external view onlyWorld {
+    require(_isAllowed(ctx.target, ctx.caller), "Only approved callers can sleep in the bed");
   }
 
-  function onWakeup(EntityId caller, EntityId target, bytes memory) external view onlyWorld {
+  function onWakeup(Hooks.WakeupContext calldata ctx) external view onlyWorld {
     // TODO: should we allow anyone to wake up from the bed?
-    require(_isAllowed(target, caller), "Only approved callers can wake up from the bed");
+    require(_isAllowed(ctx.target, ctx.caller), "Only approved callers can wake up from the bed");
   }
 }

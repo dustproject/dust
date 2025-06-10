@@ -10,7 +10,7 @@ import { DustTest, console } from "./DustTest.sol";
 import { ObjectType, ObjectTypeLib, ObjectTypes } from "../src/ObjectType.sol";
 
 contract ObjectTypeTest is DustTest {
-  function testCategories() public {
+  function testCategories() public pure {
   ${Object.entries(categories)
     .map(([name, data]) => {
       const categoryObjects = data.objects;

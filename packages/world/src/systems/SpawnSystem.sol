@@ -37,7 +37,7 @@ import { MoveLib } from "./libraries/MoveLib.sol";
 import { TerrainLib } from "./libraries/TerrainLib.sol";
 
 import { EntityId } from "../EntityId.sol";
-import { ISpawnHook } from "../ProgramInterfaces.sol";
+import "../ProgramHooks.sol" as Hooks;
 
 contract SpawnSystem is System {
   using LibPRNG for LibPRNG.PRNG;
@@ -156,7 +156,10 @@ contract SpawnSystem is System {
 
     EntityId player = _spawnPlayer(spawnCoord, spawnEnergy);
 
-    bytes memory onSpawn = abi.encodeCall(ISpawnHook.onSpawn, (player, spawnTile, spawnEnergy, extraData));
+    bytes memory onSpawn = abi.encodeCall(
+      Hooks.ISpawn.onSpawn,
+      (Hooks.SpawnContext({ caller: player, target: spawnTile, spawnEnergy: spawnEnergy, extraData: extraData }))
+    );
     spawnTile._getProgram().callOrRevert(onSpawn);
 
     return player;

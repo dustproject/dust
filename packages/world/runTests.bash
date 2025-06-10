@@ -5,7 +5,7 @@ worldAddress=$(awk -F'"' '/"31337":/{getline; print $4}' worlds.json)
 common_args=(--worldAddress="$worldAddress")
 
 run_tests() {
-  forge_opts="-vvv $*"
+  forge_opts="$*"
   echo "Running command: pnpm mud test ${common_args[*]} --forgeOptions='$forge_opts'"
   pnpm mud test "${common_args[@]}" --forgeOptions="$forge_opts"
 }
