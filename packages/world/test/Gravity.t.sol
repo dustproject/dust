@@ -5,8 +5,8 @@ import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResou
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 import { console } from "forge-std/console.sol";
 
-import { EntityId } from "../src/EntityId.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
+import { EntityId } from "../src/types/EntityId.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
@@ -25,11 +25,11 @@ import {
   PLAYER_FALL_ENERGY_COST,
   WATER_MOVE_ENERGY_COST
 } from "../src/Constants.sol";
-import { ObjectType } from "../src/ObjectType.sol";
+import { ObjectType } from "../src/types/ObjectType.sol";
 
-import { ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectType } from "../src/types/ObjectType.sol";
 
-import { Vec3, vec3 } from "../src/Vec3.sol";
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { TerrainLib } from "../src/utils/TerrainLib.sol";
 import { TestEntityUtils } from "./utils/TestUtils.sol";
 
@@ -61,7 +61,9 @@ contract GravityTest is DustTest {
 
     uint128 playerEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     assertEq(
-      playerEnergyLost, playerHandMassReduction, "Player shouldn't have lost energy from falling a safe distance"
+      playerEnergyLost,
+      playerHandMassReduction + MOVE_ENERGY_COST,
+      "Player shouldn't have lost energy from falling a safe distance"
     );
   }
 
@@ -93,7 +95,7 @@ contract GravityTest is DustTest {
     uint128 playerEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     assertEq(
       playerEnergyLost,
-      playerHandMassReduction + PLAYER_FALL_ENERGY_COST,
+      playerHandMassReduction + PLAYER_FALL_ENERGY_COST + MOVE_ENERGY_COST,
       "Player should have lost energy from mining and a single fall"
     );
   }
@@ -130,8 +132,8 @@ contract GravityTest is DustTest {
   function testMineFallOnWater() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
-    // Set player energy to exactly enough for a mine, but not for a fall
-    uint128 initialEnergy = DEFAULT_MINE_ENERGY_COST + 1;
+    // Set player energy to exactly enough for a mine and landing on water, but not for a long fall
+    uint128 initialEnergy = DEFAULT_MINE_ENERGY_COST + MOVE_ENERGY_COST + 1;
     Energy.set(
       aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: initialEnergy, drainRate: 0 })
     );
@@ -158,7 +160,11 @@ contract GravityTest is DustTest {
     // Verify player is not dead
     assertEq(aliceEntityId.getPosition(), mineCoord - vec3(0, 8, 0), "Final coord mismatch");
     assertGt(Energy.getEnergy(aliceEntityId), 0, "Player should not have died from fall on water");
-    assertEq(Energy.getEnergy(aliceEntityId), initialEnergy - DEFAULT_MINE_ENERGY_COST, "Player shouldn't have died");
+    assertEq(
+      Energy.getEnergy(aliceEntityId),
+      initialEnergy - DEFAULT_MINE_ENERGY_COST - MOVE_ENERGY_COST,
+      "Player shouldn't have died"
+    );
   }
 
   function testMineStackedPlayers() public {
@@ -213,10 +219,10 @@ contract GravityTest is DustTest {
     );
     assertEq(
       aliceEnergyBefore - aliceEnergyAfter,
-      playerHandMassReduction + PLAYER_FALL_ENERGY_COST,
+      playerHandMassReduction + PLAYER_FALL_ENERGY_COST + MOVE_ENERGY_COST,
       "Alice did not lose energy"
     );
-    assertEq(bobEnergyBefore - bobEnergyAfter, PLAYER_FALL_ENERGY_COST, "Bob did not lose energy");
+    assertEq(bobEnergyBefore - bobEnergyAfter, PLAYER_FALL_ENERGY_COST + MOVE_ENERGY_COST, "Bob did not lose energy");
   }
 
   function testMoveFallSingleBlock() public {
@@ -243,7 +249,7 @@ contract GravityTest is DustTest {
     );
 
     uint128 playerEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
-    assertEq(playerEnergyLost, MOVE_ENERGY_COST, "Player should only lose energy from the initial move");
+    assertEq(playerEnergyLost, MOVE_ENERGY_COST * 2, "Player should only lose energy from the initial move and landing");
   }
 
   function testMoveFallMultipleBlocks() public {
@@ -274,7 +280,7 @@ contract GravityTest is DustTest {
     uint128 playerEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     assertEq(
       playerEnergyLost,
-      MOVE_ENERGY_COST + PLAYER_FALL_ENERGY_COST,
+      MOVE_ENERGY_COST * 2 + PLAYER_FALL_ENERGY_COST,
       "Player energy lost should equal one move and one fall"
     );
   }
@@ -317,9 +323,15 @@ contract GravityTest is DustTest {
     assertGt(energyGainedInPool, 0, "Local energy pool did not gain energy");
     uint128 aliceEnergyAfter = Energy.getEnergy(aliceEntityId);
     uint128 bobEnergyAfter = Energy.getEnergy(bobEntityId);
-    assertEq(energyGainedInPool, aliceEnergyBefore - aliceEnergyAfter, "Energy was not transferred to pool from alice");
-    assertGt(aliceEnergyBefore - aliceEnergyAfter, PLAYER_FALL_ENERGY_COST, "Alice did not lose energy");
-    assertEq(bobEnergyBefore, bobEnergyAfter, "Bob lost energy");
+    assertEq(
+      energyGainedInPool,
+      aliceEnergyBefore - aliceEnergyAfter + MOVE_ENERGY_COST,
+      "Energy was not transferred to pool from alice"
+    );
+    assertEq(
+      aliceEnergyBefore - aliceEnergyAfter, PLAYER_FALL_ENERGY_COST + MOVE_ENERGY_COST * 2, "Alice did not lose energy"
+    );
+    assertEq(bobEnergyBefore, bobEnergyAfter + MOVE_ENERGY_COST, "Bob lost energy");
   }
 
   function testMoveFallFatal() public {
@@ -354,7 +366,7 @@ contract GravityTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
     // Set player energy to exactly enough for a mine, but not for a fall
-    uint128 initialEnergy = MOVE_ENERGY_COST + 1;
+    uint128 initialEnergy = MOVE_ENERGY_COST * 2 + 1;
     Energy.set(
       aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: initialEnergy, drainRate: 0 })
     );
@@ -381,19 +393,19 @@ contract GravityTest is DustTest {
     // Verify player is not dead
     assertEq(aliceEntityId.getPosition(), newCoords[0] - vec3(0, 8, 0), "Final coord mismatch");
     assertGt(Energy.getEnergy(aliceEntityId), 0, "Player should not have died from fall on water");
-    assertEq(Energy.getEnergy(aliceEntityId), initialEnergy - MOVE_ENERGY_COST, "Player shouldn't have died");
+    assertEq(Energy.getEnergy(aliceEntityId), initialEnergy - MOVE_ENERGY_COST * 2, "Player shouldn't have died");
   }
 
   function testMoveFallOnWaterFullPath() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
-    // Set player energy to exactly enough for a mine, but not for a fall
-    uint128 initialEnergy = MOVE_ENERGY_COST + WATER_MOVE_ENERGY_COST + 1;
+    // Set player energy to exactly enough moving and landing on shallow water
+    uint128 initialEnergy = MOVE_ENERGY_COST * 2 + 1;
     Energy.set(
       aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: initialEnergy, drainRate: 0 })
     );
 
-    // Set up destination with a deep pit
+    // Set up destination with a deep pit that ends in water
     Vec3[] memory newCoords = new Vec3[](9);
     newCoords[0] = playerCoord + vec3(0, 0, 1);
     newCoords[1] = newCoords[0] - vec3(0, 1, 0);

@@ -17,9 +17,15 @@ export const initialMessageShape = type({
 export const appContextShape = type({
   id: "string",
   config: appConfig,
-  "via?": {
-    entity: hex,
-    program: hex,
-  },
+  "via?": [
+    "undefined",
+    "|",
+    {
+      entity: hex,
+      program: hex,
+    },
+  ],
   userAddress: hex,
+  chainId: "number.integer",
+  worldAddress: hex,
 });

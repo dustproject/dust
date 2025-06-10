@@ -6,8 +6,8 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { Direction } from "../codegen/common.sol";
 import { EnergyData } from "../codegen/tables/Energy.sol";
 
-import { EntityId } from "../EntityId.sol";
-import { Vec3 } from "../Vec3.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 import { MoveLib } from "../utils/MoveLib.sol";
 import { MoveNotification, notify } from "../utils/NotifUtils.sol";

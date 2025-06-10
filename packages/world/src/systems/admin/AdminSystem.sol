@@ -5,14 +5,14 @@ import { AccessControl } from "@latticexyz/world/src/AccessControl.sol";
 import { System } from "@latticexyz/world/src/System.sol";
 import { ROOT_NAMESPACE_ID } from "@latticexyz/world/src/constants.sol";
 
-import { Vec3, vec3 } from "../../Vec3.sol";
+import { Vec3, vec3 } from "../../types/Vec3.sol";
 
 import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
 
-import { EntityId, EntityTypeLib } from "../../EntityId.sol";
-import { ObjectType } from "../../ObjectType.sol";
+import { EntityId, EntityTypeLib } from "../../types/EntityId.sol";
+import { ObjectType } from "../../types/ObjectType.sol";
 
-import { ObjectTypes } from "../../ObjectType.sol";
+import { ObjectTypes } from "../../types/ObjectType.sol";
 
 import { EntityUtils } from "../../utils/EntityUtils.sol";
 import { InventoryUtils } from "../../utils/InventoryUtils.sol";

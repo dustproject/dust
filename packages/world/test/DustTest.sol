@@ -20,15 +20,15 @@ import {
   PLAYER_ENERGY_DRAIN_RATE,
   REGION_SIZE
 } from "../src/Constants.sol";
-import { EntityId, EntityTypeLib } from "../src/EntityId.sol";
-import { ObjectType } from "../src/ObjectType.sol";
+import { EntityId, EntityTypeLib } from "../src/types/EntityId.sol";
+import { ObjectType } from "../src/types/ObjectType.sol";
 
-import { ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectTypes } from "../src/types/ObjectType.sol";
 
-import { Orientation } from "../src/Orientation.sol";
-import { Vec3, vec3 } from "../src/Vec3.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
+import { Orientation } from "../src/types/Orientation.sol";
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
@@ -153,12 +153,12 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     return (alice, aliceEntityId, coord);
   }
 
-  function randomSpawnPlayer(int32 y) internal returns (address, EntityId, Vec3) {
+  function randomSpawnPlayer(Vec3 spawnCoord) internal returns (address, EntityId, Vec3) {
     uint256 blockNumber = block.number - 5;
 
     address alice = vm.randomAddress();
     vm.prank(alice);
-    EntityId aliceEntityId = world.randomSpawn(blockNumber, y);
+    EntityId aliceEntityId = world.randomSpawn(blockNumber, spawnCoord);
 
     Vec3 playerCoord = EntityPosition.get(aliceEntityId);
 

@@ -25,12 +25,12 @@ import {
   TILL_ENERGY_COST
 } from "../src/Constants.sol";
 
-import { EntityId } from "../src/EntityId.sol";
-import { ObjectType } from "../src/ObjectType.sol";
+import { EntityId } from "../src/types/EntityId.sol";
+import { ObjectType } from "../src/types/ObjectType.sol";
 
-import { ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectType } from "../src/types/ObjectType.sol";
 
-import { Vec3, vec3 } from "../src/Vec3.sol";
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { TerrainLib } from "../src/utils/TerrainLib.sol";
 
 import { DustTest } from "./DustTest.sol";

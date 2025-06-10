@@ -15,13 +15,13 @@ import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { ChunkCommitment, ResourcePosition } from "../utils/Vec3Storage.sol";
 
 import { CHUNK_COMMIT_EXPIRY_BLOCKS, CHUNK_COMMIT_HALF_WIDTH, RESPAWN_ORE_BLOCK_RANGE } from "../Constants.sol";
-import { EntityId } from "../EntityId.sol";
-import { ObjectType } from "../ObjectType.sol";
-import { ObjectTypes } from "../ObjectType.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectType } from "../types/ObjectType.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
 
 import { NatureLib } from "../utils/NatureLib.sol";
 
-import { Vec3, vec3 } from "../Vec3.sol";
+import { Vec3, vec3 } from "../types/Vec3.sol";
 
 contract NatureSystem is System {
   function chunkCommit(EntityId caller, Vec3 chunkCoord) public {

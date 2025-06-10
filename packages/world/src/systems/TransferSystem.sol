@@ -8,13 +8,13 @@ import { EnergyData } from "../codegen/tables/Energy.sol";
 import { InventoryUtils, SlotData, SlotTransfer } from "../utils/InventoryUtils.sol";
 import { TransferNotification, notify } from "../utils/NotifUtils.sol";
 
-import { EntityId } from "../EntityId.sol";
-import { ObjectType } from "../ObjectType.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectType } from "../types/ObjectType.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
 
 import { ITransferHook } from "../ProgramInterfaces.sol";
-import { Vec3 } from "../Vec3.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 contract TransferSystem is System {
   function transfer(

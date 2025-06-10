@@ -15,14 +15,14 @@ import { AddFragmentNotification, RemoveFragmentNotification, notify } from "../
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { SAFE_PROGRAM_GAS } from "../Constants.sol";
-import { EntityId } from "../EntityId.sol";
+import { EntityId } from "../types/EntityId.sol";
 
-import { ObjectType } from "../ObjectType.sol";
+import { ObjectType } from "../types/ObjectType.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
-import { ProgramId } from "../ProgramId.sol";
 import { IAddFragmentHook, IRemoveFragmentHook } from "../ProgramInterfaces.sol";
-import { Vec3, vec3 } from "../Vec3.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
+import { ProgramId } from "../types/ProgramId.sol";
+import { Vec3, vec3 } from "../types/Vec3.sol";
 
 contract ForceFieldSystem is System {
   /**

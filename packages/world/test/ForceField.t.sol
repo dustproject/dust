@@ -25,12 +25,12 @@ import { TerrainLib } from "../src/utils/TerrainLib.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
 import { FRAGMENT_SIZE, MACHINE_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
-import { EntityId } from "../src/EntityId.sol";
-import { ObjectType } from "../src/ObjectType.sol";
+import { EntityId } from "../src/types/EntityId.sol";
+import { ObjectType } from "../src/types/ObjectType.sol";
 
-import { ObjectTypes } from "../src/ObjectType.sol";
-import { ProgramId } from "../src/ProgramId.sol";
-import { Vec3, vec3 } from "../src/Vec3.sol";
+import { ObjectTypes } from "../src/types/ObjectType.sol";
+import { ProgramId } from "../src/types/ProgramId.sol";
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 contract TestForceFieldProgram is System {
   // Just for testing, real programs should use tables

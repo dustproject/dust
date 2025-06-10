@@ -460,6 +460,19 @@ function isWaterloggable(ObjectType self) internal pure returns (bool ok) {
 }
 
 
+function isPreferredSpawn(ObjectType self) internal pure returns (bool ok) {
+  /// @solidity memory-safe-assembly
+  assembly {
+    
+      // IDs in [0..255]
+      {
+        let bit := and(shr(self, 0x100600010), 1)
+        ok := bit
+      }
+  }
+}
+
+
 // Category getters
 function getNonSolidTypes() internal pure returns (ObjectType[2] memory) {
     return [ObjectTypes.Air, ObjectTypes.Water];
@@ -556,6 +569,9 @@ function getSpawnsWithFluidTypes() internal pure returns (ObjectType[10] memory)
   }
 function getWaterloggableTypes() internal pure returns (ObjectType[98] memory) {
     return [ObjectTypes.Stone, ObjectTypes.Deepslate, ObjectTypes.Granite, ObjectTypes.Tuff, ObjectTypes.Calcite, ObjectTypes.Basalt, ObjectTypes.SmoothBasalt, ObjectTypes.Andesite, ObjectTypes.Diorite, ObjectTypes.Cobblestone, ObjectTypes.MossyCobblestone, ObjectTypes.Obsidian, ObjectTypes.Dripstone, ObjectTypes.Blackstone, ObjectTypes.CobbledDeepslate, ObjectTypes.Amethyst, ObjectTypes.Glowstone, ObjectTypes.Grass, ObjectTypes.Dirt, ObjectTypes.Moss, ObjectTypes.Podzol, ObjectTypes.Mud, ObjectTypes.PackedMud, ObjectTypes.Ice, ObjectTypes.CoalOre, ObjectTypes.CopperOre, ObjectTypes.IronOre, ObjectTypes.GoldOre, ObjectTypes.DiamondOre, ObjectTypes.NeptuniumOre, ObjectTypes.Gravel, ObjectTypes.Sand, ObjectTypes.RedSand, ObjectTypes.Sandstone, ObjectTypes.RedSandstone, ObjectTypes.Clay, ObjectTypes.Terracotta, ObjectTypes.BrownTerracotta, ObjectTypes.OrangeTerracotta, ObjectTypes.WhiteTerracotta, ObjectTypes.LightGrayTerracotta, ObjectTypes.YellowTerracotta, ObjectTypes.RedTerracotta, ObjectTypes.LightBlueTerracotta, ObjectTypes.CyanTerracotta, ObjectTypes.BlackTerracotta, ObjectTypes.PurpleTerracotta, ObjectTypes.BlueTerracotta, ObjectTypes.MagentaTerracotta, ObjectTypes.OakLog, ObjectTypes.BirchLog, ObjectTypes.JungleLog, ObjectTypes.SakuraLog, ObjectTypes.AcaciaLog, ObjectTypes.SpruceLog, ObjectTypes.DarkOakLog, ObjectTypes.MangroveLog, ObjectTypes.OakLeaf, ObjectTypes.BirchLeaf, ObjectTypes.JungleLeaf, ObjectTypes.SakuraLeaf, ObjectTypes.SpruceLeaf, ObjectTypes.AcaciaLeaf, ObjectTypes.DarkOakLeaf, ObjectTypes.AzaleaLeaf, ObjectTypes.FloweringAzaleaLeaf, ObjectTypes.MangroveLeaf, ObjectTypes.MangroveRoots, ObjectTypes.MuddyMangroveRoots, ObjectTypes.Coral, ObjectTypes.SeaAnemone, ObjectTypes.Algae, ObjectTypes.HornCoralBlock, ObjectTypes.FireCoralBlock, ObjectTypes.TubeCoralBlock, ObjectTypes.BubbleCoralBlock, ObjectTypes.BrainCoralBlock, ObjectTypes.Bone, ObjectTypes.OakPlanks, ObjectTypes.BirchPlanks, ObjectTypes.JunglePlanks, ObjectTypes.SakuraPlanks, ObjectTypes.SprucePlanks, ObjectTypes.AcaciaPlanks, ObjectTypes.DarkOakPlanks, ObjectTypes.MangrovePlanks, ObjectTypes.CopperBlock, ObjectTypes.IronBlock, ObjectTypes.GoldBlock, ObjectTypes.DiamondBlock, ObjectTypes.NeptuniumBlock, ObjectTypes.Workbench, ObjectTypes.Powerstone, ObjectTypes.ForceField, ObjectTypes.Chest, ObjectTypes.SpawnTile, ObjectTypes.TextSign, ObjectTypes.Torch];
+  }
+function getPreferredSpawnTypes() internal pure returns (ObjectType[4] memory) {
+    return [ObjectTypes.Dirt, ObjectTypes.Grass, ObjectTypes.Sand, ObjectTypes.Stone];
   }
 
   // Specialized getters

@@ -10,8 +10,9 @@ import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { PlayerBed } from "../codegen/tables/PlayerBed.sol";
 
 import { MAX_RESPAWN_HALF_WIDTH, PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
-import { ObjectType, ObjectTypes } from "../ObjectType.sol";
+
 import { checkWorldStatus } from "../Utils.sol";
+import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 
 import {
   decreaseFragmentDrainRate,
@@ -28,9 +29,9 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { MoveLib } from "../utils/MoveLib.sol";
 
-import { EntityId } from "../EntityId.sol";
 import { ISleepHook, IWakeupHook } from "../ProgramInterfaces.sol";
-import { Vec3 } from "../Vec3.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 contract BedSystem is System {
   function sleep(EntityId caller, EntityId bed, bytes calldata extraData) public {

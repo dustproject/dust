@@ -52,18 +52,18 @@ import {
   TOOL_MINE_ENERGY_COST
 } from "../Constants.sol";
 
-import { EntityId } from "../EntityId.sol";
-import { ObjectAmount, ObjectType } from "../ObjectType.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectAmount, ObjectType } from "../types/ObjectType.sol";
 import { MoveLib } from "../utils/MoveLib.sol";
 
 import { NatureLib } from "../utils/NatureLib.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
 import { OreLib } from "../utils/OreLib.sol";
 
-import { ProgramId } from "../ProgramId.sol";
 import { IDetachProgramHook, IMineHook } from "../ProgramInterfaces.sol";
-import { Vec3, vec3 } from "../Vec3.sol";
+import { ProgramId } from "../types/ProgramId.sol";
+import { Vec3, vec3 } from "../types/Vec3.sol";
 
 contract MineSystem is System {
   using SafeCastLib for *;
@@ -104,7 +104,7 @@ contract MineSystem is System {
   function _mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) internal returns (EntityId) {
     uint128 callerEnergy = caller.activate().energy;
     caller.requireConnected(coord);
-    MineLib._requireReachable(caller, coord);
+    MineLib._requireReachable(coord);
 
     (EntityId mined, ObjectType minedType) = EntityUtils.getOrCreateBlockAt(coord);
     require(minedType.isBlock(), "Object is not mineable");
@@ -346,16 +346,14 @@ library MineLib {
     notify(sleepingPlayerId, DeathNotification({ deathCoord: bedCoord }));
   }
 
-  function _requireReachable(EntityId caller, Vec3 coord) public view {
+  function _requireReachable(Vec3 coord) public view {
     Vec3[6] memory neighbors = coord.neighbors6();
     for (uint256 i = 0; i < neighbors.length; i++) {
       Vec3 neighbor = neighbors[i];
       ObjectType objectType = EntityUtils.getObjectTypeAt(neighbor);
-      EntityId entity = EntityUtils.getMovableEntityAt(neighbor);
-      bool isEmpty = objectType.isNonSolid() && (entity == caller || !entity._exists());
 
-      // If the neighbor is empty, we consider the coordinate reachable
-      if (isEmpty) return;
+      // If the neighbor is passthrough, we consider the coordinate reachable
+      if (objectType.isPassThrough()) return;
     }
 
     revert("Coordinate is not reachable");

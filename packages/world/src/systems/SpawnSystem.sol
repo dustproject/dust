@@ -21,12 +21,12 @@ import {
   PLAYER_ENERGY_DRAIN_RATE,
   SPAWN_BLOCK_RANGE
 } from "../Constants.sol";
-import { ObjectType } from "../ObjectType.sol";
+import { ObjectType } from "../types/ObjectType.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
 import { checkWorldStatus } from "../Utils.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
 
-import { Vec3, vec3 } from "../Vec3.sol";
+import { Vec3, vec3 } from "../types/Vec3.sol";
 import { removeEnergyFromLocalPool, updateMachineEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
@@ -36,28 +36,46 @@ import { MoveLib } from "../utils/MoveLib.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { TerrainLib } from "../utils/TerrainLib.sol";
 
-import { EntityId } from "../EntityId.sol";
 import { ISpawnHook } from "../ProgramInterfaces.sol";
+import { EntityId } from "../types/EntityId.sol";
 
 contract SpawnSystem is System {
   using LibPRNG for LibPRNG.PRNG;
 
-  function getAllRandomSpawnCoords(address sender)
-    public
-    view
-    returns (Vec3[] memory spawnCoords, uint256[] memory blockNumbers)
-  {
-    spawnCoords = new Vec3[](SPAWN_BLOCK_RANGE);
-    blockNumbers = new uint256[](SPAWN_BLOCK_RANGE);
-    for (uint256 i = 0; i < SPAWN_BLOCK_RANGE; i++) {
-      uint256 blockNumber = block.number - (i + 1);
-      spawnCoords[i] = getRandomSpawnCoord(blockNumber, sender);
-      blockNumbers[i] = blockNumber;
+  function getRandomSpawnCoord(uint256 blockNumber, address sender) public view returns (Vec3 spawnCoord) {
+    Vec3 spawnChunk = getRandomSpawnChunk(blockNumber, sender);
+    spawnCoord = spawnChunk.mul(CHUNK_SIZE);
+
+    Vec3 backupSpawnCoord = vec3(0, 0, 0);
+    bool backupSpawnCoordFound = false;
+
+    // Loop through the chunk and find a valid spawn coord
+    for (int32 x = 0; x < CHUNK_SIZE; x++) {
+      // Start from the top of the chunk and work down
+      for (int32 y = CHUNK_SIZE - 1; y >= 0; y--) {
+        for (int32 z = 0; z < CHUNK_SIZE; z++) {
+          Vec3 spawnCoordCandidate = spawnCoord + vec3(x, y, z);
+          if (!isValidSpawn(spawnCoordCandidate)) continue;
+
+          Vec3 belowCoord = spawnCoordCandidate - vec3(0, 1, 0);
+          if (EntityUtils.getObjectTypeAt(belowCoord).isPreferredSpawn()) {
+            return spawnCoordCandidate;
+          } else if (!backupSpawnCoordFound) {
+            backupSpawnCoord = spawnCoordCandidate;
+            backupSpawnCoordFound = true;
+          }
+        }
+      }
     }
-    return (spawnCoords, blockNumbers);
+
+    if (backupSpawnCoordFound) {
+      return backupSpawnCoord;
+    }
+
+    revert("No valid spawn coord found in chunk");
   }
 
-  function getRandomSpawnCoord(uint256 blockNumber, address sender) public view returns (Vec3 spawnCoord) {
+  function getRandomSpawnChunk(uint256 blockNumber, address sender) public view returns (Vec3 chunk) {
     uint256 exploredChunkCount = SurfaceChunkCount._get();
     require(exploredChunkCount > 0, "No surface chunks available");
 
@@ -65,19 +83,8 @@ contract SpawnSystem is System {
     LibPRNG.PRNG memory prng;
     prng.seed(uint256(keccak256(abi.encodePacked(blockhash(blockNumber), sender))));
     uint256 chunkIndex = prng.uniform(exploredChunkCount);
-    Vec3 chunk = SurfaceChunkByIndex._get(chunkIndex);
 
-    // Convert chunk coordinates to world coordinates and add random offset
-    Vec3 coord = chunk.mul(CHUNK_SIZE);
-
-    // Convert CHUNK_SIZE from int32 to uint256
-    uint256 chunkSize = uint256(int256(CHUNK_SIZE));
-
-    // Get random position within the chunk (0 to CHUNK_SIZE-1)
-    int32 relativeX = int32(int256(prng.next() % chunkSize));
-    int32 relativeZ = int32(int256(prng.next() % chunkSize));
-
-    return coord + vec3(relativeX, 0, relativeZ);
+    return SurfaceChunkByIndex._get(chunkIndex);
   }
 
   function isValidSpawn(Vec3 spawnCoord) public view returns (bool) {
@@ -98,8 +105,8 @@ contract SpawnSystem is System {
     if (
       belowType.isNull()
         || (
-          belowType != ObjectTypes.Water && belowType.isPassThrough()
-            && !EntityUtils.getMovableEntityAt(belowCoord)._exists()
+          belowType.isPassThrough() && !EntityUtils.getMovableEntityAt(belowCoord)._exists()
+            && EntityUtils.getFluidLevelAt(belowCoord) == 0
         )
     ) {
       return false;
@@ -108,29 +115,14 @@ contract SpawnSystem is System {
     return true;
   }
 
-  function getValidSpawnY(Vec3 spawnCoordCandidate) public view returns (Vec3 spawnCoord) {
-    for (int32 i = CHUNK_SIZE - 1; i >= 0; i--) {
-      spawnCoord = spawnCoordCandidate + vec3(0, i, 0);
-      if (isValidSpawn(spawnCoord)) {
-        return spawnCoord;
-      }
-    }
-
-    revert("No valid spawn Y found in chunk");
-  }
-
-  function randomSpawn(uint256 blockNumber, int32 y) public returns (EntityId) {
+  function randomSpawn(uint256 blockNumber, Vec3 spawnCoord) public returns (EntityId) {
     checkWorldStatus();
     require(
-      blockNumber < block.number && blockNumber >= block.number - SPAWN_BLOCK_RANGE, "Can only choose past 10 blocks"
+      blockNumber < block.number && blockNumber >= block.number - SPAWN_BLOCK_RANGE, "Can only choose past 20 blocks"
     );
 
-    Vec3 spawnCoord = getRandomSpawnCoord(blockNumber, _msgSender());
-
-    require(spawnCoord.y() <= y && y < spawnCoord.y() + CHUNK_SIZE, "y coordinate outside of spawn chunk");
-
-    // Use the y coordinate given by the player
-    spawnCoord = vec3(spawnCoord.x(), y, spawnCoord.z());
+    Vec3 spawnChunk = getRandomSpawnChunk(blockNumber, _msgSender());
+    require(spawnChunk == spawnCoord.toChunkCoord(), "Spawn coordinate cannot be in a different chunk");
 
     (EntityId forceField,) = ForceFieldUtils.getForceField(spawnCoord);
     require(!forceField._exists(), "Cannot spawn in force field");

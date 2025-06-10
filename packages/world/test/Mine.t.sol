@@ -41,13 +41,12 @@ import {
   SPECIALIZED_WOODEN_TOOL_MULTIPLIER,
   TOOL_MINE_ENERGY_COST
 } from "../src/Constants.sol";
-import { ObjectAmount, ObjectType, ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectAmount, ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 
-import { EntityId, EntityTypeLib } from "../src/EntityId.sol";
 import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
 
-import { Orientation } from "../src/Orientation.sol";
-import { Vec3, vec3 } from "../src/Vec3.sol";
+import { Orientation } from "../src/types/Orientation.sol";
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { TerrainLib } from "../src/utils/TerrainLib.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
@@ -943,5 +942,220 @@ contract MineTest is DustTest {
       (, ObjectType minedType) = TestEntityUtils.getBlockAt(blockCoord);
       assertEq(minedType, ObjectTypes.Water, "Blocks with fluid should be replaced with water when mined");
     }
+  }
+
+  // Reachability tests
+
+  function testMineFailsWhenCompletelyEnclosed() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    // Create a block completely surrounded by solid blocks
+    Vec3 targetCoord = playerCoord + vec3(5, 0, 0);
+
+    // Place solid blocks on all 6 sides
+    setObjectAtCoord(targetCoord + vec3(1, 0, 0), ObjectTypes.Stone); // Right
+    setObjectAtCoord(targetCoord + vec3(-1, 0, 0), ObjectTypes.Stone); // Left
+    setObjectAtCoord(targetCoord + vec3(0, 1, 0), ObjectTypes.Stone); // Above
+    setObjectAtCoord(targetCoord + vec3(0, -1, 0), ObjectTypes.Stone); // Below
+    setObjectAtCoord(targetCoord + vec3(0, 0, 1), ObjectTypes.Stone); // Front
+    setObjectAtCoord(targetCoord + vec3(0, 0, -1), ObjectTypes.Stone); // Back
+
+    // Place target block
+    setObjectAtCoord(targetCoord, ObjectTypes.Dirt);
+
+    // Move player close enough to mine
+    EntityPosition.set(aliceEntityId, targetCoord + vec3(2, 0, 0));
+
+    // Try to mine - should fail
+    vm.prank(alice);
+    vm.expectRevert("Coordinate is not reachable");
+    world.mine(aliceEntityId, targetCoord, "");
+  }
+
+  function testMineSucceedsWithSingleAirNeighbor() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    // Create a block with 5 solid neighbors and 1 air
+    Vec3 targetCoord = playerCoord + vec3(5, 0, 0);
+
+    // Place solid blocks on 5 sides
+    setObjectAtCoord(targetCoord + vec3(1, 0, 0), ObjectTypes.Stone); // Right
+    setObjectAtCoord(targetCoord + vec3(-1, 0, 0), ObjectTypes.Stone); // Left
+    setObjectAtCoord(targetCoord + vec3(0, 1, 0), ObjectTypes.Stone); // Above
+    setObjectAtCoord(targetCoord + vec3(0, -1, 0), ObjectTypes.Stone); // Below
+    setObjectAtCoord(targetCoord + vec3(0, 0, 1), ObjectTypes.Stone); // Front
+    // Back is air (not set)
+
+    // Place target block
+    setObjectAtCoord(targetCoord, ObjectTypes.Dirt);
+
+    // Move player close enough to mine
+    EntityPosition.set(aliceEntityId, targetCoord + vec3(2, 0, 0));
+
+    // Try to mine - should succeed
+    vm.prank(alice);
+    world.mineUntilDestroyed(aliceEntityId, targetCoord, "");
+
+    // Verify it was mined
+    assertEq(TestEntityUtils.getObjectTypeAt(targetCoord), ObjectTypes.Air, "Block should be mined");
+  }
+
+  function testMineSucceedsWithWaterNeighbor() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    // Create a block with solid neighbors except one water
+    Vec3 targetCoord = playerCoord + vec3(5, 0, 0);
+
+    // Place solid blocks on 5 sides
+    setObjectAtCoord(targetCoord + vec3(1, 0, 0), ObjectTypes.Stone); // Right
+    setObjectAtCoord(targetCoord + vec3(-1, 0, 0), ObjectTypes.Stone); // Left
+    setObjectAtCoord(targetCoord + vec3(0, 1, 0), ObjectTypes.Stone); // Above
+    setObjectAtCoord(targetCoord + vec3(0, -1, 0), ObjectTypes.Stone); // Below
+    setObjectAtCoord(targetCoord + vec3(0, 0, 1), ObjectTypes.Stone); // Front
+    setObjectAtCoord(targetCoord + vec3(0, 0, -1), ObjectTypes.Water); // Back is water
+
+    // Place target block
+    setObjectAtCoord(targetCoord, ObjectTypes.Dirt);
+
+    // Move player close enough to mine
+    EntityPosition.set(aliceEntityId, targetCoord + vec3(2, 0, 0));
+
+    // Try to mine - should succeed
+    vm.prank(alice);
+    world.mineUntilDestroyed(aliceEntityId, targetCoord, "");
+
+    // Verify it was mined
+    assertEq(TestEntityUtils.getObjectTypeAt(targetCoord), ObjectTypes.Air, "Block should be mined");
+  }
+
+  function testMineSucceedsWithVariousPassthroughNeighbors() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    // Test different passthrough types
+    ObjectType[4] memory passthroughTypes =
+      [ObjectTypes.Torch, ObjectTypes.WheatSeed, ObjectTypes.FescueGrass, ObjectTypes.OakSapling];
+
+    for (uint256 i = 0; i < passthroughTypes.length; i++) {
+      Vec3 targetCoord = playerCoord + vec3(5, int32(int256(i * 2)), 0);
+
+      // Place solid blocks on all sides except one
+      setObjectAtCoord(targetCoord + vec3(1, 0, 0), ObjectTypes.Stone);
+      setObjectAtCoord(targetCoord + vec3(-1, 0, 0), ObjectTypes.Stone);
+      setObjectAtCoord(targetCoord + vec3(0, 1, 0), ObjectTypes.Stone);
+      setObjectAtCoord(targetCoord + vec3(0, -1, 0), ObjectTypes.Stone);
+      setObjectAtCoord(targetCoord + vec3(0, 0, 1), ObjectTypes.Stone);
+
+      // Place passthrough neighbor
+      setObjectAtCoord(targetCoord + vec3(0, 0, -1), passthroughTypes[i]);
+
+      // Place target block
+      setObjectAtCoord(targetCoord, ObjectTypes.Dirt);
+
+      // Move player close enough
+      EntityPosition.set(aliceEntityId, targetCoord + vec3(2, 0, 0));
+
+      // Should succeed
+      vm.prank(alice);
+      world.mineUntilDestroyed(aliceEntityId, targetCoord, "");
+
+      assertEq(
+        TestEntityUtils.getObjectTypeAt(targetCoord),
+        ObjectTypes.Air,
+        "Block should be minable with passthrough neighbor"
+      );
+    }
+  }
+
+  function testMineReachabilityAtDifferentHeights() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    // Test underground (negative Y)
+    Vec3 undergroundCoord = vec3(playerCoord.x() + 5, -10, playerCoord.z());
+
+    // Surround with stone except top
+    setObjectAtCoord(undergroundCoord + vec3(1, 0, 0), ObjectTypes.Stone);
+    setObjectAtCoord(undergroundCoord + vec3(-1, 0, 0), ObjectTypes.Stone);
+    setObjectAtCoord(undergroundCoord + vec3(0, -1, 0), ObjectTypes.Stone);
+    setObjectAtCoord(undergroundCoord + vec3(0, 0, 1), ObjectTypes.Stone);
+    setObjectAtCoord(undergroundCoord + vec3(0, 0, -1), ObjectTypes.Stone);
+    // Top is air
+
+    setObjectAtCoord(undergroundCoord, ObjectTypes.Dirt);
+    EntityPosition.set(aliceEntityId, undergroundCoord + vec3(2, 0, 0));
+
+    vm.prank(alice);
+    world.mineUntilDestroyed(aliceEntityId, undergroundCoord, "");
+    assertEq(TestEntityUtils.getObjectTypeAt(undergroundCoord), ObjectTypes.Air, "Underground block should be minable");
+
+    // Test high altitude
+    Vec3 skyCoord = vec3(playerCoord.x() + 5, 100, playerCoord.z());
+
+    // Only place bottom neighbor as solid
+    setObjectAtCoord(skyCoord + vec3(0, -1, 0), ObjectTypes.Stone);
+    // All other sides are air
+
+    setObjectAtCoord(skyCoord, ObjectTypes.Dirt);
+    EntityPosition.set(aliceEntityId, skyCoord + vec3(1, 0, 0));
+
+    vm.prank(alice);
+    world.mineUntilDestroyed(aliceEntityId, skyCoord, "");
+    assertEq(TestEntityUtils.getObjectTypeAt(skyCoord), ObjectTypes.Air, "Sky block should be minable");
+  }
+
+  function testMineMixedNeighborTypes() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    Vec3 targetCoord = playerCoord + vec3(5, 0, 0);
+
+    // Mix of solid blocks, air, water, and small objects
+    setObjectAtCoord(targetCoord + vec3(1, 0, 0), ObjectTypes.Stone); // Solid
+    setObjectAtCoord(targetCoord + vec3(-1, 0, 0), ObjectTypes.Water); // Passthrough
+    setObjectAtCoord(targetCoord + vec3(0, 1, 0), ObjectTypes.OakLog); // Solid
+    setObjectAtCoord(targetCoord + vec3(0, -1, 0), ObjectTypes.Torch); // Passthrough
+    setObjectAtCoord(targetCoord + vec3(0, 0, 1), ObjectTypes.IronOre); // Solid
+    // Back is air (passthrough)
+
+    setObjectAtCoord(targetCoord, ObjectTypes.Dirt);
+    EntityPosition.set(aliceEntityId, targetCoord + vec3(2, 0, 0));
+
+    // Should succeed because has multiple passthrough neighbors
+    vm.prank(alice);
+    world.mineUntilDestroyed(aliceEntityId, targetCoord, "");
+
+    assertEq(
+      TestEntityUtils.getObjectTypeAt(targetCoord), ObjectTypes.Air, "Block with mixed neighbors should be minable"
+    );
+  }
+
+  function testMineReachabilityEdgeCases() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    // Test a chain of unreachable blocks
+    Vec3 baseCoord = playerCoord + vec3(10, 0, 0);
+
+    // Create a 3x3x3 cube of solid blocks
+    for (int32 x = -1; x <= 1; x++) {
+      for (int32 y = -1; y <= 1; y++) {
+        for (int32 z = -1; z <= 1; z++) {
+          setObjectAtCoord(baseCoord + vec3(x, y, z), ObjectTypes.Stone);
+        }
+      }
+    }
+
+    // Try to mine the center block
+    EntityPosition.set(aliceEntityId, baseCoord + vec3(3, 0, 0));
+
+    vm.prank(alice);
+    vm.expectRevert("Coordinate is not reachable");
+    world.mine(aliceEntityId, baseCoord, "");
+
+    // Now make one neighbor passthrough and it should work
+    setObjectAtCoord(baseCoord + vec3(0, 0, -1), ObjectTypes.Air);
+
+    vm.prank(alice);
+    world.mineUntilDestroyed(aliceEntityId, baseCoord, "");
+    assertEq(
+      TestEntityUtils.getObjectTypeAt(baseCoord), ObjectTypes.Air, "Block should be minable after adding air neighbor"
+    );
   }
 }

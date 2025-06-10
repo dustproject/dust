@@ -6,11 +6,11 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { Action } from "../codegen/common.sol";
 
 import { MAX_PICKUP_RADIUS } from "../Constants.sol";
-import { EntityId } from "../EntityId.sol";
-import { ObjectType } from "../ObjectType.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectType } from "../types/ObjectType.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
-import { Vec3 } from "../Vec3.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
+import { Vec3 } from "../types/Vec3.sol";
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils, SlotAmount, SlotTransfer } from "../utils/InventoryUtils.sol";
 import { DropNotification, PickupNotification, notify } from "../utils/NotifUtils.sol";

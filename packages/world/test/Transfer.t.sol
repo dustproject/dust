@@ -11,7 +11,7 @@ import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResou
 import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
-import { EntityId } from "../src/EntityId.sol";
+import { EntityId } from "../src/types/EntityId.sol";
 
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { EnergyData } from "../src/codegen/tables/Energy.sol";
@@ -28,13 +28,13 @@ import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { DustTest } from "./DustTest.sol";
 
 import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_RADIUS } from "../src/Constants.sol";
-import { ObjectType } from "../src/ObjectType.sol";
+import { ObjectType } from "../src/types/ObjectType.sol";
 
-import { ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectTypes } from "../src/types/ObjectType.sol";
 
-import { Orientation } from "../src/Orientation.sol";
-import { ProgramId } from "../src/ProgramId.sol";
-import { Vec3, vec3 } from "../src/Vec3.sol";
+import { Orientation } from "../src/types/Orientation.sol";
+import { ProgramId } from "../src/types/ProgramId.sol";
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { TerrainLib } from "../src/utils/TerrainLib.sol";
 
 import { SlotData, SlotTransfer } from "../src/utils/InventoryUtils.sol";

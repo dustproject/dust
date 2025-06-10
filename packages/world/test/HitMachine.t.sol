@@ -4,11 +4,12 @@ pragma solidity >=0.8.24;
 import { console } from "forge-std/console.sol";
 
 import { DEFAULT_HIT_ENERGY_COST, SPECIALIZED_ORE_TOOL_MULTIPLIER, TOOL_HIT_ENERGY_COST } from "../src/Constants.sol";
-import { EntityId } from "../src/EntityId.sol";
-import { ObjectType, ObjectTypes } from "../src/ObjectType.sol";
-import { Vec3, vec3 } from "../src/Vec3.sol";
+
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
+import { EntityId } from "../src/types/EntityId.sol";
+import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { ForceFieldUtils } from "../src/utils/ForceFieldUtils.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 import { DustTest } from "./DustTest.sol";

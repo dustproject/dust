@@ -9,17 +9,14 @@ src = "src"
 test = "test"
 out = "out"
 dynamic_test_linking = true
-
 allow_paths = [
   # pnpm symlinks to the project root's node_modules
   "../../node_modules",
 ]
-
 extra_output_files = [
   "abi",
   "evm.bytecode"
 ]
-
 fs_permissions = [{ access = "read", path = "./"}]
 script_execution_protection = false
 

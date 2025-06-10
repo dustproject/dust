@@ -3,7 +3,6 @@ pragma solidity >=0.8.24;
 
 import { LibBit } from "solady/utils/LibBit.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
 import { InventoryBitmap } from "../codegen/tables/InventoryBitmap.sol";
 import { InventorySlot, InventorySlotData } from "../codegen/tables/InventorySlot.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
@@ -12,11 +11,9 @@ import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { burnToolEnergy } from "../utils/EnergyUtils.sol";
 import { Math } from "../utils/MathLib.sol";
 
-import { EntityId } from "../EntityId.sol";
-
-import { ObjectAmount, ObjectType } from "../ObjectType.sol";
-
-import { Vec3 } from "../Vec3.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectAmount, ObjectType, ObjectTypes } from "../types/ObjectType.sol";
+import { Vec3 } from "../types/Vec3.sol";
 import { OreLib } from "./OreLib.sol";
 
 struct SlotTransfer {

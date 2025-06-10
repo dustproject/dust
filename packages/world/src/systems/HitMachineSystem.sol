@@ -31,11 +31,12 @@ import {
   SPECIALIZED_WOODEN_TOOL_MULTIPLIER,
   TOOL_HIT_ENERGY_COST
 } from "../Constants.sol";
-import { EntityId } from "../EntityId.sol";
-import { ObjectType, ObjectTypes } from "../ObjectType.sol";
-import { ProgramId } from "../ProgramId.sol";
+
 import { IHitHook } from "../ProgramInterfaces.sol";
-import { Vec3 } from "../Vec3.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
+import { ProgramId } from "../types/ProgramId.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 contract HitMachineSystem is System {
   function hitForceField(EntityId caller, Vec3 coord, uint16 toolSlot) public {

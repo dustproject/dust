@@ -30,12 +30,14 @@ import { MoveLib } from "../utils/MoveLib.sol";
 import { TerrainLib } from "../utils/TerrainLib.sol";
 
 import { BUILD_ENERGY_COST, MAX_FLUID_LEVEL } from "../Constants.sol";
-import { EntityId } from "../EntityId.sol";
-import { ObjectType, ObjectTypes } from "../ObjectType.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 
-import { ProgramId } from "../ProgramId.sol";
 import { IBuildHook } from "../ProgramInterfaces.sol";
-import { Orientation, Vec3, vec3 } from "../Vec3.sol";
+
+import { Orientation } from "../types/Orientation.sol";
+import { ProgramId } from "../types/ProgramId.sol";
+import { Vec3, vec3 } from "../types/Vec3.sol";
 
 struct BuildContext {
   EntityId caller;
@@ -83,9 +85,10 @@ contract BuildSystem is System {
     require(!ctx.buildType.isPassThrough(), "Cannot jump build on a pass-through block");
 
     // Jump movement
+    MoveLib.jump(coord);
+
     Vec3[] memory moveCoords = new Vec3[](1);
     moveCoords[0] = coord + vec3(0, 1, 0);
-    MoveLib.moveWithoutGravity(coord, moveCoords);
     notify(caller, MoveNotification({ moveCoords: moveCoords }));
 
     return _build(ctx, extraData);

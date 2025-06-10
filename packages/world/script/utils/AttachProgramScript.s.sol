@@ -7,10 +7,10 @@ import { console } from "forge-std/console.sol";
 
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
 
-import { EntityId, EntityTypeLib } from "../../src/EntityId.sol";
+import { EntityId, EntityTypeLib } from "../../src/types/EntityId.sol";
 
-import { ObjectTypes } from "../../src/ObjectType.sol";
-import { ProgramId } from "../../src/ProgramId.sol";
+import { ObjectTypes } from "../../src/types/ObjectType.sol";
+import { ProgramId } from "../../src/types/ProgramId.sol";
 
 import { EntityProgram } from "../../src/codegen/tables/EntityProgram.sol";
 

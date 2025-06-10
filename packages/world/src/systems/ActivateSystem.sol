@@ -5,14 +5,14 @@ import { System } from "@latticexyz/world/src/System.sol";
 
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 
-import { ObjectType } from "../ObjectType.sol";
+import { ObjectType } from "../types/ObjectType.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
 
 import { checkWorldStatus } from "../Utils.sol";
 import { updateMachineEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
 
-import { EntityId, EntityTypeLib } from "../EntityId.sol";
+import { EntityId, EntityTypeLib } from "../types/EntityId.sol";
 
 contract ActivateSystem is System {
   function activate(EntityId entityId) public {
