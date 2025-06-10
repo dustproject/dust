@@ -57,7 +57,7 @@
     "file": "test/Build.t.sol:BuildTest",
     "test": "testJumpBuild",
     "name": "jump build",
-    "gasUsed": 452249
+    "gasUsed": 452324
   },
   {
     "file": "test/Craft.t.sol:CraftTest",
@@ -129,37 +129,37 @@
     "file": "test/Gravity.t.sol:GravityTest",
     "test": "testMineFallMultipleBlocks",
     "name": "mine with three block fall",
-    "gasUsed": 686346
+    "gasUsed": 676008
   },
   {
     "file": "test/Gravity.t.sol:GravityTest",
     "test": "testMineFallSingleBlock",
     "name": "mine with single block fall",
-    "gasUsed": 606849
+    "gasUsed": 596515
   },
   {
     "file": "test/Gravity.t.sol:GravityTest",
     "test": "testMineStackedPlayers",
     "name": "mine with three block fall with a stacked player",
-    "gasUsed": 969864
+    "gasUsed": 959580
   },
   {
     "file": "test/Gravity.t.sol:GravityTest",
     "test": "testMoveFallMultipleBlocks",
     "name": "move with three block fall",
-    "gasUsed": 352167
+    "gasUsed": 347990
   },
   {
     "file": "test/Gravity.t.sol:GravityTest",
     "test": "testMoveFallSingleBlock",
     "name": "move with single block fall",
-    "gasUsed": 322994
+    "gasUsed": 318821
   },
   {
     "file": "test/Gravity.t.sol:GravityTest",
     "test": "testMoveStackedPlayers",
     "name": "move with three block fall with a stacked player",
-    "gasUsed": 686869
+    "gasUsed": 672317
   },
   {
     "file": "test/HitMachine.t.sol:HitMachineTest",
@@ -297,61 +297,61 @@
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveFiveBlocksNonTerrain",
     "name": "move 5 blocks non-terrain",
-    "gasUsed": 366003
+    "gasUsed": 344729
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveFiveBlocksTerrain",
     "name": "move 5 blocks terrain",
-    "gasUsed": 559054
+    "gasUsed": 507338
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveJump",
     "name": "move single jump",
-    "gasUsed": 331139
+    "gasUsed": 320878
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveMaxBlocksNonTerrain",
     "name": "move 24 blocks non-terrain",
-    "gasUsed": 838188
+    "gasUsed": 735093
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveMaxBlocksTerrain",
     "name": "move 24 blocks terrain",
-    "gasUsed": 1720183
+    "gasUsed": 1470781
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveOneBlockNonTerrain",
     "name": "move 1 blocks non-terrain",
-    "gasUsed": 267033
+    "gasUsed": 262787
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveOneBlockTerrain",
     "name": "move 1 blocks terrain",
-    "gasUsed": 315369
+    "gasUsed": 305036
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveOverLava",
     "name": "move over lava",
-    "gasUsed": 310501
+    "gasUsed": 310489
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveTenBlocksNonTerrain",
     "name": "move 10 blocks non-terrain",
-    "gasUsed": 490182
+    "gasUsed": 447527
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveTenBlocksTerrain",
     "name": "move 10 blocks terrain",
-    "gasUsed": 864032
+    "gasUsed": 760473
   },
   {
     "file": "test/Spawn.t.sol:SpawnTest",
@@ -489,7 +489,7 @@
     "file": "test/Tree.t.sol:TreeTest",
     "test": "testTreeGrowthWithSpace",
     "name": "grow oak tree",
-    "gasUsed": 4501392
+    "gasUsed": 4656906
   },
   {
     "file": "test/Tree.t.sol:TreeTest",
