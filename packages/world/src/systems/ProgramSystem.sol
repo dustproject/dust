@@ -72,7 +72,7 @@ contract ProgramSystem is System {
 
   function _validateTarget(EntityId target) internal view returns (EntityId) {
     ObjectType targetType = target._getObjectType();
-    require(targetType.isSmartEntity(), "Can only attach programs to smart entities");
+    require(targetType.isSmartEntity(), "Target is not a smart entity");
     return target.baseEntityId();
   }
 

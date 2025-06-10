@@ -146,7 +146,7 @@ contract ProgramTest is DustTest {
 
     // Try to detach program on non-smart entity - should fail
     vm.prank(alice);
-    vm.expectRevert("Can only attach programs to smart entities");
+    vm.expectRevert("Target is not a smart entity");
     world.detachProgram(aliceEntityId, grassEntityId, "");
   }
 
@@ -249,7 +249,7 @@ contract ProgramTest is DustTest {
 
     // Try to attach program to non-smart entity - should fail
     vm.prank(alice);
-    vm.expectRevert("Can only attach programs to smart entities");
+    vm.expectRevert("Target is not a smart entity");
     world.attachProgram(aliceEntityId, grassEntityId, programId, "");
   }
 
@@ -457,7 +457,7 @@ contract ProgramTest is DustTest {
 
     // Try to update program on non-smart entity - should fail
     vm.prank(alice);
-    vm.expectRevert("Can only attach programs to smart entities");
+    vm.expectRevert("Target is not a smart entity");
     world.updateProgram(aliceEntityId, grassEntityId, programId, "");
   }
 
