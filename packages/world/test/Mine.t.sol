@@ -41,6 +41,7 @@ import {
   SPECIALIZED_WOODEN_TOOL_MULTIPLIER,
   TOOL_MINE_ENERGY_COST
 } from "../src/Constants.sol";
+import { EntityId } from "../src/types/EntityId.sol";
 import { ObjectAmount, ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 
 import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";

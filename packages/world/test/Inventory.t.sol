@@ -23,9 +23,7 @@ import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_RADIUS } from "../src/Constants.sol";
 import { EntityId } from "../src/types/EntityId.sol";
 
-import { ObjectType } from "../src/types/ObjectType.sol";
-
-import { ObjectTypes } from "../src/types/ObjectType.sol";
+import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 
 import { SlotAmount, SlotTransfer } from "../src/utils/InventoryUtils.sol";
 

@@ -17,8 +17,8 @@ import { EncodedLengths, EncodedLengthsLib } from "@latticexyz/store/src/Encoded
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
 // Import user types
-import { EntityId } from "../../EntityId.sol";
-import { ProgramId } from "../../ProgramId.sol";
+import { EntityId } from "../../types/EntityId.sol";
+import { ProgramId } from "../../types/ProgramId.sol";
 
 library EntityProgram {
   // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "EntityProgram", typeId: RESOURCE_TABLE });`

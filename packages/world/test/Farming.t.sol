@@ -26,9 +26,7 @@ import {
 } from "../src/Constants.sol";
 
 import { EntityId } from "../src/types/EntityId.sol";
-import { ObjectType } from "../src/types/ObjectType.sol";
-
-import { ObjectType } from "../src/types/ObjectType.sol";
+import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { TerrainLib } from "../src/utils/TerrainLib.sol";

@@ -30,9 +30,7 @@ import {
   PLAYER_SAFE_FALL_DISTANCE,
   PLAYER_SWIM_ENERGY_DRAIN_RATE
 } from "../src/Constants.sol";
-import { ObjectType } from "../src/types/ObjectType.sol";
-
-import { ObjectTypes } from "../src/types/ObjectType.sol";
+import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 
 import { Orientation } from "../src/types/Orientation.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";

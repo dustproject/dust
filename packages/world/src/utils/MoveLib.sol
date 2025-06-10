@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { MoveUnits } from "../../codegen/tables/MoveUnits.sol";
 import { Energy } from "../codegen/tables/Energy.sol";
+import { MoveUnits } from "../codegen/tables/MoveUnits.sol";
 
 import "../Constants.sol" as Constants;
 import { EntityId } from "../types/EntityId.sol";

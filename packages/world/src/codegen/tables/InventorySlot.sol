@@ -17,8 +17,8 @@ import { EncodedLengths, EncodedLengthsLib } from "@latticexyz/store/src/Encoded
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
 // Import user types
-import { EntityId } from "../../EntityId.sol";
-import { ObjectType } from "../../ObjectType.sol";
+import { EntityId } from "../../types/EntityId.sol";
+import { ObjectType } from "../../types/ObjectType.sol";
 
 struct InventorySlotData {
   EntityId entityId;

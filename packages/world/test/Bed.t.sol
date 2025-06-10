@@ -26,10 +26,7 @@ import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import { CHUNK_SIZE, MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
 import { EntityId } from "../src/types/EntityId.sol";
-
-import { ObjectType } from "../src/types/ObjectType.sol";
-import { EntityIdLib } from "../src/utils/EntityIdLib.sol";
-
+import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 import { Orientation } from "../src/types/Orientation.sol";
 import { ProgramId } from "../src/types/ProgramId.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";

@@ -3,10 +3,10 @@ pragma solidity >=0.8.24;
 
 import { IMachineSystem } from "./world/IMachineSystem.sol";
 import { ITransferSystem } from "./world/ITransferSystem.sol";
-import { Vec3, vec3 } from "../Vec3.sol";
-import { Orientation } from "../Orientation.sol";
-import { ObjectType, ObjectAmount } from "../ObjectType.sol";
-import { ObjectTypes } from "../ObjectType.sol";
+import { Vec3, vec3 } from "../types/Vec3.sol";
+import { Orientation } from "../types/Orientation.sol";
+import { ObjectType, ObjectAmount } from "../types/ObjectType.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
 
 library ObjectTypeLib {
   function unwrap(ObjectType self) internal pure returns (uint16) {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { ObjectType } from "../ObjectType.sol";
+import { ObjectType } from "../types/ObjectType.sol";
 
 ObjectType constant Null = ObjectType.wrap(0);
 ObjectType constant Air = ObjectType.wrap(1);

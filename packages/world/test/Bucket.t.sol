@@ -13,9 +13,7 @@ import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
 import { MAX_ENTITY_INFLUENCE_RADIUS } from "../src/Constants.sol";
-import { ObjectType } from "../src/types/ObjectType.sol";
-
-import { ObjectTypes } from "../src/types/ObjectType.sol";
+import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { TerrainLib } from "../src/utils/TerrainLib.sol";

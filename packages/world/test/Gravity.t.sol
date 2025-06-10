@@ -25,9 +25,7 @@ import {
   PLAYER_FALL_ENERGY_COST,
   WATER_MOVE_ENERGY_COST
 } from "../src/Constants.sol";
-import { ObjectType } from "../src/types/ObjectType.sol";
-
-import { ObjectType } from "../src/types/ObjectType.sol";
+import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { TerrainLib } from "../src/utils/TerrainLib.sol";

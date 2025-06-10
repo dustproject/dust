@@ -11,9 +11,7 @@ import {
   REGION_SIZE
 } from "../src/Constants.sol";
 import { EntityId, EntityTypeLib } from "../src/types/EntityId.sol";
-import { ObjectType } from "../src/types/ObjectType.sol";
-
-import { ObjectTypes } from "../src/types/ObjectType.sol";
+import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";

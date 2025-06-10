@@ -62,15 +62,15 @@ export default defineWorld({
     ],
   },
   userTypes: {
-    ObjectType: { filePath: "./src/ObjectType.sol", type: "uint16" },
-    Orientation: { filePath: "./src/Orientation.sol", type: "uint8" },
-    EntityId: { filePath: "./src/EntityId.sol", type: "bytes32" },
-    ProgramId: { filePath: "./src/ProgramId.sol", type: "bytes32" },
+    ObjectType: { filePath: "./src/types/ObjectType.sol", type: "uint16" },
+    Orientation: { filePath: "./src/types/Orientation.sol", type: "uint8" },
+    EntityId: { filePath: "./src/types/EntityId.sol", type: "bytes32" },
+    ProgramId: { filePath: "./src/types/ProgramId.sol", type: "bytes32" },
     ResourceId: {
       filePath: "@latticexyz/store/src/ResourceId.sol",
       type: "bytes32",
     },
-    Vec3: { filePath: "./src/Vec3.sol", type: "uint96" },
+    Vec3: { filePath: "./src/types/Vec3.sol", type: "uint96" },
   },
   tables: {
     // ------------------------------------------------------------

@@ -2,10 +2,10 @@
 /* Auto‑generated. DO NOT EDIT. */
 pragma solidity >=0.8.24;
 
-import { Vec3 } from "../Vec3.sol";
-import { ObjectType  } from "../ObjectType.sol";
+import { Vec3 } from "../types/Vec3.sol";
+import { ObjectType  } from "../types/ObjectType.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
 
 struct TreeData {
   ObjectType logType;

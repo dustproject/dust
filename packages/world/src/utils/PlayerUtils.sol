@@ -23,9 +23,7 @@ import { InventoryUtils } from "./InventoryUtils.sol";
 
 import { FRAGMENT_SIZE, PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
 import { EntityId } from "../types/EntityId.sol";
-
 import { Vec3, vec3 } from "../types/Vec3.sol";
-import { EntityIdLib } from "./EntityIdLib.sol";
 
 import { DeathNotification, notify } from "./NotifUtils.sol";
 

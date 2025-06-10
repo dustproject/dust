@@ -25,7 +25,7 @@ import { LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 import {
   CHUNK_SIZE, MACHINE_ENERGY_DRAIN_RATE, MAX_PLAYER_ENERGY, PLAYER_ENERGY_DRAIN_RATE
 } from "../src/Constants.sol";
-import { ObjectType } from "../src/types/ObjectType.sol";
+import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 
 import { ProgramId } from "../src/types/ProgramId.sol";
 

@@ -5,7 +5,7 @@ function generateObjectTypesSol(): string {
   return `// SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { ObjectType } from "../ObjectType.sol";
+import { ObjectType } from "../types/ObjectType.sol";
 
 ${objects
   .map((obj) => {
