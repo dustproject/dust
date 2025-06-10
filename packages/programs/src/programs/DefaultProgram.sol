@@ -45,7 +45,7 @@ abstract contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, Worl
 
   function onDetachProgram(EntityId caller, EntityId target, bytes memory) external onlyWorld {
     uint256 groupId = EntityAccessGroup.get(target);
-    require(_canDetach(caller, groupId), "Caller not authorized to detach this program");
+    require(_isSafeCall(target) || _canDetach(caller, groupId), "Caller not authorized to detach this program");
 
     EntityAccessGroup.deleteRecord(target);
   }
