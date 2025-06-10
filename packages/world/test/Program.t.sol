@@ -58,7 +58,7 @@ contract ProgramTest is DustTest {
     return ProgramId.wrap(programSystemId.unwrap());
   }
 
-  function testAttachProgramBasic() public {
+  function testAttachProgram() public {
     // Setup player and chest
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
     Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
@@ -180,7 +180,7 @@ contract ProgramTest is DustTest {
     assertInventoryHasObject(chestEntityId, transferObjectType, numToTransfer);
   }
 
-  function testDetachProgramBasic() public {
+  function testDetachProgram() public {
     // Setup player and chest
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
     Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
