@@ -42,14 +42,15 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import {
   DEFAULT_MINE_ENERGY_COST,
-  DEFAULT_ORE_TOOL_MULTIPLIER,
-  DEFAULT_WOODEN_TOOL_MULTIPLIER,
+  HIT_ACTION_MODIFIER,
   MAX_PICKUP_RADIUS,
+  MINE_ACTION_MODIFIER,
+  ORE_TOOL_BASE_MULTIPLIER,
   PLAYER_ENERGY_DRAIN_RATE,
   SAFE_PROGRAM_GAS,
-  SPECIALIZED_ORE_TOOL_MULTIPLIER,
-  SPECIALIZED_WOODEN_TOOL_MULTIPLIER,
-  TOOL_MINE_ENERGY_COST
+  SPECIALIZATION_MULTIPLIER,
+  TOOL_MINE_ENERGY_COST,
+  WOODEN_TOOL_BASE_MULTIPLIER
 } from "../Constants.sol";
 
 import { EntityId } from "../EntityId.sol";
@@ -399,17 +400,21 @@ library MineLib {
   }
 
   function _getToolMultiplier(ObjectType toolType, ObjectType minedType) public pure returns (uint128) {
+    // Bare hands case - just return action modifier
     if (toolType.isNull()) {
-      return 1;
+      return MINE_ACTION_MODIFIER;
     }
 
+    // Apply base tool multiplier
     bool isWoodenTool = toolType == ObjectTypes.WoodenAxe || toolType == ObjectTypes.WoodenPick;
+    uint128 multiplier = isWoodenTool ? WOODEN_TOOL_BASE_MULTIPLIER : ORE_TOOL_BASE_MULTIPLIER;
 
+    // Apply specialization bonus if tool matches the task
     if ((toolType.isAxe() && minedType.hasAxeMultiplier()) || (toolType.isPick() && minedType.hasPickMultiplier())) {
-      return isWoodenTool ? SPECIALIZED_WOODEN_TOOL_MULTIPLIER : SPECIALIZED_ORE_TOOL_MULTIPLIER;
+      multiplier = multiplier * SPECIALIZATION_MULTIPLIER;
     }
 
-    return isWoodenTool ? DEFAULT_WOODEN_TOOL_MULTIPLIER : DEFAULT_ORE_TOOL_MULTIPLIER;
+    return multiplier * MINE_ACTION_MODIFIER;
   }
 }
 

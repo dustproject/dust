@@ -37,7 +37,7 @@ contract FarmingSystem is System {
 
     ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
     require(toolData.toolType.isHoe(), "Must equip a hoe");
-    toolData.use(type(uint128).max, 1);
+    toolData.use(type(uint128).max);
 
     EntityObjectType._set(farmland, ObjectTypes.Farmland);
   }
