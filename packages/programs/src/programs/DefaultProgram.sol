@@ -31,8 +31,11 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
     // If the force field is associated with an access group, use that groupId
     if (forceField.exists()) {
       groupId = EntityAccessGroup.get(forceField);
-      // When a forcefield exists, only members can attach programs
-      require(AccessGroupMember.get(groupId, ctx.caller), "Only members can attach programs when forcefield exists");
+      // When a forcefield already exists, only members can attach programs
+      require(
+        ctx.target == forceField || AccessGroupMember.get(groupId, ctx.caller),
+        "Only members can attach programs when forcefield exists"
+      );
     }
 
     // If the force field is not associated with an access group, create a new one
