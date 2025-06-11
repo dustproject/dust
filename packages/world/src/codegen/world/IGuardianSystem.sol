@@ -13,7 +13,7 @@ interface IGuardianSystem {
 
   function unpause() external;
 
-  function addGuardian(address moderator) external;
+  function addGuardian(address guardian) external;
 
-  function removeGuardian(address moderator) external;
+  function removeGuardian(address guardian) external;
 }

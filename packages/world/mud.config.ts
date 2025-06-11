@@ -367,10 +367,10 @@ export default defineWorld({
     },
     Guardians: {
       schema: {
-        moderatorAddress: "address",
+        guardian: "address",
         isGuardian: "bool",
       },
-      key: ["moderatorAddress"],
+      key: ["guardian"],
     },
     UniqueEntity: {
       schema: {

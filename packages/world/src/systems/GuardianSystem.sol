@@ -30,14 +30,14 @@ contract GuardianSystem is System {
     WorldStatus._setIsPaused(false);
   }
 
-  function addGuardian(address moderator) public onlyROOT {
-    require(!Guardians._get(moderator), "Address is already a moderator");
-    Guardians._set(moderator, true);
+  function addGuardian(address guardian) public onlyROOT {
+    require(!Guardians._get(guardian), "Address is already a guardian");
+    Guardians._set(guardian, true);
   }
 
-  function removeGuardian(address moderator) public onlyROOT {
-    require(Guardians._get(moderator), "Address is not a moderator");
-    Guardians._set(moderator, false);
+  function removeGuardian(address guardian) public onlyROOT {
+    require(Guardians._get(guardian), "Address is not a guardian");
+    Guardians._set(guardian, false);
   }
 
   function _requireROOT() internal view {

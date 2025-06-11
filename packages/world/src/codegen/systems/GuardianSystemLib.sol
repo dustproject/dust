@@ -45,12 +45,12 @@ library GuardianSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).unpause();
   }
 
-  function addGuardian(GuardianSystemType self, address moderator) internal {
-    return CallWrapper(self.toResourceId(), address(0)).addGuardian(moderator);
+  function addGuardian(GuardianSystemType self, address guardian) internal {
+    return CallWrapper(self.toResourceId(), address(0)).addGuardian(guardian);
   }
 
-  function removeGuardian(GuardianSystemType self, address moderator) internal {
-    return CallWrapper(self.toResourceId(), address(0)).removeGuardian(moderator);
+  function removeGuardian(GuardianSystemType self, address guardian) internal {
+    return CallWrapper(self.toResourceId(), address(0)).removeGuardian(guardian);
   }
 
   function pause(CallWrapper memory self) internal {
@@ -73,21 +73,21 @@ library GuardianSystemLib {
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
-  function addGuardian(CallWrapper memory self, address moderator) internal {
+  function addGuardian(CallWrapper memory self, address guardian) internal {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert GuardianSystemLib_CallingFromRootSystem();
 
-    bytes memory systemCall = abi.encodeCall(_addGuardian_address.addGuardian, (moderator));
+    bytes memory systemCall = abi.encodeCall(_addGuardian_address.addGuardian, (guardian));
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
-  function removeGuardian(CallWrapper memory self, address moderator) internal {
+  function removeGuardian(CallWrapper memory self, address guardian) internal {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert GuardianSystemLib_CallingFromRootSystem();
 
-    bytes memory systemCall = abi.encodeCall(_removeGuardian_address.removeGuardian, (moderator));
+    bytes memory systemCall = abi.encodeCall(_removeGuardian_address.removeGuardian, (guardian));
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
@@ -103,13 +103,13 @@ library GuardianSystemLib {
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
-  function addGuardian(RootCallWrapper memory self, address moderator) internal {
-    bytes memory systemCall = abi.encodeCall(_addGuardian_address.addGuardian, (moderator));
+  function addGuardian(RootCallWrapper memory self, address guardian) internal {
+    bytes memory systemCall = abi.encodeCall(_addGuardian_address.addGuardian, (guardian));
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
-  function removeGuardian(RootCallWrapper memory self, address moderator) internal {
-    bytes memory systemCall = abi.encodeCall(_removeGuardian_address.removeGuardian, (moderator));
+  function removeGuardian(RootCallWrapper memory self, address guardian) internal {
+    bytes memory systemCall = abi.encodeCall(_removeGuardian_address.removeGuardian, (guardian));
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
@@ -160,11 +160,11 @@ interface _unpause {
 }
 
 interface _addGuardian_address {
-  function addGuardian(address moderator) external;
+  function addGuardian(address guardian) external;
 }
 
 interface _removeGuardian_address {
-  function removeGuardian(address moderator) external;
+  function removeGuardian(address guardian) external;
 }
 
 using GuardianSystemLib for GuardianSystemType global;

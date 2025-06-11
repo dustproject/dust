@@ -34,7 +34,7 @@ library Guardians {
    */
   function getKeyNames() internal pure returns (string[] memory keyNames) {
     keyNames = new string[](1);
-    keyNames[0] = "moderatorAddress";
+    keyNames[0] = "guardian";
   }
 
   /**
@@ -63,9 +63,9 @@ library Guardians {
   /**
    * @notice Get isGuardian.
    */
-  function getIsGuardian(address moderatorAddress) internal view returns (bool isGuardian) {
+  function getIsGuardian(address guardian) internal view returns (bool isGuardian) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
+    _keyTuple[0] = bytes32(uint256(uint160(guardian)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
@@ -74,9 +74,9 @@ library Guardians {
   /**
    * @notice Get isGuardian.
    */
-  function _getIsGuardian(address moderatorAddress) internal view returns (bool isGuardian) {
+  function _getIsGuardian(address guardian) internal view returns (bool isGuardian) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
+    _keyTuple[0] = bytes32(uint256(uint160(guardian)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
@@ -85,9 +85,9 @@ library Guardians {
   /**
    * @notice Get isGuardian.
    */
-  function get(address moderatorAddress) internal view returns (bool isGuardian) {
+  function get(address guardian) internal view returns (bool isGuardian) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
+    _keyTuple[0] = bytes32(uint256(uint160(guardian)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
@@ -96,9 +96,9 @@ library Guardians {
   /**
    * @notice Get isGuardian.
    */
-  function _get(address moderatorAddress) internal view returns (bool isGuardian) {
+  function _get(address guardian) internal view returns (bool isGuardian) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
+    _keyTuple[0] = bytes32(uint256(uint160(guardian)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (_toBool(uint8(bytes1(_blob))));
@@ -107,9 +107,9 @@ library Guardians {
   /**
    * @notice Set isGuardian.
    */
-  function setIsGuardian(address moderatorAddress, bool isGuardian) internal {
+  function setIsGuardian(address guardian, bool isGuardian) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
+    _keyTuple[0] = bytes32(uint256(uint160(guardian)));
 
     StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isGuardian)), _fieldLayout);
   }
@@ -117,9 +117,9 @@ library Guardians {
   /**
    * @notice Set isGuardian.
    */
-  function _setIsGuardian(address moderatorAddress, bool isGuardian) internal {
+  function _setIsGuardian(address guardian, bool isGuardian) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
+    _keyTuple[0] = bytes32(uint256(uint160(guardian)));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isGuardian)), _fieldLayout);
   }
@@ -127,9 +127,9 @@ library Guardians {
   /**
    * @notice Set isGuardian.
    */
-  function set(address moderatorAddress, bool isGuardian) internal {
+  function set(address guardian, bool isGuardian) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
+    _keyTuple[0] = bytes32(uint256(uint160(guardian)));
 
     StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isGuardian)), _fieldLayout);
   }
@@ -137,9 +137,9 @@ library Guardians {
   /**
    * @notice Set isGuardian.
    */
-  function _set(address moderatorAddress, bool isGuardian) internal {
+  function _set(address guardian, bool isGuardian) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
+    _keyTuple[0] = bytes32(uint256(uint160(guardian)));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isGuardian)), _fieldLayout);
   }
@@ -147,9 +147,9 @@ library Guardians {
   /**
    * @notice Delete all data for given keys.
    */
-  function deleteRecord(address moderatorAddress) internal {
+  function deleteRecord(address guardian) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
+    _keyTuple[0] = bytes32(uint256(uint160(guardian)));
 
     StoreSwitch.deleteRecord(_tableId, _keyTuple);
   }
@@ -157,9 +157,9 @@ library Guardians {
   /**
    * @notice Delete all data for given keys.
    */
-  function _deleteRecord(address moderatorAddress) internal {
+  function _deleteRecord(address guardian) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
+    _keyTuple[0] = bytes32(uint256(uint160(guardian)));
 
     StoreCore.deleteRecord(_tableId, _keyTuple, _fieldLayout);
   }
@@ -190,9 +190,9 @@ library Guardians {
   /**
    * @notice Encode keys as a bytes32 array using this table's field layout.
    */
-  function encodeKeyTuple(address moderatorAddress) internal pure returns (bytes32[] memory) {
+  function encodeKeyTuple(address guardian) internal pure returns (bytes32[] memory) {
     bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
+    _keyTuple[0] = bytes32(uint256(uint160(guardian)));
 
     return _keyTuple;
   }
