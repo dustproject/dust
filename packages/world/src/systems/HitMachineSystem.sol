@@ -58,7 +58,6 @@ contract HitMachineSystem is System {
     require(energyLeft > 0, "Cannot hit depleted forcefield");
 
     ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
-
     uint128 playerEnergyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, energyLeft);
 
     Vec3 forceFieldCoord = forceField._getPosition();
@@ -76,16 +75,17 @@ contract HitMachineSystem is System {
     uint128 machineEnergyReduction = playerEnergyReduction + massReduction;
 
     decreaseMachineEnergy(forceField, machineEnergyReduction);
-
     addEnergyToLocalPool(forceFieldCoord, machineEnergyReduction + playerEnergyReduction);
 
-    ProgramId program = forceField._getProgram();
-    bytes memory onHit = abi.encodeCall(
-      Hooks.IHit.onHit,
-      (Hooks.HitContext({ caller: caller, target: forceField, damage: machineEnergyReduction, extraData: "" }))
-    );
-    // Don't revert and use a fixed amount of gas so the program can't prevent hitting
-    program.call({ gas: SAFE_PROGRAM_GAS, hook: onHit });
+    {
+      Hooks.HitContext memory ctx =
+        Hooks.HitContext({ caller: caller, target: forceField, damage: machineEnergyReduction, extraData: "" });
+      ProgramId program = forceField._getProgram();
+      bytes memory onHit = abi.encodeCall(Hooks.IHit.onHit, ctx);
+
+      // Don't revert and use a fixed amount of gas so the program can't prevent hitting
+      program.call({ gas: SAFE_PROGRAM_GAS, hook: onHit });
+    }
 
     notify(caller, HitMachineNotification({ machine: forceField, machineCoord: forceFieldCoord }));
   }
