@@ -30,16 +30,18 @@ import {
 } from "../src/utils/Vec3Storage.sol";
 
 import {
+  ACTION_MODIFIER_DENOMINATOR,
   CHUNK_SIZE,
   DEFAULT_MINE_ENERGY_COST,
-  DEFAULT_WOODEN_TOOL_MULTIPLIER,
   MACHINE_ENERGY_DRAIN_RATE,
   MAX_ENTITY_INFLUENCE_RADIUS,
   MAX_FLUID_LEVEL,
   MAX_PLAYER_ENERGY,
+  MINE_ACTION_MODIFIER,
   PLAYER_ENERGY_DRAIN_RATE,
-  SPECIALIZED_WOODEN_TOOL_MULTIPLIER,
-  TOOL_MINE_ENERGY_COST
+  SPECIALIZATION_MULTIPLIER,
+  TOOL_MINE_ENERGY_COST,
+  WOODEN_TOOL_BASE_MULTIPLIER
 } from "../src/Constants.sol";
 import { ObjectAmount, ObjectType, ObjectTypes } from "../src/ObjectType.sol";
 
@@ -775,7 +777,9 @@ contract MineTest is DustTest {
       world.mine(aliceEntityId, stoneCoord, slot, "");
 
       (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(stoneCoord);
-      uint128 massReduction = TOOL_MINE_ENERGY_COST + pickMass / 10 * SPECIALIZED_WOODEN_TOOL_MULTIPLIER;
+      // Calculate expected multiplier: wooden base (3) * mine modifier (1) * specialization (3) = 9
+      uint128 expectedMultiplier = WOODEN_TOOL_BASE_MULTIPLIER * MINE_ACTION_MODIFIER * SPECIALIZATION_MULTIPLIER;
+      uint128 massReduction = TOOL_MINE_ENERGY_COST + pickMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
       uint128 expectedMass = stoneMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden pick on stone");
     }
@@ -797,7 +801,9 @@ contract MineTest is DustTest {
       world.mine(aliceEntityId, logCoord, slot, "");
 
       (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(logCoord);
-      uint128 massReduction = TOOL_MINE_ENERGY_COST + axeMass / 10 * SPECIALIZED_WOODEN_TOOL_MULTIPLIER;
+      // Calculate expected multiplier: wooden base (3) * mine modifier (1) * specialization (3) = 9
+      uint128 expectedMultiplier = WOODEN_TOOL_BASE_MULTIPLIER * MINE_ACTION_MODIFIER * SPECIALIZATION_MULTIPLIER;
+      uint128 massReduction = TOOL_MINE_ENERGY_COST + axeMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
       uint128 expectedMass = logMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden axe on log");
     }
@@ -816,7 +822,9 @@ contract MineTest is DustTest {
       world.mine(aliceEntityId, stoneCoord, slot, "");
 
       (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(stoneCoord);
-      uint128 massReduction = TOOL_MINE_ENERGY_COST + axeMass / 10 * DEFAULT_WOODEN_TOOL_MULTIPLIER;
+      // Calculate expected multiplier: wooden base (3) * mine modifier (1) * no specialization = 3
+      uint128 expectedMultiplier = WOODEN_TOOL_BASE_MULTIPLIER * MINE_ACTION_MODIFIER;
+      uint128 massReduction = TOOL_MINE_ENERGY_COST + axeMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
       uint128 expectedMass = stoneMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden axe on stone");
     }

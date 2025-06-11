@@ -6,7 +6,6 @@ import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
 import { LocalEnergyPool } from "../codegen/tables/LocalEnergyPool.sol";
-import { ERC165Checker } from "@latticexyz/world/src/ERC165Checker.sol";
 import { System } from "@latticexyz/world/src/System.sol";
 
 import {
@@ -24,12 +23,12 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import {
   DEFAULT_HIT_ENERGY_COST,
-  DEFAULT_ORE_TOOL_MULTIPLIER,
-  DEFAULT_WOODEN_TOOL_MULTIPLIER,
+  HIT_ACTION_MODIFIER,
+  ORE_TOOL_BASE_MULTIPLIER,
   SAFE_PROGRAM_GAS,
-  SPECIALIZED_ORE_TOOL_MULTIPLIER,
-  SPECIALIZED_WOODEN_TOOL_MULTIPLIER,
-  TOOL_HIT_ENERGY_COST
+  SPECIALIZATION_MULTIPLIER,
+  TOOL_HIT_ENERGY_COST,
+  WOODEN_TOOL_BASE_MULTIPLIER
 } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectType, ObjectTypes } from "../ObjectType.sol";
@@ -101,16 +100,20 @@ contract HitMachineSystem is System {
   }
 
   function _getToolMultiplier(ObjectType toolType) internal pure returns (uint128) {
+    // Bare hands case - just return action modifier
     if (toolType.isNull()) {
-      return 1;
+      return HIT_ACTION_MODIFIER;
     }
 
+    // Apply base tool multiplier
     bool isWoodenTool = toolType == ObjectTypes.WoodenWhacker;
+    uint128 multiplier = isWoodenTool ? WOODEN_TOOL_BASE_MULTIPLIER : ORE_TOOL_BASE_MULTIPLIER;
 
+    // Apply specialization bonus if using a whacker (the right tool for hitting)
     if (toolType.isWhacker()) {
-      return isWoodenTool ? SPECIALIZED_WOODEN_TOOL_MULTIPLIER : SPECIALIZED_ORE_TOOL_MULTIPLIER;
+      multiplier = multiplier * SPECIALIZATION_MULTIPLIER;
     }
 
-    return isWoodenTool ? DEFAULT_WOODEN_TOOL_MULTIPLIER : DEFAULT_ORE_TOOL_MULTIPLIER;
+    return multiplier * HIT_ACTION_MODIFIER;
   }
 }
