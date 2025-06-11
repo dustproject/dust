@@ -37,6 +37,7 @@ import { ProgramId } from "../src/ProgramId.sol";
 import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 
+import "../src/ProgramHooks.sol" as Hooks;
 import { SlotData, SlotTransfer } from "../src/utils/InventoryUtils.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
@@ -53,28 +54,22 @@ contract TestChestProgram is System {
   // Flag to control whether the hook should revert
   bool public shouldRevert;
 
-  function onTransfer(
-    EntityId caller,
-    EntityId target,
-    SlotData[] memory deposits,
-    SlotData[] memory withdrawals,
-    bytes memory extraData
-  ) external {
+  function onTransfer(Hooks.TransferContext calldata ctx) external {
     require(!shouldRevert, "Transfer not allowed by chest");
 
-    lastCaller = caller;
-    lastTarget = target;
-    lastExtraData = extraData;
+    lastCaller = ctx.caller;
+    lastTarget = ctx.target;
+    lastExtraData = ctx.extraData;
 
     delete _lastDeposits;
     delete _lastWithdrawals;
 
-    for (uint256 i = 0; i < deposits.length; i++) {
-      _lastDeposits.push(deposits[i]);
+    for (uint256 i = 0; i < ctx.deposits.length; i++) {
+      _lastDeposits.push(ctx.deposits[i]);
     }
 
-    for (uint256 i = 0; i < withdrawals.length; i++) {
-      _lastWithdrawals.push(withdrawals[i]);
+    for (uint256 i = 0; i < ctx.withdrawals.length; i++) {
+      _lastWithdrawals.push(ctx.withdrawals[i]);
     }
   }
 

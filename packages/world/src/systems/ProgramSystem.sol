@@ -23,8 +23,8 @@ import { ObjectType } from "../ObjectType.sol";
 
 import { ObjectTypes } from "../ObjectType.sol";
 
+import "../ProgramHooks.sol" as Hooks;
 import { ProgramId } from "../ProgramId.sol";
-import { IAttachProgramHook, IDetachProgramHook, IProgramValidator } from "../ProgramInterfaces.sol";
 import { Vec3 } from "../Vec3.sol";
 
 contract ProgramSystem is System {
@@ -101,15 +101,30 @@ contract ProgramSystem is System {
 
     (EntityId validator, ProgramId validatorProgram) = _getValidatorProgram(validatorCoord);
 
-    bytes memory validateProgram =
-      abi.encodeCall(IProgramValidator.validateProgram, (caller, validator, target, program, extraData));
+    bytes memory validateProgram = abi.encodeCall(
+      Hooks.IProgramValidator.validateProgram,
+      (
+        Hooks.ValidateProgramContext({
+          caller: caller,
+          target: validator,
+          programmed: target,
+          program: program,
+          extraData: extraData
+        })
+      )
+    );
 
     // The validateProgram view function should revert if the program is not allowed
     validatorProgram.staticcallOrRevert(validateProgram);
 
     EntityProgram._set(target, program);
 
-    program.callOrRevert(abi.encodeCall(IAttachProgramHook.onAttachProgram, (caller, target, extraData)));
+    program.callOrRevert(
+      abi.encodeCall(
+        Hooks.IAttachProgram.onAttachProgram,
+        (Hooks.AttachProgramContext({ caller: caller, target: target, extraData: extraData }))
+      )
+    );
 
     notify(caller, AttachProgramNotification({ attachedTo: target, programSystemId: program.toResourceId() }));
   }
@@ -121,7 +136,10 @@ contract ProgramSystem is System {
     Vec3 forceFieldCoord,
     bytes calldata extraData
   ) internal {
-    bytes memory onDetachProgram = abi.encodeCall(IDetachProgramHook.onDetachProgram, (caller, target, extraData));
+    bytes memory onDetachProgram = abi.encodeCall(
+      Hooks.IDetachProgram.onDetachProgram,
+      (Hooks.DetachProgramContext({ caller: caller, target: target, extraData: extraData }))
+    );
 
     (EntityId forceField,) = ForceFieldUtils.getForceField(forceFieldCoord);
     // If forcefield doesn't have energy, allow detachment

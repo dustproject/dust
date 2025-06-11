@@ -33,8 +33,9 @@ import {
 } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectType, ObjectTypes } from "../ObjectType.sol";
+
+import "../ProgramHooks.sol" as Hooks;
 import { ProgramId } from "../ProgramId.sol";
-import { IHitHook } from "../ProgramInterfaces.sol";
 import { Vec3 } from "../Vec3.sol";
 
 contract HitMachineSystem is System {
@@ -79,7 +80,10 @@ contract HitMachineSystem is System {
     addEnergyToLocalPool(forceFieldCoord, machineEnergyReduction + playerEnergyReduction);
 
     ProgramId program = forceField._getProgram();
-    bytes memory onHit = abi.encodeCall(IHitHook.onHit, (caller, forceField, machineEnergyReduction, ""));
+    bytes memory onHit = abi.encodeCall(
+      Hooks.IHit.onHit,
+      (Hooks.HitContext({ caller: caller, target: forceField, damage: machineEnergyReduction, extraData: "" }))
+    );
     // Don't revert and use a fixed amount of gas so the program can't prevent hitting
     program.call({ gas: SAFE_PROGRAM_GAS, hook: onHit });
 

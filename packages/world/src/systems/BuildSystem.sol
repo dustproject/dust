@@ -33,8 +33,8 @@ import { BUILD_ENERGY_COST, MAX_FLUID_LEVEL } from "../Constants.sol";
 import { EntityId } from "../EntityId.sol";
 import { ObjectType, ObjectTypes } from "../ObjectType.sol";
 
+import "../ProgramHooks.sol" as Hooks;
 import { ProgramId } from "../ProgramId.sol";
-import { IBuildHook } from "../ProgramInterfaces.sol";
 import { Orientation, Vec3, vec3 } from "../Vec3.sol";
 
 struct BuildContext {
@@ -180,7 +180,18 @@ contract BuildSystem is System {
       }
 
       program.callOrRevert(
-        abi.encodeCall(IBuildHook.onBuild, (ctx.caller, forceField, ctx.buildType, coord, extraData))
+        abi.encodeCall(
+          Hooks.IBuild.onBuild,
+          (
+            Hooks.BuildContext({
+              caller: ctx.caller,
+              target: forceField,
+              objectType: ctx.buildType,
+              coord: coord,
+              extraData: extraData
+            })
+          )
+        )
       );
     }
   }
