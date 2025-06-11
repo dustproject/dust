@@ -53,11 +53,12 @@ contract HitMachineSystem is System {
     require(forceField._exists(), "No force field at this location");
 
     (EnergyData memory machineData,) = updateMachineEnergy(forceField);
-    require(machineData.energy > 0, "Cannot hit depleted forcefield");
+    uint128 energyLeft = machineData.energy;
+    require(energyLeft > 0, "Cannot hit depleted forcefield");
 
     ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
 
-    uint128 playerEnergyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, machineData.energy);
+    uint128 playerEnergyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, energyLeft);
 
     Vec3 forceFieldCoord = forceField._getPosition();
 
@@ -67,7 +68,9 @@ contract HitMachineSystem is System {
       return;
     }
 
-    uint128 massReduction = toolData.use(machineData.energy, _getToolMultiplier(toolData.toolType));
+    energyLeft -= playerEnergyReduction;
+
+    uint128 massReduction = toolData.use(energyLeft, _getToolMultiplier(toolData.toolType));
 
     uint128 machineEnergyReduction = playerEnergyReduction + massReduction;
 
@@ -83,14 +86,14 @@ contract HitMachineSystem is System {
     notify(caller, HitMachineNotification({ machine: forceField, machineCoord: forceFieldCoord }));
   }
 
-  function _getCallerEnergyReduction(ObjectType toolType, uint128 currentEnergy, uint128 massLeft)
+  function _getCallerEnergyReduction(ObjectType toolType, uint128 currentEnergy, uint128 energyLeft)
     internal
     pure
     returns (uint128)
   {
     uint128 maxEnergyCost = toolType.isNull() ? DEFAULT_HIT_ENERGY_COST : TOOL_HIT_ENERGY_COST;
     maxEnergyCost = Math.min(currentEnergy, maxEnergyCost);
-    return Math.min(massLeft, maxEnergyCost);
+    return Math.min(energyLeft, maxEnergyCost);
   }
 
   function _getToolMultiplier(ObjectType toolType) internal pure returns (uint128) {

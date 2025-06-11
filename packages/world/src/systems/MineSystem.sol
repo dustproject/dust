@@ -291,7 +291,7 @@ library MineLib {
 
     ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
 
-    uint128 energyReduction = MineLib._getCallerEnergyReduction(toolData.toolType, callerEnergy, massLeft);
+    uint128 energyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, massLeft);
 
     if (energyReduction > 0) {
       // If player died, return early
