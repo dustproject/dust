@@ -149,4 +149,123 @@ contract HitMachineTest is DustTest {
 
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
+
+  function testHitForceFieldEnergyReductionOrder() public {
+    // This test verifies that tool mass reduction is calculated based on remaining energy
+    // after player energy reduction, not the total force field energy
+    // This would fail before the fix where it passed full force field energy to tool.use()
+
+    // Setup player and force field
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    EntityId forceField = setupForceField(playerCoord + vec3(1, 0, 0));
+
+    // Create and equip whacker
+    EntityId whacker = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.CopperWhacker);
+    uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, whacker);
+
+    uint128 whackerMass = Mass.getMass(whacker);
+
+    // Set force field to have high total energy but low remaining after player reduction
+    // Force field: TOOL_HIT_ENERGY_COST + 90 (enough for 10 mass reduction before fix)
+    // After player reduction: 90 remaining (enough for exactly 10 mass)
+    Energy.setEnergy(forceField, TOOL_HIT_ENERGY_COST + 90);
+    Energy.setEnergy(aliceEntityId, TOOL_HIT_ENERGY_COST + 100);
+
+    // Hit force field with whacker
+    vm.prank(alice);
+    world.hitForceField(aliceEntityId, playerCoord + vec3(1, 0, 0), slot);
+
+    // After fix: tool damage based on remaining 90 energy
+    // Tool can use: 90 / 9 = 10 mass exactly
+    // Tool damage: 10 * 9 = 90
+    assertEq(Energy.getEnergy(forceField), 0);
+    assertEq(Energy.getEnergy(aliceEntityId), 100);
+    assertEq(Mass.getMass(whacker), whackerMass - 10);
+  }
+
+  function testHitForceFieldWhenToolMassReductionExceedsRemainingEnergy() public {
+    // Test case where the tool would normally reduce more mass than the remaining energy allows
+
+    // Setup
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    EntityId forceField = setupForceField(playerCoord + vec3(1, 0, 0));
+    EntityId whacker = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.CopperWhacker);
+    uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, whacker);
+
+    uint128 whackerMass = Mass.getMass(whacker);
+
+    // Set force field energy so that remaining energy after player reduction is less than tool mass reduction
+    // Force field energy = TOOL_HIT_ENERGY_COST + half of what tool would normally reduce
+    Energy.setEnergy(forceField, TOOL_HIT_ENERGY_COST + (whackerMass / 10 * SPECIALIZED_ORE_TOOL_MULTIPLIER) / 2);
+    Energy.setEnergy(aliceEntityId, TOOL_HIT_ENERGY_COST + 10);
+
+    // Hit force field with whacker
+    vm.prank(alice);
+    world.hitForceField(aliceEntityId, playerCoord + vec3(1, 0, 0), slot);
+
+    // Verify energy reductions
+    assertEq(Energy.getEnergy(forceField), 0); // Should be fully depleted
+    assertEq(Energy.getEnergy(aliceEntityId), 10);
+
+    // Verify tool mass reduction was limited by remaining energy
+    uint128 remainingAfterPlayer = (whackerMass / 10 * SPECIALIZED_ORE_TOOL_MULTIPLIER) / 2;
+    assertEq(Mass.getMass(whacker), whackerMass - remainingAfterPlayer / SPECIALIZED_ORE_TOOL_MULTIPLIER);
+  }
+
+  function testHitForceFieldWithExactPlayerEnergyForReduction() public {
+    // Test when force field has exactly enough energy for player reduction
+    // This tests that tool damage is correctly calculated when player uses all force field energy
+
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    EntityId forceField = setupForceField(playerCoord + vec3(1, 0, 0));
+    EntityId whacker = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.CopperWhacker);
+    uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, whacker);
+
+    uint128 whackerMass = Mass.getMass(whacker);
+
+    // Set force field to exactly TOOL_HIT_ENERGY_COST
+    // Player reduction will be limited to this amount, leaving nothing for tool
+    Energy.setEnergy(aliceEntityId, TOOL_HIT_ENERGY_COST + 100);
+    Energy.setEnergy(forceField, TOOL_HIT_ENERGY_COST);
+
+    // Hit force field with whacker
+    vm.prank(alice);
+    world.hitForceField(aliceEntityId, playerCoord + vec3(1, 0, 0), slot);
+
+    // Force field should be fully depleted (player used all of it)
+    assertEq(Energy.getEnergy(forceField), 0);
+    // Player should have reduced by TOOL_HIT_ENERGY_COST
+    assertEq(Energy.getEnergy(aliceEntityId), 100);
+    // Tool should not have been used (no energy left)
+    assertEq(Mass.getMass(whacker), whackerMass);
+  }
+
+  function testHitForceFieldWhenForceFieldEnergyLessThanPlayerReduction() public {
+    // Test when force field has less energy than player would normally reduce
+
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    EntityId forceField = setupForceField(playerCoord + vec3(1, 0, 0));
+
+    // Set force field energy less than TOOL_HIT_ENERGY_COST
+    Energy.setEnergy(forceField, TOOL_HIT_ENERGY_COST / 2);
+    Energy.setEnergy(aliceEntityId, TOOL_HIT_ENERGY_COST + 10);
+
+    // Create and equip whacker
+    EntityId whacker = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.CopperWhacker);
+    uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, whacker);
+    uint128 initialWhackerMass = Mass.getMass(whacker);
+
+    // Hit force field with whacker
+    vm.prank(alice);
+    world.hitForceField(aliceEntityId, playerCoord + vec3(1, 0, 0), slot);
+
+    // Player energy reduction should be limited by force field energy
+    assertEq(Energy.getEnergy(aliceEntityId), TOOL_HIT_ENERGY_COST + 10 - TOOL_HIT_ENERGY_COST / 2);
+
+    // Force field should be fully depleted
+    assertEq(Energy.getEnergy(forceField), 0);
+
+    // Tool should not have been used since remaining energy after player reduction is 0
+    assertEq(Mass.getMass(whacker), initialWhackerMass);
+  }
 }
