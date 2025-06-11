@@ -13,11 +13,11 @@ import { ICraftSystem } from "./ICraftSystem.sol";
 import { IFarmingSystem } from "./IFarmingSystem.sol";
 import { IFoodSystem } from "./IFoodSystem.sol";
 import { IForceFieldSystem } from "./IForceFieldSystem.sol";
+import { IGuardianSystem } from "./IGuardianSystem.sol";
 import { IHitMachineSystem } from "./IHitMachineSystem.sol";
 import { IInventorySystem } from "./IInventorySystem.sol";
 import { IMachineSystem } from "./IMachineSystem.sol";
 import { IMineSystem } from "./IMineSystem.sol";
-import { IModeratorSystem } from "./IModeratorSystem.sol";
 import { IMoveSystem } from "./IMoveSystem.sol";
 import { INatureSystem } from "./INatureSystem.sol";
 import { IProgramSystem } from "./IProgramSystem.sol";
@@ -44,11 +44,11 @@ interface IWorld is
   IFarmingSystem,
   IFoodSystem,
   IForceFieldSystem,
+  IGuardianSystem,
   IHitMachineSystem,
   IInventorySystem,
   IMachineSystem,
   IMineSystem,
-  IModeratorSystem,
   IMoveSystem,
   INatureSystem,
   IProgramSystem,

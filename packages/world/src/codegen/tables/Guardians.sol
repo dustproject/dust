@@ -16,9 +16,9 @@ import { Schema } from "@latticexyz/store/src/Schema.sol";
 import { EncodedLengths, EncodedLengthsLib } from "@latticexyz/store/src/EncodedLengths.sol";
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
-library Moderators {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "Moderators", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x746200000000000000000000000000004d6f64657261746f7273000000000000);
+library Guardians {
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "Guardians", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x74620000000000000000000000000000477561726469616e7300000000000000);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0001010001000000000000000000000000000000000000000000000000000000);
@@ -43,7 +43,7 @@ library Moderators {
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
     fieldNames = new string[](1);
-    fieldNames[0] = "isModerator";
+    fieldNames[0] = "isGuardian";
   }
 
   /**
@@ -61,9 +61,9 @@ library Moderators {
   }
 
   /**
-   * @notice Get isModerator.
+   * @notice Get isGuardian.
    */
-  function getIsModerator(address moderatorAddress) internal view returns (bool isModerator) {
+  function getIsGuardian(address moderatorAddress) internal view returns (bool isGuardian) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
@@ -72,9 +72,9 @@ library Moderators {
   }
 
   /**
-   * @notice Get isModerator.
+   * @notice Get isGuardian.
    */
-  function _getIsModerator(address moderatorAddress) internal view returns (bool isModerator) {
+  function _getIsGuardian(address moderatorAddress) internal view returns (bool isGuardian) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
@@ -83,9 +83,9 @@ library Moderators {
   }
 
   /**
-   * @notice Get isModerator.
+   * @notice Get isGuardian.
    */
-  function get(address moderatorAddress) internal view returns (bool isModerator) {
+  function get(address moderatorAddress) internal view returns (bool isGuardian) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
@@ -94,9 +94,9 @@ library Moderators {
   }
 
   /**
-   * @notice Get isModerator.
+   * @notice Get isGuardian.
    */
-  function _get(address moderatorAddress) internal view returns (bool isModerator) {
+  function _get(address moderatorAddress) internal view returns (bool isGuardian) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
@@ -105,43 +105,43 @@ library Moderators {
   }
 
   /**
-   * @notice Set isModerator.
+   * @notice Set isGuardian.
    */
-  function setIsModerator(address moderatorAddress, bool isModerator) internal {
+  function setIsGuardian(address moderatorAddress, bool isGuardian) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isModerator)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isGuardian)), _fieldLayout);
   }
 
   /**
-   * @notice Set isModerator.
+   * @notice Set isGuardian.
    */
-  function _setIsModerator(address moderatorAddress, bool isModerator) internal {
+  function _setIsGuardian(address moderatorAddress, bool isGuardian) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isModerator)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isGuardian)), _fieldLayout);
   }
 
   /**
-   * @notice Set isModerator.
+   * @notice Set isGuardian.
    */
-  function set(address moderatorAddress, bool isModerator) internal {
+  function set(address moderatorAddress, bool isGuardian) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isModerator)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isGuardian)), _fieldLayout);
   }
 
   /**
-   * @notice Set isModerator.
+   * @notice Set isGuardian.
    */
-  function _set(address moderatorAddress, bool isModerator) internal {
+  function _set(address moderatorAddress, bool isGuardian) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = bytes32(uint256(uint160(moderatorAddress)));
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isModerator)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((isGuardian)), _fieldLayout);
   }
 
   /**
@@ -168,8 +168,8 @@ library Moderators {
    * @notice Tightly pack static (fixed length) data using this table's schema.
    * @return The static data, encoded into a sequence of bytes.
    */
-  function encodeStatic(bool isModerator) internal pure returns (bytes memory) {
-    return abi.encodePacked(isModerator);
+  function encodeStatic(bool isGuardian) internal pure returns (bytes memory) {
+    return abi.encodePacked(isGuardian);
   }
 
   /**
@@ -178,8 +178,8 @@ library Moderators {
    * @return The lengths of the dynamic fields (packed into a single bytes32 value).
    * @return The dynamic (variable length) data, encoded into a sequence of bytes.
    */
-  function encode(bool isModerator) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
-    bytes memory _staticData = encodeStatic(isModerator);
+  function encode(bool isGuardian) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
+    bytes memory _staticData = encodeStatic(isGuardian);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;

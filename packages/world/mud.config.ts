@@ -365,10 +365,10 @@ export default defineWorld({
       },
       key: [],
     },
-    Moderators: {
+    Guardians: {
       schema: {
         moderatorAddress: "address",
-        isModerator: "bool",
+        isGuardian: "bool",
       },
       key: ["moderatorAddress"],
     },
