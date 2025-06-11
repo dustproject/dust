@@ -1,5 +1,7 @@
 import { getOrientation } from "./orientation";
 
+const MINUTES = 60n;
+
 export interface Category {
   objects: ObjectName[];
   checkName?: string;
@@ -407,60 +409,60 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   {
     name: "WheatSeed",
     growableEnergy: 4300000000000000n,
-    timeToGrow: 900n,
+    timeToGrow: 17n * MINUTES,
     crop: "Wheat",
   },
   {
     name: "PumpkinSeed",
     growableEnergy: 34300000000000000n,
-    timeToGrow: 3600n,
+    timeToGrow: 171n * MINUTES,
     crop: "Pumpkin",
   },
   {
     name: "MelonSeed",
     growableEnergy: 34300000000000000n,
-    timeToGrow: 3600n,
+    timeToGrow: 171n * MINUTES,
     crop: "Melon",
   },
   {
     name: "OakSapling",
     growableEnergy: 148000000000000000n,
-    timeToGrow: 345600n,
+    timeToGrow: 740n * MINUTES,
   },
   {
     name: "BirchSapling",
     growableEnergy: 139000000000000000n,
-    timeToGrow: 345600n,
+    timeToGrow: 695n * MINUTES,
   },
   {
     name: "JungleSapling",
     growableEnergy: 300000000000000000n,
-    timeToGrow: 345600n,
+    timeToGrow: 1500n * MINUTES,
   },
   {
     name: "SakuraSapling",
     growableEnergy: 187000000000000000n,
-    timeToGrow: 345600n,
+    timeToGrow: 1100n * MINUTES,
   },
   {
     name: "AcaciaSapling",
     growableEnergy: 158000000000000000n,
-    timeToGrow: 345600n,
+    timeToGrow: 790n * MINUTES,
   },
   {
     name: "SpruceSapling",
     growableEnergy: 256000000000000000n,
-    timeToGrow: 345600n,
+    timeToGrow: 1280n * MINUTES,
   },
   {
     name: "DarkOakSapling",
     growableEnergy: 202000000000000000n,
-    timeToGrow: 345600n,
+    timeToGrow: 1010n * MINUTES,
   },
   {
     name: "MangroveSapling",
     growableEnergy: 232000000000000000n,
-    timeToGrow: 345600n,
+    timeToGrow: 1160n * MINUTES,
   },
   {
     name: "ForceField",
