@@ -5,46 +5,50 @@ import { AccessControl } from "@latticexyz/world/src/AccessControl.sol";
 import { System } from "@latticexyz/world/src/System.sol";
 import { ROOT_NAMESPACE_ID } from "@latticexyz/world/src/constants.sol";
 
-import { Vec3, vec3 } from "../../Vec3.sol";
+import { Vec3, vec3 } from "../../src/Vec3.sol";
 
-import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
+import { ReverseMovablePosition } from "../../src/utils/Vec3Storage.sol";
 
-import { EntityId, EntityTypeLib } from "../../EntityId.sol";
-import { ObjectType } from "../../ObjectType.sol";
+import { EntityId, EntityTypeLib } from "../../src/EntityId.sol";
+import { ObjectType } from "../../src/ObjectType.sol";
 
-import { ObjectTypes } from "../../ObjectType.sol";
+import { ObjectTypes } from "../../src/ObjectType.sol";
 
-import { EntityUtils } from "../../utils/EntityUtils.sol";
-import { InventoryUtils } from "../../utils/InventoryUtils.sol";
-import { PlayerUtils } from "../../utils/PlayerUtils.sol";
-import { MoveLib } from "../libraries/MoveLib.sol";
+import { MoveLib } from "../../src/systems/libraries/MoveLib.sol";
+import { EntityUtils } from "../../src/utils/EntityUtils.sol";
+import { InventoryUtils } from "../../src/utils/InventoryUtils.sol";
+import { PlayerUtils } from "../../src/utils/PlayerUtils.sol";
 
-contract AdminSystem is System {
-  modifier onlyAdmin() {
+// Only for debugging purposes, not deployed to production
+contract DebugSystem is System {
+  modifier onlyGuardian() {
     AccessControl.requireOwner(ROOT_NAMESPACE_ID, _msgSender());
     _;
   }
 
-  function adminAddToInventory(EntityId owner, ObjectType objectType, uint16 numObjectsToAdd) public onlyAdmin {
-    require(!objectType.isTool(), "To add a tool, you must use adminAddToolToInventory");
+  function debugAddToInventory(EntityId owner, ObjectType objectType, uint16 numObjectsToAdd) public onlyGuardian {
+    require(!objectType.isTool(), "To add a tool, you must use debugAddToolToInventory");
     InventoryUtils.addObject(owner, objectType, numObjectsToAdd);
   }
 
-  function adminAddToolToInventory(EntityId owner, ObjectType toolObjectType) public onlyAdmin returns (EntityId) {
+  function debugAddToolToInventory(EntityId owner, ObjectType toolObjectType) public onlyGuardian returns (EntityId) {
     EntityId tool = EntityUtils.createUniqueEntity(toolObjectType);
     InventoryUtils.addEntity(owner, tool);
     return tool;
   }
 
-  function adminRemoveFromInventory(EntityId owner, ObjectType objectType, uint16 numObjectsToRemove) public onlyAdmin {
+  function debugRemoveFromInventory(EntityId owner, ObjectType objectType, uint16 numObjectsToRemove)
+    public
+    onlyGuardian
+  {
     InventoryUtils.removeObject(owner, objectType, numObjectsToRemove);
   }
 
-  function adminRemoveToolFromInventory(EntityId owner, EntityId tool) public onlyAdmin {
+  function debugRemoveToolFromInventory(EntityId owner, EntityId tool) public onlyGuardian {
     InventoryUtils.removeEntity(owner, tool);
   }
 
-  function adminTeleportPlayer(address playerAddress, Vec3 finalCoord) public onlyAdmin {
+  function debugTeleportPlayer(address playerAddress, Vec3 finalCoord) public onlyGuardian {
     EntityId player = EntityTypeLib.encodePlayer(playerAddress);
     player.activate();
 
