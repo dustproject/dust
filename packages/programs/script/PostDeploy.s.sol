@@ -32,36 +32,28 @@ contract PostDeploy is DustScript {
     // Create the programs
     ResourceId ffProgramId =
       WorldResourceIdLib.encode({ typeId: RESOURCE_SYSTEM, namespace: DEFAULT_NAMESPACE, name: "ForceFieldProgra" });
-    if (Systems.getSystem(ffProgramId) == address(0)) {
-      ForceFieldProgram forceFieldProgram = new ForceFieldProgram(world);
-      world.registerSystem(ffProgramId, forceFieldProgram, false);
-    }
+    ForceFieldProgram forceFieldProgram = new ForceFieldProgram(world);
+    world.registerSystem(ffProgramId, forceFieldProgram, false);
 
     ResourceId chestProgramId =
       WorldResourceIdLib.encode({ typeId: RESOURCE_SYSTEM, namespace: DEFAULT_NAMESPACE, name: "ChestProgram" });
-    if (Systems.getSystem(chestProgramId) == address(0)) {
-      ChestProgram chestProgram = new ChestProgram(world);
-      world.registerSystem(chestProgramId, chestProgram, false);
-    }
+    ChestProgram chestProgram = new ChestProgram(world);
+    world.registerSystem(chestProgramId, chestProgram, false);
 
     ResourceId bedProgramId =
       WorldResourceIdLib.encode({ typeId: RESOURCE_SYSTEM, namespace: DEFAULT_NAMESPACE, name: "BedProgram" });
-    if (Systems.getSystem(bedProgramId) == address(0)) {
-      BedProgram bedProgram = new BedProgram(world);
-      world.registerSystem(bedProgramId, bedProgram, false);
-    }
+    BedProgram bedProgram = new BedProgram(world);
+    world.registerSystem(bedProgramId, bedProgram, false);
+
     ResourceId spawnTileProgramId =
       WorldResourceIdLib.encode({ typeId: RESOURCE_SYSTEM, namespace: DEFAULT_NAMESPACE, name: "SpawnTileProgram" });
-    if (Systems.getSystem(spawnTileProgramId) == address(0)) {
-      SpawnTileProgram spawnTileProgram = new SpawnTileProgram(world);
-      world.registerSystem(spawnTileProgramId, spawnTileProgram, false);
-    }
+    SpawnTileProgram spawnTileProgram = new SpawnTileProgram(world);
+    world.registerSystem(spawnTileProgramId, spawnTileProgram, false);
+
     ResourceId textSignProgramId =
       WorldResourceIdLib.encode({ typeId: RESOURCE_SYSTEM, namespace: DEFAULT_NAMESPACE, name: "TextSignProgram" });
-    if (Systems.getSystem(textSignProgramId) == address(0)) {
-      TextSignProgram textSignProgram = new TextSignProgram(world);
-      world.registerSystem(textSignProgramId, textSignProgram, false);
-    }
+    TextSignProgram textSignProgram = new TextSignProgram(world);
+    world.registerSystem(textSignProgramId, textSignProgram, false);
 
     vm.stopBroadcast();
   }
