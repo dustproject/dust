@@ -10,7 +10,7 @@ import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
 import { ROOT_NAMESPACE } from "@latticexyz/world/src/constants.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
-import { DebugSystem } from "./DebugSystem.sol";
+import { DebugSystem } from "../../src/systems/debug/DebugSystem.sol";
 
 function ensureDebugSystem(IWorld world) {
   ResourceId debugSystemId =

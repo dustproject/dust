@@ -386,4 +386,12 @@ export default defineWorld({
       key: ["entityId"],
     },
   },
+  systems: {
+    // This system is only used during development and is not deployed on mainnet
+    DebugSystem: {
+      deploy: {
+        disabled: true,
+      },
+    },
+  },
 });

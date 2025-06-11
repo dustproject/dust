@@ -24,6 +24,7 @@ import { IProgramSystem } from "./IProgramSystem.sol";
 import { ISpawnSystem } from "./ISpawnSystem.sol";
 import { ITerrainSystem } from "./ITerrainSystem.sol";
 import { ITransferSystem } from "./ITransferSystem.sol";
+import { IDebugSystem } from "./IDebugSystem.sol";
 
 /**
  * @title IWorld
@@ -53,5 +54,6 @@ interface IWorld is
   IProgramSystem,
   ISpawnSystem,
   ITerrainSystem,
-  ITransferSystem
+  ITransferSystem,
+  IDebugSystem
 {}

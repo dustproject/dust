@@ -25,7 +25,7 @@ contract TeleportScript is Script {
 
     ensureDebugSystem(world);
 
-    // world.debugTeleportPlayer(playerAddress, vec3(x, y, z));
+    world.debugTeleportPlayer(playerAddress, vec3(x, y, z));
 
     vm.stopBroadcast();
   }

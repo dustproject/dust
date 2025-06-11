@@ -28,25 +28,25 @@ contract GiveScript is Script {
     ensureDebugSystem(world);
 
     EntityId playerEntityId = EntityTypeLib.encodePlayer(playerAddress);
-    // world.debugAddToInventory(playerEntityId, ObjectTypes.OakLog, 99);
-    // world.debugAddToInventory(playerEntityId, ObjectTypes.Chest, 1);
-    // world.debugAddToInventory(playerEntityId, ObjectTypes.MelonSmoothie, 99);
-    // world.debugAddToInventory(playerEntityId, ObjectTypes.Torch, 99);
-    // world.debugAddToInventory(playerEntityId, ObjectTypes.ForceField, 3);
-    // world.debugAddToInventory(playerEntityId, ObjectTypes.TextSign, 1);
-    // world.debugAddToInventory(playerEntityId, ObjectTypes.Workbench, 1);
-    // world.debugAddToInventory(playerEntityId, ObjectTypes.Furnace, 1);
-    // world.debugAddToInventory(playerEntityId, ObjectTypes.Powerstone, 1);
-    // world.debugAddToInventory(playerEntityId, ObjectTypes.SpawnTile, 1);
-    // world.debugAddToInventory(playerEntityId, ObjectTypes.Bed, 1);
-    // world.debugAddToInventory(playerEntityId, ObjectTypes.Bucket, 1);
-    // world.debugAddToInventory(playerEntityId, ObjectTypes.WaterBucket, 3);
-    // world.debugAddToInventory(playerEntityId, ObjectTypes.OakSapling, 10);
-    // world.debugAddToInventory(playerEntityId, ObjectTypes.Battery, 10);
-    // world.debugAddToInventory(playerEntityId, ObjectTypes.Wheat, 99);
-    // world.debugAddToolToInventory(playerEntityId, ObjectTypes.WoodenHoe);
-    // world.debugAddToolToInventory(playerEntityId, ObjectTypes.IronPick);
-    // world.debugAddToolToInventory(playerEntityId, ObjectTypes.NeptuniumAxe);
+    world.debugAddToInventory(playerEntityId, ObjectTypes.OakLog, 99);
+    world.debugAddToInventory(playerEntityId, ObjectTypes.Chest, 1);
+    world.debugAddToInventory(playerEntityId, ObjectTypes.MelonSmoothie, 99);
+    world.debugAddToInventory(playerEntityId, ObjectTypes.Torch, 99);
+    world.debugAddToInventory(playerEntityId, ObjectTypes.ForceField, 3);
+    world.debugAddToInventory(playerEntityId, ObjectTypes.TextSign, 1);
+    world.debugAddToInventory(playerEntityId, ObjectTypes.Workbench, 1);
+    world.debugAddToInventory(playerEntityId, ObjectTypes.Furnace, 1);
+    world.debugAddToInventory(playerEntityId, ObjectTypes.Powerstone, 1);
+    world.debugAddToInventory(playerEntityId, ObjectTypes.SpawnTile, 1);
+    world.debugAddToInventory(playerEntityId, ObjectTypes.Bed, 1);
+    world.debugAddToInventory(playerEntityId, ObjectTypes.Bucket, 1);
+    world.debugAddToInventory(playerEntityId, ObjectTypes.WaterBucket, 3);
+    world.debugAddToInventory(playerEntityId, ObjectTypes.OakSapling, 10);
+    world.debugAddToInventory(playerEntityId, ObjectTypes.Battery, 10);
+    world.debugAddToInventory(playerEntityId, ObjectTypes.Wheat, 99);
+    world.debugAddToolToInventory(playerEntityId, ObjectTypes.WoodenHoe);
+    world.debugAddToolToInventory(playerEntityId, ObjectTypes.IronPick);
+    world.debugAddToolToInventory(playerEntityId, ObjectTypes.NeptuniumAxe);
 
     vm.stopBroadcast();
   }
