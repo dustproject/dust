@@ -1450,17 +1450,17 @@ library ObjectTypeLib {
   }
 
   function getTimeToGrow(ObjectType self) internal pure returns (uint128) {
-    if (self == ObjectTypes.WheatSeed) return 900;
-    if (self == ObjectTypes.PumpkinSeed) return 3600;
-    if (self == ObjectTypes.MelonSeed) return 3600;
-    if (self == ObjectTypes.OakSapling) return 345600;
-    if (self == ObjectTypes.BirchSapling) return 345600;
-    if (self == ObjectTypes.JungleSapling) return 345600;
-    if (self == ObjectTypes.SakuraSapling) return 345600;
-    if (self == ObjectTypes.AcaciaSapling) return 345600;
-    if (self == ObjectTypes.SpruceSapling) return 345600;
-    if (self == ObjectTypes.DarkOakSapling) return 345600;
-    if (self == ObjectTypes.MangroveSapling) return 345600;
+    if (self == ObjectTypes.WheatSeed) return 1020;
+    if (self == ObjectTypes.PumpkinSeed) return 10260;
+    if (self == ObjectTypes.MelonSeed) return 10260;
+    if (self == ObjectTypes.OakSapling) return 44400;
+    if (self == ObjectTypes.BirchSapling) return 41700;
+    if (self == ObjectTypes.JungleSapling) return 90000;
+    if (self == ObjectTypes.SakuraSapling) return 66000;
+    if (self == ObjectTypes.AcaciaSapling) return 47400;
+    if (self == ObjectTypes.SpruceSapling) return 76800;
+    if (self == ObjectTypes.DarkOakSapling) return 60600;
+    if (self == ObjectTypes.MangroveSapling) return 69600;
     return 0;
   }
 
