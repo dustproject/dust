@@ -365,12 +365,12 @@ export default defineWorld({
       },
       key: [],
     },
-    Moderators: {
+    Guardians: {
       schema: {
-        moderatorAddress: "address",
-        isModerator: "bool",
+        guardian: "address",
+        isGuardian: "bool",
       },
-      key: ["moderatorAddress"],
+      key: ["guardian"],
     },
     UniqueEntity: {
       schema: {
@@ -387,7 +387,8 @@ export default defineWorld({
     },
   },
   systems: {
-    AdminSystem: {
+    // This system is only used during development and is not deployed on mainnet
+    DebugSystem: {
       deploy: {
         disabled: true,
       },

@@ -8,7 +8,7 @@ import { console } from "forge-std/console.sol";
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
 
 import { vec3 } from "../../src/Vec3.sol";
-import { ensureAdminSystem } from "./ensureAdminSystem.sol";
+import { ensureDebugSystem } from "./ensureDebugSystem.sol";
 
 contract TeleportScript is Script {
   function run(address worldAddress, address playerAddress, int32 x, int32 y, int32 z) external {
@@ -23,9 +23,9 @@ contract TeleportScript is Script {
     // Start broadcasting transactions from the deployer account
     vm.startBroadcast(deployerPrivateKey);
 
-    ensureAdminSystem(world);
+    ensureDebugSystem(world);
 
-    world.adminTeleportPlayer(playerAddress, vec3(x, y, z));
+    world.debugTeleportPlayer(playerAddress, vec3(x, y, z));
 
     vm.stopBroadcast();
   }
