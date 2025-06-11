@@ -52,8 +52,8 @@ uint128 constant MOVING_UNIT_COST = MAX_MOVE_UNITS_PER_SECOND / 15; // 15 blocks
 uint128 constant SWIMMING_UNIT_COST = MAX_MOVE_UNITS_PER_SECOND * 10 / 135; // 13,5 blocks per second (90% of walking speed)
 
 // Base tool effectiveness (relative to bare hands)
-uint128 constant WOODEN_TOOL_BASE_MULTIPLIER = 3; // 3x base effectiveness
-uint128 constant ORE_TOOL_BASE_MULTIPLIER = 10; // 10x base effectiveness
+uint128 constant WOODEN_TOOL_BASE_MULTIPLIER = 10; // 10x base effectiveness
+uint128 constant ORE_TOOL_BASE_MULTIPLIER = 3; // 3x base effectiveness
 
 // Specialization bonus (when tool matches task)
 uint128 constant SPECIALIZATION_MULTIPLIER = 3; // 3x bonus for using the right tool
