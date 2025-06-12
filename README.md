@@ -36,8 +36,7 @@ This repository includes the core physics contracts of the DUST protocol, a clie
 │   ├── programs           // default programs installed on entities
 │   └── dustkit            // client SDK to built apps in DUST
 └── apps
-    ├── dustkit-playground // a playground to iterate on apps with dustkit
-    └── player-position    // an example app
+    └── dustkit-playground // a playground to iterate on apps with dustkit
 ```
 
 To understand the relationship between programs and apps, have a look at [PROGRAMS.md](./PROGRAMS.md).
