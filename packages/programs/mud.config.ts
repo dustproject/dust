@@ -6,7 +6,10 @@ export default defineWorld({
     generateSystemLibraries: true,
   },
   userTypes: {
-    EntityId: { filePath: "@dust/world/src/EntityId.sol", type: "bytes32" },
+    EntityId: {
+      filePath: "@dust/world/src/types/EntityId.sol",
+      type: "bytes32",
+    },
   },
   tables: {
     AccessGroupCount: {
