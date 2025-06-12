@@ -1,6 +1,6 @@
 # DUST
 
-DUST is our serious attempt at seeding an autonomous world.
+DUST is our serious attempt at seeding an [autonomous world](https://0xparc.org/blog/autonomous-worlds).
 
 ## DUST is live on Redstone mainnet, but still in alpha.
 
@@ -34,7 +34,7 @@ This repository includes the core physics contracts of the DUST protocol, a clie
 ├── packages
 │   ├── world              // the core physics contracts
 │   ├── programs           // default programs installed on entities
-│   └── dustkit            // client SDK to built apps in DUST
+│   └── dustkit            // client SDK to build apps in DUST
 └── apps
     └── dustkit-playground // a playground to iterate on apps with dustkit
 ```
@@ -45,6 +45,6 @@ To understand the relationship between programs and apps, have a look at [PROGRA
 
 - [Discord](https://dustproject.org/discord)
 - [Landing page](https://dustproject.org)
-- [Learning resources](https://dustproject.org/learn)
+- [Learning resources](https://dustproject.org/what)
 - [Browser client](https://alpha.dustproject.org) ([join discord to get access](https://dustproject.org/access))
 - [Explorer](https://dustproject.org/explorer)
