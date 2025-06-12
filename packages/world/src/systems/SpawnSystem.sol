@@ -121,8 +121,9 @@ contract SpawnSystem is System {
       blockNumber < block.number && blockNumber >= block.number - SPAWN_BLOCK_RANGE, "Can only choose past 20 blocks"
     );
 
-    Vec3 spawnChunk = getRandomSpawnChunk(blockNumber, _msgSender());
-    require(spawnChunk == spawnCoord.toChunkCoord(), "Spawn coordinate cannot be in a different chunk");
+    // Vec3 spawnChunk = getRandomSpawnChunk(blockNumber, _msgSender());
+    // require(spawnChunk == spawnCoord.toChunkCoord(), "Spawn coordinate cannot be in a different chunk");
+    spawnCoord = getRandomSpawnCoord(blockNumber, _msgSender());
 
     (EntityId forceField,) = ForceFieldUtils.getForceField(spawnCoord);
     require(!forceField._exists(), "Cannot spawn in force field");
