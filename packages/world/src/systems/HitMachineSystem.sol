@@ -6,7 +6,6 @@ import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
 import { LocalEnergyPool } from "../codegen/tables/LocalEnergyPool.sol";
-import { ERC165Checker } from "@latticexyz/world/src/ERC165Checker.sol";
 import { System } from "@latticexyz/world/src/System.sol";
 
 import {
@@ -24,15 +23,15 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import {
   DEFAULT_HIT_ENERGY_COST,
-  DEFAULT_ORE_TOOL_MULTIPLIER,
-  DEFAULT_WOODEN_TOOL_MULTIPLIER,
+  HIT_ACTION_MODIFIER,
+  ORE_TOOL_BASE_MULTIPLIER,
   SAFE_PROGRAM_GAS,
-  SPECIALIZED_ORE_TOOL_MULTIPLIER,
-  SPECIALIZED_WOODEN_TOOL_MULTIPLIER,
-  TOOL_HIT_ENERGY_COST
+  SPECIALIZATION_MULTIPLIER,
+  TOOL_HIT_ENERGY_COST,
+  WOODEN_TOOL_BASE_MULTIPLIER
 } from "../Constants.sol";
 
-import { IHitHook } from "../ProgramInterfaces.sol";
+import "../ProgramHooks.sol" as Hooks;
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 import { ProgramId } from "../types/ProgramId.sol";
@@ -54,11 +53,11 @@ contract HitMachineSystem is System {
     require(forceField._exists(), "No force field at this location");
 
     (EnergyData memory machineData,) = updateMachineEnergy(forceField);
-    require(machineData.energy > 0, "Cannot hit depleted forcefield");
+    uint128 energyLeft = machineData.energy;
+    require(energyLeft > 0, "Cannot hit depleted forcefield");
 
     ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
-
-    uint128 playerEnergyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, machineData.energy);
+    uint128 playerEnergyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, energyLeft);
 
     Vec3 forceFieldCoord = forceField._getPosition();
 
@@ -68,43 +67,53 @@ contract HitMachineSystem is System {
       return;
     }
 
-    uint128 massReduction = toolData.use(machineData.energy, _getToolMultiplier(toolData.toolType));
+    energyLeft -= playerEnergyReduction;
+
+    uint128 massReduction = toolData.use(energyLeft, _getToolMultiplier(toolData.toolType));
 
     uint128 machineEnergyReduction = playerEnergyReduction + massReduction;
 
     decreaseMachineEnergy(forceField, machineEnergyReduction);
-
     addEnergyToLocalPool(forceFieldCoord, machineEnergyReduction + playerEnergyReduction);
 
-    ProgramId program = forceField._getProgram();
-    bytes memory onHit = abi.encodeCall(IHitHook.onHit, (caller, forceField, machineEnergyReduction, ""));
-    // Don't revert and use a fixed amount of gas so the program can't prevent hitting
-    program.call({ gas: SAFE_PROGRAM_GAS, hook: onHit });
+    {
+      Hooks.HitContext memory ctx =
+        Hooks.HitContext({ caller: caller, target: forceField, damage: machineEnergyReduction, extraData: "" });
+      ProgramId program = forceField._getProgram();
+      bytes memory onHit = abi.encodeCall(Hooks.IHit.onHit, ctx);
+
+      // Don't revert and use a fixed amount of gas so the program can't prevent hitting
+      program.call({ gas: SAFE_PROGRAM_GAS, hook: onHit });
+    }
 
     notify(caller, HitMachineNotification({ machine: forceField, machineCoord: forceFieldCoord }));
   }
 
-  function _getCallerEnergyReduction(ObjectType toolType, uint128 currentEnergy, uint128 massLeft)
+  function _getCallerEnergyReduction(ObjectType toolType, uint128 currentEnergy, uint128 energyLeft)
     internal
     pure
     returns (uint128)
   {
     uint128 maxEnergyCost = toolType.isNull() ? DEFAULT_HIT_ENERGY_COST : TOOL_HIT_ENERGY_COST;
     maxEnergyCost = Math.min(currentEnergy, maxEnergyCost);
-    return Math.min(massLeft, maxEnergyCost);
+    return Math.min(energyLeft, maxEnergyCost);
   }
 
   function _getToolMultiplier(ObjectType toolType) internal pure returns (uint128) {
+    // Bare hands case - just return action modifier
     if (toolType.isNull()) {
-      return 1;
+      return HIT_ACTION_MODIFIER;
     }
 
+    // Apply base tool multiplier
     bool isWoodenTool = toolType == ObjectTypes.WoodenWhacker;
+    uint128 multiplier = isWoodenTool ? WOODEN_TOOL_BASE_MULTIPLIER : ORE_TOOL_BASE_MULTIPLIER;
 
+    // Apply specialization bonus if using a whacker (the right tool for hitting)
     if (toolType.isWhacker()) {
-      return isWoodenTool ? SPECIALIZED_WOODEN_TOOL_MULTIPLIER : SPECIALIZED_ORE_TOOL_MULTIPLIER;
+      multiplier = multiplier * SPECIALIZATION_MULTIPLIER;
     }
 
-    return isWoodenTool ? DEFAULT_WOODEN_TOOL_MULTIPLIER : DEFAULT_ORE_TOOL_MULTIPLIER;
+    return multiplier * HIT_ACTION_MODIFIER;
   }
 }

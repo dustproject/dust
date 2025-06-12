@@ -8,13 +8,9 @@ import { EnergyData } from "../codegen/tables/Energy.sol";
 import { InventoryUtils, SlotData, SlotTransfer } from "../utils/InventoryUtils.sol";
 import { TransferNotification, notify } from "../utils/NotifUtils.sol";
 
+import "../ProgramHooks.sol" as Hooks;
 import { EntityId } from "../types/EntityId.sol";
-import { ObjectType } from "../types/ObjectType.sol";
-
-import { ObjectTypes } from "../types/ObjectType.sol";
-
-import { ITransferHook } from "../ProgramInterfaces.sol";
-import { Vec3 } from "../types/Vec3.sol";
+import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 
 contract TransferSystem is System {
   function transfer(
@@ -50,16 +46,26 @@ contract TransferSystem is System {
       require(!targetType.isPassThrough(), "Cannot transfer directly to pass-through object");
     }
 
-    (SlotData[] memory fromSlotData, SlotData[] memory toSlotData) = InventoryUtils.transfer(from, to, transfers);
+    SlotData[] memory deposits;
+    SlotData[] memory withdrawals;
+    {
+      (SlotData[] memory fromSlotData, SlotData[] memory toSlotData) = InventoryUtils.transfer(from, to, transfers);
 
-    // Get deposits and withdrawals FROM THE TARGET's PERSPECTIVE
-    // If target == to, we are depositing fromSlotData and withdrawing toSlotData
-    (SlotData[] memory deposits, SlotData[] memory withdrawals) =
-      target == to ? (fromSlotData, toSlotData) : (toSlotData, fromSlotData);
+      // Get deposits and withdrawals FROM THE TARGET's PERSPECTIVE
+      // If target == to, we are depositing fromSlotData and withdrawing toSlotData
+      (deposits, withdrawals) = target == to ? (fromSlotData, toSlotData) : (toSlotData, fromSlotData);
+    }
 
     if (target._exists()) {
-      bytes memory onTransfer =
-        abi.encodeCall(ITransferHook.onTransfer, (caller, target, deposits, withdrawals, extraData));
+      Hooks.TransferContext memory ctx = Hooks.TransferContext({
+        caller: caller,
+        target: target,
+        deposits: deposits,
+        withdrawals: withdrawals,
+        extraData: extraData
+      });
+
+      bytes memory onTransfer = abi.encodeCall(Hooks.ITransfer.onTransfer, (ctx));
 
       target._getProgram().callOrRevert(onTransfer);
     }

@@ -34,8 +34,8 @@
     "fix:format": "forge fmt",
     "fix:lint": "solhint --config ./.solhint.json '**/*.sol' --fix",
     "script:attach-program": "./runForgeScript.bash script/utils/AttachProgramScript.s.sol",
-    "script:give": "./runForgeScript.bash script/admin/GiveScript.s.sol",
-    "script:teleport": "./runForgeScript.bash script/admin/TeleportScript.s.sol",
+    "script:give": "./runForgeScript.bash script/debug/GiveScript.s.sol",
+    "script:teleport": "./runForgeScript.bash script/debug/TeleportScript.s.sol",
     "test": "./runTests.bash",
     "test:js": "vitest"
   },

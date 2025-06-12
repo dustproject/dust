@@ -25,6 +25,8 @@ import { TerrainLib } from "../src/utils/TerrainLib.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
 import { FRAGMENT_SIZE, MACHINE_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
+
+import "../src/ProgramHooks.sol" as Hooks;
 import { EntityId } from "../src/types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 import { ProgramId } from "../src/types/ProgramId.sol";
@@ -37,19 +39,19 @@ contract TestForceFieldProgram is System {
   bool revertOnMine;
   bool revertOnRemoveFragment;
 
-  function validateProgram(EntityId, EntityId, EntityId, ProgramId, bytes memory) external view {
+  function validateProgram(Hooks.ValidateProgramContext calldata) external view {
     require(!revertOnValidateProgram, "Not allowed by forcefield");
   }
 
-  function onBuild(EntityId, EntityId, ObjectType, Vec3, bytes memory) external view {
+  function onBuild(Hooks.BuildContext calldata) external view {
     require(!revertOnBuild, "Not allowed by forcefield");
   }
 
-  function onMine(EntityId, EntityId, ObjectType, Vec3, bytes memory) external view {
+  function onMine(Hooks.MineContext calldata) external view {
     require(!revertOnMine, "Not allowed by forcefield");
   }
 
-  function onRemoveFragment(EntityId, EntityId, EntityId, bytes memory) external view {
+  function onRemoveFragment(Hooks.RemoveFragmentContext calldata) external view {
     require(!revertOnRemoveFragment, "Not allowed by forcefield");
   }
 
@@ -78,15 +80,15 @@ contract TestFragmentProgram is System {
   bool revertOnBuild;
   bool revertOnMine;
 
-  function validateProgram(EntityId, EntityId, EntityId, ProgramId, bytes memory) external view {
+  function validateProgram(Hooks.ValidateProgramContext calldata) external view {
     require(!revertOnValidateProgram, "Not allowed by forcefield fragment");
   }
 
-  function onBuild(EntityId, EntityId, ObjectType, Vec3, bytes memory) external view {
+  function onBuild(Hooks.BuildContext calldata) external view {
     require(!revertOnBuild, "Not allowed by forcefield fragment");
   }
 
-  function onMine(EntityId, EntityId, ObjectType, Vec3, bytes memory) external view {
+  function onMine(Hooks.MineContext calldata) external view {
     require(!revertOnMine, "Not allowed by forcefield fragment");
   }
 
@@ -918,7 +920,15 @@ contract ForceFieldTest is DustTest {
     // Expect the forcefield program's onProgramAttached to be called with the correct parameters
     bytes memory expectedCallData = abi.encodeCall(
       TestForceFieldProgram.validateProgram,
-      (aliceEntityId, forceFieldEntityId, chestEntityId, ProgramId.wrap(programSystemId.unwrap()), bytes(""))
+      (
+        Hooks.ValidateProgramContext({
+          caller: aliceEntityId,
+          target: forceFieldEntityId,
+          programmed: chestEntityId,
+          program: ProgramId.wrap(programSystemId.unwrap()),
+          extraData: bytes("")
+        })
+      )
     );
     vm.expectCall(address(forceFieldProgram), expectedCallData);
 

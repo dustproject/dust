@@ -14,7 +14,7 @@ Default programs will make the builder the owner of that smart object. As an own
 - Approved callers can transfer any items in and out
 
 ## Bed Program
-- Allows admin to set the list of approved callers
+- Allows owner to set the list of approved callers
 - Approved callers can sleep and wakeup
 
 

@@ -16,36 +16,40 @@ import { ObjectTypes } from "../../types/ObjectType.sol";
 
 import { EntityUtils } from "../../utils/EntityUtils.sol";
 import { InventoryUtils } from "../../utils/InventoryUtils.sol";
-
 import { MoveLib } from "../../utils/MoveLib.sol";
 import { PlayerUtils } from "../../utils/PlayerUtils.sol";
 
-contract AdminSystem is System {
-  modifier onlyAdmin() {
+// Only for debugging purposes, not deployed to production
+contract DebugSystem is System {
+  modifier onlyROOT() {
     AccessControl.requireOwner(ROOT_NAMESPACE_ID, _msgSender());
     _;
   }
 
-  function adminAddToInventory(EntityId owner, ObjectType objectType, uint16 numObjectsToAdd) public onlyAdmin {
-    require(!objectType.isTool(), "To add a tool, you must use adminAddToolToInventory");
+  constructor() {
+    require(block.chainid == 31337, "DebugSystem can only be deployed in dev env");
+  }
+
+  function debugAddToInventory(EntityId owner, ObjectType objectType, uint16 numObjectsToAdd) public onlyROOT {
+    require(!objectType.isTool(), "To add a tool, you must use debugAddToolToInventory");
     InventoryUtils.addObject(owner, objectType, numObjectsToAdd);
   }
 
-  function adminAddToolToInventory(EntityId owner, ObjectType toolObjectType) public onlyAdmin returns (EntityId) {
+  function debugAddToolToInventory(EntityId owner, ObjectType toolObjectType) public onlyROOT returns (EntityId) {
     EntityId tool = EntityUtils.createUniqueEntity(toolObjectType);
     InventoryUtils.addEntity(owner, tool);
     return tool;
   }
 
-  function adminRemoveFromInventory(EntityId owner, ObjectType objectType, uint16 numObjectsToRemove) public onlyAdmin {
+  function debugRemoveFromInventory(EntityId owner, ObjectType objectType, uint16 numObjectsToRemove) public onlyROOT {
     InventoryUtils.removeObject(owner, objectType, numObjectsToRemove);
   }
 
-  function adminRemoveToolFromInventory(EntityId owner, EntityId tool) public onlyAdmin {
+  function debugRemoveToolFromInventory(EntityId owner, EntityId tool) public onlyROOT {
     InventoryUtils.removeEntity(owner, tool);
   }
 
-  function adminTeleportPlayer(address playerAddress, Vec3 finalCoord) public onlyAdmin {
+  function debugTeleportPlayer(address playerAddress, Vec3 finalCoord) public onlyROOT {
     EntityId player = EntityTypeLib.encodePlayer(playerAddress);
     player.activate();
 

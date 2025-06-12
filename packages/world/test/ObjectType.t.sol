@@ -3,10 +3,10 @@ pragma solidity >=0.8.24;
 
 import { DustTest, console } from "./DustTest.sol";
 
-import { ObjectType, ObjectTypeLib, ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectType, ObjectTypeLib, ObjectTypes } from "../src/types/ObjectType.sol";
 
 contract ObjectTypeTest is DustTest {
-  function testCategories() public {
+  function testCategories() public pure {
     {
       assertTrue(ObjectTypes.Air.isNonSolid(), "isNonSolid");
       assertTrue(ObjectTypes.Water.isNonSolid(), "isNonSolid");

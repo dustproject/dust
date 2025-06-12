@@ -16,12 +16,11 @@ import { FuelMachineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { MACHINE_ENERGY_DRAIN_RATE } from "../Constants.sol";
+
+import "../ProgramHooks.sol" as Hooks;
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
-
-import { IFuelHook } from "../ProgramInterfaces.sol";
 import { ProgramId } from "../types/ProgramId.sol";
-import { Vec3 } from "../types/Vec3.sol";
 
 contract MachineSystem is System {
   function fuelMachine(EntityId caller, EntityId machine, SlotAmount[] memory slots, bytes calldata extraData) external {
@@ -50,7 +49,12 @@ contract MachineSystem is System {
     Energy._setEnergy(machine, newEnergyLevel);
 
     ProgramId program = machine._getProgram();
-    program.callOrRevert(abi.encodeCall(IFuelHook.onFuel, (caller, machine, fuelAmount, extraData)));
+    program.callOrRevert(
+      abi.encodeCall(
+        Hooks.IFuel.onFuel,
+        (Hooks.FuelContext({ caller: caller, target: machine, fuelAmount: fuelAmount, extraData: extraData }))
+      )
+    );
 
     notify(caller, FuelMachineNotification({ machine: machine, fuelAmount: fuelAmount }));
   }

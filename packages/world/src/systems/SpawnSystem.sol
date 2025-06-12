@@ -21,12 +21,13 @@ import {
   PLAYER_ENERGY_DRAIN_RATE,
   SPAWN_BLOCK_RANGE
 } from "../Constants.sol";
-import { ObjectType } from "../types/ObjectType.sol";
+
+import "../ProgramHooks.sol" as Hooks;
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
+import { Vec3, vec3 } from "../types/Vec3.sol";
 
 import { checkWorldStatus } from "../Utils.sol";
-import { ObjectTypes } from "../types/ObjectType.sol";
-
-import { Vec3, vec3 } from "../types/Vec3.sol";
 import { removeEnergyFromLocalPool, updateMachineEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
@@ -35,9 +36,6 @@ import { SpawnNotification, notify } from "../utils/NotifUtils.sol";
 import { MoveLib } from "../utils/MoveLib.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { TerrainLib } from "../utils/TerrainLib.sol";
-
-import { ISpawnHook } from "../ProgramInterfaces.sol";
-import { EntityId } from "../types/EntityId.sol";
 
 contract SpawnSystem is System {
   using LibPRNG for LibPRNG.PRNG;
@@ -156,7 +154,10 @@ contract SpawnSystem is System {
 
     EntityId player = _spawnPlayer(spawnCoord, spawnEnergy);
 
-    bytes memory onSpawn = abi.encodeCall(ISpawnHook.onSpawn, (player, spawnTile, spawnEnergy, extraData));
+    bytes memory onSpawn = abi.encodeCall(
+      Hooks.ISpawn.onSpawn,
+      (Hooks.SpawnContext({ caller: player, target: spawnTile, spawnEnergy: spawnEnergy, extraData: extraData }))
+    );
     spawnTile._getProgram().callOrRevert(onSpawn);
 
     return player;

@@ -35,6 +35,6 @@ import { DisabledExtraDrops } from "./tables/DisabledExtraDrops.sol";
 import { SeedGrowth } from "./tables/SeedGrowth.sol";
 import { Notification, NotificationData } from "./tables/Notification.sol";
 import { WorldStatus } from "./tables/WorldStatus.sol";
-import { Moderators } from "./tables/Moderators.sol";
+import { Guardians } from "./tables/Guardians.sol";
 import { UniqueEntity } from "./tables/UniqueEntity.sol";
 import { BaseEntity } from "./tables/BaseEntity.sol";

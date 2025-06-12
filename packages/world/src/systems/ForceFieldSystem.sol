@@ -15,14 +15,12 @@ import { AddFragmentNotification, RemoveFragmentNotification, notify } from "../
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { SAFE_PROGRAM_GAS } from "../Constants.sol";
+
+import "../ProgramHooks.sol" as Hooks;
 import { EntityId } from "../types/EntityId.sol";
-
-import { ObjectType } from "../types/ObjectType.sol";
-
-import { IAddFragmentHook, IRemoveFragmentHook } from "../ProgramInterfaces.sol";
-import { ObjectTypes } from "../types/ObjectType.sol";
+import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 import { ProgramId } from "../types/ProgramId.sol";
-import { Vec3, vec3 } from "../types/Vec3.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 contract ForceFieldSystem is System {
   /**
@@ -117,8 +115,10 @@ contract ForceFieldSystem is System {
 
     ForceFieldUtils.addFragment(forceField, fragment);
 
-    bytes memory onAddFragment =
-      abi.encodeCall(IAddFragmentHook.onAddFragment, (caller, forceField, fragment, extraData));
+    bytes memory onAddFragment = abi.encodeCall(
+      Hooks.IAddFragment.onAddFragment,
+      (Hooks.AddFragmentContext({ caller: caller, target: forceField, added: fragment, extraData: extraData }))
+    );
 
     _callForceFieldHook(forceField, onAddFragment);
 
@@ -163,8 +163,10 @@ contract ForceFieldSystem is System {
 
     ForceFieldUtils.removeFragment(forceField, fragment);
 
-    bytes memory onRemoveFragment =
-      abi.encodeCall(IRemoveFragmentHook.onRemoveFragment, (caller, forceField, fragment, extraData));
+    bytes memory onRemoveFragment = abi.encodeCall(
+      Hooks.IRemoveFragment.onRemoveFragment,
+      (Hooks.RemoveFragmentContext({ caller: caller, target: forceField, removed: fragment, extraData: extraData }))
+    );
 
     _callForceFieldHook(forceField, onRemoveFragment);
 

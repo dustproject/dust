@@ -271,11 +271,12 @@ library MoveLib {
 
   function _getMoveCost(Vec3 coord) internal view returns (uint128 energyCost, uint128 moveUnitCost) {
     Vec3 belowCoord = coord - vec3(0, 1, 0);
-    if (EntityUtils.getObjectTypeAt(belowCoord) == ObjectTypes.Lava) {
+    ObjectType belowType = EntityUtils.getObjectTypeAt(belowCoord);
+    if (belowType == ObjectTypes.Lava) {
       return (Constants.LAVA_MOVE_ENERGY_COST, Constants.MOVING_UNIT_COST);
     }
 
-    if (EntityUtils.getFluidLevelAt(belowCoord) > 0) {
+    if (belowType.isPassThrough() && _isFluid(belowCoord)) {
       return (Constants.WATER_MOVE_ENERGY_COST, Constants.SWIMMING_UNIT_COST);
     }
 

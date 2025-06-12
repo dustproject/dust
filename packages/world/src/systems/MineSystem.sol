@@ -42,28 +42,27 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import {
   DEFAULT_MINE_ENERGY_COST,
-  DEFAULT_ORE_TOOL_MULTIPLIER,
-  DEFAULT_WOODEN_TOOL_MULTIPLIER,
+  HIT_ACTION_MODIFIER,
   MAX_PICKUP_RADIUS,
+  MINE_ACTION_MODIFIER,
+  ORE_TOOL_BASE_MULTIPLIER,
   PLAYER_ENERGY_DRAIN_RATE,
   SAFE_PROGRAM_GAS,
-  SPECIALIZED_ORE_TOOL_MULTIPLIER,
-  SPECIALIZED_WOODEN_TOOL_MULTIPLIER,
-  TOOL_MINE_ENERGY_COST
+  SPECIALIZATION_MULTIPLIER,
+  TOOL_MINE_ENERGY_COST,
+  WOODEN_TOOL_BASE_MULTIPLIER
 } from "../Constants.sol";
 
+import "../ProgramHooks.sol" as Hooks;
 import { EntityId } from "../types/EntityId.sol";
-import { ObjectAmount, ObjectType } from "../types/ObjectType.sol";
+import { ObjectAmount, ObjectType, ObjectTypes } from "../types/ObjectType.sol";
+import { ProgramId } from "../types/ProgramId.sol";
+import { Vec3, vec3 } from "../types/Vec3.sol";
+
 import { MoveLib } from "../utils/MoveLib.sol";
 
 import { NatureLib } from "../utils/NatureLib.sol";
-
-import { ObjectTypes } from "../types/ObjectType.sol";
 import { OreLib } from "../utils/OreLib.sol";
-
-import { IDetachProgramHook, IMineHook } from "../ProgramInterfaces.sol";
-import { ProgramId } from "../types/ProgramId.sol";
-import { Vec3, vec3 } from "../types/Vec3.sol";
 
 contract MineSystem is System {
   using SafeCastLib for *;
@@ -245,7 +244,10 @@ contract MineSystem is System {
     // Detach program if it exists
     ProgramId program = mined._getProgram();
     if (program.exists()) {
-      bytes memory onDetachProgram = abi.encodeCall(IDetachProgramHook.onDetachProgram, (caller, mined, ""));
+      bytes memory onDetachProgram = abi.encodeCall(
+        Hooks.IDetachProgram.onDetachProgram,
+        (Hooks.DetachProgramContext({ caller: caller, target: mined, extraData: "" }))
+      );
       program.call({ gas: SAFE_PROGRAM_GAS, hook: onDetachProgram });
 
       EntityProgram._deleteRecord(mined);
@@ -291,7 +293,7 @@ library MineLib {
 
     ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
 
-    uint128 energyReduction = MineLib._getCallerEnergyReduction(toolData.toolType, callerEnergy, massLeft);
+    uint128 energyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, massLeft);
 
     if (energyReduction > 0) {
       // If player died, return early
@@ -379,23 +381,38 @@ library MineLib {
       }
     }
 
-    bytes memory onMine = abi.encodeCall(IMineHook.onMine, (caller, forceField, objectType, coord, extraData));
+    bytes memory onMine = abi.encodeCall(
+      Hooks.IMine.onMine,
+      (
+        Hooks.MineContext({
+          caller: caller,
+          target: forceField,
+          objectType: objectType,
+          coord: coord,
+          extraData: extraData
+        })
+      )
+    );
 
     program.callOrRevert(onMine);
   }
 
   function _getToolMultiplier(ObjectType toolType, ObjectType minedType) public pure returns (uint128) {
+    // Bare hands case - just return action modifier
     if (toolType.isNull()) {
-      return 1;
+      return MINE_ACTION_MODIFIER;
     }
 
+    // Apply base tool multiplier
     bool isWoodenTool = toolType == ObjectTypes.WoodenAxe || toolType == ObjectTypes.WoodenPick;
+    uint128 multiplier = isWoodenTool ? WOODEN_TOOL_BASE_MULTIPLIER : ORE_TOOL_BASE_MULTIPLIER;
 
+    // Apply specialization bonus if tool matches the task
     if ((toolType.isAxe() && minedType.hasAxeMultiplier()) || (toolType.isPick() && minedType.hasPickMultiplier())) {
-      return isWoodenTool ? SPECIALIZED_WOODEN_TOOL_MULTIPLIER : SPECIALIZED_ORE_TOOL_MULTIPLIER;
+      multiplier = multiplier * SPECIALIZATION_MULTIPLIER;
     }
 
-    return isWoodenTool ? DEFAULT_WOODEN_TOOL_MULTIPLIER : DEFAULT_ORE_TOOL_MULTIPLIER;
+    return multiplier * MINE_ACTION_MODIFIER;
   }
 }
 

@@ -29,7 +29,7 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { MoveLib } from "../utils/MoveLib.sol";
 
-import { ISleepHook, IWakeupHook } from "../ProgramInterfaces.sol";
+import "../ProgramHooks.sol" as Hooks;
 import { EntityId } from "../types/EntityId.sol";
 import { Vec3 } from "../types/Vec3.sol";
 
@@ -51,7 +51,8 @@ contract BedSystem is System {
 
     PlayerUtils.removePlayerFromGrid(caller, callerCoord);
 
-    bytes memory onSleep = abi.encodeCall(ISleepHook.onSleep, (caller, bed, extraData));
+    bytes memory onSleep =
+      abi.encodeCall(Hooks.ISleep.onSleep, (Hooks.SleepContext({ caller: caller, target: bed, extraData: extraData })));
     bed._getProgram().callOrRevert(onSleep);
 
     notify(caller, SleepNotification({ bed: bed, bedCoord: bedCoord }));
@@ -82,7 +83,9 @@ contract BedSystem is System {
 
     PlayerUtils.addPlayerToGrid(caller, spawnCoord);
 
-    bytes memory onWakeup = abi.encodeCall(IWakeupHook.onWakeup, (caller, bed, extraData));
+    bytes memory onWakeup = abi.encodeCall(
+      Hooks.IWakeup.onWakeup, (Hooks.WakeupContext({ caller: caller, target: bed, extraData: extraData }))
+    );
     bed._getProgram().callOrRevert(onWakeup);
 
     notify(caller, WakeupNotification({ bed: bed, bedCoord: bedCoord }));

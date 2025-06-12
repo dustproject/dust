@@ -5,18 +5,14 @@ import { IBaseWorld } from "@latticexyz/world-consumer/src/experimental/WorldCon
 
 import { EntityId } from "@dust/world/src/EntityId.sol";
 
-import { ITransferHook, SlotData } from "@dust/world/src/ProgramInterfaces.sol";
+import "@dust/world/src/ProgramHooks.sol" as Hooks;
 
 import { DefaultProgram } from "./DefaultProgram.sol";
 
-contract ChestProgram is ITransferHook, DefaultProgram {
+contract ChestProgram is Hooks.ITransfer, DefaultProgram {
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
 
-  function onTransfer(EntityId caller, EntityId target, SlotData[] memory, SlotData[] memory, bytes memory)
-    external
-    view
-    onlyWorld
-  {
-    require(_isAllowed(target, caller), "Only approved callers can transfer to/from the chest");
+  function onTransfer(Hooks.TransferContext calldata ctx) external view onlyWorld {
+    require(_isAllowed(ctx.target, ctx.caller), "Only approved callers can transfer to/from the chest");
   }
 }

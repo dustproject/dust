@@ -12,8 +12,11 @@ import { burnToolEnergy } from "../utils/EnergyUtils.sol";
 import { Math } from "../utils/MathLib.sol";
 
 import { EntityId } from "../types/EntityId.sol";
+
 import { ObjectAmount, ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 import { Vec3 } from "../types/Vec3.sol";
+
+import { ACTION_MODIFIER_DENOMINATOR } from "../Constants.sol";
 import { OreLib } from "./OreLib.sol";
 
 struct SlotTransfer {
@@ -126,6 +129,10 @@ library InventoryUtils {
     return ToolData(owner, tool, toolType, slot, Mass._getMass(tool));
   }
 
+  function use(ToolData memory toolData, uint128 useMassMax) public returns (uint128) {
+    return use(toolData, useMassMax, ACTION_MODIFIER_DENOMINATOR);
+  }
+
   function use(ToolData memory toolData, uint128 useMassMax, uint128 multiplier) public returns (uint128) {
     (uint128 actionMassReduction, uint128 toolMassReduction) = getMassReduction(toolData, useMassMax, multiplier);
     reduceMass(toolData, toolMassReduction);
@@ -143,8 +150,8 @@ library InventoryUtils {
 
     uint128 toolMass = ObjectPhysics._getMass(toolData.toolType);
     uint128 maxToolMassReduction = Math.min(toolMass / 10, toolData.massLeft);
-    uint128 massReduction = Math.min(maxToolMassReduction * multiplier, massLeft);
-    uint128 toolMassReduction = massReduction / multiplier;
+    uint128 massReduction = Math.min(maxToolMassReduction * multiplier / ACTION_MODIFIER_DENOMINATOR, massLeft);
+    uint128 toolMassReduction = massReduction * ACTION_MODIFIER_DENOMINATOR / multiplier;
 
     return (massReduction, toolMassReduction);
   }

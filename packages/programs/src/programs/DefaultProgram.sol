@@ -11,7 +11,7 @@ import { Energy } from "@dust/world/src/codegen/tables/Energy.sol";
 import { Fragment, FragmentData } from "@dust/world/src/codegen/tables/Fragment.sol";
 import { Machine } from "@dust/world/src/codegen/tables/Machine.sol";
 
-import { IAttachProgramHook, IDetachProgramHook } from "@dust/world/src/ProgramInterfaces.sol";
+import "@dust/world/src/ProgramHooks.sol" as Hooks;
 
 import { AccessGroupCount } from "../codegen/tables/AccessGroupCount.sol";
 import { AccessGroupMember } from "../codegen/tables/AccessGroupMember.sol";
@@ -20,32 +20,41 @@ import { EntityAccessGroup } from "../codegen/tables/EntityAccessGroup.sol";
 
 import { createAccessGroup } from "../createAccessGroup.sol";
 
-abstract contract DefaultProgram is IAttachProgramHook, IDetachProgramHook, WorldConsumer {
+abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, WorldConsumer {
   constructor(IBaseWorld _world) WorldConsumer(_world) { }
 
-  function onAttachProgram(EntityId caller, EntityId target, bytes memory) external onlyWorld {
-    (EntityId forceField,) = _getForceField(target);
+  function onAttachProgram(Hooks.AttachProgramContext calldata ctx) external onlyWorld {
+    (EntityId forceField,) = _getForceField(ctx.target);
 
     uint256 groupId;
 
     // If the force field is associated with an access group, use that groupId
     if (forceField.exists()) {
       groupId = EntityAccessGroup.get(forceField);
+      // When a forcefield already exists, only members can attach programs
+      require(
+        ctx.target == forceField || AccessGroupMember.get(groupId, ctx.caller),
+        "Only members can attach programs when forcefield exists"
+      );
     }
 
     // If the force field is not associated with an access group, create a new one
     if (groupId == 0) {
-      groupId = createAccessGroup(caller);
+      groupId = createAccessGroup(ctx.caller);
     }
 
-    EntityAccessGroup.set(target, groupId);
+    EntityAccessGroup.set(ctx.target, groupId);
   }
 
-  function onDetachProgram(EntityId caller, EntityId target, bytes memory) external onlyWorld {
-    uint256 groupId = EntityAccessGroup.get(target);
-    require(_isSafeCall(target) || AccessGroupOwner.get(groupId) == caller, "Only the owner can detach this program");
+  function onDetachProgram(Hooks.DetachProgramContext calldata ctx) external onlyWorld {
+    uint256 groupId = EntityAccessGroup.get(ctx.target);
+    require(_isSafeCall(ctx.target) || _canDetach(ctx.caller, groupId), "Caller not authorized to detach this program");
 
-    EntityAccessGroup.deleteRecord(target);
+    EntityAccessGroup.deleteRecord(ctx.target);
+  }
+
+  function _canDetach(EntityId caller, uint256 groupId) internal view virtual returns (bool) {
+    return AccessGroupMember.get(groupId, caller);
   }
 
   function _isAllowed(EntityId target, EntityId caller) internal view returns (bool) {

@@ -30,11 +30,10 @@ import { MoveLib } from "../utils/MoveLib.sol";
 import { TerrainLib } from "../utils/TerrainLib.sol";
 
 import { BUILD_ENERGY_COST, MAX_FLUID_LEVEL } from "../Constants.sol";
+
+import "../ProgramHooks.sol" as Hooks;
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
-
-import { IBuildHook } from "../ProgramInterfaces.sol";
-
 import { Orientation } from "../types/Orientation.sol";
 import { ProgramId } from "../types/ProgramId.sol";
 import { Vec3, vec3 } from "../types/Vec3.sol";
@@ -182,7 +181,18 @@ contract BuildSystem is System {
       }
 
       program.callOrRevert(
-        abi.encodeCall(IBuildHook.onBuild, (ctx.caller, forceField, ctx.buildType, coord, extraData))
+        abi.encodeCall(
+          Hooks.IBuild.onBuild,
+          (
+            Hooks.BuildContext({
+              caller: ctx.caller,
+              target: forceField,
+              objectType: ctx.buildType,
+              coord: coord,
+              extraData: extraData
+            })
+          )
+        )
       );
     }
   }

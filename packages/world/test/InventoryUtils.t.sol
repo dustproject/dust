@@ -3,11 +3,11 @@ pragma solidity >=0.8.24;
 
 import { LibBit } from "solady/utils/LibBit.sol";
 
-import { DustTest, console } from "./DustTest.sol";
-
+import { ACTION_MODIFIER_DENOMINATOR } from "../src/Constants.sol";
 import { EntityId } from "../src/types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
-import { Vec3, vec3 } from "../src/types/Vec3.sol";
+import { vec3 } from "../src/types/Vec3.sol";
+import { DustTest, console } from "./DustTest.sol";
 
 import { InventoryBitmap } from "../src/codegen/tables/InventoryBitmap.sol";
 import { Math } from "../src/utils/MathLib.sol";
@@ -283,7 +283,7 @@ contract InventoryUtilsTest is DustTest {
 
     // Use the tool partially
     uint128 initialMass = Mass.getMass(toolId);
-    TestInventoryUtils.use(toolData, 100, 1);
+    TestInventoryUtils.use(toolData, 100, ACTION_MODIFIER_DENOMINATOR);
 
     // Tool should still exist with reduced mass
     assertTrue(Mass.getMass(toolId) < initialMass, "Tool mass should be reduced");
@@ -296,8 +296,8 @@ contract InventoryUtilsTest is DustTest {
 
   function testFuzzAddRemoveObjects(uint16 addAmount, uint16 removeAmount) public {
     // Bound inputs
-    vm.assume(addAmount > 0 && addAmount <= 999);
-    vm.assume(removeAmount <= addAmount);
+    addAmount = uint16(bound(addAmount, 1, 999));
+    removeAmount = uint16(bound(removeAmount, 0, addAmount));
 
     (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
 
@@ -329,10 +329,10 @@ contract InventoryUtilsTest is DustTest {
   // Fuzz test for transferring objects between slots
   function testFuzzTransferBetweenSlots(uint16 amount1, uint16 amount2, uint16 transferAmount) public {
     // Bound inputs to reasonable values
-    vm.assume(amount1 > 0 && amount1 <= 99); // Max stack is 99
-    vm.assume(amount2 > 0 && amount2 <= 99);
-    vm.assume(transferAmount > 0 && transferAmount <= amount1);
-    vm.assume(amount2 + transferAmount <= 99); // Ensure we don't exceed stack limit
+    amount1 = uint16(bound(amount1, 1, 99)); // Max stack is 99
+    amount2 = uint16(bound(amount2, 1, 99));
+    transferAmount = uint16(bound(transferAmount, 1, amount1));
+    amount2 = uint16(bound(amount2, 1, 99 - transferAmount)); // Ensure we don't exceed stack limit
 
     // Setup player
     (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
@@ -367,8 +367,8 @@ contract InventoryUtilsTest is DustTest {
   // Fuzz test for transferring between inventories
   function testFuzzTransferBetweenInventories(uint16 amount, uint16 transferAmount) public {
     // Bound inputs to reasonable values
-    vm.assume(amount > 0 && amount <= 99);
-    vm.assume(transferAmount > 0 && transferAmount <= amount);
+    amount = uint16(bound(amount, 1, 99));
+    transferAmount = uint16(bound(transferAmount, 1, amount));
 
     // Setup players
     (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
@@ -403,8 +403,8 @@ contract InventoryUtilsTest is DustTest {
   // Fuzz test for transferring SlotAmounts between inventories
   function testFuzzTransferAmountsBetweenInventories(uint16 amount, uint16 transferAmount) public {
     // Bound inputs to reasonable values
-    vm.assume(amount > 0 && amount <= 99);
-    vm.assume(transferAmount > 0 && transferAmount <= amount);
+    amount = uint16(bound(amount, 1, 99));
+    transferAmount = uint16(bound(transferAmount, 1, amount));
 
     // Setup players
     (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
@@ -439,7 +439,7 @@ contract InventoryUtilsTest is DustTest {
   // Fuzz test for entity transfers
   function testFuzzEntityTransfers(uint8 numEntities) public {
     // Bound input
-    vm.assume(numEntities > 0 && numEntities <= 10);
+    numEntities = uint8(bound(numEntities, 1, 10));
 
     // Setup players
     (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
@@ -479,7 +479,7 @@ contract InventoryUtilsTest is DustTest {
   // Fuzz test for entity transfers with slot amounts
   function testFuzzEntityAmountTransfers(uint8 numEntities) public {
     // Bound input
-    vm.assume(numEntities > 0 && numEntities <= 10);
+    numEntities = uint8(bound(numEntities, 1, 10));
 
     // Setup players
     (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
@@ -519,8 +519,8 @@ contract InventoryUtilsTest is DustTest {
   // Fuzz test for swapping different types
   function testFuzzSwapDifferentTypes(uint16 amount1, uint16 amount2) public {
     // Bound inputs to reasonable values
-    vm.assume(amount1 > 0 && amount1 <= 99);
-    vm.assume(amount2 > 0 && amount2 <= 99);
+    amount1 = uint16(bound(amount1, 1, 99));
+    amount2 = uint16(bound(amount2, 1, 99));
 
     // Setup player
     (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
@@ -549,7 +549,7 @@ contract InventoryUtilsTest is DustTest {
   // Fuzz test for transferAll between inventories with varying contents
   function testFuzzTransferAll(uint16 numObjects) public {
     // Bound input to reasonable values
-    vm.assume(numObjects > 0 && numObjects <= 10);
+    numObjects = uint16(bound(numObjects, 1, 10));
 
     // Setup players
     (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
@@ -601,6 +601,70 @@ contract InventoryUtilsTest is DustTest {
     // Verify inventory integrity
     _verifyInventoryBitmapIntegrity(alice);
     _verifyInventoryBitmapIntegrity(bob);
+  }
+
+  // Fuzz test to verify tool mass reduction never exceeds max using actual inventory tools
+  function testFuzzToolMassReduction(uint8 toolTypeIndex, uint128 multiplier, uint128 useMassMax) public {
+    // Setup player
+    (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
+
+    // Tool types to test
+    ObjectType[6] memory toolTypes = [
+      ObjectTypes.WoodenPick,
+      ObjectTypes.WoodenAxe,
+      ObjectTypes.IronPick,
+      ObjectTypes.CopperAxe,
+      ObjectTypes.CopperWhacker,
+      ObjectTypes.IronWhacker
+    ];
+
+    // Bound inputs
+    toolTypeIndex = uint8(bound(toolTypeIndex, 0, 5));
+    multiplier = uint128(bound(multiplier, 1, 100e18)); // 0.000001x to 100x
+    useMassMax = uint128(bound(useMassMax, 1, type(uint64).max));
+
+    // Add tool to inventory
+    ObjectType toolType = toolTypes[toolTypeIndex];
+    EntityId toolEntity = TestInventoryUtils.addEntity(alice, toolType);
+    uint16 slot = TestInventoryUtils.findEntity(alice, toolEntity);
+
+    // Get tool data
+    ToolData memory toolData = TestInventoryUtils.getToolData(alice, slot);
+    uint128 initialToolMass = toolData.massLeft;
+    uint128 maxToolMassReduction = Math.min(ObjectPhysics.getMass(toolType) / 10, initialToolMass);
+
+    // Use the tool with the given multiplier
+    uint128 actionMassReduction = TestInventoryUtils.use(toolData, useMassMax, multiplier);
+
+    // Get the actual tool mass reduction
+    uint128 finalToolMass = Mass.getMass(toolEntity);
+    uint128 actualToolMassReduction = initialToolMass > finalToolMass ? initialToolMass - finalToolMass : 0;
+
+    // Verify the invariant: tool mass reduction should never exceed max
+    assertLe(
+      actualToolMassReduction,
+      maxToolMassReduction,
+      "INVARIANT VIOLATED: actualToolMassReduction exceeds maxToolMassReduction"
+    );
+
+    // Verify the relationship between actionMassReduction and toolMassReduction
+    if (actionMassReduction > 0 && multiplier > 0) {
+      // The tool mass reduction should match what we expect from the formula
+      uint128 expectedToolMassReduction = actionMassReduction * ACTION_MODIFIER_DENOMINATOR / multiplier;
+
+      // Account for the case where the tool was fully consumed
+      if (actualToolMassReduction < expectedToolMassReduction) {
+        // Tool must have been fully consumed
+        assertEq(finalToolMass, 0, "Tool should be fully consumed");
+        assertEq(actualToolMassReduction, initialToolMass, "All tool mass should be consumed");
+      } else {
+        // Normal case - tool mass reduction matches expected
+        assertEq(actualToolMassReduction, expectedToolMassReduction, "Tool mass reduction mismatch");
+      }
+    }
+
+    // Verify inventory integrity
+    _verifyInventoryBitmapIntegrity(alice);
   }
 
   function _verifyInventoryBitmapIntegrity(EntityId entity) internal {
