@@ -15,17 +15,7 @@ import { InventoryUtils } from "./InventoryUtils.sol";
 import { Math } from "./Math.sol";
 import { OreLib } from "./OreLib.sol";
 
-import {
-  ACTION_MODIFIER_DENOMINATOR,
-  DEFAULT_MINE_ENERGY_COST,
-  HIT_ACTION_MODIFIER,
-  MINE_ACTION_MODIFIER,
-  ORE_TOOL_BASE_MULTIPLIER,
-  SPECIALIZATION_MULTIPLIER,
-  TOOL_HIT_ENERGY_COST,
-  TOOL_MINE_ENERGY_COST,
-  WOODEN_TOOL_BASE_MULTIPLIER
-} from "../Constants.sol";
+import "../Constants.sol" as Constants;
 
 struct ToolData {
   EntityId owner;
@@ -33,12 +23,6 @@ struct ToolData {
   ObjectType toolType;
   uint16 slot;
   uint128 massLeft;
-}
-
-enum ActionType {
-  Mine,
-  Hit,
-  Till
 }
 
 library ToolUtils {
@@ -55,16 +39,20 @@ library ToolUtils {
   }
 
   function use(ToolData memory toolData, uint128 useMassMax) public returns (uint128) {
-    return use(toolData, useMassMax, ACTION_MODIFIER_DENOMINATOR);
+    return use(toolData, useMassMax, Constants.ACTION_MODIFIER_DENOMINATOR, false);
   }
 
-  function use(ToolData memory toolData, uint128 useMassMax, uint128 multiplier) public returns (uint128) {
-    (uint128 actionMassReduction, uint128 toolMassReduction) = getMassReduction(toolData, useMassMax, multiplier);
+  function use(ToolData memory toolData, uint128 useMassMax, uint128 actionModifier, bool specialized)
+    public
+    returns (uint128)
+  {
+    (uint128 actionMassReduction, uint128 toolMassReduction) =
+      getMassReduction(toolData, useMassMax, actionModifier, specialized);
     reduceMass(toolData, toolMassReduction);
     return actionMassReduction;
   }
 
-  function getMassReduction(ToolData memory toolData, uint128 massLeft, uint128 multiplier)
+  function getMassReduction(ToolData memory toolData, uint128 massLeft, uint128 actionModifier, bool specialized)
     internal
     view
     returns (uint128, uint128)
@@ -75,10 +63,34 @@ library ToolUtils {
 
     uint128 toolMass = ObjectPhysics._getMass(toolData.toolType);
     uint128 maxToolMassReduction = Math.min(toolMass / 10, toolData.massLeft);
-    uint128 massReduction = Math.min(maxToolMassReduction * multiplier / ACTION_MODIFIER_DENOMINATOR, massLeft);
-    uint128 toolMassReduction = massReduction * ACTION_MODIFIER_DENOMINATOR / multiplier;
 
-    return (massReduction, toolMassReduction);
+    uint128 baseMultiplier =
+      toolData.toolType.isWoodenTool() ? Constants.WOODEN_TOOL_BASE_MULTIPLIER : Constants.ORE_TOOL_BASE_MULTIPLIER;
+
+    uint128 specializationMultiplier = specialized ? Constants.SPECIALIZATION_MULTIPLIER : 1;
+
+    uint128 multiplier = baseMultiplier * specializationMultiplier * actionModifier;
+
+    uint128 potentialMassReduction = maxToolMassReduction * multiplier / Constants.ACTION_MODIFIER_DENOMINATOR;
+
+    if (potentialMassReduction <= massLeft) {
+      // Tool capacity is the limiting factor - use exact tool mass reduction
+      return (potentialMassReduction, maxToolMassReduction);
+    } else {
+      // massLeft is the limiting factor - calculate tool mass reduction that produces exactly massLeft
+      // We need: toolMassReduction * multiplier / ACTION_MODIFIER_DENOMINATOR = massLeft
+      // So: toolMassReduction = massLeft * ACTION_MODIFIER_DENOMINATOR / multiplier
+      // But we need to round up to ensure we get at least massLeft when we multiply back
+      uint128 toolMassReduction = (massLeft * Constants.ACTION_MODIFIER_DENOMINATOR + multiplier - 1) / multiplier;
+
+      // Ensure we don't exceed the max tool mass reduction
+      toolMassReduction = Math.min(toolMassReduction, maxToolMassReduction);
+
+      // Recalculate the actual mass reduction with the rounded tool mass reduction
+      uint128 actualMassReduction = toolMassReduction * multiplier / Constants.ACTION_MODIFIER_DENOMINATOR;
+
+      return (actualMassReduction, toolMassReduction);
+    }
   }
 
   function reduceMass(ToolData memory toolData, uint128 massReduction) internal {

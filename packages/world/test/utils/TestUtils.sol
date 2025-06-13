@@ -231,8 +231,16 @@ library TestToolUtils {
     return ToolUtils.getToolData(owner, slot);
   }
 
-  function use(ToolData memory toolData, uint128 useMassMax, uint128 multiplier) public asWorld returns (uint128) {
-    return toolData.use(useMassMax, multiplier);
+  function use(ToolData memory toolData, uint128 useMassMax) public asWorld returns (uint128) {
+    return toolData.use(useMassMax);
+  }
+
+  function use(ToolData memory toolData, uint128 useMassMax, uint128 actionModifier, bool specialized)
+    public
+    asWorld
+    returns (uint128)
+  {
+    return toolData.use(useMassMax, actionModifier, specialized);
   }
 }
 

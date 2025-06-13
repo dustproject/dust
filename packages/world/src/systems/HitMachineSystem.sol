@@ -69,7 +69,7 @@ contract HitMachineSystem is System {
 
     energyLeft -= playerEnergyReduction;
 
-    uint128 massReduction = toolData.use(energyLeft, _getToolMultiplier(toolData.toolType));
+    uint128 massReduction = toolData.use(energyLeft, HIT_ACTION_MODIFIER, toolData.toolType.isWhacker());
 
     uint128 machineEnergyReduction = playerEnergyReduction + massReduction;
 
@@ -97,23 +97,5 @@ contract HitMachineSystem is System {
     uint128 maxEnergyCost = toolType.isNull() ? DEFAULT_HIT_ENERGY_COST : TOOL_HIT_ENERGY_COST;
     maxEnergyCost = Math.min(currentEnergy, maxEnergyCost);
     return Math.min(energyLeft, maxEnergyCost);
-  }
-
-  function _getToolMultiplier(ObjectType toolType) internal pure returns (uint128) {
-    // Bare hands case - just return action modifier
-    if (toolType.isNull()) {
-      return HIT_ACTION_MODIFIER;
-    }
-
-    // Apply base tool multiplier
-    bool isWoodenTool = toolType == ObjectTypes.WoodenWhacker;
-    uint128 multiplier = isWoodenTool ? WOODEN_TOOL_BASE_MULTIPLIER : ORE_TOOL_BASE_MULTIPLIER;
-
-    // Apply specialization bonus if using a whacker (the right tool for hitting)
-    if (toolType.isWhacker()) {
-      multiplier = multiplier * SPECIALIZATION_MULTIPLIER;
-    }
-
-    return multiplier * HIT_ACTION_MODIFIER;
   }
 }

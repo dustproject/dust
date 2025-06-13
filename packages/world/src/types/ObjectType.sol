@@ -488,6 +488,18 @@ library ObjectTypeLib {
     }
   }
 
+  function isWoodenTool(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      // IDs in [32768..33023]
+      {
+        let off := sub(self, 32768)
+        let bit := and(shr(off, 0x9041), 1)
+        ok := bit
+      }
+    }
+  }
+
   function isPassThrough(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
@@ -1027,6 +1039,10 @@ library ObjectTypeLib {
       ObjectTypes.Furnace,
       ObjectTypes.ForceField
     ];
+  }
+
+  function getWoodenToolTypes() internal pure returns (ObjectType[4] memory) {
+    return [ObjectTypes.WoodenPick, ObjectTypes.WoodenAxe, ObjectTypes.WoodenWhacker, ObjectTypes.WoodenHoe];
   }
 
   function getPassThroughTypes() internal pure returns (ObjectType[42] memory) {

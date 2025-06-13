@@ -298,8 +298,9 @@ library MineLib {
     uint128 energyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, massLeft);
 
     if (energyReduction > 0) {
-      // If player died, return early
       (callerEnergy,) = transferEnergyToPool(caller, energyReduction);
+
+      // If player died, return early
       if (callerEnergy == 0) {
         return (massLeft, false);
       }
@@ -307,9 +308,10 @@ library MineLib {
       massLeft -= energyReduction;
     }
 
-    uint128 toolMultiplier = _getToolMultiplier(toolData.toolType, minedType);
+    bool specialized = (toolData.toolType.isAxe() && minedType.hasAxeMultiplier())
+      || (toolData.toolType.isPick() && minedType.hasPickMultiplier());
 
-    uint128 massReduction = toolData.use(massLeft, toolMultiplier);
+    uint128 massReduction = toolData.use(massLeft, MINE_ACTION_MODIFIER, specialized);
 
     massLeft -= massReduction;
 
@@ -321,7 +323,6 @@ library MineLib {
     pure
     returns (uint128)
   {
-    // if tool mass reduction is not enough, consume energy from player up to mine energy cost
     uint128 maxEnergyCost = toolType.isNull() ? DEFAULT_MINE_ENERGY_COST : TOOL_MINE_ENERGY_COST;
     maxEnergyCost = Math.min(currentEnergy, maxEnergyCost);
     return Math.min(massLeft, maxEnergyCost);
@@ -397,24 +398,6 @@ library MineLib {
     );
 
     program.callOrRevert(onMine);
-  }
-
-  function _getToolMultiplier(ObjectType toolType, ObjectType minedType) public pure returns (uint128) {
-    // Bare hands case - just return action modifier
-    if (toolType.isNull()) {
-      return MINE_ACTION_MODIFIER;
-    }
-
-    // Apply base tool multiplier
-    bool isWoodenTool = toolType == ObjectTypes.WoodenAxe || toolType == ObjectTypes.WoodenPick;
-    uint128 multiplier = isWoodenTool ? WOODEN_TOOL_BASE_MULTIPLIER : ORE_TOOL_BASE_MULTIPLIER;
-
-    // Apply specialization bonus if tool matches the task
-    if ((toolType.isAxe() && minedType.hasAxeMultiplier()) || (toolType.isPick() && minedType.hasPickMultiplier())) {
-      multiplier = multiplier * SPECIALIZATION_MULTIPLIER;
-    }
-
-    return multiplier * MINE_ACTION_MODIFIER;
   }
 }
 
