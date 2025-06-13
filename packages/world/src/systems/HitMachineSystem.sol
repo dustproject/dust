@@ -16,10 +16,10 @@ import {
 } from "../utils/EnergyUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 
-import { InventoryUtils, ToolData } from "../utils/InventoryUtils.sol";
 import { Math } from "../utils/Math.sol";
 import { HitMachineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
+import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
 import {
   DEFAULT_HIT_ENERGY_COST,
@@ -30,12 +30,12 @@ import {
   TOOL_HIT_ENERGY_COST,
   WOODEN_TOOL_BASE_MULTIPLIER
 } from "../Constants.sol";
-import { EntityId } from "../EntityId.sol";
-import { ObjectType, ObjectTypes } from "../ObjectType.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 
 import "../ProgramHooks.sol" as Hooks;
-import { ProgramId } from "../ProgramId.sol";
-import { Vec3 } from "../Vec3.sol";
+import { ProgramId } from "../types/ProgramId.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 contract HitMachineSystem is System {
   function hitForceField(EntityId caller, Vec3 coord, uint16 toolSlot) public {
@@ -56,7 +56,7 @@ contract HitMachineSystem is System {
     uint128 energyLeft = machineData.energy;
     require(energyLeft > 0, "Cannot hit depleted forcefield");
 
-    ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
+    ToolData memory toolData = ToolUtils.getToolData(caller, toolSlot);
     uint128 playerEnergyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, energyLeft);
 
     Vec3 forceFieldCoord = forceField._getPosition();

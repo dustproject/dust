@@ -18,14 +18,14 @@ import { AttachProgramNotification, DetachProgramNotification, notify } from "..
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { SAFE_PROGRAM_GAS } from "../Constants.sol";
-import { EntityId } from "../EntityId.sol";
-import { ObjectType } from "../ObjectType.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectType } from "../types/ObjectType.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
 
 import "../ProgramHooks.sol" as Hooks;
-import { ProgramId } from "../ProgramId.sol";
-import { Vec3 } from "../Vec3.sol";
+import { ProgramId } from "../types/ProgramId.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 contract ProgramSystem is System {
   function updateProgram(EntityId caller, EntityId target, ProgramId newProgram, bytes calldata extraData) public {

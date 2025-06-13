@@ -25,12 +25,12 @@ import { DustTest, console } from "./DustTest.sol";
 import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import { CHUNK_SIZE, MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
-import { EntityId, EntityIdLib } from "../src/EntityId.sol";
-import { ObjectType, ObjectTypes } from "../src/ObjectType.sol";
+import { EntityId, EntityIdLib } from "../src/types/EntityId.sol";
+import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 
-import { Orientation } from "../src/Orientation.sol";
-import { ProgramId } from "../src/ProgramId.sol";
-import { Vec3, vec3 } from "../src/Vec3.sol";
+import { Orientation } from "../src/types/Orientation.sol";
+import { ProgramId } from "../src/types/ProgramId.sol";
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 contract TestBedProgram is System {
   fallback() external { }

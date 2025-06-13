@@ -5,8 +5,8 @@ import { WorldContextConsumerLib } from "@latticexyz/world/src/WorldContext.sol"
 import { Vm } from "forge-std/Vm.sol";
 import { console } from "forge-std/console.sol";
 
-import { EntityId } from "../../src/EntityId.sol";
-import { Vec3 } from "../../src/Vec3.sol";
+import { EntityId } from "../../src/types/EntityId.sol";
+import { Vec3 } from "../../src/types/Vec3.sol";
 
 import { Energy, EnergyData } from "../../src/codegen/tables/Energy.sol";
 import { Machine } from "../../src/codegen/tables/Machine.sol";
@@ -14,7 +14,7 @@ import { Machine } from "../../src/codegen/tables/Machine.sol";
 import { EntityObjectType } from "../../src/codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../../src/codegen/tables/InventorySlot.sol";
 
-import { ObjectType } from "../../src/ObjectType.sol";
+import { ObjectType } from "../../src/types/ObjectType.sol";
 
 import {
   updateMachineEnergy as _updateMachineEnergy,
@@ -23,8 +23,9 @@ import {
 
 import { EntityUtils } from "../../src/utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../../src/utils/ForceFieldUtils.sol";
-import { InventoryUtils, SlotAmount, SlotTransfer, ToolData } from "../../src/utils/InventoryUtils.sol";
+import { InventoryUtils, SlotAmount, SlotTransfer } from "../../src/utils/InventoryUtils.sol";
 import { PlayerUtils } from "../../src/utils/PlayerUtils.sol";
+import { ToolData, ToolUtils } from "../../src/utils/ToolUtils.sol";
 
 Vm constant vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
@@ -184,14 +185,6 @@ library TestInventoryUtils {
     InventoryUtils.removeObjectFromSlot(ownerEntityId, slot, numObjectsToRemove);
   }
 
-  function getToolData(EntityId owner, uint16 slot) public asWorld returns (ToolData memory) {
-    return InventoryUtils.getToolData(owner, slot);
-  }
-
-  function use(ToolData memory toolData, uint128 useMassMax, uint128 multiplier) public asWorld returns (uint128) {
-    return toolData.use(useMassMax, multiplier);
-  }
-
   function findEntity(EntityId owner, EntityId entityId) public asWorld returns (uint16) {
     return InventoryUtils.findEntity(owner, entityId);
   }
@@ -218,6 +211,28 @@ library TestInventoryUtils {
     returns (uint16[] memory slots)
   {
     return InventoryUtils.getSlotsWithType(ownerEntityId, objectType);
+  }
+}
+
+library TestToolUtils {
+  bytes32 constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestToolUtils");
+
+  modifier asWorld() {
+    TestUtils.asWorld(LIB_ADDRESS_SLOT);
+    _;
+  }
+
+  // Hack to be able to access the library address until we figure out why mud doesn't allow it
+  function init(address libAddress) public {
+    TestUtils.init(LIB_ADDRESS_SLOT, libAddress);
+  }
+
+  function getToolData(EntityId owner, uint16 slot) public asWorld returns (ToolData memory) {
+    return ToolUtils.getToolData(owner, slot);
+  }
+
+  function use(ToolData memory toolData, uint128 useMassMax, uint128 multiplier) public asWorld returns (uint128) {
+    return toolData.use(useMassMax, multiplier);
   }
 }
 

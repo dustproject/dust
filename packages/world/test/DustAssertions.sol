@@ -4,13 +4,16 @@ pragma solidity >=0.8.24;
 import { GasReporter } from "@latticexyz/gas-report/src/GasReporter.sol";
 import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 import { console } from "forge-std/console.sol";
+import { LibBit } from "solady/utils/LibBit.sol";
 
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { NamespaceOwner } from "@latticexyz/world/src/codegen/tables/NamespaceOwner.sol";
 
-import { Vec3, vec3 } from "../src/Vec3.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
+import { InventoryBitmap } from "../src/codegen/tables/InventoryBitmap.sol";
+import { InventorySlot, InventorySlotData } from "../src/codegen/tables/InventorySlot.sol";
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
@@ -20,10 +23,10 @@ import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 
 import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
-import { EntityId } from "../src/EntityId.sol";
+import { EntityId } from "../src/types/EntityId.sol";
 
-import { ObjectAmount, ObjectType, ObjectTypeLib, ObjectTypes } from "../src/ObjectType.sol";
-import { ProgramId } from "../src/ProgramId.sol";
+import { ObjectAmount, ObjectType, ObjectTypeLib, ObjectTypes } from "../src/types/ObjectType.sol";
+import { ProgramId } from "../src/types/ProgramId.sol";
 import { TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 import { encodeChunk } from "./utils/encodeChunk.sol";
 
@@ -181,5 +184,67 @@ abstract contract DustAssertions is MudTest, GasReporter {
 
   function assertNotEq(ObjectType a, ObjectType b) internal pure {
     assertTrue(a != b);
+  }
+
+  function _verifyInventoryBitmapIntegrity(EntityId entity) internal {
+    uint256[] memory bitmap = InventoryBitmap.get(entity);
+
+    // After pruning, either the bitmap is empty or its last word is non-zero.
+    if (bitmap.length == 0) {
+      assertEq(TestInventoryUtils.getOccupiedSlotCount(entity), 0, "Bitmap empty but slots present");
+      return; // nothing else to verify
+    }
+    assertTrue(bitmap[bitmap.length - 1] != 0, "Trailing zero word detected");
+
+    // count set bits
+    uint256 bitmapCount = 0;
+    for (uint256 i = 0; i < bitmap.length; ++i) {
+      bitmapCount += LibBit.popCount(bitmap[i]);
+    }
+
+    // per-slot verification
+    uint256 actualCount = 0;
+    for (uint256 wordIndex = 0; wordIndex < bitmap.length; ++wordIndex) {
+      uint256 word = bitmap[wordIndex];
+      uint256 originalWord = word;
+
+      // every set bit -> slot MUST have data
+      while (word != 0) {
+        uint256 bitIndex = LibBit.ffs(word);
+        word &= word - 1; // clear LS1B
+
+        uint16 slot = uint16(wordIndex * 256 + bitIndex);
+        InventorySlotData memory slotData = InventorySlot.get(entity, slot);
+
+        assertTrue(!slotData.objectType.isNull(), "Bit set but slot empty");
+        assertTrue(slotData.amount > 0, "Slot amount is zero");
+
+        if (slotData.objectType.isTool()) {
+          assertTrue(slotData.amount == 1, "Tool slot should have amount 1");
+          assertTrue(slotData.entityId != EntityId.wrap(0), "Tool slot has zero entity id");
+        }
+
+        if (slotData.entityId != EntityId.wrap(0)) {
+          // if slot has an entity, it must have a valid mass
+          assertTrue(Mass.getMass(slotData.entityId) > 0, "Entity in slot has zero mass");
+        }
+
+        ++actualCount;
+      }
+
+      // every slot with data -> bit MUST be set
+      for (uint256 bit = 0; bit < 256; ++bit) {
+        uint16 slot = uint16(wordIndex * 256 + bit);
+        InventorySlotData memory slotData = InventorySlot.get(entity, slot);
+
+        if (!slotData.objectType.isNull()) {
+          bool bitIsSet = (originalWord & (uint256(1) << bit)) != 0;
+          assertTrue(bitIsSet, "Slot has data but bit not set");
+        }
+      }
+    }
+
+    assertEq(bitmapCount, actualCount, "Bitmap count mismatch");
+    assertEq(bitmapCount, TestInventoryUtils.getOccupiedSlotCount(entity), "Mismatch with utility count");
   }
 }

@@ -4,7 +4,6 @@ import {
   objects,
   objectsByName,
 } from "../objects";
-import { getOrientation } from "../orientation";
 
 // Build minimal sliding windows over sorted ids
 function buildSlidingWindows(ids: number[]): { start: number; mask: bigint }[] {
@@ -90,8 +89,8 @@ function generateObjectTypeSol(): string {
   return `// SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { IMachineSystem } from "./codegen/world/IMachineSystem.sol";
-import { ITransferSystem } from "./codegen/world/ITransferSystem.sol";
+import { IMachineSystem } from "../codegen/world/IMachineSystem.sol";
+import { ITransferSystem } from "../codegen/world/ITransferSystem.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
 import { Orientation } from "./Orientation.sol";
 

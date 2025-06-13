@@ -17,7 +17,7 @@ import { EncodedLengths, EncodedLengthsLib } from "@latticexyz/store/src/Encoded
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
 // Import user types
-import { EntityId } from "../../EntityId.sol";
+import { EntityId } from "../../types/EntityId.sol";
 
 struct FragmentData {
   EntityId forceField;

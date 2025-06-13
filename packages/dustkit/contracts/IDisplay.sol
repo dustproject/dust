@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { EntityId } from "@dust/world/src/EntityId.sol";
+import { EntityId } from "@dust/world/src/types/EntityId.sol";
 
 /**
  * Follows a similar convention to protocol programs:

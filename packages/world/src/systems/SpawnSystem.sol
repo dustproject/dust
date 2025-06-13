@@ -21,12 +21,12 @@ import {
   PLAYER_ENERGY_DRAIN_RATE,
   SPAWN_BLOCK_RANGE
 } from "../Constants.sol";
-import { ObjectType } from "../ObjectType.sol";
+import { ObjectType } from "../types/ObjectType.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
-import { checkWorldStatus } from "../Utils.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
+import { checkWorldStatus } from "../utils/WorldUtils.sol";
 
-import { Vec3, vec3 } from "../Vec3.sol";
+import { Vec3, vec3 } from "../types/Vec3.sol";
 import { removeEnergyFromLocalPool, updateMachineEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
@@ -36,8 +36,8 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { MoveLib } from "./libraries/MoveLib.sol";
 import { TerrainLib } from "./libraries/TerrainLib.sol";
 
-import { EntityId } from "../EntityId.sol";
 import "../ProgramHooks.sol" as Hooks;
+import { EntityId } from "../types/EntityId.sol";
 
 contract SpawnSystem is System {
   using LibPRNG for LibPRNG.PRNG;

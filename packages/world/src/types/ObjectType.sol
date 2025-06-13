@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { IMachineSystem } from "../codegen/world/IMachineSystem.sol";
+import { ITransferSystem } from "../codegen/world/ITransferSystem.sol";
+
 import { Orientation } from "./Orientation.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
-import { IMachineSystem } from "./codegen/world/IMachineSystem.sol";
-import { ITransferSystem } from "./codegen/world/ITransferSystem.sol";
 
 type ObjectType is uint16;
 
