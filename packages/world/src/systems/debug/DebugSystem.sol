@@ -53,7 +53,7 @@ contract DebugSystem is System {
     EntityId player = EntityTypeLib.encodePlayer(playerAddress);
     player.activate();
 
-    Vec3[] memory playerCoords = ObjectTypes.Player.getRelativeCoords(player._getPosition());
+    Vec3[] memory playerCoords = ObjectTypes.Player.getCoords(player._getPosition());
     EntityId[] memory players = _getPlayerEntityIds(player, playerCoords);
     require(!MoveLib._gravityApplies(finalCoord), "Cannot teleport here as gravity applies");
 
@@ -61,7 +61,7 @@ contract DebugSystem is System {
       ReverseMovablePosition._deleteRecord(playerCoords[i]);
     }
 
-    Vec3[] memory newPlayerCoords = ObjectTypes.Player.getRelativeCoords(finalCoord);
+    Vec3[] memory newPlayerCoords = ObjectTypes.Player.getCoords(finalCoord);
     for (uint256 i = 0; i < newPlayerCoords.length; i++) {
       Vec3 newCoord = newPlayerCoords[i];
 

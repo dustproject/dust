@@ -153,7 +153,7 @@ ${Object.entries(categories)
   }
 
   /// @dev Get relative schema coords, including base coord
-  function getRelativeCoords(ObjectType self, Vec3 baseCoord, Orientation orientation)
+  function getCoords(ObjectType self, Vec3 baseCoord, Orientation orientation)
     internal
     pure
     returns (Vec3[] memory)
@@ -185,8 +185,8 @@ ${Object.entries(categories)
     return orientation == Orientation.wrap(0);
   }
 
-  function getRelativeCoords(ObjectType self, Vec3 baseCoord) internal pure returns (Vec3[] memory) {
-    return getRelativeCoords(self, baseCoord, Orientation.wrap(0));
+  function getCoords(ObjectType self, Vec3 baseCoord) internal pure returns (Vec3[] memory) {
+    return getCoords(self, baseCoord, Orientation.wrap(0));
   }
 
   function isActionAllowed(ObjectType self, bytes4 sig) internal pure returns (bool) {

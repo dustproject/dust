@@ -101,7 +101,7 @@ library MoveLib {
   function _requireValidMove(Vec3 baseOldCoord, Vec3 baseNewCoord) internal view {
     require(baseOldCoord.inSurroundingCube(baseNewCoord, 1), "New coord is too far from old coord");
 
-    Vec3[] memory newPlayerCoords = ObjectTypes.Player.getRelativeCoords(baseNewCoord);
+    Vec3[] memory newPlayerCoords = ObjectTypes.Player.getCoords(baseNewCoord);
 
     for (uint256 i = 0; i < newPlayerCoords.length; i++) {
       Vec3 newCoord = newPlayerCoords[i];
@@ -223,7 +223,7 @@ library MoveLib {
   }
 
   function _removePlayerPosition(Vec3 playerCoord) internal returns (EntityId[] memory) {
-    Vec3[] memory playerCoords = ObjectTypes.Player.getRelativeCoords(playerCoord);
+    Vec3[] memory playerCoords = ObjectTypes.Player.getCoords(playerCoord);
     EntityId[] memory playerEntityIds = new EntityId[](playerCoords.length);
 
     for (uint256 i; i < playerCoords.length; ++i) {
@@ -235,7 +235,7 @@ library MoveLib {
   }
 
   function _setPlayerPosition(EntityId[] memory playerEntityIds, Vec3 playerCoord) private {
-    Vec3[] memory playerCoords = ObjectTypes.Player.getRelativeCoords(playerCoord);
+    Vec3[] memory playerCoords = ObjectTypes.Player.getCoords(playerCoord);
     for (uint256 i = 0; i < playerCoords.length; i++) {
       EntityUtils.setMovableEntityAt(playerCoords[i], playerEntityIds[i]);
     }

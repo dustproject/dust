@@ -189,7 +189,7 @@ contract MineSystem is System {
 
   function _removeRelativeBlocks(EntityId mined, ObjectType minedType, Vec3 baseCoord) internal {
     // First coord will be the base coord, the rest is relative schema coords
-    Vec3[] memory coords = minedType.getRelativeCoords(baseCoord, EntityOrientation._get(mined));
+    Vec3[] memory coords = minedType.getCoords(baseCoord, EntityOrientation._get(mined));
 
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {

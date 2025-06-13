@@ -40,7 +40,7 @@ library PlayerUtils {
     EntityUtils.setMovableEntityAt(playerCoord, player);
 
     // Handle the player's body parts
-    Vec3[] memory coords = ObjectTypes.Player.getRelativeCoords(playerCoord);
+    Vec3[] memory coords = ObjectTypes.Player.getCoords(playerCoord);
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];
@@ -59,7 +59,7 @@ library PlayerUtils {
     EntityPosition._deleteRecord(player);
     ReverseMovablePosition._deleteRecord(playerCoord);
 
-    Vec3[] memory coords = ObjectTypes.Player.getRelativeCoords(playerCoord);
+    Vec3[] memory coords = ObjectTypes.Player.getCoords(playerCoord);
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];

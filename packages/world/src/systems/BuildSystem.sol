@@ -221,7 +221,7 @@ library BuildLib {
   }
 
   function _addBlocks(BuildContext memory ctx) internal returns (EntityId, Vec3[] memory) {
-    Vec3[] memory coords = ctx.buildType.getRelativeCoords(ctx.coord, ctx.orientation);
+    Vec3[] memory coords = ctx.buildType.getCoords(ctx.coord, ctx.orientation);
 
     EntityId base = _addBlock(ctx.buildType, ctx.coord);
     EntityOrientation._set(base, ctx.orientation);

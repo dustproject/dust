@@ -245,7 +245,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
       EntityFluidLevel.set(entityId, MAX_FLUID_LEVEL);
     }
 
-    Vec3[] memory coords = objectType.getRelativeCoords(coord, orientation);
+    Vec3[] memory coords = objectType.getCoords(coord, orientation);
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];
