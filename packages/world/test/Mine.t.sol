@@ -17,6 +17,8 @@ import { Machine } from "../src/codegen/tables/Machine.sol";
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 
 import { BurnedResourceCount } from "../src/codegen/tables/BurnedResourceCount.sol";
+
+import { Death } from "../src/codegen/tables/Death.sol";
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
@@ -382,7 +384,7 @@ contract MineTest is DustTest {
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
   }
 
-  function testMineBedWithPlayer() public {
+  function testMineBedWithDeadPlayer() public {
     (address alice, EntityId aliceEntityId, Vec3 coord) = setupFlatChunkWithPlayer();
 
     // Give objects to the player to test that transfers work
@@ -436,6 +438,117 @@ contract MineTest is DustTest {
     assertEq(EntityObjectType.get(bed), ObjectTypes.Air, "Top entity is not air");
     assertInventoryHasObject(bed, ObjectTypes.Grass, 1);
     assertInventoryHasObject(bed, ObjectTypes.IronPick, 1);
+  }
+
+  function testMineBedWithSleepingPlayerWithEnergy() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupFlatChunkWithPlayer();
+
+    // Give objects to the player to test that transfers work
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Grass, 1);
+    TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.IronPick);
+
+    Vec3 bedCoord = coord + vec3(2, 0, 0);
+
+    uint128 initialPlayerEnergy = Energy.getEnergy(aliceEntityId);
+
+    // Set a high forcefield energy so it doesn't deplete
+    uint128 initialForcefieldEnergy = (MACHINE_ENERGY_DRAIN_RATE + PLAYER_ENERGY_DRAIN_RATE) * 10000;
+
+    uint128 initialTimestamp = uint128(vm.getBlockTimestamp());
+
+    // Set forcefield
+    setupForceField(
+      bedCoord,
+      EnergyData({
+        energy: initialForcefieldEnergy,
+        lastUpdatedTime: initialTimestamp,
+        drainRate: MACHINE_ENERGY_DRAIN_RATE
+      })
+    );
+
+    // Create bed
+    EntityId bed = setObjectAtCoord(bedCoord, ObjectTypes.Bed, Orientation.wrap(44));
+
+    vm.prank(alice);
+    world.sleep(aliceEntityId, bed, "");
+
+    // Advance time but not enough to deplete player energy
+    uint128 timeDelta = 100 seconds;
+    vm.warp(vm.getBlockTimestamp() + timeDelta);
+
+    // Verify player still has energy
+    uint128 playerEnergy = Energy.getEnergy(aliceEntityId);
+    assertGt(playerEnergy, 0, "Player should still have energy");
+
+    (address bob, EntityId bobEntityId) = createTestPlayer(bedCoord - vec3(1, 0, 0));
+
+    // Try to mine the bed with sleeping player
+    vm.prank(bob);
+    startGasReport("mine bed with sleeping player with energy");
+    world.mineUntilDestroyed(bobEntityId, bedCoord, "");
+    endGasReport();
+
+    // Check that the player is not dead but spawned at bed position
+    assertFalse(Death.getLastDiedAt(aliceEntityId) > 0, "Player should not be dead");
+
+    // Player should be at bed position
+    Vec3 playerPos = EntityPosition.get(aliceEntityId);
+    assertEq(playerPos.x(), bedCoord.x(), "Player should be at bed x position");
+    assertEq(playerPos.y(), bedCoord.y(), "Player should be at bed y position");
+    assertEq(playerPos.z(), bedCoord.z(), "Player should be at bed z position");
+
+    // bed entity id should now be air
+    assertEq(EntityObjectType.get(bed), ObjectTypes.Air, "Bed entity is not air");
+
+    // Player should still have their inventory
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Grass, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.IronPick, 1);
+  }
+
+  function testMineBedWithBlockedSpawnPosition() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupFlatChunkWithPlayer();
+
+    Vec3 bedCoord = coord + vec3(2, 0, 0);
+
+    // Set a high forcefield energy so it doesn't deplete
+    uint128 initialForcefieldEnergy = (MACHINE_ENERGY_DRAIN_RATE + PLAYER_ENERGY_DRAIN_RATE) * 10000;
+
+    uint128 initialTimestamp = uint128(vm.getBlockTimestamp());
+
+    // Set forcefield
+    setupForceField(
+      bedCoord,
+      EnergyData({
+        energy: initialForcefieldEnergy,
+        lastUpdatedTime: initialTimestamp,
+        drainRate: MACHINE_ENERGY_DRAIN_RATE
+      })
+    );
+
+    // Create bed
+    EntityId bed = setObjectAtCoord(bedCoord, ObjectTypes.Bed, Orientation.wrap(44));
+
+    // Block the spawn position above the bed
+    setObjectAtCoord(bedCoord + vec3(0, 1, 0), ObjectTypes.Stone);
+
+    vm.prank(alice);
+    world.sleep(aliceEntityId, bed, "");
+
+    // Advance time slightly
+    vm.warp(vm.getBlockTimestamp() + 100 seconds);
+
+    (address bob, EntityId bobEntityId) = createTestPlayer(bedCoord - vec3(1, 0, 0));
+
+    // Try to mine the bed - should fail because spawn position is blocked
+    vm.prank(bob);
+    vm.expectRevert("Cannot spawn on a non-passable block");
+    world.mineUntilDestroyed(bobEntityId, bedCoord, "");
+
+    // Bed should still exist
+    assertEq(EntityObjectType.get(bed), ObjectTypes.Bed, "Bed should still exist");
+
+    // Player should still be sleeping
+    assertEq(PlayerBed.getBedEntityId(aliceEntityId), bed, "Player should still be in bed");
   }
 
   function testMineMultiSize() public {
