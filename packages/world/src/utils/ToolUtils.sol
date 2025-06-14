@@ -69,28 +69,17 @@ library ToolUtils {
 
     uint128 specializationMultiplier = specialized ? Constants.SPECIALIZATION_MULTIPLIER : 1;
 
-    uint128 multiplier = baseMultiplier * specializationMultiplier * actionModifier;
+    uint256 multiplier = uint256(baseMultiplier) * specializationMultiplier * actionModifier;
 
-    uint128 potentialMassReduction = maxToolMassReduction * multiplier / Constants.ACTION_MODIFIER_DENOMINATOR;
+    uint256 maxReductionScaled = uint256(maxToolMassReduction) * multiplier;
+    uint256 massLeftScaled = uint256(massLeft) * Constants.ACTION_MODIFIER_DENOMINATOR;
 
-    if (potentialMassReduction <= massLeft) {
+    if (maxReductionScaled <= massLeftScaled) {
       // Tool capacity is the limiting factor - use exact tool mass reduction
-      return (potentialMassReduction, maxToolMassReduction);
-    } else {
-      // massLeft is the limiting factor - calculate tool mass reduction that produces exactly massLeft
-      // We need: toolMassReduction * multiplier / ACTION_MODIFIER_DENOMINATOR = massLeft
-      // So: toolMassReduction = massLeft * ACTION_MODIFIER_DENOMINATOR / multiplier
-      // But we need to round up to ensure we get at least massLeft when we multiply back
-      uint128 toolMassReduction = (massLeft * Constants.ACTION_MODIFIER_DENOMINATOR + multiplier - 1) / multiplier;
-
-      // Ensure we don't exceed the max tool mass reduction
-      toolMassReduction = Math.min(toolMassReduction, maxToolMassReduction);
-
-      // Recalculate the actual mass reduction with the rounded tool mass reduction
-      uint128 actualMassReduction = toolMassReduction * multiplier / Constants.ACTION_MODIFIER_DENOMINATOR;
-
-      return (actualMassReduction, toolMassReduction);
+      return (uint128(maxReductionScaled / Constants.ACTION_MODIFIER_DENOMINATOR), maxToolMassReduction);
     }
+
+    return (massLeft, uint128(Math.divUp(massLeftScaled, multiplier)));
   }
 
   function reduceMass(ToolData memory toolData, uint128 massReduction) internal {

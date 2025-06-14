@@ -56,8 +56,9 @@ contract ToolUtilsTest is DustTest {
 
   // Helper to calculate multiplier inline
   function _getMultiplier(ObjectType toolType, uint128 actionModifier, bool specialized) private pure returns (uint128) {
-    return (toolType.isWoodenTool() ? WOODEN_TOOL_BASE_MULTIPLIER : ORE_TOOL_BASE_MULTIPLIER)
-      * (specialized ? SPECIALIZATION_MULTIPLIER : 1) * actionModifier;
+    uint128 baseMultiplier = toolType.isWoodenTool() ? WOODEN_TOOL_BASE_MULTIPLIER : ORE_TOOL_BASE_MULTIPLIER;
+    uint128 specializationMultiplier = specialized ? SPECIALIZATION_MULTIPLIER : 1;
+    return baseMultiplier * specializationMultiplier * actionModifier;
   }
 
   // Fuzz test to verify tool mass reduction never exceeds max using actual inventory tools
@@ -79,8 +80,10 @@ contract ToolUtilsTest is DustTest {
 
     // Bound inputs and add tool
     ObjectType toolType = toolTypes[bound(toolTypeIndex, 0, 5)];
-    actionModifier = uint128(bound(actionModifier, 1, 100 * ACTION_MODIFIER_DENOMINATOR));
-    useMassMax = uint128(bound(useMassMax, 1, type(uint64).max));
+    // Bound actionModifier to reasonable game values (up to 1000x modifier)
+    actionModifier = uint128(bound(actionModifier, 1, 1000 * ACTION_MODIFIER_DENOMINATOR));
+    // Bound useMassMax to prevent overflow when multiplied by ACTION_MODIFIER_DENOMINATOR (1e18)
+    useMassMax = uint128(bound(useMassMax, 1, type(uint128).max));
 
     EntityId toolEntity = TestInventoryUtils.addEntity(alice, toolType);
 
@@ -113,16 +116,21 @@ contract ToolUtilsTest is DustTest {
         // Calculate max tool mass reduction
         uint128 maxToolMassReduction = Math.min(ObjectPhysics.getMass(toolType) / 10, initialToolMass);
 
-        // Check if tool capacity or useMassMax is limiting
-        if (maxToolMassReduction * _tempMultiplier / ACTION_MODIFIER_DENOMINATOR <= _tempUseMassMax) {
+        // Calculate expected values matching the contract's logic exactly
+        uint256 maxReductionScaled = uint256(maxToolMassReduction) * _tempMultiplier;
+        uint256 massLeftScaled = uint256(_tempUseMassMax) * ACTION_MODIFIER_DENOMINATOR;
+
+        if (maxReductionScaled <= massLeftScaled) {
           // Tool capacity is limiting - expect exact max tool mass reduction
-          assertEq(actualToolMassReduction, maxToolMassReduction, "Tool mass reduction should match expected exactly");
+          assertEq(
+            actualToolMassReduction,
+            maxToolMassReduction,
+            "Tool mass reduction should be exact max when tool capacity limits"
+          );
         } else {
-          // useMassMax is limiting - calculate expected with rounding
-          // Break down calculation to avoid stack issues
-          uint128 numerator = _tempUseMassMax * ACTION_MODIFIER_DENOMINATOR + _tempMultiplier - 1;
-          uint128 expected = Math.min(numerator / _tempMultiplier, maxToolMassReduction);
-          assertEq(actualToolMassReduction, expected, "Tool mass reduction should match expected exactly");
+          // useMassMax is limiting - calculate expected with divUp
+          uint128 expectedToolMassReduction = uint128(Math.divUp(massLeftScaled, _tempMultiplier));
+          assertEq(actualToolMassReduction, expectedToolMassReduction, "Tool mass reduction should match expected");
         }
       }
     }
