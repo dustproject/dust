@@ -13,9 +13,9 @@ import { EntityUtils } from "../utils/EntityUtils.sol";
 import { EntityPosition } from "../utils/Vec3Storage.sol";
 
 import { MACHINE_ENERGY_DRAIN_RATE } from "../Constants.sol";
-import { EntityId } from "../EntityId.sol";
-import { ObjectTypes } from "../ObjectType.sol";
-import { Vec3 } from "../Vec3.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 library ForceFieldUtils {
   /**

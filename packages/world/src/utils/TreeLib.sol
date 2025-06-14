@@ -2,8 +2,8 @@
 /* Auto‑generated. DO NOT EDIT. */
 pragma solidity >=0.8.24;
 
-import { ObjectType, ObjectTypes } from "./ObjectType.sol";
-import { Vec3 } from "./Vec3.sol";
+import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 library TreeBlobs {
   /* Oak – 50 fixed, 8 random */

@@ -16,14 +16,14 @@ import { FuelMachineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { MACHINE_ENERGY_DRAIN_RATE } from "../Constants.sol";
-import { EntityId } from "../EntityId.sol";
-import { ObjectType } from "../ObjectType.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectType } from "../types/ObjectType.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
 
 import "../ProgramHooks.sol" as Hooks;
-import { ProgramId } from "../ProgramId.sol";
-import { Vec3 } from "../Vec3.sol";
+import { ProgramId } from "../types/ProgramId.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 contract MachineSystem is System {
   function fuelMachine(EntityId caller, EntityId machine, SlotAmount[] memory slots, bytes calldata extraData) external {

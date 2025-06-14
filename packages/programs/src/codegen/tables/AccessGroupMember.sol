@@ -21,7 +21,7 @@ import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 import { EncodeArray } from "@latticexyz/store/src/tightcoder/EncodeArray.sol";
 
 // Import user types
-import { EntityId } from "@dust/world/src/EntityId.sol";
+import { EntityId } from "@dust/world/src/types/EntityId.sol";
 
 library AccessGroupMember {
   // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "dfprograms_1", name: "AccessGroupMembe", typeId: RESOURCE_TABLE });`

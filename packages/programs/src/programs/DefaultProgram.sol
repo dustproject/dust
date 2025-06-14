@@ -4,8 +4,8 @@ pragma solidity >=0.8.24;
 import { IBaseWorld, WorldConsumer } from "@latticexyz/world-consumer/src/experimental/WorldConsumer.sol";
 import { System, WorldContextConsumer } from "@latticexyz/world/src/System.sol";
 
-import { EntityId, EntityTypeLib } from "@dust/world/src/EntityId.sol";
-import { Vec3 } from "@dust/world/src/Vec3.sol";
+import { EntityId, EntityTypeLib } from "@dust/world/src/types/EntityId.sol";
+import { Vec3 } from "@dust/world/src/types/Vec3.sol";
 
 import { Energy } from "@dust/world/src/codegen/tables/Energy.sol";
 import { Fragment, FragmentData } from "@dust/world/src/codegen/tables/Fragment.sol";

@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { EntityId } from "../EntityId.sol";
+import { EntityId } from "../types/EntityId.sol";
 
 import { buildSystem } from "../codegen/systems/BuildSystemLib.sol";
 import { programSystem } from "../codegen/systems/ProgramSystemLib.sol";
 
-import { Orientation } from "../Orientation.sol";
-import { ProgramId } from "../ProgramId.sol";
-import { Vec3 } from "../Vec3.sol";
+import { Orientation } from "../types/Orientation.sol";
+import { ProgramId } from "../types/ProgramId.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 import { System } from "@latticexyz/world/src/System.sol";
 

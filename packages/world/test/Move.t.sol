@@ -14,7 +14,7 @@ import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 
 import { DustTest } from "./DustTest.sol";
 
-import { EntityId, EntityTypeLib } from "../src/EntityId.sol";
+import { EntityId, EntityTypeLib } from "../src/types/EntityId.sol";
 import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
 import {
@@ -30,12 +30,12 @@ import {
   PLAYER_SAFE_FALL_DISTANCE,
   PLAYER_SWIM_ENERGY_DRAIN_RATE
 } from "../src/Constants.sol";
-import { ObjectType } from "../src/ObjectType.sol";
+import { ObjectType } from "../src/types/ObjectType.sol";
 
-import { ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectTypes } from "../src/types/ObjectType.sol";
 
-import { Orientation } from "../src/Orientation.sol";
-import { Vec3, vec3 } from "../src/Vec3.sol";
+import { Orientation } from "../src/types/Orientation.sol";
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 import { NonPassableBlock } from "../src/systems/libraries/MoveLib.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";

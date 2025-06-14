@@ -10,16 +10,16 @@ import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 import { addEnergyToLocalPool, transferEnergyToPool } from "../utils/EnergyUtils.sol";
 
 import { EntityUtils } from "../utils/EntityUtils.sol";
-import { InventoryUtils, ToolData } from "../utils/InventoryUtils.sol";
+import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
 import { Math } from "../utils/Math.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { TILL_ENERGY_COST } from "../Constants.sol";
-import { EntityId } from "../EntityId.sol";
-import { ObjectType } from "../ObjectType.sol";
-import { ObjectTypes } from "../ObjectType.sol";
-import { Vec3, vec3 } from "../Vec3.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectType } from "../types/ObjectType.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
+import { Vec3, vec3 } from "../types/Vec3.sol";
 
 contract FarmingSystem is System {
   function till(EntityId caller, Vec3 coord, uint16 toolSlot) external {
@@ -35,7 +35,7 @@ contract FarmingSystem is System {
       return;
     }
 
-    ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
+    ToolData memory toolData = ToolUtils.getToolData(caller, toolSlot);
     require(toolData.toolType.isHoe(), "Must equip a hoe");
     toolData.use(type(uint128).max);
 

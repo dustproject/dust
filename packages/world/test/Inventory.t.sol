@@ -21,16 +21,16 @@ import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
 import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_RADIUS } from "../src/Constants.sol";
-import { EntityId } from "../src/EntityId.sol";
+import { EntityId } from "../src/types/EntityId.sol";
 
-import { ObjectType } from "../src/ObjectType.sol";
+import { ObjectType } from "../src/types/ObjectType.sol";
 
-import { ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectTypes } from "../src/types/ObjectType.sol";
 
 import { SlotAmount, SlotTransfer } from "../src/utils/InventoryUtils.sol";
 
-import { Orientation } from "../src/Orientation.sol";
-import { Vec3, vec3 } from "../src/Vec3.sol";
+import { Orientation } from "../src/types/Orientation.sol";
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 import { DustTest } from "./DustTest.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";

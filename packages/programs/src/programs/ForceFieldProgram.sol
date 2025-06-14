@@ -3,10 +3,10 @@ pragma solidity >=0.8.24;
 
 import { IBaseWorld } from "@latticexyz/world-consumer/src/experimental/WorldConsumer.sol";
 
-import { EntityId } from "@dust/world/src/EntityId.sol";
-import { ObjectAmount, ObjectType } from "@dust/world/src/ObjectType.sol";
-import { ProgramId } from "@dust/world/src/ProgramId.sol";
-import { Vec3 } from "@dust/world/src/Vec3.sol";
+import { EntityId } from "@dust/world/src/types/EntityId.sol";
+import { ObjectAmount, ObjectType } from "@dust/world/src/types/ObjectType.sol";
+import { ProgramId } from "@dust/world/src/types/ProgramId.sol";
+import { Vec3 } from "@dust/world/src/types/Vec3.sol";
 
 import "@dust/world/src/ProgramHooks.sol" as Hooks;
 
