@@ -257,26 +257,41 @@ contract MineSystem is System {
   }
 
   function _handleDrop(EntityId caller, EntityId mined, ObjectType minedType, Vec3 minedCoord) internal {
-    // Get drops with all metadata for resource tracking
-    ObjectAmount[] memory result = RandomResourceLib._getMineDrops(mined, minedType, minedCoord);
+    // Get extra drops (seeds, saplings, etc)
+    ObjectAmount[] memory extraDrops = RandomResourceLib._getExtraDrops(mined, minedType, minedCoord);
 
-    for (uint256 i = 0; i < result.length; i++) {
-      (ObjectType dropType, uint128 amount) = (result[i].objectType, result[i].amount);
+    // Handle extra drops with resource tracking
+    for (uint256 i = 0; i < extraDrops.length; i++) {
+      (ObjectType dropType, uint128 amount) = (extraDrops[i].objectType, extraDrops[i].amount);
 
       if (amount == 0) continue;
 
-      try InventoryUtils.addObject(caller, dropType, amount) {
-        // added to inventory successfully
-      } catch {
-        // If that fails, drop the object on the ground
-        InventoryUtils.addObject(mined, dropType, amount);
-      }
+      _addToInventoryOrDrop(caller, mined, dropType, amount);
 
-      // Track mined resource count for seeds
+      // Track mined resource count for seeds from extra drops
       // TODO: could make it more general like .isCappedResource() or something
       if (dropType.isGrowable()) {
         ResourceCount._set(dropType, ResourceCount._get(dropType) + amount);
       }
+    }
+
+    // Handle the mined object itself (no resource tracking)
+    // If farmland, convert to dirt
+    if (minedType == ObjectTypes.Farmland || minedType == ObjectTypes.WetFarmland) {
+      minedType = ObjectTypes.Dirt;
+    }
+
+    _addToInventoryOrDrop(caller, mined, minedType, 1);
+  }
+
+  function _addToInventoryOrDrop(EntityId caller, EntityId fallbackEntity, ObjectType objectType, uint128 amount)
+    internal
+  {
+    try InventoryUtils.addObject(caller, objectType, amount) {
+      // added to inventory successfully
+    } catch {
+      // If that fails, drop the object on the ground
+      InventoryUtils.addObject(fallbackEntity, objectType, amount);
     }
   }
 }
@@ -419,20 +434,24 @@ library MineLib {
 }
 
 library RandomResourceLib {
-  struct RandomDrop {
+  struct DropDistribution {
     ObjectType objectType;
     uint256[] distribution;
   }
 
-  function _getMineDrops(EntityId mined, ObjectType objectType, Vec3 coord) public view returns (ObjectAmount[] memory) {
-    RandomDrop[] memory randomDrops = _getRandomDrops(mined, objectType);
+  function _getExtraDrops(EntityId mined, ObjectType objectType, Vec3 coord)
+    public
+    view
+    returns (ObjectAmount[] memory)
+  {
+    DropDistribution[] memory dropDistributions = _getDropDistributions(mined, objectType);
 
-    ObjectAmount[] memory result = new ObjectAmount[](randomDrops.length + 1);
+    ObjectAmount[] memory result = new ObjectAmount[](dropDistributions.length);
 
-    if (randomDrops.length > 0) {
+    if (dropDistributions.length > 0) {
       uint256 randomSeed = NatureLib.getRandomSeed(coord);
-      for (uint256 i = 0; i < randomDrops.length; i++) {
-        RandomDrop memory drop = randomDrops[i];
+      for (uint256 i = 0; i < dropDistributions.length; i++) {
+        DropDistribution memory drop = dropDistributions[i];
         (uint256 cap, uint256 remaining) = NatureLib.getCapAndRemaining(drop.objectType);
         uint256[] memory weights = RandomLib.adjustWeights(drop.distribution, cap, remaining);
         uint256 amount = RandomLib.selectByWeight(weights, randomSeed);
@@ -440,18 +459,14 @@ library RandomResourceLib {
       }
     }
 
-    // If farmland, convert to dirt
-    if (objectType == ObjectTypes.Farmland || objectType == ObjectTypes.WetFarmland) {
-      objectType = ObjectTypes.Dirt;
-    }
-
-    // Add base type as a drop for all objects
-    result[result.length - 1] = ObjectAmount(objectType, 1);
-
     return result;
   }
 
-  function _getRandomDrops(EntityId mined, ObjectType objectType) private view returns (RandomDrop[] memory drops) {
+  function _getDropDistributions(EntityId mined, ObjectType objectType)
+    private
+    view
+    returns (DropDistribution[] memory drops)
+  {
     if (!objectType.hasExtraDrops() || DisabledExtraDrops._get(mined)) {
       return drops;
     }
@@ -461,8 +476,8 @@ library RandomResourceLib {
       distribution[0] = 43; // 0 seeds: 43%
       distribution[1] = 57; // 1 seed:  57%
 
-      drops = new RandomDrop[](1);
-      drops[0] = RandomDrop(ObjectTypes.WheatSeed, distribution);
+      drops = new DropDistribution[](1);
+      drops[0] = DropDistribution(ObjectTypes.WheatSeed, distribution);
       return drops;
     }
 
@@ -473,8 +488,8 @@ library RandomResourceLib {
       distribution[2] = 20; // 2 seeds: 20%
       distribution[3] = 10; // 3 seeds: 10%
 
-      drops = new RandomDrop[](1);
-      drops[0] = RandomDrop(ObjectTypes.WheatSeed, distribution);
+      drops = new DropDistribution[](1);
+      drops[0] = DropDistribution(ObjectTypes.WheatSeed, distribution);
       return drops;
     }
 
@@ -486,8 +501,8 @@ library RandomResourceLib {
       distribution[2] = 27; // 2 seeds: 27%
       distribution[3] = 23; // 3 seeds: 23%
 
-      drops = new RandomDrop[](1);
-      drops[0] = RandomDrop(ObjectTypes.MelonSeed, distribution);
+      drops = new DropDistribution[](1);
+      drops[0] = DropDistribution(ObjectTypes.MelonSeed, distribution);
       return drops;
     }
 
@@ -499,8 +514,8 @@ library RandomResourceLib {
       distribution[2] = 27; // 2 seeds: 27%
       distribution[3] = 23; // 3 seeds: 23%
 
-      drops = new RandomDrop[](1);
-      drops[0] = RandomDrop(ObjectTypes.PumpkinSeed, distribution);
+      drops = new DropDistribution[](1);
+      drops[0] = DropDistribution(ObjectTypes.PumpkinSeed, distribution);
       return drops;
     }
 
@@ -510,8 +525,8 @@ library RandomResourceLib {
       distribution[0] = 100 - chance; // No sapling
       distribution[1] = chance; // 1 sapling
 
-      drops = new RandomDrop[](1);
-      drops[0] = RandomDrop(objectType.getSapling(), distribution);
+      drops = new DropDistribution[](1);
+      drops[0] = DropDistribution(objectType.getSapling(), distribution);
       return drops;
     }
   }
