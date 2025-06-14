@@ -178,7 +178,7 @@ contract MineSystem is System {
     }
 
     ObjectType replacementType = EntityFluidLevel._get(entityId) > 0 ? ObjectTypes.Water : ObjectTypes.Air;
-    EntityObjectType._set(entityId, replacementType);
+    EntityUtils.setEntityObjectType(entityId, replacementType);
 
     Vec3 aboveCoord = coord + vec3(0, 1, 0);
     EntityId above = EntityUtils.getMovableEntityAt(aboveCoord);
@@ -231,7 +231,7 @@ contract MineSystem is System {
   }
 
   function _removeGrowable(EntityId entityId, ObjectType objectType, Vec3 coord) internal {
-    EntityObjectType._set(entityId, ObjectTypes.Air);
+    EntityUtils.setEntityObjectType(entityId, ObjectTypes.Air);
     addEnergyToLocalPool(coord, objectType.getGrowableEnergy());
   }
 
@@ -528,8 +528,7 @@ library RandomResourceLib {
 
     // Set mined resource count for the specific ore
     ResourceCount._set(ore, ResourceCount._get(ore) + 1);
-    EntityObjectType._set(entityId, ore);
-    Mass._setMass(entityId, ObjectPhysics._getMass(ore));
+    EntityUtils.setEntityObjectType(entityId, ore);
 
     return ore;
   }

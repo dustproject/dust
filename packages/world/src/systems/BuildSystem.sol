@@ -224,12 +224,16 @@ library BuildLib {
 
     EntityId base = _addBlock(ctx.buildType, ctx.coord);
     EntityOrientation._set(base, ctx.orientation);
+
     Mass._setMass(base, ObjectPhysics._getMass(ctx.buildType));
+    EntityUtils.setEntityObjectType(base, ctx.buildType);
 
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
       EntityId relative = _addBlock(ctx.buildType, coords[i]);
       BaseEntity._set(relative, base);
+      // We don't use setEntityObjectType as we don't set the mass for relative blocks
+      EntityObjectType._set(relative, ctx.buildType);
     }
 
     return (base, coords);
@@ -284,7 +288,5 @@ library BuildLib {
     // if (terrainType == ObjectTypes.Water && !buildType.isWaterloggable()) {
     //   EntityFluidLevel._deleteRecord(terrain);
     // }
-
-    EntityObjectType._set(terrain, buildType);
   }
 }

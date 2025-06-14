@@ -288,11 +288,10 @@ contract FarmingTest is DustTest {
     assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
     assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seed was removed from circulation");
 
-    // Verify local energy pool hasn't changed (energy not returned since crop was fully grown)
-    // NOTE: player's energy is not reduced as currently wheat has 0 mass
+    // Verify local energy pool has changed (from the player's energy cost)
     assertEq(
       LocalEnergyPool.get(farmlandCoord.toLocalEnergyPoolShardCoord()),
-      initialLocalEnergy,
+      initialLocalEnergy + ObjectPhysics.getMass(ObjectTypes.Wheat),
       "Local energy pool shouldn't change after harvesting mature crop"
     );
   }
