@@ -1051,6 +1051,9 @@ export const categories: Record<string, Category> = {
       "ForceField",
     ],
   },
+  WoodenTool: {
+    objects: ["WoodenPick", "WoodenAxe", "WoodenWhacker", "WoodenHoe"],
+  },
   PassThrough: {
     objects: [
       "Air",

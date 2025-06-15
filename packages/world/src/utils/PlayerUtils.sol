@@ -13,16 +13,16 @@ import { PlayerBed } from "../codegen/tables/PlayerBed.sol";
 
 import { EntityPosition, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
 
-import { ObjectType } from "../ObjectType.sol";
-import { ObjectTypes } from "../ObjectType.sol";
-import { checkWorldStatus } from "../Utils.sol";
+import { ObjectType } from "../types/ObjectType.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
+import { checkWorldStatus } from "../utils/WorldUtils.sol";
 
 import { EntityUtils } from "./EntityUtils.sol";
 import { InventoryUtils } from "./InventoryUtils.sol";
 
 import { FRAGMENT_SIZE, PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
-import { EntityId, EntityIdLib } from "../EntityId.sol";
-import { Vec3, vec3 } from "../Vec3.sol";
+import { EntityId, EntityIdLib } from "../types/EntityId.sol";
+import { Vec3, vec3 } from "../types/Vec3.sol";
 
 import { DeathNotification, notify } from "./NotifUtils.sol";
 

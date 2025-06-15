@@ -6,7 +6,7 @@ function generateInitObjectsSol(): string {
 pragma solidity >=0.8.24;
 
 import { ObjectPhysics, ObjectPhysicsData } from "../src/codegen/tables/ObjectPhysics.sol";
-import { ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectTypes } from "../src/types/ObjectType.sol";
 
 function initObjects() {
 ${objects

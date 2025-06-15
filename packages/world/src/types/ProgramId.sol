@@ -8,7 +8,6 @@ import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 
 import { EntityId } from "./EntityId.sol";
 import { ObjectType } from "./ObjectType.sol";
-
 import { Vec3 } from "./Vec3.sol";
 
 type ProgramId is bytes32;

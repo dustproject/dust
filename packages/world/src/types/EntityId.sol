@@ -6,23 +6,22 @@ import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 import { WorldContextConsumerLib } from "@latticexyz/world/src/WorldContext.sol";
 import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
 
-import { BaseEntity } from "./codegen/tables/BaseEntity.sol";
-import { Energy, EnergyData } from "./codegen/tables/Energy.sol";
+import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
+import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
-import { EntityObjectType } from "./codegen/tables/EntityObjectType.sol";
-import { EntityProgram } from "./codegen/tables/EntityProgram.sol";
-import { PlayerBed } from "./codegen/tables/PlayerBed.sol";
+import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
+import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
+import { PlayerBed } from "../codegen/tables/PlayerBed.sol";
 
-import { updateMachineEnergy, updatePlayerEnergy } from "./utils/EnergyUtils.sol";
-import { ForceFieldUtils } from "./utils/ForceFieldUtils.sol";
-import { EntityPosition } from "./utils/Vec3Storage.sol";
+import { updateMachineEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
+import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
+import { EntityPosition } from "../utils/Vec3Storage.sol";
+import { checkWorldStatus } from "../utils/WorldUtils.sol";
 
-import { MAX_ENTITY_INFLUENCE_RADIUS } from "./Constants.sol";
-import { ObjectType } from "./ObjectType.sol";
+import { MAX_ENTITY_INFLUENCE_RADIUS } from "../Constants.sol";
+import { ObjectType, ObjectTypes } from "./ObjectType.sol";
 
-import { ObjectTypes } from "./ObjectType.sol";
 import { ProgramId } from "./ProgramId.sol";
-import { checkWorldStatus } from "./Utils.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
 
 type EntityId is bytes32;

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { ObjectTypes } from "../src/ObjectType.sol";
 import { ObjectPhysics, ObjectPhysicsData } from "../src/codegen/tables/ObjectPhysics.sol";
+import { ObjectTypes } from "../src/types/ObjectType.sol";
 
 function initObjects() {
   ObjectPhysics.set(ObjectTypes.Stone, ObjectPhysicsData({ mass: 12000000000000000, energy: 0 }));

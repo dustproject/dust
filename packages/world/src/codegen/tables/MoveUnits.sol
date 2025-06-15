@@ -17,7 +17,7 @@ import { EncodedLengths, EncodedLengthsLib } from "@latticexyz/store/src/Encoded
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
 // Import user types
-import { EntityId } from "../../EntityId.sol";
+import { EntityId } from "../../types/EntityId.sol";
 
 library MoveUnits {
   // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "MoveUnits", typeId: RESOURCE_TABLE });`

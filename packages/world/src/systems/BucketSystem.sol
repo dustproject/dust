@@ -9,10 +9,10 @@ import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 
-import { EntityId } from "../EntityId.sol";
-import { ObjectType } from "../ObjectType.sol";
-import { ObjectTypes } from "../ObjectType.sol";
-import { Vec3 } from "../Vec3.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectType } from "../types/ObjectType.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 contract BucketSystem is System {
   function fillBucket(EntityId caller, Vec3 waterCoord, uint16 bucketSlot) external {

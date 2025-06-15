@@ -43,14 +43,14 @@ import {
   TOOL_MINE_ENERGY_COST,
   WOODEN_TOOL_BASE_MULTIPLIER
 } from "../src/Constants.sol";
-import { ObjectAmount, ObjectType, ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectAmount, ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 
-import { EntityId, EntityTypeLib } from "../src/EntityId.sol";
 import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
+import { EntityId, EntityTypeLib } from "../src/types/EntityId.sol";
 
-import { Orientation } from "../src/Orientation.sol";
-import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
+import { Orientation } from "../src/types/Orientation.sol";
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract MineTest is DustTest {

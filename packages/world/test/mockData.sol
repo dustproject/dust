@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { Vec3, vec3 } from "../src/Vec3.sol";
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 library MockChunk {
   bytes32 constant regionRoot = hex"c1c4fe1f0a8c848f4cd987943cb74607cce09655dd1650a49502e347a0d76e27";

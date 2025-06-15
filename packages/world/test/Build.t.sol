@@ -4,7 +4,7 @@ pragma solidity >=0.8.24;
 import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
 import { console } from "forge-std/console.sol";
 
-import { EntityId } from "../src/EntityId.sol";
+import { EntityId } from "../src/types/EntityId.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
@@ -20,16 +20,16 @@ import { DustTest } from "./DustTest.sol";
 import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
 import { BUILD_ENERGY_COST, CHUNK_SIZE, MAX_ENTITY_INFLUENCE_RADIUS, MAX_FLUID_LEVEL } from "../src/Constants.sol";
-import { ObjectType } from "../src/ObjectType.sol";
+import { ObjectType } from "../src/types/ObjectType.sol";
 
-import { ObjectTypes } from "../src/ObjectType.sol";
 import { NonPassableBlock } from "../src/systems/libraries/MoveLib.sol";
+import { ObjectTypes } from "../src/types/ObjectType.sol";
 
-import { EntityId, EntityTypeLib } from "../src/EntityId.sol";
-import { Orientation } from "../src/Orientation.sol";
-import { Vec3, vec3 } from "../src/Vec3.sol";
 import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
+import { EntityId, EntityTypeLib } from "../src/types/EntityId.sol";
+import { Orientation } from "../src/types/Orientation.sol";
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract BuildTest is DustTest {

@@ -20,8 +20,8 @@ library Math {
     return uint128(FixedPointMathLib.dist(a, b));
   }
 
-  function divUp(uint128 a, uint128 b) internal pure returns (uint128) {
-    return uint128(FixedPointMathLib.divUp(a, b));
+  function divUp(uint256 a, uint256 b) internal pure returns (uint256) {
+    return FixedPointMathLib.divUp(a, b);
   }
 
   function abs(int256 a) internal pure returns (uint256) {

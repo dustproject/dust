@@ -13,10 +13,10 @@ import { InventoryUtils, SlotAmount } from "../utils/InventoryUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { MAX_PLAYER_ENERGY } from "../Constants.sol";
-import { EntityId } from "../EntityId.sol";
-import { ObjectType, ObjectTypes } from "../ObjectType.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 
-import { Vec3 } from "../Vec3.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 contract FoodSystem is System {
   function eat(EntityId caller, SlotAmount memory slotAmount) public {

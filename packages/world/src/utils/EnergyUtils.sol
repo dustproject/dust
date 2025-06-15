@@ -16,12 +16,12 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { LocalEnergyPool } from "../utils/Vec3Storage.sol";
 
 import { PLAYER_ENERGY_DRAIN_RATE } from "../Constants.sol";
-import { EntityId } from "../EntityId.sol";
-import { ObjectType } from "../ObjectType.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectType } from "../types/ObjectType.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
 
-import { Vec3 } from "../Vec3.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 function getLatestEnergyData(EntityId entityId) view returns (EnergyData memory, uint128, uint128) {
   EnergyData memory energyData = Energy._get(entityId);

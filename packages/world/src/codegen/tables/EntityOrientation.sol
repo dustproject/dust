@@ -17,8 +17,8 @@ import { EncodedLengths, EncodedLengthsLib } from "@latticexyz/store/src/Encoded
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
 // Import user types
-import { EntityId } from "../../EntityId.sol";
-import { Orientation } from "../../Orientation.sol";
+import { EntityId } from "../../types/EntityId.sol";
+import { Orientation } from "../../types/Orientation.sol";
 
 library EntityOrientation {
   // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "EntityOrientatio", typeId: RESOURCE_TABLE });`

@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { IMachineSystem } from "../codegen/world/IMachineSystem.sol";
+import { ITransferSystem } from "../codegen/world/ITransferSystem.sol";
+
 import { Orientation } from "./Orientation.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
-import { IMachineSystem } from "./codegen/world/IMachineSystem.sol";
-import { ITransferSystem } from "./codegen/world/ITransferSystem.sol";
 
 type ObjectType is uint16;
 
@@ -482,6 +483,18 @@ library ObjectTypeLib {
       // IDs in [0..255]
       {
         let bit := and(shr(self, 0xc2003e00fc0000000000000003ffe0001ffff0), 1)
+        ok := bit
+      }
+    }
+  }
+
+  function isWoodenTool(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      // IDs in [32768..33023]
+      {
+        let off := sub(self, 32768)
+        let bit := and(shr(off, 0x9041), 1)
         ok := bit
       }
     }
@@ -1026,6 +1039,10 @@ library ObjectTypeLib {
       ObjectTypes.Furnace,
       ObjectTypes.ForceField
     ];
+  }
+
+  function getWoodenToolTypes() internal pure returns (ObjectType[4] memory) {
+    return [ObjectTypes.WoodenPick, ObjectTypes.WoodenAxe, ObjectTypes.WoodenWhacker, ObjectTypes.WoodenHoe];
   }
 
   function getPassThroughTypes() internal pure returns (ObjectType[42] memory) {
