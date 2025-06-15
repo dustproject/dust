@@ -6,6 +6,7 @@ import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 import { console } from "forge-std/console.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
+import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
@@ -144,6 +145,7 @@ contract TreeTest is DustTest {
       (EntityId logEntityId, ObjectType logType) = TestEntityUtils.getBlockAt(checkCoord);
       assertTrue(logEntityId.exists(), "Log entity doesn't exist");
       assertEq(logType, ObjectTypes.OakLog, "Entity is not oak log");
+      assertEq(Mass.get(logEntityId), ObjectPhysics.getMass(logType), "Log mass is incorrect");
     }
 
     // Verify leaves exist in canopy area (test a few sample points)
