@@ -225,7 +225,6 @@ library BuildLib {
     EntityId base = _addBlock(ctx.buildType, ctx.coord);
     EntityOrientation._set(base, ctx.orientation);
 
-    Mass._setMass(base, ObjectPhysics._getMass(ctx.buildType));
     EntityUtils.setEntityObjectType(base, ctx.buildType);
 
     // Only iterate through relative schema coords
