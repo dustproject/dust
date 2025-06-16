@@ -169,7 +169,7 @@ contract BuildSystem is System {
         continue;
       }
 
-      (EnergyData memory machineData,) = updateMachineEnergy(forceField);
+      EnergyData memory machineData = updateMachineEnergy(forceField);
       if (machineData.energy == 0) {
         continue;
       }

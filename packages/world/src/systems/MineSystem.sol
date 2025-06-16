@@ -43,6 +43,7 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import {
   DEFAULT_MINE_ENERGY_COST,
   HIT_ACTION_MODIFIER,
+  MACHINE_ENERGY_DRAIN_RATE,
   MAX_PICKUP_RADIUS,
   MINE_ACTION_MODIFIER,
   ORE_TOOL_BASE_MULTIPLIER,
@@ -116,7 +117,7 @@ contract MineSystem is System {
     minedType = _prepareBlock(mined, minedType, coord);
 
     (uint128 massLeft, bool canMine) =
-      MineLib._applyMassReduction(caller, callerEnergy, toolSlot, minedType, Mass._getMass(mined));
+      MinePhysicsLib._applyMassReduction(caller, callerEnergy, toolSlot, minedType, Mass._getMass(mined));
 
     if (!canMine) {
       // Player died, return early
@@ -153,8 +154,14 @@ contract MineSystem is System {
 
   function _prepareBlock(EntityId mined, ObjectType minedType, Vec3 coord) internal returns (ObjectType) {
     if (minedType.isMachine()) {
-      (EnergyData memory machineData,) = updateMachineEnergy(mined);
+      EnergyData memory machineData = updateMachineEnergy(mined);
       require(machineData.energy == 0, "Cannot mine a machine that has energy");
+
+      // Prevent mining forcefields that have sleeping players
+      if (minedType == ObjectTypes.ForceField) {
+        _requireNoSleepingPlayers(mined);
+      }
+
       return minedType;
     }
 
@@ -294,9 +301,89 @@ contract MineSystem is System {
       InventoryUtils.addObject(fallbackEntity, objectType, amount);
     }
   }
+
+  function _requireNoSleepingPlayers(EntityId forceField) internal view {
+    uint128 drainRate = Energy._getDrainRate(forceField);
+
+    /* Check if drain rate is perfectly divisible by machine rate
+    * This works because:
+    * - Each fragment contributes exactly MACHINE_ENERGY_DRAIN_RATE to the total
+    * - Each sleeping player adds PLAYER_ENERGY_DRAIN_RATE which has remainder 4,526,893,230
+    * - Therefore: drainRate % MACHINE_ENERGY_DRAIN_RATE == 0 only when no players are sleeping
+    *
+    * Edge case proof: When would N players give remainder 0?
+    * We need: (N * PLAYER_ENERGY_DRAIN_RATE) % MACHINE_ENERGY_DRAIN_RATE == 0
+    * This means: N * PLAYER_ENERGY_DRAIN_RATE = K * MACHINE_ENERGY_DRAIN_RATE (for some integer K)
+    *
+    * Given: PLAYER_ENERGY_DRAIN_RATE = 1,351,851,852,000
+    *        MACHINE_ENERGY_DRAIN_RATE = 9,488,203,935
+    *        GCD(1351851852000, 9488203935) = 15
+    *
+    * Therefore: N * (1351851852000/15) = K * (9488203935/15)
+    *            N * 90,123,456,800 = K * 632,546,929
+    *
+    * Since 90,123,456,800 and 632,546,929 are coprime (GCD = 1),
+    * N must be a multiple of 632,546,929 for the equation to hold.
+    * This means at least 632,546,929 players must be sleeping in the same forcefield!
+    */
+
+    // TODO: This modulo check is a hack but not ideal long-term. We should consider:
+    // - Storing fragment count for the forcefield entity
+    // - Or tracking sleeping player count directly
+    // - Or using a more robust detection method that doesn't rely on mathematical properties
+    require(drainRate % MACHINE_ENERGY_DRAIN_RATE == 0, "Cannot mine forcefield with sleeping players");
+  }
 }
 
 library MineLib {
+  function _requireReachable(Vec3 coord) public view {
+    Vec3[6] memory neighbors = coord.neighbors6();
+    for (uint256 i = 0; i < neighbors.length; i++) {
+      Vec3 neighbor = neighbors[i];
+      ObjectType objectType = EntityUtils.getObjectTypeAt(neighbor);
+
+      // If the neighbor is passthrough, we consider the coordinate reachable
+      if (objectType.isPassThrough()) return;
+    }
+
+    revert("Coordinate is not reachable");
+  }
+
+  function _requireMinesAllowed(EntityId caller, ObjectType objectType, Vec3 coord, bytes calldata extraData) public {
+    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
+    if (!forceField._exists()) {
+      return;
+    }
+
+    EnergyData memory machineData = updateMachineEnergy(forceField);
+    if (machineData.energy == 0) {
+      return;
+    }
+
+    // We know fragment is active because its forcefield exists, so we can use its program
+    ProgramId program = fragment._getProgram();
+    if (!program.exists()) {
+      program = forceField._getProgram();
+      if (!program.exists()) {
+        return;
+      }
+    }
+
+    Hooks.MineContext memory ctx = Hooks.MineContext({
+      caller: caller,
+      target: forceField,
+      objectType: objectType,
+      coord: coord,
+      extraData: extraData
+    });
+
+    bytes memory onMine = abi.encodeCall(Hooks.IMine.onMine, ctx);
+
+    program.callOrRevert(onMine);
+  }
+}
+
+library MinePhysicsLib {
   function _applyMassReduction(
     EntityId caller,
     uint128 callerEnergy,
@@ -342,55 +429,6 @@ library MineLib {
     return Math.min(massLeft, maxEnergyCost);
   }
 
-  function _requireReachable(Vec3 coord) public view {
-    Vec3[6] memory neighbors = coord.neighbors6();
-    for (uint256 i = 0; i < neighbors.length; i++) {
-      Vec3 neighbor = neighbors[i];
-      ObjectType objectType = EntityUtils.getObjectTypeAt(neighbor);
-
-      // If the neighbor is passthrough, we consider the coordinate reachable
-      if (objectType.isPassThrough()) return;
-    }
-
-    revert("Coordinate is not reachable");
-  }
-
-  function _requireMinesAllowed(EntityId caller, ObjectType objectType, Vec3 coord, bytes calldata extraData) public {
-    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
-    if (!forceField._exists()) {
-      return;
-    }
-
-    (EnergyData memory machineData,) = updateMachineEnergy(forceField);
-    if (machineData.energy == 0) {
-      return;
-    }
-
-    // We know fragment is active because its forcefield exists, so we can use its program
-    ProgramId program = fragment._getProgram();
-    if (!program.exists()) {
-      program = forceField._getProgram();
-      if (!program.exists()) {
-        return;
-      }
-    }
-
-    bytes memory onMine = abi.encodeCall(
-      Hooks.IMine.onMine,
-      (
-        Hooks.MineContext({
-          caller: caller,
-          target: forceField,
-          objectType: objectType,
-          coord: coord,
-          extraData: extraData
-        })
-      )
-    );
-
-    program.callOrRevert(onMine);
-  }
-
   function _getToolMultiplier(ObjectType toolType, ObjectType minedType) public pure returns (uint128) {
     // Bare hands case - just return action modifier
     if (toolType.isNull()) {
@@ -419,8 +457,8 @@ library MineBedLib {
     }
 
     (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
-    uint128 depletedTime = decreaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
-    EnergyData memory playerData = updateSleepingPlayerEnergy(sleepingPlayer, bed, depletedTime, bedCoord);
+    decreaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
+    EnergyData memory playerData = updateSleepingPlayerEnergy(sleepingPlayer, bed, forceField, bedCoord);
 
     PlayerUtils.removePlayerFromBed(sleepingPlayer, bed);
 

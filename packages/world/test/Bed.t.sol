@@ -15,6 +15,7 @@ import { Fragment } from "../src/codegen/tables/Fragment.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Machine } from "../src/codegen/tables/Machine.sol";
+import { Mass } from "../src/codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
@@ -603,6 +604,295 @@ contract BedTest is DustTest {
     assertEq(bedPlayerData.playerEntityId.unwrap(), aliceEntityId.unwrap(), "Bed's player entity is not alice");
     assertEq(
       PlayerBed.getBedEntityId(aliceEntityId).unwrap(), bedEntityId.unwrap(), "Player's bed entity is not the bed"
+    );
+  }
+
+  function testCannotMineForcefieldWithSleepingPlayer() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupFlatChunkWithPlayer();
+    (address bob, EntityId bobEntityId) = createTestPlayer(coord + vec3(1, 0, 0));
+
+    Vec3 bedCoord = coord - vec3(2, 0, 0);
+    Vec3 forcefieldCoord = bedCoord + vec3(1, 0, 0);
+
+    uint128 initialPlayerEnergy = Energy.getEnergy(aliceEntityId);
+    uint128 initialTimestamp = uint128(vm.getBlockTimestamp());
+
+    // Set forcefield with no energy (depleted)
+    EntityId forcefieldEntityId = setupForceField(
+      forcefieldCoord,
+      EnergyData({ energy: 0, lastUpdatedTime: initialTimestamp, drainRate: MACHINE_ENERGY_DRAIN_RATE })
+    );
+
+    EntityId bedEntityId = createBed(bedCoord);
+
+    // Alice goes to sleep
+    vm.prank(alice);
+    world.sleep(aliceEntityId, bedEntityId, "");
+
+    // Wait some time
+    uint128 timeDelta = 100 seconds;
+    vm.warp(vm.getBlockTimestamp() + timeDelta);
+
+    // Bob tries to mine the forcefield, but it should fail
+    // Set the mass of the existing forcefield instance, not the object type
+    Mass.setMass(forcefieldEntityId, playerHandMassReduction - 1);
+    vm.prank(bob);
+    vm.expectRevert("Cannot mine forcefield with sleeping players");
+    world.mine(bobEntityId, forcefieldCoord, "");
+
+    // Alice can still wake up normally
+    vm.prank(alice);
+    world.wakeup(aliceEntityId, coord, "");
+
+    // Check that player energy was drained (forcefield had no energy)
+    assertEq(
+      Energy.getEnergy(aliceEntityId),
+      initialPlayerEnergy - (PLAYER_ENERGY_DRAIN_RATE * timeDelta),
+      "Player energy should be drained when forcefield has no energy"
+    );
+  }
+
+  function testCannotMineDepletedForcefieldWithSleepingPlayer() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupFlatChunkWithPlayer();
+    (address bob, EntityId bobEntityId) = createTestPlayer(coord + vec3(1, 0, 0));
+
+    Vec3 bedCoord = coord - vec3(2, 0, 0);
+    Vec3 forcefieldCoord = bedCoord + vec3(1, 0, 0);
+
+    uint128 initialPlayerEnergy = Energy.getEnergy(aliceEntityId);
+    uint128 initialTimestamp = uint128(vm.getBlockTimestamp());
+
+    // Set forcefield with NO energy (depleted)
+    setupForceField(
+      forcefieldCoord,
+      EnergyData({ energy: 0, lastUpdatedTime: initialTimestamp, drainRate: MACHINE_ENERGY_DRAIN_RATE })
+    );
+
+    EntityId bedEntityId = createBed(bedCoord);
+
+    // Alice goes to sleep in depleted forcefield
+    vm.prank(alice);
+    world.sleep(aliceEntityId, bedEntityId, "");
+
+    // Wait some time while sleeping
+    uint128 timeDelta = 100 seconds;
+    vm.warp(vm.getBlockTimestamp() + timeDelta);
+
+    // Bob tries to mine the forcefield, but it should fail
+    // Set the mass of the existing forcefield instance, not the object type
+    (EntityId forcefieldEntityId,) = TestEntityUtils.getBlockAt(forcefieldCoord);
+    Mass.setMass(forcefieldEntityId, playerHandMassReduction - 1);
+    vm.prank(bob);
+    vm.expectRevert("Cannot mine forcefield with sleeping players");
+    world.mine(bobEntityId, forcefieldCoord, "");
+
+    // Alice can still wake up normally
+    vm.prank(alice);
+    world.wakeup(aliceEntityId, coord, "");
+
+    // Check that player energy was correctly drained for time in depleted forcefield
+    uint128 expectedEnergy = initialPlayerEnergy - (PLAYER_ENERGY_DRAIN_RATE * timeDelta);
+    assertEq(
+      Energy.getEnergy(aliceEntityId),
+      expectedEnergy,
+      "Player energy should be drained for sleep duration in depleted forcefield"
+    );
+  }
+
+  function testCannotMinePartiallyDepletedForcefieldWithSleepingPlayer() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupFlatChunkWithPlayer();
+    (address bob, EntityId bobEntityId) = createTestPlayer(coord + vec3(1, 0, 0));
+
+    Vec3 bedCoord = coord - vec3(2, 0, 0);
+    Vec3 forcefieldCoord = bedCoord + vec3(1, 0, 0);
+
+    uint128 initialPlayerEnergy = Energy.getEnergy(aliceEntityId);
+
+    // Set forcefield with energy that will deplete after 50 seconds
+    uint128 forcefieldLifetime = 50 seconds;
+    setupForceField(
+      forcefieldCoord,
+      EnergyData({
+        energy: (MACHINE_ENERGY_DRAIN_RATE + PLAYER_ENERGY_DRAIN_RATE) * forcefieldLifetime,
+        lastUpdatedTime: uint128(vm.getBlockTimestamp()),
+        drainRate: MACHINE_ENERGY_DRAIN_RATE
+      })
+    );
+
+    EntityId bedEntityId = createBed(bedCoord);
+
+    // Alice goes to sleep
+    vm.prank(alice);
+    world.sleep(aliceEntityId, bedEntityId, "");
+
+    // Wait until forcefield depletes plus extra time
+    vm.warp(vm.getBlockTimestamp() + forcefieldLifetime + 30 seconds);
+
+    // Bob tries to mine the forcefield, but it should fail
+    // Set the mass of the existing forcefield instance, not the object type
+    (EntityId forcefieldEntityId,) = TestEntityUtils.getBlockAt(forcefieldCoord);
+    Mass.setMass(forcefieldEntityId, playerHandMassReduction - 1);
+    vm.prank(bob);
+    vm.expectRevert("Cannot mine forcefield with sleeping players");
+    world.mine(bobEntityId, forcefieldCoord, "");
+
+    // Alice can still wake up
+    vm.prank(alice);
+    world.wakeup(aliceEntityId, coord, "");
+
+    // Check that player energy was correctly drained only for depleted time
+    // Player loses energy for: 30 seconds after forcefield depleted
+    assertEq(
+      Energy.getEnergy(aliceEntityId),
+      initialPlayerEnergy - (PLAYER_ENERGY_DRAIN_RATE * 30 seconds),
+      "Player energy should be drained only for time forcefield was depleted"
+    );
+  }
+
+  function testMineBedWithSleepingPlayerAfterForcefieldDestroyed() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupFlatChunkWithPlayer();
+    (address bob, EntityId bobEntityId) = createTestPlayer(coord + vec3(5, 0, 0));
+
+    Vec3 bedCoord = coord - vec3(2, 0, 0);
+    Vec3 forcefieldCoord = bedCoord + vec3(1, 0, 0);
+
+    uint128 initialTimestamp = uint128(vm.getBlockTimestamp());
+
+    // Set forcefield with no energy
+    EntityId forceField = setupForceField(
+      forcefieldCoord,
+      EnergyData({ energy: 0, lastUpdatedTime: initialTimestamp, drainRate: MACHINE_ENERGY_DRAIN_RATE })
+    );
+
+    EntityId bedEntityId = createBed(bedCoord);
+
+    // Alice goes to sleep
+    vm.prank(alice);
+    world.sleep(aliceEntityId, bedEntityId, "");
+
+    // Wait some time
+    uint128 timeDelta = 100 seconds;
+    vm.warp(vm.getBlockTimestamp() + timeDelta);
+
+    // Bob tries to mine the forcefield, but it should fail because there's a sleeping player
+    // Set the mass of the existing forcefield instance, not the object type
+    Mass.setMass(forceField, playerHandMassReduction - 1);
+    vm.prank(bob);
+    vm.expectRevert("Cannot mine forcefield with sleeping players");
+    world.mine(bobEntityId, forcefieldCoord, "");
+  }
+
+  function testCannotMineForcefieldWithMultipleSleepingPlayers() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupFlatChunkWithPlayer();
+    (address bob, EntityId bobEntityId) = createTestPlayer(coord + vec3(1, 0, 0));
+    (address charlie, EntityId charlieEntityId) = createTestPlayer(coord + vec3(2, 0, 0));
+
+    console.log(coord.toString());
+
+    Vec3 bed1Coord = coord - vec3(2, 0, 0);
+    Vec3 bed2Coord = coord - vec3(4, 0, 0);
+    Vec3 forcefieldCoord = coord - vec3(1, 0, 0);
+
+    uint128 initialAliceEnergy = Energy.getEnergy(aliceEntityId);
+    uint128 initialCharlieEnergy = Energy.getEnergy(charlieEntityId);
+
+    // Set forcefield with no energy
+    setupForceField(
+      forcefieldCoord,
+      EnergyData({ energy: 0, lastUpdatedTime: uint128(vm.getBlockTimestamp()), drainRate: MACHINE_ENERGY_DRAIN_RATE })
+    );
+
+    // Create two beds and sleep
+    {
+      EntityId bed1 = createBed(bed1Coord);
+      vm.prank(alice);
+      world.sleep(aliceEntityId, bed1, "");
+    }
+
+    {
+      EntityId bed2 = createBed(bed2Coord);
+      vm.prank(charlie);
+      world.sleep(charlieEntityId, bed2, "");
+    }
+
+    // Wait some time
+    vm.warp(vm.getBlockTimestamp() + 100 seconds);
+
+    // Bob tries to mine forcefield, but it should fail
+    (EntityId forcefieldEntityId,) = TestEntityUtils.getBlockAt(forcefieldCoord);
+    Mass.setMass(forcefieldEntityId, playerHandMassReduction - 1);
+    vm.prank(bob);
+    vm.expectRevert("Cannot mine forcefield with sleeping players");
+    world.mine(bobEntityId, forcefieldCoord, "");
+
+    // Both players can still wake up
+    vm.prank(alice);
+    world.wakeup(aliceEntityId, coord, "");
+
+    vm.prank(charlie);
+    world.wakeup(charlieEntityId, coord + vec3(2, 0, 0), "");
+
+    // Check energy drain
+    uint128 totalTime = 100 seconds;
+    assertEq(
+      Energy.getEnergy(aliceEntityId),
+      initialAliceEnergy - (PLAYER_ENERGY_DRAIN_RATE * totalTime),
+      "Alice's energy should be drained correctly"
+    );
+    assertEq(
+      Energy.getEnergy(charlieEntityId),
+      initialCharlieEnergy - (PLAYER_ENERGY_DRAIN_RATE * totalTime),
+      "Charlie's energy should be drained correctly"
+    );
+  }
+
+  function testWakeupAfterForcefieldDestroyedConservativeEstimate() public {
+    (address alice, EntityId aliceEntityId, Vec3 coord) = setupFlatChunkWithPlayer();
+
+    Vec3 bedCoord = coord - vec3(2, 0, 0);
+    Vec3 forcefieldCoord = bedCoord + vec3(1, 0, 0);
+
+    uint128 initialPlayerEnergy = Energy.getEnergy(aliceEntityId);
+    uint128 initialTimestamp = uint128(vm.getBlockTimestamp());
+
+    // Set forcefield with no energy
+    EntityId forceField = setupForceField(
+      forcefieldCoord,
+      EnergyData({ energy: 0, lastUpdatedTime: initialTimestamp, drainRate: MACHINE_ENERGY_DRAIN_RATE })
+    );
+
+    EntityId bedEntityId = createBed(bedCoord);
+
+    // Alice goes to sleep
+    vm.prank(alice);
+    world.sleep(aliceEntityId, bedEntityId, "");
+
+    // Wait some time
+    uint128 timeDelta = 100 seconds;
+    vm.warp(vm.getBlockTimestamp() + timeDelta);
+
+    // Manually clear the Machine table to simulate forcefield being mined
+    // This tests the conservative estimation case in updateSleepingPlayerEnergy
+    Machine._deleteRecord(forceField);
+
+    // Also clear Energy table to fully simulate mined state
+    Energy._deleteRecord(forceField);
+
+    // Wait more time after forcefield is "mined"
+    uint128 timeAfterMining = 50 seconds;
+    vm.warp(vm.getBlockTimestamp() + timeAfterMining);
+
+    // Alice wakes up
+    vm.prank(alice);
+    world.wakeup(aliceEntityId, coord, "");
+
+    // The conservative estimate should drain energy for the entire time since sleeping
+    // (timeDelta + timeAfterMining) = 150 seconds total
+    uint128 expectedEnergy = initialPlayerEnergy - (PLAYER_ENERGY_DRAIN_RATE * (timeDelta + timeAfterMining));
+    assertEq(
+      Energy.getEnergy(aliceEntityId),
+      expectedEnergy,
+      "Player energy should be drained conservatively for entire sleep duration"
     );
   }
 }

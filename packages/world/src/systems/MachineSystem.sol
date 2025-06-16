@@ -45,7 +45,7 @@ contract MachineSystem is System {
       InventoryUtils.removeObjectFromSlot(caller, slots[i].slot, slots[i].amount);
     }
 
-    (EnergyData memory machineData,) = updateMachineEnergy(machine);
+    EnergyData memory machineData = updateMachineEnergy(machine);
 
     uint128 newEnergyLevel = machineData.energy + uint128(fuelAmount) * ObjectPhysics._getEnergy(ObjectTypes.Battery);
 

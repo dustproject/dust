@@ -28,6 +28,11 @@ uint128 constant BLOCK_TIME = 2 seconds;
 // Values To Tune
 // ------------------------------------------------------------
 uint128 constant MAX_PLAYER_ENERGY = 817600000000000000;
+
+// IMPORTANT: These drain rates are used for detecting sleeping players in forcefields
+// The detection relies on PLAYER_ENERGY_DRAIN_RATE % MACHINE_ENERGY_DRAIN_RATE != 0
+// Current: 1351851852000 % 9488203935 = 4526893230 (non-zero, so detection works)
+// If you change these values, verify the modulo is still non-zero or update the detection logic in MineSystem
 uint128 constant PLAYER_ENERGY_DRAIN_RATE = 1351851852000;
 uint128 constant PLAYER_SWIM_ENERGY_DRAIN_RATE = MAX_PLAYER_ENERGY / 5 minutes; // 5 minutes to drain all energy if fully submerged
 uint128 constant PLAYER_LAVA_ENERGY_DRAIN_RATE = MAX_PLAYER_ENERGY / 10 seconds; // 10 seconds to drain all energy if standing on lava

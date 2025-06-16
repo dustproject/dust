@@ -5,20 +5,20 @@ pragma solidity >=0.8.24;
 
 import { DefaultProgramSystem } from "../../DefaultProgramSystem.sol";
 import { EntityId } from "@dust/world/src/EntityId.sol";
-
-import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
-import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
+import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 import { IWorldCall } from "@latticexyz/world/src/IWorldKernel.sol";
 import { SystemCall } from "@latticexyz/world/src/SystemCall.sol";
 import { WorldContextConsumerLib } from "@latticexyz/world/src/WorldContext.sol";
 import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
-import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
+import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
+import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 
 type DefaultProgramSystemType is bytes32;
 
 // equivalent to WorldResourceIdLib.encode({ typeId: RESOURCE_SYSTEM, namespace: "dfprograms_1", name: "DefaultProgramSy" }))
-DefaultProgramSystemType constant defaultProgramSystem =
-  DefaultProgramSystemType.wrap(0x7379646670726f6772616d735f31000044656661756c7450726f6772616d5379);
+DefaultProgramSystemType constant defaultProgramSystem = DefaultProgramSystemType.wrap(
+  0x7379646670726f6772616d735f31000044656661756c7450726f6772616d5379
+);
 
 struct CallWrapper {
   ResourceId systemId;
@@ -46,27 +46,43 @@ library DefaultProgramSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).setAccessGroup(caller, target, groupId);
   }
 
-  function setMembership(DefaultProgramSystemType self, EntityId caller, uint256 groupId, EntityId member, bool allowed)
-    internal
-  {
+  function setMembership(
+    DefaultProgramSystemType self,
+    EntityId caller,
+    uint256 groupId,
+    EntityId member,
+    bool allowed
+  ) internal {
     return CallWrapper(self.toResourceId(), address(0)).setMembership(caller, groupId, member, allowed);
   }
 
-  function setMembership(DefaultProgramSystemType self, EntityId caller, uint256 groupId, address member, bool allowed)
-    internal
-  {
+  function setMembership(
+    DefaultProgramSystemType self,
+    EntityId caller,
+    uint256 groupId,
+    address member,
+    bool allowed
+  ) internal {
     return CallWrapper(self.toResourceId(), address(0)).setMembership(caller, groupId, member, allowed);
   }
 
-  function setMembership(DefaultProgramSystemType self, EntityId caller, EntityId target, EntityId member, bool allowed)
-    internal
-  {
+  function setMembership(
+    DefaultProgramSystemType self,
+    EntityId caller,
+    EntityId target,
+    EntityId member,
+    bool allowed
+  ) internal {
     return CallWrapper(self.toResourceId(), address(0)).setMembership(caller, target, member, allowed);
   }
 
-  function setMembership(DefaultProgramSystemType self, EntityId caller, EntityId target, address member, bool allowed)
-    internal
-  {
+  function setMembership(
+    DefaultProgramSystemType self,
+    EntityId caller,
+    EntityId target,
+    address member,
+    bool allowed
+  ) internal {
     return CallWrapper(self.toResourceId(), address(0)).setMembership(caller, target, member, allowed);
   }
 
@@ -74,9 +90,12 @@ library DefaultProgramSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).setOwner(caller, groupId, newOwner);
   }
 
-  function setTextSignContent(DefaultProgramSystemType self, EntityId caller, EntityId target, string memory content)
-    internal
-  {
+  function setTextSignContent(
+    DefaultProgramSystemType self,
+    EntityId caller,
+    EntityId target,
+    string memory content
+  ) internal {
     return CallWrapper(self.toResourceId(), address(0)).setTextSignContent(caller, target, content);
   }
 
@@ -96,60 +115,86 @@ library DefaultProgramSystemLib {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert DefaultProgramSystemLib_CallingFromRootSystem();
 
-    bytes memory systemCall =
-      abi.encodeCall(_setAccessGroup_EntityId_EntityId_uint256.setAccessGroup, (caller, target, groupId));
+    bytes memory systemCall = abi.encodeCall(
+      _setAccessGroup_EntityId_EntityId_uint256.setAccessGroup,
+      (caller, target, groupId)
+    );
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
-  function setMembership(CallWrapper memory self, EntityId caller, uint256 groupId, EntityId member, bool allowed)
-    internal
-  {
+  function setMembership(
+    CallWrapper memory self,
+    EntityId caller,
+    uint256 groupId,
+    EntityId member,
+    bool allowed
+  ) internal {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert DefaultProgramSystemLib_CallingFromRootSystem();
 
-    bytes memory systemCall =
-      abi.encodeCall(_setMembership_EntityId_uint256_EntityId_bool.setMembership, (caller, groupId, member, allowed));
+    bytes memory systemCall = abi.encodeCall(
+      _setMembership_EntityId_uint256_EntityId_bool.setMembership,
+      (caller, groupId, member, allowed)
+    );
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
-  function setMembership(CallWrapper memory self, EntityId caller, uint256 groupId, address member, bool allowed)
-    internal
-  {
+  function setMembership(
+    CallWrapper memory self,
+    EntityId caller,
+    uint256 groupId,
+    address member,
+    bool allowed
+  ) internal {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert DefaultProgramSystemLib_CallingFromRootSystem();
 
-    bytes memory systemCall =
-      abi.encodeCall(_setMembership_EntityId_uint256_address_bool.setMembership, (caller, groupId, member, allowed));
+    bytes memory systemCall = abi.encodeCall(
+      _setMembership_EntityId_uint256_address_bool.setMembership,
+      (caller, groupId, member, allowed)
+    );
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
-  function setMembership(CallWrapper memory self, EntityId caller, EntityId target, EntityId member, bool allowed)
-    internal
-  {
+  function setMembership(
+    CallWrapper memory self,
+    EntityId caller,
+    EntityId target,
+    EntityId member,
+    bool allowed
+  ) internal {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert DefaultProgramSystemLib_CallingFromRootSystem();
 
-    bytes memory systemCall =
-      abi.encodeCall(_setMembership_EntityId_EntityId_EntityId_bool.setMembership, (caller, target, member, allowed));
+    bytes memory systemCall = abi.encodeCall(
+      _setMembership_EntityId_EntityId_EntityId_bool.setMembership,
+      (caller, target, member, allowed)
+    );
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
-  function setMembership(CallWrapper memory self, EntityId caller, EntityId target, address member, bool allowed)
-    internal
-  {
+  function setMembership(
+    CallWrapper memory self,
+    EntityId caller,
+    EntityId target,
+    address member,
+    bool allowed
+  ) internal {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert DefaultProgramSystemLib_CallingFromRootSystem();
 
-    bytes memory systemCall =
-      abi.encodeCall(_setMembership_EntityId_EntityId_address_bool.setMembership, (caller, target, member, allowed));
+    bytes memory systemCall = abi.encodeCall(
+      _setMembership_EntityId_EntityId_address_bool.setMembership,
+      (caller, target, member, allowed)
+    );
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
@@ -165,14 +210,19 @@ library DefaultProgramSystemLib {
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
-  function setTextSignContent(CallWrapper memory self, EntityId caller, EntityId target, string memory content)
-    internal
-  {
+  function setTextSignContent(
+    CallWrapper memory self,
+    EntityId caller,
+    EntityId target,
+    string memory content
+  ) internal {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert DefaultProgramSystemLib_CallingFromRootSystem();
 
-    bytes memory systemCall =
-      abi.encodeCall(_setTextSignContent_EntityId_EntityId_string.setTextSignContent, (caller, target, content));
+    bytes memory systemCall = abi.encodeCall(
+      _setTextSignContent_EntityId_EntityId_string.setTextSignContent,
+      (caller, target, content)
+    );
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
@@ -186,40 +236,66 @@ library DefaultProgramSystemLib {
   }
 
   function setAccessGroup(RootCallWrapper memory self, EntityId caller, EntityId target, uint256 groupId) internal {
-    bytes memory systemCall =
-      abi.encodeCall(_setAccessGroup_EntityId_EntityId_uint256.setAccessGroup, (caller, target, groupId));
+    bytes memory systemCall = abi.encodeCall(
+      _setAccessGroup_EntityId_EntityId_uint256.setAccessGroup,
+      (caller, target, groupId)
+    );
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
-  function setMembership(RootCallWrapper memory self, EntityId caller, uint256 groupId, EntityId member, bool allowed)
-    internal
-  {
-    bytes memory systemCall =
-      abi.encodeCall(_setMembership_EntityId_uint256_EntityId_bool.setMembership, (caller, groupId, member, allowed));
+  function setMembership(
+    RootCallWrapper memory self,
+    EntityId caller,
+    uint256 groupId,
+    EntityId member,
+    bool allowed
+  ) internal {
+    bytes memory systemCall = abi.encodeCall(
+      _setMembership_EntityId_uint256_EntityId_bool.setMembership,
+      (caller, groupId, member, allowed)
+    );
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
-  function setMembership(RootCallWrapper memory self, EntityId caller, uint256 groupId, address member, bool allowed)
-    internal
-  {
-    bytes memory systemCall =
-      abi.encodeCall(_setMembership_EntityId_uint256_address_bool.setMembership, (caller, groupId, member, allowed));
+  function setMembership(
+    RootCallWrapper memory self,
+    EntityId caller,
+    uint256 groupId,
+    address member,
+    bool allowed
+  ) internal {
+    bytes memory systemCall = abi.encodeCall(
+      _setMembership_EntityId_uint256_address_bool.setMembership,
+      (caller, groupId, member, allowed)
+    );
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
-  function setMembership(RootCallWrapper memory self, EntityId caller, EntityId target, EntityId member, bool allowed)
-    internal
-  {
-    bytes memory systemCall =
-      abi.encodeCall(_setMembership_EntityId_EntityId_EntityId_bool.setMembership, (caller, target, member, allowed));
+  function setMembership(
+    RootCallWrapper memory self,
+    EntityId caller,
+    EntityId target,
+    EntityId member,
+    bool allowed
+  ) internal {
+    bytes memory systemCall = abi.encodeCall(
+      _setMembership_EntityId_EntityId_EntityId_bool.setMembership,
+      (caller, target, member, allowed)
+    );
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
-  function setMembership(RootCallWrapper memory self, EntityId caller, EntityId target, address member, bool allowed)
-    internal
-  {
-    bytes memory systemCall =
-      abi.encodeCall(_setMembership_EntityId_EntityId_address_bool.setMembership, (caller, target, member, allowed));
+  function setMembership(
+    RootCallWrapper memory self,
+    EntityId caller,
+    EntityId target,
+    address member,
+    bool allowed
+  ) internal {
+    bytes memory systemCall = abi.encodeCall(
+      _setMembership_EntityId_EntityId_address_bool.setMembership,
+      (caller, target, member, allowed)
+    );
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
@@ -228,11 +304,16 @@ library DefaultProgramSystemLib {
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
-  function setTextSignContent(RootCallWrapper memory self, EntityId caller, EntityId target, string memory content)
-    internal
-  {
-    bytes memory systemCall =
-      abi.encodeCall(_setTextSignContent_EntityId_EntityId_string.setTextSignContent, (caller, target, content));
+  function setTextSignContent(
+    RootCallWrapper memory self,
+    EntityId caller,
+    EntityId target,
+    string memory content
+  ) internal {
+    bytes memory systemCall = abi.encodeCall(
+      _setTextSignContent_EntityId_EntityId_string.setTextSignContent,
+      (caller, target, content)
+    );
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
@@ -273,6 +354,7 @@ library DefaultProgramSystemLib {
  *
  * Each interface is uniquely named based on the function name and parameters to prevent collisions.
  */
+
 interface _newAccessGroup_EntityId {
   function newAccessGroup(EntityId owner) external;
 }

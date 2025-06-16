@@ -24,7 +24,7 @@ import { DustTest, console } from "./DustTest.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
-import { FRAGMENT_SIZE, MACHINE_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
+import { FRAGMENT_SIZE, MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
 import { EntityId } from "../src/EntityId.sol";
 
 import { ObjectType } from "../src/ObjectType.sol";
@@ -1641,7 +1641,7 @@ contract ForceFieldTest is DustTest {
     world.attachProgram(aliceEntityId, chestEntityId, ProgramId.wrap(programSystemId.unwrap()), "");
   }
 
-  function testAddFragmentWithExtraDrainRate() public {
+  function testAddFragmentWithExtraDrainRateNotAllowed() public {
     // Set up a flat chunk with a player
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
@@ -1662,66 +1662,45 @@ contract ForceFieldTest is DustTest {
     uint128 extraDrainRate = 1;
     Fragment.setExtraDrainRate(fragment, extraDrainRate);
 
-    // Expand the force field
+    // Try to expand the force field - should fail
+    vm.prank(alice);
+    vm.expectRevert("Fragment must not have an extra drain rate");
+    world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, newFragmentCoord, "");
+  }
+
+  function testRemoveFragmentWithExtraDrainRateNotAllowed() public {
+    // Set up a flat chunk with a player
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    EnergyData memory initialEnergyData =
+      EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 });
+
+    // Set up a force field with energy
+    Vec3 forceFieldCoord = playerCoord + vec3(2, 0, 0);
+    EntityId forceFieldEntityId = setupForceField(forceFieldCoord, initialEnergyData);
+
+    // Define expansion area
+    Vec3 refFragmentCoord = forceFieldCoord.toFragmentCoord();
+    Vec3 newFragmentCoord = refFragmentCoord + vec3(1, 0, 0);
+
+    // Add the fragment first
     vm.prank(alice);
     world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, newFragmentCoord, "");
 
-    // Verify that the energy drain rate has increased
-    EnergyData memory afterEnergyData = Energy.get(forceFieldEntityId);
-    assertEq(
-      afterEnergyData.drainRate,
-      initialEnergyData.drainRate + MACHINE_ENERGY_DRAIN_RATE + extraDrainRate,
-      "Energy drain rate did not increase correctly"
-    );
-
-    // Verify that each new fragment exists
-    assertTrue(
-      TestForceFieldUtils.isFragment(forceFieldEntityId, newFragmentCoord),
-      "Force field fragment not found at coordinate"
-    );
-  }
-
-  function testRemoveFragmentWithExtraDrainRate() public {
-    // Set up a flat chunk with a player
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
-
-    EnergyData memory initialEnergyData =
-      EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 });
-
-    // Set up a force field with energy
-    Vec3 forceFieldCoord = playerCoord + vec3(2, 0, 0);
-    EntityId forceFieldEntityId = setupForceField(forceFieldCoord, initialEnergyData);
-
-    // Define expansion area
-    Vec3 refFragmentCoord = forceFieldCoord.toFragmentCoord();
-    Vec3 newFragmentCoord = refFragmentCoord + vec3(1, 0, 0);
-
-    EntityId fragment = TestEntityUtils.getOrCreateFragmentAt(newFragmentCoord);
-
-    // Set extraDrainRate
-    uint128 extraDrainRate = 1;
+    // Now add extra drain rate to the fragment (simulating a bed being placed)
+    EntityId fragment = TestEntityUtils.getFragmentAt(newFragmentCoord);
+    uint128 extraDrainRate = PLAYER_ENERGY_DRAIN_RATE;
     Fragment.setExtraDrainRate(fragment, extraDrainRate);
 
-    // Expand the force field
-    vm.startPrank(alice);
-    world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, newFragmentCoord, "");
-
+    // Try to remove the fragment - should fail
     uint8[] memory boundaryIdx = new uint8[](1);
     boundaryIdx[0] = 0;
     uint8[] memory parents = new uint8[](1);
     parents[0] = 0;
 
+    vm.prank(alice);
+    vm.expectRevert("Fragment must not have an extra drain rate");
     world.removeFragment(aliceEntityId, forceFieldEntityId, newFragmentCoord, boundaryIdx, parents, "");
-    vm.stopPrank();
-
-    // Verify that the energy drain rate has increased
-    EnergyData memory afterEnergyData = Energy.get(forceFieldEntityId);
-    assertEq(afterEnergyData.drainRate, initialEnergyData.drainRate, "Energy drain rate did not reset correctly");
-
-    assertFalse(
-      TestForceFieldUtils.isFragment(forceFieldEntityId, newFragmentCoord),
-      "Force field fragment is still part of the forceField"
-    );
   }
 
   function testFragmentOnMineNotExecutedIfNotInForceField() public {

@@ -6,6 +6,7 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+import { Machine } from "../codegen/tables/Machine.sol";
 
 import { PlayerBed } from "../codegen/tables/PlayerBed.sol";
 
@@ -113,16 +114,20 @@ library BedLib {
     (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
     require(forceField._exists(), "Bed is not inside a forcefield");
 
-    uint128 depletedTime = increaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
+    increaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
+
+    // Get the current depleted time from the machine
+    uint128 depletedTime = forceField._exists() ? Machine._getDepletedTime(forceField) : 0;
+
     PlayerBed._setBedEntityId(caller, bed);
     BedPlayer._set(bed, caller, depletedTime);
   }
 
   function removePlayerFromBed(EntityId caller, EntityId bed, Vec3 bedCoord) public returns (EnergyData memory) {
     (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
-    uint128 depletedTime = decreaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
+    decreaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
 
-    EnergyData memory playerData = updateSleepingPlayerEnergy(caller, bed, depletedTime, bedCoord);
+    EnergyData memory playerData = updateSleepingPlayerEnergy(caller, bed, forceField, bedCoord);
 
     PlayerUtils.removePlayerFromBed(caller, bed);
     return playerData;

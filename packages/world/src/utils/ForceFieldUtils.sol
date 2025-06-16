@@ -64,7 +64,7 @@ library ForceFieldUtils {
    * @dev Set up a new forcefield with its initial fragment
    */
   function setupForceField(EntityId forceField, Vec3 coord) internal {
-    Machine._setCreatedAt(forceField, uint128(block.timestamp));
+    Machine._set({ entityId: forceField, createdAt: uint128(block.timestamp), depletedTime: 0 });
     addFragment(forceField, EntityUtils.getOrCreateFragmentAt(coord.toFragmentCoord()));
   }
 
@@ -73,6 +73,7 @@ library ForceFieldUtils {
    */
   function addFragment(EntityId forceField, EntityId fragment) internal {
     require(!fragment._getProgram().exists(), "Can't expand into a fragment with a program");
+    require(Fragment._getExtraDrainRate(fragment) == 0, "Fragment must not have an extra drain rate");
 
     FragmentData memory fragmentData = Fragment._get(fragment);
     require(!_isFragmentActive(fragmentData, fragmentData.forceField), "Fragment already belongs to a forcefield");
@@ -80,8 +81,8 @@ library ForceFieldUtils {
     fragmentData.forceField = forceField;
     fragmentData.forceFieldCreatedAt = Machine._getCreatedAt(forceField);
 
-    (EnergyData memory machineData,) = updateMachineEnergy(forceField);
-    Energy._setDrainRate(forceField, machineData.drainRate + MACHINE_ENERGY_DRAIN_RATE + fragmentData.extraDrainRate);
+    EnergyData memory machineData = updateMachineEnergy(forceField);
+    Energy._setDrainRate(forceField, machineData.drainRate + MACHINE_ENERGY_DRAIN_RATE);
     Fragment._set(fragment, fragmentData);
   }
 
@@ -90,12 +91,10 @@ library ForceFieldUtils {
    */
   function removeFragment(EntityId forceField, EntityId fragment) internal {
     require(!fragment._getProgram().exists(), "Can't remove a fragment with a program");
-
-    (EnergyData memory machineData,) = updateMachineEnergy(forceField);
-    Energy._setDrainRate(
-      forceField, machineData.drainRate - MACHINE_ENERGY_DRAIN_RATE - Fragment._getExtraDrainRate(fragment)
-    );
-    Fragment._deleteRecord(fragment);
+    require(Fragment._getExtraDrainRate(fragment) == 0, "Fragment must not have an extra drain rate");
+    EnergyData memory machineData = updateMachineEnergy(forceField);
+    Energy._setDrainRate(forceField, machineData.drainRate - MACHINE_ENERGY_DRAIN_RATE);
+    Fragment._setForceField(fragment, EntityId.wrap(0));
   }
 
   /**

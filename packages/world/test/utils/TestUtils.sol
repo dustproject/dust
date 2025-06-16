@@ -234,7 +234,7 @@ library TestEnergyUtils {
     TestUtils.init(LIB_ADDRESS_SLOT, libAddress);
   }
 
-  function updateMachineEnergy(EntityId entityId) public asWorld returns (EnergyData memory, uint128) {
+  function updateMachineEnergy(EntityId entityId) public asWorld returns (EnergyData memory) {
     return _updateMachineEnergy(entityId);
   }
 
