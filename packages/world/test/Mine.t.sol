@@ -251,9 +251,11 @@ contract MineTest is DustTest {
     vm.prank(alice);
     world.mineUntilDestroyed(aliceEntityId, farmlandCoord + vec3(0, 1, 0), "");
 
+    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Wheat seeds were not removed from circulation");
+
     // Verify drops
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 0);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
 
     // Verify crop no longer exists
     assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
@@ -303,9 +305,11 @@ contract MineTest is DustTest {
     vm.prank(alice);
     world.mineUntilDestroyed(aliceEntityId, farmlandCoord, "");
 
+    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seed drop was not removed from circulation");
+
     // Verify drops
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 0);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
 
     // Verify crop no longer exists
     assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
