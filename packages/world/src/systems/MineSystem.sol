@@ -12,13 +12,13 @@ import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
 
+import { Death, DeathData } from "../codegen/tables/Death.sol";
 import { EntityFluidLevel } from "../codegen/tables/EntityFluidLevel.sol";
 import { EntityOrientation } from "../codegen/tables/EntityOrientation.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
-
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
 import { RandomLib } from "../RandomLib.sol";
@@ -37,7 +37,7 @@ import {
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils, ToolData } from "../utils/InventoryUtils.sol";
-import { DeathNotification, MineNotification, notify } from "../utils/NotifUtils.sol";
+import { DeathNotification, MineNotification, WakeupNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import {
@@ -185,7 +185,7 @@ contract MineSystem is System {
     }
 
     ObjectType replacementType = EntityFluidLevel._get(entityId) > 0 ? ObjectTypes.Water : ObjectTypes.Air;
-    EntityObjectType._set(entityId, replacementType);
+    EntityUtils.setEntityObjectType(entityId, replacementType);
 
     Vec3 aboveCoord = coord + vec3(0, 1, 0);
     EntityId above = EntityUtils.getMovableEntityAt(aboveCoord);
@@ -238,13 +238,13 @@ contract MineSystem is System {
   }
 
   function _removeGrowable(EntityId entityId, ObjectType objectType, Vec3 coord) internal {
-    EntityObjectType._set(entityId, ObjectTypes.Air);
+    EntityUtils.setEntityObjectType(entityId, ObjectTypes.Air);
     addEnergyToLocalPool(coord, objectType.getGrowableEnergy());
   }
 
   function _cleanupEntity(EntityId caller, EntityId mined, ObjectType minedType, Vec3 baseCoord) internal {
     if (minedType == ObjectTypes.Bed) {
-      MineLib._mineBed(mined, baseCoord);
+      MineBedLib._mineBed(mined, baseCoord);
     } else if (minedType.isMachine()) {
       Energy._deleteRecord(mined);
       Machine._deleteRecord(mined);
@@ -264,26 +264,41 @@ contract MineSystem is System {
   }
 
   function _handleDrop(EntityId caller, EntityId mined, ObjectType minedType, Vec3 minedCoord) internal {
-    // Get drops with all metadata for resource tracking
-    ObjectAmount[] memory result = RandomResourceLib._getMineDrops(mined, minedType, minedCoord);
+    // Get extra drops (seeds, saplings, etc)
+    ObjectAmount[] memory extraDrops = RandomResourceLib._getExtraDrops(mined, minedType, minedCoord);
 
-    for (uint256 i = 0; i < result.length; i++) {
-      (ObjectType dropType, uint128 amount) = (result[i].objectType, result[i].amount);
+    // Handle extra drops with resource tracking
+    for (uint256 i = 0; i < extraDrops.length; i++) {
+      (ObjectType dropType, uint128 amount) = (extraDrops[i].objectType, extraDrops[i].amount);
 
       if (amount == 0) continue;
 
-      try InventoryUtils.addObject(caller, dropType, amount) {
-        // added to inventory successfully
-      } catch {
-        // If that fails, drop the object on the ground
-        InventoryUtils.addObject(mined, dropType, amount);
-      }
+      _addToInventoryOrDrop(caller, mined, dropType, amount);
 
-      // Track mined resource count for seeds
+      // Track mined resource count for seeds from extra drops
       // TODO: could make it more general like .isCappedResource() or something
       if (dropType.isGrowable()) {
         ResourceCount._set(dropType, ResourceCount._get(dropType) + amount);
       }
+    }
+
+    // Handle the mined object itself (no resource tracking)
+    // If farmland, convert to dirt
+    if (minedType == ObjectTypes.Farmland || minedType == ObjectTypes.WetFarmland) {
+      minedType = ObjectTypes.Dirt;
+    }
+
+    _addToInventoryOrDrop(caller, mined, minedType, 1);
+  }
+
+  function _addToInventoryOrDrop(EntityId caller, EntityId fallbackEntity, ObjectType objectType, uint128 amount)
+    internal
+  {
+    try InventoryUtils.addObject(caller, objectType, amount) {
+      // added to inventory successfully
+    } catch {
+      // If that fails, drop the object on the ground
+      InventoryUtils.addObject(fallbackEntity, objectType, amount);
     }
   }
 }
@@ -336,61 +351,6 @@ library MineLib {
     );
 
     program.callOrRevert(onMine);
-  }
-
-  function _mineBed(EntityId bed, Vec3 bedCoord) public {
-    // If there is a player sleeping in the mined bed, kill them
-    EntityId sleepingPlayerId = BedPlayer._getPlayerEntityId(bed);
-    if (!sleepingPlayerId._exists()) {
-      return;
-    }
-
-    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
-    decreaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
-    EnergyData memory playerData = updateSleepingPlayerEnergy(sleepingPlayerId, bed, fragment, bedCoord);
-
-    PlayerUtils.removePlayerFromBed(sleepingPlayerId, bed);
-
-    // Bed entity should now be Air
-    InventoryUtils.transferAll(sleepingPlayerId, bed);
-
-    // Kill the player
-    // The player is not on the grid so no need to call killPlayer
-    Energy._setEnergy(sleepingPlayerId, 0);
-    addEnergyToLocalPool(bedCoord, playerData.energy);
-    notify(sleepingPlayerId, DeathNotification({ deathCoord: bedCoord }));
-  }
-
-  function _requireNoSleepingPlayers(EntityId forceField) internal view {
-    uint128 drainRate = Energy._getDrainRate(forceField);
-
-    /* Check if drain rate is perfectly divisible by machine rate
-    * This works because:
-    * - Each fragment contributes exactly MACHINE_ENERGY_DRAIN_RATE to the total
-    * - Each sleeping player adds PLAYER_ENERGY_DRAIN_RATE which has remainder 4,526,893,230
-    * - Therefore: drainRate % MACHINE_ENERGY_DRAIN_RATE == 0 only when no players are sleeping
-    *
-    * Edge case proof: When would N players give remainder 0?
-    * We need: (N * PLAYER_ENERGY_DRAIN_RATE) % MACHINE_ENERGY_DRAIN_RATE == 0
-    * This means: N * PLAYER_ENERGY_DRAIN_RATE = K * MACHINE_ENERGY_DRAIN_RATE (for some integer K)
-    *
-    * Given: PLAYER_ENERGY_DRAIN_RATE = 1,351,851,852,000
-    *        MACHINE_ENERGY_DRAIN_RATE = 9,488,203,935
-    *        GCD(1351851852000, 9488203935) = 15
-    *
-    * Therefore: N * (1351851852000/15) = K * (9488203935/15)
-    *            N * 90,123,456,800 = K * 632,546,929
-    *
-    * Since 90,123,456,800 and 632,546,929 are coprime (GCD = 1),
-    * N must be a multiple of 632,546,929 for the equation to hold.
-    * This means at least 632,546,929 players must be sleeping in the same forcefield!
-    */
-
-    // TODO: This modulo check is a hack but not ideal long-term. We should consider:
-    // - Storing fragment count in the forcefield entity
-    // - Or tracking sleeping player count directly
-    // - Or using a more robust detection method that doesn't rely on mathematical properties
-    require(drainRate % MACHINE_ENERGY_DRAIN_RATE == 0, "Cannot mine forcefield with sleeping players");
   }
 }
 
@@ -459,21 +419,99 @@ library MinePhysicsLib {
   }
 }
 
+library MineBedLib {
+  function _mineBed(EntityId bed, Vec3 bedCoord) public {
+    // If there is a player sleeping in the mined bed, spawn them
+    EntityId sleepingPlayer = BedPlayer._getPlayerEntityId(bed);
+    if (!sleepingPlayer._exists()) {
+      return;
+    }
+
+    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
+    decreaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
+    EnergyData memory playerData = updateSleepingPlayerEnergy(sleepingPlayer, bed, fragment, bedCoord);
+
+    PlayerUtils.removePlayerFromBed(sleepingPlayer, bed);
+
+    // Player died
+    if (playerData.energy == 0) {
+      // Bed entity should now be Air
+      InventoryUtils.transferAll(sleepingPlayer, bed);
+
+      Death._set(
+        sleepingPlayer, DeathData({ lastDiedAt: uint128(block.timestamp), deaths: Death.getDeaths(sleepingPlayer) + 1 })
+      );
+      notify(sleepingPlayer, DeathNotification({ deathCoord: bedCoord }));
+      return;
+    }
+
+    // If player is not dead, spawn them at the bed position
+    PlayerUtils.addPlayerToGrid(sleepingPlayer, bedCoord);
+
+    // Run gravity on the bed coordinate to ensure the player is placed correctly
+    MoveLib.runGravity(bedCoord);
+
+    bytes memory onWakeup = abi.encodeCall(
+      Hooks.IWakeup.onWakeup, (Hooks.WakeupContext({ caller: sleepingPlayer, target: bed, extraData: "" }))
+    );
+
+    bed._getProgram().call({ gas: SAFE_PROGRAM_GAS, hook: onWakeup });
+
+    notify(sleepingPlayer, WakeupNotification({ bed: bed, bedCoord: bedCoord }));
+  }
+
+  function _requireNoSleepingPlayers(EntityId forceField) internal view {
+    uint128 drainRate = Energy._getDrainRate(forceField);
+
+    /* Check if drain rate is perfectly divisible by machine rate
+    * This works because:
+    * - Each fragment contributes exactly MACHINE_ENERGY_DRAIN_RATE to the total
+    * - Each sleeping player adds PLAYER_ENERGY_DRAIN_RATE which has remainder 4,526,893,230
+    * - Therefore: drainRate % MACHINE_ENERGY_DRAIN_RATE == 0 only when no players are sleeping
+    *
+    * Edge case proof: When would N players give remainder 0?
+    * We need: (N * PLAYER_ENERGY_DRAIN_RATE) % MACHINE_ENERGY_DRAIN_RATE == 0
+    * This means: N * PLAYER_ENERGY_DRAIN_RATE = K * MACHINE_ENERGY_DRAIN_RATE (for some integer K)
+    *
+    * Given: PLAYER_ENERGY_DRAIN_RATE = 1,351,851,852,000
+    *        MACHINE_ENERGY_DRAIN_RATE = 9,488,203,935
+    *        GCD(1351851852000, 9488203935) = 15
+    *
+    * Therefore: N * (1351851852000/15) = K * (9488203935/15)
+    *            N * 90,123,456,800 = K * 632,546,929
+    *
+    * Since 90,123,456,800 and 632,546,929 are coprime (GCD = 1),
+    * N must be a multiple of 632,546,929 for the equation to hold.
+    * This means at least 632,546,929 players must be sleeping in the same forcefield!
+    */
+
+    // TODO: This modulo check is a hack but not ideal long-term. We should consider:
+    // - Storing fragment count in the forcefield entity
+    // - Or tracking sleeping player count directly
+    // - Or using a more robust detection method that doesn't rely on mathematical properties
+    require(drainRate % MACHINE_ENERGY_DRAIN_RATE == 0, "Cannot mine forcefield with sleeping players");
+  }
+}
+
 library RandomResourceLib {
-  struct RandomDrop {
+  struct DropDistribution {
     ObjectType objectType;
     uint256[] distribution;
   }
 
-  function _getMineDrops(EntityId mined, ObjectType objectType, Vec3 coord) public view returns (ObjectAmount[] memory) {
-    RandomDrop[] memory randomDrops = _getRandomDrops(mined, objectType);
+  function _getExtraDrops(EntityId mined, ObjectType objectType, Vec3 coord)
+    public
+    view
+    returns (ObjectAmount[] memory)
+  {
+    DropDistribution[] memory dropDistributions = _getDropDistributions(mined, objectType);
 
-    ObjectAmount[] memory result = new ObjectAmount[](randomDrops.length + 1);
+    ObjectAmount[] memory result = new ObjectAmount[](dropDistributions.length);
 
-    if (randomDrops.length > 0) {
+    if (dropDistributions.length > 0) {
       uint256 randomSeed = NatureLib.getRandomSeed(coord);
-      for (uint256 i = 0; i < randomDrops.length; i++) {
-        RandomDrop memory drop = randomDrops[i];
+      for (uint256 i = 0; i < dropDistributions.length; i++) {
+        DropDistribution memory drop = dropDistributions[i];
         (uint256 cap, uint256 remaining) = NatureLib.getCapAndRemaining(drop.objectType);
         uint256[] memory weights = RandomLib.adjustWeights(drop.distribution, cap, remaining);
         uint256 amount = RandomLib.selectByWeight(weights, randomSeed);
@@ -481,18 +519,14 @@ library RandomResourceLib {
       }
     }
 
-    // If farmland, convert to dirt
-    if (objectType == ObjectTypes.Farmland || objectType == ObjectTypes.WetFarmland) {
-      objectType = ObjectTypes.Dirt;
-    }
-
-    // Add base type as a drop for all objects
-    result[result.length - 1] = ObjectAmount(objectType, 1);
-
     return result;
   }
 
-  function _getRandomDrops(EntityId mined, ObjectType objectType) private view returns (RandomDrop[] memory drops) {
+  function _getDropDistributions(EntityId mined, ObjectType objectType)
+    private
+    view
+    returns (DropDistribution[] memory drops)
+  {
     if (!objectType.hasExtraDrops() || DisabledExtraDrops._get(mined)) {
       return drops;
     }
@@ -502,8 +536,8 @@ library RandomResourceLib {
       distribution[0] = 43; // 0 seeds: 43%
       distribution[1] = 57; // 1 seed:  57%
 
-      drops = new RandomDrop[](1);
-      drops[0] = RandomDrop(ObjectTypes.WheatSeed, distribution);
+      drops = new DropDistribution[](1);
+      drops[0] = DropDistribution(ObjectTypes.WheatSeed, distribution);
       return drops;
     }
 
@@ -514,8 +548,8 @@ library RandomResourceLib {
       distribution[2] = 20; // 2 seeds: 20%
       distribution[3] = 10; // 3 seeds: 10%
 
-      drops = new RandomDrop[](1);
-      drops[0] = RandomDrop(ObjectTypes.WheatSeed, distribution);
+      drops = new DropDistribution[](1);
+      drops[0] = DropDistribution(ObjectTypes.WheatSeed, distribution);
       return drops;
     }
 
@@ -527,8 +561,8 @@ library RandomResourceLib {
       distribution[2] = 27; // 2 seeds: 27%
       distribution[3] = 23; // 3 seeds: 23%
 
-      drops = new RandomDrop[](1);
-      drops[0] = RandomDrop(ObjectTypes.MelonSeed, distribution);
+      drops = new DropDistribution[](1);
+      drops[0] = DropDistribution(ObjectTypes.MelonSeed, distribution);
       return drops;
     }
 
@@ -540,8 +574,8 @@ library RandomResourceLib {
       distribution[2] = 27; // 2 seeds: 27%
       distribution[3] = 23; // 3 seeds: 23%
 
-      drops = new RandomDrop[](1);
-      drops[0] = RandomDrop(ObjectTypes.PumpkinSeed, distribution);
+      drops = new DropDistribution[](1);
+      drops[0] = DropDistribution(ObjectTypes.PumpkinSeed, distribution);
       return drops;
     }
 
@@ -551,8 +585,8 @@ library RandomResourceLib {
       distribution[0] = 100 - chance; // No sapling
       distribution[1] = chance; // 1 sapling
 
-      drops = new RandomDrop[](1);
-      drops[0] = RandomDrop(objectType.getSapling(), distribution);
+      drops = new DropDistribution[](1);
+      drops[0] = DropDistribution(objectType.getSapling(), distribution);
       return drops;
     }
   }
@@ -569,8 +603,7 @@ library RandomResourceLib {
 
     // Set mined resource count for the specific ore
     ResourceCount._set(ore, ResourceCount._get(ore) + 1);
-    EntityObjectType._set(entityId, ore);
-    Mass._setMass(entityId, ObjectPhysics._getMass(ore));
+    EntityUtils.setEntityObjectType(entityId, ore);
 
     return ore;
   }

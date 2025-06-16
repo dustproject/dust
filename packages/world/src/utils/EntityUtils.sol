@@ -54,7 +54,7 @@ library EntityUtils {
   function getOrCreateBlockAt(Vec3 coord) internal returns (EntityId, ObjectType) {
     (EntityId entityId, ObjectType objectType) = getBlockAt(coord);
     if (!entityId._exists()) {
-      _initEntity(entityId, objectType);
+      setEntityObjectType(entityId, objectType);
       EntityPosition._set(entityId, coord);
 
       if (objectType.spawnsWithFluid()) {
@@ -69,7 +69,7 @@ library EntityUtils {
     address playerAddress = WorldContextConsumerLib._msgSender();
     EntityId player = EntityTypeLib.encodePlayer(playerAddress);
     if (!player._exists()) {
-      _initEntity(player, ObjectTypes.Player);
+      setEntityObjectType(player, ObjectTypes.Player);
     }
 
     return player;
@@ -84,7 +84,7 @@ library EntityUtils {
 
     // Create a new fragment entity if needed
     if (!fragment._exists()) {
-      _initEntity(fragment, ObjectTypes.Fragment);
+      setEntityObjectType(fragment, ObjectTypes.Fragment);
       EntityPosition._set(fragment, fragmentCoord);
     }
 
@@ -96,7 +96,7 @@ library EntityUtils {
     UniqueEntity._set(uniqueEntity);
 
     EntityId entityId = EntityId.wrap(bytes32(uniqueEntity));
-    _initEntity(entityId, objectType);
+    setEntityObjectType(entityId, objectType);
     return entityId;
   }
 
@@ -109,11 +109,9 @@ library EntityUtils {
     ReverseMovablePosition._set(coord, entityId);
   }
 
-  function _initEntity(EntityId entityId, ObjectType objectType) private {
+  function setEntityObjectType(EntityId entityId, ObjectType objectType) internal {
     EntityObjectType._set(entityId, objectType);
     uint128 mass = ObjectPhysics._getMass(objectType);
-    if (mass > 0) {
-      Mass._setMass(entityId, mass);
-    }
+    Mass._setMass(entityId, mass);
   }
 }
