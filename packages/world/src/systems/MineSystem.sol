@@ -397,7 +397,7 @@ library MineLib {
 
 library MineBedLib {
   function _mineBed(EntityId bed, Vec3 bedCoord) public {
-    // If there is a player sleeping in the mined bed, kill them
+    // If there is a player sleeping in the mined bed, spawn them
     EntityId sleepingPlayer = BedPlayer._getPlayerEntityId(bed);
     if (!sleepingPlayer._exists()) {
       return;
