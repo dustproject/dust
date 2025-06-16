@@ -8,7 +8,7 @@ import { IWorld } from "../../src/codegen/world/IWorld.sol";
 
 import { DustScript } from "../DustScript.sol";
 
-contract SetGuardianScript is DustScript {
+contract SetPausedScript is DustScript {
   function run(address worldAddress, bool paused) external {
     // Specify a store so that you can use tables directly in PostDeploy
     StoreSwitch.setStoreAddress(worldAddress);
