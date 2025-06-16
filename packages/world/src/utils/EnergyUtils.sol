@@ -7,7 +7,7 @@ import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { PlayerBed } from "../codegen/tables/PlayerBed.sol";
 
 import { Fragment } from "../codegen/tables/Fragment.sol";
-import { Machine } from "../codegen/tables/Machine.sol";
+import { Machine, MachineData } from "../codegen/tables/Machine.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
@@ -55,9 +55,9 @@ function getLatestEnergyData(EntityId entityId) view returns (EnergyData memory,
   return (energyData, energyDrained, depletedTime);
 }
 
-function updateMachineEnergy(EntityId machine) returns (EnergyData memory, uint128) {
+function updateMachineEnergy(EntityId machine) returns (EnergyData memory) {
   if (!machine._exists()) {
-    return (EnergyData(0, 0, 0), 0);
+    return EnergyData(0, 0, 0);
   }
 
   (EnergyData memory energyData, uint128 energyDrained, uint128 depletedTime) = getLatestEnergyData(machine);
@@ -73,7 +73,7 @@ function updateMachineEnergy(EntityId machine) returns (EnergyData memory, uint1
   }
 
   Energy._set(machine, energyData);
-  return (energyData, currentDepletedTime);
+  return energyData;
 }
 
 /// @dev Used within systems before performing an action
@@ -120,26 +120,20 @@ function decreasePlayerEnergy(EntityId player, Vec3 playerCoord, uint128 amount)
   return newEnergy;
 }
 
-function increaseFragmentDrainRate(EntityId forceField, EntityId fragment, uint128 amount) returns (uint128) {
-  uint128 depletedTime = 0;
+function increaseFragmentDrainRate(EntityId forceField, EntityId fragment, uint128 amount) {
   if (forceField._exists()) {
-    (EnergyData memory machineData, uint128 forceFieldDepletedTime) = updateMachineEnergy(forceField);
+    EnergyData memory machineData = updateMachineEnergy(forceField);
     Energy._setDrainRate(forceField, machineData.drainRate + amount);
-    depletedTime = forceFieldDepletedTime;
   }
   Fragment._setExtraDrainRate(fragment, Fragment._getExtraDrainRate(fragment) + amount);
-  return depletedTime;
 }
 
-function decreaseFragmentDrainRate(EntityId forceField, EntityId fragment, uint128 amount) returns (uint128) {
-  uint128 depletedTime = 0;
+function decreaseFragmentDrainRate(EntityId forceField, EntityId fragment, uint128 amount) {
   if (forceField._exists()) {
-    (EnergyData memory machineData, uint128 forceFieldDepletedTime) = updateMachineEnergy(forceField);
+    EnergyData memory machineData = updateMachineEnergy(forceField);
     Energy._setDrainRate(forceField, machineData.drainRate - amount);
-    depletedTime = forceFieldDepletedTime;
   }
   Fragment._setExtraDrainRate(fragment, Fragment._getExtraDrainRate(fragment) - amount);
-  return depletedTime;
 }
 
 function addEnergyToLocalPool(Vec3 coord, uint128 numToAdd) returns (uint128) {
@@ -177,10 +171,25 @@ function removeEnergyFromLocalPool(Vec3 coord, uint128 numToRemove) returns (uin
   return newLocalEnergy;
 }
 
-function updateSleepingPlayerEnergy(EntityId player, EntityId bed, uint128 depletedTime, Vec3 bedCoord)
+function updateSleepingPlayerEnergy(EntityId player, EntityId bed, EntityId fragment, Vec3 bedCoord)
   returns (EnergyData memory)
 {
-  uint128 timeWithoutEnergy = depletedTime - BedPlayer._getLastDepletedTime(bed);
+  uint128 lastDepletedTime = BedPlayer._getLastDepletedTime(bed);
+  uint128 timeWithoutEnergy = 0;
+  uint128 currentDepletedTime = 0;
+
+  // Get the forcefield from the fragment
+  EntityId forceField = Fragment._getForceField(fragment);
+  MachineData memory machineData = Machine._get(forceField);
+
+  // Get the current depleted time from the forcefield
+  currentDepletedTime = machineData.depletedTime;
+
+  // Calculate time without energy based on depleted time difference
+  if (currentDepletedTime >= lastDepletedTime) {
+    timeWithoutEnergy = currentDepletedTime - lastDepletedTime;
+  }
+
   EnergyData memory playerEnergyData = Energy._get(player);
 
   if (timeWithoutEnergy > 0) {
@@ -196,7 +205,7 @@ function updateSleepingPlayerEnergy(EntityId player, EntityId bed, uint128 deple
   // Set last updated so next time updatePlayerEnergy is called it will drain from here
   playerEnergyData.lastUpdatedTime = uint128(block.timestamp);
   Energy._set(player, playerEnergyData);
-  BedPlayer._setLastDepletedTime(bed, depletedTime);
+  BedPlayer._setLastDepletedTime(bed, currentDepletedTime);
 
   return playerEnergyData;
 }

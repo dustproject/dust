@@ -52,7 +52,7 @@ contract HitMachineSystem is System {
     (EntityId forceField,) = ForceFieldUtils.getForceField(coord);
     require(forceField._exists(), "No force field at this location");
 
-    (EnergyData memory machineData,) = updateMachineEnergy(forceField);
+    EnergyData memory machineData = updateMachineEnergy(forceField);
     uint128 energyLeft = machineData.energy;
     require(energyLeft > 0, "Cannot hit depleted forcefield");
 
