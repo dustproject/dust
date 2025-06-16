@@ -1,35 +1,23 @@
 import type { Hex } from "viem";
 import { setupNetwork } from "./setupNetwork";
 
-import fs from "node:fs";
-import path from "node:path";
-import { constructTableNameForQuery, replacer } from "./utils";
+import { constructTableNameForQuery } from "./utils";
+import { decodeEntityType, EntityTypes } from "@dust/world/internal";
 
 async function main() {
-  const {
-    publicClient,
-    fromBlock,
-    worldAddress,
-    IWorldAbi,
-    account,
-    txOptions,
-    callTx,
-    indexer,
-  } = await setupNetwork();
+  const { worldAddress, indexer } = await setupNetwork();
 
   const query = [
     {
       address: worldAddress,
-      query: `SELECT ${indexer?.type === "sqlite" ? "*" : '"entityId", "programAddress"'} FROM "${constructTableNameForQuery(
+      query: `SELECT ${indexer?.type === "sqlite" ? "*" : '"entityId", "energy"'} FROM "${constructTableNameForQuery(
         "",
-        "Program",
+        "Energy",
         worldAddress as Hex,
         indexer,
       )}";`,
     },
   ];
-
-  const entityIds = new Set();
 
   // fetch post request
   const response = await fetch(indexer?.url, {
@@ -40,22 +28,20 @@ async function main() {
     },
     body: JSON.stringify(query),
   });
+  // console.log(response);
   const content = await response.json();
+
+  let numPlayers = 0;
   for (const row of content.result[0]) {
     // don't include the first row cuz its the header
     if (row[0].toLowerCase() === "entityid") continue;
-    if (
-      row[1].toLowerCase() ===
-      "0x602e17290e184Cafab0f8AB242f49DF690f0ab45".toLowerCase()
-    ) {
-      entityIds.add(row[0]);
+    console.log(row);
+    const entityType = decodeEntityType(row[0]);
+    if (entityType === EntityTypes.Player) {
+      numPlayers++;
     }
-    // entityIds.add(row[0]);
   }
-  let i = 0;
-  for (const entityId of entityIds) {
-    i++;
-  }
+  console.log("numPlayers", numPlayers);
 }
 
 main();

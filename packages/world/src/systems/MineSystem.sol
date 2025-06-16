@@ -12,13 +12,13 @@ import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
 
+import { Death, DeathData } from "../codegen/tables/Death.sol";
 import { EntityFluidLevel } from "../codegen/tables/EntityFluidLevel.sol";
 import { EntityOrientation } from "../codegen/tables/EntityOrientation.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
-
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
 import { RandomLib } from "../RandomLib.sol";
@@ -37,7 +37,7 @@ import {
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils, ToolData } from "../utils/InventoryUtils.sol";
-import { DeathNotification, MineNotification, notify } from "../utils/NotifUtils.sol";
+import { DeathNotification, MineNotification, WakeupNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import {
@@ -237,7 +237,7 @@ contract MineSystem is System {
 
   function _cleanupEntity(EntityId caller, EntityId mined, ObjectType minedType, Vec3 baseCoord) internal {
     if (minedType == ObjectTypes.Bed) {
-      MineLib._mineBed(mined, baseCoord);
+      MineBedLib._mineBed(mined, baseCoord);
     } else if (minedType.isMachine()) {
       Energy._deleteRecord(mined);
       Machine._deleteRecord(mined);
@@ -342,29 +342,6 @@ library MineLib {
     return Math.min(massLeft, maxEnergyCost);
   }
 
-  function _mineBed(EntityId bed, Vec3 bedCoord) public {
-    // If there is a player sleeping in the mined bed, kill them
-    EntityId sleepingPlayerId = BedPlayer._getPlayerEntityId(bed);
-    if (!sleepingPlayerId._exists()) {
-      return;
-    }
-
-    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
-    uint128 depletedTime = decreaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
-    EnergyData memory playerData = updateSleepingPlayerEnergy(sleepingPlayerId, bed, depletedTime, bedCoord);
-
-    PlayerUtils.removePlayerFromBed(sleepingPlayerId, bed);
-
-    // Bed entity should now be Air
-    InventoryUtils.transferAll(sleepingPlayerId, bed);
-
-    // Kill the player
-    // The player is not on the grid so no need to call killPlayer
-    Energy._setEnergy(sleepingPlayerId, 0);
-    addEnergyToLocalPool(bedCoord, playerData.energy);
-    notify(sleepingPlayerId, DeathNotification({ deathCoord: bedCoord }));
-  }
-
   function _requireReachable(Vec3 coord) public view {
     Vec3[6] memory neighbors = coord.neighbors6();
     for (uint256 i = 0; i < neighbors.length; i++) {
@@ -430,6 +407,48 @@ library MineLib {
     }
 
     return multiplier * MINE_ACTION_MODIFIER;
+  }
+}
+
+library MineBedLib {
+  function _mineBed(EntityId bed, Vec3 bedCoord) public {
+    // If there is a player sleeping in the mined bed, spawn them
+    EntityId sleepingPlayer = BedPlayer._getPlayerEntityId(bed);
+    if (!sleepingPlayer._exists()) {
+      return;
+    }
+
+    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
+    uint128 depletedTime = decreaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
+    EnergyData memory playerData = updateSleepingPlayerEnergy(sleepingPlayer, bed, depletedTime, bedCoord);
+
+    PlayerUtils.removePlayerFromBed(sleepingPlayer, bed);
+
+    // Player died
+    if (playerData.energy == 0) {
+      // Bed entity should now be Air
+      InventoryUtils.transferAll(sleepingPlayer, bed);
+
+      Death._set(
+        sleepingPlayer, DeathData({ lastDiedAt: uint128(block.timestamp), deaths: Death.getDeaths(sleepingPlayer) + 1 })
+      );
+      notify(sleepingPlayer, DeathNotification({ deathCoord: bedCoord }));
+      return;
+    }
+
+    // If player is not dead, spawn them at the bed position
+    PlayerUtils.addPlayerToGrid(sleepingPlayer, bedCoord);
+
+    // Run gravity on the bed coordinate to ensure the player is placed correctly
+    MoveLib.runGravity(bedCoord);
+
+    bytes memory onWakeup = abi.encodeCall(
+      Hooks.IWakeup.onWakeup, (Hooks.WakeupContext({ caller: sleepingPlayer, target: bed, extraData: "" }))
+    );
+
+    bed._getProgram().call({ gas: SAFE_PROGRAM_GAS, hook: onWakeup });
+
+    notify(sleepingPlayer, WakeupNotification({ bed: bed, bedCoord: bedCoord }));
   }
 }
 
