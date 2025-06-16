@@ -89,6 +89,7 @@ library NatureLib {
     uint256 seedCount = ResourceCount._get(objectType);
     // This should never happen if there are seeds in the world obtained from drops
     require(seedCount > 0, "Not enough seeds in circulation");
+    ResourceCount._set(objectType, seedCount - 1);
 
     if (objectType.isSeed()) {
       // Turn wet farmland to regular farmland if mining a seed or crop

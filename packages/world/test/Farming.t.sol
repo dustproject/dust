@@ -269,6 +269,8 @@ contract FarmingTest is DustTest {
     vm.prank(alice);
     world.growSeed(aliceEntityId, cropCoord);
 
+    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 0, "Wheat seeds should be added to circulation after growing");
+
     // Set up chunk commitment for randomness when mining
     newCommit(alice, aliceEntityId, cropCoord, bytes32(0));
 
@@ -282,7 +284,7 @@ contract FarmingTest is DustTest {
     // Verify wheat and seeds were obtained
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
     // TODO: test randomness
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 0);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
 
     // Verify crop no longer exists
     assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
@@ -389,6 +391,8 @@ contract FarmingTest is DustTest {
     Vec3 farmlandCoord = vec3(playerCoord.x() + 1, 0, playerCoord.z());
     setObjectAtCoord(farmlandCoord, ObjectTypes.WetFarmland);
 
+    ResourceCount.set(ObjectTypes.WheatSeed, 1);
+
     // Add wheat seeds to inventory
     TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
 
@@ -413,6 +417,8 @@ contract FarmingTest is DustTest {
     vm.prank(alice);
     world.mineUntilDestroyed(aliceEntityId, cropCoord, "");
 
+    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seeds should not be added to circulation if not grown");
+
     // We get seeds back, not wheat
     assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 0);
@@ -425,11 +431,14 @@ contract FarmingTest is DustTest {
     (cropEntityId,) = TestEntityUtils.getBlockAt(cropCoord);
     fullyGrownAt = SeedGrowth.getFullyGrownAt(cropEntityId);
 
+    console.log(ResourceCount.get(ObjectTypes.WheatSeed));
     // Full growth - Warp past the full growth time
     vm.roll(vm.getBlockNumber() + CHUNK_COMMIT_EXPIRY_BLOCKS + 1);
     vm.warp(fullyGrownAt + 1);
     vm.prank(alice);
     world.growSeed(aliceEntityId, cropCoord);
+
+    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 0, "Seeds should be added to circulation after growing");
 
     // Set up chunk commitment for randomness when mining
     newCommit(alice, aliceEntityId, cropCoord, bytes32(0));
@@ -438,9 +447,11 @@ contract FarmingTest is DustTest {
     vm.prank(alice);
     world.mineUntilDestroyed(aliceEntityId, cropCoord, "");
 
+    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seeds should be added to circulation if received as a drop");
+
     // Now we get wheat and seeds
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
     // TODO: test randomness
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 0);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
   }
 }
