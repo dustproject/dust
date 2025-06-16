@@ -100,7 +100,7 @@ library NatureLib {
       }
 
       ObjectType cropType = objectType.getCrop();
-      EntityObjectType._set(seed, cropType);
+      EntityUtils.setEntityObjectType(seed, cropType);
       return cropType;
     } else if (objectType.isSapling()) {
       // Grow the tree (replace the seed with the trunk and add blocks)
@@ -183,13 +183,13 @@ library NatureLib {
       return false;
     }
 
-    EntityObjectType._set(leaf, leafType);
+    EntityUtils.setEntityObjectType(leaf, leafType);
     return true;
   }
 
   function _growTreeTrunk(EntityId seed, Vec3 baseCoord, TreeData memory treeData) private returns (uint32) {
     // Replace the seed with the trunk
-    EntityObjectType._set(seed, treeData.logType);
+    EntityUtils.setEntityObjectType(seed, treeData.logType);
 
     // Create the trunk up to available space
     for (uint32 i = 1; i < treeData.trunkHeight; i++) {
@@ -199,7 +199,7 @@ library NatureLib {
         return i;
       }
 
-      EntityObjectType._set(trunk, treeData.logType);
+      EntityUtils.setEntityObjectType(trunk, treeData.logType);
     }
 
     return treeData.trunkHeight;
