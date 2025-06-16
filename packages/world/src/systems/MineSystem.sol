@@ -159,7 +159,7 @@ contract MineSystem is System {
 
       // Prevent mining forcefields that have sleeping players
       if (minedType == ObjectTypes.ForceField) {
-        MineLib._requireNoSleepingPlayers(mined);
+        _requireNoSleepingPlayers(mined);
       }
 
       return minedType;
@@ -301,6 +301,38 @@ contract MineSystem is System {
       InventoryUtils.addObject(fallbackEntity, objectType, amount);
     }
   }
+
+  function _requireNoSleepingPlayers(EntityId forceField) internal view {
+    uint128 drainRate = Energy._getDrainRate(forceField);
+
+    /* Check if drain rate is perfectly divisible by machine rate
+    * This works because:
+    * - Each fragment contributes exactly MACHINE_ENERGY_DRAIN_RATE to the total
+    * - Each sleeping player adds PLAYER_ENERGY_DRAIN_RATE which has remainder 4,526,893,230
+    * - Therefore: drainRate % MACHINE_ENERGY_DRAIN_RATE == 0 only when no players are sleeping
+    *
+    * Edge case proof: When would N players give remainder 0?
+    * We need: (N * PLAYER_ENERGY_DRAIN_RATE) % MACHINE_ENERGY_DRAIN_RATE == 0
+    * This means: N * PLAYER_ENERGY_DRAIN_RATE = K * MACHINE_ENERGY_DRAIN_RATE (for some integer K)
+    *
+    * Given: PLAYER_ENERGY_DRAIN_RATE = 1,351,851,852,000
+    *        MACHINE_ENERGY_DRAIN_RATE = 9,488,203,935
+    *        GCD(1351851852000, 9488203935) = 15
+    *
+    * Therefore: N * (1351851852000/15) = K * (9488203935/15)
+    *            N * 90,123,456,800 = K * 632,546,929
+    *
+    * Since 90,123,456,800 and 632,546,929 are coprime (GCD = 1),
+    * N must be a multiple of 632,546,929 for the equation to hold.
+    * This means at least 632,546,929 players must be sleeping in the same forcefield!
+    */
+
+    // TODO: This modulo check is a hack but not ideal long-term. We should consider:
+    // - Storing fragment count for the forcefield entity
+    // - Or tracking sleeping player count directly
+    // - Or using a more robust detection method that doesn't rely on mathematical properties
+    require(drainRate % MACHINE_ENERGY_DRAIN_RATE == 0, "Cannot mine forcefield with sleeping players");
+  }
 }
 
 library MineLib {
@@ -337,18 +369,15 @@ library MineLib {
       }
     }
 
-    bytes memory onMine = abi.encodeCall(
-      Hooks.IMine.onMine,
-      (
-        Hooks.MineContext({
-          caller: caller,
-          target: forceField,
-          objectType: objectType,
-          coord: coord,
-          extraData: extraData
-        })
-      )
-    );
+    Hooks.MineContext memory ctx = Hooks.MineContext({
+      caller: caller,
+      target: forceField,
+      objectType: objectType,
+      coord: coord,
+      extraData: extraData
+    });
+
+    bytes memory onMine = abi.encodeCall(Hooks.IMine.onMine, ctx);
 
     program.callOrRevert(onMine);
   }
@@ -429,7 +458,7 @@ library MineBedLib {
 
     (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
     decreaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
-    EnergyData memory playerData = updateSleepingPlayerEnergy(sleepingPlayer, bed, fragment, bedCoord);
+    EnergyData memory playerData = updateSleepingPlayerEnergy(sleepingPlayer, bed, forceField, bedCoord);
 
     PlayerUtils.removePlayerFromBed(sleepingPlayer, bed);
 
@@ -458,38 +487,6 @@ library MineBedLib {
     bed._getProgram().call({ gas: SAFE_PROGRAM_GAS, hook: onWakeup });
 
     notify(sleepingPlayer, WakeupNotification({ bed: bed, bedCoord: bedCoord }));
-  }
-
-  function _requireNoSleepingPlayers(EntityId forceField) internal view {
-    uint128 drainRate = Energy._getDrainRate(forceField);
-
-    /* Check if drain rate is perfectly divisible by machine rate
-    * This works because:
-    * - Each fragment contributes exactly MACHINE_ENERGY_DRAIN_RATE to the total
-    * - Each sleeping player adds PLAYER_ENERGY_DRAIN_RATE which has remainder 4,526,893,230
-    * - Therefore: drainRate % MACHINE_ENERGY_DRAIN_RATE == 0 only when no players are sleeping
-    *
-    * Edge case proof: When would N players give remainder 0?
-    * We need: (N * PLAYER_ENERGY_DRAIN_RATE) % MACHINE_ENERGY_DRAIN_RATE == 0
-    * This means: N * PLAYER_ENERGY_DRAIN_RATE = K * MACHINE_ENERGY_DRAIN_RATE (for some integer K)
-    *
-    * Given: PLAYER_ENERGY_DRAIN_RATE = 1,351,851,852,000
-    *        MACHINE_ENERGY_DRAIN_RATE = 9,488,203,935
-    *        GCD(1351851852000, 9488203935) = 15
-    *
-    * Therefore: N * (1351851852000/15) = K * (9488203935/15)
-    *            N * 90,123,456,800 = K * 632,546,929
-    *
-    * Since 90,123,456,800 and 632,546,929 are coprime (GCD = 1),
-    * N must be a multiple of 632,546,929 for the equation to hold.
-    * This means at least 632,546,929 players must be sleeping in the same forcefield!
-    */
-
-    // TODO: This modulo check is a hack but not ideal long-term. We should consider:
-    // - Storing fragment count in the forcefield entity
-    // - Or tracking sleeping player count directly
-    // - Or using a more robust detection method that doesn't rely on mathematical properties
-    require(drainRate % MACHINE_ENERGY_DRAIN_RATE == 0, "Cannot mine forcefield with sleeping players");
   }
 }
 

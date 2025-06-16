@@ -127,7 +127,7 @@ library BedLib {
     (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
     decreaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
 
-    EnergyData memory playerData = updateSleepingPlayerEnergy(caller, bed, fragment, bedCoord);
+    EnergyData memory playerData = updateSleepingPlayerEnergy(caller, bed, forceField, bedCoord);
 
     PlayerUtils.removePlayerFromBed(caller, bed);
     return playerData;

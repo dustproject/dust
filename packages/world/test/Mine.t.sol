@@ -452,8 +452,6 @@ contract MineTest is DustTest {
 
     Vec3 bedCoord = coord + vec3(2, 0, 0);
 
-    uint128 initialPlayerEnergy = Energy.getEnergy(aliceEntityId);
-
     // Set a high forcefield energy so it doesn't deplete
     uint128 initialForcefieldEnergy = (MACHINE_ENERGY_DRAIN_RATE + PLAYER_ENERGY_DRAIN_RATE) * 10000;
 

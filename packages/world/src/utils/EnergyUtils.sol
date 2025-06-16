@@ -171,26 +171,30 @@ function removeEnergyFromLocalPool(Vec3 coord, uint128 numToRemove) returns (uin
   return newLocalEnergy;
 }
 
-function updateSleepingPlayerEnergy(EntityId player, EntityId bed, EntityId fragment, Vec3 bedCoord)
+// NOTE: assumes updateSleepingPlayerEnergy is always called after the forcefield is updated
+function updateSleepingPlayerEnergy(EntityId player, EntityId bed, EntityId forceField, Vec3 bedCoord)
   returns (EnergyData memory)
 {
-  uint128 lastDepletedTime = BedPlayer._getLastDepletedTime(bed);
   uint128 timeWithoutEnergy = 0;
   uint128 currentDepletedTime = 0;
 
-  // Get the forcefield from the fragment
-  EntityId forceField = Fragment._getForceField(fragment);
+  EnergyData memory playerEnergyData = Energy._get(player);
   MachineData memory machineData = Machine._get(forceField);
 
-  // Get the current depleted time from the forcefield
-  currentDepletedTime = machineData.depletedTime;
-
-  // Calculate time without energy based on depleted time difference
-  if (currentDepletedTime >= lastDepletedTime) {
+  // If forcefield was destroyed, entityId should be 0
+  if (forceField._exists()) {
+    currentDepletedTime = machineData.depletedTime;
+    uint128 lastDepletedTime = BedPlayer._getLastDepletedTime(bed);
+    require(
+      lastDepletedTime <= currentDepletedTime,
+      "Invalid last depleted time for bed, should be less than or equal to current depleted time"
+    );
     timeWithoutEnergy = currentDepletedTime - lastDepletedTime;
+  } else {
+    // Conservatively assume that the player has been sleeping without energy since the last time they were updated
+    currentDepletedTime = 0;
+    timeWithoutEnergy = uint128(block.timestamp) - playerEnergyData.lastUpdatedTime;
   }
-
-  EnergyData memory playerEnergyData = Energy._get(player);
 
   if (timeWithoutEnergy > 0) {
     uint128 totalEnergyDepleted = timeWithoutEnergy * PLAYER_ENERGY_DRAIN_RATE;
