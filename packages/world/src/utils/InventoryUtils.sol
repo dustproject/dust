@@ -314,8 +314,7 @@ library InventoryUtils {
     EntityId entity = InventorySlot._getEntityId(owner, slot);
     require(entity._exists(), "Not an entity");
 
-    _clearBit(owner, slot);
-    InventorySlot._deleteRecord(owner, slot);
+    _clearSlot(owner, slot);
     // Don't delete mass!
     return entity;
   }
@@ -635,6 +634,11 @@ library InventoryUtils {
     InventoryBitmap._updateBitmap(owner, wordIndex, word);
   }
 
+  function _clearSlot(EntityId owner, uint16 slot) private {
+    _clearBit(owner, slot);
+    InventorySlot._deleteRecord(owner, slot);
+  }
+
   function _clearBit(EntityId owner, uint16 slot) private {
     uint256 wordIndex = slot / SLOTS_PER_WORD;
     uint256 bitIndex = slot & 255;
@@ -658,11 +662,6 @@ library InventoryUtils {
     uint256 bitIndex = slot % SLOTS_PER_WORD;
     if (wordIndex >= bitmap.length) return false;
     return (bitmap[wordIndex] & (1 << bitIndex)) != 0;
-  }
-
-  function _clearSlot(EntityId owner, uint16 slot) private {
-    _clearBit(owner, slot);
-    InventorySlot._deleteRecord(owner, slot);
   }
 }
 
