@@ -98,6 +98,11 @@ abstract contract DustAssertions is MudTest, GasReporter {
     assertTrue(amount == 0, "Inventory entity not found");
   }
 
+  function assertInventoryEmpty(EntityId owner) internal {
+    uint256 slotCount = TestInventoryUtils.getOccupiedSlotCount(owner);
+    assertEq(slotCount, 0, "Inventory is not empty");
+  }
+
   function getEnergyDataSnapshot(EntityId playerEntityId) internal returns (EnergyDataSnapshot memory) {
     EnergyDataSnapshot memory snapshot;
     snapshot.playerEntityId = playerEntityId;

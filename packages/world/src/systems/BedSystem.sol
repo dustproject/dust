@@ -74,7 +74,8 @@ contract BedSystem is System {
       (EntityId drop, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(spawnCoord);
       require(objectType.isPassThrough(), "Cannot drop items on a non-passable block");
 
-      InventoryUtils.transferAll(caller, drop);
+      bool allTransferred = InventoryUtils.transferAll(caller, drop);
+      require(allTransferred, "Failed to transfer all items to drop location");
 
       return;
     }
@@ -104,7 +105,8 @@ contract BedSystem is System {
     EnergyData memory playerData = BedLib.removePlayerFromBed(player, bed, bedCoord);
     require(playerData.energy == 0, "Player is not dead");
 
-    InventoryUtils.transferAll(player, drop);
+    bool allTransferred = InventoryUtils.transferAll(player, drop);
+    require(allTransferred, "Failed to transfer all items to drop location");
   }
 }
 
