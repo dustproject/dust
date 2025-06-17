@@ -151,7 +151,7 @@ contract SpawnSystem is System {
 
     (EntityId forceField,) = ForceFieldUtils.getForceField(spawnTileCoord);
     require(forceField._exists(), "Spawn tile is not inside a forcefield");
-    (EnergyData memory machineData,) = updateMachineEnergy(forceField);
+    EnergyData memory machineData = updateMachineEnergy(forceField);
     require(machineData.energy >= spawnEnergy, "Not enough energy in spawn tile forcefield");
     Energy._setEnergy(forceField, machineData.energy - spawnEnergy);
 

@@ -85,7 +85,7 @@ library PlayerUtils {
     (EntityId to,) = EntityUtils.getOrCreateBlockAt(coord);
     InventoryUtils.transferAll(player, to);
     removePlayerFromGrid(player, coord);
-    Death.set(player, DeathData({ lastDiedAt: uint128(block.timestamp), deaths: Death.getDeaths(player) + 1 }));
+    Death._set(player, DeathData({ lastDiedAt: uint128(block.timestamp), deaths: Death.getDeaths(player) + 1 }));
     notify(player, DeathNotification({ deathCoord: coord }));
   }
 }

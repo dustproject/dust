@@ -22,7 +22,7 @@ import type {
 
 import { privateKeyToAccount } from "viem/accounts";
 
-import IWorldAbi from "@dust/world/IWorld.abi.json";
+import IWorldAbi from "@dust/world/out/IWorld.sol/IWorld.abi";
 import worldsJson from "@dust/world/worlds.json";
 import ERC20SystemAbi from "@latticexyz/world-modules/out/ERC20System.sol/ERC20System.abi.json";
 import ERC721SystemAbi from "@latticexyz/world-modules/out/ERC721System.sol/ERC721System.abi.json";

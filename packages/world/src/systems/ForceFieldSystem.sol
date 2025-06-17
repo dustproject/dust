@@ -181,7 +181,7 @@ contract ForceFieldSystem is System {
       return;
     }
 
-    (EnergyData memory machineData,) = updateMachineEnergy(forceField);
+    EnergyData memory machineData = updateMachineEnergy(forceField);
     if (machineData.energy > 0) {
       program.callOrRevert(hook);
     } else {

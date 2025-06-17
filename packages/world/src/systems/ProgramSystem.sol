@@ -143,7 +143,7 @@ contract ProgramSystem is System {
 
     (EntityId forceField,) = ForceFieldUtils.getForceField(forceFieldCoord);
     // If forcefield doesn't have energy, allow detachment
-    (EnergyData memory machineData,) = updateMachineEnergy(forceField);
+    EnergyData memory machineData = updateMachineEnergy(forceField);
     if (machineData.energy > 0) {
       program.callOrRevert(onDetachProgram);
     } else {
@@ -163,7 +163,7 @@ contract ProgramSystem is System {
     }
 
     // If forcefield doesn't have energy, allow the program
-    (EnergyData memory machineData,) = updateMachineEnergy(forceField);
+    EnergyData memory machineData = updateMachineEnergy(forceField);
     if (machineData.energy == 0) {
       return (EntityId.wrap(0), ProgramId.wrap(0));
     }

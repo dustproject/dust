@@ -178,7 +178,7 @@ library ActivateLib {
         (forceField,) = ForceFieldUtils.getForceField(self._getPosition());
       }
 
-      (energyData,) = updateMachineEnergy(forceField);
+      energyData = updateMachineEnergy(forceField);
     }
 
     require(energyData.energy > 0, "Entity has no energy");
