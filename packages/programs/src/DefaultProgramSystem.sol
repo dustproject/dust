@@ -3,7 +3,7 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
-import { EntityId, EntityTypeLib } from "@dust/world/src/EntityId.sol";
+import { EntityId, EntityTypeLib } from "@dust/world/src/types/EntityId.sol";
 
 import { AccessGroupCount } from "./codegen/tables/AccessGroupCount.sol";
 import { AccessGroupMember } from "./codegen/tables/AccessGroupMember.sol";

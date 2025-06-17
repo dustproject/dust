@@ -4,11 +4,12 @@ pragma solidity >=0.8.24;
 import { LibString } from "solady/utils/LibString.sol";
 import { SafeCastLib } from "solady/utils/SafeCastLib.sol";
 
-import { CHUNK_SIZE, FRAGMENT_SIZE, REGION_SIZE } from "./Constants.sol";
-import { Orientation } from "./Orientation.sol";
-import { Direction } from "./codegen/common.sol";
+import { CHUNK_SIZE, FRAGMENT_SIZE, REGION_SIZE } from "../Constants.sol";
 
-import { Math } from "./utils/Math.sol";
+import { Direction } from "../codegen/common.sol";
+import { Orientation } from "./Orientation.sol";
+
+import { Math } from "../utils/Math.sol";
 
 // Vec3 stores 3 packed int32 values (x, y, z)
 type Vec3 is uint96;

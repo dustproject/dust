@@ -17,7 +17,7 @@ import { EncodedLengths, EncodedLengthsLib } from "@latticexyz/store/src/Encoded
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
 // Import user types
-import { EntityId } from "@dust/world/src/EntityId.sol";
+import { EntityId } from "@dust/world/src/types/EntityId.sol";
 
 library AccessGroupOwner {
   // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "dfprograms_1", name: "AccessGroupOwner", typeId: RESOURCE_TABLE });`

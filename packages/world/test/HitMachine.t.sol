@@ -11,11 +11,12 @@ import {
   SPECIALIZATION_MULTIPLIER,
   TOOL_HIT_ENERGY_COST
 } from "../src/Constants.sol";
-import { EntityId } from "../src/EntityId.sol";
-import { ObjectType, ObjectTypes } from "../src/ObjectType.sol";
-import { Vec3, vec3 } from "../src/Vec3.sol";
+
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
+import { EntityId } from "../src/types/EntityId.sol";
+import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { ForceFieldUtils } from "../src/utils/ForceFieldUtils.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 import { DustTest } from "./DustTest.sol";
@@ -98,9 +99,6 @@ contract HitMachineTest is DustTest {
     uint128 maxToolMassReduction = whackerMass / 10;
     uint128 expectedMultiplier = ORE_TOOL_BASE_MULTIPLIER * HIT_ACTION_MODIFIER * SPECIALIZATION_MULTIPLIER;
 
-    // Calculate the exact energy reduction as the contract does
-    // In InventoryUtils: massReduction = min(maxToolMassReduction * multiplier / ACTION_MODIFIER_DENOMINATOR, energyLeft)
-    // Note: Due to integer division, 10 * (1e18/30) * 3 = 999999999999999990, not 1e18
     uint128 actionMassReduction = maxToolMassReduction * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
 
     uint128 actualForceFieldEnergy = Energy.getEnergy(forceField);
@@ -109,10 +107,8 @@ contract HitMachineTest is DustTest {
     assertEq(Energy.getEnergy(aliceEntityId), aliceEnergy - TOOL_HIT_ENERGY_COST);
 
     // Check tool mass reduction
-    // The actual tool mass reduction is calculated as: toolMassReduction = actionMassReduction * DENOMINATOR / multiplier
-    // This may differ slightly from maxToolMassReduction due to rounding
-    uint128 actualToolMassReduction = (actionMassReduction * ACTION_MODIFIER_DENOMINATOR) / expectedMultiplier;
-    assertEq(Mass.getMass(whacker), whackerMass - actualToolMassReduction);
+    // When tool capacity is limiting, the exact maxToolMassReduction is used
+    assertEq(Mass.getMass(whacker), whackerMass - maxToolMassReduction);
   }
 
   function testHitDepletedForceField() public {
@@ -186,23 +182,32 @@ contract HitMachineTest is DustTest {
     // Set force field to have high total energy but low remaining after player reduction
     // Force field: TOOL_HIT_ENERGY_COST + 90 (enough for 10 mass reduction before fix)
     // After player reduction: 90 remaining (enough for exactly 10 mass)
-    Energy.setEnergy(forceField, TOOL_HIT_ENERGY_COST + 90);
+    uint128 remainingEnergy = 90;
+    Energy.setEnergy(forceField, TOOL_HIT_ENERGY_COST + remainingEnergy);
     Energy.setEnergy(aliceEntityId, TOOL_HIT_ENERGY_COST + 100);
 
     // Hit force field with whacker
     vm.prank(alice);
     world.hitForceField(aliceEntityId, playerCoord + vec3(1, 0, 0), slot);
 
-    // After fix: tool damage based on remaining 90 energy
-    // With ore whacker multiplier ~1x, tool mass reduction = energy reduction
-    // Since remaining energy is 90 and whackerMass/10 is typically 100+, tool will consume all 90 energy
-    // Tool mass reduction = 90 * ACTION_MODIFIER_DENOMINATOR / (10 * HIT_ACTION_MODIFIER * 3)
-    uint128 expectedMultiplier = ORE_TOOL_BASE_MULTIPLIER * HIT_ACTION_MODIFIER * SPECIALIZATION_MULTIPLIER;
-    uint128 toolMassReduction = 90 * ACTION_MODIFIER_DENOMINATOR / expectedMultiplier;
+    // Calculate expected tool mass reduction based on remaining energy
+    uint256 multiplier = uint256(ORE_TOOL_BASE_MULTIPLIER) * HIT_ACTION_MODIFIER * SPECIALIZATION_MULTIPLIER;
+    uint128 maxToolMassReduction = whackerMass / 10;
+
+    // Calculate using the same logic as ToolUtils
+    uint256 maxReductionScaled = uint256(maxToolMassReduction) * multiplier;
+    uint256 massLeftScaled = uint256(remainingEnergy) * ACTION_MODIFIER_DENOMINATOR;
+
+    uint128 expectedToolMassReduction;
+    if (maxReductionScaled <= massLeftScaled) {
+      expectedToolMassReduction = maxToolMassReduction;
+    } else {
+      expectedToolMassReduction = uint128((massLeftScaled + multiplier - 1) / multiplier); // divUp
+    }
 
     assertEq(Energy.getEnergy(forceField), 0);
     assertEq(Energy.getEnergy(aliceEntityId), 100);
-    assertEq(Mass.getMass(whacker), whackerMass - toolMassReduction);
+    assertEq(Mass.getMass(whacker), whackerMass - expectedToolMassReduction);
   }
 
   function testHitForceFieldWhenToolMassReductionExceedsRemainingEnergy() public {
@@ -219,25 +224,28 @@ contract HitMachineTest is DustTest {
     // Set force field energy so that remaining energy after player reduction is less than tool mass reduction
     // Force field energy = TOOL_HIT_ENERGY_COST + half of what tool would normally reduce
     // Calculate expected multiplier for ore whacker
-    uint128 expectedMultiplier = ORE_TOOL_BASE_MULTIPLIER * HIT_ACTION_MODIFIER * SPECIALIZATION_MULTIPLIER;
-    Energy.setEnergy(
-      forceField, TOOL_HIT_ENERGY_COST + (whackerMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR) / 2
-    );
+    uint256 multiplier = uint256(ORE_TOOL_BASE_MULTIPLIER) * HIT_ACTION_MODIFIER * SPECIALIZATION_MULTIPLIER;
+    uint128 maxToolMassReduction = whackerMass / 10;
+    uint128 maxActionMassReduction = uint128((uint256(maxToolMassReduction) * multiplier) / ACTION_MODIFIER_DENOMINATOR);
+    uint128 remainingEnergy = maxActionMassReduction / 2;
+
+    Energy.setEnergy(forceField, TOOL_HIT_ENERGY_COST + remainingEnergy);
     Energy.setEnergy(aliceEntityId, TOOL_HIT_ENERGY_COST + 10);
 
     // Hit force field with whacker
     vm.prank(alice);
     world.hitForceField(aliceEntityId, playerCoord + vec3(1, 0, 0), slot);
 
+    // Calculate expected tool mass reduction based on remaining energy
+    uint256 massLeftScaled = uint256(remainingEnergy) * ACTION_MODIFIER_DENOMINATOR;
+    uint128 expectedToolMassReduction = uint128((massLeftScaled + multiplier - 1) / multiplier); // divUp
+
     // Verify energy reductions
     assertEq(Energy.getEnergy(forceField), 0); // Should be fully depleted
     assertEq(Energy.getEnergy(aliceEntityId), 10);
 
     // Verify tool mass reduction was limited by remaining energy
-    uint128 remainingAfterPlayer = (whackerMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR) / 2;
-    assertEq(
-      Mass.getMass(whacker), whackerMass - remainingAfterPlayer * ACTION_MODIFIER_DENOMINATOR / expectedMultiplier
-    );
+    assertEq(Mass.getMass(whacker), whackerMass - expectedToolMassReduction);
   }
 
   function testHitForceFieldWithExactPlayerEnergyForReduction() public {

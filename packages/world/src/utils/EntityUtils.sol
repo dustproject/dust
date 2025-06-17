@@ -12,9 +12,9 @@ import { TerrainLib } from "../systems/libraries/TerrainLib.sol";
 import { EntityPosition, ReverseMovablePosition } from "../utils/Vec3Storage.sol";
 
 import { MAX_FLUID_LEVEL } from "../Constants.sol";
-import { EntityId, EntityTypeLib } from "../EntityId.sol";
-import { ObjectType, ObjectTypes } from "../ObjectType.sol";
-import { Vec3 } from "../Vec3.sol";
+import { EntityId, EntityTypeLib } from "../types/EntityId.sol";
+import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 library EntityUtils {
   /// @notice Get the object type id at a given coordinate.

@@ -21,9 +21,9 @@ import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
-import { RandomLib } from "../RandomLib.sol";
-import { TreeLib } from "../TreeLib.sol";
 import { Math } from "../utils/Math.sol";
+import { RandomLib } from "../utils/RandomLib.sol";
+import { TreeLib } from "../utils/TreeLib.sol";
 import { ResourcePosition } from "../utils/Vec3Storage.sol";
 
 import {
@@ -36,9 +36,11 @@ import {
 
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
-import { InventoryUtils, ToolData } from "../utils/InventoryUtils.sol";
+import { InventoryUtils } from "../utils/InventoryUtils.sol";
+
 import { DeathNotification, MineNotification, WakeupNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
+import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
 import {
   DEFAULT_MINE_ENERGY_COST,
@@ -54,18 +56,18 @@ import {
   WOODEN_TOOL_BASE_MULTIPLIER
 } from "../Constants.sol";
 
-import { EntityId } from "../EntityId.sol";
-import { ObjectAmount, ObjectType } from "../ObjectType.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectAmount, ObjectType } from "../types/ObjectType.sol";
 import { MoveLib } from "./libraries/MoveLib.sol";
 
-import { NatureLib } from "../NatureLib.sol";
+import { NatureLib } from "../utils/NatureLib.sol";
 
-import { ObjectTypes } from "../ObjectType.sol";
-import { OreLib } from "../OreLib.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
+import { OreLib } from "../utils/OreLib.sol";
 
 import "../ProgramHooks.sol" as Hooks;
-import { ProgramId } from "../ProgramId.sol";
-import { Vec3, vec3 } from "../Vec3.sol";
+import { ProgramId } from "../types/ProgramId.sol";
+import { Vec3, vec3 } from "../types/Vec3.sol";
 
 contract MineSystem is System {
   using SafeCastLib for *;
@@ -89,9 +91,7 @@ contract MineSystem is System {
       // TODO: factor out the mass reduction logic so it's cheaper to call
       EntityId entityId = _mine(caller, coord, toolSlot, extraData);
       massLeft = Mass._getMass(entityId);
-    } while (
-      massLeft > 0 && Energy._getEnergy(caller) > 0 && InventoryUtils.getToolData(caller, toolSlot).massLeft > 0
-    );
+    } while (massLeft > 0 && Energy._getEnergy(caller) > 0 && ToolUtils.getToolData(caller, toolSlot).massLeft > 0);
   }
 
   function mineUntilDestroyed(EntityId caller, Vec3 coord, bytes calldata extraData) public {
@@ -395,13 +395,14 @@ library MinePhysicsLib {
       return (0, true);
     }
 
-    ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
+    ToolData memory toolData = ToolUtils.getToolData(caller, toolSlot);
 
     uint128 energyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, massLeft);
 
     if (energyReduction > 0) {
-      // If player died, return early
       (callerEnergy,) = transferEnergyToPool(caller, energyReduction);
+
+      // If player died, return early
       if (callerEnergy == 0) {
         return (massLeft, false);
       }
@@ -409,9 +410,10 @@ library MinePhysicsLib {
       massLeft -= energyReduction;
     }
 
-    uint128 toolMultiplier = _getToolMultiplier(toolData.toolType, minedType);
+    bool specialized = (toolData.toolType.isAxe() && minedType.hasAxeMultiplier())
+      || (toolData.toolType.isPick() && minedType.hasPickMultiplier());
 
-    uint128 massReduction = toolData.use(massLeft, toolMultiplier);
+    uint128 massReduction = toolData.use(massLeft, MINE_ACTION_MODIFIER, specialized);
 
     massLeft -= massReduction;
 
@@ -423,28 +425,9 @@ library MinePhysicsLib {
     pure
     returns (uint128)
   {
-    // if tool mass reduction is not enough, consume energy from player up to mine energy cost
     uint128 maxEnergyCost = toolType.isNull() ? DEFAULT_MINE_ENERGY_COST : TOOL_MINE_ENERGY_COST;
     maxEnergyCost = Math.min(currentEnergy, maxEnergyCost);
     return Math.min(massLeft, maxEnergyCost);
-  }
-
-  function _getToolMultiplier(ObjectType toolType, ObjectType minedType) public pure returns (uint128) {
-    // Bare hands case - just return action modifier
-    if (toolType.isNull()) {
-      return MINE_ACTION_MODIFIER;
-    }
-
-    // Apply base tool multiplier
-    bool isWoodenTool = toolType == ObjectTypes.WoodenAxe || toolType == ObjectTypes.WoodenPick;
-    uint128 multiplier = isWoodenTool ? WOODEN_TOOL_BASE_MULTIPLIER : ORE_TOOL_BASE_MULTIPLIER;
-
-    // Apply specialization bonus if tool matches the task
-    if ((toolType.isAxe() && minedType.hasAxeMultiplier()) || (toolType.isPick() && minedType.hasPickMultiplier())) {
-      multiplier = multiplier * SPECIALIZATION_MULTIPLIER;
-    }
-
-    return multiplier * MINE_ACTION_MODIFIER;
   }
 }
 

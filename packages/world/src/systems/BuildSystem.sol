@@ -30,12 +30,12 @@ import { MoveLib } from "./libraries/MoveLib.sol";
 import { TerrainLib } from "./libraries/TerrainLib.sol";
 
 import { BUILD_ENERGY_COST, MAX_FLUID_LEVEL } from "../Constants.sol";
-import { EntityId } from "../EntityId.sol";
-import { ObjectType, ObjectTypes } from "../ObjectType.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 
 import "../ProgramHooks.sol" as Hooks;
-import { ProgramId } from "../ProgramId.sol";
-import { Orientation, Vec3, vec3 } from "../Vec3.sol";
+import { ProgramId } from "../types/ProgramId.sol";
+import { Orientation, Vec3, vec3 } from "../types/Vec3.sol";
 
 struct BuildContext {
   EntityId caller;

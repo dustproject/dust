@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { EntityId } from "./EntityId.sol";
-import { ObjectType } from "./ObjectType.sol";
-import { ProgramId } from "./ProgramId.sol";
-import { Vec3 } from "./Vec3.sol";
+import { EntityId } from "./types/EntityId.sol";
+import { ObjectType } from "./types/ObjectType.sol";
+import { ProgramId } from "./types/ProgramId.sol";
+import { Vec3 } from "./types/Vec3.sol";
 import { SlotData } from "./utils/InventoryUtils.sol";
 
 /**
