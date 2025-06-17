@@ -1,5 +1,8 @@
 # Changelog
 
+## 2024-06-17
+- Fix: Don't revert if trying to pickup multiple drops that don't fit in the inventory.
+
 ## 2024-06-16
 
 - Wake up player when mining their bed instead of killing them.
