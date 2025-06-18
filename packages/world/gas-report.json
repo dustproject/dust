@@ -507,7 +507,7 @@
     "file": "test/Tree.t.sol:TreeTest",
     "test": "testTreeGrowthWithSpace",
     "name": "grow oak tree",
-    "gasUsed": 7017245
+    "gasUsed": 6785181
   },
   {
     "file": "test/Tree.t.sol:TreeTest",
