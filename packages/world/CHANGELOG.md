@@ -1,5 +1,9 @@
 # Changelog
 
+## 2024-06-18
+
+- Feat: New transferAmounts function, made to simplify apps interactions with chests.
+
 ## 2024-06-16
 
 - Wake up player when mining their bed instead of killing them.

@@ -5,7 +5,7 @@ pragma solidity >=0.8.24;
 
 import { TransferSystem } from "../../systems/TransferSystem.sol";
 import { EntityId } from "../../types/EntityId.sol";
-import { SlotTransfer } from "../../utils/InventoryUtils.sol";
+import { SlotTransfer, SlotAmount } from "../../utils/InventoryUtils.sol";
 import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 import { IWorldCall } from "@latticexyz/world/src/IWorldKernel.sol";
 import { SystemCall } from "@latticexyz/world/src/SystemCall.sol";
@@ -50,6 +50,17 @@ library TransferSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).transfer(caller, from, to, transfers, extraData);
   }
 
+  function transferAmounts(
+    TransferSystemType self,
+    EntityId caller,
+    EntityId from,
+    EntityId to,
+    SlotAmount[] memory amounts,
+    bytes memory extraData
+  ) internal {
+    return CallWrapper(self.toResourceId(), address(0)).transferAmounts(caller, from, to, amounts, extraData);
+  }
+
   function transfer(
     CallWrapper memory self,
     EntityId caller,
@@ -70,6 +81,26 @@ library TransferSystemLib {
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
+  function transferAmounts(
+    CallWrapper memory self,
+    EntityId caller,
+    EntityId from,
+    EntityId to,
+    SlotAmount[] memory amounts,
+    bytes memory extraData
+  ) internal {
+    // if the contract calling this function is a root system, it should use `callAsRoot`
+    if (address(_world()) == address(this)) revert TransferSystemLib_CallingFromRootSystem();
+
+    bytes memory systemCall = abi.encodeCall(
+      _transferAmounts_EntityId_EntityId_EntityId_SlotAmountArray_bytes.transferAmounts,
+      (caller, from, to, amounts, extraData)
+    );
+    self.from == address(0)
+      ? _world().call(self.systemId, systemCall)
+      : _world().callFrom(self.from, self.systemId, systemCall);
+  }
+
   function transfer(
     RootCallWrapper memory self,
     EntityId caller,
@@ -81,6 +112,21 @@ library TransferSystemLib {
     bytes memory systemCall = abi.encodeCall(
       _transfer_EntityId_EntityId_EntityId_SlotTransferArray_bytes.transfer,
       (caller, from, to, transfers, extraData)
+    );
+    SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
+  }
+
+  function transferAmounts(
+    RootCallWrapper memory self,
+    EntityId caller,
+    EntityId from,
+    EntityId to,
+    SlotAmount[] memory amounts,
+    bytes memory extraData
+  ) internal {
+    bytes memory systemCall = abi.encodeCall(
+      _transferAmounts_EntityId_EntityId_EntityId_SlotAmountArray_bytes.transferAmounts,
+      (caller, from, to, amounts, extraData)
     );
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
@@ -129,6 +175,16 @@ interface _transfer_EntityId_EntityId_EntityId_SlotTransferArray_bytes {
     EntityId from,
     EntityId to,
     SlotTransfer[] memory transfers,
+    bytes memory extraData
+  ) external;
+}
+
+interface _transferAmounts_EntityId_EntityId_EntityId_SlotAmountArray_bytes {
+  function transferAmounts(
+    EntityId caller,
+    EntityId from,
+    EntityId to,
+    SlotAmount[] memory amounts,
     bytes memory extraData
   ) external;
 }
