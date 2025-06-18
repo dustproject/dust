@@ -1,9 +1,4 @@
-import {
-  type ObjectAmount,
-  categories,
-  objects,
-  objectsByName,
-} from "../objects";
+import { type ObjectAmount, categories, objects, objectsByName } from "../objects";
 
 // Build minimal sliding windows over sorted ids
 function buildSlidingWindows(ids: number[]): { start: number; mask: bigint }[] {
@@ -25,11 +20,7 @@ function buildSlidingWindows(ids: number[]): { start: number; mask: bigint }[] {
   return windows;
 }
 
-export function renderCheck(
-  name: string,
-  ids: number[],
-  customFnName?: string,
-): string {
+export function renderCheck(name: string, ids: number[], customFnName?: string): string {
   if (ids.length === 0) {
     throw new Error(`No ids for ${name} Category`);
   }
@@ -213,7 +204,7 @@ ${Object.entries(categories)
     }
 
     if (self == ObjectTypes.Chest) {
-      return sig == ITransferSystem.transfer.selector || sig == IMachineSystem.fuelMachine.selector;
+      return sig == ITransferSystem.transfer.selector || sig == ITransferSystem.transferAmounts.selector || sig == IMachineSystem.fuelMachine.selector;
     }
 
     return false;
@@ -235,10 +226,7 @@ ${Object.entries(categories)
   function getOreAmount(ObjectType self) internal pure returns(ObjectAmount memory) {
     ${objects
       .filter((result) => result.oreAmount !== undefined)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ${renderObjectAmount(obj.oreAmount!)};`,
-      )
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${renderObjectAmount(obj.oreAmount!)};`)
       .join("\n    ")}
     return ObjectAmount(ObjectTypes.Null, 0);
   }
@@ -246,10 +234,7 @@ ${Object.entries(categories)
   function getPlankAmount(ObjectType self) internal pure returns(uint16) {
     ${objects
       .filter((obj) => obj.plankAmount !== undefined)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ${obj.plankAmount!.toString()};`,
-      )
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${obj.plankAmount!.toString()};`)
       .join("\n    ")}
     return 0;
   }
@@ -257,10 +242,7 @@ ${Object.entries(categories)
   function getCrop(ObjectType self) internal pure returns(ObjectType) {
     ${objects
       .filter((obj) => obj.crop)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.crop};`,
-      )
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.crop};`)
       .join("\n    ")}
     return ObjectTypes.Null;
   }
@@ -268,10 +250,7 @@ ${Object.entries(categories)
   function getSapling(ObjectType self) internal pure returns(ObjectType) {
     ${objects
       .filter((obj) => obj.sapling)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.sapling};`,
-      )
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ObjectTypes.${obj.sapling};`)
       .join("\n    ")}
     return ObjectTypes.Null;
   }
@@ -279,10 +258,7 @@ ${Object.entries(categories)
   function getTimeToGrow(ObjectType self) internal pure returns(uint128) {
     ${objects
       .filter((obj) => obj.timeToGrow)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ${obj.timeToGrow};`,
-      )
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${obj.timeToGrow};`)
       .join("\n    ")}
     return 0;
   }
@@ -290,10 +266,7 @@ ${Object.entries(categories)
   function getGrowableEnergy(ObjectType self) public pure returns(uint128) {
     ${objects
       .filter((obj) => obj.growableEnergy)
-      .map(
-        (obj) =>
-          `if (self == ObjectTypes.${obj.name}) return ${obj.growableEnergy};`,
-      )
+      .map((obj) => `if (self == ObjectTypes.${obj.name}) return ${obj.growableEnergy};`)
       .join("\n    ")}
     return 0;
   }

@@ -38,7 +38,7 @@ import { ProgramId } from "../src/types/ProgramId.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 import "../src/ProgramHooks.sol" as Hooks;
-import { SlotData, SlotTransfer } from "../src/utils/InventoryUtils.sol";
+import { SlotAmount, SlotData, SlotTransfer } from "../src/utils/InventoryUtils.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
@@ -957,5 +957,259 @@ contract TransferTest is DustTest {
     assertEq(deposit.entityId, EntityId.wrap(0), "Deposit entity ID should be zero");
     assertEq(deposit.objectType, transferObjectType, "Incorrect deposit object type");
     assertEq(deposit.amount, numToTransfer, "Incorrect deposit amount");
+  }
+
+  // Tests for SlotAmount transfer function
+  function testTransferSlotAmountBasic() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
+    EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
+
+    ObjectType transferObjectType = ObjectTypes.Grass;
+    uint16 numToTransfer = 10;
+    TestInventoryUtils.addObject(aliceEntityId, transferObjectType, numToTransfer);
+
+    assertInventoryHasObject(aliceEntityId, transferObjectType, numToTransfer);
+    assertInventoryHasObject(chestEntityId, transferObjectType, 0);
+
+    SlotAmount[] memory amounts = new SlotAmount[](1);
+    amounts[0] = SlotAmount({ slot: 0, amount: numToTransfer });
+
+    vm.prank(alice);
+    world.transferAmounts(aliceEntityId, aliceEntityId, chestEntityId, amounts, "");
+
+    assertInventoryHasObject(aliceEntityId, transferObjectType, 0);
+    assertInventoryHasObject(chestEntityId, transferObjectType, numToTransfer);
+  }
+
+  function testTransferSlotAmountMultipleItems() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
+    EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
+
+    ObjectType objectType1 = ObjectTypes.Grass;
+    ObjectType objectType2 = ObjectTypes.Stone;
+    uint16 amount1 = 10;
+    uint16 amount2 = 20;
+
+    TestInventoryUtils.addObject(aliceEntityId, objectType1, amount1);
+    TestInventoryUtils.addObject(aliceEntityId, objectType2, amount2);
+
+    assertInventoryHasObject(aliceEntityId, objectType1, amount1);
+    assertInventoryHasObject(aliceEntityId, objectType2, amount2);
+
+    SlotAmount[] memory amounts = new SlotAmount[](2);
+    amounts[0] = SlotAmount({ slot: 0, amount: amount1 });
+    amounts[1] = SlotAmount({ slot: 1, amount: amount2 });
+
+    vm.prank(alice);
+    world.transferAmounts(aliceEntityId, aliceEntityId, chestEntityId, amounts, "");
+
+    assertInventoryHasObject(aliceEntityId, objectType1, 0);
+    assertInventoryHasObject(aliceEntityId, objectType2, 0);
+    assertInventoryHasObject(chestEntityId, objectType1, amount1);
+    assertInventoryHasObject(chestEntityId, objectType2, amount2);
+  }
+
+  function testTransferSlotAmountPartialTransfer() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
+    EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
+
+    ObjectType transferObjectType = ObjectTypes.Grass;
+    uint16 totalAmount = 20;
+    uint16 transferAmount = 15;
+
+    TestInventoryUtils.addObject(aliceEntityId, transferObjectType, totalAmount);
+
+    SlotAmount[] memory amounts = new SlotAmount[](1);
+    amounts[0] = SlotAmount({ slot: 0, amount: transferAmount });
+
+    vm.prank(alice);
+    world.transferAmounts(aliceEntityId, aliceEntityId, chestEntityId, amounts, "");
+
+    assertInventoryHasObject(aliceEntityId, transferObjectType, totalAmount - transferAmount);
+    assertInventoryHasObject(chestEntityId, transferObjectType, transferAmount);
+  }
+
+  function testTransferSlotAmountWithEntities() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
+    EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
+
+    EntityId toolEntityId = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenPick);
+
+    assertInventoryHasEntity(aliceEntityId, toolEntityId, 1);
+    assertInventoryHasEntity(chestEntityId, toolEntityId, 0);
+
+    SlotAmount[] memory amounts = new SlotAmount[](1);
+    amounts[0] = SlotAmount({ slot: 0, amount: 1 });
+
+    vm.prank(alice);
+    world.transferAmounts(aliceEntityId, aliceEntityId, chestEntityId, amounts, "");
+
+    assertInventoryHasEntity(aliceEntityId, toolEntityId, 0);
+    assertInventoryHasEntity(chestEntityId, toolEntityId, 1);
+  }
+
+  function testTransferSlotAmountFailsSelfTransfer() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    ObjectType transferObjectType = ObjectTypes.Grass;
+    TestInventoryUtils.addObject(aliceEntityId, transferObjectType, 10);
+
+    SlotAmount[] memory amounts = new SlotAmount[](1);
+    amounts[0] = SlotAmount({ slot: 0, amount: 10 });
+
+    vm.prank(alice);
+    vm.expectRevert("Cannot transfer amounts to self");
+    world.transferAmounts(aliceEntityId, aliceEntityId, aliceEntityId, amounts, "");
+  }
+
+  function testTransferSlotAmountFailsIfCallerNotInvolved() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address bob, EntityId bobEntityId, Vec3 bobCoord) = spawnPlayerOnAirChunk(playerCoord + vec3(5, 0, 0));
+
+    Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
+    EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
+
+    ObjectType transferObjectType = ObjectTypes.Grass;
+    TestInventoryUtils.addObject(bobEntityId, transferObjectType, 10);
+
+    SlotAmount[] memory amounts = new SlotAmount[](1);
+    amounts[0] = SlotAmount({ slot: 0, amount: 10 });
+
+    // Alice tries to transfer from Bob to chest
+    vm.prank(alice);
+    vm.expectRevert("Caller is not involved in transfer");
+    world.transferAmounts(aliceEntityId, bobEntityId, chestEntityId, amounts, "");
+  }
+
+  function testTransferSlotAmountHookValidation() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
+    EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
+
+    // Attach program to chest
+    TestChestProgram program = new TestChestProgram();
+    attachTestProgram(chestEntityId, program, "namespace");
+
+    ObjectType transferObjectType = ObjectTypes.Grass;
+    uint16 transferAmount = 10;
+    TestInventoryUtils.addObject(aliceEntityId, transferObjectType, transferAmount);
+
+    SlotAmount[] memory amounts = new SlotAmount[](1);
+    amounts[0] = SlotAmount({ slot: 0, amount: transferAmount });
+
+    // Test that hook can block transfer
+    program.setShouldRevert(true);
+    vm.prank(alice);
+    vm.expectRevert("Transfer not allowed by chest");
+    world.transferAmounts(aliceEntityId, aliceEntityId, chestEntityId, amounts, "");
+
+    // Test successful transfer with hook
+    program.setShouldRevert(false);
+    vm.prank(alice);
+    world.transferAmounts(aliceEntityId, aliceEntityId, chestEntityId, amounts, "");
+
+    // Verify hook received correct data from target's perspective
+    assertEq(program.lastCaller(), aliceEntityId, "Incorrect caller");
+    assertEq(program.lastTarget(), chestEntityId, "Incorrect target");
+
+    // From chest's perspective, it received deposits
+    SlotData[] memory deposits = program.lastDeposits();
+    assertEq(deposits.length, 1, "Should have 1 deposit");
+    assertEq(deposits[0].objectType, transferObjectType, "Incorrect deposit type");
+    assertEq(deposits[0].amount, transferAmount, "Incorrect deposit amount");
+
+    SlotData[] memory withdrawals = program.lastWithdrawals();
+    assertEq(withdrawals.length, 0, "Should have no withdrawals");
+  }
+
+  function testTransferSlotAmountReverseDirection() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
+    EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
+
+    // Attach program to chest
+    TestChestProgram program = new TestChestProgram();
+    attachTestProgram(chestEntityId, program, "namespace");
+
+    ObjectType transferObjectType = ObjectTypes.Stone;
+    uint16 transferAmount = 15;
+    TestInventoryUtils.addObject(chestEntityId, transferObjectType, transferAmount);
+
+    SlotAmount[] memory amounts = new SlotAmount[](1);
+    amounts[0] = SlotAmount({ slot: 0, amount: transferAmount });
+
+    // Transfer from chest to player
+    vm.prank(alice);
+    world.transferAmounts(aliceEntityId, chestEntityId, aliceEntityId, amounts, "");
+
+    assertInventoryHasObject(aliceEntityId, transferObjectType, transferAmount);
+    assertInventoryHasObject(chestEntityId, transferObjectType, 0);
+
+    // Verify hook received correct data from target's perspective
+    assertEq(program.lastCaller(), aliceEntityId, "Incorrect caller");
+    assertEq(program.lastTarget(), chestEntityId, "Incorrect target");
+
+    // From chest's perspective, it had withdrawals
+    SlotData[] memory withdrawals = program.lastWithdrawals();
+    assertEq(withdrawals.length, 1, "Should have 1 withdrawal");
+    assertEq(withdrawals[0].objectType, transferObjectType, "Incorrect withdrawal type");
+    assertEq(withdrawals[0].amount, transferAmount, "Incorrect withdrawal amount");
+
+    SlotData[] memory deposits = program.lastDeposits();
+    assertEq(deposits.length, 0, "Should have no deposits");
+  }
+
+  function testTransferSlotAmountGasComparison() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address bob, EntityId bobEntityId,) = spawnPlayerOnAirChunk(playerCoord + vec3(5, 0, 0));
+
+    Vec3 chestCoord1 = playerCoord + vec3(0, 0, 1);
+    Vec3 chestCoord2 = playerCoord + vec3(0, 0, 2);
+    EntityId chestEntityId1 = setObjectAtCoord(chestCoord1, ObjectTypes.Chest);
+    EntityId chestEntityId2 = setObjectAtCoord(chestCoord2, ObjectTypes.Chest);
+
+    // Setup identical inventories for both players
+    ObjectType objectType1 = ObjectTypes.Grass;
+    ObjectType objectType2 = ObjectTypes.Stone;
+    TestInventoryUtils.addObject(aliceEntityId, objectType1, 10);
+    TestInventoryUtils.addObject(aliceEntityId, objectType2, 20);
+    TestInventoryUtils.addObject(bobEntityId, objectType1, 10);
+    TestInventoryUtils.addObject(bobEntityId, objectType2, 20);
+
+    // Transfer with SlotTransfer (specifying destination slots)
+    SlotTransfer[] memory transfers = new SlotTransfer[](2);
+    transfers[0] = SlotTransfer({ slotFrom: 0, slotTo: 5, amount: 10 });
+    transfers[1] = SlotTransfer({ slotFrom: 1, slotTo: 6, amount: 20 });
+
+    vm.prank(alice);
+    startGasReport("transfer with SlotTransfer");
+    world.transfer(aliceEntityId, aliceEntityId, chestEntityId1, transfers, "");
+    endGasReport();
+
+    // Transfer with SlotAmount (automatic destination slots)
+    SlotAmount[] memory amounts = new SlotAmount[](2);
+    amounts[0] = SlotAmount({ slot: 0, amount: 10 });
+    amounts[1] = SlotAmount({ slot: 1, amount: 20 });
+
+    vm.prank(bob);
+    startGasReport("transferAmounts with SlotAmount");
+    world.transferAmounts(bobEntityId, bobEntityId, chestEntityId2, amounts, "");
+    endGasReport();
+
+    // Verify both transfers had same effect
+    assertInventoryHasObject(chestEntityId1, objectType1, 10);
+    assertInventoryHasObject(chestEntityId1, objectType2, 20);
+    assertInventoryHasObject(chestEntityId2, objectType1, 10);
+    assertInventoryHasObject(chestEntityId2, objectType2, 20);
   }
 }
