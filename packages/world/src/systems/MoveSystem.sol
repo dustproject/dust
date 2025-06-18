@@ -14,7 +14,7 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { MoveLib } from "./libraries/MoveLib.sol";
 
 contract MoveSystem is System {
-  function move(EntityId caller, Vec3[] memory newCoords) public {
+  function move(EntityId caller, Vec3[] calldata newCoords) public {
     caller.activate();
 
     MoveLib.move(caller._getPosition(), newCoords);
@@ -22,7 +22,7 @@ contract MoveSystem is System {
     notify(caller, MoveNotification({ moveCoords: newCoords }));
   }
 
-  function moveDirections(EntityId caller, Direction[] memory directions) public {
+  function moveDirections(EntityId caller, Direction[] calldata directions) public {
     caller.activate();
 
     Vec3 coord = caller._getPosition();
@@ -30,6 +30,23 @@ contract MoveSystem is System {
     Vec3[] memory newCoords = new Vec3[](directions.length);
     for (uint256 i = 0; i < directions.length; i++) {
       newCoords[i] = (i == 0 ? coord : newCoords[i - 1]).transform(directions[i]);
+    }
+
+    MoveLib.move(coord, newCoords);
+
+    notify(caller, MoveNotification({ moveCoords: newCoords }));
+  }
+
+  // 5 bits per direction, packed into a single uint256 (max 51 directions)
+  function moveDirectionsPacked(EntityId caller, uint256 packedDirections, uint8 count) public {
+    caller.activate();
+
+    Vec3 coord = caller._getPosition();
+
+    Vec3[] memory newCoords = new Vec3[](count);
+    for (uint256 i = 0; i < count; i++) {
+      Direction direction = Direction((packedDirections >> (i * 5)) & 0x1F);
+      newCoords[i] = (i == 0 ? coord : newCoords[i - 1]).transform(direction);
     }
 
     MoveLib.move(coord, newCoords);
