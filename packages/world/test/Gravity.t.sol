@@ -5,8 +5,8 @@ import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResou
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 import { console } from "forge-std/console.sol";
 
-import { EntityId } from "../src/EntityId.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
+import { EntityId } from "../src/types/EntityId.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
@@ -25,12 +25,12 @@ import {
   PLAYER_FALL_ENERGY_COST,
   WATER_MOVE_ENERGY_COST
 } from "../src/Constants.sol";
-import { ObjectType } from "../src/ObjectType.sol";
+import { ObjectType } from "../src/types/ObjectType.sol";
 
-import { ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectTypes } from "../src/types/ObjectType.sol";
 
-import { Vec3, vec3 } from "../src/Vec3.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { TestEntityUtils } from "./utils/TestUtils.sol";
 
 contract GravityTest is DustTest {

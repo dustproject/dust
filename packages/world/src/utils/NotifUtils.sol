@@ -6,10 +6,10 @@ import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 import { Action } from "../codegen/common.sol";
 import { Notification, NotificationData } from "../codegen/tables/Notification.sol";
 
-import { EntityId } from "../EntityId.sol";
-import { ObjectType } from "../ObjectType.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectType } from "../types/ObjectType.sol";
 
-import { Vec3 } from "../Vec3.sol";
+import { Vec3 } from "../types/Vec3.sol";
 import { SlotData } from "../utils/InventoryUtils.sol";
 
 struct BuildNotification {

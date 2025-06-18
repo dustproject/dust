@@ -10,12 +10,13 @@ import { LibBit } from "solady/utils/LibBit.sol";
 import { burnToolEnergy } from "../utils/EnergyUtils.sol";
 import { Math } from "../utils/Math.sol";
 
-import { EntityId } from "../EntityId.sol";
+import { EntityId } from "../types/EntityId.sol";
 
 import { ACTION_MODIFIER_DENOMINATOR } from "../Constants.sol";
-import { ObjectAmount, ObjectType, ObjectTypes } from "../ObjectType.sol";
-import { OreLib } from "../OreLib.sol";
-import { Vec3 } from "../Vec3.sol";
+import { ObjectAmount, ObjectType, ObjectTypes } from "../types/ObjectType.sol";
+
+import { Vec3 } from "../types/Vec3.sol";
+import { OreLib } from "../utils/OreLib.sol";
 
 struct SlotTransfer {
   uint16 slotFrom;
@@ -32,14 +33,6 @@ struct SlotData {
   EntityId entityId;
   ObjectType objectType;
   uint16 amount;
-}
-
-struct ToolData {
-  EntityId owner;
-  EntityId tool;
-  ObjectType toolType;
-  uint16 slot;
-  uint128 massLeft;
 }
 
 library InventoryUtils {
@@ -189,63 +182,6 @@ library InventoryUtils {
       uint16 toAdd = remaining < stackable ? uint16(remaining) : stackable;
       InventorySlot._set(owner, slot, EntityId.wrap(0), objectType, toAdd);
       remaining -= toAdd;
-    }
-  }
-
-  /* Tool operations */
-
-  function getToolData(EntityId owner, uint16 slot) internal view returns (ToolData memory) {
-    EntityId tool = InventorySlot._getEntityId(owner, slot);
-    if (!tool._exists()) {
-      return ToolData(owner, tool, ObjectTypes.Null, slot, 0);
-    }
-
-    ObjectType toolType = tool._getObjectType();
-    require(toolType.isTool(), "Inventory item is not a tool");
-
-    return ToolData(owner, tool, toolType, slot, Mass._getMass(tool));
-  }
-
-  function use(ToolData memory toolData, uint128 useMassMax) public returns (uint128) {
-    return use(toolData, useMassMax, ACTION_MODIFIER_DENOMINATOR);
-  }
-
-  function use(ToolData memory toolData, uint128 useMassMax, uint128 multiplier) public returns (uint128) {
-    (uint128 actionMassReduction, uint128 toolMassReduction) = getMassReduction(toolData, useMassMax, multiplier);
-    reduceMass(toolData, toolMassReduction);
-    return actionMassReduction;
-  }
-
-  function getMassReduction(ToolData memory toolData, uint128 massLeft, uint128 multiplier)
-    internal
-    view
-    returns (uint128, uint128)
-  {
-    if (toolData.toolType.isNull()) {
-      return (0, 0);
-    }
-
-    uint128 toolMass = ObjectPhysics._getMass(toolData.toolType);
-    uint128 maxToolMassReduction = Math.min(toolMass / 10, toolData.massLeft);
-    uint128 massReduction = Math.min(maxToolMassReduction * multiplier / ACTION_MODIFIER_DENOMINATOR, massLeft);
-    uint128 toolMassReduction = massReduction * ACTION_MODIFIER_DENOMINATOR / multiplier;
-
-    return (massReduction, toolMassReduction);
-  }
-
-  function reduceMass(ToolData memory toolData, uint128 massReduction) internal {
-    if (!toolData.tool._exists()) {
-      return;
-    }
-
-    require(toolData.massLeft > 0, "Tool is broken");
-
-    if (toolData.massLeft <= massReduction) {
-      removeEntityFromSlot(toolData.owner, toolData.slot);
-      OreLib.burnOres(toolData.toolType);
-      burnToolEnergy(toolData.toolType, toolData.owner._getPosition());
-    } else {
-      Mass._setMass(toolData.tool, toolData.massLeft - massReduction);
     }
   }
 
@@ -465,7 +401,7 @@ library InventoryUtils {
     }
   }
 
-  function transferAll(EntityId from, EntityId to) public returns (bool) {
+  function transferAll(EntityId from, EntityId to) public returns (bool allTransferred) {
     require(from != to, "Cannot transfer all to self");
 
     uint256[] memory bitmap = InventoryBitmap._getBitmap(from);
@@ -664,5 +600,3 @@ library InventoryUtils {
     return (bitmap[wordIndex] & (1 << bitIndex)) != 0;
   }
 }
-
-using InventoryUtils for ToolData global;

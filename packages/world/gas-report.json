@@ -63,19 +63,19 @@
     "file": "test/Craft.t.sol:CraftTest",
     "test": "testCraftAnyInput",
     "name": "craft with any input",
-    "gasUsed": 215941
+    "gasUsed": 215922
   },
   {
     "file": "test/Craft.t.sol:CraftTest",
     "test": "testCraftMultipleInputsSingleOutput",
     "name": "handcraft multiple inputs",
-    "gasUsed": 208156
+    "gasUsed": 208137
   },
   {
     "file": "test/Craft.t.sol:CraftTest",
     "test": "testCraftSingleInputSingleOutput",
     "name": "handcraft single input",
-    "gasUsed": 206435
+    "gasUsed": 206416
   },
   {
     "file": "test/Craft.t.sol:CraftTest",
@@ -87,19 +87,19 @@
     "file": "test/Craft.t.sol:CraftTest",
     "test": "testCraftWithStation",
     "name": "craft with station",
-    "gasUsed": 215693
+    "gasUsed": 215674
   },
   {
     "file": "test/Farming.t.sol:FarmingTest",
     "test": "testTillDirt",
     "name": "till dirt",
-    "gasUsed": 202221
+    "gasUsed": 202335
   },
   {
     "file": "test/Farming.t.sol:FarmingTest",
     "test": "testTillGrass",
     "name": "till grass",
-    "gasUsed": 200221
+    "gasUsed": 200335
   },
   {
     "file": "test/ForceField.t.sol:ForceFieldTest",
@@ -129,19 +129,19 @@
     "file": "test/Gravity.t.sol:GravityTest",
     "test": "testMineFallMultipleBlocks",
     "name": "mine with three block fall",
-    "gasUsed": 685791
+    "gasUsed": 688457
   },
   {
     "file": "test/Gravity.t.sol:GravityTest",
     "test": "testMineFallSingleBlock",
     "name": "mine with single block fall",
-    "gasUsed": 606298
+    "gasUsed": 608964
   },
   {
     "file": "test/Gravity.t.sol:GravityTest",
     "test": "testMineStackedPlayers",
     "name": "mine with three block fall with a stacked player",
-    "gasUsed": 969363
+    "gasUsed": 972029
   },
   {
     "file": "test/Gravity.t.sol:GravityTest",
@@ -165,37 +165,37 @@
     "file": "test/HitMachine.t.sol:HitMachineTest",
     "test": "testHitForceFieldWithInsufficientEnergy",
     "name": "hit force field with insufficient energy",
-    "gasUsed": 304811
+    "gasUsed": 304766
   },
   {
     "file": "test/HitMachine.t.sol:HitMachineTest",
     "test": "testHitForceFieldWithWhacker",
     "name": "hit force field with whacker",
-    "gasUsed": 131487
+    "gasUsed": 131427
   },
   {
     "file": "test/HitMachine.t.sol:HitMachineTest",
     "test": "testHitForceFieldWithoutTool",
     "name": "hit force field without tool",
-    "gasUsed": 119892
+    "gasUsed": 119999
   },
   {
     "file": "test/HitMachine.t.sol:HitMachineTest",
     "test": "testHitForceFieldWithoutToolFatal",
     "name": "hit force field without tool",
-    "gasUsed": 304811
+    "gasUsed": 304766
   },
   {
     "file": "test/Inventory.t.sol:InventoryTest",
     "test": "testDropNonTerrain",
     "name": "drop non-terrain",
-    "gasUsed": 207048
+    "gasUsed": 207014
   },
   {
     "file": "test/Inventory.t.sol:InventoryTest",
     "test": "testDropTerrain",
     "name": "drop terrain",
-    "gasUsed": 284824
+    "gasUsed": 284790
   },
   {
     "file": "test/Inventory.t.sol:InventoryTest",
@@ -213,91 +213,91 @@
     "file": "test/Inventory.t.sol:InventoryTest",
     "test": "testPickup",
     "name": "pickup",
-    "gasUsed": 200886
+    "gasUsed": 200875
   },
   {
     "file": "test/Inventory.t.sol:InventoryTest",
     "test": "testPickupAll",
     "name": "pickup all",
-    "gasUsed": 394834
+    "gasUsed": 394778
   },
   {
     "file": "test/Inventory.t.sol:InventoryTest",
     "test": "testPickupMultiple",
     "name": "pickup multiple",
-    "gasUsed": 300776
+    "gasUsed": 300799
   },
   {
     "file": "test/Inventory.t.sol:InventoryTest",
     "test": "testPickupTool",
     "name": "pickup tool",
-    "gasUsed": 222168
+    "gasUsed": 222191
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineBedWithDeadPlayer",
     "name": "mine bed with player",
-    "gasUsed": 841166
+    "gasUsed": 843961
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineBedWithSleepingPlayerWithEnergy",
     "name": "mine bed with sleeping player with energy",
-    "gasUsed": 752047
+    "gasUsed": 754898
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineImmatureSeed",
     "name": "mine immature seed with hand",
-    "gasUsed": 239095
+    "gasUsed": 239042
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineMultiSize",
     "name": "mine multi-size with hand, entirely mined",
-    "gasUsed": 306416
+    "gasUsed": 309082
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineMultiSizeWithOrientation",
     "name": "",
-    "gasUsed": 6738287
+    "gasUsed": 6738909
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineNonTerrain",
     "name": "mine non-terrain with hand, entirely mined",
-    "gasUsed": 282625
+    "gasUsed": 285291
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineResource",
     "name": "mine Ore with hand, entirely mined",
-    "gasUsed": 2325923
+    "gasUsed": 2332474
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineResourceTypeIsFixedAfterPartialMine",
     "name": "mine Ore with hand, partially mined",
-    "gasUsed": 365036
+    "gasUsed": 365221
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineSmartEntity",
     "name": "mine smart entity with tool, entirely mined",
-    "gasUsed": 349894
+    "gasUsed": 352497
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineTerrain",
     "name": "mine terrain with hand, entirely mined",
-    "gasUsed": 396462
+    "gasUsed": 399128
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineTerrainRequiresMultipleMines",
     "name": "mine terrain with hand, partially mined",
-    "gasUsed": 240745
+    "gasUsed": 240930
   },
   {
     "file": "test/Move.t.sol:MoveTest",
@@ -417,7 +417,7 @@
     "file": "test/Transfer.t.sol:TransferTest",
     "test": "testSelfTransferEntityToNullSlot",
     "name": "swap entity with null slot",
-    "gasUsed": 223493
+    "gasUsed": 223516
   },
   {
     "file": "test/Transfer.t.sol:TransferTest",
@@ -441,49 +441,49 @@
     "file": "test/Transfer.t.sol:TransferTest",
     "test": "testTransferFromChest",
     "name": "transfer from chest",
-    "gasUsed": 216616
+    "gasUsed": 216605
   },
   {
     "file": "test/Transfer.t.sol:TransferTest",
     "test": "testTransferToChest",
     "name": "transfer to chest",
-    "gasUsed": 216620
+    "gasUsed": 216609
   },
   {
     "file": "test/Transfer.t.sol:TransferTest",
     "test": "testTransferToolFromChest",
     "name": "transfer tools from chest",
-    "gasUsed": 338659
+    "gasUsed": 338716
   },
   {
     "file": "test/Transfer.t.sol:TransferTest",
     "test": "testTransferToolToChest",
     "name": "transfer tool to chest",
-    "gasUsed": 237902
+    "gasUsed": 237925
   },
   {
     "file": "test/Transfer.t.sol:TransferTest",
     "test": "testTransferWithinChestInventory",
     "name": "transfer within chest inventory",
-    "gasUsed": 216448
+    "gasUsed": 216437
   },
   {
     "file": "test/Tree.t.sol:TreeTest",
     "test": "testHarvestImmatureTreeSeed",
     "name": "harvest immature tree seed",
-    "gasUsed": 239182
+    "gasUsed": 239129
   },
   {
     "file": "test/Tree.t.sol:TreeTest",
     "test": "testHarvestMatureTree",
     "name": "harvest mature tree log",
-    "gasUsed": 340216
+    "gasUsed": 343067
   },
   {
     "file": "test/Tree.t.sol:TreeTest",
     "test": "testMineTreeLeaves",
     "name": "harvest tree leaf",
-    "gasUsed": 381708
+    "gasUsed": 384366
   },
   {
     "file": "test/Tree.t.sol:TreeTest",
@@ -495,7 +495,7 @@
     "file": "test/Tree.t.sol:TreeTest",
     "test": "testTreeGrowthWithSpace",
     "name": "grow oak tree",
-    "gasUsed": 6669218
+    "gasUsed": 6901190
   },
   {
     "file": "test/Tree.t.sol:TreeTest",

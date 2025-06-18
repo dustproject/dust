@@ -6,9 +6,9 @@ import { LibBit } from "solady/utils/LibBit.sol";
 import { DustTest, console } from "./DustTest.sol";
 
 import { ACTION_MODIFIER_DENOMINATOR } from "../src/Constants.sol";
-import { EntityId } from "../src/EntityId.sol";
-import { ObjectType, ObjectTypes } from "../src/ObjectType.sol";
-import { Vec3, vec3 } from "../src/Vec3.sol";
+import { EntityId } from "../src/types/EntityId.sol";
+import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 import { InventoryBitmap } from "../src/codegen/tables/InventoryBitmap.sol";
 import { Math } from "../src/utils/Math.sol";
@@ -17,7 +17,7 @@ import { InventorySlot, InventorySlotData } from "../src/codegen/tables/Inventor
 import { Mass } from "../src/codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
-import { SlotAmount, SlotTransfer, TestEntityUtils, TestInventoryUtils, ToolData } from "./utils/TestUtils.sol";
+import { SlotAmount, SlotTransfer, TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract InventoryUtilsTest is DustTest {
   function testMultipleTransferAll() public {
@@ -266,29 +266,6 @@ contract InventoryUtilsTest is DustTest {
     assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 2, "Should have 2 slots");
     assertEq(InventorySlot.getAmount(alice, 0), 99);
     assertEq(InventorySlot.getAmount(alice, 1), 1);
-
-    _verifyInventoryBitmapIntegrity(alice);
-  }
-
-  function testToolUse() public {
-    (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
-
-    // Add a tool
-    TestInventoryUtils.addEntity(alice, ObjectTypes.IronPick);
-    EntityId toolId = InventorySlot.getEntityId(alice, 0);
-
-    // Get tool data
-    ToolData memory toolData = TestInventoryUtils.getToolData(alice, 0);
-    assertEq(toolData.toolType, ObjectTypes.IronPick);
-    assertEq(toolData.tool, toolId);
-
-    // Use the tool partially
-    uint128 initialMass = Mass.getMass(toolId);
-    TestInventoryUtils.use(toolData, 100, ACTION_MODIFIER_DENOMINATOR);
-
-    // Tool should still exist with reduced mass
-    assertTrue(Mass.getMass(toolId) < initialMass, "Tool mass should be reduced");
-    assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 1, "Tool should still be in inventory");
 
     _verifyInventoryBitmapIntegrity(alice);
   }
@@ -601,131 +578,5 @@ contract InventoryUtilsTest is DustTest {
     // Verify inventory integrity
     _verifyInventoryBitmapIntegrity(alice);
     _verifyInventoryBitmapIntegrity(bob);
-  }
-
-  // Fuzz test to verify tool mass reduction never exceeds max using actual inventory tools
-  function testFuzzToolMassReduction(uint8 toolTypeIndex, uint128 multiplier, uint128 useMassMax) public {
-    // Setup player
-    (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
-
-    // Tool types to test
-    ObjectType[6] memory toolTypes = [
-      ObjectTypes.WoodenPick,
-      ObjectTypes.WoodenAxe,
-      ObjectTypes.IronPick,
-      ObjectTypes.CopperAxe,
-      ObjectTypes.CopperWhacker,
-      ObjectTypes.IronWhacker
-    ];
-
-    // Bound inputs
-    toolTypeIndex = uint8(bound(toolTypeIndex, 0, 5));
-    multiplier = uint128(bound(multiplier, 1, 100e18)); // 0.000001x to 100x
-    useMassMax = uint128(bound(useMassMax, 1, type(uint64).max));
-
-    // Add tool to inventory
-    ObjectType toolType = toolTypes[toolTypeIndex];
-    EntityId toolEntity = TestInventoryUtils.addEntity(alice, toolType);
-    uint16 slot = TestInventoryUtils.findEntity(alice, toolEntity);
-
-    // Get tool data
-    ToolData memory toolData = TestInventoryUtils.getToolData(alice, slot);
-    uint128 initialToolMass = toolData.massLeft;
-    uint128 maxToolMassReduction = Math.min(ObjectPhysics.getMass(toolType) / 10, initialToolMass);
-
-    // Use the tool with the given multiplier
-    uint128 actionMassReduction = TestInventoryUtils.use(toolData, useMassMax, multiplier);
-
-    // Get the actual tool mass reduction
-    uint128 finalToolMass = Mass.getMass(toolEntity);
-    uint128 actualToolMassReduction = initialToolMass > finalToolMass ? initialToolMass - finalToolMass : 0;
-
-    // Verify the invariant: tool mass reduction should never exceed max
-    assertLe(
-      actualToolMassReduction,
-      maxToolMassReduction,
-      "INVARIANT VIOLATED: actualToolMassReduction exceeds maxToolMassReduction"
-    );
-
-    // Verify the relationship between actionMassReduction and toolMassReduction
-    if (actionMassReduction > 0 && multiplier > 0) {
-      // The tool mass reduction should match what we expect from the formula
-      uint128 expectedToolMassReduction = actionMassReduction * ACTION_MODIFIER_DENOMINATOR / multiplier;
-
-      // Account for the case where the tool was fully consumed
-      if (actualToolMassReduction < expectedToolMassReduction) {
-        // Tool must have been fully consumed
-        assertEq(finalToolMass, 0, "Tool should be fully consumed");
-        assertEq(actualToolMassReduction, initialToolMass, "All tool mass should be consumed");
-      } else {
-        // Normal case - tool mass reduction matches expected
-        assertEq(actualToolMassReduction, expectedToolMassReduction, "Tool mass reduction mismatch");
-      }
-    }
-
-    // Verify inventory integrity
-    _verifyInventoryBitmapIntegrity(alice);
-  }
-
-  function _verifyInventoryBitmapIntegrity(EntityId entity) internal {
-    uint256[] memory bitmap = InventoryBitmap.get(entity);
-
-    // After pruning, either the bitmap is empty or its last word is non-zero.
-    if (bitmap.length == 0) {
-      assertEq(TestInventoryUtils.getOccupiedSlotCount(entity), 0, "Bitmap empty but slots present");
-      return; // nothing else to verify
-    }
-    assertTrue(bitmap[bitmap.length - 1] != 0, "Trailing zero word detected");
-
-    // count set bits
-    uint256 bitmapCount = 0;
-    for (uint256 i = 0; i < bitmap.length; ++i) {
-      bitmapCount += LibBit.popCount(bitmap[i]);
-    }
-
-    // per-slot verification
-    uint256 actualCount = 0;
-    for (uint256 wordIndex = 0; wordIndex < bitmap.length; ++wordIndex) {
-      uint256 word = bitmap[wordIndex];
-      uint256 originalWord = word;
-
-      // every set bit -> slot MUST have data
-      while (word != 0) {
-        uint256 bitIndex = LibBit.ffs(word);
-        word &= word - 1; // clear LS1B
-
-        uint16 slot = uint16(wordIndex * 256 + bitIndex);
-        InventorySlotData memory slotData = InventorySlot.get(entity, slot);
-
-        assertTrue(!slotData.objectType.isNull(), "Bit set but slot empty");
-        assertTrue(slotData.amount > 0, "Slot amount is zero");
-
-        if (slotData.objectType.isTool()) {
-          assertTrue(slotData.amount == 1, "Tool slot should have amount 1");
-          assertTrue(slotData.entityId != EntityId.wrap(0), "Tool slot has zero entity id");
-        }
-
-        if (slotData.entityId != EntityId.wrap(0)) {
-          // if slot has an entity, it must have a valid mass
-          assertTrue(Mass.getMass(slotData.entityId) > 0, "Entity in slot has zero mass");
-        }
-
-        ++actualCount;
-      }
-
-      // every slot with data -> bit MUST be set
-      for (uint256 bit = 0; bit < 256; ++bit) {
-        uint16 slot = uint16(wordIndex * 256 + bit);
-        InventorySlotData memory slotData = InventorySlot.get(entity, slot);
-
-        if (!slotData.objectType.isNull()) {
-          bool bitIsSet = (originalWord & (uint256(1) << bit)) != 0;
-          assertTrue(bitIsSet, "Slot has data but bit not set");
-        }
-      }
-    }
-
-    assertEq(bitmapCount, actualCount, "Bitmap count mismatch");
-    assertEq(bitmapCount, TestInventoryUtils.getOccupiedSlotCount(entity), "Mismatch with utility count");
   }
 }

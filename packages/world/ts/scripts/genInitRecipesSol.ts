@@ -42,7 +42,7 @@ function generateInitRecipesSol(): string {
 pragma solidity >=0.8.24;
 
 import { Recipes, RecipesData } from "../src/codegen/tables/Recipes.sol";
-import { ObjectType, ObjectTypes } from "../src/ObjectType.sol";
+import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 
 function initRecipes() {
   ${recipes.map(renderRecipe).join("\n")}

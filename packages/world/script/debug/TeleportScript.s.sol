@@ -7,7 +7,7 @@ import { console } from "forge-std/console.sol";
 
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
 
-import { vec3 } from "../../src/Vec3.sol";
+import { vec3 } from "../../src/types/Vec3.sol";
 import { ensureDebugSystem } from "./ensureDebugSystem.sol";
 
 contract TeleportScript is Script {

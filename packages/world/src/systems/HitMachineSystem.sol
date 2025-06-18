@@ -16,10 +16,10 @@ import {
 } from "../utils/EnergyUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 
-import { InventoryUtils, ToolData } from "../utils/InventoryUtils.sol";
 import { Math } from "../utils/Math.sol";
 import { HitMachineNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
+import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
 import {
   DEFAULT_HIT_ENERGY_COST,
@@ -30,12 +30,12 @@ import {
   TOOL_HIT_ENERGY_COST,
   WOODEN_TOOL_BASE_MULTIPLIER
 } from "../Constants.sol";
-import { EntityId } from "../EntityId.sol";
-import { ObjectType, ObjectTypes } from "../ObjectType.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 
 import "../ProgramHooks.sol" as Hooks;
-import { ProgramId } from "../ProgramId.sol";
-import { Vec3 } from "../Vec3.sol";
+import { ProgramId } from "../types/ProgramId.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 contract HitMachineSystem is System {
   function hitForceField(EntityId caller, Vec3 coord, uint16 toolSlot) public {
@@ -56,7 +56,7 @@ contract HitMachineSystem is System {
     uint128 energyLeft = machineData.energy;
     require(energyLeft > 0, "Cannot hit depleted forcefield");
 
-    ToolData memory toolData = InventoryUtils.getToolData(caller, toolSlot);
+    ToolData memory toolData = ToolUtils.getToolData(caller, toolSlot);
     uint128 playerEnergyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, energyLeft);
 
     Vec3 forceFieldCoord = forceField._getPosition();
@@ -69,7 +69,7 @@ contract HitMachineSystem is System {
 
     energyLeft -= playerEnergyReduction;
 
-    uint128 massReduction = toolData.use(energyLeft, _getToolMultiplier(toolData.toolType));
+    uint128 massReduction = toolData.use(energyLeft, HIT_ACTION_MODIFIER, toolData.toolType.isWhacker());
 
     uint128 machineEnergyReduction = playerEnergyReduction + massReduction;
 
@@ -97,23 +97,5 @@ contract HitMachineSystem is System {
     uint128 maxEnergyCost = toolType.isNull() ? DEFAULT_HIT_ENERGY_COST : TOOL_HIT_ENERGY_COST;
     maxEnergyCost = Math.min(currentEnergy, maxEnergyCost);
     return Math.min(energyLeft, maxEnergyCost);
-  }
-
-  function _getToolMultiplier(ObjectType toolType) internal pure returns (uint128) {
-    // Bare hands case - just return action modifier
-    if (toolType.isNull()) {
-      return HIT_ACTION_MODIFIER;
-    }
-
-    // Apply base tool multiplier
-    bool isWoodenTool = toolType == ObjectTypes.WoodenWhacker;
-    uint128 multiplier = isWoodenTool ? WOODEN_TOOL_BASE_MULTIPLIER : ORE_TOOL_BASE_MULTIPLIER;
-
-    // Apply specialization bonus if using a whacker (the right tool for hitting)
-    if (toolType.isWhacker()) {
-      multiplier = multiplier * SPECIALIZATION_MULTIPLIER;
-    }
-
-    return multiplier * HIT_ACTION_MODIFIER;
   }
 }

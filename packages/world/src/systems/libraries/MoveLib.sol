@@ -7,12 +7,12 @@ import { MoveUnits } from "../../codegen/tables/MoveUnits.sol";
 import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
 
 import "../../Constants.sol" as Constants;
-import { EntityId } from "../../EntityId.sol";
-import { ObjectType } from "../../ObjectType.sol";
+import { EntityId } from "../../types/EntityId.sol";
+import { ObjectType } from "../../types/ObjectType.sol";
 
-import { ObjectTypes } from "../../ObjectType.sol";
+import { ObjectTypes } from "../../types/ObjectType.sol";
 
-import { Vec3, vec3 } from "../../Vec3.sol";
+import { Vec3, vec3 } from "../../types/Vec3.sol";
 import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../../utils/EnergyUtils.sol";
 import { EntityUtils } from "../../utils/EntityUtils.sol";
 
