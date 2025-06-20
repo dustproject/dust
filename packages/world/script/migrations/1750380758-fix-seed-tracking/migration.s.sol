@@ -107,7 +107,6 @@ contract FixSeedTracking is Migration {
 
     // Start the migration
     console.log("\nRunning Migration");
-    startBroadcast();
 
     // Update ResourceCount table with correct values
     console.log("\nUpdating ResourceCount table...");

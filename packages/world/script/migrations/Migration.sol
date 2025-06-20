@@ -30,23 +30,8 @@ abstract contract Migration is DustScript {
   ChangeRecord[] internal changes;
 
   function run() public {
-    // Clear any existing data
-    delete queries;
-    delete changes;
-
-    // Get world
+    // Get config
     Config memory cfg = config();
-    IWorld world = cfg.world;
-
-    // Start broadcasting if needed
-    startBroadcast();
-
-    // Pause the world for migration
-    console.log("Pausing world for migration...");
-    world.pause();
-
-    // Stop broadcasting temporarily to wait for indexer
-    vm.stopBroadcast();
 
     // Wait for indexer to confirm world is paused
     Indexer memory idx = indexer(cfg);
@@ -61,10 +46,6 @@ abstract contract Migration is DustScript {
     // Run the migration
     console.log("Running migration...");
     runMigration();
-
-    // Unpause the world
-    console.log("Unpausing world...");
-    world.unpause();
 
     // Stop broadcasting
     if (vm.isContext(Vm.ForgeContext.ScriptBroadcast)) {

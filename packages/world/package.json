@@ -29,6 +29,7 @@
     "codegen:tree-lib": "tsx ./ts/scripts/genTreeLibSol.ts > ./src/utils/TreeLib.sol",
     "deploy:local": "pnpm entrykit-deploy && pnpm run build && mud deploy",
     "dev": "pnpm entrykit-deploy && pnpm run build && pnpm mud dev-contracts --rpc http://127.0.0.1:8545",
+    "world:set-paused": "forge script SetPausedScript --aws --broadcast --sig 'run(bool)'",
     "fix": "pnpm run fix:format",
     "fix:format": "forge fmt",
     "fix:lint": "solhint --config ./.solhint.json '**/*.sol' --fix",
