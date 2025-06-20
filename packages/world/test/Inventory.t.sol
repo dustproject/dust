@@ -295,22 +295,73 @@ contract InventoryTest is DustTest {
     assertInventoryHasObject(airEntityId, transferObjectType, 0);
   }
 
-  function testPickupFailsIfInventoryFull() public {
+  function testPickupAllPartialWhenInventoryAlmostFull() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     Vec3 pickupCoord = playerCoord + vec3(0, 1, 0);
     EntityId airEntityId = setObjectAtCoord(pickupCoord, ObjectTypes.Air);
     ObjectType transferObjectType = ObjectTypes.Grass;
-    TestInventoryUtils.addObject(airEntityId, transferObjectType, 1);
-    assertInventoryHasObject(airEntityId, transferObjectType, 1);
-    assertInventoryHasObject(aliceEntityId, transferObjectType, 0);
+    uint16 stackSize = transferObjectType.getStackable();
+    uint16 maxSlots = ObjectTypes.Player.getMaxInventorySlots();
 
-    TestInventoryUtils.addObject(
-      aliceEntityId, transferObjectType, ObjectTypes.Player.getMaxInventorySlots() * transferObjectType.getStackable()
-    );
+    // Fill inventory except for space for 50 items
+    uint16 spaceLeft = 50;
+    TestInventoryUtils.addObject(aliceEntityId, transferObjectType, maxSlots * stackSize - spaceLeft);
+
+    // Try to pickup 100 items (only 50 will fit)
+    uint16 numToPickup = 100;
+    TestInventoryUtils.addObject(airEntityId, transferObjectType, numToPickup);
+
     vm.prank(alice);
-    vm.expectRevert("Inventory is full");
     world.pickupAll(aliceEntityId, pickupCoord);
+
+    // Check that only 50 items were picked up
+    assertInventoryHasObject(aliceEntityId, transferObjectType, maxSlots * stackSize);
+    assertInventoryHasObject(airEntityId, transferObjectType, numToPickup - spaceLeft);
+  }
+
+  function testPickupAllMultipleItemTypes() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    Vec3 pickupCoord = playerCoord + vec3(0, 1, 0);
+    EntityId airEntityId = setObjectAtCoord(pickupCoord, ObjectTypes.Air);
+
+    // Add multiple item types to the drop location
+    TestInventoryUtils.addObject(airEntityId, ObjectTypes.Grass, 50);
+    TestInventoryUtils.addObject(airEntityId, ObjectTypes.Stone, 30);
+    TestInventoryUtils.addObject(airEntityId, ObjectTypes.Sand, 20);
+
+    vm.prank(alice);
+    world.pickupAll(aliceEntityId, pickupCoord);
+
+    // All items should be picked up
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Grass, 50);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Stone, 30);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.Sand, 20);
+
+    // Drop location should be empty
+    assertInventoryHasObject(airEntityId, ObjectTypes.Grass, 0);
+    assertInventoryHasObject(airEntityId, ObjectTypes.Stone, 0);
+    assertInventoryHasObject(airEntityId, ObjectTypes.Sand, 0);
+  }
+
+  function testPickupAllWithEntities() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+
+    Vec3 pickupCoord = playerCoord + vec3(0, 1, 0);
+    EntityId airEntityId = setObjectAtCoord(pickupCoord, ObjectTypes.Air);
+
+    // Add a tool entity to the drop location
+    TestInventoryUtils.addEntity(airEntityId, ObjectTypes.WoodenPick);
+
+    vm.prank(alice);
+    world.pickupAll(aliceEntityId, pickupCoord);
+
+    // Tool should be picked up
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WoodenPick, 1);
+
+    // Drop location should be empty
+    assertInventoryEmpty(airEntityId);
   }
 
   function testDropFailsIfDoesntHaveBlock() public {
