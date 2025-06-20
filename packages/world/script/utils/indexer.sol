@@ -2,7 +2,8 @@
 pragma solidity >=0.8.24;
 
 import { Config } from "./config.sol";
-import { Vm } from "forge-std/Vm.sol";
+import { Vm, vm } from "./vm.sol";
+import { console } from "forge-std/console.sol";
 
 struct Indexer {
   Config config;
@@ -23,11 +24,46 @@ function indexer(Config memory config) pure returns (Indexer memory) {
 }
 
 library IndexerLib {
-  Vm constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
-
   function query(Indexer memory self, string memory sql, string memory schema) internal returns (IndexerResult memory) {
     Vm.FfiResult memory response = _executeQuery(self, sql);
     return _parseResponse(response, schema);
+  }
+
+  function waitForWorldPause(Indexer memory self) internal returns (uint256 syncedBlockNumber) {
+    // Skip waiting if we're just simulating
+    if (!vm.isContext(Vm.ForgeContext.ScriptBroadcast)) {
+      // In simulation mode, just return current block height
+      IndexerResult memory result = query(self, "SELECT isPaused FROM WorldStatus", "(bool)");
+      return result.blockHeight;
+    }
+
+    // In broadcast mode, wait until world is paused in the indexer
+    uint256 attempts = 0;
+    uint256 maxAttempts = 60; // Max 60 seconds wait
+
+    console.log("Waiting for world pause to be indexed...");
+
+    while (attempts < maxAttempts) {
+      // Query WorldStatus table to check if paused
+      IndexerResult memory result = query(self, "SELECT isPaused FROM WorldStatus", "(bool)");
+      syncedBlockNumber = result.blockHeight;
+
+      // Check if world is paused
+      if (result.rows.length > 0) {
+        bool isPaused = abi.decode(result.rows[0], (bool));
+        if (isPaused) {
+          // World is paused in indexer, we can proceed
+          console.log("World pause confirmed at block:", syncedBlockNumber);
+          return syncedBlockNumber;
+        }
+      }
+
+      // Wait 1 second before trying again
+      vm.sleep(1000);
+      attempts++;
+    }
+
+    revert("Indexer sync timeout: world pause not indexed after 60 seconds");
   }
 
   function _executeQuery(Indexer memory self, string memory sql) private returns (Vm.FfiResult memory) {
@@ -92,7 +128,6 @@ library IndexerLib {
     result.blockHeight = vm.parseJsonUint(json, ".block_height");
 
     result.columns = vm.parseJsonStringArray(json, ".result[0][0]");
-    result.rows = new bytes[](result.columns.length);
 
     uint256 rowCount = 0;
     while (vm.keyExistsJson(json, _row(rowCount + 1))) {

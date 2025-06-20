@@ -17,7 +17,7 @@ extra_output_files = [
   "abi",
   "evm.bytecode"
 ]
-fs_permissions = [{ access = "read", path = "./"}]
+fs_permissions = [{ access = "read", path = "./"}, { access = "read-write", path = "./script/migrations/" }]
 script_execution_protection = false
 
 [fmt]
