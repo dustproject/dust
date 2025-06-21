@@ -25,6 +25,11 @@ struct ChangeRecord {
   string newValue;
 }
 
+struct Metadata {
+  uint256 blockNumber;
+  uint256 blockTimestamp;
+}
+
 abstract contract Migration is DustScript {
   QueryRecord[] internal queries;
   ChangeRecord[] internal changes;
@@ -39,18 +44,13 @@ abstract contract Migration is DustScript {
     console.log("Indexer synced to block:", syncedBlock);
 
     // Resume broadcasting for migration
-    if (vm.isContext(Vm.ForgeContext.ScriptBroadcast)) {
-      startBroadcast();
-    }
+    startBroadcast();
 
     // Run the migration
     console.log("Running migration...");
     runMigration();
 
-    // Stop broadcasting
-    if (vm.isContext(Vm.ForgeContext.ScriptBroadcast)) {
-      vm.stopBroadcast();
-    }
+    vm.stopBroadcast();
 
     // Write output
     _writeOutput();
@@ -64,8 +64,8 @@ abstract contract Migration is DustScript {
   function getOutputPath() internal view virtual returns (string memory);
 
   // Helper to construct migration output path from timestamp and name
-  function getMigrationOutputPath(uint256 timestamp, string memory name) internal pure returns (string memory) {
-    return string.concat("script/migrations/", vm.toString(timestamp), "-", name, "/output.json");
+  function getMigrationOutputPath(string memory name) internal pure returns (string memory) {
+    return string.concat("script/migrations/", name, "/output.json");
   }
 
   // Get an indexer that records queries
@@ -83,6 +83,29 @@ abstract contract Migration is DustScript {
     // Record it
     queries.push(
       QueryRecord({ query: sql, blockHeight: result.blockHeight, columns: result.columns, rows: result.rows })
+    );
+
+    return result;
+  }
+
+  // Query function that only records the query, not the results
+  function recordingQueryNoResults(string memory sql, string memory schema)
+    internal
+    returns (IndexerResult memory result)
+  {
+    Indexer memory idx = getIndexer();
+
+    // Execute the query
+    result = idx.query(sql, schema);
+
+    // Record only the query metadata, not the results
+    queries.push(
+      QueryRecord({
+        query: sql,
+        blockHeight: result.blockHeight,
+        columns: result.columns,
+        rows: new bytes[](0) // Empty array instead of actual results
+       })
     );
 
     return result;
@@ -113,67 +136,46 @@ abstract contract Migration is DustScript {
   }
 
   function _writeOutput() private {
-    string memory json = "";
+    // Build metadata struct
+    Metadata memory metadata = Metadata({ blockNumber: block.number, blockTimestamp: block.timestamp });
+    string memory metadataJson =
+      vm.serializeJsonType("Metadata(uint256 blockNumber,uint256 blockTimestamp)", abi.encode(metadata));
 
-    // Start JSON object
-    json = string.concat(json, "{\n");
-
-    // Add queries array
-    json = string.concat(json, '  "queries": [\n');
+    // Serialize all parts
+    string memory queriesJson;
     for (uint256 i = 0; i < queries.length; i++) {
-      json = string.concat(json, "    {\n");
-      json = string.concat(json, '      "query": "', _escapeJson(queries[i].query), '",\n');
-      json = string.concat(json, '      "blockHeight": ', vm.toString(queries[i].blockHeight), ",\n");
+      queriesJson = string.concat(
+        queriesJson,
+        vm.serializeJsonType(
+          "QueryRecord(string query,uint256 blockHeight,string[] columns,bytes[] rows)", abi.encode(queries[1])
+        )
+      );
 
-      // Add columns
-      json = string.concat(json, '      "columns": [');
-      for (uint256 j = 0; j < queries[i].columns.length; j++) {
-        json = string.concat(json, '"', queries[i].columns[j], '"');
-        if (j < queries[i].columns.length - 1) json = string.concat(json, ", ");
-      }
-      json = string.concat(json, "],\n");
-
-      // Add rows (as hex strings)
-      json = string.concat(json, '      "rows": [');
-      for (uint256 j = 0; j < queries[i].rows.length; j++) {
-        json = string.concat(json, '"', vm.toString(queries[i].rows[j]), '"');
-        if (j < queries[i].rows.length - 1) json = string.concat(json, ", ");
-      }
-      json = string.concat(json, "]\n");
-
-      json = string.concat(json, "    }");
-      if (i < queries.length - 1) json = string.concat(json, ",");
-      json = string.concat(json, "\n");
+      if (i < queries.length - 1) queriesJson = string.concat(queriesJson, ",");
     }
-    json = string.concat(json, "  ],\n");
 
-    // Add changes array
-    json = string.concat(json, '  "changes": [\n');
+    queriesJson = string.concat("[", queriesJson, "]");
+
+    string memory changesJson;
     for (uint256 i = 0; i < changes.length; i++) {
-      json = string.concat(json, "    {\n");
-      json = string.concat(json, '      "description": "', changes[i].description, '",\n');
-      json = string.concat(json, '      "tableName": "', changes[i].tableName, '",\n');
-      json = string.concat(json, '      "key": "', changes[i].key, '",\n');
-      json = string.concat(json, '      "oldValue": "', changes[i].oldValue, '",\n');
-      json = string.concat(json, '      "newValue": "', changes[i].newValue, '"\n');
-      json = string.concat(json, "    }");
-      if (i < changes.length - 1) json = string.concat(json, ",");
-      json = string.concat(json, "\n");
+      changesJson = string.concat(
+        changesJson,
+        vm.serializeJsonType(
+          "ChangeRecord(string description,string tableName,string key,string oldValue,string newValue)",
+          abi.encode(changes[i])
+        )
+      );
+      if (i < changes.length - 1) changesJson = string.concat(changesJson, ",");
     }
-    json = string.concat(json, "  ]\n");
 
-    // Close JSON object
-    json = string.concat(json, "}\n");
+    changesJson = string.concat("[", changesJson, "]");
 
-    // Write to file using the path specified by the migration
-    string memory outputPath = getOutputPath();
-    vm.writeFile(outputPath, json);
-    console.log("Migration output saved to:", outputPath);
-  }
+    // Combine everything into the final output
+    string memory output = string.concat(
+      "{", '"metadata":', metadataJson, ",", '"queries":', queriesJson, ",", '"changes":', changesJson, "}"
+    );
 
-  function _escapeJson(string memory str) private pure returns (string memory) {
-    // Basic JSON escaping - in production would need more comprehensive escaping
-    // For now, just return the string as-is
-    return str;
+    vm.writeJson(output, getOutputPath());
+    console.log("Migration output saved to:", getOutputPath());
   }
 }

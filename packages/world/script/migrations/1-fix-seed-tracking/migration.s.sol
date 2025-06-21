@@ -15,7 +15,7 @@ contract FixSeedTracking is Migration {
   mapping(ObjectType => uint256) private totalCounts;
 
   function getOutputPath() internal pure override returns (string memory) {
-    return getMigrationOutputPath(1750380758, "fix-seed-tracking");
+    return getMigrationOutputPath("1-fix-seed-tracking");
   }
 
   function runMigration() internal override {
