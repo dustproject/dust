@@ -6,6 +6,7 @@ import { console } from "forge-std/console.sol";
 import { Config, config } from "../../utils/config.sol";
 import { IndexerResult } from "../../utils/indexer.sol";
 
+import { EntityObjectType } from "../../../src/codegen/tables/EntityObjectType.sol";
 import { Mass } from "../../../src/codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../../../src/codegen/tables/ObjectPhysics.sol";
 import { EntityId } from "../../../src/types/EntityId.sol";
@@ -14,152 +15,94 @@ import { ObjectType, ObjectTypes } from "../../../src/types/ObjectType.sol";
 import { Migration } from "../Migration.sol";
 
 contract FixGrowablesMass is Migration {
-  mapping(ObjectType => EntityId[]) public entitiesWithoutMass;
-  mapping(bytes32 => bool) private hasMass;
-
-  uint256 constant BATCH = 100; // page width
-
   function getOutputPath() internal pure override returns (string memory) {
     return getMigrationOutputPath("2-fix-growables-mass");
   }
 
   function runMigration() internal override {
-    ObjectType[21] memory growables = [
-      // Trees
-      ObjectTypes.OakLog,
-      ObjectTypes.BirchLog,
-      ObjectTypes.JungleLog,
-      ObjectTypes.SakuraLog,
-      ObjectTypes.AcaciaLog,
-      ObjectTypes.SpruceLog,
-      ObjectTypes.DarkOakLog,
-      ObjectTypes.MangroveLog,
-      // Leaves
-      ObjectTypes.OakLeaf,
-      ObjectTypes.BirchLeaf,
-      ObjectTypes.JungleLeaf,
-      ObjectTypes.SakuraLeaf,
-      ObjectTypes.SpruceLeaf,
-      ObjectTypes.AcaciaLeaf,
-      ObjectTypes.DarkOakLeaf,
-      ObjectTypes.AzaleaLeaf,
-      ObjectTypes.FloweringAzaleaLeaf,
-      ObjectTypes.MangroveLeaf,
-      // Crops
-      ObjectTypes.Wheat,
-      ObjectTypes.Pumpkin,
-      ObjectTypes.Melon
-    ];
+    console.log("Reading entities data from JSON file...");
 
-    // Build string for SQL query
-    string memory growableTypes = "";
-    for (uint256 i = 0; i < growables.length; i++) {
-      growableTypes = string.concat(growableTypes, vm.toString(growables[i].unwrap()));
-      if (i < growables.length - 1) {
-        growableTypes = string.concat(growableTypes, ", ");
-      }
-    }
-    growableTypes = string.concat("(", growableTypes, ")");
+    // Read the JSON file
+    string memory json = vm.readFile("script/migrations/2-fix-growables-mass/data.json");
 
-    bytes32 anchor;
+    // Get metadata
+    console.log("Data from block: %s", vm.parseJsonUint(json, ".blockNumber"));
+    console.log("Total entities to process: %s", vm.parseJsonUint(json, ".totalEntities"));
 
-    while (true) {
-      IndexerResult memory page = recordingQueryNoResults(
-        string.concat(
-          "SELECT entityId, objectType FROM EntityObjectType WHERE objectType IN ",
-          growableTypes,
-          " AND entityId  > ",
-          _bytea(anchor),
-          "ORDER BY entityId LIMIT ",
-          vm.toString(BATCH)
-        ),
-        "(bytes32,uint16)"
-      );
+    // Get all object type keys
+    string[] memory objectTypeKeys = vm.parseJsonKeys(json, ".entitiesWithoutMass");
 
-      if (page.rows.length == 0) break; // done
-
-      uint256 n = page.rows.length;
-
-      string memory inIds = "";
-      bytes32 lastId;
-      for (uint256 i; i < n; ++i) {
-        (bytes32 id,) = abi.decode(page.rows[i], (bytes32, ObjectType));
-        inIds = string.concat(inIds, _bytea(id));
-        if (i + 1 < n) inIds = string.concat(inIds, ",");
-        lastId = id;
-      }
-      anchor = lastId; // advance cursor
-
-      IndexerResult memory have = recordingQueryNoResults(
-        string.concat("SELECT entityId FROM Mass WHERE entityId IN (", inIds, ");"), "(bytes32)"
-      );
-
-      if (n == have.rows.length) {
-        console.log("All %s entities have Mass", n);
-        continue; // all have Mass, skip to next page
-      }
-
-      for (uint256 i; i < have.rows.length; ++i) {
-        bytes32 id = abi.decode(have.rows[i], (bytes32));
-        hasMass[id] = true;
-      }
-
-      for (uint256 i; i < n; ++i) {
-        (bytes32 id, ObjectType ot) = abi.decode(page.rows[i], (bytes32, ObjectType));
-        if (!hasMass[id]) {
-          entitiesWithoutMass[ot].push(EntityId.wrap(id));
-        }
-        // Clear mapping for next batch
-        hasMass[id] = false;
-      }
-    }
-
-    uint256 totalMissing;
-    for (uint256 i; i < growables.length; ++i) {
-      totalMissing += entitiesWithoutMass[growables[i]].length;
-    }
-
-    console.log("Done. Total entities missing Mass: %s", totalMissing);
-
-    console.log("\nStarting to fix mass for entities...");
     uint256 totalFixed = 0;
 
-    for (uint256 i; i < growables.length; ++i) {
-      ObjectType objectType = growables[i];
-      EntityId[] memory entities = entitiesWithoutMass[objectType];
+    // Process each object type
+    for (uint256 i = 0; i < objectTypeKeys.length; i++) {
+      totalFixed += _processObjectType(json, objectTypeKeys[i], totalFixed);
+    }
 
-      if (entities.length == 0) continue;
+    console.log("\nMigration complete! Total fixed: %s", totalFixed);
+  }
 
-      // Get the correct mass for this object type from ObjectPhysics table
-      uint128 massValue = ObjectPhysics.getMass(objectType);
+  function _processObjectType(string memory json, string memory objectTypeKey, uint256 currentTotalFixed)
+    internal
+    returns (uint256)
+  {
+    uint16 objectTypeValue = uint16(vm.parseUint(objectTypeKey));
 
-      console.log("Fixing ObjectType %s: %s entities with mass %s", objectType.unwrap(), entities.length, massValue);
+    console.log("\nProcessing ObjectType %s", objectTypeValue);
 
-      // Set mass for all entities of this type
-      for (uint256 j; j < entities.length; ++j) {
-        Mass.set(entities[j], massValue);
+    // Get mass from ObjectPhysics table
+    ObjectType objectType = ObjectType.wrap(objectTypeValue);
+    uint128 massValue = ObjectPhysics.getMass(objectType);
 
-        recordChange(
-          string.concat("Set mass for ", vm.toString(objectType.unwrap()), " entity"),
-          "Mass",
-          vm.toString(EntityId.unwrap(entities[j])),
-          "0",
-          vm.toString(massValue)
-        );
+    // Get entity IDs from JSON
+    string memory typePath = string.concat(".entitiesWithoutMass.", objectTypeKey);
+    bytes32[] memory entityIds = vm.parseJsonBytes32Array(json, string.concat(typePath, ".entities"));
 
-        totalFixed++;
+    console.log("Expected mass: %s, Entity count: %s", massValue, entityIds.length);
 
-        // Log progress every 100 entities
-        if (totalFixed % 100 == 0) {
-          console.log("Progress: %s entities fixed", totalFixed);
+    uint256 fixedCount = 0;
+    uint256 skippedCount = 0;
+
+    // Process entities
+    for (uint256 i = 0; i < entityIds.length; i++) {
+      if (_fixEntity(EntityId.wrap(entityIds[i]), objectTypeValue, massValue)) {
+        fixedCount++;
+
+        // Log progress
+        if ((currentTotalFixed + fixedCount) % 100 == 0) {
+          console.log("Progress: %s entities fixed", currentTotalFixed + fixedCount);
         }
+      } else {
+        skippedCount++;
       }
     }
 
-    console.log("\nMigration complete! Fixed mass for %s entities", totalFixed);
+    console.log("Batch complete: fixed %s, skipped %s", fixedCount, skippedCount);
+    return fixedCount;
   }
 
-  function _bytea(bytes32 b) internal pure returns (string memory) {
-    return string.concat("decode('", vm.replace(vm.toString(b), "0x", ""), "','hex')");
+  function _fixEntity(EntityId entityId, uint16 objectTypeValue, uint128 massValue) internal returns (bool) {
+    // Verify entity still has the same object type
+    if (EntityObjectType.getObjectType(entityId).unwrap() != objectTypeValue) {
+      return false;
+    }
+
+    // Check current mass
+    if (Mass.get(entityId) != 0) {
+      return false;
+    }
+
+    // Set the mass
+    Mass.set(entityId, massValue);
+
+    recordChange(
+      string.concat("Set mass for ObjectType ", vm.toString(objectTypeValue)),
+      "Mass",
+      vm.toString(entityId.unwrap()),
+      "0",
+      vm.toString(massValue)
+    );
+
+    return true;
   }
 }
