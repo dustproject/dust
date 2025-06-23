@@ -129,19 +129,19 @@
     "file": "test/Gravity.t.sol:GravityTest",
     "test": "testMineFallMultipleBlocks",
     "name": "mine with three block fall",
-    "gasUsed": 688457
+    "gasUsed": 689480
   },
   {
     "file": "test/Gravity.t.sol:GravityTest",
     "test": "testMineFallSingleBlock",
     "name": "mine with single block fall",
-    "gasUsed": 608964
+    "gasUsed": 609987
   },
   {
     "file": "test/Gravity.t.sol:GravityTest",
     "test": "testMineStackedPlayers",
     "name": "mine with three block fall with a stacked player",
-    "gasUsed": 972029
+    "gasUsed": 973052
   },
   {
     "file": "test/Gravity.t.sol:GravityTest",
@@ -237,67 +237,67 @@
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineBedWithDeadPlayer",
     "name": "mine bed with player",
-    "gasUsed": 843961
+    "gasUsed": 846010
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineBedWithSleepingPlayerWithEnergy",
     "name": "mine bed with sleeping player with energy",
-    "gasUsed": 754898
+    "gasUsed": 756947
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineImmatureSeed",
     "name": "mine immature seed with hand",
-    "gasUsed": 239042
+    "gasUsed": 247920
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineMultiSize",
     "name": "mine multi-size with hand, entirely mined",
-    "gasUsed": 309082
+    "gasUsed": 310105
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineMultiSizeWithOrientation",
     "name": "",
-    "gasUsed": 6738909
+    "gasUsed": 6739932
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineNonTerrain",
     "name": "mine non-terrain with hand, entirely mined",
-    "gasUsed": 285291
+    "gasUsed": 286312
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineResource",
     "name": "mine Ore with hand, entirely mined",
-    "gasUsed": 2332474
+    "gasUsed": 2355624
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineResourceTypeIsFixedAfterPartialMine",
     "name": "mine Ore with hand, partially mined",
-    "gasUsed": 365221
+    "gasUsed": 366242
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineSmartEntity",
     "name": "mine smart entity with tool, entirely mined",
-    "gasUsed": 352497
+    "gasUsed": 354544
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineTerrain",
     "name": "mine terrain with hand, entirely mined",
-    "gasUsed": 399128
+    "gasUsed": 400150
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineTerrainRequiresMultipleMines",
     "name": "mine terrain with hand, partially mined",
-    "gasUsed": 240930
+    "gasUsed": 241950
   },
   {
     "file": "test/Move.t.sol:MoveTest",
@@ -471,19 +471,19 @@
     "file": "test/Tree.t.sol:TreeTest",
     "test": "testHarvestImmatureTreeSeed",
     "name": "harvest immature tree seed",
-    "gasUsed": 239129
+    "gasUsed": 248007
   },
   {
     "file": "test/Tree.t.sol:TreeTest",
     "test": "testHarvestMatureTree",
     "name": "harvest mature tree log",
-    "gasUsed": 343067
+    "gasUsed": 345113
   },
   {
     "file": "test/Tree.t.sol:TreeTest",
     "test": "testMineTreeLeaves",
     "name": "harvest tree leaf",
-    "gasUsed": 384366
+    "gasUsed": 385388
   },
   {
     "file": "test/Tree.t.sol:TreeTest",
