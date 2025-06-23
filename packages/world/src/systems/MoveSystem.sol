@@ -14,7 +14,7 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { MoveLib } from "./libraries/MoveLib.sol";
 
 contract MoveSystem is System {
-  function move(EntityId caller, Vec3[] calldata newCoords) public {
+  function move(EntityId caller, Vec3[] memory newCoords) public {
     caller.activate();
 
     MoveLib.move(caller._getPosition(), newCoords);
@@ -22,7 +22,7 @@ contract MoveSystem is System {
     notify(caller, MoveNotification({ moveCoords: newCoords }));
   }
 
-  function moveDirections(EntityId caller, Direction[] calldata directions) public {
+  function moveDirections(EntityId caller, Direction[] memory directions) public {
     caller.activate();
 
     Vec3 coord = caller._getPosition();
