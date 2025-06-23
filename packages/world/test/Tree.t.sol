@@ -36,6 +36,10 @@ import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 import { DustTest } from "./DustTest.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
+import {
+  CannotPlantOnThisBlock,
+  SeedCannotBeGrownYet
+} from "../src/Errors.sol";
 
 contract TreeTest is DustTest {
   function testPlantTree() public {
@@ -88,7 +92,7 @@ contract TreeTest is DustTest {
     setTerrainAtCoord(stoneCoord, ObjectTypes.Stone);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot plant on this block");
+    vm.expectRevert(abi.encodeWithSelector(CannotPlantOnThisBlock.selector, ObjectTypes.Stone));
     world.build(aliceEntityId, stoneCoord + vec3(0, 1, 0), 0, "");
 
     // Try to plant on farmland
@@ -96,7 +100,7 @@ contract TreeTest is DustTest {
     setTerrainAtCoord(farmlandCoord, ObjectTypes.Farmland);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot plant on this block");
+    vm.expectRevert(abi.encodeWithSelector(CannotPlantOnThisBlock.selector, ObjectTypes.Farmland));
     world.build(aliceEntityId, farmlandCoord + vec3(0, 1, 0), 0, "");
   }
 
@@ -417,7 +421,7 @@ contract TreeTest is DustTest {
     vm.warp(fullyGrownAt - 1);
 
     vm.prank(alice);
-    vm.expectRevert("Seed cannot be grown yet");
+    vm.expectRevert(abi.encodeWithSelector(SeedCannotBeGrownYet.selector, fullyGrownAt, block.timestamp));
     world.growSeed(aliceEntityId, seedCoord);
 
     // Now advance time and verify it can grow

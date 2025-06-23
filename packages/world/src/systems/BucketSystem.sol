@@ -3,6 +3,7 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
+import { MustUseBucket, MustUseWaterBucket, NotFarmland, NotWater } from "../Errors.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 
@@ -19,9 +20,13 @@ contract BucketSystem is System {
     caller.activate();
     caller.requireConnected(waterCoord);
 
-    require(EntityUtils.safeGetObjectTypeAt(waterCoord) == ObjectTypes.Water, "Not water");
+    if (EntityUtils.safeGetObjectTypeAt(waterCoord) != ObjectTypes.Water) {
+      revert NotWater(EntityUtils.safeGetObjectTypeAt(waterCoord));
+    }
 
-    require(InventorySlot._getObjectType(caller, bucketSlot) == ObjectTypes.Bucket, "Must use an empty Bucket");
+    if (InventorySlot._getObjectType(caller, bucketSlot) != ObjectTypes.Bucket) {
+      revert MustUseBucket(InventorySlot._getObjectType(caller, bucketSlot));
+    }
 
     // We know buckets are not stackable, so we can directly replace the slot
     InventoryUtils.removeObjectFromSlot(caller, bucketSlot, 1);
@@ -33,9 +38,11 @@ contract BucketSystem is System {
     caller.requireConnected(coord);
 
     (EntityId farmland, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(coord);
-    require(objectType == ObjectTypes.Farmland, "Not farmland");
+    if (objectType != ObjectTypes.Farmland) revert NotFarmland(objectType);
 
-    require(InventorySlot._getObjectType(caller, bucketSlot) == ObjectTypes.WaterBucket, "Must use a Water Bucket");
+    if (InventorySlot._getObjectType(caller, bucketSlot) != ObjectTypes.WaterBucket) {
+      revert MustUseWaterBucket(InventorySlot._getObjectType(caller, bucketSlot));
+    }
 
     // We know buckets are not stackable, so we can directly replace the slot
     InventoryUtils.removeObjectFromSlot(caller, bucketSlot, 1);

@@ -34,6 +34,21 @@ import { SlotAmount } from "../src/utils/InventoryUtils.sol";
 
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
+// Import custom errors
+import {
+  InputAmountMustBePositive,
+  NotEnoughInputsForRecipe,
+  RecipeNotFound,
+  InvalidStation,
+  EntityIsTooFar,
+  InventoryIsFull,
+  NotEnoughEnergy,
+  CallerNotAllowed,
+  PlayerIsSleeping
+} from "../src/Errors.sol";
+
+import { CRAFT_ENERGY_COST } from "../src/Constants.sol";
+
 contract CraftTest is DustTest {
   function hashRecipe(
     ObjectType stationObjectType,
@@ -371,7 +386,7 @@ contract CraftTest is DustTest {
     inputs[0] = SlotAmount({ slot: 0, amount: 0 });
 
     vm.prank(alice);
-    vm.expectRevert("Input amount must be greater than 0");
+    vm.expectRevert(InputAmountMustBePositive.selector);
     world.craft(aliceEntityId, recipeId, inputs);
 
     inputTypes = new ObjectType[](1);
@@ -402,7 +417,7 @@ contract CraftTest is DustTest {
     inputs[2] = SlotAmount({ slot: 2, amount: 1 });
 
     vm.prank(alice);
-    vm.expectRevert("Not enough inputs for recipe");
+    vm.expectRevert(abi.encodeWithSelector(NotEnoughInputsForRecipe.selector, 1, 0));
     world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
   }
 
@@ -423,7 +438,7 @@ contract CraftTest is DustTest {
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
 
     vm.prank(alice);
-    vm.expectRevert("Recipe not found");
+    vm.expectRevert(abi.encodeWithSelector(RecipeNotFound.selector, ObjectType.wrap(9999))); // Non-existent object type
     world.craft(aliceEntityId, recipeId, inputs);
   }
 
@@ -455,18 +470,18 @@ contract CraftTest is DustTest {
     inputs[1] = SlotAmount({ slot: 1, amount: inputAmounts[1] });
 
     vm.prank(alice);
-    vm.expectRevert("Invalid station");
+    vm.expectRevert(abi.encodeWithSelector(InvalidStation.selector, ObjectTypes.Workbench, ObjectTypes.Air));
     world.craft(aliceEntityId, recipeId, inputs);
 
     vm.prank(alice);
-    vm.expectRevert("Invalid station");
+    vm.expectRevert(abi.encodeWithSelector(InvalidStation.selector, ObjectTypes.Workbench, ObjectTypes.Furnace));
     world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
 
     stationCoord = playerCoord + vec3(int32(MAX_ENTITY_INFLUENCE_RADIUS) + 1, 0, 0);
     stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
 
     vm.prank(alice);
-    vm.expectRevert("Entity is too far");
+    vm.expectRevert(abi.encodeWithSelector(EntityIsTooFar.selector, playerCoord, stationCoord));
     world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
   }
 
@@ -491,7 +506,7 @@ contract CraftTest is DustTest {
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
 
     vm.prank(alice);
-    vm.expectRevert("Inventory is full");
+    vm.expectRevert(abi.encodeWithSelector(InventoryIsFull.selector, aliceEntityId));
     world.craft(aliceEntityId, recipeId, inputs);
   }
 
@@ -519,7 +534,7 @@ contract CraftTest is DustTest {
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
 
     vm.prank(alice);
-    vm.expectRevert("Not enough energy");
+    vm.expectRevert(abi.encodeWithSelector(NotEnoughEnergy.selector, uint32(CRAFT_ENERGY_COST), 1));
     world.craft(aliceEntityId, recipeId, inputs);
   }
 
@@ -544,7 +559,7 @@ contract CraftTest is DustTest {
     SlotAmount[] memory inputs = new SlotAmount[](1);
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
 
-    vm.expectRevert("Caller not allowed");
+    vm.expectRevert(abi.encodeWithSelector(CallerNotAllowed.selector, aliceEntityId));
     world.craft(aliceEntityId, recipeId, inputs);
   }
 
@@ -573,7 +588,7 @@ contract CraftTest is DustTest {
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
 
     vm.prank(alice);
-    vm.expectRevert("Player is sleeping");
+    vm.expectRevert(abi.encodeWithSelector(PlayerIsSleeping.selector, aliceEntityId));
     world.craft(aliceEntityId, recipeId, inputs);
   }
 
@@ -602,7 +617,7 @@ contract CraftTest is DustTest {
     inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
 
     vm.prank(alice);
-    vm.expectRevert("Not enough energy");
+    vm.expectRevert(abi.encodeWithSelector(NotEnoughEnergy.selector, uint32(CRAFT_ENERGY_COST), 0));
     world.craft(aliceEntityId, recipeId, inputs);
 
     // Verify inventory is unchanged

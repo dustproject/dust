@@ -33,6 +33,17 @@ import { ObjectTypes } from "../src/types/ObjectType.sol";
 import { ProgramId } from "../src/types/ProgramId.sol";
 
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
+import {
+  NotWithinCommitmentBlocks,
+  PlayerAlreadySpawned,
+  DustIsPaused,
+  SpawnTileNotInsideForceField,
+  NotASpawnTile,
+  NoOptionsAvailable,
+  NotEnoughEnergyInSpawnTile,
+  SpawnTileTooFarAway,
+  CannotSpawnOnNonPassableBlock
+} from "../src/Errors.sol";
 
 contract TestSpawnProgram is System {
   fallback() external { }
@@ -66,13 +77,13 @@ contract SpawnTest is DustTest {
 
   function testRandomSpawnPaused() public {
     WorldStatus.setIsPaused(true);
-    vm.expectRevert("DUST is paused. Try again later");
+    vm.expectRevert(abi.encodeWithSelector(DustIsPaused.selector));
     world.randomSpawn(vm.getBlockNumber(), vec3(0, 0, 0));
   }
 
   function testRandomSpawnFailsDueToOldBlock() public {
     uint256 pastBlock = vm.getBlockNumber() - 21;
-    vm.expectRevert("Can only choose past 20 blocks");
+    vm.expectRevert(abi.encodeWithSelector(NotWithinCommitmentBlocks.selector, pastBlock, vm.getBlockNumber()));
     world.randomSpawn(pastBlock, vec3(0, 0, 0));
   }
 
@@ -124,7 +135,7 @@ contract SpawnTest is DustTest {
     setupAirChunk(vec3(0, 0, 0));
 
     vm.prank(alice);
-    vm.expectRevert("No valid spawn coord found in chunk");
+    vm.expectRevert(abi.encodeWithSelector(NoOptionsAvailable.selector));
     world.getRandomSpawnCoord(blockNumber, alice);
   }
 
@@ -136,7 +147,7 @@ contract SpawnTest is DustTest {
     EntityId spawnTileEntityId = randomEntityId();
 
     vm.prank(alice);
-    vm.expectRevert("Not a spawn tile");
+    vm.expectRevert(abi.encodeWithSelector(NotASpawnTile.selector, ObjectTypes.Null));
     world.spawn(spawnTileEntityId, spawnCoord, 1, "");
   }
 
@@ -154,7 +165,7 @@ contract SpawnTest is DustTest {
     EntityId spawnTileEntityId = setObjectAtCoord(spawnTileCoord, ObjectTypes.SpawnTile);
 
     vm.prank(alice);
-    vm.expectRevert("Spawn tile is too far away");
+    vm.expectRevert(abi.encodeWithSelector(SpawnTileTooFarAway.selector, spawnTileCoord, spawnCoord));
     world.spawn(spawnTileEntityId, spawnCoord, 1, "");
   }
 
@@ -169,7 +180,7 @@ contract SpawnTest is DustTest {
     EntityId spawnTileEntityId = setObjectAtCoord(spawnTileCoord, ObjectTypes.SpawnTile);
 
     vm.prank(alice);
-    vm.expectRevert("Spawn tile is not inside a forcefield");
+    vm.expectRevert(abi.encodeWithSelector(SpawnTileNotInsideForceField.selector, spawnTileEntityId));
     world.spawn(spawnTileEntityId, spawnCoord, 1, "");
   }
 
@@ -187,7 +198,7 @@ contract SpawnTest is DustTest {
     EntityId spawnTileEntityId = setObjectAtCoord(spawnTileCoord, ObjectTypes.SpawnTile);
 
     vm.prank(alice);
-    vm.expectRevert("Not enough energy in spawn tile forcefield");
+    vm.expectRevert(abi.encodeWithSelector(NotEnoughEnergyInSpawnTile.selector, 1, 0));
     world.spawn(spawnTileEntityId, spawnCoord, 1, "");
   }
 
@@ -224,7 +235,7 @@ contract SpawnTest is DustTest {
 
   function testSpawnFailsIfNotDead() public {
     // This should setup a player with energy
-    (address alice,, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     Vec3 spawnCoord = playerCoord;
     Vec3 spawnTileCoord = spawnCoord - vec3(0, 1, 0);
@@ -245,7 +256,7 @@ contract SpawnTest is DustTest {
 
     // Spawn player should fail as the player has energy
     vm.prank(alice);
-    vm.expectRevert("Player already spawned");
+    vm.expectRevert(abi.encodeWithSelector(PlayerAlreadySpawned.selector, aliceEntityId));
     world.spawn(spawnTileEntityId, spawnCoord, 1, "");
   }
 
@@ -272,7 +283,7 @@ contract SpawnTest is DustTest {
 
   function testRandomSpawnFailsIfNotDead() public {
     // This should setup a player with energy
-    (address alice,,) = setupFlatChunkWithPlayer();
+    (address alice, EntityId aliceEntityId,) = setupFlatChunkWithPlayer();
 
     uint256 blockNumber = vm.getBlockNumber() - 5;
 
@@ -285,7 +296,7 @@ contract SpawnTest is DustTest {
 
     // Spawn player should fail as the player has energy
     vm.prank(alice);
-    vm.expectRevert("Player already spawned");
+    vm.expectRevert(abi.encodeWithSelector(PlayerAlreadySpawned.selector, aliceEntityId));
     world.randomSpawn(blockNumber, spawnCoord);
   }
 
@@ -351,7 +362,7 @@ contract SpawnTest is DustTest {
 
     // Second player tries to spawn at the same coordinates
     vm.prank(bob);
-    vm.expectRevert("Cannot spawn on a non-passable block");
+    vm.expectRevert(abi.encodeWithSelector(CannotSpawnOnNonPassableBlock.selector, ObjectTypes.Player));
     world.spawn(spawnTileEntityId, spawnCoord, 1, "");
   }
 }

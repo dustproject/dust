@@ -3,6 +3,7 @@ pragma solidity >=0.8.24;
 
 import { CHUNK_SIZE } from "../../Constants.sol";
 
+import { ChunkNotExploredYet, UnsupportedChunkEncodingVersion } from "../../Errors.sol";
 import { ObjectType } from "../../types/ObjectType.sol";
 import { ObjectTypes } from "../../types/ObjectType.sol";
 import { Vec3, vec3 } from "../../types/Vec3.sol";
@@ -43,7 +44,7 @@ library TerrainLib {
 
     address chunkPointer = _getChunkPointer(chunkCoord, world);
     bytes1 version = chunkPointer.readBytes1(0);
-    require(version == _VERSION, "Unsupported chunk encoding version");
+    if (version != _VERSION) revert UnsupportedChunkEncodingVersion(uint16(uint8(version)), uint16(uint8(_VERSION)));
 
     uint256 index = _getBlockIndex(coord);
     bytes1 blockType = chunkPointer.readBytes1(index);
@@ -66,11 +67,11 @@ library TerrainLib {
   /// @notice Get the biome of a voxel coordinate.
   function getBiome(Vec3 coord, address world) internal view returns (uint8) {
     Vec3 chunkCoord = coord.toChunkCoord();
-    require(_isChunkExplored(chunkCoord, world), "Chunk not explored");
+    if (!_isChunkExplored(chunkCoord, world)) revert ChunkNotExploredYet(chunkCoord);
 
     address chunkPointer = _getChunkPointer(chunkCoord, world);
     bytes1 version = chunkPointer.readBytes1(0);
-    require(version == _VERSION, "Unsupported chunk encoding version");
+    if (version != _VERSION) revert UnsupportedChunkEncodingVersion(uint16(uint8(version)), uint16(uint8(_VERSION)));
 
     bytes1 biome = chunkPointer.readBytes1(1);
     return uint8(biome);
@@ -90,11 +91,11 @@ library TerrainLib {
 
   /// @notice Returns true if the chunk is the highest non-air chunk in this X/Z column
   function isSurfaceChunk(Vec3 chunkCoord, address world) internal view returns (bool) {
-    require(_isChunkExplored(chunkCoord, world), "Chunk not explored");
+    if (!_isChunkExplored(chunkCoord, world)) revert ChunkNotExploredYet(chunkCoord);
 
     address chunkPointer = _getChunkPointer(chunkCoord, world);
     bytes1 version = chunkPointer.readBytes1(0);
-    require(version == _VERSION, "Unsupported chunk encoding version");
+    if (version != _VERSION) revert UnsupportedChunkEncodingVersion(uint16(uint8(version)), uint16(uint8(_VERSION)));
 
     bytes1 isSurface = chunkPointer.readBytes1(2);
     return uint8(isSurface) == 1;

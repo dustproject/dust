@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import {
+  CannotDecrease0Energy,
+  InvalidLastDepletedTime,
+  NotEnoughEnergy,
+  NotEnoughEnergyInLocalPool,
+  PlayerIsSleeping
+} from "../Errors.sol";
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
@@ -78,7 +85,7 @@ function updateMachineEnergy(EntityId machine) returns (EnergyData memory) {
 
 /// @dev Used within systems before performing an action
 function updatePlayerEnergy(EntityId player) returns (EnergyData memory) {
-  require(!PlayerBed._getBedEntityId(player).exists(), "Player is sleeping");
+  if (PlayerBed._getBedEntityId(player).exists()) revert PlayerIsSleeping(player);
 
   (EnergyData memory energyData, uint128 energyDrained,) = getLatestEnergyData(player);
   Vec3 coord = player._getPosition();
@@ -96,9 +103,9 @@ function updatePlayerEnergy(EntityId player) returns (EnergyData memory) {
 }
 
 function decreaseMachineEnergy(EntityId machine, uint128 amount) returns (uint128) {
-  require(amount > 0, "Cannot decrease 0 energy");
+  if (amount == 0) revert CannotDecrease0Energy();
   uint128 current = Energy._getEnergy(machine);
-  require(current >= amount, "Not enough energy");
+  if (current < amount) revert NotEnoughEnergy(uint32(amount), uint32(current));
   uint128 newEnergy = current - amount;
   Energy._setEnergy(machine, newEnergy);
 
@@ -106,9 +113,9 @@ function decreaseMachineEnergy(EntityId machine, uint128 amount) returns (uint12
 }
 
 function decreasePlayerEnergy(EntityId player, Vec3 playerCoord, uint128 amount) returns (uint128) {
-  require(amount > 0, "Cannot decrease 0 energy");
+  if (amount == 0) revert CannotDecrease0Energy();
   uint128 current = Energy._getEnergy(player);
-  require(current >= amount, "Not enough energy");
+  if (current < amount) revert NotEnoughEnergy(uint32(amount), uint32(current));
 
   uint128 newEnergy = current - amount;
   Energy._setEnergy(player, newEnergy);
@@ -164,7 +171,7 @@ function transferEnergyToPool(EntityId entityId, uint128 amount) returns (uint12
 function removeEnergyFromLocalPool(Vec3 coord, uint128 numToRemove) returns (uint128) {
   Vec3 shardCoord = coord.toLocalEnergyPoolShardCoord();
   uint128 localEnergy = LocalEnergyPool._get(shardCoord);
-  require(localEnergy >= numToRemove, "Not enough energy in local pool");
+  if (localEnergy < numToRemove) revert NotEnoughEnergyInLocalPool(uint32(numToRemove), uint32(localEnergy));
 
   uint128 newLocalEnergy = localEnergy - numToRemove;
   LocalEnergyPool._set(shardCoord, newLocalEnergy);
@@ -185,10 +192,7 @@ function updateSleepingPlayerEnergy(EntityId player, EntityId bed, EntityId forc
   if (forceField._exists()) {
     currentDepletedTime = machineData.depletedTime;
     uint128 lastDepletedTime = BedPlayer._getLastDepletedTime(bed);
-    require(
-      lastDepletedTime <= currentDepletedTime,
-      "Invalid last depleted time for bed, should be less than or equal to current depleted time"
-    );
+    if (lastDepletedTime > currentDepletedTime) revert InvalidLastDepletedTime(lastDepletedTime);
     timeWithoutEnergy = currentDepletedTime - lastDepletedTime;
   } else {
     // Conservatively assume that the player has been sleeping without energy since the last time they were updated

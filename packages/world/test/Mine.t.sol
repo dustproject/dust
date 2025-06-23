@@ -22,6 +22,18 @@ import { Death } from "../src/codegen/tables/Death.sol";
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
+import {
+  CannotSpawnOnNonPassableBlock,
+  ObjectIsNotMineable,
+  EntityIsTooFar,
+  ChunkNotExploredYet,
+  CallerNotAllowed,
+  PlayerIsSleeping,
+  CannotMineWithEnergyRemaining,
+  DustIsPaused,
+  EntityHasNoEnergy,
+  NewCoordTooFarFromOld
+} from "../src/Errors.sol";
 
 import {
   ChunkCommitment,
@@ -542,7 +554,7 @@ contract MineTest is DustTest {
 
     // Try to mine the bed - should fail because spawn position is blocked
     vm.prank(bob);
-    vm.expectRevert("Cannot spawn on a non-passable block");
+    vm.expectRevert(abi.encodeWithSelector(CannotSpawnOnNonPassableBlock.selector, ObjectTypes.Basalt));
     world.mineUntilDestroyed(bobEntityId, bedCoord, "");
 
     // Bed should still exist
@@ -669,19 +681,19 @@ contract MineTest is DustTest {
     setObjectAtCoord(mineCoord, mineObjectType);
 
     vm.prank(alice);
-    vm.expectRevert("Object is not mineable");
+    vm.expectRevert(abi.encodeWithSelector(ObjectIsNotMineable.selector, ObjectTypes.Air));
     world.mine(aliceEntityId, mineCoord, "");
 
     setObjectAtCoord(mineCoord, ObjectTypes.Water);
 
     vm.prank(alice);
-    vm.expectRevert("Object is not mineable");
+    vm.expectRevert(abi.encodeWithSelector(ObjectIsNotMineable.selector, ObjectTypes.Water));
     world.mine(aliceEntityId, mineCoord, "");
 
     setObjectAtCoord(mineCoord, ObjectTypes.Bedrock);
 
     vm.prank(alice);
-    vm.expectRevert("Object is not mineable");
+    vm.expectRevert(abi.encodeWithSelector(ObjectIsNotMineable.selector, ObjectTypes.Bedrock));
     world.mine(aliceEntityId, mineCoord, "");
   }
 
@@ -693,13 +705,13 @@ contract MineTest is DustTest {
     setObjectAtCoord(mineCoord, mineObjectType);
 
     vm.prank(alice);
-    vm.expectRevert("Entity is too far");
+    vm.expectRevert(abi.encodeWithSelector(EntityIsTooFar.selector, playerCoord, mineCoord));
     world.mine(aliceEntityId, mineCoord, "");
 
     mineCoord = playerCoord - vec3(CHUNK_SIZE / 2 + 1, 0, 0);
 
     vm.prank(alice);
-    vm.expectRevert("Chunk not explored yet");
+    vm.expectRevert(abi.encodeWithSelector(ChunkNotExploredYet.selector, mineCoord.toChunkCoord()));
     world.mine(aliceEntityId, mineCoord, "");
   }
 
@@ -745,7 +757,8 @@ contract MineTest is DustTest {
     ObjectType mineObjectType = ObjectTypes.Dirt;
     setObjectAtCoord(mineCoord, mineObjectType);
 
-    vm.expectRevert("Caller not allowed");
+    EntityId nonPlayerEntityId = EntityId.wrap(bytes32(uint256(0xdeadbeef)));
+    vm.expectRevert(abi.encodeWithSelector(CallerNotAllowed.selector, nonPlayerEntityId));
     world.mine(aliceEntityId, mineCoord, "");
   }
 
@@ -760,7 +773,7 @@ contract MineTest is DustTest {
     PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     vm.prank(alice);
-    vm.expectRevert("Player is sleeping");
+    vm.expectRevert(abi.encodeWithSelector(PlayerIsSleeping.selector, aliceEntityId));
     world.mine(aliceEntityId, mineCoord, "");
   }
 
@@ -773,7 +786,7 @@ contract MineTest is DustTest {
     Energy.set(mineEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 10000, drainRate: 0 }));
 
     vm.prank(alice);
-    vm.expectRevert("Cannot mine a machine that has energy");
+    vm.expectRevert(abi.encodeWithSelector(CannotMineWithEnergyRemaining.selector, 100));
     world.mine(aliceEntityId, mineCoord, "");
   }
 
@@ -788,7 +801,7 @@ contract MineTest is DustTest {
     assertInventoryHasObject(aliceEntityId, mineObjectType, 0);
 
     vm.prank(alice);
-    vm.expectRevert("DUST is paused. Try again later");
+    vm.expectRevert(abi.encodeWithSelector(DustIsPaused.selector));
     world.mine(aliceEntityId, mineCoord, "");
   }
 
@@ -803,7 +816,7 @@ contract MineTest is DustTest {
     Vec3 mineCoord = vec3(CHUNK_SIZE, FLAT_CHUNK_GRASS_LEVEL, CHUNK_SIZE);
 
     vm.prank(alice);
-    vm.expectRevert("Coordinate is not reachable");
+    vm.expectRevert(abi.encodeWithSelector(NewCoordTooFarFromOld.selector, boundaryCoord, mineCoord));
     world.mine(aliceEntityId, mineCoord, "");
   }
 
@@ -816,7 +829,7 @@ contract MineTest is DustTest {
     Vec3 mineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z());
 
     vm.prank(alice);
-    vm.expectRevert("Entity has no energy");
+    vm.expectRevert(abi.encodeWithSelector(EntityHasNoEnergy.selector, aliceEntityId));
     world.mine(aliceEntityId, mineCoord, "");
   }
 
@@ -842,13 +855,13 @@ contract MineTest is DustTest {
   }
 
   function testMineWithInvalidCoordinates() public {
-    (address alice, EntityId aliceEntityId,) = setupFlatChunkWithPlayer();
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
     // Try to mine at invalid coordinates
     Vec3 invalidCoord = vec3(type(int32).max, type(int32).max, type(int32).max);
 
     vm.prank(alice);
-    vm.expectRevert("Entity is too far");
+    vm.expectRevert(abi.encodeWithSelector(EntityIsTooFar.selector, playerCoord, invalidCoord));
     world.mine(aliceEntityId, invalidCoord, "");
   }
 
@@ -1091,7 +1104,7 @@ contract MineTest is DustTest {
 
     // Try to mine - should fail
     vm.prank(alice);
-    vm.expectRevert("Coordinate is not reachable");
+    vm.expectRevert(abi.encodeWithSelector(NewCoordTooFarFromOld.selector, targetCoord + vec3(2, 0, 0), targetCoord));
     world.mine(aliceEntityId, targetCoord, "");
   }
 
@@ -1269,7 +1282,7 @@ contract MineTest is DustTest {
     EntityPosition.set(aliceEntityId, baseCoord + vec3(3, 0, 0));
 
     vm.prank(alice);
-    vm.expectRevert("Coordinate is not reachable");
+    vm.expectRevert(abi.encodeWithSelector(NewCoordTooFarFromOld.selector, baseCoord + vec3(3, 0, 0), baseCoord));
     world.mine(aliceEntityId, baseCoord, "");
 
     // Now make one neighbor passthrough and it should work

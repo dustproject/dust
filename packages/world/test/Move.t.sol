@@ -41,6 +41,18 @@ import { NonPassableBlock } from "../src/systems/libraries/MoveLib.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
+// Import custom errors
+import {
+  CannotJumpMoreThan3Blocks,
+  CannotGlideMoreThan10Blocks,
+  CannotMoveThroughPlayer,
+  NewCoordTooFarFromOld,
+  ChunkNotExploredYet,
+  CallerNotAllowed,
+  PlayerIsSleeping,
+  MoveLimitExceeded
+} from "../src/Errors.sol";
+
 contract MoveTest is DustTest {
   function _testMoveMultipleBlocks(address player, uint8 numBlocksToMove, bool overTerrain) internal {
     EntityId playerEntityId = EntityTypeLib.encodePlayer(player);
@@ -420,7 +432,7 @@ contract MoveTest is DustTest {
     }
 
     vm.prank(alice);
-    vm.expectRevert("Cannot jump more than 3 blocks");
+    vm.expectRevert(abi.encodeWithSelector(CannotJumpMoreThan3Blocks.selector, 4));
     world.move(aliceEntityId, newCoords);
   }
 
@@ -436,7 +448,7 @@ contract MoveTest is DustTest {
     }
 
     vm.prank(alice);
-    vm.expectRevert("Cannot glide more than 10 blocks");
+    vm.expectRevert(abi.encodeWithSelector(CannotGlideMoreThan10Blocks.selector, 11));
     world.move(aliceEntityId, newCoords);
   }
 
@@ -467,7 +479,7 @@ contract MoveTest is DustTest {
   function testMoveFailsIfPlayer() public {
     (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupAirChunkWithPlayer();
 
-    (,, Vec3 bobCoord) = spawnPlayerOnAirChunk(aliceCoord + vec3(0, 0, 2));
+    (, EntityId bobEntityId, Vec3 bobCoord) = spawnPlayerOnAirChunk(aliceCoord + vec3(0, 0, 2));
 
     Vec3[] memory newCoords = new Vec3[](2);
     newCoords[0] = aliceCoord + vec3(0, 0, 1);
@@ -476,13 +488,13 @@ contract MoveTest is DustTest {
     setObjectAtCoord(newCoords[0] + vec3(0, 1, 0), ObjectTypes.Air);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot move through a player");
+    vm.expectRevert(abi.encodeWithSelector(CannotMoveThroughPlayer.selector, bobEntityId));
     world.move(aliceEntityId, newCoords);
 
     newCoords[1] = bobCoord + vec3(0, 1, 0);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot move through a player");
+    vm.expectRevert(abi.encodeWithSelector(CannotMoveThroughPlayer.selector, bobEntityId));
     world.move(aliceEntityId, newCoords);
   }
 
@@ -494,7 +506,7 @@ contract MoveTest is DustTest {
     newCoords[1] = playerCoord + vec3(0, 0, 3);
 
     vm.prank(alice);
-    vm.expectRevert("New coord is too far from old coord");
+    vm.expectRevert(abi.encodeWithSelector(NewCoordTooFarFromOld.selector, newCoords[0], newCoords[1]));
     world.move(aliceEntityId, newCoords);
 
     uint256 pathLength = uint256(int256(playerCoord.x())) + 1;
@@ -504,7 +516,7 @@ contract MoveTest is DustTest {
     }
 
     vm.prank(alice);
-    vm.expectRevert("Chunk not explored yet");
+    vm.expectRevert(abi.encodeWithSelector(ChunkNotExploredYet.selector, newCoords[newCoords.length - 1].toChunkCoord()));
     world.move(aliceEntityId, newCoords);
   }
 
@@ -657,7 +669,7 @@ contract MoveTest is DustTest {
     newCoords[0] = playerCoord + vec3(0, 0, 1);
     newCoords[1] = playerCoord + vec3(0, 0, 2);
 
-    vm.expectRevert("Caller not allowed");
+    vm.expectRevert(abi.encodeWithSelector(CallerNotAllowed.selector, aliceEntityId));
     world.move(aliceEntityId, newCoords);
   }
 
@@ -672,7 +684,7 @@ contract MoveTest is DustTest {
     PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     vm.prank(alice);
-    vm.expectRevert("Player is sleeping");
+    vm.expectRevert(abi.encodeWithSelector(PlayerIsSleeping.selector, aliceEntityId));
     world.move(aliceEntityId, newCoords);
   }
 
@@ -729,14 +741,14 @@ contract MoveTest is DustTest {
     // Create second player
     Vec3 bobCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
 
-    createTestPlayer(bobCoord);
+    (, EntityId bobEntityId) = createTestPlayer(bobCoord);
 
     // Try to move through Bob
     Vec3[] memory newCoords = new Vec3[](1);
     newCoords[0] = bobCoord;
 
     vm.prank(alice);
-    vm.expectRevert("Cannot move through a player");
+    vm.expectRevert(abi.encodeWithSelector(CannotMoveThroughPlayer.selector, bobEntityId));
     world.move(aliceEntityId, newCoords);
   }
 
@@ -855,7 +867,7 @@ contract MoveTest is DustTest {
     setTerrainAtCoord(belowCoord, ObjectTypes.Grass);
 
     vm.prank(alice);
-    vm.expectRevert("Move limit exceeded");
+    vm.expectRevert(abi.encodeWithSelector(MoveLimitExceeded.selector, 31));
     world.move(aliceEntityId, newCoords);
 
     Vec3 finalCoord = EntityPosition.get(aliceEntityId);
@@ -903,7 +915,7 @@ contract MoveTest is DustTest {
     setTerrainAtCoord(belowCoord, ObjectTypes.Water);
 
     vm.prank(alice);
-    vm.expectRevert("Move limit exceeded");
+    vm.expectRevert(abi.encodeWithSelector(MoveLimitExceeded.selector, 31));
     world.move(aliceEntityId, newCoords);
 
     Vec3 finalCoord = EntityPosition.get(aliceEntityId);

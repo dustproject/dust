@@ -4,6 +4,19 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 import { LibPRNG } from "solady/utils/LibPRNG.sol";
 
+import {
+  CannotSpawnHereGravityApplies,
+  CannotSpawnInForceField,
+  CannotSpawnWithMoreThan30PercentEnergy,
+  NoOptionsAvailable,
+  NoSurfaceChunksAvailable,
+  NotASpawnTile,
+  NotEnoughEnergyInSpawnTile,
+  NotWithinCommitmentBlocks,
+  PlayerAlreadySpawned,
+  SpawnTileNotInsideForceField,
+  SpawnTileTooFarAway
+} from "../Errors.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
@@ -72,12 +85,12 @@ contract SpawnSystem is System {
       return backupSpawnCoord;
     }
 
-    revert("No valid spawn coord found in chunk");
+    revert NoOptionsAvailable();
   }
 
   function getRandomSpawnChunk(uint256 blockNumber, address sender) public view returns (Vec3 chunk) {
     uint256 exploredChunkCount = SurfaceChunkCount._get();
-    require(exploredChunkCount > 0, "No surface chunks available");
+    if (exploredChunkCount == 0) revert NoSurfaceChunksAvailable();
 
     // Randomness used for the chunk index and relative coordinates
     LibPRNG.PRNG memory prng;
@@ -117,16 +130,16 @@ contract SpawnSystem is System {
 
   function randomSpawn(uint256 blockNumber, Vec3 spawnCoord) public returns (EntityId) {
     checkWorldStatus();
-    require(
-      blockNumber < block.number && blockNumber >= block.number - SPAWN_BLOCK_RANGE, "Can only choose past 20 blocks"
-    );
+    if (blockNumber >= block.number || blockNumber < block.number - SPAWN_BLOCK_RANGE) {
+      revert NotWithinCommitmentBlocks(blockNumber, block.number);
+    }
 
     // Vec3 spawnChunk = getRandomSpawnChunk(blockNumber, _msgSender());
     // require(spawnChunk == spawnCoord.toChunkCoord(), "Spawn coordinate cannot be in a different chunk");
     spawnCoord = getRandomSpawnCoord(blockNumber, _msgSender());
 
     (EntityId forceField,) = ForceFieldUtils.getForceField(spawnCoord);
-    require(!forceField._exists(), "Cannot spawn in force field");
+    if (forceField._exists()) revert CannotSpawnInForceField(forceField);
 
     // 30% of max player energy
     uint128 spawnEnergy = MAX_PLAYER_ENERGY * 3 / 10;
@@ -142,17 +155,21 @@ contract SpawnSystem is System {
     returns (EntityId)
   {
     checkWorldStatus();
-    require(spawnEnergy <= MAX_PLAYER_ENERGY * 3 / 10, "Cannot spawn with more than 30% of max player energy");
+    if (spawnEnergy > MAX_PLAYER_ENERGY * 3 / 10) revert CannotSpawnWithMoreThan30PercentEnergy(uint32(spawnEnergy));
     ObjectType objectType = spawnTile._getObjectType();
-    require(objectType == ObjectTypes.SpawnTile, "Not a spawn tile");
+    if (objectType != ObjectTypes.SpawnTile) revert NotASpawnTile(objectType);
 
     Vec3 spawnTileCoord = spawnTile._getPosition();
-    require(spawnTileCoord.inSurroundingCube(spawnCoord, MAX_RESPAWN_HALF_WIDTH), "Spawn tile is too far away");
+    if (!spawnTileCoord.inSurroundingCube(spawnCoord, MAX_RESPAWN_HALF_WIDTH)) {
+      revert SpawnTileTooFarAway(spawnTileCoord, spawnCoord);
+    }
 
     (EntityId forceField,) = ForceFieldUtils.getForceField(spawnTileCoord);
-    require(forceField._exists(), "Spawn tile is not inside a forcefield");
+    if (!forceField._exists()) revert SpawnTileNotInsideForceField(spawnTile);
     EnergyData memory machineData = updateMachineEnergy(forceField);
-    require(machineData.energy >= spawnEnergy, "Not enough energy in spawn tile forcefield");
+    if (machineData.energy < spawnEnergy) {
+      revert NotEnoughEnergyInSpawnTile(uint32(spawnEnergy), uint32(machineData.energy));
+    }
     Energy._setEnergy(forceField, machineData.energy - spawnEnergy);
 
     EntityId player = _spawnPlayer(spawnCoord, spawnEnergy);
@@ -167,7 +184,7 @@ contract SpawnSystem is System {
   }
 
   function _spawnPlayer(Vec3 spawnCoord, uint128 spawnEnergy) internal returns (EntityId) {
-    require(!MoveLib._gravityApplies(spawnCoord), "Cannot spawn player here as gravity applies");
+    if (MoveLib._gravityApplies(spawnCoord)) revert CannotSpawnHereGravityApplies(spawnCoord);
 
     EntityId player = EntityUtils.getOrCreatePlayer();
     SpawnLib._requirePlayerDead(player);
@@ -188,6 +205,6 @@ contract SpawnSystem is System {
 
 library SpawnLib {
   function _requirePlayerDead(EntityId player) public {
-    require(updatePlayerEnergy(player).energy == 0, "Player already spawned");
+    if (updatePlayerEnergy(player).energy != 0) revert PlayerAlreadySpawned(player);
   }
 }

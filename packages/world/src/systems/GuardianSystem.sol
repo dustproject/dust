@@ -5,6 +5,7 @@ import { AccessControl } from "@latticexyz/world/src/AccessControl.sol";
 import { System } from "@latticexyz/world/src/System.sol";
 import { ROOT_NAMESPACE_ID } from "@latticexyz/world/src/constants.sol";
 
+import { AddressAlreadyGuardian, AddressNotGuardian } from "../Errors.sol";
 import { Guardians } from "../codegen/tables/Guardians.sol";
 import { WorldStatus } from "../codegen/tables/WorldStatus.sol";
 
@@ -31,12 +32,12 @@ contract GuardianSystem is System {
   }
 
   function addGuardian(address guardian) public onlyROOT {
-    require(!Guardians._get(guardian), "Address is already a guardian");
+    if (Guardians._get(guardian)) revert AddressAlreadyGuardian(guardian);
     Guardians._set(guardian, true);
   }
 
   function removeGuardian(address guardian) public onlyROOT {
-    require(Guardians._get(guardian), "Address is not a guardian");
+    if (!Guardians._get(guardian)) revert AddressNotGuardian(guardian);
     Guardians._set(guardian, false);
   }
 

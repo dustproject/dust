@@ -3,6 +3,17 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
+import {
+  BedFull,
+  BedNotInsideForceField,
+  BedTooFarAway,
+  CannotDropOnNonPassableBlock,
+  CannotSpawnHereGravityApplies,
+  DropLocationTooFarFromBed,
+  NotABed,
+  PlayerIsNotDead,
+  PlayerNotInBed
+} from "../Errors.sol";
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
@@ -39,11 +50,11 @@ contract BedSystem is System {
 
     (Vec3 callerCoord,) = caller.requireConnected(bed);
 
-    require(bed._getObjectType() == ObjectTypes.Bed, "Not a bed");
+    if (bed._getObjectType() != ObjectTypes.Bed) revert NotABed(bed._getObjectType());
 
     bed = bed.baseEntityId();
 
-    require(!BedPlayer._getPlayerEntityId(bed)._exists(), "Bed full");
+    if (BedPlayer._getPlayerEntityId(bed)._exists()) revert BedFull(bed);
 
     Vec3 bedCoord = bed._getPosition();
 
@@ -65,21 +76,21 @@ contract BedSystem is System {
     caller._validateCaller();
 
     (EntityId bed, Vec3 bedCoord) = BedLib.getPlayerBed(caller);
-    require(bedCoord.inSurroundingCube(spawnCoord, MAX_RESPAWN_HALF_WIDTH), "Bed is too far away");
+    if (!bedCoord.inSurroundingCube(spawnCoord, MAX_RESPAWN_HALF_WIDTH)) revert BedTooFarAway(bedCoord, spawnCoord);
 
     EnergyData memory playerData = BedLib.removePlayerFromBed(caller, bed, bedCoord);
     if (playerData.energy == 0) {
       // Player died while sleeping
 
       (EntityId drop, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(spawnCoord);
-      require(objectType.isPassThrough(), "Cannot drop items on a non-passable block");
+      if (!objectType.isPassThrough()) revert CannotDropOnNonPassableBlock(objectType);
 
       InventoryUtils.transferAll(caller, drop);
 
       return;
     }
 
-    require(!MoveLib._gravityApplies(spawnCoord), "Cannot spawn player here as gravity applies");
+    if (MoveLib._gravityApplies(spawnCoord)) revert CannotSpawnHereGravityApplies(spawnCoord);
 
     PlayerUtils.addPlayerToGrid(caller, spawnCoord);
 
@@ -96,13 +107,15 @@ contract BedSystem is System {
 
     (EntityId bed, Vec3 bedCoord) = BedLib.getPlayerBed(player);
 
-    require(bedCoord.inSurroundingCube(dropCoord, MAX_RESPAWN_HALF_WIDTH), "Drop location is too far from bed");
+    if (!bedCoord.inSurroundingCube(dropCoord, MAX_RESPAWN_HALF_WIDTH)) {
+      revert DropLocationTooFarFromBed(dropCoord, bedCoord);
+    }
 
     (EntityId drop, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(dropCoord);
-    require(objectType.isPassThrough(), "Cannot drop items on a non-passable block");
+    if (!objectType.isPassThrough()) revert CannotDropOnNonPassableBlock(objectType);
 
     EnergyData memory playerData = BedLib.removePlayerFromBed(player, bed, bedCoord);
-    require(playerData.energy == 0, "Player is not dead");
+    if (playerData.energy != 0) revert PlayerIsNotDead(player);
 
     InventoryUtils.transferAll(player, drop);
   }
@@ -112,7 +125,7 @@ contract BedSystem is System {
 library BedLib {
   function addPlayerToBed(EntityId caller, EntityId bed, Vec3 bedCoord) public {
     (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(bedCoord);
-    require(forceField._exists(), "Bed is not inside a forcefield");
+    if (!forceField._exists()) revert BedNotInsideForceField(bed);
 
     increaseFragmentDrainRate(forceField, fragment, PLAYER_ENERGY_DRAIN_RATE);
 
@@ -135,7 +148,7 @@ library BedLib {
 
   function getPlayerBed(EntityId player) public view returns (EntityId, Vec3) {
     EntityId bed = PlayerBed._getBedEntityId(player);
-    require(bed._exists(), "Player is not in a bed");
+    if (!bed._exists()) revert PlayerNotInBed(player);
 
     Vec3 bedCoord = bed._getPosition();
     return (bed, bedCoord);

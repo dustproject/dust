@@ -3,6 +3,7 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
+import { CannotDropOnNonPassableBlock, CannotPickupFromNonPassableBlock, MustDropAtLeastOneObject } from "../Errors.sol";
 import { Action } from "../codegen/common.sol";
 
 import { MAX_PICKUP_RADIUS } from "../Constants.sol";
@@ -17,12 +18,12 @@ import { TerrainLib } from "./libraries/TerrainLib.sol";
 
 contract InventorySystem is System {
   function drop(EntityId caller, SlotAmount[] memory slots, Vec3 coord) public {
-    require(slots.length > 0, "Must drop at least one object");
+    if (slots.length == 0) revert MustDropAtLeastOneObject();
     caller.activate();
     caller.requireConnected(coord);
 
     (EntityId entityId, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(coord);
-    require(objectType.isPassThrough(), "Cannot drop on a non-passable block");
+    if (!objectType.isPassThrough()) revert CannotDropOnNonPassableBlock(objectType);
 
     InventoryUtils.transfer(caller, entityId, slots);
 
@@ -34,7 +35,7 @@ contract InventorySystem is System {
     caller.requireInRange(coord, MAX_PICKUP_RADIUS);
 
     (EntityId entityId, ObjectType objectType) = EntityUtils.getBlockAt(coord);
-    require(objectType.isPassThrough(), "Cannot pickup from a non-passable block");
+    if (!objectType.isPassThrough()) revert CannotPickupFromNonPassableBlock(objectType);
 
     InventoryUtils.transfer(entityId, caller, slotTransfers);
   }
@@ -44,7 +45,7 @@ contract InventorySystem is System {
     caller.requireInRange(coord, MAX_PICKUP_RADIUS);
 
     (EntityId entityId, ObjectType objectType) = EntityUtils.getBlockAt(coord);
-    require(objectType.isPassThrough(), "Cannot pickup from a non-passable block");
+    if (!objectType.isPassThrough()) revert CannotPickupFromNonPassableBlock(objectType);
 
     InventoryUtils.transferAll(entityId, caller);
 

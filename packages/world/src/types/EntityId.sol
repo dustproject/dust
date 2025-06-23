@@ -1,6 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import {
+  ActionNotAllowed,
+  CallerNotAllowed,
+  EntityHasNoEnergy,
+  EntityIsNotBlock,
+  EntityIsNotFragment,
+  EntityIsNotPlayer,
+  EntityIsTooFar,
+  FragmentIsTooFar,
+  PlayerIsSleeping
+} from "../Errors.sol";
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
 import { WorldContextConsumerLib } from "@latticexyz/world/src/WorldContext.sol";
@@ -37,10 +48,10 @@ library EntityIdLib {
 
   function _validateCaller(EntityId self, address caller, ObjectType objectType) internal view {
     if (objectType == ObjectTypes.Player) {
-      require(caller == self.getPlayerAddress(), "Caller not allowed");
+      if (caller != self.getPlayerAddress()) revert CallerNotAllowed(self);
     } else {
       address programAddress = self._getProgram()._getAddress();
-      require(caller == programAddress, "Caller not allowed");
+      if (caller != programAddress) revert CallerNotAllowed(self);
     }
   }
 
@@ -54,10 +65,10 @@ library EntityIdLib {
 
   function validateCaller(EntityId self, address caller, ObjectType objectType) internal view {
     if (objectType == ObjectTypes.Player) {
-      require(caller == self.getPlayerAddress(), "Caller not allowed");
+      if (caller != self.getPlayerAddress()) revert CallerNotAllowed(self);
     } else {
       address programAddress = self.getProgram().getAddress();
-      require(caller == programAddress, "Caller not allowed");
+      if (caller != programAddress) revert CallerNotAllowed(self);
     }
   }
 
@@ -77,7 +88,7 @@ library EntityIdLib {
   function requireInRange(EntityId self, Vec3 otherCoord, uint256 range) internal view returns (Vec3, Vec3) {
     Vec3 selfCoord = self._getPosition();
     Vec3 coord = self._getObjectType() == ObjectTypes.Player ? selfCoord + vec3(0, 1, 0) : selfCoord;
-    require(coord.inSphere(otherCoord, range), "Entity is too far");
+    if (!coord.inSphere(otherCoord, range)) revert EntityIsTooFar(coord, otherCoord);
     return (selfCoord, coord);
   }
 
@@ -96,7 +107,9 @@ library EntityIdLib {
 
   function requireAdjacentToFragment(EntityId self, Vec3 fragmentCoord) internal view returns (Vec3, Vec3) {
     Vec3 selfFragmentCoord = self._getPosition().toFragmentCoord();
-    require(selfFragmentCoord.inSurroundingCube(fragmentCoord, 1), "Fragment is too far");
+    if (!selfFragmentCoord.inSurroundingCube(fragmentCoord, 1)) {
+      revert FragmentIsTooFar(selfFragmentCoord, fragmentCoord);
+    }
     return (selfFragmentCoord, fragmentCoord);
   }
 
@@ -162,13 +175,13 @@ library ActivateLib {
     checkWorldStatus();
 
     ObjectType objectType = self._getObjectType();
-    require(objectType.isActionAllowed(sig), "Action not allowed");
+    if (!objectType.isActionAllowed(sig)) revert ActionNotAllowed(self);
 
     self._validateCaller(caller, objectType);
 
     EnergyData memory energyData;
     if (objectType == ObjectTypes.Player) {
-      require(!PlayerBed._getBedEntityId(self)._exists(), "Player is sleeping");
+      if (PlayerBed._getBedEntityId(self)._exists()) revert PlayerIsSleeping(self);
       energyData = updatePlayerEnergy(self);
     } else {
       EntityId forceField;
@@ -181,7 +194,7 @@ library ActivateLib {
       energyData = updateMachineEnergy(forceField);
     }
 
-    require(energyData.energy > 0, "Entity has no energy");
+    if (energyData.energy == 0) revert EntityHasNoEnergy(self);
 
     return energyData;
   }
@@ -227,19 +240,19 @@ library EntityTypeLib {
 
   function decodeBlock(EntityId self) internal pure returns (Vec3) {
     (EntityType entityType, Vec3 coord) = _decodeCoord(self);
-    require(entityType == EntityTypes.Block, "Entity is not a block");
+    if (EntityType.unwrap(entityType) != EntityType.unwrap(EntityTypes.Block)) revert EntityIsNotBlock(self);
     return coord;
   }
 
   function decodeFragment(EntityId self) internal pure returns (Vec3) {
     (EntityType entityType, Vec3 coord) = _decodeCoord(self);
-    require(entityType == EntityTypes.Fragment, "Entity is not a fragment");
+    if (EntityType.unwrap(entityType) != EntityType.unwrap(EntityTypes.Fragment)) revert EntityIsNotFragment(self);
     return coord;
   }
 
   function decodePlayer(EntityId self) internal pure returns (address) {
     (EntityType entityType, bytes31 data) = decode(self);
-    require(entityType == EntityTypes.Player, "Entity is not a player");
+    if (EntityType.unwrap(entityType) != EntityType.unwrap(EntityTypes.Player)) revert EntityIsNotPlayer(self);
     return address(bytes20(data));
   }
 

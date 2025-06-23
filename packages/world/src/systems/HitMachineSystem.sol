@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { CannotHitDepletedForceField, NoForceFieldAtLocation } from "../Errors.sol";
 import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
@@ -50,11 +51,11 @@ contract HitMachineSystem is System {
     uint128 callerEnergy = caller.activate().energy;
     (Vec3 callerCoord,) = caller.requireConnected(coord);
     (EntityId forceField,) = ForceFieldUtils.getForceField(coord);
-    require(forceField._exists(), "No force field at this location");
+    if (!forceField._exists()) revert NoForceFieldAtLocation(coord);
 
     EnergyData memory machineData = updateMachineEnergy(forceField);
     uint128 energyLeft = machineData.energy;
-    require(energyLeft > 0, "Cannot hit depleted forcefield");
+    if (energyLeft == 0) revert CannotHitDepletedForceField(uint32(energyLeft));
 
     ToolData memory toolData = ToolUtils.getToolData(caller, toolSlot);
     uint128 playerEnergyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, energyLeft);

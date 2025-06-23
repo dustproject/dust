@@ -3,6 +3,13 @@ pragma solidity >=0.8.24;
 
 import { Energy } from "../../codegen/tables/Energy.sol";
 
+import {
+  CannotGlideMoreThan10Blocks,
+  CannotJumpMoreThan3Blocks,
+  CannotMoveThroughPlayer,
+  MoveLimitExceeded,
+  NewCoordTooFarFromOld
+} from "../../Errors.sol";
 import { MoveUnits } from "../../codegen/tables/MoveUnits.sol";
 import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
 
@@ -102,7 +109,7 @@ library MoveLib {
   }
 
   function _requireValidMove(Vec3 baseOldCoord, Vec3 baseNewCoord) internal view {
-    require(baseOldCoord.inSurroundingCube(baseNewCoord, 1), "New coord is too far from old coord");
+    if (!baseOldCoord.inSurroundingCube(baseNewCoord, 1)) revert NewCoordTooFarFromOld(baseOldCoord, baseNewCoord);
 
     Vec3[] memory newPlayerCoords = ObjectTypes.Player.getRelativeCoords(baseNewCoord);
 
@@ -113,7 +120,9 @@ library MoveLib {
       if (!newObjectType.isPassThrough()) {
         revert NonPassableBlock(newCoord.x(), newCoord.y(), newCoord.z(), newObjectType);
       }
-      require(!EntityUtils.getMovableEntityAt(newCoord)._exists(), "Cannot move through a player");
+      if (EntityUtils.getMovableEntityAt(newCoord)._exists()) {
+        revert CannotMoveThroughPlayer(EntityUtils.getMovableEntityAt(newCoord));
+      }
     }
   }
 
@@ -188,17 +197,17 @@ library MoveLib {
       } else {
         if (dy > 0) {
           ++jumps;
-          require(jumps <= Constants.MAX_PLAYER_JUMPS, "Cannot jump more than 3 blocks");
+          if (jumps > Constants.MAX_PLAYER_JUMPS) revert CannotJumpMoreThan3Blocks(jumps);
         } else if (nextHasGravity) {
           ++glides;
-          require(glides <= Constants.MAX_PLAYER_GLIDES, "Cannot glide more than 10 blocks");
+          if (glides > Constants.MAX_PLAYER_GLIDES) revert CannotGlideMoreThan10Blocks(glides);
         }
         (uint128 moveCost, uint128 moveUnits) = _getMoveCost(next);
         cost += moveCost;
         currentMoveUnits += moveUnits;
       }
 
-      require(currentMoveUnits <= Constants.MAX_MOVE_UNITS_PER_BLOCK, "Move limit exceeded");
+      if (currentMoveUnits > Constants.MAX_MOVE_UNITS_PER_BLOCK) revert MoveLimitExceeded(currentMoveUnits);
 
       if (!nextHasGravity) {
         // If landing after a long fall, apply fall damage

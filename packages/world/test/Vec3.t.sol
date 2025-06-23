@@ -10,6 +10,7 @@ import { ObjectTypes } from "../src/types/ObjectType.sol";
 
 import { Orientation } from "../src/types/Orientation.sol";
 import { Vec3, Vec3Lib, vec3 } from "../src/types/Vec3.sol";
+import { OrientationNotSupported } from "../src/Errors.sol";
 
 contract Vec3Test is DustTest {
   function testVec3Encoding() public pure {
@@ -114,7 +115,7 @@ contract Vec3Test is DustTest {
     // Only supported orientation is 0 for now
     for (uint8 i = 1; i < 48; i++) {
       Orientation o = Orientation.wrap(i);
-      vm.expectRevert("Orientation not supported");
+      vm.expectRevert(abi.encodeWithSelector(OrientationNotSupported.selector, i));
       ObjectTypes.Dirt.getRelativeCoords(vec3(0, 0, 0), o);
     }
   }
@@ -122,7 +123,7 @@ contract Vec3Test is DustTest {
   /// forge-config: default.allow_internal_expect_revert = true
   function testOrientationUnsupportedMultiBlockRevert() public {
     Orientation o = Orientation.wrap(20);
-    vm.expectRevert("Orientation not supported");
+    vm.expectRevert(abi.encodeWithSelector(OrientationNotSupported.selector, 20));
     ObjectTypes.Bed.getRelativeCoords(vec3(0, 0, 0), o);
   }
 }

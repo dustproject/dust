@@ -17,6 +17,7 @@ import { EntityId } from "../src/types/EntityId.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
+import { ObjectIsNotFood, NotEnoughObjectsInSlot } from "../src/Errors.sol";
 
 contract FoodTest is DustTest {
   function testEatFood() public {
@@ -56,7 +57,7 @@ contract FoodTest is DustTest {
 
     // Try to eat non-food item
     vm.prank(alice);
-    vm.expectRevert("Object is not food");
+    vm.expectRevert(abi.encodeWithSelector(ObjectIsNotFood.selector, nonFoodType));
     world.eat(aliceEntityId, SlotAmount({ slot: 0, amount: 1 }));
   }
 
@@ -104,7 +105,7 @@ contract FoodTest is DustTest {
 
     // Try to eat more than available
     vm.prank(alice);
-    vm.expectRevert("Not enough objects in slot");
+    vm.expectRevert(abi.encodeWithSelector(NotEnoughObjectsInSlot.selector, 0, foodAmount + 1, foodAmount));
     world.eat(aliceEntityId, SlotAmount({ slot: 0, amount: foodAmount + 1 }));
   }
 

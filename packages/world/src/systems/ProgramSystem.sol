@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import {
+  ExistingProgramMustBeDetached,
+  NoProgramAttached,
+  ProgramDoesNotExist,
+  ProgramSystemMustBePrivate,
+  TargetIsNotSmartEntity
+} from "../Errors.sol";
 import { ERC165Checker } from "@latticexyz/world/src/ERC165Checker.sol";
 import { System } from "@latticexyz/world/src/System.sol";
 import { NamespaceOwner } from "@latticexyz/world/src/codegen/tables/NamespaceOwner.sol";
@@ -52,7 +59,7 @@ contract ProgramSystem is System {
     Vec3 validatorCoord = _getValidatorCoord(caller, target);
     target = _validateTarget(target);
 
-    require(!target._getProgram().exists(), "Existing program must be detached");
+    if (target._getProgram().exists()) revert ExistingProgramMustBeDetached(target);
 
     _attachProgram(caller, target, program, validatorCoord, extraData);
   }
@@ -65,14 +72,14 @@ contract ProgramSystem is System {
     target = _validateTarget(target);
 
     ProgramId program = target._getProgram();
-    require(program.exists(), "No program attached");
+    if (!program.exists()) revert NoProgramAttached(target);
 
     _detachProgram(caller, target, program, validatorCoord, extraData);
   }
 
   function _validateTarget(EntityId target) internal view returns (EntityId) {
     ObjectType targetType = target._getObjectType();
-    require(targetType.isSmartEntity(), "Target is not a smart entity");
+    if (!targetType.isSmartEntity()) revert TargetIsNotSmartEntity(targetType);
     return target.baseEntityId();
   }
 
@@ -96,8 +103,8 @@ contract ProgramSystem is System {
     bytes calldata extraData
   ) internal {
     (address programAddress, bool publicAccess) = Systems._get(program.toResourceId());
-    require(programAddress != address(0), "Program does not exist");
-    require(!publicAccess, "Program system must be private");
+    if (programAddress == address(0)) revert ProgramDoesNotExist(programAddress);
+    if (publicAccess) revert ProgramSystemMustBePrivate(publicAccess);
 
     (EntityId validator, ProgramId validatorProgram) = _getValidatorProgram(validatorCoord);
 

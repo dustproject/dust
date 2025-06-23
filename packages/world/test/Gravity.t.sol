@@ -17,6 +17,7 @@ import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 
 import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
+import { ChunkNotExploredYet } from "../src/Errors.sol";
 
 import {
   CHUNK_SIZE,
@@ -447,7 +448,7 @@ contract GravityTest is DustTest {
     }
 
     vm.prank(alice);
-    vm.expectRevert("Chunk not explored yet");
+    vm.expectRevert(abi.encodeWithSelector(ChunkNotExploredYet.selector, newCoords[0].toChunkCoord()));
     world.move(aliceEntityId, newCoords);
   }
 }

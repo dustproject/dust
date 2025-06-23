@@ -28,6 +28,18 @@ import { ObjectType } from "../src/types/ObjectType.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 
 import { SlotAmount, SlotTransfer } from "../src/utils/InventoryUtils.sol";
+import {
+  InventoryIsFull,
+  EmptySlot,
+  EntityIsTooFar,
+  ChunkNotExploredYet,
+  CannotDropOnNonPassableBlock,
+  CannotPickupFromNonPassableBlock,
+  MustDropAtLeastOneObject,
+  CallerNotAllowed,
+  PlayerIsSleeping,
+  AmountMustBePositive
+} from "../src/Errors.sol";
 
 import { Orientation } from "../src/types/Orientation.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
@@ -309,7 +321,7 @@ contract InventoryTest is DustTest {
       aliceEntityId, transferObjectType, ObjectTypes.Player.getMaxInventorySlots() * transferObjectType.getStackable()
     );
     vm.prank(alice);
-    vm.expectRevert("Inventory is full");
+    vm.expectRevert(abi.encodeWithSelector(InventoryIsFull.selector, aliceEntityId));
     world.pickupAll(aliceEntityId, pickupCoord);
   }
 
@@ -323,7 +335,7 @@ contract InventoryTest is DustTest {
     drop[0] = SlotAmount({ slot: 0, amount: 1 });
 
     vm.prank(alice);
-    vm.expectRevert("Empty slot");
+    vm.expectRevert(abi.encodeWithSelector(EmptySlot.selector, aliceEntityId, 0));
     world.drop(aliceEntityId, drop, dropCoord);
   }
 
@@ -336,7 +348,8 @@ contract InventoryTest is DustTest {
     SlotTransfer[] memory pickup = new SlotTransfer[](1);
     pickup[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
     vm.prank(alice);
-    vm.expectRevert("Empty slot");
+    (EntityId dropEntityId,) = TestEntityUtils.getBlockAt(dropCoord);
+    vm.expectRevert(abi.encodeWithSelector(EmptySlot.selector, dropEntityId, 0));
     world.pickup(aliceEntityId, pickup, dropCoord);
   }
 
@@ -354,7 +367,7 @@ contract InventoryTest is DustTest {
     pickup[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
 
     vm.prank(alice);
-    vm.expectRevert("Entity is too far");
+    vm.expectRevert(abi.encodeWithSelector(EntityIsTooFar.selector, playerCoord, pickupCoord));
     world.pickup(aliceEntityId, pickup, pickupCoord);
   }
 
@@ -371,13 +384,13 @@ contract InventoryTest is DustTest {
     drop[0] = SlotAmount({ slot: 0, amount: 1 });
 
     vm.prank(alice);
-    vm.expectRevert("Entity is too far");
+    vm.expectRevert(abi.encodeWithSelector(EntityIsTooFar.selector, playerCoord, dropCoord));
     world.drop(aliceEntityId, drop, dropCoord);
 
     dropCoord = playerCoord - vec3(CHUNK_SIZE / 2 + 1, 1, 0);
 
     vm.prank(alice);
-    vm.expectRevert("Chunk not explored yet");
+    vm.expectRevert(abi.encodeWithSelector(ChunkNotExploredYet.selector, dropCoord.toChunkCoord()));
     world.drop(aliceEntityId, drop, dropCoord);
   }
 
@@ -394,7 +407,7 @@ contract InventoryTest is DustTest {
     drops[0] = SlotAmount({ slot: 0, amount: 1 });
 
     vm.prank(alice);
-    vm.expectRevert("Cannot drop on a non-passable block");
+    vm.expectRevert(abi.encodeWithSelector(CannotDropOnNonPassableBlock.selector, ObjectTypes.Stone));
     world.drop(aliceEntityId, drops, dropCoord);
   }
 
@@ -411,7 +424,7 @@ contract InventoryTest is DustTest {
     pickup[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
 
     vm.prank(alice);
-    vm.expectRevert("Cannot pickup from a non-passable block");
+    vm.expectRevert(abi.encodeWithSelector(CannotPickupFromNonPassableBlock.selector, ObjectTypes.Stone));
     world.pickup(aliceEntityId, pickup, pickupCoord);
   }
 
@@ -429,7 +442,7 @@ contract InventoryTest is DustTest {
     pickup[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 0 });
 
     vm.prank(alice);
-    vm.expectRevert("Amount must be greater than 0");
+    vm.expectRevert(abi.encodeWithSelector(AmountMustBePositive.selector, 0));
     world.pickup(aliceEntityId, pickup, pickupCoord);
   }
 
@@ -447,14 +460,14 @@ contract InventoryTest is DustTest {
     drops[0] = SlotAmount({ slot: 0, amount: 0 });
 
     vm.prank(alice);
-    vm.expectRevert("Amount must be greater than 0");
+    vm.expectRevert(abi.encodeWithSelector(AmountMustBePositive.selector, 0));
     world.drop(aliceEntityId, drops, dropCoord);
 
     drops = new SlotAmount[](1);
     drops[0] = SlotAmount({ slot: 1, amount: 0 });
 
     vm.prank(alice);
-    vm.expectRevert("Amount must be greater than 0");
+    vm.expectRevert(abi.encodeWithSelector(AmountMustBePositive.selector, 0));
     world.drop(aliceEntityId, drops, dropCoord);
   }
 
@@ -471,7 +484,8 @@ contract InventoryTest is DustTest {
     SlotTransfer[] memory pickup = new SlotTransfer[](1);
     pickup[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
 
-    vm.expectRevert("Caller not allowed");
+    EntityId nonPlayerEntityId = EntityId.wrap(bytes32(uint256(0xdeadbeef)));
+    vm.expectRevert(abi.encodeWithSelector(CallerNotAllowed.selector, nonPlayerEntityId));
     world.pickup(aliceEntityId, pickup, pickupCoord);
   }
 
@@ -487,7 +501,8 @@ contract InventoryTest is DustTest {
     SlotAmount[] memory drops = new SlotAmount[](1);
     drops[0] = SlotAmount({ slot: 0, amount: 1 });
 
-    vm.expectRevert("Caller not allowed");
+    EntityId nonPlayerEntityId = EntityId.wrap(bytes32(uint256(0xdeadbeef)));
+    vm.expectRevert(abi.encodeWithSelector(CallerNotAllowed.selector, nonPlayerEntityId));
     world.drop(aliceEntityId, drops, dropCoord);
   }
 
@@ -508,7 +523,7 @@ contract InventoryTest is DustTest {
     pickup[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
 
     vm.prank(alice);
-    vm.expectRevert("Player is sleeping");
+    vm.expectRevert(abi.encodeWithSelector(PlayerIsSleeping.selector, aliceEntityId));
     world.pickup(aliceEntityId, pickup, pickupCoord);
   }
 
@@ -528,7 +543,7 @@ contract InventoryTest is DustTest {
     drops[0] = SlotAmount({ slot: 0, amount: 1 });
 
     vm.prank(alice);
-    vm.expectRevert("Player is sleeping");
+    vm.expectRevert(abi.encodeWithSelector(PlayerIsSleeping.selector, aliceEntityId));
     world.drop(aliceEntityId, drops, dropCoord);
   }
 
@@ -593,7 +608,7 @@ contract InventoryTest is DustTest {
     }
 
     // Try to add one more item
-    vm.expectRevert("Inventory is full");
+    vm.expectRevert(abi.encodeWithSelector(InventoryIsFull.selector, aliceEntityId));
     TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Diamond, 1);
 
     // Remove a stack and verify we can add a new item

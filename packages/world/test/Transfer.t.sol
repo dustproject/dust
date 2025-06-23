@@ -36,12 +36,25 @@ import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { Orientation } from "../src/types/Orientation.sol";
 import { ProgramId } from "../src/types/ProgramId.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
+import {
+  EntityIsTooFar,
+  CannotAccessAnotherPlayerInventory,
+  NotEnoughObjectsInSlot,
+  AmountMustBePositive,
+  InvalidSlot,
+  CallerNotAllowed,
+  PlayerIsSleeping,
+  ObjectDoesNotFitInSlot,
+  EmptySlot,
+  TransferNotAllowedByChest
+} from "../src/Errors.sol";
 
 import "../src/ProgramHooks.sol" as Hooks;
 import { SlotData, SlotTransfer } from "../src/utils/InventoryUtils.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
+import { AmountMustBePositive } from "../src/Errors.sol";
 
 contract TestChestProgram is System {
   // Store the last inputs received by onTransfer
@@ -55,7 +68,7 @@ contract TestChestProgram is System {
   bool public shouldRevert;
 
   function onTransfer(Hooks.TransferContext calldata ctx) external {
-    require(!shouldRevert, "Transfer not allowed by chest");
+    if (shouldRevert) revert TransferNotAllowedByChest();
 
     lastCaller = ctx.caller;
     lastTarget = ctx.target;
@@ -247,7 +260,7 @@ contract TransferTest is DustTest {
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
 
     vm.prank(alice);
-    vm.expectRevert("Object does not fit in slot");
+    vm.expectRevert(abi.encodeWithSelector(ObjectDoesNotFitInSlot.selector, 100, 99));
     world.transfer(aliceEntityId, aliceEntityId, chestEntityId, slotsToTransfer, "");
   }
 
@@ -270,7 +283,7 @@ contract TransferTest is DustTest {
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
 
     vm.prank(alice);
-    vm.expectRevert("Object does not fit in slot");
+    vm.expectRevert(abi.encodeWithSelector(ObjectDoesNotFitInSlot.selector, 100, 99));
     world.transfer(aliceEntityId, chestEntityId, aliceEntityId, slotsToTransfer, "");
   }
 
@@ -316,7 +329,7 @@ contract TransferTest is DustTest {
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
 
     vm.prank(alice);
-    vm.expectRevert("Invalid slot");
+    vm.expectRevert(abi.encodeWithSelector(InvalidSlot.selector, 0));
     world.transfer(aliceEntityId, aliceEntityId, nonChestEntityId, slotsToTransfer, "");
   }
 
@@ -335,7 +348,7 @@ contract TransferTest is DustTest {
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 2 });
 
     vm.prank(alice);
-    vm.expectRevert("Not enough objects in slot");
+    vm.expectRevert(abi.encodeWithSelector(NotEnoughObjectsInSlot.selector, 0, 2, 1));
     world.transfer(aliceEntityId, aliceEntityId, chestEntityId, slotsToTransfer, "");
 
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
@@ -349,7 +362,7 @@ contract TransferTest is DustTest {
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 2 });
 
     vm.prank(alice);
-    vm.expectRevert("Not enough objects in slot");
+    vm.expectRevert(abi.encodeWithSelector(NotEnoughObjectsInSlot.selector, 0, 2, 1));
     world.transfer(aliceEntityId, chestEntityId, aliceEntityId, slotsToTransfer, "");
 
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
@@ -368,7 +381,7 @@ contract TransferTest is DustTest {
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 1, slotTo: 1, amount: 1 });
 
     vm.prank(alice);
-    vm.expectRevert("Empty slot");
+    vm.expectRevert(abi.encodeWithSelector(EmptySlot.selector, aliceEntityId, 1));
     world.transfer(aliceEntityId, aliceEntityId, chestEntityId, slotsToTransfer, "");
 
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 1, amount: 1 });
@@ -380,7 +393,7 @@ contract TransferTest is DustTest {
     assertInventoryHasObject(chestEntityId, transferObjectType, 0);
 
     vm.prank(alice);
-    vm.expectRevert("Empty slot");
+    vm.expectRevert(abi.encodeWithSelector(EmptySlot.selector, chestEntityId, 0));
     world.transfer(aliceEntityId, chestEntityId, aliceEntityId, slotsToTransfer, "");
   }
 
@@ -398,13 +411,13 @@ contract TransferTest is DustTest {
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 0 });
 
     vm.prank(alice);
-    vm.expectRevert("Amount must be greater than 0");
+    vm.expectRevert(abi.encodeWithSelector(AmountMustBePositive.selector, 0));
     world.transfer(aliceEntityId, aliceEntityId, chestEntityId, slotsToTransfer, "");
 
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 1, slotTo: 0, amount: 0 });
 
     vm.prank(alice);
-    vm.expectRevert("Amount must be greater than 0");
+    vm.expectRevert(abi.encodeWithSelector(AmountMustBePositive.selector, 0));
     world.transfer(aliceEntityId, aliceEntityId, chestEntityId, slotsToTransfer, "");
   }
 
@@ -423,11 +436,11 @@ contract TransferTest is DustTest {
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
 
     vm.prank(alice);
-    vm.expectRevert("Entity is too far");
+    vm.expectRevert(abi.encodeWithSelector(EntityIsTooFar.selector, playerCoord, chestCoord));
     world.transfer(aliceEntityId, aliceEntityId, chestEntityId, slotsToTransfer, "");
 
     vm.prank(alice);
-    vm.expectRevert("Entity is too far");
+    vm.expectRevert(abi.encodeWithSelector(EntityIsTooFar.selector, playerCoord, chestCoord));
     world.transfer(aliceEntityId, chestEntityId, aliceEntityId, slotsToTransfer, "");
   }
 
@@ -445,7 +458,7 @@ contract TransferTest is DustTest {
     SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
 
-    vm.expectRevert("Caller not allowed");
+    vm.expectRevert(abi.encodeWithSelector(CallerNotAllowed.selector, aliceEntityId));
     world.transfer(aliceEntityId, aliceEntityId, chestEntityId, slotsToTransfer, "");
   }
 
@@ -467,7 +480,7 @@ contract TransferTest is DustTest {
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: 1 });
 
     vm.prank(alice);
-    vm.expectRevert("Player is sleeping");
+    vm.expectRevert(abi.encodeWithSelector(PlayerIsSleeping.selector, aliceEntityId));
     world.transfer(aliceEntityId, aliceEntityId, chestEntityId, slotsToTransfer, "");
   }
 
@@ -494,7 +507,7 @@ contract TransferTest is DustTest {
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: numToTransfer });
 
     vm.prank(alice);
-    vm.expectRevert("Transfer not allowed by chest");
+    vm.expectRevert(abi.encodeWithSelector(TransferNotAllowedByChest.selector));
     world.transfer(aliceEntityId, aliceEntityId, chestEntityId, slotsToTransfer, "");
   }
 
@@ -554,7 +567,7 @@ contract TransferTest is DustTest {
     SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: numToTransfer });
 
-    vm.expectRevert("Entity is too far");
+    vm.expectRevert(abi.encodeWithSelector(EntityIsTooFar.selector, chestCoord, otherChestCoord));
     program.call(
       world, abi.encodeCall(world.transfer, (chestEntityId, chestEntityId, otherChestEntityId, slotsToTransfer, ""))
     );
@@ -700,7 +713,7 @@ contract TransferTest is DustTest {
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 1, amount: numToTransfer });
 
     vm.prank(alice);
-    vm.expectRevert("Transfer not allowed by chest");
+    vm.expectRevert(abi.encodeWithSelector(TransferNotAllowedByChest.selector));
     world.transfer(aliceEntityId, chestEntityId, chestEntityId, slotsToTransfer, "");
   }
 
@@ -716,7 +729,7 @@ contract TransferTest is DustTest {
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: numToTransfer });
 
     vm.prank(alice);
-    vm.expectRevert("Cannot access another player's inventory");
+    vm.expectRevert(abi.encodeWithSelector(CannotAccessAnotherPlayerInventory.selector, ObjectTypes.Player));
     world.transfer(aliceEntityId, aliceEntityId, bobEntityId, slotsToTransfer, "");
   }
 
@@ -732,7 +745,7 @@ contract TransferTest is DustTest {
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: numToTransfer });
 
     vm.prank(alice);
-    vm.expectRevert("Cannot access another player's inventory");
+    vm.expectRevert(abi.encodeWithSelector(CannotAccessAnotherPlayerInventory.selector, ObjectTypes.Player));
     world.transfer(aliceEntityId, bobEntityId, aliceEntityId, slotsToTransfer, "");
   }
 
@@ -748,7 +761,7 @@ contract TransferTest is DustTest {
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 1, amount: numToTransfer });
 
     vm.prank(alice);
-    vm.expectRevert("Cannot access another player's inventory");
+    vm.expectRevert(abi.encodeWithSelector(CannotAccessAnotherPlayerInventory.selector, ObjectTypes.Player));
     world.transfer(aliceEntityId, bobEntityId, bobEntityId, slotsToTransfer, "");
   }
 

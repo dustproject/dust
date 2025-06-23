@@ -23,6 +23,12 @@ import { DustTest } from "./DustTest.sol";
 
 import { TestEnergyUtils, TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
+// Import custom errors
+import {
+  CannotHitDepletedForceField,
+  NoForceFieldAtLocation
+} from "../src/Errors.sol";
+
 contract HitMachineTest is DustTest {
   function testHitForceFieldWithoutTool() public {
     // Setup player and force field
@@ -122,7 +128,7 @@ contract HitMachineTest is DustTest {
 
     // Attempt to hit depleted force field
     vm.prank(alice);
-    vm.expectRevert("Cannot hit depleted forcefield");
+    vm.expectRevert(abi.encodeWithSelector(CannotHitDepletedForceField.selector, 0));
     world.hitForceField(aliceEntityId, forceFieldCoord);
   }
 
@@ -133,7 +139,7 @@ contract HitMachineTest is DustTest {
     // Try to hit at position with no force field
     Vec3 emptyPos = playerCoord + vec3(2, 0, 0);
     vm.prank(alice);
-    vm.expectRevert("No force field at this location");
+    vm.expectRevert(abi.encodeWithSelector(NoForceFieldAtLocation.selector, emptyPos));
     world.hitForceField(aliceEntityId, emptyPos);
   }
 

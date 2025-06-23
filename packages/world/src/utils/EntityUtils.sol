@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { ChunkNotExploredYet } from "../Errors.sol";
 import { WorldContextConsumerLib } from "@latticexyz/world/src/WorldContext.sol";
 
 import { EntityFluidLevel } from "../codegen/tables/EntityFluidLevel.sol";
@@ -40,7 +41,7 @@ library EntityUtils {
   /// @dev Reverts if the chunk is not explored yet.
   function safeGetObjectTypeAt(Vec3 coord) internal view returns (ObjectType) {
     ObjectType objectType = getObjectTypeAt(coord);
-    require(!objectType.isNull(), "Chunk not explored yet");
+    if (objectType.isNull()) revert ChunkNotExploredYet(coord);
     return objectType;
   }
 

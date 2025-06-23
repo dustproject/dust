@@ -1,6 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import {
+  AmountMustBePositive,
+  CannotAdd0ObjectsToSlot,
+  CannotStoreDifferentObjectTypes,
+  CannotTransferAllToSelf,
+  CannotTransferAmountsToSelf,
+  EmptySlot,
+  EntityMustExist,
+  EntityTransferAmountMustBe1,
+  InvalidSlot,
+  InventoryIsFull,
+  NotAnEntity,
+  NotEnoughObjects,
+  NotEnoughObjectsInSlot,
+  ObjectDoesNotFitInSlot,
+  ObjectTypeCannotBeAddedToInventory,
+  SlotExceedsMaxInventory,
+  SlotMustBeEmpty
+} from "../Errors.sol";
 import { InventoryBitmap } from "../codegen/tables/InventoryBitmap.sol";
 import { InventorySlot, InventorySlotData } from "../codegen/tables/InventorySlot.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
@@ -102,7 +121,7 @@ library InventoryUtils {
 
     // No free space inside current words: next slot is at current length.
     uint16 nextSlot = uint16(length * SLOTS_PER_WORD);
-    require(nextSlot < maxSlots, "Inventory is full");
+    if (nextSlot >= maxSlots) revert InventoryIsFull(owner);
     return nextSlot;
   }
 
@@ -110,7 +129,7 @@ library InventoryUtils {
 
   function addEntity(EntityId owner, EntityId entityId) internal returns (uint16 slot) {
     ObjectType objectType = entityId._getObjectType();
-    require(!objectType.isNull(), "Entity must exist");
+    if (objectType.isNull()) revert EntityMustExist(entityId);
 
     slot = findEmptySlot(owner);
     setBit(owner, slot);
@@ -119,23 +138,23 @@ library InventoryUtils {
 
   function addEntityToSlot(EntityId owner, EntityId entityId, uint16 slot) internal {
     ObjectType objectType = entityId._getObjectType();
-    require(!objectType.isNull(), "Entity must exist");
+    if (objectType.isNull()) revert EntityMustExist(entityId);
 
     // Check slot is within bounds for this entity type
     uint16 maxSlots = owner._getObjectType().getMaxInventorySlots();
-    require(slot < maxSlots, "Slot exceeds entity's max inventory");
+    if (slot >= maxSlots) revert SlotExceedsMaxInventory(slot, maxSlots);
 
     InventorySlotData memory slotData = InventorySlot._get(owner, slot);
-    require(slotData.objectType.isNull(), "Slot must be empty");
+    if (!slotData.objectType.isNull()) revert SlotMustBeEmpty(slot);
 
     setBit(owner, slot);
     InventorySlot._set(owner, slot, entityId, objectType, 1);
   }
 
   function addObject(EntityId owner, ObjectType objectType, uint128 amount) public {
-    require(amount > 0, "Amount must be greater than 0");
+    if (amount == 0) revert AmountMustBePositive(amount);
     uint16 stackable = objectType.getStackable();
-    require(stackable > 0, "Object type cannot be added to inventory");
+    if (stackable == 0) revert ObjectTypeCannotBeAddedToInventory(objectType);
 
     uint128 remaining = amount;
     uint256[] memory bitmap = InventoryBitmap._getBitmap(owner);
@@ -172,14 +191,14 @@ library InventoryUtils {
   }
 
   function addObjectToSlot(EntityId owner, ObjectType objectType, uint16 amount, uint16 slot) internal {
-    require(amount > 0, "Cannot add 0 objects to slot");
+    if (amount == 0) revert CannotAdd0ObjectsToSlot();
     uint16 stackable = objectType.getStackable();
-    require(stackable > 0, "Object type cannot be added to inventory");
+    if (stackable == 0) revert ObjectTypeCannotBeAddedToInventory(objectType);
 
     // Check slot is within bounds for this entity type
     uint16 maxSlots = owner._getObjectType().getMaxInventorySlots();
-    require(maxSlots > 0, "Invalid slot");
-    require(slot < maxSlots, "Slot exceeds entity's max inventory");
+    if (maxSlots == 0) revert InvalidSlot(slot);
+    if (slot >= maxSlots) revert SlotExceedsMaxInventory(slot, maxSlots);
 
     InventorySlotData memory slotData = InventorySlot._get(owner, slot);
 
@@ -187,9 +206,9 @@ library InventoryUtils {
       setBit(owner, slot);
       InventorySlot._set(owner, slot, EntityId.wrap(0), objectType, amount);
     } else {
-      require(slotData.objectType == objectType, "Cannot store different object types in the same slot");
+      if (slotData.objectType != objectType) revert CannotStoreDifferentObjectTypes(slotData.objectType, objectType);
       uint16 newAmount = slotData.amount + amount;
-      require(newAmount <= stackable, "Object does not fit in slot");
+      if (newAmount > stackable) revert ObjectDoesNotFitInSlot(newAmount, stackable);
       InventorySlot._setAmount(owner, slot, newAmount);
     }
   }
@@ -208,7 +227,7 @@ library InventoryUtils {
 
   function moveEntityFromSlot(EntityId owner, uint16 slot) internal returns (EntityId) {
     EntityId entity = InventorySlot._getEntityId(owner, slot);
-    require(entity._exists(), "Not an entity");
+    if (!entity._exists()) revert NotAnEntity(entity);
 
     clearBit(owner, slot);
     InventorySlot._deleteRecord(owner, slot);
@@ -217,8 +236,8 @@ library InventoryUtils {
   }
 
   function removeObject(EntityId owner, ObjectType objectType, uint16 amount) internal {
-    require(amount > 0, "Amount must be greater than 0");
-    require(!objectType.isNull(), "Empty slot");
+    if (amount == 0) revert AmountMustBePositive(amount);
+    if (objectType.isNull()) revert EmptySlot(owner, 0);
 
     uint16 remaining = amount;
     uint256[] memory bitmap = InventoryBitmap._getBitmap(owner);
@@ -247,15 +266,15 @@ library InventoryUtils {
       }
     }
 
-    require(remaining == 0, "Not enough objects");
+    if (remaining != 0) revert NotEnoughObjects(objectType, amount, amount - remaining);
   }
 
   function removeObjectFromSlot(EntityId owner, uint16 slot, uint16 amount) internal returns (ObjectType) {
-    require(amount > 0, "Amount must be greater than 0");
+    if (amount == 0) revert AmountMustBePositive(amount);
 
     InventorySlotData memory data = InventorySlot._get(owner, slot);
     require(!data.objectType.isNull(), "Empty slot");
-    require(data.amount >= amount, "Not enough objects in slot");
+    if (data.amount < amount) revert NotEnoughObjectsInSlot(slot, amount, data.amount);
 
     if (data.amount == amount) {
       clearBit(owner, slot);
@@ -282,10 +301,10 @@ library InventoryUtils {
       uint16 slotTo = slotTransfers[i].slotTo;
       uint16 amount = slotTransfers[i].amount;
 
-      require(amount > 0, "Amount must be greater than 0");
+      if (amount == 0) revert AmountMustBePositive(amount);
 
       InventorySlotData memory sourceSlot = InventorySlot._get(from, slotFrom);
-      require(!sourceSlot.objectType.isNull(), "Empty slot");
+      if (sourceSlot.objectType.isNull()) revert EmptySlot(from, slotFrom);
       fromSlotData[i] = SlotData(sourceSlot.entityId, sourceSlot.objectType, amount);
 
       InventorySlotData memory destSlot = InventorySlot._get(to, slotTo);
@@ -304,7 +323,9 @@ library InventoryUtils {
         continue;
       }
 
-      require(destSlot.objectType.isNull() || isSameType, "Cannot store different object types in the same slot");
+      if (!destSlot.objectType.isNull() && !isSameType) {
+        revert CannotStoreDifferentObjectTypes(sourceSlot.objectType, destSlot.objectType);
+      }
 
       // If transferring within the same inventory, create the corresponding withdrawal
       if (from == to) {
@@ -313,13 +334,13 @@ library InventoryUtils {
 
       if (sourceSlot.entityId._exists()) {
         // Entities are unique and always have amount=1
-        require(amount == 1, "Entity transfer amount should be 1");
+        if (amount != 1) revert EntityTransferAmountMustBe1(amount);
         // Move entity without deleting mass
         moveEntityFromSlot(from, slotFrom);
         addEntityToSlot(to, sourceSlot.entityId, slotTo);
       } else {
         // Regular objects can be transferred in partial amounts
-        require(amount <= sourceSlot.amount, "Not enough objects in slot");
+        if (amount > sourceSlot.amount) revert NotEnoughObjectsInSlot(slotFrom, amount, sourceSlot.amount);
         removeObjectFromSlot(from, slotFrom, amount);
         addObjectToSlot(to, sourceSlot.objectType, amount, slotTo);
       }
@@ -336,7 +357,7 @@ library InventoryUtils {
     public
     returns (SlotData[] memory fromSlotData)
   {
-    require(from != to, "Cannot transfer amounts to self");
+    if (from == to) revert CannotTransferAmountsToSelf(from);
 
     fromSlotData = new SlotData[](slotAmounts.length);
 
@@ -344,20 +365,20 @@ library InventoryUtils {
       uint16 slotFrom = slotAmounts[i].slot;
       uint16 amount = slotAmounts[i].amount;
 
-      require(amount > 0, "Amount must be greater than 0");
+      if (amount == 0) revert AmountMustBePositive(amount);
 
       InventorySlotData memory sourceSlot = InventorySlot._get(from, slotFrom);
-      require(!sourceSlot.objectType.isNull(), "Empty slot");
+      if (sourceSlot.objectType.isNull()) revert EmptySlot(from, slotFrom);
       fromSlotData[i] = SlotData(sourceSlot.entityId, sourceSlot.objectType, amount);
 
       if (sourceSlot.entityId._exists()) {
         // Entities are unique and always have amount=1
-        require(amount == 1, "Entity transfer amount should be 1");
+        if (amount != 1) revert EntityTransferAmountMustBe1(amount);
         moveEntityFromSlot(from, slotFrom);
         addEntity(to, sourceSlot.entityId);
       } else {
         // Regular objects can be transferred in partial amounts
-        require(amount <= sourceSlot.amount, "Not enough objects in slot");
+        if (amount > sourceSlot.amount) revert NotEnoughObjectsInSlot(slotFrom, amount, sourceSlot.amount);
         removeObjectFromSlot(from, slotFrom, amount);
         addObject(to, sourceSlot.objectType, amount);
       }
@@ -365,7 +386,7 @@ library InventoryUtils {
   }
 
   function transferAll(EntityId from, EntityId to) public {
-    require(from != to, "Cannot transfer all to self");
+    if (from == to) revert CannotTransferAllToSelf(from);
 
     uint256[] memory bitmap = InventoryBitmap._getBitmap(from);
 

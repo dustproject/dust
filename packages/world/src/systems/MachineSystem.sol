@@ -3,6 +3,7 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
+import { CanOnlyFuelMachines, MustProvideAtLeastOneSlot, SlotIsNotFuel } from "../Errors.sol";
 import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
@@ -28,18 +29,18 @@ import { Vec3 } from "../types/Vec3.sol";
 contract MachineSystem is System {
   function fuelMachine(EntityId caller, EntityId machine, SlotAmount[] memory slots, bytes calldata extraData) external {
     caller.activate();
-    require(slots.length > 0, "Must provide at least one slot");
+    if (slots.length == 0) revert MustProvideAtLeastOneSlot();
     caller.requireConnected(machine);
 
     machine = machine.baseEntityId();
 
     ObjectType objectType = machine._getObjectType();
-    require(objectType.isMachine(), "Can only fuel machines");
+    if (!objectType.isMachine()) revert CanOnlyFuelMachines(objectType);
 
     uint16 fuelAmount = 0;
     for (uint256 i = 0; i < slots.length; i++) {
       ObjectType slotType = InventorySlot._getObjectType(caller, slots[i].slot);
-      require(slotType == ObjectTypes.Battery, "Slot is not fuel");
+      if (slotType != ObjectTypes.Battery) revert SlotIsNotFuel(slotType);
       // we convert the mass to energy
       fuelAmount += slots[i].amount;
       InventoryUtils.removeObjectFromSlot(caller, slots[i].slot, slots[i].amount);

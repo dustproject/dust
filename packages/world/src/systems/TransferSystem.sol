@@ -3,6 +3,9 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
+import {
+  CallerNotInvolvedInTransfer, CannotAccessAnotherPlayerInventory, CannotTransferToPassThrough
+} from "../Errors.sol";
 import { EnergyData } from "../codegen/tables/Energy.sol";
 
 import { InventoryUtils, SlotData, SlotTransfer } from "../utils/InventoryUtils.sol";
@@ -39,15 +42,15 @@ contract TransferSystem is System {
     } else {
       // If transferring between different inventories,
       // caller must be involved and the hook should be called for other party
-      require(callerIsFrom || callerIsTo, "Caller is not involved in transfer");
+      if (!callerIsFrom && !callerIsTo) revert CallerNotInvolvedInTransfer(caller, from, to);
       target = (callerIsFrom ? to : from);
     }
 
     if (target._exists()) {
       caller.requireConnected(target);
       ObjectType targetType = target._getObjectType();
-      require(targetType != ObjectTypes.Player, "Cannot access another player's inventory");
-      require(!targetType.isPassThrough(), "Cannot transfer directly to pass-through object");
+      if (targetType == ObjectTypes.Player) revert CannotAccessAnotherPlayerInventory(targetType);
+      if (targetType.isPassThrough()) revert CannotTransferToPassThrough(targetType);
     }
 
     SlotData[] memory deposits;

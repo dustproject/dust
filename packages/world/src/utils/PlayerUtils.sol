@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { CannotSpawnOnNonPassableBlock } from "../Errors.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
@@ -30,10 +31,9 @@ library PlayerUtils {
   function addPlayerToGrid(EntityId player, Vec3 playerCoord) internal {
     // Check if the spawn location is valid
     ObjectType terrainObjectType = EntityUtils.safeGetObjectTypeAt(playerCoord);
-    require(
-      terrainObjectType.isPassThrough() && !EntityUtils.getMovableEntityAt(playerCoord)._exists(),
-      "Cannot spawn on a non-passable block"
-    );
+    if (!terrainObjectType.isPassThrough() || EntityUtils.getMovableEntityAt(playerCoord)._exists()) {
+      revert CannotSpawnOnNonPassableBlock(terrainObjectType);
+    }
 
     // Set the player at the base coordinate
     EntityUtils.setMovableEntityAt(playerCoord, player);
@@ -44,10 +44,9 @@ library PlayerUtils {
     for (uint256 i = 1; i < coords.length; i++) {
       Vec3 relativeCoord = coords[i];
       ObjectType relativeTerrainObjectType = EntityUtils.safeGetObjectTypeAt(relativeCoord);
-      require(
-        relativeTerrainObjectType.isPassThrough() && !EntityUtils.getMovableEntityAt(relativeCoord)._exists(),
-        "Cannot spawn on a non-passable block"
-      );
+      if (!relativeTerrainObjectType.isPassThrough() || EntityUtils.getMovableEntityAt(relativeCoord)._exists()) {
+        revert CannotSpawnOnNonPassableBlock(relativeTerrainObjectType);
+      }
       EntityId relativePlayer = EntityUtils.createUniqueEntity(ObjectTypes.Player);
       EntityUtils.setMovableEntityAt(relativeCoord, relativePlayer);
       BaseEntity._set(relativePlayer, player);

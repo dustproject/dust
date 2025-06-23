@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { InventoryItemIsNotTool, ToolIsBroken } from "../Errors.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 
@@ -33,7 +34,7 @@ library ToolUtils {
     }
 
     ObjectType toolType = tool._getObjectType();
-    require(toolType.isTool(), "Inventory item is not a tool");
+    if (!toolType.isTool()) revert InventoryItemIsNotTool(toolType);
 
     return ToolData(owner, tool, toolType, slot, Mass._getMass(tool));
   }
@@ -87,7 +88,7 @@ library ToolUtils {
       return;
     }
 
-    require(toolData.massLeft > 0, "Tool is broken");
+    if (toolData.massLeft == 0) revert ToolIsBroken(uint16(toolData.massLeft));
 
     if (toolData.massLeft <= massReduction) {
       InventoryUtils.removeEntityFromSlot(toolData.owner, toolData.slot);

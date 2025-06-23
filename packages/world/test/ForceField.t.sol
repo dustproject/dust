@@ -23,9 +23,19 @@ import { DustTest, console } from "./DustTest.sol";
 
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
+import { EntityUtils } from "../src/utils/EntityUtils.sol";
 
 import { FRAGMENT_SIZE, MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
 import { EntityId } from "../src/types/EntityId.sol";
+import {
+  NotAllowedByForceField,
+  NotAllowedByForceFieldFragment,
+  ReferenceFragmentNotPartOfForceField,
+  FragmentIsTooFar,
+  InvalidSpanningTree,
+  FragmentAlreadyBelongsToForceField,
+  FragmentMustNotHaveExtraDrainRate
+} from "../src/Errors.sol";
 
 import "../src/ProgramHooks.sol" as Hooks;
 import { ObjectType } from "../src/types/ObjectType.sol";
@@ -41,19 +51,19 @@ contract TestForceFieldProgram is System {
   bool revertOnRemoveFragment;
 
   function validateProgram(Hooks.ValidateProgramContext calldata) external view {
-    require(!revertOnValidateProgram, "Not allowed by forcefield");
+    if (revertOnValidateProgram) revert NotAllowedByForceField();
   }
 
   function onBuild(Hooks.BuildContext calldata) external view {
-    require(!revertOnBuild, "Not allowed by forcefield");
+    if (revertOnBuild) revert NotAllowedByForceField();
   }
 
   function onMine(Hooks.MineContext calldata) external view {
-    require(!revertOnMine, "Not allowed by forcefield");
+    if (revertOnMine) revert NotAllowedByForceField();
   }
 
   function onRemoveFragment(Hooks.RemoveFragmentContext calldata) external view {
-    require(!revertOnRemoveFragment, "Not allowed by forcefield");
+    if (revertOnRemoveFragment) revert NotAllowedByForceField();
   }
 
   function setRevertOnBuild(bool _revertOnBuild) external {
@@ -82,15 +92,15 @@ contract TestFragmentProgram is System {
   bool revertOnMine;
 
   function validateProgram(Hooks.ValidateProgramContext calldata) external view {
-    require(!revertOnValidateProgram, "Not allowed by forcefield fragment");
+    if (revertOnValidateProgram) revert NotAllowedByForceFieldFragment();
   }
 
   function onBuild(Hooks.BuildContext calldata) external view {
-    require(!revertOnBuild, "Not allowed by forcefield fragment");
+    if (revertOnBuild) revert NotAllowedByForceFieldFragment();
   }
 
   function onMine(Hooks.MineContext calldata) external view {
-    require(!revertOnMine, "Not allowed by forcefield fragment");
+    if (revertOnMine) revert NotAllowedByForceFieldFragment();
   }
 
   function setRevertOnBuild(bool _revertOnBuild) external {
@@ -188,7 +198,7 @@ contract ForceFieldTest is DustTest {
 
     // Prank as the player to mine the block
     vm.prank(alice);
-    vm.expectRevert("Not allowed by forcefield");
+    vm.expectRevert(abi.encodeWithSelector(NotAllowedByForceField.selector));
     world.mine(aliceEntityId, mineCoord, "");
   }
 
@@ -217,7 +227,7 @@ contract ForceFieldTest is DustTest {
 
     // Prank as the player to mine the block
     vm.prank(alice);
-    vm.expectRevert("Not allowed by forcefield fragment");
+    vm.expectRevert(abi.encodeWithSelector(NotAllowedByForceFieldFragment.selector));
     world.mine(aliceEntityId, mineCoord, "");
   }
 
@@ -278,7 +288,7 @@ contract ForceFieldTest is DustTest {
     // Try to build the block, should fail
     uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
     vm.prank(alice);
-    vm.expectRevert("Not allowed by forcefield");
+    vm.expectRevert(abi.encodeWithSelector(NotAllowedByForceField.selector));
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
   }
 
@@ -313,7 +323,7 @@ contract ForceFieldTest is DustTest {
 
     // Try to build the block, should fail
     vm.prank(alice);
-    vm.expectRevert("Not allowed by forcefield fragment");
+    vm.expectRevert(abi.encodeWithSelector(NotAllowedByForceFieldFragment.selector));
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
   }
 
@@ -521,7 +531,7 @@ contract ForceFieldTest is DustTest {
 
     // Add should fail because new fragment is not adjacent to reference fragment (not in Von Neumann neighborhood)
     vm.prank(alice);
-    vm.expectRevert("Reference fragment is not adjacent to new fragment");
+    vm.expectRevert(abi.encodeWithSelector(ReferenceFragmentNotPartOfForceField.selector, forceFieldEntityId, refFragmentCoord));
     world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, newFragmentCoord, "");
   }
 
@@ -544,7 +554,7 @@ contract ForceFieldTest is DustTest {
 
     // Add should fail because diagonal adjacency is not allowed (Von Neumann neighborhood requires manhattan distance = 1)
     vm.prank(alice);
-    vm.expectRevert("Reference fragment is not adjacent to new fragment");
+    vm.expectRevert(abi.encodeWithSelector(ReferenceFragmentNotPartOfForceField.selector, forceFieldEntityId, refFragmentCoord));
     world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, diagonalFragmentCoord, "");
   }
 
@@ -566,7 +576,7 @@ contract ForceFieldTest is DustTest {
 
     // Expand should fail because reference fragment is not part of the force field
     vm.prank(alice);
-    vm.expectRevert("Fragment is too far");
+    vm.expectRevert(abi.encodeWithSelector(FragmentIsTooFar.selector, playerCoord.toFragmentCoord(), newFragmentCoord));
     world.addFragment(aliceEntityId, forceFieldEntityId, invalidRefFragmentCoord, newFragmentCoord, "");
   }
 
@@ -602,7 +612,7 @@ contract ForceFieldTest is DustTest {
 
     // Remove should fail because the parent array doesn't represent a valid spanning tree
     vm.prank(alice);
-    vm.expectRevert("Invalid spanning tree");
+    vm.expectRevert(abi.encodeWithSelector(InvalidSpanningTree.selector));
     world.removeFragment(aliceEntityId, forceFieldEntityId, newFragmentCoord, boundaryIdx, invalidParents, "");
   }
 
@@ -667,7 +677,7 @@ contract ForceFieldTest is DustTest {
 
     // Create second force field
     Vec3 forceField2Coord = forceField1Coord + vec3(FRAGMENT_SIZE, 0, 0);
-    setupForceField(
+    EntityId forceField2EntityId = setupForceField(
       forceField2Coord, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: 1000, drainRate: 1 })
     );
 
@@ -675,7 +685,7 @@ contract ForceFieldTest is DustTest {
     Vec3 refFragmentCoord = forceField1Coord.toFragmentCoord();
     Vec3 newFragmentCoord = forceField2Coord.toFragmentCoord();
     vm.prank(alice);
-    vm.expectRevert("Fragment already belongs to a forcefield");
+    vm.expectRevert(abi.encodeWithSelector(FragmentAlreadyBelongsToForceField.selector, EntityUtils.getOrCreateFragmentAt(newFragmentCoord), forceField2EntityId));
     world.addFragment(aliceEntityId, forceField1EntityId, refFragmentCoord, newFragmentCoord, "");
   }
 
@@ -774,7 +784,7 @@ contract ForceFieldTest is DustTest {
 
       // Build should fail
       vm.prank(alice);
-      vm.expectRevert("Not allowed by forcefield");
+      vm.expectRevert(abi.encodeWithSelector(NotAllowedByForceField.selector));
       world.build(aliceEntityId, buildCoord2, inventorySlot, "");
     }
 
@@ -807,7 +817,7 @@ contract ForceFieldTest is DustTest {
 
       // Mining should fail
       vm.prank(alice);
-      vm.expectRevert("Not allowed by forcefield");
+      vm.expectRevert(abi.encodeWithSelector(NotAllowedByForceField.selector));
       world.mine(aliceEntityId, mineCoord2, "");
     }
   }
@@ -843,13 +853,13 @@ contract ForceFieldTest is DustTest {
     // Try to add fragment to first force field in area occupied by second force field
     // This should fail
     vm.prank(alice);
-    vm.expectRevert("Fragment already belongs to a forcefield");
+    vm.expectRevert(abi.encodeWithSelector(FragmentAlreadyBelongsToForceField.selector, EntityUtils.getOrCreateFragmentAt(newFragment2), forceField2EntityId));
     world.addFragment(aliceEntityId, forceField1EntityId, newFragment1, newFragment2, "");
 
     // Try to add fragment to second force field in area occupied by first force field
     // This should fail
     vm.prank(alice);
-    vm.expectRevert("Fragment already belongs to a forcefield");
+    vm.expectRevert(abi.encodeWithSelector(FragmentAlreadyBelongsToForceField.selector, EntityUtils.getOrCreateFragmentAt(newFragment1), forceField1EntityId));
     world.addFragment(aliceEntityId, forceField2EntityId, newFragment2, newFragment1, "");
   }
 
@@ -967,7 +977,7 @@ contract ForceFieldTest is DustTest {
 
     // Attach program with test player
     vm.prank(alice);
-    vm.expectRevert("Not allowed by forcefield");
+    vm.expectRevert(abi.encodeWithSelector(NotAllowedByForceField.selector));
     // Attempt to attach program with test player, should fail
     world.attachProgram(aliceEntityId, chestEntityId, ProgramId.wrap(programSystemId.unwrap()), "");
   }
@@ -1517,7 +1527,7 @@ contract ForceFieldTest is DustTest {
 
     // Try to remove fragment2 - should fail due to program
     vm.prank(alice);
-    vm.expectRevert("Not allowed by forcefield");
+    vm.expectRevert(abi.encodeWithSelector(NotAllowedByForceField.selector));
     world.removeFragment(aliceEntityId, forceFieldEntityId, fragment2Coord, boundaryIdx, parents, "");
 
     // Turn off the forcefield energy
@@ -1564,7 +1574,7 @@ contract ForceFieldTest is DustTest {
 
     // This should fail because fragment2 is not actually a boundary of fragment1
     vm.prank(alice);
-    vm.expectRevert("Invalid spanning tree");
+    vm.expectRevert(abi.encodeWithSelector(InvalidSpanningTree.selector));
     world.removeFragment(aliceEntityId, forceField, fragment1Coord, boundaryIdx, parents, "");
 
     // But we should be able to remove the last fragment (fragment2)
@@ -1623,7 +1633,7 @@ contract ForceFieldTest is DustTest {
 
     // Try to attach program - should be rejected by fragment validator
     vm.prank(alice);
-    vm.expectRevert("Not allowed by forcefield fragment");
+    vm.expectRevert(abi.encodeWithSelector(NotAllowedByForceFieldFragment.selector));
     world.attachProgram(aliceEntityId, chestEntityId, ProgramId.wrap(programSystemId.unwrap()), "");
 
     // Detach fragment program
@@ -1637,7 +1647,7 @@ contract ForceFieldTest is DustTest {
 
     // Try to attach program again - should be rejected by force field validator
     vm.prank(alice);
-    vm.expectRevert("Not allowed by forcefield");
+    vm.expectRevert(abi.encodeWithSelector(NotAllowedByForceField.selector));
     world.attachProgram(aliceEntityId, chestEntityId, ProgramId.wrap(programSystemId.unwrap()), "");
   }
 
@@ -1664,7 +1674,7 @@ contract ForceFieldTest is DustTest {
 
     // Try to expand the force field - should fail
     vm.prank(alice);
-    vm.expectRevert("Fragment must not have an extra drain rate");
+    vm.expectRevert(abi.encodeWithSelector(FragmentMustNotHaveExtraDrainRate.selector, extraDrainRate));
     world.addFragment(aliceEntityId, forceFieldEntityId, refFragmentCoord, newFragmentCoord, "");
   }
 
@@ -1699,7 +1709,7 @@ contract ForceFieldTest is DustTest {
     parents[0] = 0;
 
     vm.prank(alice);
-    vm.expectRevert("Fragment must not have an extra drain rate");
+    vm.expectRevert(abi.encodeWithSelector(FragmentMustNotHaveExtraDrainRate.selector, extraDrainRate));
     world.removeFragment(aliceEntityId, forceFieldEntityId, newFragmentCoord, boundaryIdx, parents, "");
   }
 

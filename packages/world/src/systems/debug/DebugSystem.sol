@@ -5,6 +5,13 @@ import { AccessControl } from "@latticexyz/world/src/AccessControl.sol";
 import { System } from "@latticexyz/world/src/System.sol";
 import { ROOT_NAMESPACE_ID } from "@latticexyz/world/src/constants.sol";
 
+import {
+  CannotTeleportHereGravityApplies,
+  CannotTeleportToNonPassableBlock,
+  CannotTeleportWherePlayerExists,
+  DebugSystemOnlyInDevEnv,
+  ToAddToolUseDebugAddToolToInventory
+} from "../../Errors.sol";
 import { Vec3, vec3 } from "../../types/Vec3.sol";
 
 import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
@@ -27,11 +34,11 @@ contract DebugSystem is System {
   }
 
   constructor() {
-    require(block.chainid == 31337, "DebugSystem can only be deployed in dev env");
+    if (block.chainid != 31337) revert DebugSystemOnlyInDevEnv(block.chainid);
   }
 
   function debugAddToInventory(EntityId owner, ObjectType objectType, uint16 numObjectsToAdd) public onlyROOT {
-    require(!objectType.isTool(), "To add a tool, you must use debugAddToolToInventory");
+    if (objectType.isTool()) revert ToAddToolUseDebugAddToolToInventory(objectType);
     InventoryUtils.addObject(owner, objectType, numObjectsToAdd);
   }
 
@@ -55,7 +62,7 @@ contract DebugSystem is System {
 
     Vec3[] memory playerCoords = ObjectTypes.Player.getRelativeCoords(player._getPosition());
     EntityId[] memory players = _getPlayerEntityIds(player, playerCoords);
-    require(!MoveLib._gravityApplies(finalCoord), "Cannot teleport here as gravity applies");
+    if (MoveLib._gravityApplies(finalCoord)) revert CannotTeleportHereGravityApplies(finalCoord);
 
     for (uint256 i = 0; i < playerCoords.length; i++) {
       ReverseMovablePosition._deleteRecord(playerCoords[i]);
@@ -66,8 +73,10 @@ contract DebugSystem is System {
       Vec3 newCoord = newPlayerCoords[i];
 
       ObjectType newObjectType = EntityUtils.safeGetObjectTypeAt(newCoord);
-      require(newObjectType.isPassThrough(), "Cannot teleport to a non-passable block");
-      require(!EntityUtils.getMovableEntityAt(newCoord)._exists(), "Cannot teleport where a player already exists");
+      if (!newObjectType.isPassThrough()) revert CannotTeleportToNonPassableBlock(newObjectType);
+      if (EntityUtils.getMovableEntityAt(newCoord)._exists()) {
+        revert CannotTeleportWherePlayerExists(EntityUtils.getMovableEntityAt(newCoord));
+      }
 
       EntityUtils.setMovableEntityAt(newCoord, players[i]);
     }

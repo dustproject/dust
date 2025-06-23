@@ -3,6 +3,16 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
+import {
+  CannotRespawnWhereDroppedObjects,
+  EntityTooFarToCommit,
+  ExistingChunkCommitment,
+  NoResourcesAvailableForRespawn,
+  NotGrowable,
+  NotWithinCommitmentBlocks,
+  ResourceCoordinateIsNotAir,
+  SeedCannotBeGrownYet
+} from "../Errors.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 
 import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
@@ -28,24 +38,25 @@ contract NatureSystem is System {
     caller.activate();
 
     Vec3 callerChunkCoord = caller._getPosition().toChunkCoord();
-    require(callerChunkCoord.inSurroundingCube(chunkCoord, CHUNK_COMMIT_HALF_WIDTH), "Entity is too far to commit");
+    if (!callerChunkCoord.inSurroundingCube(chunkCoord, CHUNK_COMMIT_HALF_WIDTH)) {
+      revert EntityTooFarToCommit(callerChunkCoord, chunkCoord);
+    }
 
     // Check existing commitment
     uint256 commitment = ChunkCommitment._get(chunkCoord);
-    require(block.number > commitment + CHUNK_COMMIT_EXPIRY_BLOCKS, "Existing chunk commitment");
+    if (block.number <= commitment + CHUNK_COMMIT_EXPIRY_BLOCKS) revert ExistingChunkCommitment(commitment);
 
     // Commit starting from next block
     ChunkCommitment._set(chunkCoord, block.number + 1);
   }
 
   function respawnResource(uint256 blockNumber, ObjectType resourceType) public {
-    require(
-      blockNumber < block.number && blockNumber >= block.number - RESPAWN_ORE_BLOCK_RANGE,
-      "Can only choose past 10 blocks"
-    );
+    if (blockNumber >= block.number || blockNumber < block.number - RESPAWN_ORE_BLOCK_RANGE) {
+      revert NotWithinCommitmentBlocks(blockNumber, block.number);
+    }
 
     uint256 burned = BurnedResourceCount._get(resourceType);
-    require(burned > 0, "No resources available for respawn");
+    if (burned == 0) revert NoResourcesAvailableForRespawn(uint32(burned));
 
     uint256 collected = ResourceCount._get(resourceType);
     uint256 resourceIdx = uint256(blockhash(blockNumber)) % collected;
@@ -54,8 +65,8 @@ contract NatureSystem is System {
 
     // Check existing entity
     (EntityId entityId, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(resourceCoord);
-    require(objectType == ObjectTypes.Air, "Resource coordinate is not air");
-    require(InventoryUtils.isEmpty(entityId), "Cannot respawn where there are dropped objects");
+    if (objectType != ObjectTypes.Air) revert ResourceCoordinateIsNotAir(objectType);
+    if (!InventoryUtils.isEmpty(entityId)) revert CannotRespawnWhereDroppedObjects(entityId);
 
     // Remove from collected resource array
     if (resourceIdx < collected) {
@@ -75,8 +86,10 @@ contract NatureSystem is System {
   function growSeed(EntityId caller, Vec3 coord) external {
     caller.activate();
     (EntityId seed, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(coord);
-    require(objectType.isGrowable(), "Not growable");
-    require(SeedGrowth._getFullyGrownAt(seed) <= block.timestamp, "Seed cannot be grown yet");
+    if (!objectType.isGrowable()) revert NotGrowable(objectType);
+    if (SeedGrowth._getFullyGrownAt(seed) > block.timestamp) {
+      revert SeedCannotBeGrownYet(SeedGrowth._getFullyGrownAt(seed), block.timestamp);
+    }
     NatureLib.growSeed(coord, seed, objectType);
   }
 }

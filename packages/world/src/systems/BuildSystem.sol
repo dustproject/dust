@@ -3,6 +3,16 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
+import {
+  CanOnlyBuildOnAirOrWater,
+  CannotBuildNonBlock,
+  CannotBuildOnMovableEntity,
+  CannotBuildOnWaterWithNonWaterloggable,
+  CannotBuildWhereDroppedObjects,
+  CannotJumpBuildOnPassThrough,
+  CannotPlantOnThisBlock,
+  ForceFieldOverlapsWithAnother
+} from "../Errors.sol";
 import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { EntityFluidLevel } from "../codegen/tables/EntityFluidLevel.sol";
@@ -80,7 +90,7 @@ contract BuildSystem is System {
 
     BuildContext memory ctx = _buildContext(caller, coord, slot, orientation, callerEnergy);
 
-    require(!ctx.buildType.isPassThrough(), "Cannot jump build on a pass-through block");
+    if (ctx.buildType.isPassThrough()) revert CannotJumpBuildOnPassThrough(ctx.buildType);
 
     // Jump movement
     MoveLib.jump(coord);
@@ -130,7 +140,7 @@ contract BuildSystem is System {
   }
 
   function _getBuildType(ObjectType slotType) internal pure returns (ObjectType) {
-    require(slotType.isBlock(), "Cannot build non-block object");
+    if (!slotType.isBlock()) revert CannotBuildNonBlock(slotType);
     return slotType;
   }
 
@@ -140,7 +150,7 @@ contract BuildSystem is System {
   function _handleSpecialBlockTypes(EntityId base, ObjectType buildType, Vec3 coord) internal {
     if (buildType.isGrowable()) {
       ObjectType belowType = EntityUtils.getObjectTypeAt(coord - vec3(0, 1, 0));
-      require(buildType.isPlantableOn(belowType), "Cannot plant on this block");
+      if (!buildType.isPlantableOn(belowType)) revert CannotPlantOnThisBlock(belowType);
 
       removeEnergyFromLocalPool(coord, buildType.getGrowableEnergy());
 
@@ -161,7 +171,7 @@ contract BuildSystem is System {
       (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
 
       if (ctx.buildType == ObjectTypes.ForceField) {
-        require(!forceField._exists(), "Force field overlaps with another force field");
+        if (forceField._exists()) revert ForceFieldOverlapsWithAnother(forceField);
         ForceFieldUtils.setupForceField(base, coord);
       }
 
@@ -266,14 +276,16 @@ library BuildLib {
     view
   {
     if (terrainType == ObjectTypes.Water) {
-      require(buildType.isWaterloggable(), "Cannot build on water with non-waterloggable block");
+      if (!buildType.isWaterloggable()) revert CannotBuildOnWaterWithNonWaterloggable(buildType);
     } else {
-      require(terrainType == ObjectTypes.Air, "Can only build on air or water");
+      if (terrainType != ObjectTypes.Air) revert CanOnlyBuildOnAirOrWater(terrainType);
     }
 
     if (!buildType.isPassThrough()) {
-      require(InventoryUtils.isEmpty(terrain), "Cannot build where there are dropped objects");
-      require(!EntityUtils.getMovableEntityAt(coord)._exists(), "Cannot build on a movable entity");
+      if (!InventoryUtils.isEmpty(terrain)) revert CannotBuildWhereDroppedObjects(coord);
+      if (EntityUtils.getMovableEntityAt(coord)._exists()) {
+        revert CannotBuildOnMovableEntity(EntityUtils.getMovableEntityAt(coord));
+      }
     }
   }
 

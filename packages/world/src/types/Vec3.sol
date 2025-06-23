@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { DivisionByZero } from "../Errors.sol";
 import { LibString } from "solady/utils/LibString.sol";
 import { SafeCastLib } from "solady/utils/SafeCastLib.sol";
 
@@ -139,13 +140,13 @@ library Vec3Lib {
   }
 
   function div(Vec3 a, int32 scalar) internal pure returns (Vec3) {
-    require(scalar != 0, "Division by zero");
+    if (scalar == 0) revert DivisionByZero();
     (int32 ax, int32 ay, int32 az) = a.xyz();
     return vec3(ax / scalar, ay / scalar, az / scalar);
   }
 
   function div(Vec3 a, uint256 scalar) internal pure returns (Vec3) {
-    require(scalar != 0, "Division by zero");
+    if (scalar == 0) revert DivisionByZero();
     return a.div(scalar.toInt32());
   }
 
@@ -155,7 +156,7 @@ library Vec3Lib {
   }
 
   function floorDiv(Vec3 a, int32 divisor) internal pure returns (Vec3) {
-    require(divisor != 0, "Division by zero");
+    if (divisor == 0) revert DivisionByZero();
 
     (int32 ax, int32 ay, int32 az) = a.xyz();
     return vec3(_floorDiv(ax, divisor), _floorDiv(ay, divisor), _floorDiv(az, divisor));
@@ -278,7 +279,7 @@ library Vec3Lib {
 
   // Floor division (integer division that rounds down)
   function _floorDiv(int32 a, int32 b) private pure returns (int32) {
-    require(b != 0, "Division by zero");
+    if (b == 0) revert DivisionByZero();
 
     // Handle special case for negative numbers
     if ((a < 0) != (b < 0) && a % b != 0) {

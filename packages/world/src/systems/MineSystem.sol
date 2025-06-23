@@ -3,6 +3,9 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
+import {
+  CannotMineForceFieldWithSleepingPlayers, CannotMineWithEnergyRemaining, ObjectIsNotMineable
+} from "../Errors.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 import { SafeCastLib } from "solady/utils/SafeCastLib.sol";
@@ -109,7 +112,7 @@ contract MineSystem is System {
     MineLib._requireReachable(coord);
 
     (EntityId mined, ObjectType minedType) = EntityUtils.getOrCreateBlockAt(coord);
-    require(minedType.isBlock(), "Object is not mineable");
+    if (!minedType.isBlock()) revert ObjectIsNotMineable(minedType);
 
     mined = mined.baseEntityId();
     Vec3 baseCoord = mined._getPosition();
@@ -155,7 +158,7 @@ contract MineSystem is System {
   function _prepareBlock(EntityId mined, ObjectType minedType, Vec3 coord) internal returns (ObjectType) {
     if (minedType.isMachine()) {
       EnergyData memory machineData = updateMachineEnergy(mined);
-      require(machineData.energy == 0, "Cannot mine a machine that has energy");
+      if (machineData.energy != 0) revert CannotMineWithEnergyRemaining(uint32(machineData.energy));
 
       // Prevent mining forcefields that have sleeping players
       if (minedType == ObjectTypes.ForceField) {
@@ -331,7 +334,7 @@ contract MineSystem is System {
     // - Storing fragment count for the forcefield entity
     // - Or tracking sleeping player count directly
     // - Or using a more robust detection method that doesn't rely on mathematical properties
-    require(drainRate % MACHINE_ENERGY_DRAIN_RATE == 0, "Cannot mine forcefield with sleeping players");
+    if (drainRate % MACHINE_ENERGY_DRAIN_RATE != 0) revert CannotMineForceFieldWithSleepingPlayers(uint32(drainRate));
   }
 }
 
@@ -346,7 +349,7 @@ library MineLib {
       if (objectType.isPassThrough()) return;
     }
 
-    revert("Coordinate is not reachable");
+    revert ObjectIsNotMineable(ObjectTypes.Null);
   }
 
   function _requireMinesAllowed(EntityId caller, ObjectType objectType, Vec3 coord, bytes calldata extraData) public {

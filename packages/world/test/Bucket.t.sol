@@ -22,6 +22,13 @@ import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 import { DustTest } from "./DustTest.sol";
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
+import {
+  NotWater,
+  MustUseBucket,
+  EntityIsTooFar,
+  NotFarmland,
+  MustUseWaterBucket
+} from "../src/Errors.sol";
 
 contract BucketTest is DustTest {
   function testFillBucket() public {
@@ -75,7 +82,7 @@ contract BucketTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Bucket, 1);
 
     vm.prank(alice);
-    vm.expectRevert("Not water");
+    vm.expectRevert(abi.encodeWithSelector(NotWater.selector, ObjectTypes.Dirt));
     world.fillBucket(aliceEntityId, nonWaterCoord, 0);
   }
 
@@ -88,7 +95,7 @@ contract BucketTest is DustTest {
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Bucket, 0);
 
     vm.prank(alice);
-    vm.expectRevert("Must use an empty Bucket");
+    vm.expectRevert(abi.encodeWithSelector(MustUseBucket.selector, ObjectTypes.Null));
     world.fillBucket(aliceEntityId, waterCoord, 0);
   }
 
@@ -100,7 +107,7 @@ contract BucketTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Bucket, 1);
 
     vm.prank(alice);
-    vm.expectRevert("Entity is too far");
+    vm.expectRevert(abi.encodeWithSelector(EntityIsTooFar.selector, playerCoord, waterCoord));
     world.fillBucket(aliceEntityId, waterCoord, 0);
   }
 
@@ -113,7 +120,7 @@ contract BucketTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.WaterBucket, 1);
 
     vm.prank(alice);
-    vm.expectRevert("Not farmland");
+    vm.expectRevert(abi.encodeWithSelector(NotFarmland.selector, ObjectTypes.Dirt));
     world.wetFarmland(aliceEntityId, nonFarmlandCoord, 0);
   }
 
@@ -126,7 +133,7 @@ contract BucketTest is DustTest {
     assertInventoryHasObject(aliceEntityId, ObjectTypes.WaterBucket, 0);
 
     vm.prank(alice);
-    vm.expectRevert("Must use a Water Bucket");
+    vm.expectRevert(abi.encodeWithSelector(MustUseWaterBucket.selector, ObjectTypes.Null));
     world.wetFarmland(aliceEntityId, farmlandCoord, 0);
   }
 
@@ -139,7 +146,7 @@ contract BucketTest is DustTest {
     TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.WaterBucket, 1);
 
     vm.prank(alice);
-    vm.expectRevert("Entity is too far");
+    vm.expectRevert(abi.encodeWithSelector(EntityIsTooFar.selector, playerCoord, farmlandCoord));
     world.wetFarmland(aliceEntityId, farmlandCoord, 0);
   }
 }

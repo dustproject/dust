@@ -28,6 +28,14 @@ import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
 import { SlotData, SlotTransfer } from "../src/utils/InventoryUtils.sol";
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
+import {
+  ProgramDoesNotExist,
+  ProgramSystemMustBePrivate,
+  NoProgramAttached,
+  TargetIsNotSmartEntity,
+  ExistingProgramMustBeDetached,
+  NotAllowedByProgram
+} from "../src/Errors.sol";
 
 contract TestProgram is System {
   bool public shouldRevert = false;
@@ -97,7 +105,7 @@ contract ProgramTest is DustTest {
 
     // Try to attach non-existent program - should fail
     vm.prank(alice);
-    vm.expectRevert("Program does not exist");
+    vm.expectRevert(abi.encodeWithSelector(ProgramDoesNotExist.selector, address(0)));
     world.attachProgram(aliceEntityId, chestEntityId, nonExistentProgram, "");
   }
 
@@ -118,7 +126,7 @@ contract ProgramTest is DustTest {
 
     // Try to attach public system - should fail
     vm.prank(alice);
-    vm.expectRevert("Program system must be private");
+    vm.expectRevert(abi.encodeWithSelector(ProgramSystemMustBePrivate.selector, true));
     world.attachProgram(aliceEntityId, chestEntityId, programId, "");
   }
 
@@ -134,7 +142,7 @@ contract ProgramTest is DustTest {
 
     // Try to detach when no program is attached - should fail
     vm.prank(alice);
-    vm.expectRevert("No program attached");
+    vm.expectRevert(abi.encodeWithSelector(NoProgramAttached.selector, chestEntityId));
     world.detachProgram(aliceEntityId, chestEntityId, "");
   }
 
@@ -146,7 +154,7 @@ contract ProgramTest is DustTest {
 
     // Try to detach program on non-smart entity - should fail
     vm.prank(alice);
-    vm.expectRevert("Target is not a smart entity");
+    vm.expectRevert(abi.encodeWithSelector(TargetIsNotSmartEntity.selector, ObjectTypes.Grass));
     world.detachProgram(aliceEntityId, grassEntityId, "");
   }
 
@@ -224,7 +232,7 @@ contract ProgramTest is DustTest {
 
     // Try to attach second program - should fail
     vm.prank(alice);
-    vm.expectRevert("Existing program must be detached");
+    vm.expectRevert(abi.encodeWithSelector(ExistingProgramMustBeDetached.selector, chestEntityId));
     world.attachProgram(aliceEntityId, chestEntityId, programId2, "");
 
     // Verify first program is still attached
@@ -249,7 +257,7 @@ contract ProgramTest is DustTest {
 
     // Try to attach program to non-smart entity - should fail
     vm.prank(alice);
-    vm.expectRevert("Target is not a smart entity");
+    vm.expectRevert(abi.encodeWithSelector(TargetIsNotSmartEntity.selector, ObjectTypes.Grass));
     world.attachProgram(aliceEntityId, grassEntityId, programId, "");
   }
 
@@ -271,7 +279,7 @@ contract ProgramTest is DustTest {
 
     // Try to attach program that will fail in onAttachProgram hook
     vm.prank(alice);
-    vm.expectRevert("Not allowed by program");
+    vm.expectRevert(abi.encodeWithSelector(NotAllowedByProgram.selector));
     world.attachProgram(aliceEntityId, chestEntityId, programId, "");
   }
 
@@ -292,7 +300,7 @@ contract ProgramTest is DustTest {
 
     // Try to detach program from within force field with energy
     vm.prank(alice);
-    vm.expectRevert("Not allowed by program");
+    vm.expectRevert(abi.encodeWithSelector(NotAllowedByProgram.selector));
     world.detachProgram(aliceEntityId, chestEntityId, "");
   }
 
@@ -415,7 +423,7 @@ contract ProgramTest is DustTest {
 
     // Try to update to non-existent program - should fail
     vm.prank(alice);
-    vm.expectRevert("Program does not exist");
+    vm.expectRevert(abi.encodeWithSelector(ProgramDoesNotExist.selector, address(0)));
     world.updateProgram(aliceEntityId, chestEntityId, nonExistentProgram, "");
   }
 
@@ -436,7 +444,7 @@ contract ProgramTest is DustTest {
 
     // Try to update to public system - should fail
     vm.prank(alice);
-    vm.expectRevert("Program system must be private");
+    vm.expectRevert(abi.encodeWithSelector(ProgramSystemMustBePrivate.selector, true));
     world.updateProgram(aliceEntityId, chestEntityId, programId, "");
   }
 
@@ -457,7 +465,7 @@ contract ProgramTest is DustTest {
 
     // Try to update program on non-smart entity - should fail
     vm.prank(alice);
-    vm.expectRevert("Target is not a smart entity");
+    vm.expectRevert(abi.encodeWithSelector(TargetIsNotSmartEntity.selector, ObjectTypes.Grass));
     world.updateProgram(aliceEntityId, grassEntityId, programId, "");
   }
 

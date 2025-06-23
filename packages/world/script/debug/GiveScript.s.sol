@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { InvalidWorldAddress } from "../../src/Errors.sol";
 import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 import { Script } from "forge-std/Script.sol";
 import { console } from "forge-std/console.sol";
@@ -17,7 +18,7 @@ contract GiveScript is Script {
     // Specify a store so that you can use tables directly in PostDeploy
     StoreSwitch.setStoreAddress(worldAddress);
     IWorld world = IWorld(worldAddress);
-    require(isContract(worldAddress), "Invalid world address provided");
+    if (!isContract(worldAddress)) revert InvalidWorldAddress(worldAddress);
 
     // Load the private key from the `PRIVATE_KEY` environment variable (in .env)
     uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { NoOptionsAvailable } from "../Errors.sol";
+
 library RandomLib {
   // Simple weighted selection from an array of weights
   function selectByWeight(uint256[] memory weights, uint256 randomSeed) internal pure returns (uint256) {
@@ -9,7 +11,7 @@ library RandomLib {
       totalWeight += weights[i];
     }
 
-    require(totalWeight > 0, "No options available");
+    if (totalWeight == 0) revert NoOptionsAvailable();
 
     // Select option based on weights
     uint256 randomValue = randomSeed % totalWeight;

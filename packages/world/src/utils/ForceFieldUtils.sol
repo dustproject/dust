@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import {
+  CannotExpandIntoFragmentWithProgram,
+  CannotRemoveFragmentWithProgram,
+  FragmentAlreadyBelongsToForceField,
+  FragmentMustNotHaveExtraDrainRate
+} from "../Errors.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
 
@@ -72,11 +78,15 @@ library ForceFieldUtils {
    * @dev Add a fragment to an existing forcefield
    */
   function addFragment(EntityId forceField, EntityId fragment) internal {
-    require(!fragment._getProgram().exists(), "Can't expand into a fragment with a program");
-    require(Fragment._getExtraDrainRate(fragment) == 0, "Fragment must not have an extra drain rate");
+    if (fragment._getProgram().exists()) revert CannotExpandIntoFragmentWithProgram(fragment);
+    if (Fragment._getExtraDrainRate(fragment) != 0) {
+      revert FragmentMustNotHaveExtraDrainRate(uint32(Fragment._getExtraDrainRate(fragment)));
+    }
 
     FragmentData memory fragmentData = Fragment._get(fragment);
-    require(!_isFragmentActive(fragmentData, fragmentData.forceField), "Fragment already belongs to a forcefield");
+    if (_isFragmentActive(fragmentData, fragmentData.forceField)) {
+      revert FragmentAlreadyBelongsToForceField(fragment, fragmentData.forceField);
+    }
 
     fragmentData.forceField = forceField;
     fragmentData.forceFieldCreatedAt = Machine._getCreatedAt(forceField);
@@ -90,8 +100,10 @@ library ForceFieldUtils {
    * @dev Remove a fragment from a forcefield
    */
   function removeFragment(EntityId forceField, EntityId fragment) internal {
-    require(!fragment._getProgram().exists(), "Can't remove a fragment with a program");
-    require(Fragment._getExtraDrainRate(fragment) == 0, "Fragment must not have an extra drain rate");
+    if (fragment._getProgram().exists()) revert CannotRemoveFragmentWithProgram(fragment);
+    if (Fragment._getExtraDrainRate(fragment) != 0) {
+      revert FragmentMustNotHaveExtraDrainRate(uint32(Fragment._getExtraDrainRate(fragment)));
+    }
     EnergyData memory machineData = updateMachineEnergy(forceField);
     Energy._setDrainRate(forceField, machineData.drainRate - MACHINE_ENERGY_DRAIN_RATE);
     Fragment._setForceField(fragment, EntityId.wrap(0));

@@ -3,6 +3,15 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
+import {
+  InputAmountExceedsRemaining,
+  InputAmountMustBePositive,
+  InputTypeDoesNotMatchRecipe,
+  InvalidStation,
+  NotEnoughEnergy,
+  NotEnoughInputsForRecipe,
+  RecipeNotFound
+} from "../Errors.sol";
 import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
@@ -27,15 +36,17 @@ contract CraftSystem is System {
   function craftWithStation(EntityId caller, EntityId station, bytes32 recipeId, SlotAmount[] memory inputs) public {
     caller.activate();
     RecipesData memory recipe = Recipes._get(recipeId);
-    require(recipe.inputTypes.length > 0, "Recipe not found");
+    if (recipe.inputTypes.length == 0) revert RecipeNotFound(ObjectType.wrap(uint16(uint256(recipeId))));
 
     if (!recipe.stationTypeId.isNull()) {
-      require(station._getObjectType() == recipe.stationTypeId, "Invalid station");
+      if (station._getObjectType() != recipe.stationTypeId) {
+        revert InvalidStation(recipe.stationTypeId, station._getObjectType());
+      }
       caller.requireConnected(station);
     }
 
     (uint128 callerEnergy,) = transferEnergyToPool(caller, CRAFT_ENERGY_COST);
-    require(callerEnergy > 0, "Not enough energy");
+    if (callerEnergy == 0) revert NotEnoughEnergy(uint32(CRAFT_ENERGY_COST), 0);
 
     CraftLib._consumeRecipeInputs(caller, recipe, inputs);
     CraftLib._createRecipeOutputs(caller, recipe);
@@ -57,13 +68,13 @@ library CraftLib {
       uint16 remainingAmount = recipe.inputAmounts[i];
 
       while (remainingAmount > 0) {
-        require(currentInput < inputs.length, "Not enough inputs for recipe");
+        if (currentInput >= inputs.length) revert NotEnoughInputsForRecipe(recipe.inputTypes.length, currentInput);
         uint16 amount = inputs[currentInput].amount;
-        require(amount > 0, "Input amount must be greater than 0");
-        require(amount <= remainingAmount, "Input amount exceeds remaining amount");
+        if (amount == 0) revert InputAmountMustBePositive();
+        if (amount > remainingAmount) revert InputAmountExceedsRemaining(amount, remainingAmount);
 
         ObjectType inputType = InventorySlot._getObjectType(caller, inputs[currentInput].slot);
-        require(recipeType.matches(inputType), "Input type does not match required recipe type");
+        if (!recipeType.matches(inputType)) revert InputTypeDoesNotMatchRecipe(recipeType, inputType);
 
         // TODO: this should be removed once craftingTime is implemented
         if (recipeType == ObjectTypes.CoalOre) {

@@ -3,6 +3,7 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
+import { ObjectIsNotFood } from "../Errors.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { ObjectPhysics, ObjectPhysicsData } from "../codegen/tables/ObjectPhysics.sol";
@@ -23,7 +24,7 @@ contract FoodSystem is System {
     EnergyData memory energyData = caller.activate();
 
     ObjectType objectType = InventorySlot._getObjectType(caller, slotAmount.slot);
-    require(objectType.isFood(), "Object is not food");
+    if (!objectType.isFood()) revert ObjectIsNotFood(objectType);
 
     ObjectPhysicsData memory physicsData = ObjectPhysics._get(objectType);
 

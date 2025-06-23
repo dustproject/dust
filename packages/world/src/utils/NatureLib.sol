@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { ChunkCommitmentExpired, NotEnoughSeedsInCirculation, NotWithinCommitmentBlocks } from "../Errors.sol";
 import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
 
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
@@ -45,8 +46,8 @@ library NatureLib {
     Vec3 chunkCoord = coord.toChunkCoord();
     uint256 commitment = ChunkCommitment._get(chunkCoord);
     // We can't get blockhash of current block
-    require(block.number > commitment, "Not within commitment blocks");
-    require(block.number <= commitment + CHUNK_COMMIT_EXPIRY_BLOCKS, "Chunk commitment expired");
+    if (block.number <= commitment) revert NotWithinCommitmentBlocks(block.number, commitment);
+    if (block.number > commitment + CHUNK_COMMIT_EXPIRY_BLOCKS) revert ChunkCommitmentExpired();
     return uint256(keccak256(abi.encodePacked(blockhash(commitment), coord)));
   }
 
@@ -88,7 +89,7 @@ library NatureLib {
     // We only update ResourceCount since seeds don't participate in respawning (no need to track positions
     uint256 seedCount = ResourceCount._get(objectType);
     // This should never happen if there are seeds in the world obtained from drops
-    require(seedCount > 0, "Not enough seeds in circulation");
+    if (seedCount == 0) revert NotEnoughSeedsInCirculation(1, uint32(seedCount));
     ResourceCount._set(objectType, seedCount - 1);
 
     if (objectType.isSeed()) {

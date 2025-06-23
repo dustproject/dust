@@ -36,6 +36,15 @@ import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { DustTest } from "./DustTest.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
+// Import custom errors
+import {
+  NotTillable,
+  MustEquipHoe,
+  EntityIsTooFar,
+  CannotPlantOnThisBlock,
+  SeedCannotBeGrownYet
+} from "../src/Errors.sol";
+
 contract FarmingTest is DustTest {
   function testTillDirt() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
@@ -115,7 +124,7 @@ contract FarmingTest is DustTest {
     TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenHoe);
 
     vm.prank(alice);
-    vm.expectRevert("Not tillable");
+    vm.expectRevert(abi.encodeWithSelector(NotTillable.selector, ObjectTypes.Stone));
     world.till(aliceEntityId, nonDirtCoord, 0);
   }
 
@@ -128,14 +137,14 @@ contract FarmingTest is DustTest {
     // No hoe equipped
 
     vm.prank(alice);
-    vm.expectRevert("Must equip a hoe");
+    vm.expectRevert(abi.encodeWithSelector(MustEquipHoe.selector, ObjectTypes.Air));
     world.till(aliceEntityId, dirtCoord, 0);
 
     // Equipped but not a hoe
     TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.IronPick);
 
     vm.prank(alice);
-    vm.expectRevert("Must equip a hoe");
+    vm.expectRevert(abi.encodeWithSelector(MustEquipHoe.selector, ObjectTypes.IronPick));
     world.till(aliceEntityId, dirtCoord, 0);
   }
 
@@ -148,7 +157,7 @@ contract FarmingTest is DustTest {
     TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenHoe);
 
     vm.prank(alice);
-    vm.expectRevert("Entity is too far");
+    vm.expectRevert(abi.encodeWithSelector(EntityIsTooFar.selector, playerCoord, dirtCoord));
     world.till(aliceEntityId, dirtCoord, 0);
   }
 
@@ -225,7 +234,7 @@ contract FarmingTest is DustTest {
     uint16 seedSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WheatSeed);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot plant on this block");
+    vm.expectRevert(abi.encodeWithSelector(CannotPlantOnThisBlock.selector, ObjectTypes.Dirt));
     world.build(aliceEntityId, dirtCoord + vec3(0, 1, 0), seedSlot, "");
 
     // Try to plant on farmland (not wet)
@@ -235,7 +244,7 @@ contract FarmingTest is DustTest {
     seedSlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.WheatSeed);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot plant on this block");
+    vm.expectRevert(abi.encodeWithSelector(CannotPlantOnThisBlock.selector, ObjectTypes.Farmland));
     world.build(aliceEntityId, farmlandCoord + vec3(0, 1, 0), seedSlot, "");
   }
 
@@ -410,7 +419,7 @@ contract FarmingTest is DustTest {
     vm.warp(fullyGrownAt - 1);
 
     vm.prank(alice);
-    vm.expectRevert("Seed cannot be grown yet");
+    vm.expectRevert(abi.encodeWithSelector(SeedCannotBeGrownYet.selector, fullyGrownAt, block.timestamp));
     world.growSeed(aliceEntityId, cropCoord);
 
     // Mine the crop

@@ -31,6 +31,26 @@ import { EntityId, EntityTypeLib } from "../src/types/EntityId.sol";
 import { Orientation } from "../src/types/Orientation.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
+import {
+  CannotJumpBuildOnPassThrough,
+  CannotMoveThroughPlayer,
+  CanOnlyBuildOnAirOrWater,
+  CannotBuildOnMovableEntity,
+  CannotBuildWhereDroppedObjects
+} from "../src/Errors.sol";
+import {
+  CannotJumpBuildOnPassThrough,
+  CannotMoveThroughPlayer,
+  CanOnlyBuildOnAirOrWater,
+  CannotBuildOnMovableEntity,
+  CannotBuildNonBlock,
+  CannotBuildWhereDroppedObjects,
+  EntityIsTooFar,
+  ChunkNotExploredYet,
+  CallerNotAllowed,
+  PlayerIsSleeping,
+  CannotBuildOnWaterWithNonWaterloggable
+} from "../src/Errors.sol";
 
 contract BuildTest is DustTest {
   function testBuildTerrain() public {
@@ -236,7 +256,7 @@ contract BuildTest is DustTest {
     uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot jump build on a pass-through block");
+    vm.expectRevert(abi.encodeWithSelector(CannotJumpBuildOnPassThrough.selector, ObjectTypes.Air));
     world.jumpBuild(aliceEntityId, inventorySlot, "");
   }
 
@@ -263,7 +283,7 @@ contract BuildTest is DustTest {
     Vec3 bobCoord = aliceCoord + vec3(0, 2, 0);
     setObjectAtCoord(bobCoord, ObjectTypes.Air);
     setObjectAtCoord(bobCoord + vec3(0, 1, 0), ObjectTypes.Air);
-    createTestPlayer(bobCoord);
+    (, EntityId bobEntityId) = createTestPlayer(bobCoord);
 
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
@@ -273,7 +293,7 @@ contract BuildTest is DustTest {
     uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot move through a player");
+    vm.expectRevert(abi.encodeWithSelector(CannotMoveThroughPlayer.selector, bobEntityId));
     world.jumpBuild(aliceEntityId, inventorySlot, "");
   }
 
@@ -292,7 +312,7 @@ contract BuildTest is DustTest {
     uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
-    vm.expectRevert("Can only build on air or water");
+    vm.expectRevert(abi.encodeWithSelector(CanOnlyBuildOnAirOrWater.selector, ObjectTypes.Grass));
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
     setObjectAtCoord(buildCoord, ObjectTypes.TextSign);
@@ -300,18 +320,18 @@ contract BuildTest is DustTest {
     Vec3 topCoord = buildCoord + vec3(0, 1, 0);
 
     vm.prank(alice);
-    vm.expectRevert("Can only build on air or water");
+    vm.expectRevert(abi.encodeWithSelector(CanOnlyBuildOnAirOrWater.selector, ObjectTypes.TextSign));
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
     vm.prank(alice);
-    vm.expectRevert("Can only build on air or water");
+    vm.expectRevert(abi.encodeWithSelector(CanOnlyBuildOnAirOrWater.selector, ObjectTypes.Grass));
     world.build(aliceEntityId, topCoord, inventorySlot, "");
   }
 
   function testBuildFailsIfPlayer() public {
     (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupAirChunkWithPlayer();
 
-    (,, Vec3 bobCoord) = spawnPlayerOnAirChunk(aliceCoord + vec3(0, 0, 1));
+    (, EntityId bobEntityId, Vec3 bobCoord) = spawnPlayerOnAirChunk(aliceCoord + vec3(0, 0, 1));
 
     ObjectType buildObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
@@ -321,15 +341,15 @@ contract BuildTest is DustTest {
     uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot build on a movable entity");
+    vm.expectRevert(abi.encodeWithSelector(CannotBuildOnMovableEntity.selector, bobEntityId));
     world.build(aliceEntityId, bobCoord, inventorySlot, "");
 
     vm.prank(alice);
-    vm.expectRevert("Cannot build on a movable entity");
+    vm.expectRevert(abi.encodeWithSelector(CannotBuildOnMovableEntity.selector, bobEntityId));
     world.build(aliceEntityId, bobCoord + vec3(0, 1, 0), inventorySlot, "");
 
     vm.prank(alice);
-    vm.expectRevert("Cannot build on a movable entity");
+    vm.expectRevert(abi.encodeWithSelector(CannotBuildOnMovableEntity.selector, aliceEntityId));
     world.build(aliceEntityId, aliceCoord, inventorySlot, "");
   }
 
@@ -348,7 +368,7 @@ contract BuildTest is DustTest {
     uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot build non-block object");
+    vm.expectRevert(abi.encodeWithSelector(CannotBuildNonBlock.selector, buildObjectType));
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
   }
 
@@ -369,7 +389,7 @@ contract BuildTest is DustTest {
     uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot build where there are dropped objects");
+    vm.expectRevert(abi.encodeWithSelector(CannotBuildWhereDroppedObjects.selector, buildCoord));
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
   }
 
@@ -384,13 +404,13 @@ contract BuildTest is DustTest {
     uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
-    vm.expectRevert("Entity is too far");
+    vm.expectRevert(abi.encodeWithSelector(EntityIsTooFar.selector, playerCoord, buildCoord));
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
     buildCoord = playerCoord - vec3(CHUNK_SIZE / 2 + 1, 0, 0);
 
     vm.prank(alice);
-    vm.expectRevert("Chunk not explored yet");
+    vm.expectRevert(abi.encodeWithSelector(ChunkNotExploredYet.selector, buildCoord.toChunkCoord()));
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
   }
 
@@ -464,7 +484,7 @@ contract BuildTest is DustTest {
     uint16 inventorySlot = 0; // assuming slot 0 is empty or has another item
 
     vm.prank(alice);
-    vm.expectRevert("Cannot build non-block object");
+    vm.expectRevert(abi.encodeWithSelector(CannotBuildNonBlock.selector, ObjectTypes.Null));
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
   }
 
@@ -481,7 +501,7 @@ contract BuildTest is DustTest {
     // Use any slot for this test
     uint16 inventorySlot = 0;
 
-    vm.expectRevert("Caller not allowed");
+    vm.expectRevert(abi.encodeWithSelector(CallerNotAllowed.selector, EntityId.wrap(0)));
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
   }
 
@@ -502,7 +522,7 @@ contract BuildTest is DustTest {
     PlayerBed.setBedEntityId(aliceEntityId, bed);
 
     vm.prank(alice);
-    vm.expectRevert("Player is sleeping");
+    vm.expectRevert(abi.encodeWithSelector(PlayerIsSleeping.selector, aliceEntityId));
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
   }
 
@@ -558,7 +578,7 @@ contract BuildTest is DustTest {
     uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, buildObjectType);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot build on water with non-waterloggable block");
+    vm.expectRevert(abi.encodeWithSelector(CannotBuildOnWaterWithNonWaterloggable.selector, buildObjectType));
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
   }
 

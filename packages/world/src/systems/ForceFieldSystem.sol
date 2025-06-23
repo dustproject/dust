@@ -3,6 +3,14 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
+import {
+  CannotRemoveForceFieldFragment,
+  FragmentNotPartOfForceField,
+  InvalidObjectType,
+  InvalidSpanningTree,
+  NoBoundaryFragmentsFound,
+  ReferenceFragmentNotPartOfForceField
+} from "../Errors.sol";
 import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
@@ -105,13 +113,15 @@ contract ForceFieldSystem is System {
     caller.requireAdjacentToFragment(fragmentCoord);
 
     ObjectType objectType = forceField._getObjectType();
-    require(objectType == ObjectTypes.ForceField, "Invalid object type");
+    if (objectType != ObjectTypes.ForceField) revert InvalidObjectType(ObjectTypes.ForceField, objectType);
 
-    require(
-      refFragmentCoord.inVonNeumannNeighborhood(fragmentCoord), "Reference fragment is not adjacent to new fragment"
-    );
+    if (!refFragmentCoord.inVonNeumannNeighborhood(fragmentCoord)) {
+      revert ReferenceFragmentNotPartOfForceField(forceField, refFragmentCoord);
+    }
 
-    require(ForceFieldUtils.isFragment(forceField, refFragmentCoord), "Reference fragment is not part of forcefield");
+    if (!ForceFieldUtils.isFragment(forceField, refFragmentCoord)) {
+      revert ReferenceFragmentNotPartOfForceField(forceField, refFragmentCoord);
+    }
 
     EntityId fragment = EntityUtils.getOrCreateFragmentAt(fragmentCoord);
 
@@ -145,22 +155,24 @@ contract ForceFieldSystem is System {
     caller.requireAdjacentToFragment(fragmentCoord);
 
     ObjectType objectType = forceField._getObjectType();
-    require(objectType == ObjectTypes.ForceField, "Invalid object type");
+    if (objectType != ObjectTypes.ForceField) revert InvalidObjectType(ObjectTypes.ForceField, objectType);
 
     Vec3 forceFieldFragmentCoord = forceField._getPosition().toFragmentCoord();
-    require(forceFieldFragmentCoord != fragmentCoord, "Can't remove forcefield's fragment");
+    if (forceFieldFragmentCoord == fragmentCoord) {
+      revert CannotRemoveForceFieldFragment(forceFieldFragmentCoord, fragmentCoord);
+    }
 
     EntityId fragment = EntityUtils.getFragmentAt(fragmentCoord);
-    require(ForceFieldUtils.isFragment(forceField, fragment), "Fragment is not part of forcefield");
+    if (!ForceFieldUtils.isFragment(forceField, fragment)) revert FragmentNotPartOfForceField(forceField, fragment);
 
     {
       // First, identify all boundary fragments (fragments adjacent to the fragment to be removed)
       Vec3[] memory boundary = computeBoundaryFragments(forceField, fragmentCoord);
 
-      require(boundary.length > 0, "No boundary fragments found");
+      if (boundary.length == 0) revert NoBoundaryFragmentsFound();
 
       // Validate that boundaryFragments are connected
-      require(validateSpanningTree(boundary, boundaryIdx, parents), "Invalid spanning tree");
+      if (!validateSpanningTree(boundary, boundaryIdx, parents)) revert InvalidSpanningTree();
     }
 
     ForceFieldUtils.removeFragment(forceField, fragment);

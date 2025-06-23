@@ -14,6 +14,7 @@ import { EntityId, EntityTypeLib } from "../src/types/EntityId.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
+import { ChunkAlreadyExplored, ChunkNotExploredYet, InvalidMerkleProof, RegionNotSeeded } from "../src/Errors.sol";
 
 import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
 import { RegionMerkleRoot } from "../src/codegen/tables/RegionMerkleRoot.sol";
@@ -179,7 +180,7 @@ contract TerrainTest is DustTest {
     (uint8[][][] memory chunk, uint8 biome, bool isSurface) = _getTestChunk();
     _setupTestChunk(chunkCoord);
 
-    vm.expectRevert("Chunk already explored");
+    vm.expectRevert(abi.encodeWithSelector(ChunkAlreadyExplored.selector, chunkCoord));
     IWorld(worldAddress).exploreChunk(chunkCoord, encodeChunk(biome, isSurface, chunk), new bytes32[](0));
   }
 
@@ -214,8 +215,9 @@ contract TerrainTest is DustTest {
 
   /// forge-config: default.allow_internal_expect_revert = true
   function testGetBiome_Fail_ChunkNotExplored() public {
-    vm.expectRevert("Chunk not explored");
-    TerrainLib.getBiome(vec3(0, 0, 0));
+    Vec3 coord = vec3(0, 0, 0);
+    vm.expectRevert(abi.encodeWithSelector(ChunkNotExploredYet.selector, coord.toChunkCoord()));
+    TerrainLib.getBiome(coord);
   }
 
   function testVerifyChunkMerkleProof() public {
@@ -239,10 +241,10 @@ contract TerrainTest is DustTest {
     RegionMerkleRoot.set(x, z, MockChunk.regionRoot);
 
     proof[0] = proof[0] ^ bytes32(uint256(1));
-    vm.expectRevert("Invalid merkle proof");
+    vm.expectRevert(abi.encodeWithSelector(InvalidMerkleProof.selector));
     IWorld(worldAddress).exploreChunk(chunkCoord, encodedChunk, proof);
 
-    vm.expectRevert("Invalid merkle proof");
+    vm.expectRevert(abi.encodeWithSelector(InvalidMerkleProof.selector));
     IWorld(worldAddress).exploreChunk(chunkCoord, encodedChunk, new bytes32[](0));
   }
 
@@ -267,12 +269,13 @@ contract TerrainTest is DustTest {
 
   function testExploreRegionEnergy_Fail_RegionNotSeeded() public {
     RegionMerkleRoot.set(0, 0, bytes32(0));
-    vm.expectRevert("Region not seeded");
-    IWorld(worldAddress).exploreRegionEnergy(vec3(0, 0, 0), 100, new bytes32[](0));
+    Vec3 regionCoord = vec3(0, 0, 0);
+    vm.expectRevert(abi.encodeWithSelector(RegionNotSeeded.selector, regionCoord));
+    IWorld(worldAddress).exploreRegionEnergy(regionCoord, 100, new bytes32[](0));
   }
 
   function testExploreRegionEnergy_Fail_InvalidMerkleProof() public {
-    vm.expectRevert("Invalid merkle proof");
+    vm.expectRevert(abi.encodeWithSelector(InvalidMerkleProof.selector));
     IWorld(worldAddress).exploreRegionEnergy(vec3(0, 0, 0), 100, new bytes32[](0));
   }
 

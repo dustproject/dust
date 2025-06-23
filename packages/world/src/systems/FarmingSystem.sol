@@ -3,6 +3,7 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
+import { MustEquipHoe, NotTillable } from "../Errors.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
@@ -27,7 +28,7 @@ contract FarmingSystem is System {
     caller.requireConnected(coord);
 
     (EntityId farmland, ObjectType objectType) = EntityUtils.getOrCreateBlockAt(coord);
-    require(objectType.isTillable(), "Not tillable");
+    if (!objectType.isTillable()) revert NotTillable(objectType);
 
     // If player died, return early
     (callerEnergy,) = transferEnergyToPool(caller, Math.min(callerEnergy, TILL_ENERGY_COST));
@@ -36,7 +37,7 @@ contract FarmingSystem is System {
     }
 
     ToolData memory toolData = ToolUtils.getToolData(caller, toolSlot);
-    require(toolData.toolType.isHoe(), "Must equip a hoe");
+    if (!toolData.toolType.isHoe()) revert MustEquipHoe(toolData.toolType);
     toolData.use(type(uint128).max);
 
     EntityObjectType._set(farmland, ObjectTypes.Farmland);

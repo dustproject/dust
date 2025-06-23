@@ -32,6 +32,12 @@ import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 import { Orientation } from "../src/types/Orientation.sol";
 import { ProgramId } from "../src/types/ProgramId.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
+import {
+  NotABed,
+  EntityIsTooFar,
+  BedNotInsideForceField,
+  CannotMineForceFieldWithSleepingPlayers
+} from "../src/Errors.sol";
 
 contract TestBedProgram is System {
   fallback() external { }
@@ -96,7 +102,7 @@ contract BedTest is DustTest {
     (EntityId bedEntityId,) = TestEntityUtils.getBlockAt(coord + vec3(1, 0, 0));
 
     vm.prank(alice);
-    vm.expectRevert("Not a bed");
+    vm.expectRevert(abi.encodeWithSelector(NotABed.selector, ObjectTypes.Air));
     world.sleep(aliceEntityId, bedEntityId, "");
   }
 
@@ -112,7 +118,7 @@ contract BedTest is DustTest {
     EntityId bedEntityId = createBed(bedCoord);
 
     vm.prank(alice);
-    vm.expectRevert("Entity is too far");
+    vm.expectRevert(abi.encodeWithSelector(EntityIsTooFar.selector, coord, bedCoord));
     world.sleep(aliceEntityId, bedEntityId, "");
   }
 
@@ -125,7 +131,7 @@ contract BedTest is DustTest {
     EntityId bedEntityId = createBed(bedCoord);
 
     vm.prank(alice);
-    vm.expectRevert("Bed is not inside a forcefield");
+    vm.expectRevert(abi.encodeWithSelector(BedNotInsideForceField.selector, bedEntityId));
     world.sleep(aliceEntityId, bedEntityId, "");
   }
 
@@ -637,7 +643,7 @@ contract BedTest is DustTest {
     // Set the mass of the existing forcefield instance, not the object type
     Mass.setMass(forcefieldEntityId, playerHandMassReduction - 1);
     vm.prank(bob);
-    vm.expectRevert("Cannot mine forcefield with sleeping players");
+    vm.expectRevert(abi.encodeWithSelector(CannotMineForceFieldWithSleepingPlayers.selector, PLAYER_ENERGY_DRAIN_RATE));
     world.mine(bobEntityId, forcefieldCoord, "");
 
     // Alice can still wake up normally
@@ -683,7 +689,7 @@ contract BedTest is DustTest {
     (EntityId forcefieldEntityId,) = TestEntityUtils.getBlockAt(forcefieldCoord);
     Mass.setMass(forcefieldEntityId, playerHandMassReduction - 1);
     vm.prank(bob);
-    vm.expectRevert("Cannot mine forcefield with sleeping players");
+    vm.expectRevert(abi.encodeWithSelector(CannotMineForceFieldWithSleepingPlayers.selector, PLAYER_ENERGY_DRAIN_RATE));
     world.mine(bobEntityId, forcefieldCoord, "");
 
     // Alice can still wake up normally
@@ -733,7 +739,7 @@ contract BedTest is DustTest {
     (EntityId forcefieldEntityId,) = TestEntityUtils.getBlockAt(forcefieldCoord);
     Mass.setMass(forcefieldEntityId, playerHandMassReduction - 1);
     vm.prank(bob);
-    vm.expectRevert("Cannot mine forcefield with sleeping players");
+    vm.expectRevert(abi.encodeWithSelector(CannotMineForceFieldWithSleepingPlayers.selector, PLAYER_ENERGY_DRAIN_RATE));
     world.mine(bobEntityId, forcefieldCoord, "");
 
     // Alice can still wake up
@@ -778,7 +784,7 @@ contract BedTest is DustTest {
     // Set the mass of the existing forcefield instance, not the object type
     Mass.setMass(forceField, playerHandMassReduction - 1);
     vm.prank(bob);
-    vm.expectRevert("Cannot mine forcefield with sleeping players");
+    vm.expectRevert(abi.encodeWithSelector(CannotMineForceFieldWithSleepingPlayers.selector, PLAYER_ENERGY_DRAIN_RATE));
     world.mine(bobEntityId, forcefieldCoord, "");
   }
 
@@ -822,7 +828,7 @@ contract BedTest is DustTest {
     (EntityId forcefieldEntityId,) = TestEntityUtils.getBlockAt(forcefieldCoord);
     Mass.setMass(forcefieldEntityId, playerHandMassReduction - 1);
     vm.prank(bob);
-    vm.expectRevert("Cannot mine forcefield with sleeping players");
+    vm.expectRevert(abi.encodeWithSelector(CannotMineForceFieldWithSleepingPlayers.selector, PLAYER_ENERGY_DRAIN_RATE));
     world.mine(bobEntityId, forcefieldCoord, "");
 
     // Both players can still wake up
