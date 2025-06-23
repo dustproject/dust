@@ -116,6 +116,8 @@ library IndexerLib {
       revert(string.concat("No block_height field in response.\n", json));
     }
 
+    result.blockHeight = vm.parseJsonUint(json, ".block_height");
+
     if (!vm.keyExistsJson(json, ".result")) {
       revert(string.concat("No result field in response.\n", json));
     }
@@ -125,7 +127,9 @@ library IndexerLib {
       revert(string.concat("Empty result array.\n", json));
     }
 
-    result.blockHeight = vm.parseJsonUint(json, ".block_height");
+    if (!vm.keyExistsJson(json, ".result[0][0]")) {
+      return result;
+    }
 
     result.columns = vm.parseJsonStringArray(json, ".result[0][0]");
 
