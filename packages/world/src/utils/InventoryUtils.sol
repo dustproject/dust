@@ -49,43 +49,7 @@ library InventoryUtils {
     return true;
   }
 
-  function setBit(EntityId owner, uint16 slot) internal {
-    uint256 wordIndex = slot / SLOTS_PER_WORD;
-    uint256 bitIndex = slot & 255; // cheaper than % 256
-
-    _ensureWordExists(owner, wordIndex);
-
-    uint256 word = InventoryBitmap._getItem(owner, wordIndex);
-    word |= uint256(1) << bitIndex;
-    InventoryBitmap._updateBitmap(owner, wordIndex, word);
-  }
-
-  function clearBit(EntityId owner, uint16 slot) internal {
-    uint256 wordIndex = slot / SLOTS_PER_WORD;
-    uint256 bitIndex = slot & 255;
-
-    uint256 length = InventoryBitmap._length(owner);
-    if (wordIndex >= length) return;
-
-    uint256 word = InventoryBitmap._getItem(owner, wordIndex);
-    word &= ~(uint256(1) << bitIndex);
-    InventoryBitmap._updateBitmap(owner, wordIndex, word);
-
-    // If we touched the last word and it is now zero, prune.
-    if (word == 0 && wordIndex == length - 1) {
-      _pruneTrailingEmptyWords(owner);
-    }
-  }
-
-  function isBitSet(uint256[] memory bitmap, uint16 slot) internal pure returns (bool) {
-    // TODO: optimize
-    uint256 wordIndex = slot / SLOTS_PER_WORD;
-    uint256 bitIndex = slot % SLOTS_PER_WORD;
-    if (wordIndex >= bitmap.length) return false;
-    return (bitmap[wordIndex] & (1 << bitIndex)) != 0;
-  }
-
-  function findEmptySlot(EntityId owner) internal view returns (uint16) {
+  function findEmptySlot(EntityId owner) internal view returns (uint16 slot, bool found) {
     uint16 maxSlots = owner._getObjectType().getMaxInventorySlots();
 
     uint256 length = InventoryBitmap._length(owner);
@@ -95,26 +59,137 @@ library InventoryUtils {
       if (word != type(uint256).max) {
         // at least one free bit here
         uint256 bitIndex = LibBit.ffs(~word); // first zero bit
-        uint16 slot = uint16(wordIndex * SLOTS_PER_WORD + bitIndex);
-        if (slot < maxSlots) return slot;
+        slot = uint16(wordIndex * SLOTS_PER_WORD + bitIndex);
+        if (slot < maxSlots) return (slot, true);
       }
     }
 
     // No free space inside current words: next slot is at current length.
-    uint16 nextSlot = uint16(length * SLOTS_PER_WORD);
-    require(nextSlot < maxSlots, "Inventory is full");
-    return nextSlot;
+    slot = uint16(length * SLOTS_PER_WORD);
+    if (slot < maxSlots) return (slot, true);
+
+    return (0, false);
+  }
+
+  /* Try operations - non-reverting versions */
+
+  function _tryAddEntity(EntityId owner, EntityId entityId) internal returns (bool success) {
+    ObjectType objectType = entityId._getObjectType();
+    if (objectType.isNull()) return false;
+
+    (uint16 slot, bool found) = findEmptySlot(owner);
+    if (found) {
+      _setBit(owner, slot);
+      InventorySlot._set(owner, slot, entityId, objectType, 1);
+    }
+
+    return found;
+  }
+
+  function _tryAddObject(EntityId owner, ObjectType objectType, uint128 amount) internal returns (uint128 added) {
+    if (amount == 0) return 0;
+    uint16 stackable = objectType.getStackable();
+    if (stackable == 0) return 0;
+
+    uint128 remaining = amount;
+    uint16 maxSlots = owner._getObjectType().getMaxInventorySlots();
+
+    // First, try to fill existing slots with matching object type
+    remaining = _fillExistingSlots(owner, objectType, remaining, stackable);
+    added = amount - remaining;
+
+    // If we still have items to add, use empty slots
+    if (remaining > 0) {
+      uint128 addedToEmpty = _addToEmptySlots(owner, objectType, remaining, stackable, maxSlots);
+      added += addedToEmpty;
+    }
+
+    return added;
+  }
+
+  function _fillExistingSlots(EntityId owner, ObjectType objectType, uint128 amount, uint16 stackable)
+    private
+    returns (uint128 remaining)
+  {
+    remaining = amount;
+    uint256[] memory bitmap = InventoryBitmap._getBitmap(owner);
+
+    for (uint256 i = 0; i < bitmap.length && remaining > 0; i++) {
+      uint256 word = bitmap[i];
+      while (word != 0 && remaining > 0) {
+        uint256 bitIndex = LibBit.ffs(word);
+        word &= word - 1;
+
+        uint16 slot = uint16(i * SLOTS_PER_WORD + bitIndex);
+        InventorySlotData memory data = InventorySlot._get(owner, slot);
+
+        if (data.objectType == objectType && data.amount < stackable) {
+          uint16 canAdd = stackable - data.amount;
+          uint16 toAdd = remaining < canAdd ? uint16(remaining) : canAdd;
+          InventorySlot._setAmount(owner, slot, data.amount + toAdd);
+          remaining -= toAdd;
+        }
+      }
+    }
+  }
+
+  function _addToEmptySlots(EntityId owner, ObjectType objectType, uint128 amount, uint16 stackable, uint16 maxSlots)
+    private
+    returns (uint128 added)
+  {
+    uint128 remaining = amount;
+    uint256 length = InventoryBitmap._length(owner);
+
+    // Check existing words for empty slots
+    for (uint256 i = 0; i < length && remaining > 0; i++) {
+      uint256 word = InventoryBitmap._getItem(owner, i);
+      if (word == type(uint256).max) continue; // Skip full words
+
+      remaining = _fillEmptySlotsInWord(owner, i, word, objectType, remaining, stackable, maxSlots);
+    }
+
+    // Add to new slots beyond existing words
+    uint16 slot = uint16(length * SLOTS_PER_WORD);
+    while (remaining > 0 && slot < maxSlots) {
+      _setBit(owner, slot);
+      uint16 toAdd = remaining < stackable ? uint16(remaining) : stackable;
+      InventorySlot._set(owner, slot, EntityId.wrap(0), objectType, toAdd);
+      remaining -= toAdd;
+      slot++;
+    }
+
+    return amount - remaining;
+  }
+
+  function _fillEmptySlotsInWord(
+    EntityId owner,
+    uint256 wordIndex,
+    uint256 word,
+    ObjectType objectType,
+    uint128 amount,
+    uint16 stackable,
+    uint16 maxSlots
+  ) private returns (uint128 remaining) {
+    remaining = amount;
+
+    for (uint256 bitIndex = 0; bitIndex < SLOTS_PER_WORD && remaining > 0; bitIndex++) {
+      if ((word & (1 << bitIndex)) != 0) continue; // Skip occupied slots
+
+      uint16 slot = uint16(wordIndex * SLOTS_PER_WORD + bitIndex);
+      if (slot >= maxSlots) break;
+
+      _setBit(owner, slot);
+      uint16 toAdd = remaining < stackable ? uint16(remaining) : stackable;
+      InventorySlot._set(owner, slot, EntityId.wrap(0), objectType, toAdd);
+      remaining -= toAdd;
+    }
   }
 
   /* Inventory operations */
 
-  function addEntity(EntityId owner, EntityId entityId) internal returns (uint16 slot) {
-    ObjectType objectType = entityId._getObjectType();
-    require(!objectType.isNull(), "Entity must exist");
-
-    slot = findEmptySlot(owner);
-    setBit(owner, slot);
-    InventorySlot._set(owner, slot, entityId, objectType, 1);
+  function addEntity(EntityId owner, EntityId entityId) internal {
+    bool success = _tryAddEntity(owner, entityId);
+    require(success, "Inventory is full");
   }
 
   function addEntityToSlot(EntityId owner, EntityId entityId, uint16 slot) internal {
@@ -128,47 +203,13 @@ library InventoryUtils {
     InventorySlotData memory slotData = InventorySlot._get(owner, slot);
     require(slotData.objectType.isNull(), "Slot must be empty");
 
-    setBit(owner, slot);
+    _setBit(owner, slot);
     InventorySlot._set(owner, slot, entityId, objectType, 1);
   }
 
   function addObject(EntityId owner, ObjectType objectType, uint128 amount) public {
-    require(amount > 0, "Amount must be greater than 0");
-    uint16 stackable = objectType.getStackable();
-    require(stackable > 0, "Object type cannot be added to inventory");
-
-    uint128 remaining = amount;
-    uint256[] memory bitmap = InventoryBitmap._getBitmap(owner);
-
-    // First, find and fill existing slots for this object type
-    for (uint256 i = 0; i < bitmap.length && remaining > 0; i++) {
-      uint256 word = bitmap[i];
-      while (word != 0 && remaining > 0) {
-        uint256 bitIndex = LibBit.ffs(word);
-        word &= word - 1; // Clear the bit
-
-        uint16 slot = uint16(i * SLOTS_PER_WORD + bitIndex);
-        InventorySlotData memory data = InventorySlot._get(owner, slot);
-
-        if (data.objectType != objectType || data.amount >= stackable) {
-          continue;
-        }
-
-        uint16 canAdd = stackable - data.amount;
-        uint16 toAdd = remaining < canAdd ? uint16(remaining) : canAdd;
-        InventorySlot._setAmount(owner, slot, data.amount + toAdd);
-        remaining -= toAdd;
-      }
-    }
-
-    // If we still have objects to add, use empty slots
-    while (remaining > 0) {
-      uint16 slot = findEmptySlot(owner);
-      setBit(owner, slot);
-      uint16 toAdd = remaining < stackable ? uint16(remaining) : stackable;
-      InventorySlot._set(owner, slot, EntityId.wrap(0), objectType, toAdd);
-      remaining -= toAdd;
-    }
+    uint128 added = _tryAddObject(owner, objectType, amount);
+    require(added == amount, "Inventory is full");
   }
 
   function addObjectToSlot(EntityId owner, ObjectType objectType, uint16 amount, uint16 slot) internal {
@@ -184,7 +225,7 @@ library InventoryUtils {
     InventorySlotData memory slotData = InventorySlot._get(owner, slot);
 
     if (slotData.objectType.isNull()) {
-      setBit(owner, slot);
+      _setBit(owner, slot);
       InventorySlot._set(owner, slot, EntityId.wrap(0), objectType, amount);
     } else {
       require(slotData.objectType == objectType, "Cannot store different object types in the same slot");
@@ -196,8 +237,7 @@ library InventoryUtils {
 
   function removeEntity(EntityId owner, EntityId entity) internal {
     uint16 slot = findEntity(owner, entity);
-    clearBit(owner, slot);
-    InventorySlot._deleteRecord(owner, slot);
+    _clearSlot(owner, slot);
     Mass._deleteRecord(entity);
   }
 
@@ -210,8 +250,7 @@ library InventoryUtils {
     EntityId entity = InventorySlot._getEntityId(owner, slot);
     require(entity._exists(), "Not an entity");
 
-    clearBit(owner, slot);
-    InventorySlot._deleteRecord(owner, slot);
+    _clearSlot(owner, slot);
     // Don't delete mass!
     return entity;
   }
@@ -238,8 +277,7 @@ library InventoryUtils {
 
         if (slotData.amount <= remaining) {
           remaining -= slotData.amount;
-          clearBit(owner, slot);
-          InventorySlot._deleteRecord(owner, slot);
+          _clearSlot(owner, slot);
         } else {
           InventorySlot._setAmount(owner, slot, slotData.amount - remaining);
           remaining = 0;
@@ -258,8 +296,7 @@ library InventoryUtils {
     require(data.amount >= amount, "Not enough objects in slot");
 
     if (data.amount == amount) {
-      clearBit(owner, slot);
-      InventorySlot._deleteRecord(owner, slot);
+      _clearSlot(owner, slot);
     } else {
       InventorySlot._setAmount(owner, slot, data.amount - amount);
     }
@@ -364,7 +401,7 @@ library InventoryUtils {
     }
   }
 
-  function transferAll(EntityId from, EntityId to) public {
+  function transferAll(EntityId from, EntityId to) public returns (bool allTransferred) {
     require(from != to, "Cannot transfer all to self");
 
     uint256[] memory bitmap = InventoryBitmap._getBitmap(from);
@@ -379,16 +416,26 @@ library InventoryUtils {
         InventorySlotData memory slotData = InventorySlot._get(from, slot);
 
         if (slotData.entityId._exists()) {
-          addEntity(to, slotData.entityId);
+          if (_tryAddEntity(to, slotData.entityId)) {
+            _clearSlot(from, slot);
+          }
         } else {
-          addObject(to, slotData.objectType, slotData.amount);
+          uint128 added = _tryAddObject(to, slotData.objectType, slotData.amount);
+          if (added == slotData.amount) {
+            _clearSlot(from, slot);
+          } else if (added > 0) {
+            // Partial transfer - update source slot amount
+            InventorySlot._setAmount(from, slot, slotData.amount - uint16(added));
+          }
         }
-
-        InventorySlot._deleteRecord(from, slot);
       }
     }
 
-    InventoryBitmap._deleteRecord(from);
+    // Clean up empty bitmap if all items were transferred
+    if (isEmpty(from)) {
+      InventoryBitmap._deleteRecord(from);
+      return true;
+    }
   }
 
   /* Helpers */
@@ -509,6 +556,39 @@ library InventoryUtils {
       unchecked {
         ++length;
       }
+    }
+  }
+
+  function _setBit(EntityId owner, uint16 slot) private {
+    uint256 wordIndex = slot / SLOTS_PER_WORD;
+    uint256 bitIndex = slot & 255; // cheaper than % 256
+
+    _ensureWordExists(owner, wordIndex);
+
+    uint256 word = InventoryBitmap._getItem(owner, wordIndex);
+    word |= uint256(1) << bitIndex;
+    InventoryBitmap._updateBitmap(owner, wordIndex, word);
+  }
+
+  function _clearSlot(EntityId owner, uint16 slot) private {
+    _clearBit(owner, slot);
+    InventorySlot._deleteRecord(owner, slot);
+  }
+
+  function _clearBit(EntityId owner, uint16 slot) private {
+    uint256 wordIndex = slot / SLOTS_PER_WORD;
+    uint256 bitIndex = slot & 255;
+
+    uint256 length = InventoryBitmap._length(owner);
+    if (wordIndex >= length) return;
+
+    uint256 word = InventoryBitmap._getItem(owner, wordIndex);
+    word &= ~(uint256(1) << bitIndex);
+    InventoryBitmap._updateBitmap(owner, wordIndex, word);
+
+    // If we touched the last word and it is now zero, prune.
+    if (word == 0 && wordIndex == length - 1) {
+      _pruneTrailingEmptyWords(owner);
     }
   }
 }

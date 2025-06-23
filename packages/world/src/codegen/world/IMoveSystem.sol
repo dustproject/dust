@@ -16,4 +16,6 @@ interface IMoveSystem {
   function move(EntityId caller, Vec3[] memory newCoords) external;
 
   function moveDirections(EntityId caller, Direction[] memory directions) external;
+
+  function moveDirectionsPacked(EntityId caller, uint256 packed) external;
 }

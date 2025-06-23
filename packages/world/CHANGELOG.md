@@ -1,8 +1,11 @@
 # Changelog
 
-## 2024-06-18
+## 2024-06-23
 
-- Feat: New transferAmounts function, made to simplify apps interactions with chests.
+- Pack move directions in a single uint256 to decrease tx calldata size.
+- New transferAmounts function that doesn't require specifying destination slots, which simplifies app interactions with chests.
+- Fix: Lazily assign mass on mine for blocks that were set up incorrectly.
+- Fix: Don't revert if trying to pickup multiple drops that don't fit in the inventory.
 
 ## 2024-06-16
 
