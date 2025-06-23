@@ -17,5 +17,5 @@ interface IMoveSystem {
 
   function moveDirections(EntityId caller, Direction[] calldata directions) external;
 
-  function moveDirectionsPacked(EntityId caller, uint256 packedDirections, uint8 count) external;
+  function moveDirectionsPacked(EntityId caller, uint256 packed) external;
 }

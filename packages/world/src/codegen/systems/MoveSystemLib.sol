@@ -48,8 +48,8 @@ library MoveSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).moveDirections(caller, directions);
   }
 
-  function moveDirectionsPacked(MoveSystemType self, EntityId caller, uint256 packedDirections, uint8 count) internal {
-    return CallWrapper(self.toResourceId(), address(0)).moveDirectionsPacked(caller, packedDirections, count);
+  function moveDirectionsPacked(MoveSystemType self, EntityId caller, uint256 packed) internal {
+    return CallWrapper(self.toResourceId(), address(0)).moveDirectionsPacked(caller, packed);
   }
 
   function move(CallWrapper memory self, EntityId caller, Vec3[] memory newCoords) internal {
@@ -75,18 +75,13 @@ library MoveSystemLib {
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
-  function moveDirectionsPacked(
-    CallWrapper memory self,
-    EntityId caller,
-    uint256 packedDirections,
-    uint8 count
-  ) internal {
+  function moveDirectionsPacked(CallWrapper memory self, EntityId caller, uint256 packed) internal {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert MoveSystemLib_CallingFromRootSystem();
 
     bytes memory systemCall = abi.encodeCall(
-      _moveDirectionsPacked_EntityId_uint256_uint8.moveDirectionsPacked,
-      (caller, packedDirections, count)
+      _moveDirectionsPacked_EntityId_uint256.moveDirectionsPacked,
+      (caller, packed)
     );
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
@@ -106,15 +101,10 @@ library MoveSystemLib {
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
-  function moveDirectionsPacked(
-    RootCallWrapper memory self,
-    EntityId caller,
-    uint256 packedDirections,
-    uint8 count
-  ) internal {
+  function moveDirectionsPacked(RootCallWrapper memory self, EntityId caller, uint256 packed) internal {
     bytes memory systemCall = abi.encodeCall(
-      _moveDirectionsPacked_EntityId_uint256_uint8.moveDirectionsPacked,
-      (caller, packedDirections, count)
+      _moveDirectionsPacked_EntityId_uint256.moveDirectionsPacked,
+      (caller, packed)
     );
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
@@ -165,8 +155,8 @@ interface _moveDirections_EntityId_DirectionArray {
   function moveDirections(EntityId caller, Direction[] memory directions) external;
 }
 
-interface _moveDirectionsPacked_EntityId_uint256_uint8 {
-  function moveDirectionsPacked(EntityId caller, uint256 packedDirections, uint8 count) external;
+interface _moveDirectionsPacked_EntityId_uint256 {
+  function moveDirectionsPacked(EntityId caller, uint256 packed) external;
 }
 
 using MoveSystemLib for MoveSystemType global;

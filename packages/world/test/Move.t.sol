@@ -932,8 +932,11 @@ contract MoveTest is DustTest {
     directions[1] = Direction.PositiveZ;
     directions[2] = Direction.NegativeX;
 
-    // Pack directions into uint256
+    // Pack directions and count into uint256
     uint256 packed = 0;
+    // Pack count (3) into top 6 bits
+    packed |= uint256(3) << 250;
+    // Pack directions into bottom bits
     packed |= uint256(uint8(directions[0])) << (0 * 5);
     packed |= uint256(uint8(directions[1])) << (1 * 5);
     packed |= uint256(uint8(directions[2])) << (2 * 5);
@@ -947,7 +950,7 @@ contract MoveTest is DustTest {
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
-    world.moveDirectionsPacked(aliceEntityId, packed, 3);
+    world.moveDirectionsPacked(aliceEntityId, packed);
 
     Vec3 finalCoord = EntityPosition.get(aliceEntityId);
     assertEq(finalCoord, expectedPath[2], "Player did not move to expected position");
@@ -965,8 +968,11 @@ contract MoveTest is DustTest {
     directions[3] = Direction.NegativeZ;
     directions[4] = Direction.PositiveXNegativeY;
 
-    // Pack directions
+    // Pack directions and count
     uint256 packed = 0;
+    // Pack count (5) into top 6 bits
+    packed |= uint256(5) << 250;
+    // Pack directions into bottom bits
     for (uint256 i = 0; i < directions.length; i++) {
       packed |= uint256(uint8(directions[i])) << (i * 5);
     }
@@ -982,7 +988,7 @@ contract MoveTest is DustTest {
     // No need to set up terrain - flat chunk already has proper ground
 
     vm.prank(alice);
-    world.moveDirectionsPacked(aliceEntityId, packed, 5);
+    world.moveDirectionsPacked(aliceEntityId, packed);
 
     Vec3 finalCoord = EntityPosition.get(aliceEntityId);
     assertEq(finalCoord, expectedPath[4], "Player did not move to expected position");
@@ -1006,8 +1012,11 @@ contract MoveTest is DustTest {
     directions[6] = Direction.NegativeZ;
     directions[7] = Direction.PositiveX;
 
-    // Pack directions for Bob
+    // Pack directions and count for Bob
     uint256 packed = 0;
+    // Pack count (8) into top 6 bits
+    packed |= uint256(8) << 250;
+    // Pack directions into bottom bits
     for (uint256 i = 0; i < directions.length; i++) {
       packed |= uint256(uint8(directions[i])) << (i * 5);
     }
@@ -1020,15 +1029,13 @@ contract MoveTest is DustTest {
 
     // Move Bob with packed version
     vm.prank(bob);
-    world.moveDirectionsPacked(bobEntityId, packed, uint8(directions.length));
+    world.moveDirectionsPacked(bobEntityId, packed);
 
     // Check that both ended up at equivalent positions
     Vec3 aliceFinal = EntityPosition.get(aliceEntityId);
     Vec3 bobFinal = EntityPosition.get(bobEntityId);
 
-    assertEq(aliceFinal.x() - playerCoord.x(), bobFinal.x() - bobCoord.x(), "X displacement should be equal");
-    assertEq(aliceFinal.y() - playerCoord.y(), bobFinal.y() - bobCoord.y(), "Y displacement should be equal");
-    assertEq(aliceFinal.z() - playerCoord.z(), bobFinal.z() - bobCoord.z(), "Z displacement should be equal");
+    assertEq(aliceFinal - playerCoord, bobFinal - bobCoord, "X displacement should be equal");
   }
 
   function testMoveDirectionsPackedMaxCapacity() public {
@@ -1039,6 +1046,9 @@ contract MoveTest is DustTest {
 
     // Create alternating pattern of movements
     uint256 packed = 0;
+    // Pack count (30) into top 6 bits
+    packed |= uint256(maxDirections) << 250;
+    // Pack directions into bottom bits
     for (uint256 i = 0; i < maxDirections; i++) {
       Direction dir = (i % 2 == 0) ? Direction.PositiveX : Direction.NegativeX;
       packed |= uint256(uint8(dir)) << (i * 5);
@@ -1047,7 +1057,7 @@ contract MoveTest is DustTest {
     // No need to set up terrain - flat chunk already has proper ground
 
     vm.prank(alice);
-    world.moveDirectionsPacked(aliceEntityId, packed, maxDirections);
+    world.moveDirectionsPacked(aliceEntityId, packed);
 
     Vec3 finalCoord = EntityPosition.get(aliceEntityId);
     // After 30 moves alternating +1/-1 on X, should be at playerCoord.x
@@ -1066,9 +1076,12 @@ contract MoveTest is DustTest {
     // Create 10 forward movements
     Direction[] memory directions = new Direction[](10);
     uint256 packed = 0;
+    // Pack count (10) into top 6 bits
+    packed |= uint256(10) << 250;
 
     for (uint256 i = 0; i < 10; i++) {
       directions[i] = Direction.PositiveZ;
+      // Pack directions into bottom bits
       packed |= uint256(uint8(Direction.PositiveZ)) << (i * 5);
 
       // Set up terrain for both players
@@ -1090,7 +1103,7 @@ contract MoveTest is DustTest {
     // Measure gas for packed version
     vm.prank(bob);
     startGasReport("moveDirectionsPacked 10 moves");
-    world.moveDirectionsPacked(bobEntityId, packed, 10);
+    world.moveDirectionsPacked(bobEntityId, packed);
     endGasReport();
   }
 }

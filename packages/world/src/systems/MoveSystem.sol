@@ -37,16 +37,25 @@ contract MoveSystem is System {
     notify(caller, MoveNotification({ moveCoords: newCoords }));
   }
 
-  // 5 bits per direction, packed into a single uint256 (max 51 directions)
-  function moveDirectionsPacked(EntityId caller, uint256 packedDirections, uint8 count) public {
+  // 6 bits for count, 5 bits per direction, packed into a single uint256 (max 50 directions)
+  function moveDirectionsPacked(EntityId caller, uint256 packed) public {
     caller.activate();
 
-    Vec3 coord = caller._getPosition();
+    // Extract count (top 6 bits)
+    uint8 count = uint8(packed >> 250);
+    require(count <= 50, "Too many directions packed");
 
+    // Extract packedDirections (bottom 250 bits)
+    uint256 packedDirections = packed & ((1 << 250) - 1);
+
+    Vec3 coord = caller._getPosition();
     Vec3[] memory newCoords = new Vec3[](count);
-    for (uint256 i = 0; i < count; i++) {
+
+    Vec3 prev = coord;
+    for (uint256 i = 0; i < count; ++i) {
       Direction direction = Direction((packedDirections >> (i * 5)) & 0x1F);
-      newCoords[i] = (i == 0 ? coord : newCoords[i - 1]).transform(direction);
+      prev = prev.transform(direction);
+      newCoords[i] = prev;
     }
 
     MoveLib.move(coord, newCoords);
