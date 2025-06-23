@@ -21,7 +21,7 @@ However, DUST is still in alpha and focused on balancing and stability. Some par
 - Bug fixes and stability improvements.
 - Map extensions beyond the current borders.
 
-The goal of all changes is to put DUST on the path of autonomy. Changes will be communicated in advance and can be followed in this repository. The changelog includes a historical log of changes since the mainnet deployment.
+The goal of all changes is to put DUST on the path of autonomy. Changes will be communicated in advance and can be followed in this repository. The [changelog](https://github.com/dustproject/dust/blob/main/packages/world/CHANGELOG.md) includes a historical log of changes since the mainnet deployment.
 
 Once the world is sufficiently stable, we will decentralize governance and let DUST stand on its own.
 

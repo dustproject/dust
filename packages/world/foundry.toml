@@ -1,6 +1,6 @@
 [profile.default]
 solc = "0.8.30"
-ffi = false
+ffi = true
 fuzz_runs = 256
 optimizer = true
 optimizer_runs = 1000000
@@ -17,7 +17,7 @@ extra_output_files = [
   "abi",
   "evm.bytecode"
 ]
-fs_permissions = [{ access = "read", path = "./"}]
+fs_permissions = [{ access = "read", path = "./"}, { access = "read-write", path = "./script/migrations/" }]
 script_execution_protection = false
 
 [fmt]

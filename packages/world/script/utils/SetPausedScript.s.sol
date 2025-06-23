@@ -5,22 +5,19 @@ import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 import { console } from "forge-std/console.sol";
 
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
-
 import { DustScript } from "../DustScript.sol";
+import { Config, config } from "./config.sol";
 
-contract SetGuardianScript is DustScript {
-  function run(address worldAddress, bool paused) external {
-    // Specify a store so that you can use tables directly in PostDeploy
-    StoreSwitch.setStoreAddress(worldAddress);
-    IWorld world = IWorld(worldAddress);
-    require(isContract(worldAddress), "Invalid world address provided");
+contract SetPausedScript is DustScript {
+  function run(bool paused) external {
+    Config memory cfg = config();
 
     startBroadcast();
 
     if (paused) {
-      world.pause();
+      cfg.world.pause();
     } else {
-      world.unpause();
+      cfg.world.unpause();
     }
 
     vm.stopBroadcast();
