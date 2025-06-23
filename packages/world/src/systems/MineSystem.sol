@@ -153,6 +153,13 @@ contract MineSystem is System {
   }
 
   function _prepareBlock(EntityId mined, ObjectType minedType, Vec3 coord) internal returns (ObjectType) {
+    if (Mass._get(mined) == 0) {
+      // If the mass is 0, we assume the block was not correctly setup (e.g. missing mass)
+      // NOTE: This currently targets the issue where grown seeds/saplings were not given mass
+      // TODO: We could potentially stop assigning mass on build and just do it here
+      Mass._setMass(mined, ObjectPhysics._getMass(minedType));
+    }
+
     if (minedType.isMachine()) {
       EnergyData memory machineData = updateMachineEnergy(mined);
       require(machineData.energy == 0, "Cannot mine a machine that has energy");
@@ -172,13 +179,6 @@ contract MineSystem is System {
     if (minedType.isGrowable() && SeedGrowth._getFullyGrownAt(mined) <= block.timestamp) {
       // If the seed is fully grown, grow it
       return NatureLib.growSeed(coord, mined, minedType);
-    }
-
-    if (Mass._get(mined) == 0) {
-      // If the mass is 0, we assume the block was not correctly setup (e.g. missing mass)
-      // NOTE: This currently targets the issue where grown seeds/saplings were not given mass
-      // TODO: We could potentially stop assigning mass on build and just do it here
-      Mass._setMass(mined, ObjectPhysics._getMass(minedType));
     }
 
     return minedType;
