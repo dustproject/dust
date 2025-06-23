@@ -591,12 +591,4 @@ library InventoryUtils {
       _pruneTrailingEmptyWords(owner);
     }
   }
-
-  function _isBitSet(uint256[] memory bitmap, uint16 slot) private pure returns (bool) {
-    // TODO: optimize
-    uint256 wordIndex = slot / SLOTS_PER_WORD;
-    uint256 bitIndex = slot % SLOTS_PER_WORD;
-    if (wordIndex >= bitmap.length) return false;
-    return (bitmap[wordIndex] & (1 << bitIndex)) != 0;
-  }
 }

@@ -165,7 +165,7 @@
     "file": "test/HitMachine.t.sol:HitMachineTest",
     "test": "testHitForceFieldWithInsufficientEnergy",
     "name": "hit force field with insufficient energy",
-    "gasUsed": 304766
+    "gasUsed": 304793
   },
   {
     "file": "test/HitMachine.t.sol:HitMachineTest",
@@ -183,7 +183,7 @@
     "file": "test/HitMachine.t.sol:HitMachineTest",
     "test": "testHitForceFieldWithoutToolFatal",
     "name": "hit force field without tool",
-    "gasUsed": 304766
+    "gasUsed": 304793
   },
   {
     "file": "test/Inventory.t.sol:InventoryTest",
@@ -495,7 +495,7 @@
     "file": "test/Tree.t.sol:TreeTest",
     "test": "testTreeGrowthWithSpace",
     "name": "grow oak tree",
-    "gasUsed": 6901190
+    "gasUsed": 7017245
   },
   {
     "file": "test/Tree.t.sol:TreeTest",
