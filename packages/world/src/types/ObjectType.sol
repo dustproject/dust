@@ -1393,7 +1393,8 @@ library ObjectTypeLib {
     }
 
     if (self == ObjectTypes.Chest) {
-      return sig == ITransferSystem.transfer.selector || sig == IMachineSystem.fuelMachine.selector;
+      return sig == ITransferSystem.transfer.selector || sig == ITransferSystem.transferAmounts.selector
+        || sig == IMachineSystem.fuelMachine.selector;
     }
 
     return false;
