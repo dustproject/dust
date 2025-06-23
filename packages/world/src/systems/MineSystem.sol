@@ -455,7 +455,8 @@ library MineBedLib {
     // Player died
     if (playerData.energy == 0) {
       // Bed entity should now be Air
-      InventoryUtils.transferAll(sleepingPlayer, bed);
+      bool allTransferred = InventoryUtils.transferAll(sleepingPlayer, bed);
+      require(allTransferred, "Failed to transfer all items to drop location");
 
       Death._set(
         sleepingPlayer, DeathData({ lastDiedAt: uint128(block.timestamp), deaths: Death.getDeaths(sleepingPlayer) + 1 })

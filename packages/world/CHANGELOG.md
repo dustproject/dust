@@ -4,6 +4,7 @@
 
 - Lazily assign mass on mine for blocks that were set up incorrectly.
 - Pack move directions in a single uint256 to decrease tx calldata size.
+- Fix: Don't revert if trying to pickup multiple drops that don't fit in the inventory.
 
 ## 2024-06-16
 

@@ -46,6 +46,7 @@ contract InventorySystem is System {
     (EntityId entityId, ObjectType objectType) = EntityUtils.getBlockAt(coord);
     require(objectType.isPassThrough(), "Cannot pickup from a non-passable block");
 
+    // transferAll will not revert if all items are not transferred
     InventoryUtils.transferAll(entityId, caller);
 
     notify(caller, PickupNotification({ pickupCoord: coord }));

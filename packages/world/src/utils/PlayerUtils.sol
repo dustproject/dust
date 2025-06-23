@@ -83,7 +83,9 @@ library PlayerUtils {
     }
     // We use getOrCreateBlockAt because when moving the block entity might not be set
     (EntityId to,) = EntityUtils.getOrCreateBlockAt(coord);
-    InventoryUtils.transferAll(player, to);
+    bool allTransferred = InventoryUtils.transferAll(player, to);
+    require(allTransferred, "Failed to transfer all items to drop location");
+
     removePlayerFromGrid(player, coord);
     Death._set(player, DeathData({ lastDiedAt: uint128(block.timestamp), deaths: Death.getDeaths(player) + 1 }));
     notify(player, DeathNotification({ deathCoord: coord }));
