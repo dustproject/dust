@@ -1,6 +1,8 @@
 # Changelog
 
-## 2024-06-17
+## 2024-06-23
+
+- Lazily assign mass on mine for blocks that were set up incorrectly.
 - Fix: Don't revert if trying to pickup multiple drops that don't fit in the inventory.
 
 ## 2024-06-16
