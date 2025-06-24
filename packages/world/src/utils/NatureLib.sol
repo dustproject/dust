@@ -144,7 +144,7 @@ library NatureLib {
     (Vec3[] memory fixedLeaves, Vec3[] memory randomLeaves) = TreeLib.getLeafCoords(saplingType);
 
     // Initial seed for randomness
-    uint256 rand = uint256(keccak256(abi.encodePacked(block.timestamp, baseCoord)));
+    uint256 rand = getRandomSeed(baseCoord);
 
     uint32 leafCount;
 

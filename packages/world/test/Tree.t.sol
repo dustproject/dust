@@ -126,6 +126,9 @@ contract TreeTest is DustTest {
     // Advance time to when the tree can grow
     vm.warp(fullyGrownAt + 1);
 
+    // Set up chunk commitment for tree growth randomness
+    newCommit(alice, aliceEntityId, seedCoord, bytes32(0));
+
     // Grow the tree
     vm.prank(alice);
     startGasReport("grow oak tree");
@@ -195,6 +198,9 @@ contract TreeTest is DustTest {
     // Advance time to when the tree can grow
     vm.warp(fullyGrownAt + 1);
 
+    // Set up chunk commitment for tree growth randomness
+    newCommit(alice, aliceEntityId, seedCoord, bytes32(0));
+
     // Grow the tree
     vm.prank(alice);
     startGasReport("grow tree with obstruction");
@@ -234,6 +240,9 @@ contract TreeTest is DustTest {
 
     // Advance time to when the tree can grow
     vm.warp(fullyGrownAt + 1);
+
+    // Set up chunk commitment for tree growth randomness
+    newCommit(alice, aliceEntityId, seedCoord, bytes32(0));
 
     // Grow the tree
     vm.prank(alice);
@@ -377,6 +386,9 @@ contract TreeTest is DustTest {
       // Advance time to when the tree can grow
       vm.warp(fullyGrownAt + 1);
 
+      // Set up chunk commitment for tree growth randomness
+      newCommit(alice, aliceEntityId, seedCoord, bytes32(uint256(i)));
+
       // Grow the tree
       vm.prank(alice);
       world.growSeed(aliceEntityId, seedCoord);
@@ -422,6 +434,9 @@ contract TreeTest is DustTest {
 
     // Now advance time and verify it can grow
     vm.warp(fullyGrownAt + 1);
+
+    // Set up chunk commitment for tree growth randomness
+    newCommit(alice, aliceEntityId, seedCoord, bytes32(0));
 
     vm.prank(alice);
     world.growSeed(aliceEntityId, seedCoord);
