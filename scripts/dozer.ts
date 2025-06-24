@@ -1,8 +1,8 @@
 import type { Hex } from "viem";
 import { setupNetwork } from "./setupNetwork";
 
+import { EntityTypes, decodeEntityType } from "@dust/world/internal";
 import { constructTableNameForQuery } from "./utils";
-import { decodeEntityType, EntityTypes } from "@dust/world/internal";
 
 async function main() {
   const { worldAddress, indexer } = await setupNetwork();
