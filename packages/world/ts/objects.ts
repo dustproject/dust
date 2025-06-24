@@ -240,7 +240,7 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   { name: "Amethyst", mass: 100000000000000000n },
   { name: "Glowstone", mass: 37500000000000000n },
   { name: "Grass", mass: 3000000000000000n },
-  { name: "Dirt", mass: 2400000000000000n },
+  { name: "Dirt", mass: 3000000000000000n },
   { name: "Moss", mass: 200000000000000n },
   { name: "Podzol", mass: 5000000000000000n },
   { name: "DirtPath", mass: 5000000000000000n },

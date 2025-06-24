@@ -23,7 +23,7 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.Amethyst, ObjectPhysicsData({ mass: 100000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Glowstone, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Grass, ObjectPhysicsData({ mass: 3000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.Dirt, ObjectPhysicsData({ mass: 2400000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Dirt, ObjectPhysicsData({ mass: 3000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Moss, ObjectPhysicsData({ mass: 200000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Podzol, ObjectPhysicsData({ mass: 5000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.DirtPath, ObjectPhysicsData({ mass: 5000000000000000, energy: 0 }));

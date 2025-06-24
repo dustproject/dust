@@ -64,4 +64,3 @@ export function unpackDirections(packed: bigint): Direction[] {
 
   return directions;
 }
-
