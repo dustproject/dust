@@ -1057,7 +1057,7 @@ contract TransferTest is DustTest {
   }
 
   function testTransferSlotAmountFailsSelfTransfer() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
 
     ObjectType transferObjectType = ObjectTypes.Grass;
     TestInventoryUtils.addObject(aliceEntityId, transferObjectType, 10);
@@ -1072,7 +1072,7 @@ contract TransferTest is DustTest {
 
   function testTransferSlotAmountFailsIfCallerNotInvolved() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
-    (address bob, EntityId bobEntityId, Vec3 bobCoord) = spawnPlayerOnAirChunk(playerCoord + vec3(5, 0, 0));
+    (, EntityId bobEntityId,) = spawnPlayerOnAirChunk(playerCoord + vec3(5, 0, 0));
 
     Vec3 chestCoord = playerCoord + vec3(0, 0, 1);
     EntityId chestEntityId = setObjectAtCoord(chestCoord, ObjectTypes.Chest);
