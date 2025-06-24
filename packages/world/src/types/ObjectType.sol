@@ -505,7 +505,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x101ffc0000000e83fffffc00000000000000006), 1)
+        let bit := and(shr(self, 0x109ffc0000000e83fffffc00000000000000006), 1)
         ok := bit
       }
     }
@@ -1045,7 +1045,7 @@ library ObjectTypeLib {
     return [ObjectTypes.WoodenPick, ObjectTypes.WoodenAxe, ObjectTypes.WoodenWhacker, ObjectTypes.WoodenHoe];
   }
 
-  function getPassThroughTypes() internal pure returns (ObjectType[42] memory) {
+  function getPassThroughTypes() internal pure returns (ObjectType[43] memory) {
     return [
       ObjectTypes.Air,
       ObjectTypes.Water,
@@ -1088,7 +1088,8 @@ library ObjectTypeLib {
       ObjectTypes.SeaAnemone,
       ObjectTypes.Algae,
       ObjectTypes.Torch,
-      ObjectTypes.BambooBush
+      ObjectTypes.BambooBush,
+      ObjectTypes.SpawnTile
     ];
   }
 

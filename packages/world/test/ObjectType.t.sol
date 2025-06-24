@@ -4562,6 +4562,7 @@ contract ObjectTypeTest is DustTest {
       assertTrue(ObjectTypes.Algae.isPassThrough(), "isPassThrough");
       assertTrue(ObjectTypes.Torch.isPassThrough(), "isPassThrough");
       assertTrue(ObjectTypes.BambooBush.isPassThrough(), "isPassThrough");
+      assertTrue(ObjectTypes.SpawnTile.isPassThrough(), "isPassThrough");
       assertFalse(ObjectTypes.Null.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.Lava.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.Stone.isPassThrough(), "!isPassThrough");
@@ -4674,7 +4675,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Powerstone.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.ForceField.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.Chest.isPassThrough(), "!isPassThrough");
-      assertFalse(ObjectTypes.SpawnTile.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.Bed.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.TextSign.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.WoodenPick.isPassThrough(), "!isPassThrough");

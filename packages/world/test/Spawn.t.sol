@@ -78,10 +78,14 @@ contract SpawnTest is DustTest {
 
   function testSpawnTile() public {
     address alice = vm.randomAddress();
-    Vec3 spawnCoord = vec3(0, 1, 0);
-    Vec3 spawnTileCoord = spawnCoord - vec3(0, 1, 0);
+    Vec3 spawnTileCoord = vec3(0, 0, 0);
+    Vec3 solidBlockCoord = spawnTileCoord + vec3(1, 0, 0); // Place solid block next to spawn tile
+    Vec3 spawnCoord = solidBlockCoord + vec3(0, 1, 0); // Spawn on top of solid block
 
     setupAirChunk(spawnCoord);
+
+    // Place solid block next to spawn tile
+    setObjectAtCoord(solidBlockCoord, ObjectTypes.Stone);
 
     // Set forcefield
     setupForceField(
@@ -195,8 +199,12 @@ contract SpawnTest is DustTest {
     // This should setup a player with energy
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    Vec3 spawnCoord = playerCoord;
-    Vec3 spawnTileCoord = spawnCoord - vec3(0, 1, 0);
+    Vec3 spawnTileCoord = playerCoord - vec3(0, 1, 0);
+    Vec3 solidBlockCoord = spawnTileCoord + vec3(1, 0, 0); // Place solid block next to spawn tile
+    Vec3 spawnCoord = solidBlockCoord + vec3(0, 1, 0); // Spawn on top of solid block
+
+    // Place solid block next to spawn tile
+    setObjectAtCoord(solidBlockCoord, ObjectTypes.Stone);
 
     // Drain energy from player
     vm.warp(vm.getBlockTimestamp() + (MAX_PLAYER_ENERGY / PLAYER_ENERGY_DRAIN_RATE) + 1);
@@ -226,8 +234,12 @@ contract SpawnTest is DustTest {
     // This should setup a player with energy
     (address alice,, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
-    Vec3 spawnCoord = playerCoord;
-    Vec3 spawnTileCoord = spawnCoord - vec3(0, 1, 0);
+    Vec3 spawnTileCoord = playerCoord - vec3(0, 1, 0);
+    Vec3 solidBlockCoord = spawnTileCoord + vec3(1, 0, 0); // Place solid block next to spawn tile
+    Vec3 spawnCoord = solidBlockCoord + vec3(0, 1, 0); // Spawn on top of solid block
+
+    // Place solid block next to spawn tile
+    setObjectAtCoord(solidBlockCoord, ObjectTypes.Stone);
 
     // Set forcefield
     EntityId forceFieldEntityId = setupForceField(spawnTileCoord);
@@ -292,10 +304,14 @@ contract SpawnTest is DustTest {
   function testSpawnRespawn() public {
     // Set up player and spawn tile
     address alice = vm.randomAddress();
-    Vec3 spawnCoord = vec3(0, 1, 0);
-    Vec3 spawnTileCoord = spawnCoord - vec3(0, 1, 0);
+    Vec3 spawnTileCoord = vec3(0, 0, 0);
+    Vec3 solidBlockCoord = spawnTileCoord + vec3(1, 0, 0); // Place solid block next to spawn tile
+    Vec3 spawnCoord = solidBlockCoord + vec3(0, 1, 0); // Spawn on top of solid block
 
     setupAirChunk(spawnCoord);
+
+    // Place solid block next to spawn tile
+    setObjectAtCoord(solidBlockCoord, ObjectTypes.Stone);
 
     // Set below entity to spawn tile
     EntityId spawnTileEntityId = setObjectAtCoord(spawnTileCoord, ObjectTypes.SpawnTile);
@@ -329,11 +345,15 @@ contract SpawnTest is DustTest {
     address alice = vm.randomAddress();
     address bob = vm.randomAddress();
 
-    Vec3 spawnCoord = vec3(0, 2, 0);
-    Vec3 spawnTileCoord = spawnCoord - vec3(0, 1, 0);
-    Vec3 forceFieldCoord = spawnTileCoord - vec3(0, 1, 0);
+    Vec3 spawnTileCoord = vec3(0, 0, 0);
+    Vec3 solidBlockCoord = spawnTileCoord + vec3(1, 0, 0); // Place solid block next to spawn tile
+    Vec3 spawnCoord = solidBlockCoord + vec3(0, 1, 0); // Spawn on top of solid block
+    Vec3 forceFieldCoord = spawnTileCoord + vec3(0, 0, 1); // Place forcefield next to spawn tile
 
     setupAirChunk(spawnCoord);
+
+    // Place solid block next to spawn tile
+    setObjectAtCoord(solidBlockCoord, ObjectTypes.Stone);
 
     // Set forcefield with energy
     setupForceField(

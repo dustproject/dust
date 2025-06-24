@@ -497,10 +497,7 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   {
     name: "Bed",
     mass: 13500000000000000n,
-    supportedOrientations: [
-      getOrientation("NegativeX"),
-      getOrientation("NegativeZ"),
-    ],
+    supportedOrientations: [getOrientation("NegativeX"), getOrientation("NegativeZ")],
   },
   {
     name: "Workbench",
@@ -825,26 +822,10 @@ export const categories: Record<string, Category> = {
     ],
   },
   Ore: {
-    objects: [
-      "CoalOre",
-      "CopperOre",
-      "IronOre",
-      "GoldOre",
-      "DiamondOre",
-      "NeptuniumOre",
-    ],
+    objects: ["CoalOre", "CopperOre", "IronOre", "GoldOre", "DiamondOre", "NeptuniumOre"],
   },
   Log: {
-    objects: [
-      "OakLog",
-      "BirchLog",
-      "JungleLog",
-      "SakuraLog",
-      "AcaciaLog",
-      "SpruceLog",
-      "DarkOakLog",
-      "MangroveLog",
-    ],
+    objects: ["OakLog", "BirchLog", "JungleLog", "SakuraLog", "AcaciaLog", "SpruceLog", "DarkOakLog", "MangroveLog"],
   },
   Leaf: {
     objects: [
@@ -888,37 +869,16 @@ export const categories: Record<string, Category> = {
     ],
   },
   SmartEntity: {
-    objects: [
-      "ForceField",
-      "Chest",
-      "SpawnTile",
-      "Bed",
-      "Fragment",
-      "TextSign",
-    ],
+    objects: ["ForceField", "Chest", "SpawnTile", "Bed", "Fragment", "TextSign"],
   },
   Station: {
     objects: ["Workbench", "Powerstone", "Furnace"],
   },
   Pick: {
-    objects: [
-      "WoodenPick",
-      "CopperPick",
-      "IronPick",
-      "GoldPick",
-      "DiamondPick",
-      "NeptuniumPick",
-    ],
+    objects: ["WoodenPick", "CopperPick", "IronPick", "GoldPick", "DiamondPick", "NeptuniumPick"],
   },
   Axe: {
-    objects: [
-      "WoodenAxe",
-      "CopperAxe",
-      "IronAxe",
-      "GoldAxe",
-      "DiamondAxe",
-      "NeptuniumAxe",
-    ],
+    objects: ["WoodenAxe", "CopperAxe", "IronAxe", "GoldAxe", "DiamondAxe", "NeptuniumAxe"],
   },
   Hoe: {
     objects: ["WoodenHoe"],
@@ -1098,6 +1058,7 @@ export const categories: Record<string, Category> = {
       "Algae",
       "Torch",
       "BambooBush",
+      "SpawnTile",
     ],
   },
   Growable: {
