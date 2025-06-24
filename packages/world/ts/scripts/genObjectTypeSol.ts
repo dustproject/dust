@@ -303,7 +303,7 @@ ${Object.entries(categories)
       return on == ObjectTypes.WetFarmland;
     }
     if(self.isSapling()) {
-      return on == ObjectTypes.Dirt || on == ObjectTypes.Grass;
+      return on == ObjectTypes.Dirt || on == ObjectTypes.Grass || on == ObjectTypes.Moss;
     }
     return false;
   }
