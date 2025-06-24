@@ -240,7 +240,7 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   { name: "Amethyst", mass: 100000000000000000n },
   { name: "Glowstone", mass: 37500000000000000n },
   { name: "Grass", mass: 3000000000000000n },
-  { name: "Dirt", mass: 2400000000000000n },
+  { name: "Dirt", mass: 3000000000000000n },
   { name: "Moss", mass: 200000000000000n },
   { name: "Podzol", mass: 5000000000000000n },
   { name: "DirtPath", mass: 5000000000000000n },
@@ -497,10 +497,7 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   {
     name: "Bed",
     mass: 13500000000000000n,
-    supportedOrientations: [
-      getOrientation("NegativeX"),
-      getOrientation("NegativeZ"),
-    ],
+    supportedOrientations: [getOrientation("NegativeX"), getOrientation("NegativeZ")],
   },
   {
     name: "Workbench",
@@ -825,26 +822,10 @@ export const categories: Record<string, Category> = {
     ],
   },
   Ore: {
-    objects: [
-      "CoalOre",
-      "CopperOre",
-      "IronOre",
-      "GoldOre",
-      "DiamondOre",
-      "NeptuniumOre",
-    ],
+    objects: ["CoalOre", "CopperOre", "IronOre", "GoldOre", "DiamondOre", "NeptuniumOre"],
   },
   Log: {
-    objects: [
-      "OakLog",
-      "BirchLog",
-      "JungleLog",
-      "SakuraLog",
-      "AcaciaLog",
-      "SpruceLog",
-      "DarkOakLog",
-      "MangroveLog",
-    ],
+    objects: ["OakLog", "BirchLog", "JungleLog", "SakuraLog", "AcaciaLog", "SpruceLog", "DarkOakLog", "MangroveLog"],
   },
   Leaf: {
     objects: [
@@ -888,37 +869,16 @@ export const categories: Record<string, Category> = {
     ],
   },
   SmartEntity: {
-    objects: [
-      "ForceField",
-      "Chest",
-      "SpawnTile",
-      "Bed",
-      "Fragment",
-      "TextSign",
-    ],
+    objects: ["ForceField", "Chest", "SpawnTile", "Bed", "Fragment", "TextSign"],
   },
   Station: {
     objects: ["Workbench", "Powerstone", "Furnace"],
   },
   Pick: {
-    objects: [
-      "WoodenPick",
-      "CopperPick",
-      "IronPick",
-      "GoldPick",
-      "DiamondPick",
-      "NeptuniumPick",
-    ],
+    objects: ["WoodenPick", "CopperPick", "IronPick", "GoldPick", "DiamondPick", "NeptuniumPick"],
   },
   Axe: {
-    objects: [
-      "WoodenAxe",
-      "CopperAxe",
-      "IronAxe",
-      "GoldAxe",
-      "DiamondAxe",
-      "NeptuniumAxe",
-    ],
+    objects: ["WoodenAxe", "CopperAxe", "IronAxe", "GoldAxe", "DiamondAxe", "NeptuniumAxe"],
   },
   Hoe: {
     objects: ["WoodenHoe"],
