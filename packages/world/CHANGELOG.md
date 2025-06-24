@@ -1,5 +1,10 @@
 # Changelog
 
+## 2024-06-24
+
+- Use chunk randomness for tree growth.
+- Allow planting saplings on moss.
+
 ## 2024-06-23
 
 - Pack move directions in a single uint256 to decrease tx calldata size.
