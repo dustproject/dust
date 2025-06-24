@@ -1,0 +1,16 @@
+{
+  "metadata": {
+    "blockNumber": 19306202,
+    "blockTimestamp": 1750797495
+  },
+  "queries": [],
+  "changes": [
+    {
+      "description": "Update Dirt mass to match Grass",
+      "tableName": "ObjectPhysics",
+      "key": "22",
+      "oldValue": "2400000000000000",
+      "newValue": "3000000000000000"
+    }
+  ]
+}
