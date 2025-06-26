@@ -1,4 +1,5 @@
 import {
+  type Category,
   type ObjectAmount,
   categories,
   objects,
@@ -126,7 +127,7 @@ library ObjectTypeLib {
 
   // Direct Category Checks
 ${Object.entries(categories)
-  .map(([name, data]) => {
+  .map(([name, data]: [string, Category]) => {
     return renderCheck(
       name,
       data.objects.map((obj) => objectsByName[obj].id),
