@@ -40,6 +40,7 @@
     "world:set-paused": "forge script SetPausedScript --aws --broadcast --sig 'run(bool)'"
   },
   "dependencies": {
+    "@latticexyz/common": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
     "@latticexyz/config": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
     "@latticexyz/schema-type": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
     "@latticexyz/store": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",

@@ -1,4 +1,4 @@
-import { categories, objectNames } from "../objects";
+import { type Category, categories, objectNames } from "../objects";
 
 // Template for the Solidity file
 function generateObjectTypeTestSol(): string {
@@ -12,7 +12,7 @@ import { ObjectType, ObjectTypeLib, ObjectTypes } from "../src/types/ObjectType.
 contract ObjectTypeTest is DustTest {
   function testCategories() public pure {
   ${Object.entries(categories)
-    .map(([name, data]) => {
+    .map(([name, data]: [string, Category]) => {
       const categoryObjects = data.objects;
       const objectsNotInCategory = objectNames.filter(
         (obj) => !categoryObjects.includes(obj),
