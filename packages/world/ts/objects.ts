@@ -650,7 +650,7 @@ export const objectsByName = objects.reduce(
   {} as Record<ObjectName, ObjectDefinition>,
 );
 
-export const categories: Record<string, Category> = {
+export const categories = {
   NonSolid: { objects: ["Air", "Water"] },
   Any: {
     objects: ["AnyPlank", "AnyLog", "AnyLeaf", "AnyTerracotta"],
@@ -1355,4 +1355,4 @@ export const categories: Record<string, Category> = {
   PreferredSpawn: {
     objects: ["Dirt", "Grass", "Sand", "Stone"],
   },
-} as const;
+} as const satisfies Record<string, Category>;
