@@ -21,7 +21,7 @@ ${objects
 
 function validateSeeds() {
   const seeds = objects.filter((obj) =>
-    categories.Seed!.objects.includes(obj.name),
+    categories.Seed.objects.includes(obj.name as never),
   );
   for (const seed of seeds) {
     if (!seed.crop) {
