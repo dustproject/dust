@@ -1,7 +1,7 @@
 import { defineWorld } from "@latticexyz/world";
 
 export default defineWorld({
-  namespace: "dfprograms_1",
+  namespace: "defaultprogram",
   codegen: {
     generateSystemLibraries: true,
   },
