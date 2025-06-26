@@ -13,6 +13,9 @@ contract ChestProgram is Hooks.ITransfer, DefaultProgram {
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
 
   function onTransfer(Hooks.TransferContext calldata ctx) external view onlyWorld {
-    require(_isAllowed(ctx.target, ctx.caller), "Only approved callers can transfer to/from the chest");
+    if (_isProtected(ctx.target)) {
+      (EntityId forceField,) = _getForceField(target);
+      require(_isAllowed(forceField, ctx.caller), "Only approved callers can transfer to/from the chest");
+    }
   }
 }
