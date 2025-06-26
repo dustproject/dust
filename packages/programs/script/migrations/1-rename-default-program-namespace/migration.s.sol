@@ -34,7 +34,7 @@ contract RenameDefaultProgramNamespace is Migration {
       bytes memory row = accessGroupCounts.rows[i];
       (uint256 count) = abi.decode(row, (uint256));
 
-      // AccessGroupCount.set(count);
+      AccessGroupCount.set(count);
     }
 
     IndexerResult memory accessGroupOwners =
@@ -43,7 +43,7 @@ contract RenameDefaultProgramNamespace is Migration {
       bytes memory row = accessGroupOwners.rows[i];
       (uint256 groupId, bytes32 owner) = abi.decode(row, (uint256, bytes32));
 
-      // AccessGroupOwner.set(groupId, EntityId.wrap(owner));
+      AccessGroupOwner.set(groupId, EntityId.wrap(owner));
     }
 
     IndexerResult memory accessGroupMembers = recordingQuery(
@@ -53,7 +53,7 @@ contract RenameDefaultProgramNamespace is Migration {
       bytes memory row = accessGroupMembers.rows[i];
       (uint256 groupId, bytes32 member, bool hasAccess) = abi.decode(row, (uint256, bytes32, bool));
 
-      // AccessGroupMember.set(groupId, EntityId.wrap(member), hasAccess);
+      AccessGroupMember.set(groupId, EntityId.wrap(member), hasAccess);
     }
 
     IndexerResult memory entityAccessGroups =
@@ -62,16 +62,16 @@ contract RenameDefaultProgramNamespace is Migration {
       bytes memory row = entityAccessGroups.rows[i];
       (bytes32 entityId, uint256 groupId) = abi.decode(row, (bytes32, uint256));
 
-      // EntityAccessGroup.set(EntityId.wrap(entityId), groupId);
+      EntityAccessGroup.set(EntityId.wrap(entityId), groupId);
     }
 
     IndexerResult memory textSignContents =
       recordingQuery(string.concat("SELECT entityId, content FROM dfprograms_1__TextSignContent"), "(bytes32,string)");
     for (uint256 i = 0; i < textSignContents.rows.length; i++) {
       bytes memory row = textSignContents.rows[i];
-      // (bytes32 entityId, string memory content) = abi.decode(row, (bytes32, string));
+      (bytes32 entityId, string memory content) = abi.decode(row, (bytes32, string));
 
-      // TextSignContent.set(EntityId.wrap(entityId), content);
+      TextSignContent.set(EntityId.wrap(entityId), content);
     }
 
     IndexerResult memory entityPrograms =
@@ -84,7 +84,7 @@ contract RenameDefaultProgramNamespace is Migration {
         continue;
       }
 
-      // EntityProgram.set(EntityId.wrap(entityId), ProgramId.wrap(newProgram.unwrap()));
+      EntityProgram.set(EntityId.wrap(entityId), ProgramId.wrap(newProgram.unwrap()));
     }
 
     console.log("\nMigration Complete!");
