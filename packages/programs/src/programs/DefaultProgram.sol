@@ -26,28 +26,16 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
   function onAttachProgram(Hooks.AttachProgramContext calldata ctx) external onlyWorld {
     (EntityId forceField,) = _getForceField(ctx.target);
 
-    uint256 groupId;
-
-    // If the force field is associated with an access group, use that groupId
-    if (forceField.exists()) {
-      groupId = EntityAccessGroup.get(forceField);
-      // When a forcefield already exists, only members can attach programs
-      require(
-        ctx.target == forceField || AccessGroupMember.get(groupId, ctx.caller),
-        "Only members can attach programs when forcefield exists"
-      );
+    if (ctx.target == forceField) {
+      uint256 groupId = createAccessGroup(ctx.caller);
+      EntityAccessGroup.set(ctx.target, groupId);
+    } else {
+      require(_isAllowed(ctx.target, ctx.caller), "Only force field members can attach program");
     }
-
-    // If the force field is not associated with an access group, create a new one
-    if (groupId == 0) {
-      groupId = createAccessGroup(ctx.caller);
-    }
-
-    EntityAccessGroup.set(ctx.target, groupId);
   }
 
   function onDetachProgram(Hooks.DetachProgramContext calldata ctx) external onlyWorld {
-    uint256 groupId = EntityAccessGroup.get(ctx.target);
+    uint256 groupId = _getGroupId(ctx.target);
     require(_isSafeCall(ctx.target) || _canDetach(ctx.caller, groupId), "Caller not authorized to detach this program");
 
     EntityAccessGroup.deleteRecord(ctx.target);
@@ -57,9 +45,18 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
     return AccessGroupMember.get(groupId, caller);
   }
 
+  function _getGroupId(EntityId target) internal view returns (uint256 groupId) {
+    groupId = EntityAccessGroup.get(target);
+    if (groupId == 0) {
+      (EntityId forceField,) = _getForceField(target);
+      if (forceField.exists()) {
+        groupId = EntityAccessGroup.get(forceField);
+      }
+    }
+  }
+
   function _isAllowed(EntityId target, EntityId caller) internal view returns (bool) {
-    uint256 groupId = EntityAccessGroup.get(target);
-    return AccessGroupMember.get(groupId, caller);
+    return AccessGroupMember.get(_getGroupId(target), caller);
   }
 
   function _isSafeCall(EntityId target) internal view returns (bool) {
