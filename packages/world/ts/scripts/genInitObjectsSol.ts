@@ -1,3 +1,4 @@
+import { includes } from "@latticexyz/common/utils";
 import { categories, objects, objectsByName } from "../objects";
 
 // Template for the Solidity file
@@ -21,7 +22,7 @@ ${objects
 
 function validateSeeds() {
   const seeds = objects.filter((obj) =>
-    categories.Seed.objects.includes(obj.name as never),
+    includes(categories.Seed.objects, obj.name),
   );
   for (const seed of seeds) {
     if (!seed.crop) {

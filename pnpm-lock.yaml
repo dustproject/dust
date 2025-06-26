@@ -203,6 +203,9 @@ importers:
 
   packages/world:
     dependencies:
+      '@latticexyz/common':
+        specifier: 2.2.22-168c20816258c0b5c387f354283873a7544294ca
+        version: 2.2.22-168c20816258c0b5c387f354283873a7544294ca(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
       '@latticexyz/config':
         specifier: 2.2.22-168c20816258c0b5c387f354283873a7544294ca
         version: 2.2.22-168c20816258c0b5c387f354283873a7544294ca(@aws-sdk/client-kms@3.750.0)(asn1.js@5.4.1)(typescript@5.8.3)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
