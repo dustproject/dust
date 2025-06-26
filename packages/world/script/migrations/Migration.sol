@@ -147,7 +147,7 @@ abstract contract Migration is DustScript {
       queriesJson = string.concat(
         queriesJson,
         vm.serializeJsonType(
-          "QueryRecord(string query,uint256 blockHeight,string[] columns,bytes[] rows)", abi.encode(queries[1])
+          "QueryRecord(string query,uint256 blockHeight,string[] columns,bytes[] rows)", abi.encode(queries[i])
         )
       );
 
