@@ -24,7 +24,7 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
   constructor(IBaseWorld _world) WorldConsumer(_world) { }
 
   function onAttachProgram(Hooks.AttachProgramContext calldata ctx) external onlyWorld {
-    (EntityId forceField, bool isProtected) = _getForceField(ctx.target);
+    (EntityId forceField,) = _getForceField(ctx.target);
 
     if (ctx.target == forceField) {
       // Always create access group for forcefields
@@ -32,10 +32,8 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
       return;
     }
 
-    // For entities: only create access group if in a custom forcefield (no access group)
-    if (isProtected && EntityAccessGroup.get(forceField) == 0) {
-      _createAndSetAccessGroup(ctx.target, ctx.caller);
-    }
+    // For entities: don't create access groups (they'll be locked in custom forcefields anyway)
+    // Access control is handled by _getGroupId which locks entities in custom forcefields
   }
 
   function onDetachProgram(Hooks.DetachProgramContext calldata ctx) external onlyWorld {

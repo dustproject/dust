@@ -158,13 +158,13 @@ contract DefaultProgramTest is MudTest {
 
     EntityId entityId = blockEntityId(coord + vec3(1, 0, 0));
 
-    // Should create an access group for the entity since forcefield has no group
+    // Should NOT create an access group for the entity (will be locked instead)
     vm.prank(worldAddress);
     defaultProgram.onAttachProgram(AttachProgramContext({ caller: playerEntityId, target: entityId, extraData: "" }));
 
-    // Verify entity now has an access group
+    // Verify entity has no access group
     uint256 entityGroupId = EntityAccessGroup.get(entityId);
-    assertNotEq(entityGroupId, 0, "Entity should have an access group when in forcefield without group");
+    assertEq(entityGroupId, 0, "Entity should not have an access group when in forcefield without group");
   }
 
   function testDetachProgramWithoutAccessGroup() public {
@@ -305,18 +305,14 @@ contract DefaultProgramTest is MudTest {
 
     EntityId entity = blockEntityId(coord + vec3(1, 0, 0));
 
-    // Attach program to entity - should create its own access group
+    // Attach program to entity - no access group created for entities in custom forcefields
     vm.prank(worldAddress);
     defaultProgram.onAttachProgram(AttachProgramContext({ caller: alice, target: entity, extraData: "" }));
 
     uint256 entityGroupId = EntityAccessGroup.get(entity);
-    assertNotEq(entityGroupId, 0, "entity should have its own access group");
+    assertEq(entityGroupId, 0, "entity should not have an access group in custom forcefield");
 
-    // Add alice as member
-    AccessGroupMember.set(entityGroupId, alice, true);
-
-    // Even though alice is a member of entity's group, she cannot detach
-    // because entities in custom forcefields are always locked
+    // Alice cannot detach because entities in custom forcefields are always locked
     vm.expectRevert("Caller not authorized to detach this program");
     vm.prank(worldAddress);
     defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
