@@ -35,38 +35,56 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
   }
 
   function onDetachProgram(Hooks.DetachProgramContext calldata ctx) external onlyWorld {
-    uint256 groupId = _getGroupId(ctx.target);
-    require(_isSafeCall(ctx.target) || _canDetach(ctx.caller, groupId), "Caller not authorized to detach this program");
+    require(_canDetach(ctx.caller, ctx.target), "Caller not authorized to detach this program");
 
     EntityAccessGroup.deleteRecord(ctx.target);
   }
 
-  function _canDetach(EntityId caller, uint256 groupId) internal view virtual returns (bool) {
-    return AccessGroupMember.get(groupId, caller);
+  function _canDetach(EntityId caller, EntityId target) internal view virtual returns (bool) {
+    return _isAllowed(target, caller);
   }
 
-  function _getGroupId(EntityId target) internal view returns (uint256 groupId) {
-    groupId = EntityAccessGroup.get(target);
-    if (groupId == 0) {
-      (EntityId forceField,) = _getForceField(target);
-      if (forceField.exists()) {
-        groupId = EntityAccessGroup.get(forceField);
-      }
+  function _getGroupId(EntityId target) internal view returns (uint256 groupId, bool isLocked) {
+    (EntityId forceField,) = _getForceField(target);
+    bool isProtected = forceField.exists() && Energy.getEnergy(forceField) != 0;
+
+    // If not within a forcefield, open by default
+    if (!isProtected) return (0, false);
+
+    // If within a charged forcefield, check if the forcefield has an access group
+    uint256 forceFieldGroupId = EntityAccessGroup.get(forceField);
+
+    // If forcefield has NO access group, lock completely (this is a non-default forcefield)
+    if (forceFieldGroupId == 0) {
+      return (0, true);
     }
+
+    // Forcefield has an access group
+    // Check if chest has its own group
+    uint256 chestGroupId = EntityAccessGroup.get(target);
+    if (chestGroupId != 0) {
+      return (chestGroupId, false); // Use chest's group
+    }
+
+    // Chest has no group, fallback to forcefield's group
+    return (forceFieldGroupId, false);
   }
 
   function _isAllowed(EntityId target, EntityId caller) internal view returns (bool) {
-    return AccessGroupMember.get(_getGroupId(target), caller);
-  }
+    (uint256 groupId, bool isLocked) = _getGroupId(target);
 
-  function _isSafeCall(EntityId target) internal view returns (bool) {
-    return !_isProtected(target);
-  }
+    // If locked (forcefield without access group), deny access
+    if (isLocked) {
+      return false;
+    }
 
-  // TODO: extract to utils
-  function _isProtected(EntityId target) internal view returns (bool) {
-    (EntityId forceField,) = _getForceField(target);
-    return forceField.exists() && Energy.getEnergy(forceField) != 0;
+    // If no access group, allow access
+    if (groupId == 0) {
+      return true;
+    }
+
+    // Check if caller is member of the access group
+    return AccessGroupMember.get(groupId, caller);
   }
 
   // TODO: extract to utils

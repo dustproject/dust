@@ -50,7 +50,14 @@ contract ForceFieldProgram is
   }
 
   // Override the default program attachment logic to only allow the owner of the access group to detach forcefield programs
-  function _canDetach(EntityId caller, uint256 groupId) internal view override returns (bool) {
+  function _canDetach(EntityId caller, EntityId target) internal view override returns (bool) {
+    (uint256 groupId,) = _getGroupId(target);
+
+    if (groupId == 0) {
+      return true; // If no group, allow detachment
+    }
+
+    // Only the owner of the access group can detach
     return AccessGroupOwner.get(groupId) == caller;
   }
 }
