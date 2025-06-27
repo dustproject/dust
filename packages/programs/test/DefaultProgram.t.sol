@@ -130,11 +130,18 @@ contract DefaultProgramTest is MudTest {
     vm.prank(worldAddress);
     defaultProgram.onAttachProgram(AttachProgramContext({ caller: alice, target: entityId, extraData: "" }));
 
-    // Bob (not a member) should fail
+    // Entity should NOT have its own access group (should be 0 to fallback to forcefield)
+    uint256 entityGroupId = EntityAccessGroup.get(entityId);
+    assertEq(entityGroupId, 0, "Entity should not have its own access group when forcefield has one");
+
+    // Bob can also attach program to another entity (anyone can attach programs)
     EntityId entityId2 = blockEntityId(coord + vec3(0, 1, 0));
-    vm.expectRevert("Only force field members can attach program");
     vm.prank(worldAddress);
     defaultProgram.onAttachProgram(AttachProgramContext({ caller: bob, target: entityId2, extraData: "" }));
+
+    // This entity should also not have its own access group
+    uint256 entityGroupId2 = EntityAccessGroup.get(entityId2);
+    assertEq(entityGroupId2, 0, "Entity2 should not have its own access group when forcefield has one");
   }
 
   function testAttachProgramToEntityInForceFieldWithoutAccessGroup() public {
@@ -146,10 +153,13 @@ contract DefaultProgramTest is MudTest {
 
     EntityId entityId = blockEntityId(coord + vec3(1, 0, 0));
 
-    // Should fail because forcefield without access group is locked
-    vm.expectRevert("Only force field members can attach program");
+    // Should create an access group for the entity since forcefield has no group
     vm.prank(worldAddress);
     defaultProgram.onAttachProgram(AttachProgramContext({ caller: playerEntityId, target: entityId, extraData: "" }));
+
+    // Verify entity now has an access group
+    uint256 entityGroupId = EntityAccessGroup.get(entityId);
+    assertNotEq(entityGroupId, 0, "Entity should have an access group when in forcefield without group");
   }
 
   function testDetachProgramWithoutAccessGroup() public {
@@ -218,8 +228,8 @@ contract DefaultProgramTest is MudTest {
     defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entityId, extraData: "" }));
   }
 
-  // Test chest with its own group inside forcefield with group
-  function testChestWithOwnGroupInForceFieldWithGroup() public {
+  // Test entity with its own group inside forcefield with group
+  function testEntityWithOwnGroupInForceFieldWithGroup() public {
     (, EntityId alice) = createTestPlayer();
     (, EntityId bob) = createTestPlayer();
     (, EntityId charlie) = createTestPlayer();
@@ -234,26 +244,26 @@ contract DefaultProgramTest is MudTest {
     AccessGroupMember.set(forceFieldGroupId, alice, true);
     AccessGroupMember.set(forceFieldGroupId, bob, true);
 
-    // Create chest with its own group
-    EntityId chest = blockEntityId(coord + vec3(1, 0, 0));
-    EntityAccessGroup.set(chest, 2);
+    // Create entity with its own group
+    EntityId entity = blockEntityId(coord + vec3(1, 0, 0));
+    EntityAccessGroup.set(entity, 2);
     AccessGroupMember.set(2, charlie, true);
 
-    // Charlie can detach (member of chest's group)
+    // Charlie can detach (member of entity's group)
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: charlie, target: chest, extraData: "" }));
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: charlie, target: entity, extraData: "" }));
 
-    // Reset chest group for next test
-    EntityAccessGroup.set(chest, 2);
+    // Reset entity group for next test
+    EntityAccessGroup.set(entity, 2);
 
-    // Alice cannot detach (member of forcefield but not chest)
+    // Alice cannot detach (member of forcefield but not entity)
     vm.expectRevert("Caller not authorized to detach this program");
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: chest, extraData: "" }));
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
   }
 
-  // Test chest without group falls back to forcefield's group
-  function testChestWithoutGroupInForceFieldWithGroup() public {
+  // Test entity without group falls back to forcefield's group
+  function testEntityWithoutGroupInForceFieldWithGroup() public {
     (, EntityId alice) = createTestPlayer();
     (, EntityId bob) = createTestPlayer();
 
@@ -266,49 +276,67 @@ contract DefaultProgramTest is MudTest {
     uint256 forceFieldGroupId = EntityAccessGroup.get(forceField);
     AccessGroupMember.set(forceFieldGroupId, alice, true);
 
-    // Create chest without its own group
-    EntityId chest = blockEntityId(coord + vec3(1, 0, 0));
+    // Create entity without its own group
+    EntityId entity = blockEntityId(coord + vec3(1, 0, 0));
 
     // Alice can detach (member of forcefield's group)
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: chest, extraData: "" }));
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
 
     // Bob cannot detach (not member of forcefield's group)
     vm.expectRevert("Caller not authorized to detach this program");
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: chest, extraData: "" }));
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
   }
 
-  // Test chest in forcefield without access group is locked
-  function testChestInForceFieldWithoutGroupIsLocked() public {
+  // Test entity in forcefield without access group gets its own group
+  function testEntityInForceFieldWithoutGroupGetsOwnGroup() public {
     (, EntityId alice) = createTestPlayer();
+    (, EntityId bob) = createTestPlayer();
 
     Vec3 coord = vec3(1, 2, 3);
     mockForceField(coord);
     // Forcefield has no access group
 
-    EntityId chest = blockEntityId(coord + vec3(1, 0, 0));
+    EntityId entity = blockEntityId(coord + vec3(1, 0, 0));
 
-    // No one can detach from locked chest
+    // Attach program to entity - should create its own access group
+    vm.prank(worldAddress);
+    defaultProgram.onAttachProgram(AttachProgramContext({ caller: alice, target: entity, extraData: "" }));
+
+    uint256 entityGroupId = EntityAccessGroup.get(entity);
+    assertNotEq(entityGroupId, 0, "entity should have its own access group");
+
+    // Add alice as member
+    AccessGroupMember.set(entityGroupId, alice, true);
+
+    // Alice can detach (member of entity's group)
+    vm.prank(worldAddress);
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
+
+    // Reset for next test
+    EntityAccessGroup.set(entity, entityGroupId);
+
+    // Bob cannot detach (not a member)
     vm.expectRevert("Caller not authorized to detach this program");
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: chest, extraData: "" }));
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
   }
 
-  // Test chest outside forcefield is open to everyone
-  function testChestOutsideForceFieldIsOpen() public {
+  // Test entity outside forcefield is open to everyone
+  function testEntityOutsideForceFieldIsOpen() public {
     (, EntityId alice) = createTestPlayer();
     (, EntityId bob) = createTestPlayer();
 
-    // Create chest outside any forcefield
-    EntityId chest = blockEntityId(vec3(10, 10, 10));
+    // Create entity outside any forcefield
+    EntityId entity = blockEntityId(vec3(10, 10, 10));
 
     // Anyone can detach
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: chest, extraData: "" }));
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
 
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: chest, extraData: "" }));
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
   }
 
   // Test forcefield energy depletion changes access
@@ -325,18 +353,18 @@ contract DefaultProgramTest is MudTest {
     uint256 forceFieldGroupId = EntityAccessGroup.get(forceField);
     AccessGroupMember.set(forceFieldGroupId, alice, true);
 
-    EntityId chest = blockEntityId(coord + vec3(1, 0, 0));
+    EntityId entity = blockEntityId(coord + vec3(1, 0, 0));
 
     // Alice can access while forcefield is active
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: chest, extraData: "" }));
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
 
     // Deplete forcefield energy
     Energy.setEnergy(forceField, 0);
 
-    // Now anyone can access (chest is no longer protected)
+    // Now anyone can access (entity is no longer protected)
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: chest, extraData: "" }));
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
   }
 
   // Test forcefield without energy from the start
@@ -356,18 +384,18 @@ contract DefaultProgramTest is MudTest {
     uint256 forceFieldGroupId = EntityAccessGroup.get(forceField);
     AccessGroupMember.set(forceFieldGroupId, alice, true);
 
-    // Create chest with its own access group
-    EntityId chest = blockEntityId(coord + vec3(1, 0, 0));
-    EntityAccessGroup.set(chest, 2);
+    // Create entity with its own access group
+    EntityId entity = blockEntityId(coord + vec3(1, 0, 0));
+    EntityAccessGroup.set(entity, 2);
     AccessGroupMember.set(2, alice, true);
 
     // Bob can access because forcefield has no energy (not protected)
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: chest, extraData: "" }));
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
 
     // Alice can also access
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: chest, extraData: "" }));
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
   }
 
   // Test forcefield without energy and without access group
@@ -382,14 +410,14 @@ contract DefaultProgramTest is MudTest {
     Energy.setEnergy(forceField, 0);
     // Forcefield has no access group
 
-    EntityId chest = blockEntityId(coord + vec3(1, 0, 0));
+    EntityId entity = blockEntityId(coord + vec3(1, 0, 0));
 
     // Anyone can access because forcefield has no energy
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: chest, extraData: "" }));
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
 
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: chest, extraData: "" }));
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
   }
 
   // Test entity with program and access group inside forcefield without energy
@@ -408,34 +436,34 @@ contract DefaultProgramTest is MudTest {
     AccessGroupMember.set(forceFieldGroupId, alice, true);
 
     // Create entity with program and its own access group
-    EntityId chest = blockEntityId(coord + vec3(1, 0, 0));
+    EntityId entity = blockEntityId(coord + vec3(1, 0, 0));
     vm.prank(worldAddress);
-    defaultProgram.onAttachProgram(AttachProgramContext({ caller: alice, target: chest, extraData: "" }));
-    EntityAccessGroup.set(chest, 2);
-    AccessGroupMember.set(2, bob, true); // Only bob is member of chest's group
+    defaultProgram.onAttachProgram(AttachProgramContext({ caller: alice, target: entity, extraData: "" }));
+    EntityAccessGroup.set(entity, 2);
+    AccessGroupMember.set(2, bob, true); // Only bob is member of entity's group
 
-    // While forcefield has energy, only bob can access (chest's group member)
+    // While forcefield has energy, only bob can access (entity's group member)
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: chest, extraData: "" }));
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
 
-    // Reset chest group
-    EntityAccessGroup.set(chest, 2);
+    // Reset entity group
+    EntityAccessGroup.set(entity, 2);
 
-    // Charlie cannot access (not in chest's group)
+    // Charlie cannot access (not in entity's group)
     vm.expectRevert("Caller not authorized to detach this program");
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: charlie, target: chest, extraData: "" }));
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: charlie, target: entity, extraData: "" }));
 
     // Deplete forcefield energy
     Energy.setEnergy(forceField, 0);
 
-    // Now the chest is unprotected - anyone can access
-    // Even though chest has its own access group, it's ignored because it's not in an active forcefield
+    // Now the entity is unprotected - anyone can access
+    // Even though entity has its own access group, it's ignored because it's not in an active forcefield
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: charlie, target: chest, extraData: "" }));
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: charlie, target: entity, extraData: "" }));
 
     // Alice can also access now
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: chest, extraData: "" }));
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
   }
 }

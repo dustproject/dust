@@ -27,10 +27,25 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
     (EntityId forceField,) = _getForceField(ctx.target);
 
     if (ctx.target == forceField) {
+      // Always create access group for forcefields
       uint256 groupId = createAccessGroup(ctx.caller);
       EntityAccessGroup.set(ctx.target, groupId);
     } else {
-      require(_isAllowed(ctx.target, ctx.caller), "Only force field members can attach program");
+      // For entities within forcefields
+      bool isProtected = forceField.exists() && Energy.getEnergy(forceField) != 0;
+
+      if (isProtected) {
+        // Check if the forcefield has an access group
+        uint256 forceFieldGroupId = EntityAccessGroup.get(forceField);
+
+        if (forceFieldGroupId == 0) {
+          // Forcefield has NO access group - create one for the entity
+          uint256 groupId = createAccessGroup(ctx.caller);
+          EntityAccessGroup.set(ctx.target, groupId);
+        }
+        // If forcefield has an access group, don't create one for the entity (will fallback)
+      }
+      // If not in a forcefield, don't create an access group (open access)
     }
   }
 
@@ -54,19 +69,25 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
     // If within a charged forcefield, check if the forcefield has an access group
     uint256 forceFieldGroupId = EntityAccessGroup.get(forceField);
 
-    // If forcefield has NO access group, lock completely (this is a non-default forcefield)
+    uint256 targetGroupId = EntityAccessGroup.get(target);
+
+    // If forcefield has NO access group
     if (forceFieldGroupId == 0) {
+      // Check if entity has its own access group
+      if (targetGroupId != 0) {
+        return (targetGroupId, false); // Use entity's group even in custom forcefield
+      }
+      // No groups at all, lock completely
       return (0, true);
     }
 
     // Forcefield has an access group
-    // Check if chest has its own group
-    uint256 chestGroupId = EntityAccessGroup.get(target);
-    if (chestGroupId != 0) {
-      return (chestGroupId, false); // Use chest's group
+    // Check if entity has its own group
+    if (targetGroupId != 0) {
+      return (targetGroupId, false); // Use entity's group
     }
 
-    // Chest has no group, fallback to forcefield's group
+    // Entity has no group, fallback to forcefield's group
     return (forceFieldGroupId, false);
   }
 
