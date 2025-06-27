@@ -55,21 +55,17 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
     if (!isProtected) return (0, false);
 
     uint256 forceFieldGroupId = EntityAccessGroup.get(forceField);
-    uint256 targetGroupId = EntityAccessGroup.get(target);
 
-    if (targetGroupId != 0) {
-      // If target has an access group, use it
-      return (targetGroupId, false);
-    }
-
-    // Custom forcefield (no access group)
+    // Custom forcefield (no access group) - ALWAYS lock
     if (forceFieldGroupId == 0) {
-      // If no access group in both the target and the forcefield, lock
       return (0, true);
     }
 
-    // Standard forcefield - fallback to forcefield's group
-    return (forceFieldGroupId, false);
+    // Standard forcefield - check if entity has its own group
+    uint256 targetGroupId = EntityAccessGroup.get(target);
+
+    // Use entity's group if it has one, otherwise fallback to forcefield's
+    return targetGroupId != 0 ? (targetGroupId, false) : (forceFieldGroupId, false);
   }
 
   function _isAllowed(EntityId target, EntityId caller) internal view returns (bool) {

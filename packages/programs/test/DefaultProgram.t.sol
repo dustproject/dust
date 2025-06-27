@@ -26,6 +26,11 @@ import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 
 contract DefaultProgramMock is DefaultProgram {
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
+
+  // Test helper to check access without detaching
+  function isAllowed(EntityId target, EntityId caller) external view returns (bool) {
+    return _isAllowed(target, caller);
+  }
 }
 
 contract DefaultProgramTest is MudTest {
@@ -289,14 +294,14 @@ contract DefaultProgramTest is MudTest {
     defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
   }
 
-  // Test entity in forcefield without access group gets its own group
-  function testEntityInForceFieldWithoutGroupGetsOwnGroup() public {
+  // Test entity in forcefield without access group is always locked
+  function testEntityInForceFieldWithoutGroupIsLocked() public {
     (, EntityId alice) = createTestPlayer();
     (, EntityId bob) = createTestPlayer();
 
     Vec3 coord = vec3(1, 2, 3);
     mockForceField(coord);
-    // Forcefield has no access group
+    // Forcefield has no access group (custom forcefield)
 
     EntityId entity = blockEntityId(coord + vec3(1, 0, 0));
 
@@ -310,14 +315,13 @@ contract DefaultProgramTest is MudTest {
     // Add alice as member
     AccessGroupMember.set(entityGroupId, alice, true);
 
-    // Alice can detach (member of entity's group)
+    // Even though alice is a member of entity's group, she cannot detach
+    // because entities in custom forcefields are always locked
+    vm.expectRevert("Caller not authorized to detach this program");
     vm.prank(worldAddress);
     defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
 
-    // Reset for next test
-    EntityAccessGroup.set(entity, entityGroupId);
-
-    // Bob cannot detach (not a member)
+    // Bob also cannot detach
     vm.expectRevert("Caller not authorized to detach this program");
     vm.prank(worldAddress);
     defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
@@ -326,17 +330,13 @@ contract DefaultProgramTest is MudTest {
   // Test entity outside forcefield is open to everyone
   function testEntityOutsideForceFieldIsOpen() public {
     (, EntityId alice) = createTestPlayer();
-    (, EntityId bob) = createTestPlayer();
 
     // Create entity outside any forcefield
     EntityId entity = blockEntityId(vec3(10, 10, 10));
 
-    // Anyone can detach
+    // Anyone can detach (testing with alice)
     vm.prank(worldAddress);
     defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
-
-    vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
   }
 
   // Test forcefield energy depletion changes access
@@ -355,14 +355,15 @@ contract DefaultProgramTest is MudTest {
 
     EntityId entity = blockEntityId(coord + vec3(1, 0, 0));
 
-    // Alice can access while forcefield is active
+    // Bob cannot access while forcefield is active (not a member)
+    vm.expectRevert("Caller not authorized to detach this program");
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
+    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
 
     // Deplete forcefield energy
     Energy.setEnergy(forceField, 0);
 
-    // Now anyone can access (entity is no longer protected)
+    // Now bob can access (entity is no longer protected)
     vm.prank(worldAddress);
     defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
   }
@@ -390,18 +391,14 @@ contract DefaultProgramTest is MudTest {
     AccessGroupMember.set(2, alice, true);
 
     // Bob can access because forcefield has no energy (not protected)
+    // Even though entity has an access group, it's ignored when not in active forcefield
     vm.prank(worldAddress);
     defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
-
-    // Alice can also access
-    vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
   }
 
   // Test forcefield without energy and without access group
   function testForceFieldWithoutEnergyAndWithoutAccessGroup() public {
     (, EntityId alice) = createTestPlayer();
-    (, EntityId bob) = createTestPlayer();
 
     Vec3 coord = vec3(1, 2, 3);
     EntityId forceField = mockForceField(coord);
@@ -415,9 +412,6 @@ contract DefaultProgramTest is MudTest {
     // Anyone can access because forcefield has no energy
     vm.prank(worldAddress);
     defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
-
-    vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
   }
 
   // Test entity with program and access group inside forcefield without energy
@@ -443,12 +437,6 @@ contract DefaultProgramTest is MudTest {
     AccessGroupMember.set(2, bob, true); // Only bob is member of entity's group
 
     // While forcefield has energy, only bob can access (entity's group member)
-    vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
-
-    // Reset entity group
-    EntityAccessGroup.set(entity, 2);
-
     // Charlie cannot access (not in entity's group)
     vm.expectRevert("Caller not authorized to detach this program");
     vm.prank(worldAddress);
@@ -461,9 +449,5 @@ contract DefaultProgramTest is MudTest {
     // Even though entity has its own access group, it's ignored because it's not in an active forcefield
     vm.prank(worldAddress);
     defaultProgram.onDetachProgram(DetachProgramContext({ caller: charlie, target: entity, extraData: "" }));
-
-    // Alice can also access now
-    vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
   }
 }
