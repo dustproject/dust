@@ -17,7 +17,7 @@ import { ForceFieldProgram } from "../src/programs/ForceFieldProgram.sol";
 import { SpawnTileProgram } from "../src/programs/SpawnTileProgram.sol";
 import { TextSignProgram } from "../src/programs/TextSignProgram.sol";
 
-bytes14 constant DEFAULT_NAMESPACE = "dfprograms_1";
+bytes14 constant DEFAULT_NAMESPACE = "defaultprogram";
 
 contract PostDeploy is DustScript {
   function run(address worldAddress) external {
