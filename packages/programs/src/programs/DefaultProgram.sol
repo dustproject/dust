@@ -24,28 +24,17 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
   constructor(IBaseWorld _world) WorldConsumer(_world) { }
 
   function onAttachProgram(Hooks.AttachProgramContext calldata ctx) external onlyWorld {
-    (EntityId forceField,) = _getForceField(ctx.target);
+    (EntityId forceField, bool isProtected) = _getForceField(ctx.target);
 
     if (ctx.target == forceField) {
       // Always create access group for forcefields
-      uint256 groupId = createAccessGroup(ctx.caller);
-      EntityAccessGroup.set(ctx.target, groupId);
-    } else {
-      // For entities within forcefields
-      bool isProtected = forceField.exists() && Energy.getEnergy(forceField) != 0;
+      _createAndSetAccessGroup(ctx.target, ctx.caller);
+      return;
+    }
 
-      if (isProtected) {
-        // Check if the forcefield has an access group
-        uint256 forceFieldGroupId = EntityAccessGroup.get(forceField);
-
-        if (forceFieldGroupId == 0) {
-          // Forcefield has NO access group - create one for the entity
-          uint256 groupId = createAccessGroup(ctx.caller);
-          EntityAccessGroup.set(ctx.target, groupId);
-        }
-        // If forcefield has an access group, don't create one for the entity (will fallback)
-      }
-      // If not in a forcefield, don't create an access group (open access)
+    // For entities: only create access group if in a custom forcefield (no access group)
+    if (isProtected && EntityAccessGroup.get(forceField) == 0) {
+      _createAndSetAccessGroup(ctx.target, ctx.caller);
     }
   }
 
@@ -60,66 +49,54 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
   }
 
   function _getGroupId(EntityId target) internal view returns (uint256 groupId, bool isLocked) {
-    (EntityId forceField,) = _getForceField(target);
-    bool isProtected = forceField.exists() && Energy.getEnergy(forceField) != 0;
+    (EntityId forceField, bool isProtected) = _getForceField(target);
 
-    // If not within a forcefield, open by default
+    // Not in protected forcefield = open access
     if (!isProtected) return (0, false);
 
-    // If within a charged forcefield, check if the forcefield has an access group
     uint256 forceFieldGroupId = EntityAccessGroup.get(forceField);
-
     uint256 targetGroupId = EntityAccessGroup.get(target);
 
-    // If forcefield has NO access group
+    if (targetGroupId != 0) {
+      // If target has an access group, use it
+      return (targetGroupId, false);
+    }
+
+    // Custom forcefield (no access group)
     if (forceFieldGroupId == 0) {
-      // Check if entity has its own access group
-      if (targetGroupId != 0) {
-        return (targetGroupId, false); // Use entity's group even in custom forcefield
-      }
-      // No groups at all, lock completely
+      // If no access group in both the target and the forcefield, lock
       return (0, true);
     }
 
-    // Forcefield has an access group
-    // Check if entity has its own group
-    if (targetGroupId != 0) {
-      return (targetGroupId, false); // Use entity's group
-    }
-
-    // Entity has no group, fallback to forcefield's group
+    // Standard forcefield - fallback to forcefield's group
     return (forceFieldGroupId, false);
   }
 
   function _isAllowed(EntityId target, EntityId caller) internal view returns (bool) {
     (uint256 groupId, bool isLocked) = _getGroupId(target);
 
-    // If locked (forcefield without access group), deny access
-    if (isLocked) {
-      return false;
-    }
+    // Locked = deny, No group = allow, Has group = check membership
+    return !isLocked && (groupId == 0 || AccessGroupMember.get(groupId, caller));
+  }
 
-    // If no access group, allow access
-    if (groupId == 0) {
-      return true;
-    }
-
-    // Check if caller is member of the access group
-    return AccessGroupMember.get(groupId, caller);
+  function _createAndSetAccessGroup(EntityId target, EntityId owner) internal {
+    uint256 groupId = createAccessGroup(owner);
+    EntityAccessGroup.set(target, groupId);
   }
 
   // TODO: extract to utils
-  function _getForceField(EntityId target) internal view returns (EntityId, EntityId) {
+  function _getForceField(EntityId target) internal view returns (EntityId, bool isProtected) {
     Vec3 fragmentCoord = target.getPosition().toFragmentCoord();
     EntityId fragment = EntityTypeLib.encodeFragment(fragmentCoord);
-    if (!fragment.exists()) return (EntityId.wrap(0), fragment);
+    if (!fragment.exists()) return (EntityId.wrap(0), false);
 
     FragmentData memory fragmentData = Fragment.get(fragment);
 
     bool isActive = fragmentData.forceField.exists()
       && fragmentData.forceFieldCreatedAt == Machine.getCreatedAt(fragmentData.forceField);
 
-    return isActive ? (fragmentData.forceField, fragment) : (EntityId.wrap(0), fragment);
+    return
+      isActive ? (fragmentData.forceField, Energy.getEnergy(fragmentData.forceField) != 0) : (EntityId.wrap(0), false);
   }
 
   // We include a fallback function to prevent hooks not implemented
