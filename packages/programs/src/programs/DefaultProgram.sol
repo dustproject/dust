@@ -46,7 +46,7 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
     return _isAllowed(target, caller);
   }
 
-  function _getGroupId(EntityId target) internal view returns (uint256 groupId, bool isLocked) {
+  function _getGroupId(EntityId target) internal view returns (uint256 groupId, bool defaultDeny) {
     (EntityId forceField, bool isProtected) = _getForceField(target);
 
     // Not in protected forcefield = open access
@@ -67,10 +67,10 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
   }
 
   function _isAllowed(EntityId target, EntityId caller) internal view returns (bool) {
-    (uint256 groupId, bool isLocked) = _getGroupId(target);
+    (uint256 groupId, bool defaultDeny) = _getGroupId(target);
 
-    // Locked = deny, No group = allow, Has group = check membership
-    return !isLocked && (groupId == 0 || AccessGroupMember.get(groupId, caller));
+    // No default forcefield = deny, No group = allow, Has group = check membership
+    return !defaultDeny && (groupId == 0 || AccessGroupMember.get(groupId, caller));
   }
 
   function _createAndSetAccessGroup(EntityId target, EntityId owner) internal {
