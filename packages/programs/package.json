@@ -21,7 +21,8 @@
     "deploy:local": "pnpm run build && mud deploy",
     "fix": "pnpm run fix:format",
     "fix:format": "forge fmt",
-    "fix:lint": "solhint --config ./.solhint.json '**/*.sol' --fix"
+    "fix:lint": "solhint --config ./.solhint.json '**/*.sol' --fix",
+    "test": "mud test"
   },
   "dependencies": {
     "@dust/world": "workspace:*",
