@@ -35,25 +35,35 @@ contract PostDeploy is DustScript {
     ForceFieldProgram forceFieldProgram = new ForceFieldProgram(world);
     world.registerSystem(ffProgramId, forceFieldProgram, false);
 
+    console.log("Registered ForceFieldProgram", address(forceFieldProgram));
+
     ResourceId chestProgramId =
       WorldResourceIdLib.encode({ typeId: RESOURCE_SYSTEM, namespace: DEFAULT_NAMESPACE, name: "ChestProgram" });
     ChestProgram chestProgram = new ChestProgram(world);
     world.registerSystem(chestProgramId, chestProgram, false);
+
+    console.log("Registered ChestProgram", address(chestProgram));
 
     ResourceId bedProgramId =
       WorldResourceIdLib.encode({ typeId: RESOURCE_SYSTEM, namespace: DEFAULT_NAMESPACE, name: "BedProgram" });
     BedProgram bedProgram = new BedProgram(world);
     world.registerSystem(bedProgramId, bedProgram, false);
 
+    console.log("Registered BedProgram", address(bedProgram));
+
     ResourceId spawnTileProgramId =
       WorldResourceIdLib.encode({ typeId: RESOURCE_SYSTEM, namespace: DEFAULT_NAMESPACE, name: "SpawnTileProgram" });
     SpawnTileProgram spawnTileProgram = new SpawnTileProgram(world);
     world.registerSystem(spawnTileProgramId, spawnTileProgram, false);
 
+    console.log("Registered SpawnTileProgram", address(spawnTileProgram));
+
     ResourceId textSignProgramId =
       WorldResourceIdLib.encode({ typeId: RESOURCE_SYSTEM, namespace: DEFAULT_NAMESPACE, name: "TextSignProgram" });
     TextSignProgram textSignProgram = new TextSignProgram(world);
     world.registerSystem(textSignProgramId, textSignProgram, false);
+
+    console.log("Registered TextSignProgram", address(textSignProgram));
 
     vm.stopBroadcast();
   }
