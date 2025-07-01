@@ -1464,6 +1464,7 @@ library ObjectTypeLib {
     if (self == ObjectTypes.SpruceLeaf) return ObjectTypes.SpruceSapling;
     if (self == ObjectTypes.AcaciaLeaf) return ObjectTypes.AcaciaSapling;
     if (self == ObjectTypes.DarkOakLeaf) return ObjectTypes.DarkOakSapling;
+    if (self == ObjectTypes.MangroveLeaf) return ObjectTypes.MangroveSapling;
     return ObjectTypes.Null;
   }
 

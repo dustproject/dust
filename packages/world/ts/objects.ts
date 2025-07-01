@@ -328,7 +328,12 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
     mass: 500000000000000n,
     energy: 500000000000000n,
   },
-  { name: "MangroveLeaf", mass: 500000000000000n, energy: 500000000000000n },
+  {
+    name: "MangroveLeaf",
+    mass: 500000000000000n,
+    energy: 500000000000000n,
+    sapling: "MangroveSapling",
+  },
   { name: "MangroveRoots", mass: 400000000000000n },
   { name: "MuddyMangroveRoots", mass: 400000000000000n },
   { name: "AzaleaFlower", mass: 300000000000000n },
