@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { isAllowed } from "../src/isAllowed.sol";
 import { DefaultProgram, IBaseWorld } from "../src/programs/DefaultProgram.sol";
 
 import { Energy } from "@dust/world/src/codegen/tables/Energy.sol";
@@ -26,11 +27,6 @@ import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 
 contract DefaultProgramMock is DefaultProgram {
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
-
-  // Test helper to check access without detaching
-  function isAllowed(EntityId target, EntityId caller) external view returns (bool) {
-    return _isAllowed(target, caller);
-  }
 }
 
 contract DefaultProgramTest is MudTest {
