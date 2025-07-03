@@ -1,5 +1,10 @@
 # Changelog
 
+## 2024-07-03
+
+- Fix mining Mangrove Leafs
+- Fix access control for setting text sign content
+
 ## 2024-06-24
 
 - Use chunk randomness for tree growth.
