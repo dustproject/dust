@@ -11,6 +11,9 @@ import { Vec3 } from "@dust/world/src/types/Vec3.sol";
 import "@dust/world/src/ProgramHooks.sol" as Hooks;
 
 import { AccessGroupOwner } from "../codegen/tables/AccessGroupOwner.sol";
+
+import { getGroupId } from "../getGroupId.sol";
+import { isAllowed } from "../isAllowed.sol";
 import { DefaultProgram } from "./DefaultProgram.sol";
 
 contract ForceFieldProgram is
@@ -34,24 +37,24 @@ contract ForceFieldProgram is
   }
 
   function onAddFragment(Hooks.AddFragmentContext calldata ctx) external view onlyWorld {
-    require(_isAllowed(ctx.target, ctx.caller), "Only approved callers can add fragments to the force field");
+    require(isAllowed(ctx.target, ctx.caller), "Only approved callers can add fragments to the force field");
   }
 
   function onRemoveFragment(Hooks.RemoveFragmentContext calldata ctx) external view onlyWorld {
-    require(_isAllowed(ctx.target, ctx.caller), "Only approved callers can remove fragments from the force field");
+    require(isAllowed(ctx.target, ctx.caller), "Only approved callers can remove fragments from the force field");
   }
 
   function onBuild(Hooks.BuildContext calldata ctx) external view onlyWorld {
-    require(_isAllowed(ctx.target, ctx.caller), "Only approved callers can build in the force field");
+    require(isAllowed(ctx.target, ctx.caller), "Only approved callers can build in the force field");
   }
 
   function onMine(Hooks.MineContext calldata ctx) external view onlyWorld {
-    require(_isAllowed(ctx.target, ctx.caller), "Only approved callers can mine in the force field");
+    require(isAllowed(ctx.target, ctx.caller), "Only approved callers can mine in the force field");
   }
 
   // Override the default program attachment logic to only allow the owner of the access group to detach forcefield programs
   function _canDetach(EntityId caller, EntityId target) internal view override returns (bool) {
-    (uint256 groupId,) = _getGroupId(target);
+    (uint256 groupId,) = getGroupId(target);
 
     if (groupId == 0) {
       return true; // If no group, allow detachment

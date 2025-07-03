@@ -13,6 +13,8 @@ import { EntityAccessGroup } from "./codegen/tables/EntityAccessGroup.sol";
 import { TextSignContent } from "./codegen/tables/TextSignContent.sol";
 
 import { createAccessGroup } from "./createAccessGroup.sol";
+import { getGroupId } from "./getGroupId.sol";
+import { isAllowed } from "./isAllowed.sol";
 
 contract DefaultProgramSystem is System {
   function newAccessGroup(EntityId owner) external returns (uint256) {
@@ -38,7 +40,8 @@ contract DefaultProgramSystem is System {
   }
 
   function setMembership(EntityId caller, EntityId target, EntityId member, bool allowed) public {
-    uint256 groupId = EntityAccessGroup.get(target);
+    (uint256 groupId,) = getGroupId(target);
+    require(groupId != 0, "Target entity has no access group");
     setMembership(caller, groupId, member, allowed);
   }
 
@@ -54,13 +57,12 @@ contract DefaultProgramSystem is System {
 
   function setTextSignContent(EntityId caller, EntityId target, string memory content) external {
     caller.validateCaller();
-    uint256 groupId = EntityAccessGroup.get(target);
-    _requireMember(groupId, caller);
+    _requireMember(caller, target);
     TextSignContent.set(target, content);
   }
 
-  function _requireMember(uint256 groupId, EntityId caller) private view {
-    require(AccessGroupMember.get(groupId, caller), "Caller is not a member of the access group");
+  function _requireMember(EntityId caller, EntityId target) private view {
+    require(isAllowed(target, caller), "Caller is not a member of the access group");
   }
 
   function _requireOwner(uint256 groupId, EntityId caller) private view {
