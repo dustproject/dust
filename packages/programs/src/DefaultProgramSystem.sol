@@ -61,6 +61,10 @@ contract DefaultProgramSystem is System {
     TextSignContent.set(target, content);
   }
 
+  function getEntityGroupId(EntityId target) external view returns (uint256 groupId, bool defaultDeny) {
+    return getGroupId(target);
+  }
+
   function _requireMember(EntityId caller, EntityId target) private view {
     require(isAllowed(target, caller), "Caller is not a member of the access group");
   }
