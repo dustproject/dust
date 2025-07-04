@@ -22,6 +22,11 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
   function onAttachProgram(Hooks.AttachProgramContext calldata ctx) external onlyWorld {
     (EntityId forceField,) = getForceField(ctx.target);
 
+    // Sanity check to ensure the target's access group is not already set
+    if (EntityAccessGroup.get(ctx.target) != 0) {
+      EntityAccessGroup.deleteRecord(ctx.target);
+    }
+
     if (ctx.target == forceField) {
       // Always create access group for forcefields
       _createAndSetAccessGroup(ctx.target, ctx.caller);
@@ -33,7 +38,8 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
   }
 
   function onDetachProgram(Hooks.DetachProgramContext calldata ctx) external onlyWorld {
-    require(_canDetach(ctx.caller, ctx.target), "Caller not authorized to detach this program");
+    (, bool isProtected) = getForceField(ctx.target);
+    require(!isProtected || _canDetach(ctx.caller, ctx.target), "Caller not authorized to detach this program");
 
     EntityAccessGroup.deleteRecord(ctx.target);
   }

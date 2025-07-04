@@ -22,6 +22,7 @@
     "fix": "pnpm run fix:format",
     "fix:format": "forge fmt",
     "fix:lint": "solhint --config ./.solhint.json '**/*.sol' --fix",
+    "getAccessGroup": "force script GetAccessGroup",
     "test": "mud test"
   },
   "dependencies": {
