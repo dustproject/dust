@@ -22,18 +22,17 @@ import { getGroupId } from "../src/getGroupId.sol";
 import { isAllowed } from "../src/isAllowed.sol";
 
 contract GetAccessGroup is DustScript {
-  function run(address worldAddress) external {
-    // Specify a store so that you can use tables directly in PostDeploy
+  function run(address worldAddress, EntityId target) public {
     StoreSwitch.setStoreAddress(worldAddress);
-    EntityId target = EntityId.wrap(0x03000000b500000040fffff62500000000000000000000000000000000000000);
 
     (uint256 groupId, bool dd) = getGroupId(target);
 
-    EntityId caller = EntityId.wrap(0x01c5e51e5b42c81e37a4ef913f2dcb818d7a285b140000000000000000000000);
-
     console.log("Group ID:", groupId);
-    console.log("dd:", dd);
+    console.log("Default Deny:", dd);
+  }
 
+  function run(address worldAddress, EntityId target, EntityId caller) external {
+    run(worldAddress, target);
     console.log("isAllowed:", isAllowed(target, caller));
   }
 }
