@@ -66,7 +66,7 @@ uint128 constant SPECIALIZATION_MULTIPLIER = 3; // 3x bonus for using the right 
 // Action modifiers (fractional values use ACTION_MODIFIER_DENOMINATOR)
 uint128 constant ACTION_MODIFIER_DENOMINATOR = 1e18;
 uint128 constant MINE_ACTION_MODIFIER = ACTION_MODIFIER_DENOMINATOR; // 1x (no change for mining)
-uint128 constant HIT_ACTION_MODIFIER = ACTION_MODIFIER_DENOMINATOR / 100; // ~1/30x
+uint128 constant HIT_ACTION_MODIFIER = ACTION_MODIFIER_DENOMINATOR / 100; // ~1/100x
 
 // Resource caps
 uint256 constant MAX_WHEAT_SEED = 29_659;
