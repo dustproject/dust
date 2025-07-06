@@ -23,6 +23,7 @@ export default defineWorld({
       "Wakeup",
       "FuelMachine",
       "HitMachine",
+      "HitPlayer",
       "AttachProgram",
       "DetachProgram",
       "AddFragment",

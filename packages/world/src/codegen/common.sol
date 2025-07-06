@@ -18,6 +18,7 @@ enum Action {
   Wakeup,
   FuelMachine,
   HitMachine,
+  HitPlayer,
   AttachProgram,
   DetachProgram,
   AddFragment,

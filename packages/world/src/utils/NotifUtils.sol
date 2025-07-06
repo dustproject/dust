@@ -76,6 +76,12 @@ struct HitMachineNotification {
   Vec3 machineCoord;
 }
 
+struct HitPlayerNotification {
+  EntityId targetPlayer;
+  Vec3 targetCoord;
+  uint128 damage;
+}
+
 struct AttachProgramNotification {
   EntityId attachedTo;
   ResourceId programSystemId;
@@ -197,6 +203,17 @@ function notify(EntityId player, HitMachineNotification memory hitMachineNotific
       timestamp: uint128(block.timestamp),
       action: Action.HitMachine,
       data: abi.encode(hitMachineNotification)
+    })
+  );
+}
+
+function notify(EntityId player, HitPlayerNotification memory hitPlayerNotification) {
+  Notification._set(
+    player,
+    NotificationData({
+      timestamp: uint128(block.timestamp),
+      action: Action.HitPlayer,
+      data: abi.encode(hitPlayerNotification)
     })
   );
 }
