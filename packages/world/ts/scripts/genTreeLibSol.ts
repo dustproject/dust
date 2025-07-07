@@ -59,7 +59,7 @@ export function genTreeLib(): string {
 
     chancePieces.push(`
     if (objectType == ObjectTypes.${t.leaf}) {
-      return uint256(3) * 100 / ${fixed.length + random.length};
+      return uint256(3) * 1e18 / ${fixed.length + random.length};
     }`);
   }
 

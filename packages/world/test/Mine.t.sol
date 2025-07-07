@@ -251,15 +251,14 @@ contract MineTest is DustTest {
     vm.prank(alice);
     world.mineUntilDestroyed(aliceEntityId, farmlandCoord + vec3(0, 1, 0), "");
 
-    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Wheat seeds were not removed from circulation");
+    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 2, "Wheat seeds were not removed from circulation");
 
     // Verify drops
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 2);
 
     // Verify crop no longer exists
     assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
-    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seed was removed from circulation");
 
     // Verify local energy pool has changed (from player's energy cost)
     assertEq(
@@ -304,15 +303,14 @@ contract MineTest is DustTest {
     vm.prank(alice);
     world.mineUntilDestroyed(aliceEntityId, farmlandCoord, "");
 
-    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seed drop was not removed from circulation");
+    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 2, "Seed drop was not removed from circulation");
 
     // Verify drops
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 2);
 
     // Verify crop no longer exists
     assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
-    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seed was removed from circulation");
   }
 
   function testMineResourceTypeIsFixedAfterPartialMine() public {

@@ -521,8 +521,8 @@ library RandomResourceLib {
 
     if (objectType == ObjectTypes.FescueGrass || objectType == ObjectTypes.SwitchGrass) {
       uint256[] memory distribution = new uint256[](2);
-      distribution[0] = 43; // 0 seeds: 43%
-      distribution[1] = 57; // 1 seed:  57%
+      distribution[0] = 43 * 1e18; // 0 seeds: 43%
+      distribution[1] = 57 * 1e18; // 1 seed:  57%
 
       drops = new DropDistribution[](1);
       drops[0] = DropDistribution(ObjectTypes.WheatSeed, distribution);
@@ -531,10 +531,10 @@ library RandomResourceLib {
 
     if (objectType == ObjectTypes.Wheat) {
       uint256[] memory distribution = new uint256[](4);
-      distribution[0] = 40; // 0 seeds: 40%
-      distribution[1] = 30; // 1 seed:  30%
-      distribution[2] = 20; // 2 seeds: 20%
-      distribution[3] = 10; // 3 seeds: 10%
+      distribution[0] = 40 * 1e18; // 0 seeds: 40%
+      distribution[1] = 30 * 1e18; // 1 seed:  30%
+      distribution[2] = 20 * 1e18; // 2 seeds: 20%
+      distribution[3] = 10 * 1e18; // 3 seeds: 10%
 
       drops = new DropDistribution[](1);
       drops[0] = DropDistribution(ObjectTypes.WheatSeed, distribution);
@@ -544,10 +544,10 @@ library RandomResourceLib {
     if (objectType == ObjectTypes.Melon) {
       // Expected return 1.53
       uint256[] memory distribution = new uint256[](4);
-      distribution[0] = 20; // 0 seeds: 20%
-      distribution[1] = 30; // 1 seed:  30%
-      distribution[2] = 27; // 2 seeds: 27%
-      distribution[3] = 23; // 3 seeds: 23%
+      distribution[0] = 20 * 1e18; // 0 seeds: 20%
+      distribution[1] = 30 * 1e18; // 1 seed:  30%
+      distribution[2] = 27 * 1e18; // 2 seeds: 27%
+      distribution[3] = 23 * 1e18; // 3 seeds: 23%
 
       drops = new DropDistribution[](1);
       drops[0] = DropDistribution(ObjectTypes.MelonSeed, distribution);
@@ -557,10 +557,10 @@ library RandomResourceLib {
     if (objectType == ObjectTypes.Pumpkin) {
       // Expected return 1.53
       uint256[] memory distribution = new uint256[](4);
-      distribution[0] = 20; // 0 seeds: 20%
-      distribution[1] = 30; // 1 seed:  30%
-      distribution[2] = 27; // 2 seeds: 27%
-      distribution[3] = 23; // 3 seeds: 23%
+      distribution[0] = 20 * 1e18; // 0 seeds: 20%
+      distribution[1] = 30 * 1e18; // 1 seed:  30%
+      distribution[2] = 27 * 1e18; // 2 seeds: 27%
+      distribution[3] = 23 * 1e18; // 3 seeds: 23%
 
       drops = new DropDistribution[](1);
       drops[0] = DropDistribution(ObjectTypes.PumpkinSeed, distribution);
@@ -570,7 +570,7 @@ library RandomResourceLib {
     if (objectType.isLeaf()) {
       uint256 chance = TreeLib.getLeafDropChance(objectType);
       uint256[] memory distribution = new uint256[](2);
-      distribution[0] = 100 - chance; // No sapling
+      distribution[0] = 1e18 - chance; // No sapling
       distribution[1] = chance; // 1 sapling
 
       drops = new DropDistribution[](1);

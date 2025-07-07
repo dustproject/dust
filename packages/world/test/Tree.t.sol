@@ -339,8 +339,8 @@ contract TreeTest is DustTest {
     world.mineUntilDestroyed(aliceEntityId, leafCoord, "");
     endGasReport();
 
-    // Verify sapling was obtained
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.OakSapling, 1);
+    // Verify sapling was not obtained
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.OakSapling, 0);
 
     // Verify leaf entity no longer exists
     assertEq(EntityObjectType.get(leafEntityId), ObjectTypes.Air, "Leaf wasn't removed after harvesting");
