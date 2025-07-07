@@ -8,13 +8,13 @@ import { EntityId } from "@dust/world/src/types/EntityId.sol";
 
 import "@dust/world/src/ProgramHooks.sol" as Hooks;
 
+import { AccessGroupMember } from "../codegen/tables/AccessGroupMember.sol";
 import { EntityAccessGroup } from "../codegen/tables/EntityAccessGroup.sol";
 
 import { createAccessGroup } from "../createAccessGroup.sol";
 import { getForceField } from "../getForceField.sol";
 
 import { getGroupId } from "../getGroupId.sol";
-import { isAllowed } from "../isAllowed.sol";
 
 abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, WorldConsumer {
   constructor(IBaseWorld _world) WorldConsumer(_world) { }
@@ -45,7 +45,14 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
   }
 
   function _canDetach(EntityId caller, EntityId target) internal view virtual returns (bool) {
-    return isAllowed(target, caller);
+    (uint256 groupId,) = getGroupId(target);
+
+    if (groupId == 0) {
+      return true; // If no group, allow detachment
+    }
+
+    // Only the owner of the access group can detach
+    return AccessGroupMember.get(groupId, caller);
   }
 
   function _createAndSetAccessGroup(EntityId target, EntityId owner) internal {
