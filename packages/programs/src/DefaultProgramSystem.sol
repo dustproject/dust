@@ -24,7 +24,7 @@ contract DefaultProgramSystem is System {
 
   function setAccessGroup(EntityId caller, EntityId target, uint256 groupId) external {
     caller.validateCaller();
-    uint256 currentGroupId = EntityAccessGroup.get(target);
+    (uint256 currentGroupId,) = getGroupId(target);
     _requireOwner(currentGroupId, caller);
     EntityAccessGroup.set(target, groupId);
   }
@@ -70,6 +70,6 @@ contract DefaultProgramSystem is System {
   }
 
   function _requireOwner(uint256 groupId, EntityId caller) private view {
-    require(AccessGroupOwner.get(groupId) == caller, "Only the owner can call this function");
+    require(AccessGroupOwner.get(groupId) == caller, "Only the owner of the access group can call this function");
   }
 }
