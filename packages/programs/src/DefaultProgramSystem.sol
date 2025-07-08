@@ -30,13 +30,13 @@ contract DefaultProgramSystem is System {
   }
 
   /// @dev This function can be called by other entities to get a new access group assigned to themselves
-  function setAccessGroup(EntityId target, address groupOwner) external {
-    target.validateCaller();
-    require(target.getObjectType().isSmartEntity(), "Target must be a smart entity");
-    (uint256 currentGroupId,) = getGroupId(target);
+  function setAccessGroup(EntityId caller, address groupOwner) external {
+    caller.validateCaller();
+    require(caller.getObjectType().isSmartEntity(), "Target must be a smart entity");
+    (uint256 currentGroupId,) = getGroupId(caller);
     require(currentGroupId == 0, "Target entity already has an access group");
     uint256 groupId = createAccessGroup(EntityTypeLib.encodePlayer(groupOwner));
-    EntityAccessGroup.set(target, groupId);
+    EntityAccessGroup.set(caller, groupId);
   }
 
   function setMembership(EntityId caller, uint256 groupId, EntityId member, bool allowed) public {

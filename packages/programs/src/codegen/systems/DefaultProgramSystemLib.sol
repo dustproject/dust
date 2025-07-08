@@ -46,6 +46,10 @@ library DefaultProgramSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).setAccessGroup(caller, target, groupId);
   }
 
+  function setAccessGroup(DefaultProgramSystemType self, EntityId caller, address groupOwner) internal {
+    return CallWrapper(self.toResourceId(), address(0)).setAccessGroup(caller, groupOwner);
+  }
+
   function setMembership(DefaultProgramSystemType self, EntityId caller, uint256 groupId, EntityId member, bool allowed)
     internal
   {
@@ -106,6 +110,16 @@ library DefaultProgramSystemLib {
 
     bytes memory systemCall =
       abi.encodeCall(_setAccessGroup_EntityId_EntityId_uint256.setAccessGroup, (caller, target, groupId));
+    self.from == address(0)
+      ? _world().call(self.systemId, systemCall)
+      : _world().callFrom(self.from, self.systemId, systemCall);
+  }
+
+  function setAccessGroup(CallWrapper memory self, EntityId caller, address groupOwner) internal {
+    // if the contract calling this function is a root system, it should use `callAsRoot`
+    if (address(_world()) == address(this)) revert DefaultProgramSystemLib_CallingFromRootSystem();
+
+    bytes memory systemCall = abi.encodeCall(_setAccessGroup_EntityId_address.setAccessGroup, (caller, groupOwner));
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
@@ -218,6 +232,11 @@ library DefaultProgramSystemLib {
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
+  function setAccessGroup(RootCallWrapper memory self, EntityId caller, address groupOwner) internal {
+    bytes memory systemCall = abi.encodeCall(_setAccessGroup_EntityId_address.setAccessGroup, (caller, groupOwner));
+    SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
+  }
+
   function setMembership(RootCallWrapper memory self, EntityId caller, uint256 groupId, EntityId member, bool allowed)
     internal
   {
@@ -317,6 +336,10 @@ interface _newAccessGroup_EntityId {
 
 interface _setAccessGroup_EntityId_EntityId_uint256 {
   function setAccessGroup(EntityId caller, EntityId target, uint256 groupId) external;
+}
+
+interface _setAccessGroup_EntityId_address {
+  function setAccessGroup(EntityId caller, address groupOwner) external;
 }
 
 interface _setMembership_EntityId_uint256_EntityId_bool {
