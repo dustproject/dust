@@ -59,7 +59,7 @@ export function genTreeLib(): string {
 
     chancePieces.push(`
     if (objectType == ObjectTypes.${t.leaf}) {
-      return uint256(3) * 1e18 / ${fixed.length + random.length};
+      return uint256(3) * PRECISION_MULTIPLIER / ${fixed.length + random.length};
     }`);
   }
 
@@ -69,6 +69,7 @@ pragma solidity >=0.8.24;
 
 import { Vec3 } from "../types/Vec3.sol";
 import { ObjectType, ObjectTypes  } from "../types/ObjectType.sol";
+import { PRECISION_MULTIPLIER } from "../Constants.sol";
 
 library TreeBlobs {${blobs.join("")}
 }

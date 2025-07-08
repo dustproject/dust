@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+uint256 constant PRECISION_MULTIPLIER = 1e18;
+
 uint32 constant MAX_ENTITY_INFLUENCE_RADIUS = 10;
 uint32 constant MAX_PICKUP_RADIUS = 6;
 uint32 constant MAX_RESPAWN_HALF_WIDTH = 10;
