@@ -2,6 +2,7 @@
 /* Auto‑generated. DO NOT EDIT. */
 pragma solidity >=0.8.24;
 
+import { PRECISION_MULTIPLIER } from "../Constants.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 import { Vec3 } from "../types/Vec3.sol";
 
@@ -117,28 +118,28 @@ library TreeLib {
 
   function getLeafDropChance(ObjectType objectType) internal pure returns (uint256) {
     if (objectType == ObjectTypes.OakLeaf) {
-      return uint256(3) * 100 / 58;
+      return uint256(3) * PRECISION_MULTIPLIER / 58;
     }
     if (objectType == ObjectTypes.BirchLeaf) {
-      return uint256(3) * 100 / 13;
+      return uint256(3) * PRECISION_MULTIPLIER / 13;
     }
     if (objectType == ObjectTypes.JungleLeaf) {
-      return uint256(3) * 100 / 84;
+      return uint256(3) * PRECISION_MULTIPLIER / 84;
     }
     if (objectType == ObjectTypes.SakuraLeaf) {
-      return uint256(3) * 100 / 79;
+      return uint256(3) * PRECISION_MULTIPLIER / 79;
     }
     if (objectType == ObjectTypes.AcaciaLeaf) {
-      return uint256(3) * 100 / 50;
+      return uint256(3) * PRECISION_MULTIPLIER / 50;
     }
     if (objectType == ObjectTypes.SpruceLeaf) {
-      return uint256(3) * 100 / 94;
+      return uint256(3) * PRECISION_MULTIPLIER / 94;
     }
     if (objectType == ObjectTypes.DarkOakLeaf) {
-      return uint256(3) * 100 / 94;
+      return uint256(3) * PRECISION_MULTIPLIER / 94;
     }
     if (objectType == ObjectTypes.MangroveLeaf) {
-      return uint256(3) * 100 / 88;
+      return uint256(3) * PRECISION_MULTIPLIER / 88;
     }
     revert("Leaf type not supported");
   }

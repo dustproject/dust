@@ -14,7 +14,8 @@ import {
   MAX_DIAMOND,
   MAX_GOLD,
   MAX_IRON,
-  MAX_NEPTUNIUM
+  MAX_NEPTUNIUM,
+  PRECISION_MULTIPLIER
 } from "../Constants.sol";
 import { ObjectAmount, ObjectType, ObjectTypeLib, ObjectTypes } from "../types/ObjectType.sol";
 
@@ -37,8 +38,7 @@ library OreLib {
 
     for (uint256 i = 0; i < oreTypes.length; i++) {
       (uint256 cap, uint256 remaining) = NatureLib.getCapAndRemaining(oreTypes[i]);
-      // We multiply by 1e18 to avoid precision loss in weight calculations
-      weights[i] = biomeMultipliers[i] * remaining * 1e18 / cap;
+      weights[i] = biomeMultipliers[i] * remaining * PRECISION_MULTIPLIER / cap;
     }
 
     // Select ore based on availability

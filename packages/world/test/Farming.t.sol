@@ -284,11 +284,11 @@ contract FarmingTest is DustTest {
     // Verify wheat and seeds were obtained
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
     // TODO: test randomness
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 2);
 
     // Verify crop no longer exists
     assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
-    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seed was removed from circulation");
+    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 2, "Seed was not removed from circulation");
 
     // Verify local energy pool has changed (from the player's energy cost)
     assertEq(
@@ -447,11 +447,13 @@ contract FarmingTest is DustTest {
     vm.prank(alice);
     world.mineUntilDestroyed(aliceEntityId, cropCoord, "");
 
-    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seeds should be added to circulation if received as a drop");
+    assertEq(
+      ResourceCount.get(ObjectTypes.WheatSeed), 2, "Seeds should be removed from circulation if received as a drop"
+    );
 
     // Now we get wheat and seeds
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
     // TODO: test randomness
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 2);
   }
 }
