@@ -1,9 +1,13 @@
 # Changelog
 
+## 2024-07-07
+
+- Fix precision loss for seed drops.
+
 ## 2024-07-04
 
 - Fix clearing access group when mining unprotected entities.
-- Decrease hit action modifier 1/30 -> 1/100
+- Decrease hit action modifier 1/30 -> 1/100.
 
 ## 2024-07-03
 
