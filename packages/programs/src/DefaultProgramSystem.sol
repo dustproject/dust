@@ -34,6 +34,12 @@ contract DefaultProgramSystem is System {
 
   /* Explicit caller (EntityId) */
 
+  function setOwner(EntityId caller, uint256 groupId, EntityId newOwner) public {
+    caller.validateCaller();
+    _requireOwner(groupId, caller);
+    AccessGroupOwner.set(groupId, newOwner);
+  }
+
   function setAccessGroup(EntityId caller, EntityId target, uint256 groupId) public {
     caller.validateCaller();
     (uint256 currentGroupId,) = getGroupId(target);
@@ -60,12 +66,6 @@ contract DefaultProgramSystem is System {
     setMembership(caller, target, EntityTypeLib.encodePlayer(member), allowed);
   }
 
-  function setOwner(EntityId caller, uint256 groupId, EntityId newOwner) public {
-    caller.validateCaller();
-    _requireOwner(groupId, caller);
-    AccessGroupOwner.set(groupId, newOwner);
-  }
-
   function setTextSignContent(EntityId caller, EntityId target, string memory content) public {
     caller.validateCaller();
     _requireMember(caller, target);
@@ -73,6 +73,10 @@ contract DefaultProgramSystem is System {
   }
 
   /* Implicit caller (_msgSender()) */
+
+  function setOwner(uint256 groupId, EntityId newOwner) external {
+    setOwner(EntityTypeLib.encodePlayer(_msgSender()), groupId, newOwner);
+  }
 
   function setAccessGroup(EntityId target, uint256 groupId) public {
     setAccessGroup(EntityTypeLib.encodePlayer(_msgSender()), target, groupId);
@@ -94,10 +98,6 @@ contract DefaultProgramSystem is System {
 
   function setMembership(EntityId target, address member, bool allowed) external {
     setMembership(target, EntityTypeLib.encodePlayer(member), allowed);
-  }
-
-  function setOwner(uint256 groupId, EntityId newOwner) external {
-    setOwner(EntityTypeLib.encodePlayer(_msgSender()), groupId, newOwner);
   }
 
   function setTextSignContent(EntityId target, string memory content) external {
