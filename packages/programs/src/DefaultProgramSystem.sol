@@ -22,10 +22,20 @@ contract DefaultProgramSystem is System {
     return createAccessGroup(owner);
   }
 
-  function setAccessGroup(EntityId caller, EntityId target, uint256 groupId) external {
+  function setAccessGroup(EntityId caller, EntityId target, uint256 groupId) public {
     caller.validateCaller();
     (uint256 currentGroupId,) = getGroupId(target);
     _requireOwner(currentGroupId, caller);
+    EntityAccessGroup.set(target, groupId);
+  }
+
+  /// @dev This function can be called by other entities to get a new access group assigned to themselves
+  function setAccessGroup(EntityId target, address groupOwner) external {
+    target.validateCaller();
+    require(target.getObjectType().isSmartEntity(), "Target must be a smart entity");
+    (uint256 currentGroupId,) = getGroupId(target);
+    require(currentGroupId == 0, "Target entity already has an access group");
+    uint256 groupId = createAccessGroup(EntityTypeLib.encodePlayer(groupOwner));
     EntityAccessGroup.set(target, groupId);
   }
 
@@ -71,5 +81,11 @@ contract DefaultProgramSystem is System {
 
   function _requireOwner(uint256 groupId, EntityId caller) private view {
     require(AccessGroupOwner.get(groupId) == caller, "Only the owner of the access group can call this function");
+  }
+
+  function _setAccessGroup(EntityId caller, EntityId target, uint256 groupId) private {
+    (uint256 currentGroupId,) = getGroupId(target);
+    _requireOwner(currentGroupId, caller);
+    EntityAccessGroup.set(target, groupId);
   }
 }
