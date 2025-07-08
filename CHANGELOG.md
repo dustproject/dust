@@ -4,6 +4,7 @@
 
 - Fix access control for settin entity access group.
 - Support setting access group by smart entity programs.
+- Add overloaded functions to DefaultProgramSystem that don't recieve a caller.
 
 ## 2024-07-07
 
