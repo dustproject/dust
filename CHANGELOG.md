@@ -1,5 +1,10 @@
 # Changelog
 
+## 2024-07-08
+
+- Fix access control for settin entity access group.
+- Support setting access group by smart entity programs.
+
 ## 2024-07-07
 
 - Fix precision loss for seed drops.
