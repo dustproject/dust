@@ -15,7 +15,7 @@ function getGroupId(EntityId target) view returns (uint256 groupId, bool default
 
   uint256 forceFieldGroupId = EntityAccessGroup.get(forceField);
 
-  // Custom forcefield (no access group) - ALWAYS lock
+  // Forcefield without access group - ALWAYS lock
   if (forceFieldGroupId == 0) {
     return (0, true);
   }
@@ -24,5 +24,5 @@ function getGroupId(EntityId target) view returns (uint256 groupId, bool default
   uint256 targetGroupId = EntityAccessGroup.get(target);
 
   // Use entity's group if it has one, otherwise fallback to forcefield's
-  return targetGroupId != 0 ? (targetGroupId, false) : (forceFieldGroupId, false);
+  return (targetGroupId != 0 ? targetGroupId : forceFieldGroupId, false);
 }

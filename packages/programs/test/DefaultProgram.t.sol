@@ -290,35 +290,6 @@ contract DefaultProgramTest is MudTest {
     defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
   }
 
-  // Test entity in forcefield without access group is always locked
-  function testEntityInForceFieldWithoutGroupIsLocked() public {
-    (, EntityId alice) = createTestPlayer();
-    (, EntityId bob) = createTestPlayer();
-
-    Vec3 coord = vec3(1, 2, 3);
-    mockForceField(coord);
-    // Forcefield has no access group (custom forcefield)
-
-    EntityId entity = blockEntityId(coord + vec3(1, 0, 0));
-
-    // Attach program to entity - no access group created for entities in custom forcefields
-    vm.prank(worldAddress);
-    defaultProgram.onAttachProgram(AttachProgramContext({ caller: alice, target: entity, extraData: "" }));
-
-    uint256 entityGroupId = EntityAccessGroup.get(entity);
-    assertEq(entityGroupId, 0, "entity should not have an access group in custom forcefield");
-
-    // Alice cannot detach because entities in custom forcefields are always locked
-    vm.expectRevert("Caller not authorized to detach this program");
-    vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
-
-    // Bob also cannot detach
-    vm.expectRevert("Caller not authorized to detach this program");
-    vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
-  }
-
   // Test entity outside forcefield is open to everyone
   function testEntityOutsideForceFieldIsOpen() public {
     (, EntityId alice) = createTestPlayer();

@@ -31,43 +31,25 @@ contract ProgramSystem is System {
   function updateProgram(EntityId caller, EntityId target, ProgramId newProgram, bytes calldata extraData) public {
     caller.activate();
 
-    // Validate and prepare target
-    Vec3 validatorCoord = _getValidatorCoord(caller, target);
-    target = _validateTarget(target);
-
     // Detach existing program if any
-    ProgramId existingProgram = target._getProgram();
-    if (existingProgram.exists()) {
-      _detachProgram(caller, target, existingProgram, validatorCoord, extraData);
+    if (target._getProgram().exists()) {
+      _detachProgram(caller, target, extraData);
     }
 
     // Attach new program
-    _attachProgram(caller, target, newProgram, validatorCoord, extraData);
+    _attachProgram(caller, target, newProgram, extraData);
   }
 
   function attachProgram(EntityId caller, EntityId target, ProgramId program, bytes calldata extraData) public {
     caller.activate();
 
-    // Validate and prepare target
-    Vec3 validatorCoord = _getValidatorCoord(caller, target);
-    target = _validateTarget(target);
-
-    require(!target._getProgram().exists(), "Existing program must be detached");
-
-    _attachProgram(caller, target, program, validatorCoord, extraData);
+    _attachProgram(caller, target, program, extraData);
   }
 
   function detachProgram(EntityId caller, EntityId target, bytes calldata extraData) public {
     caller.activate();
 
-    // Validate and prepare target
-    Vec3 validatorCoord = _getValidatorCoord(caller, target);
-    target = _validateTarget(target);
-
-    ProgramId program = target._getProgram();
-    require(program.exists(), "No program attached");
-
-    _detachProgram(caller, target, program, validatorCoord, extraData);
+    _detachProgram(caller, target, extraData);
   }
 
   function _validateTarget(EntityId target) internal view returns (EntityId) {
@@ -88,16 +70,15 @@ contract ProgramSystem is System {
     }
   }
 
-  function _attachProgram(
-    EntityId caller,
-    EntityId target,
-    ProgramId program,
-    Vec3 validatorCoord,
-    bytes calldata extraData
-  ) internal {
+  function _attachProgram(EntityId caller, EntityId target, ProgramId program, bytes calldata extraData) internal {
+    // Validate and prepare target
+    Vec3 validatorCoord = _getValidatorCoord(caller, target);
+    target = _validateTarget(target);
+
     (address programAddress, bool publicAccess) = Systems._get(program.toResourceId());
     require(programAddress != address(0), "Program does not exist");
     require(!publicAccess, "Program system must be private");
+    require(!target._getProgram().exists(), "Existing program must be detached");
 
     (EntityId validator, ProgramId validatorProgram) = _getValidatorProgram(validatorCoord);
 
@@ -129,13 +110,14 @@ contract ProgramSystem is System {
     notify(caller, AttachProgramNotification({ attachedTo: target, programSystemId: program.toResourceId() }));
   }
 
-  function _detachProgram(
-    EntityId caller,
-    EntityId target,
-    ProgramId program,
-    Vec3 forceFieldCoord,
-    bytes calldata extraData
-  ) internal {
+  function _detachProgram(EntityId caller, EntityId target, bytes calldata extraData) internal {
+    // Validate and prepare target
+    Vec3 forceFieldCoord = _getValidatorCoord(caller, target);
+    target = _validateTarget(target);
+
+    ProgramId program = target._getProgram();
+    require(program.exists(), "No program attached");
+
     bytes memory onDetachProgram = abi.encodeCall(
       Hooks.IDetachProgram.onDetachProgram,
       (Hooks.DetachProgramContext({ caller: caller, target: target, extraData: extraData }))
