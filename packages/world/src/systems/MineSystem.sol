@@ -568,6 +568,19 @@ library RandomResourceLib {
       return drops;
     }
 
+    if (objectType == ObjectTypes.CottonBush) {
+      // Similar to wheat distribution
+      uint256[] memory distribution = new uint256[](4);
+      distribution[0] = 40 * PRECISION_MULTIPLIER; // 0 seeds: 40%
+      distribution[1] = 30 * PRECISION_MULTIPLIER; // 1 seed:  30%
+      distribution[2] = 20 * PRECISION_MULTIPLIER; // 2 seeds: 20%
+      distribution[3] = 10 * PRECISION_MULTIPLIER; // 3 seeds: 10%
+
+      drops = new DropDistribution[](1);
+      drops[0] = DropDistribution(ObjectTypes.CottonSeed, distribution);
+      return drops;
+    }
+
     if (objectType.isLeaf()) {
       uint256 chance = TreeLib.getLeafDropChance(objectType);
       uint256[] memory distribution = new uint256[](2);
