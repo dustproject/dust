@@ -47,12 +47,12 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.PolishedTuff, ObjectPhysicsData({ mass: 15000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.PolishedBasalt, ObjectPhysicsData({ mass: 75000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.PolishedBlackstone, ObjectPhysicsData({ mass: 50000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.ChiseledStoneBricks, ObjectPhysicsData({ mass: 24000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.ChiseledTuffBricks, ObjectPhysicsData({ mass: 30000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.ChiseledDeepslate, ObjectPhysicsData({ mass: 200000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.ChiseledPolishedBlackstone, ObjectPhysicsData({ mass: 100000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.ChiseledSandstone, ObjectPhysicsData({ mass: 60000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.ChiseledRedSandstone, ObjectPhysicsData({ mass: 75000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.ChiseledStoneBricks, ObjectPhysicsData({ mass: 12000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.ChiseledTuffBricks, ObjectPhysicsData({ mass: 15000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.ChiseledDeepslate, ObjectPhysicsData({ mass: 100000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.ChiseledPolishedBlackstone, ObjectPhysicsData({ mass: 50000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.ChiseledSandstone, ObjectPhysicsData({ mass: 30000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.ChiseledRedSandstone, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.CrackedStoneBricks, ObjectPhysicsData({ mass: 12000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.CrackedTuffBricks, ObjectPhysicsData({ mass: 15000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.CrackedDeepslateBricks, ObjectPhysicsData({ mass: 100000000000000000, energy: 0 }));

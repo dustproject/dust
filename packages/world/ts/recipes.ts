@@ -90,6 +90,11 @@ export const recipes: Recipe[] = [
   },
   {
     station: "Workbench",
+    inputs: [["IronBar", 9]],
+    outputs: [["IronBlock", 1]],
+  },
+  {
+    station: "Workbench",
     inputs: [["GoldBar", 9]],
     outputs: [["GoldBlock", 1]],
   },
@@ -464,9 +469,29 @@ export const recipes: Recipe[] = [
     inputs: [
       ["Sand", 4],
       ["Gravel", 4],
+      ["PinkDye", 1],
+      ["PurpleDye", 1],
+    ],
+    outputs: [["MagentaConcretePowder", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Sand", 4],
+      ["Gravel", 4],
       ["YellowDye", 1],
     ],
     outputs: [["YellowConcretePowder", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Sand", 4],
+      ["Gravel", 4],
+      ["BlueDye", 1],
+      ["WhiteDye", 1],
+    ],
+    outputs: [["LightBlueConcretePowder", 8]],
   },
   {
     station: "Workbench",
@@ -494,6 +519,16 @@ export const recipes: Recipe[] = [
       ["GrayDye", 1],
     ],
     outputs: [["GrayConcretePowder", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Sand", 4],
+      ["Gravel", 4],
+      ["GrayDye", 1],
+      ["WhiteDye", 1],
+    ],
+    outputs: [["LightGrayConcretePowder", 8]],
   },
   {
     station: "Workbench",
@@ -581,6 +616,26 @@ export const recipes: Recipe[] = [
   },
   {
     inputs: [
+      ["MagentaConcretePowder", 1],
+      ["WaterBucket", 1],
+    ],
+    outputs: [
+      ["MagentaConcrete", 1],
+      ["Bucket", 1],
+    ],
+  },
+  {
+    inputs: [
+      ["LightBlueConcretePowder", 1],
+      ["WaterBucket", 1],
+    ],
+    outputs: [
+      ["LightBlueConcrete", 1],
+      ["Bucket", 1],
+    ],
+  },
+  {
+    inputs: [
       ["YellowConcretePowder", 1],
       ["WaterBucket", 1],
     ],
@@ -616,6 +671,16 @@ export const recipes: Recipe[] = [
     ],
     outputs: [
       ["GrayConcrete", 1],
+      ["Bucket", 1],
+    ],
+  },
+  {
+    inputs: [
+      ["LightGrayConcretePowder", 1],
+      ["WaterBucket", 1],
+    ],
+    outputs: [
+      ["LightGrayConcrete", 1],
       ["Bucket", 1],
     ],
   },
@@ -710,12 +775,12 @@ export const recipes: Recipe[] = [
   // },
   // Construction blocks
   {
-    inputs: [["Stone", 4]],
-    outputs: [["StoneBricks", 4]],
+    inputs: [["Stone", 1]],
+    outputs: [["StoneBricks", 1]],
   },
   {
-    inputs: [["Tuff", 4]],
-    outputs: [["TuffBricks", 4]],
+    inputs: [["Tuff", 1]],
+    outputs: [["TuffBricks", 1]],
   },
   {
     inputs: [["CobbledDeepslate", 4]],
@@ -734,96 +799,105 @@ export const recipes: Recipe[] = [
   // Polished blocks (Stonecutter)
   {
     station: "Stonecutter",
-    inputs: [["Andesite", 4]],
-    outputs: [["PolishedAndesite", 4]],
+    inputs: [["Andesite", 1]],
+    outputs: [["PolishedAndesite", 1]],
   },
   {
     station: "Stonecutter",
-    inputs: [["Granite", 4]],
-    outputs: [["PolishedGranite", 4]],
+    inputs: [["Granite", 1]],
+    outputs: [["PolishedGranite", 1]],
   },
   {
     station: "Stonecutter",
-    inputs: [["Diorite", 4]],
-    outputs: [["PolishedDiorite", 4]],
+    inputs: [["Diorite", 1]],
+    outputs: [["PolishedDiorite", 1]],
   },
   {
     station: "Stonecutter",
-    inputs: [["Tuff", 4]],
-    outputs: [["PolishedTuff", 4]],
+    inputs: [["Tuff", 1]],
+    outputs: [["PolishedTuff", 1]],
   },
   {
     station: "Stonecutter",
-    inputs: [["Basalt", 4]],
-    outputs: [["PolishedBasalt", 4]],
+    inputs: [["Basalt", 1]],
+    outputs: [["PolishedBasalt", 1]],
   },
   {
     station: "Stonecutter",
-    inputs: [["Blackstone", 4]],
-    outputs: [["PolishedBlackstone", 4]],
+    inputs: [["Blackstone", 1]],
+    outputs: [["PolishedBlackstone", 1]],
   },
   // Chiseled blocks (Stonecutter)
   {
     station: "Stonecutter",
-    inputs: [["StoneBricks", 2]],
+    inputs: [["StoneBricks", 1]],
     outputs: [["ChiseledStoneBricks", 1]],
   },
   {
     station: "Stonecutter",
-    inputs: [["TuffBricks", 2]],
+    inputs: [["TuffBricks", 1]],
     outputs: [["ChiseledTuffBricks", 1]],
   },
   {
     station: "Stonecutter",
-    inputs: [["DeepslateBricks", 2]],
+    inputs: [["DeepslateBricks", 1]],
     outputs: [["ChiseledDeepslate", 1]],
   },
   {
     station: "Stonecutter",
-    inputs: [["PolishedBlackstone", 2]],
+    inputs: [["PolishedBlackstone", 1]],
     outputs: [["ChiseledPolishedBlackstone", 1]],
   },
   {
     station: "Stonecutter",
-    inputs: [["Sandstone", 2]],
+    inputs: [["Sandstone", 1]],
     outputs: [["ChiseledSandstone", 1]],
   },
   {
     station: "Stonecutter",
-    inputs: [["RedSandstone", 2]],
+    inputs: [["RedSandstone", 1]],
     outputs: [["ChiseledRedSandstone", 1]],
   },
-  // Cracked blocks (Workbench)
+  // Cracked blocks (Furnace)
   {
-    station: "Workbench",
-    inputs: [["StoneBricks", 4]],
-    outputs: [["CrackedStoneBricks", 4]],
+    station: "Furnace",
+    inputs: [
+      ["StoneBricks", 1],
+      ["CoalOre", 1],
+    ],
+    outputs: [["CrackedStoneBricks", 1]],
   },
   {
-    station: "Workbench",
-    inputs: [["TuffBricks", 4]],
-    outputs: [["CrackedTuffBricks", 4]],
+    station: "Furnace",
+    inputs: [
+      ["TuffBricks", 1],
+      ["CoalOre", 1],
+    ],
+    outputs: [["CrackedTuffBricks", 1]],
   },
   {
-    station: "Workbench",
-    inputs: [["DeepslateBricks", 4]],
-    outputs: [["CrackedDeepslateBricks", 4]],
+    station: "Furnace",
+    inputs: [
+      ["DeepslateBricks", 1],
+      ["CoalOre", 1],
+    ],
+    outputs: [["CrackedDeepslateBricks", 1]],
   },
   // Smooth blocks (Stonecutter)
   {
     station: "Stonecutter",
-    inputs: [["Sandstone", 4]],
-    outputs: [["SmoothSandstone", 4]],
+    inputs: [["Sandstone", 1]],
+    outputs: [["SmoothSandstone", 1]],
   },
   {
     station: "Stonecutter",
-    inputs: [["RedSandstone", 4]],
-    outputs: [["SmoothRedSandstone", 4]],
+    inputs: [["RedSandstone", 1]],
+    outputs: [["SmoothRedSandstone", 1]],
   },
   {
     station: "Stonecutter",
-    inputs: [["Stone", 4]],
-    outputs: [["SmoothStone", 4]],
+    inputs: [["Stone", 1]],
+    outputs: [["SmoothStone", 1]],
   },
   // Colored cotton recipes
   {
@@ -853,7 +927,7 @@ export const recipes: Recipe[] = [
   // Note: The colored cotton recipes seem to output the same Cotton item
   // This might need specific colored cotton objects like RedCotton, OrangeCotton, etc.
   // For now I'll just add terracotta coloring recipes
-  
+
   // Colored terracotta recipes
   {
     station: "Workbench",
@@ -928,7 +1002,7 @@ export const recipes: Recipe[] = [
     outputs: [["BlueTerracotta", 8]],
   },
   {
-    station: "Workbench", 
+    station: "Workbench",
     inputs: [
       ["Terracotta", 8],
       ["PinkDye", 1],
@@ -942,6 +1016,15 @@ export const recipes: Recipe[] = [
       ["GrayDye", 1],
     ],
     outputs: [["LightGrayTerracotta", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Terracotta", 8],
+      ["BlueDye", 1],
+      ["WhiteDye", 1],
+    ],
+    outputs: [["LightBlueTerracotta", 8]],
   },
   // Functional objects recipes
   {
@@ -1177,39 +1260,489 @@ export const recipes: Recipe[] = [
     ],
     outputs: [["Lodestone", 1]],
   },
+  // Stairs recipes
+  {
+    station: "Stonecutter",
+    inputs: [["Stone", 1]],
+    outputs: [["StoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Cobblestone", 1]],
+    outputs: [["CobblestoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["MossyCobblestone", 1]],
+    outputs: [["MossyCobblestoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["StoneBricks", 1]],
+    outputs: [["StoneBricksStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["SmoothStone", 1]],
+    outputs: [["SmoothStoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Andesite", 1]],
+    outputs: [["AndesiteStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Granite", 1]],
+    outputs: [["GraniteStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Diorite", 1]],
+    outputs: [["DioriteStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Tuff", 1]],
+    outputs: [["TuffStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Basalt", 1]],
+    outputs: [["BasaltStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Blackstone", 1]],
+    outputs: [["BlackstoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedAndesite", 1]],
+    outputs: [["PolishedAndesiteStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedGranite", 1]],
+    outputs: [["PolishedGraniteStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedDiorite", 1]],
+    outputs: [["PolishedDioriteStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedTuff", 1]],
+    outputs: [["PolishedTuffStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedBasalt", 1]],
+    outputs: [["PolishedBasaltStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedBlackstone", 1]],
+    outputs: [["PolishedBlackstoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Deepslate", 1]],
+    outputs: [["DeepslateStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["CobbledDeepslate", 1]],
+    outputs: [["CobbledDeepslateStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["DeepslateBricks", 1]],
+    outputs: [["DeepslateBricksStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Sandstone", 1]],
+    outputs: [["SandstoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["RedSandstone", 1]],
+    outputs: [["RedSandstoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["SmoothSandstone", 1]],
+    outputs: [["SmoothSandstoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["SmoothRedSandstone", 1]],
+    outputs: [["SmoothRedSandstoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["BrickBlock", 1]],
+    outputs: [["BrickBlockStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["MudBricks", 1]],
+    outputs: [["MudBricksStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["TuffBricks", 1]],
+    outputs: [["TuffBricksStairs", 1]],
+  },
+  // Wooden stairs
+  {
+    inputs: [["OakPlanks", 6]],
+    outputs: [["OakPlanksStairs", 6]],
+  },
+  {
+    inputs: [["BirchPlanks", 6]],
+    outputs: [["BirchPlanksStairs", 6]],
+  },
+  {
+    inputs: [["JunglePlanks", 6]],
+    outputs: [["JunglePlanksStairs", 6]],
+  },
+  {
+    inputs: [["SakuraPlanks", 6]],
+    outputs: [["SakuraPlanksStairs", 6]],
+  },
+  {
+    inputs: [["AcaciaPlanks", 6]],
+    outputs: [["AcaciaPlanksStairs", 6]],
+  },
+  {
+    inputs: [["SprucePlanks", 6]],
+    outputs: [["SprucePlanksStairs", 6]],
+  },
+  {
+    inputs: [["DarkOakPlanks", 6]],
+    outputs: [["DarkOakPlanksStairs", 6]],
+  },
+  {
+    inputs: [["MangrovePlanks", 6]],
+    outputs: [["MangrovePlanksStairs", 6]],
+  },
+  // Slab recipes
+  {
+    station: "Stonecutter",
+    inputs: [["Stone", 1]],
+    outputs: [["StoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Cobblestone", 1]],
+    outputs: [["CobblestoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["MossyCobblestone", 1]],
+    outputs: [["MossyCobblestoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["StoneBricks", 1]],
+    outputs: [["StoneBricksSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["SmoothStone", 1]],
+    outputs: [["SmoothStoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Andesite", 1]],
+    outputs: [["AndesiteSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Granite", 1]],
+    outputs: [["GraniteSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Diorite", 1]],
+    outputs: [["DioriteSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Tuff", 1]],
+    outputs: [["TuffSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Basalt", 1]],
+    outputs: [["BasaltSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Blackstone", 1]],
+    outputs: [["BlackstoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedAndesite", 1]],
+    outputs: [["PolishedAndesiteSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedGranite", 1]],
+    outputs: [["PolishedGraniteSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedDiorite", 1]],
+    outputs: [["PolishedDioriteSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedTuff", 1]],
+    outputs: [["PolishedTuffSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedBasalt", 1]],
+    outputs: [["PolishedBasaltSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedBlackstone", 1]],
+    outputs: [["PolishedBlackstoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Deepslate", 1]],
+    outputs: [["DeepslateSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["CobbledDeepslate", 1]],
+    outputs: [["CobbledDeepslateSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["DeepslateBricks", 1]],
+    outputs: [["DeepslateBricksSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Sandstone", 1]],
+    outputs: [["SandstoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["RedSandstone", 1]],
+    outputs: [["RedSandstoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["SmoothSandstone", 1]],
+    outputs: [["SmoothSandstoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["SmoothRedSandstone", 1]],
+    outputs: [["SmoothRedSandstoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["BrickBlock", 1]],
+    outputs: [["BrickBlockSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["MudBricks", 1]],
+    outputs: [["MudBricksSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["TuffBricks", 1]],
+    outputs: [["TuffBricksSlab", 2]],
+  },
+  // Wooden slabs
+  {
+    inputs: [["OakPlanks", 3]],
+    outputs: [["OakPlanksSlab", 6]],
+  },
+  {
+    inputs: [["BirchPlanks", 3]],
+    outputs: [["BirchPlanksSlab", 6]],
+  },
+  {
+    inputs: [["JunglePlanks", 3]],
+    outputs: [["JunglePlanksSlab", 6]],
+  },
+  {
+    inputs: [["SakuraPlanks", 3]],
+    outputs: [["SakuraPlanksSlab", 6]],
+  },
+  {
+    inputs: [["AcaciaPlanks", 3]],
+    outputs: [["AcaciaPlanksSlab", 6]],
+  },
+  {
+    inputs: [["SprucePlanks", 3]],
+    outputs: [["SprucePlanksSlab", 6]],
+  },
+  {
+    inputs: [["DarkOakPlanks", 3]],
+    outputs: [["DarkOakPlanksSlab", 6]],
+  },
+  {
+    inputs: [["MangrovePlanks", 3]],
+    outputs: [["MangrovePlanksSlab", 6]],
+  },
+  // Wall recipes
+  {
+    station: "Stonecutter",
+    inputs: [["Stone", 1]],
+    outputs: [["StoneWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Cobblestone", 1]],
+    outputs: [["CobblestoneWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["MossyCobblestone", 1]],
+    outputs: [["MossyCobblestoneWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["StoneBricks", 1]],
+    outputs: [["StoneBricksWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Andesite", 1]],
+    outputs: [["AndesiteWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Granite", 1]],
+    outputs: [["GraniteWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Diorite", 1]],
+    outputs: [["DioriteWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Tuff", 1]],
+    outputs: [["TuffWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Basalt", 1]],
+    outputs: [["BasaltWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Blackstone", 1]],
+    outputs: [["BlackstoneWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedAndesite", 1]],
+    outputs: [["PolishedAndesiteWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedGranite", 1]],
+    outputs: [["PolishedGraniteWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedDiorite", 1]],
+    outputs: [["PolishedDioriteWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedTuff", 1]],
+    outputs: [["PolishedTuffWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedBasalt", 1]],
+    outputs: [["PolishedBasaltWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedBlackstone", 1]],
+    outputs: [["PolishedBlackstoneWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Deepslate", 1]],
+    outputs: [["DeepslateWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["CobbledDeepslate", 1]],
+    outputs: [["CobbledDeepslateWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["DeepslateBricks", 1]],
+    outputs: [["DeepslateBricksWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Sandstone", 1]],
+    outputs: [["SandstoneWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["RedSandstone", 1]],
+    outputs: [["RedSandstoneWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["BrickBlock", 1]],
+    outputs: [["BrickBlockWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["MudBricks", 1]],
+    outputs: [["MudBricksWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["TuffBricks", 1]],
+    outputs: [["TuffBricksWall", 1]],
+  },
 ];
 
 // Get recipes where an object is used as input
 export function getRecipesByInput(objectType: ObjectName): Recipe[] {
-  return recipes.filter((recipe) =>
-    recipe.inputs.some((input) => input[0] === objectType),
-  );
+  return recipes.filter((recipe) => recipe.inputs.some((input) => input[0] === objectType));
 }
 
 // Get recipes where an object is produced as output
 export function getRecipesByOutput(objectType: ObjectName): Recipe[] {
-  return recipes.filter((recipe) =>
-    recipe.outputs.some((output) => output[0] === objectType),
-  );
+  return recipes.filter((recipe) => recipe.outputs.some((output) => output[0] === objectType));
 }
 
 // Validate that a recipe maintains mass+energy balance
 export function validateRecipe(recipe: Recipe) {
   // Check if this is a dye-related recipe (outputs include dyes)
-  const isDyeRecipe = recipe.outputs.some(([objectType]) => 
-    objectType.endsWith("Dye")
-  );
-  
+  const isDyeRecipe = recipe.outputs.some(([objectType]) => objectType.endsWith("Dye"));
+
   // Skip validation for dye recipes since dyes have 0 mass by design
   if (isDyeRecipe) {
     return;
   }
 
   // Filter out coal inputs as they should not be added to the output's mass
-  const inputs =
-    recipe.station !== "Furnace"
-      ? recipe.inputs
-      : recipe.inputs.filter((input) => input[0] !== "CoalOre");
+  const inputs = recipe.station !== "Furnace" ? recipe.inputs : recipe.inputs.filter((input) => input[0] !== "CoalOre");
   const totalInputMassEnergy = getTotalMassEnergy(inputs);
   const totalOutputMassEnergy = getTotalMassEnergy(recipe.outputs);
   if (totalInputMassEnergy !== totalOutputMassEnergy) {
