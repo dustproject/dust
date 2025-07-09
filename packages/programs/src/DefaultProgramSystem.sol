@@ -22,6 +22,10 @@ contract DefaultProgramSystem is System {
     return createAccessGroup(owner);
   }
 
+  function getAccessGroupId(EntityId entity) external view returns (uint256 groupId, bool defaultDeny) {
+    (groupId, defaultDeny) = getGroupId(entity);
+  }
+
   /// @dev This function can be called by other entities to get a new access group assigned to themselves
   function setAccessGroup(EntityId caller, address groupOwner) external {
     caller.validateCaller();
