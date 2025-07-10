@@ -449,6 +449,27 @@ export const recipes: Recipe[] = [
     ],
     outputs: [["PurpleDye", 2]],
   },
+  {
+    inputs: [
+      ["PurpleDye", 1],
+      ["PinkDye", 1],
+    ],
+    outputs: [["MagentaDye", 2]],
+  },
+  {
+    inputs: [
+      ["BlueDye", 1],
+      ["WhiteDye", 1],
+    ],
+    outputs: [["LightBlueDye", 2]],
+  },
+  {
+    inputs: [
+      ["GrayDye", 1],
+      ["WhiteDye", 1],
+    ],
+    outputs: [["LightGrayDye", 2]],
+  },
   // Concrete powder recipes
   {
     station: "Workbench",
@@ -473,8 +494,7 @@ export const recipes: Recipe[] = [
     inputs: [
       ["Sand", 4],
       ["Gravel", 4],
-      ["PinkDye", 1],
-      ["PurpleDye", 1],
+      ["MagentaDye", 1],
     ],
     outputs: [["MagentaConcretePowder", 8]],
   },
@@ -492,8 +512,7 @@ export const recipes: Recipe[] = [
     inputs: [
       ["Sand", 4],
       ["Gravel", 4],
-      ["BlueDye", 1],
-      ["WhiteDye", 1],
+      ["LightBlueDye", 1],
     ],
     outputs: [["LightBlueConcretePowder", 8]],
   },
@@ -529,8 +548,7 @@ export const recipes: Recipe[] = [
     inputs: [
       ["Sand", 4],
       ["Gravel", 4],
-      ["GrayDye", 1],
-      ["WhiteDye", 1],
+      ["LightGrayDye", 1],
     ],
     outputs: [["LightGrayConcretePowder", 8]],
   },
@@ -913,7 +931,7 @@ export const recipes: Recipe[] = [
       ["Cotton", 8],
       ["RedDye", 1],
     ],
-    outputs: [["Cotton", 8]],
+    outputs: [["RedCotton", 8]],
   },
   {
     station: "Workbench",
@@ -921,7 +939,7 @@ export const recipes: Recipe[] = [
       ["Cotton", 8],
       ["OrangeDye", 1],
     ],
-    outputs: [["Cotton", 8]],
+    outputs: [["OrangeCotton", 8]],
   },
   {
     station: "Workbench",
@@ -929,11 +947,112 @@ export const recipes: Recipe[] = [
       ["Cotton", 8],
       ["YellowDye", 1],
     ],
-    outputs: [["Cotton", 8]],
+    outputs: [["YellowCotton", 8]],
   },
-  // Note: The colored cotton recipes seem to output the same Cotton item
-  // This might need specific colored cotton objects like RedCotton, OrangeCotton, etc.
-  // For now I'll just add terracotta coloring recipes
+  {
+    station: "Workbench",
+    inputs: [
+      ["Cotton", 8],
+      ["BlueDye", 1],
+    ],
+    outputs: [["BlueCotton", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Cotton", 8],
+      ["GreenDye", 1],
+    ],
+    outputs: [["GreenCotton", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Cotton", 8],
+      ["WhiteDye", 1],
+    ],
+    outputs: [["WhiteCotton", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Cotton", 8],
+      ["BlackDye", 1],
+    ],
+    outputs: [["BlackCotton", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Cotton", 8],
+      ["BrownDye", 1],
+    ],
+    outputs: [["BrownCotton", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Cotton", 8],
+      ["PinkDye", 1],
+    ],
+    outputs: [["PinkCotton", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Cotton", 8],
+      ["LimeDye", 1],
+    ],
+    outputs: [["LimeCotton", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Cotton", 8],
+      ["CyanDye", 1],
+    ],
+    outputs: [["CyanCotton", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Cotton", 8],
+      ["GrayDye", 1],
+    ],
+    outputs: [["GrayCotton", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Cotton", 8],
+      ["PurpleDye", 1],
+    ],
+    outputs: [["PurpleCotton", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Cotton", 8],
+      ["MagentaDye", 1],
+    ],
+    outputs: [["MagentaCotton", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Cotton", 8],
+      ["LightBlueDye", 1],
+    ],
+    outputs: [["LightBlueCotton", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Cotton", 8],
+      ["LightGrayDye", 1],
+    ],
+    outputs: [["LightGrayCotton", 8]],
+  },
 
   // Colored terracotta recipes
   {
@@ -1012,15 +1131,15 @@ export const recipes: Recipe[] = [
     station: "Workbench",
     inputs: [
       ["Terracotta", 8],
-      ["PinkDye", 1],
+      ["MagentaDye", 1],
     ],
-    outputs: [["MagentaTerracotta", 8]], // Using MagentaTerracotta for PinkDye
+    outputs: [["MagentaTerracotta", 8]],
   },
   {
     station: "Workbench",
     inputs: [
       ["Terracotta", 8],
-      ["GrayDye", 1],
+      ["LightGrayDye", 1],
     ],
     outputs: [["LightGrayTerracotta", 8]],
   },
@@ -1028,8 +1147,7 @@ export const recipes: Recipe[] = [
     station: "Workbench",
     inputs: [
       ["Terracotta", 8],
-      ["BlueDye", 1],
-      ["WhiteDye", 1],
+      ["LightBlueDye", 1],
     ],
     outputs: [["LightBlueTerracotta", 8]],
   },
