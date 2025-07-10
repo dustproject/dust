@@ -56,335 +56,335 @@ library ObjectTypes {
   ObjectType constant Sandstone = ObjectType.wrap(34);
   ObjectType constant RedSandstone = ObjectType.wrap(35);
   ObjectType constant Clay = ObjectType.wrap(36);
-  ObjectType constant StoneBricks = ObjectType.wrap(37);
-  ObjectType constant TuffBricks = ObjectType.wrap(38);
-  ObjectType constant DeepslateBricks = ObjectType.wrap(39);
-  ObjectType constant PolishedAndesite = ObjectType.wrap(40);
-  ObjectType constant PolishedGranite = ObjectType.wrap(41);
-  ObjectType constant PolishedDiorite = ObjectType.wrap(42);
-  ObjectType constant PolishedTuff = ObjectType.wrap(43);
-  ObjectType constant PolishedBasalt = ObjectType.wrap(44);
-  ObjectType constant PolishedBlackstone = ObjectType.wrap(45);
-  ObjectType constant ChiseledStoneBricks = ObjectType.wrap(46);
-  ObjectType constant ChiseledTuffBricks = ObjectType.wrap(47);
-  ObjectType constant ChiseledDeepslate = ObjectType.wrap(48);
-  ObjectType constant ChiseledPolishedBlackstone = ObjectType.wrap(49);
-  ObjectType constant ChiseledSandstone = ObjectType.wrap(50);
-  ObjectType constant ChiseledRedSandstone = ObjectType.wrap(51);
-  ObjectType constant CrackedStoneBricks = ObjectType.wrap(52);
-  ObjectType constant CrackedTuffBricks = ObjectType.wrap(53);
-  ObjectType constant CrackedDeepslateBricks = ObjectType.wrap(54);
-  ObjectType constant SmoothSandstone = ObjectType.wrap(55);
-  ObjectType constant SmoothRedSandstone = ObjectType.wrap(56);
-  ObjectType constant SmoothStone = ObjectType.wrap(57);
-  ObjectType constant Terracotta = ObjectType.wrap(58);
-  ObjectType constant BrownTerracotta = ObjectType.wrap(59);
-  ObjectType constant OrangeTerracotta = ObjectType.wrap(60);
-  ObjectType constant WhiteTerracotta = ObjectType.wrap(61);
-  ObjectType constant LightGrayTerracotta = ObjectType.wrap(62);
-  ObjectType constant YellowTerracotta = ObjectType.wrap(63);
-  ObjectType constant RedTerracotta = ObjectType.wrap(64);
-  ObjectType constant LightBlueTerracotta = ObjectType.wrap(65);
-  ObjectType constant CyanTerracotta = ObjectType.wrap(66);
-  ObjectType constant BlackTerracotta = ObjectType.wrap(67);
-  ObjectType constant PurpleTerracotta = ObjectType.wrap(68);
-  ObjectType constant BlueTerracotta = ObjectType.wrap(69);
-  ObjectType constant MagentaTerracotta = ObjectType.wrap(70);
-  ObjectType constant OakLog = ObjectType.wrap(71);
-  ObjectType constant BirchLog = ObjectType.wrap(72);
-  ObjectType constant JungleLog = ObjectType.wrap(73);
-  ObjectType constant SakuraLog = ObjectType.wrap(74);
-  ObjectType constant AcaciaLog = ObjectType.wrap(75);
-  ObjectType constant SpruceLog = ObjectType.wrap(76);
-  ObjectType constant DarkOakLog = ObjectType.wrap(77);
-  ObjectType constant MangroveLog = ObjectType.wrap(78);
-  ObjectType constant OakLeaf = ObjectType.wrap(79);
-  ObjectType constant BirchLeaf = ObjectType.wrap(80);
-  ObjectType constant JungleLeaf = ObjectType.wrap(81);
-  ObjectType constant SakuraLeaf = ObjectType.wrap(82);
-  ObjectType constant SpruceLeaf = ObjectType.wrap(83);
-  ObjectType constant AcaciaLeaf = ObjectType.wrap(84);
-  ObjectType constant DarkOakLeaf = ObjectType.wrap(85);
-  ObjectType constant AzaleaLeaf = ObjectType.wrap(86);
-  ObjectType constant FloweringAzaleaLeaf = ObjectType.wrap(87);
-  ObjectType constant MangroveLeaf = ObjectType.wrap(88);
-  ObjectType constant MangroveRoots = ObjectType.wrap(89);
-  ObjectType constant MuddyMangroveRoots = ObjectType.wrap(90);
-  ObjectType constant AzaleaFlower = ObjectType.wrap(91);
-  ObjectType constant BellFlower = ObjectType.wrap(92);
-  ObjectType constant DandelionFlower = ObjectType.wrap(93);
-  ObjectType constant DaylilyFlower = ObjectType.wrap(94);
-  ObjectType constant LilacFlower = ObjectType.wrap(95);
-  ObjectType constant RoseFlower = ObjectType.wrap(96);
-  ObjectType constant FireFlower = ObjectType.wrap(97);
-  ObjectType constant MorninggloryFlower = ObjectType.wrap(98);
-  ObjectType constant PeonyFlower = ObjectType.wrap(99);
-  ObjectType constant Ultraviolet = ObjectType.wrap(100);
-  ObjectType constant SunFlower = ObjectType.wrap(101);
-  ObjectType constant FlyTrap = ObjectType.wrap(102);
-  ObjectType constant FescueGrass = ObjectType.wrap(103);
-  ObjectType constant SwitchGrass = ObjectType.wrap(104);
-  ObjectType constant VinesBush = ObjectType.wrap(105);
-  ObjectType constant IvyVine = ObjectType.wrap(106);
-  ObjectType constant HempBush = ObjectType.wrap(107);
-  ObjectType constant GoldenMushroom = ObjectType.wrap(108);
-  ObjectType constant RedMushroom = ObjectType.wrap(109);
-  ObjectType constant CoffeeBush = ObjectType.wrap(110);
-  ObjectType constant StrawberryBush = ObjectType.wrap(111);
-  ObjectType constant RaspberryBush = ObjectType.wrap(112);
-  ObjectType constant Wheat = ObjectType.wrap(113);
-  ObjectType constant CottonBush = ObjectType.wrap(114);
-  ObjectType constant Pumpkin = ObjectType.wrap(115);
-  ObjectType constant Melon = ObjectType.wrap(116);
-  ObjectType constant RedMushroomBlock = ObjectType.wrap(117);
-  ObjectType constant BrownMushroomBlock = ObjectType.wrap(118);
-  ObjectType constant MushroomStem = ObjectType.wrap(119);
-  ObjectType constant BambooBush = ObjectType.wrap(120);
-  ObjectType constant Cactus = ObjectType.wrap(121);
-  ObjectType constant Cotton = ObjectType.wrap(122);
-  ObjectType constant CottonSeed = ObjectType.wrap(123);
-  ObjectType constant Glass = ObjectType.wrap(124);
-  ObjectType constant Brick = ObjectType.wrap(125);
-  ObjectType constant BrickBlock = ObjectType.wrap(126);
-  ObjectType constant MudBricks = ObjectType.wrap(127);
-  ObjectType constant Paper = ObjectType.wrap(128);
-  ObjectType constant Book = ObjectType.wrap(129);
-  ObjectType constant Stick = ObjectType.wrap(130);
-  ObjectType constant RedDye = ObjectType.wrap(131);
-  ObjectType constant YellowDye = ObjectType.wrap(132);
-  ObjectType constant BlueDye = ObjectType.wrap(133);
-  ObjectType constant GreenDye = ObjectType.wrap(134);
-  ObjectType constant WhiteDye = ObjectType.wrap(135);
-  ObjectType constant BlackDye = ObjectType.wrap(136);
-  ObjectType constant BrownDye = ObjectType.wrap(137);
-  ObjectType constant OrangeDye = ObjectType.wrap(138);
-  ObjectType constant PinkDye = ObjectType.wrap(139);
-  ObjectType constant LimeDye = ObjectType.wrap(140);
-  ObjectType constant CyanDye = ObjectType.wrap(141);
-  ObjectType constant GrayDye = ObjectType.wrap(142);
-  ObjectType constant PurpleDye = ObjectType.wrap(143);
-  ObjectType constant WhiteConcretePowder = ObjectType.wrap(144);
-  ObjectType constant OrangeConcretePowder = ObjectType.wrap(145);
-  ObjectType constant MagentaConcretePowder = ObjectType.wrap(146);
-  ObjectType constant LightBlueConcretePowder = ObjectType.wrap(147);
-  ObjectType constant YellowConcretePowder = ObjectType.wrap(148);
-  ObjectType constant LimeConcretePowder = ObjectType.wrap(149);
-  ObjectType constant PinkConcretePowder = ObjectType.wrap(150);
-  ObjectType constant GrayConcretePowder = ObjectType.wrap(151);
-  ObjectType constant LightGrayConcretePowder = ObjectType.wrap(152);
-  ObjectType constant CyanConcretePowder = ObjectType.wrap(153);
-  ObjectType constant PurpleConcretePowder = ObjectType.wrap(154);
-  ObjectType constant BlueConcretePowder = ObjectType.wrap(155);
-  ObjectType constant BrownConcretePowder = ObjectType.wrap(156);
-  ObjectType constant GreenConcretePowder = ObjectType.wrap(157);
-  ObjectType constant RedConcretePowder = ObjectType.wrap(158);
-  ObjectType constant BlackConcretePowder = ObjectType.wrap(159);
-  ObjectType constant WhiteConcrete = ObjectType.wrap(160);
-  ObjectType constant OrangeConcrete = ObjectType.wrap(161);
-  ObjectType constant MagentaConcrete = ObjectType.wrap(162);
-  ObjectType constant LightBlueConcrete = ObjectType.wrap(163);
-  ObjectType constant YellowConcrete = ObjectType.wrap(164);
-  ObjectType constant LimeConcrete = ObjectType.wrap(165);
-  ObjectType constant PinkConcrete = ObjectType.wrap(166);
-  ObjectType constant GrayConcrete = ObjectType.wrap(167);
-  ObjectType constant LightGrayConcrete = ObjectType.wrap(168);
-  ObjectType constant CyanConcrete = ObjectType.wrap(169);
-  ObjectType constant PurpleConcrete = ObjectType.wrap(170);
-  ObjectType constant BlueConcrete = ObjectType.wrap(171);
-  ObjectType constant BrownConcrete = ObjectType.wrap(172);
-  ObjectType constant GreenConcrete = ObjectType.wrap(173);
-  ObjectType constant RedConcrete = ObjectType.wrap(174);
-  ObjectType constant BlackConcrete = ObjectType.wrap(175);
-  ObjectType constant GlassPane = ObjectType.wrap(176);
-  ObjectType constant OakDoor = ObjectType.wrap(177);
-  ObjectType constant BirchDoor = ObjectType.wrap(178);
-  ObjectType constant JungleDoor = ObjectType.wrap(179);
-  ObjectType constant SakuraDoor = ObjectType.wrap(180);
-  ObjectType constant AcaciaDoor = ObjectType.wrap(181);
-  ObjectType constant SpruceDoor = ObjectType.wrap(182);
-  ObjectType constant DarkOakDoor = ObjectType.wrap(183);
-  ObjectType constant MangroveDoor = ObjectType.wrap(184);
-  ObjectType constant IronDoor = ObjectType.wrap(185);
-  ObjectType constant OakTrapdoor = ObjectType.wrap(186);
-  ObjectType constant BirchTrapdoor = ObjectType.wrap(187);
-  ObjectType constant JungleTrapdoor = ObjectType.wrap(188);
-  ObjectType constant SakuraTrapdoor = ObjectType.wrap(189);
-  ObjectType constant AcaciaTrapdoor = ObjectType.wrap(190);
-  ObjectType constant SpruceTrapdoor = ObjectType.wrap(191);
-  ObjectType constant DarkOakTrapdoor = ObjectType.wrap(192);
-  ObjectType constant MangroveTrapdoor = ObjectType.wrap(193);
-  ObjectType constant IronTrapdoor = ObjectType.wrap(194);
-  ObjectType constant OakFence = ObjectType.wrap(195);
-  ObjectType constant BirchFence = ObjectType.wrap(196);
-  ObjectType constant JungleFence = ObjectType.wrap(197);
-  ObjectType constant SakuraFence = ObjectType.wrap(198);
-  ObjectType constant AcaciaFence = ObjectType.wrap(199);
-  ObjectType constant SpruceFence = ObjectType.wrap(200);
-  ObjectType constant DarkOakFence = ObjectType.wrap(201);
-  ObjectType constant MangroveFence = ObjectType.wrap(202);
-  ObjectType constant OakFenceGate = ObjectType.wrap(203);
-  ObjectType constant BirchFenceGate = ObjectType.wrap(204);
-  ObjectType constant JungleFenceGate = ObjectType.wrap(205);
-  ObjectType constant SakuraFenceGate = ObjectType.wrap(206);
-  ObjectType constant AcaciaFenceGate = ObjectType.wrap(207);
-  ObjectType constant SpruceFenceGate = ObjectType.wrap(208);
-  ObjectType constant DarkOakFenceGate = ObjectType.wrap(209);
-  ObjectType constant MangroveFenceGate = ObjectType.wrap(210);
-  ObjectType constant IronBars = ObjectType.wrap(211);
-  ObjectType constant Lantern = ObjectType.wrap(212);
-  ObjectType constant Ladder = ObjectType.wrap(213);
-  ObjectType constant Barrel = ObjectType.wrap(214);
-  ObjectType constant Bookshelf = ObjectType.wrap(215);
-  ObjectType constant Carpet = ObjectType.wrap(216);
-  ObjectType constant FlowerPot = ObjectType.wrap(217);
-  ObjectType constant Lodestone = ObjectType.wrap(218);
-  ObjectType constant StoneStairs = ObjectType.wrap(219);
-  ObjectType constant CobblestoneStairs = ObjectType.wrap(220);
-  ObjectType constant MossyCobblestoneStairs = ObjectType.wrap(221);
-  ObjectType constant StoneBricksStairs = ObjectType.wrap(222);
-  ObjectType constant SmoothStoneStairs = ObjectType.wrap(223);
-  ObjectType constant AndesiteStairs = ObjectType.wrap(224);
-  ObjectType constant GraniteStairs = ObjectType.wrap(225);
-  ObjectType constant DioriteStairs = ObjectType.wrap(226);
-  ObjectType constant TuffStairs = ObjectType.wrap(227);
-  ObjectType constant BasaltStairs = ObjectType.wrap(228);
-  ObjectType constant BlackstoneStairs = ObjectType.wrap(229);
-  ObjectType constant PolishedAndesiteStairs = ObjectType.wrap(230);
-  ObjectType constant PolishedGraniteStairs = ObjectType.wrap(231);
-  ObjectType constant PolishedDioriteStairs = ObjectType.wrap(232);
-  ObjectType constant PolishedTuffStairs = ObjectType.wrap(233);
-  ObjectType constant PolishedBasaltStairs = ObjectType.wrap(234);
-  ObjectType constant PolishedBlackstoneStairs = ObjectType.wrap(235);
-  ObjectType constant DeepslateStairs = ObjectType.wrap(236);
-  ObjectType constant CobbledDeepslateStairs = ObjectType.wrap(237);
-  ObjectType constant DeepslateBricksStairs = ObjectType.wrap(238);
-  ObjectType constant SandstoneStairs = ObjectType.wrap(239);
-  ObjectType constant RedSandstoneStairs = ObjectType.wrap(240);
-  ObjectType constant SmoothSandstoneStairs = ObjectType.wrap(241);
-  ObjectType constant SmoothRedSandstoneStairs = ObjectType.wrap(242);
-  ObjectType constant BrickBlockStairs = ObjectType.wrap(243);
-  ObjectType constant MudBricksStairs = ObjectType.wrap(244);
-  ObjectType constant TuffBricksStairs = ObjectType.wrap(245);
-  ObjectType constant OakPlanksStairs = ObjectType.wrap(246);
-  ObjectType constant BirchPlanksStairs = ObjectType.wrap(247);
-  ObjectType constant JunglePlanksStairs = ObjectType.wrap(248);
-  ObjectType constant SakuraPlanksStairs = ObjectType.wrap(249);
-  ObjectType constant AcaciaPlanksStairs = ObjectType.wrap(250);
-  ObjectType constant SprucePlanksStairs = ObjectType.wrap(251);
-  ObjectType constant DarkOakPlanksStairs = ObjectType.wrap(252);
-  ObjectType constant MangrovePlanksStairs = ObjectType.wrap(253);
-  ObjectType constant StoneSlab = ObjectType.wrap(254);
-  ObjectType constant CobblestoneSlab = ObjectType.wrap(255);
-  ObjectType constant MossyCobblestoneSlab = ObjectType.wrap(256);
-  ObjectType constant StoneBricksSlab = ObjectType.wrap(257);
-  ObjectType constant SmoothStoneSlab = ObjectType.wrap(258);
-  ObjectType constant AndesiteSlab = ObjectType.wrap(259);
-  ObjectType constant GraniteSlab = ObjectType.wrap(260);
-  ObjectType constant DioriteSlab = ObjectType.wrap(261);
-  ObjectType constant TuffSlab = ObjectType.wrap(262);
-  ObjectType constant BasaltSlab = ObjectType.wrap(263);
-  ObjectType constant BlackstoneSlab = ObjectType.wrap(264);
-  ObjectType constant PolishedAndesiteSlab = ObjectType.wrap(265);
-  ObjectType constant PolishedGraniteSlab = ObjectType.wrap(266);
-  ObjectType constant PolishedDioriteSlab = ObjectType.wrap(267);
-  ObjectType constant PolishedTuffSlab = ObjectType.wrap(268);
-  ObjectType constant PolishedBasaltSlab = ObjectType.wrap(269);
-  ObjectType constant PolishedBlackstoneSlab = ObjectType.wrap(270);
-  ObjectType constant DeepslateSlab = ObjectType.wrap(271);
-  ObjectType constant CobbledDeepslateSlab = ObjectType.wrap(272);
-  ObjectType constant DeepslateBricksSlab = ObjectType.wrap(273);
-  ObjectType constant SandstoneSlab = ObjectType.wrap(274);
-  ObjectType constant RedSandstoneSlab = ObjectType.wrap(275);
-  ObjectType constant SmoothSandstoneSlab = ObjectType.wrap(276);
-  ObjectType constant SmoothRedSandstoneSlab = ObjectType.wrap(277);
-  ObjectType constant BrickBlockSlab = ObjectType.wrap(278);
-  ObjectType constant MudBricksSlab = ObjectType.wrap(279);
-  ObjectType constant TuffBricksSlab = ObjectType.wrap(280);
-  ObjectType constant OakPlanksSlab = ObjectType.wrap(281);
-  ObjectType constant BirchPlanksSlab = ObjectType.wrap(282);
-  ObjectType constant JunglePlanksSlab = ObjectType.wrap(283);
-  ObjectType constant SakuraPlanksSlab = ObjectType.wrap(284);
-  ObjectType constant AcaciaPlanksSlab = ObjectType.wrap(285);
-  ObjectType constant SprucePlanksSlab = ObjectType.wrap(286);
-  ObjectType constant DarkOakPlanksSlab = ObjectType.wrap(287);
-  ObjectType constant MangrovePlanksSlab = ObjectType.wrap(288);
-  ObjectType constant StoneWall = ObjectType.wrap(289);
-  ObjectType constant CobblestoneWall = ObjectType.wrap(290);
-  ObjectType constant MossyCobblestoneWall = ObjectType.wrap(291);
-  ObjectType constant StoneBricksWall = ObjectType.wrap(292);
-  ObjectType constant AndesiteWall = ObjectType.wrap(293);
-  ObjectType constant GraniteWall = ObjectType.wrap(294);
-  ObjectType constant DioriteWall = ObjectType.wrap(295);
-  ObjectType constant TuffWall = ObjectType.wrap(296);
-  ObjectType constant BasaltWall = ObjectType.wrap(297);
-  ObjectType constant BlackstoneWall = ObjectType.wrap(298);
-  ObjectType constant PolishedAndesiteWall = ObjectType.wrap(299);
-  ObjectType constant PolishedGraniteWall = ObjectType.wrap(300);
-  ObjectType constant PolishedDioriteWall = ObjectType.wrap(301);
-  ObjectType constant PolishedTuffWall = ObjectType.wrap(302);
-  ObjectType constant PolishedBasaltWall = ObjectType.wrap(303);
-  ObjectType constant PolishedBlackstoneWall = ObjectType.wrap(304);
-  ObjectType constant DeepslateWall = ObjectType.wrap(305);
-  ObjectType constant CobbledDeepslateWall = ObjectType.wrap(306);
-  ObjectType constant DeepslateBricksWall = ObjectType.wrap(307);
-  ObjectType constant SandstoneWall = ObjectType.wrap(308);
-  ObjectType constant RedSandstoneWall = ObjectType.wrap(309);
-  ObjectType constant BrickBlockWall = ObjectType.wrap(310);
-  ObjectType constant MudBricksWall = ObjectType.wrap(311);
-  ObjectType constant TuffBricksWall = ObjectType.wrap(312);
-  ObjectType constant Coral = ObjectType.wrap(313);
-  ObjectType constant SeaAnemone = ObjectType.wrap(314);
-  ObjectType constant Algae = ObjectType.wrap(315);
-  ObjectType constant HornCoralBlock = ObjectType.wrap(316);
-  ObjectType constant FireCoralBlock = ObjectType.wrap(317);
-  ObjectType constant TubeCoralBlock = ObjectType.wrap(318);
-  ObjectType constant BubbleCoralBlock = ObjectType.wrap(319);
-  ObjectType constant BrainCoralBlock = ObjectType.wrap(320);
-  ObjectType constant Snow = ObjectType.wrap(321);
-  ObjectType constant Ice = ObjectType.wrap(322);
-  ObjectType constant Lava = ObjectType.wrap(323);
-  ObjectType constant SpiderWeb = ObjectType.wrap(324);
-  ObjectType constant Bone = ObjectType.wrap(325);
-  ObjectType constant CoalOre = ObjectType.wrap(326);
-  ObjectType constant CopperOre = ObjectType.wrap(327);
-  ObjectType constant IronOre = ObjectType.wrap(328);
-  ObjectType constant GoldOre = ObjectType.wrap(329);
-  ObjectType constant DiamondOre = ObjectType.wrap(330);
-  ObjectType constant NeptuniumOre = ObjectType.wrap(331);
-  ObjectType constant TextSign = ObjectType.wrap(332);
-  ObjectType constant OakPlanks = ObjectType.wrap(333);
-  ObjectType constant BirchPlanks = ObjectType.wrap(334);
-  ObjectType constant JunglePlanks = ObjectType.wrap(335);
-  ObjectType constant SakuraPlanks = ObjectType.wrap(336);
-  ObjectType constant SprucePlanks = ObjectType.wrap(337);
-  ObjectType constant AcaciaPlanks = ObjectType.wrap(338);
-  ObjectType constant DarkOakPlanks = ObjectType.wrap(339);
-  ObjectType constant MangrovePlanks = ObjectType.wrap(340);
-  ObjectType constant CopperBlock = ObjectType.wrap(341);
-  ObjectType constant IronBlock = ObjectType.wrap(342);
-  ObjectType constant GoldBlock = ObjectType.wrap(343);
-  ObjectType constant DiamondBlock = ObjectType.wrap(344);
-  ObjectType constant NeptuniumBlock = ObjectType.wrap(345);
-  ObjectType constant WheatSeed = ObjectType.wrap(346);
-  ObjectType constant PumpkinSeed = ObjectType.wrap(347);
-  ObjectType constant MelonSeed = ObjectType.wrap(348);
-  ObjectType constant OakSapling = ObjectType.wrap(349);
-  ObjectType constant BirchSapling = ObjectType.wrap(350);
-  ObjectType constant JungleSapling = ObjectType.wrap(351);
-  ObjectType constant SakuraSapling = ObjectType.wrap(352);
-  ObjectType constant AcaciaSapling = ObjectType.wrap(353);
-  ObjectType constant SpruceSapling = ObjectType.wrap(354);
-  ObjectType constant DarkOakSapling = ObjectType.wrap(355);
-  ObjectType constant MangroveSapling = ObjectType.wrap(356);
-  ObjectType constant ForceField = ObjectType.wrap(357);
-  ObjectType constant Chest = ObjectType.wrap(358);
-  ObjectType constant SpawnTile = ObjectType.wrap(359);
-  ObjectType constant Bed = ObjectType.wrap(360);
-  ObjectType constant Workbench = ObjectType.wrap(361);
-  ObjectType constant Powerstone = ObjectType.wrap(362);
-  ObjectType constant Stonecutter = ObjectType.wrap(363);
-  ObjectType constant Furnace = ObjectType.wrap(364);
-  ObjectType constant Torch = ObjectType.wrap(365);
+  ObjectType constant OakLog = ObjectType.wrap(37);
+  ObjectType constant BirchLog = ObjectType.wrap(38);
+  ObjectType constant JungleLog = ObjectType.wrap(39);
+  ObjectType constant SakuraLog = ObjectType.wrap(40);
+  ObjectType constant AcaciaLog = ObjectType.wrap(41);
+  ObjectType constant SpruceLog = ObjectType.wrap(42);
+  ObjectType constant DarkOakLog = ObjectType.wrap(43);
+  ObjectType constant MangroveLog = ObjectType.wrap(44);
+  ObjectType constant OakLeaf = ObjectType.wrap(45);
+  ObjectType constant BirchLeaf = ObjectType.wrap(46);
+  ObjectType constant JungleLeaf = ObjectType.wrap(47);
+  ObjectType constant SakuraLeaf = ObjectType.wrap(48);
+  ObjectType constant SpruceLeaf = ObjectType.wrap(49);
+  ObjectType constant AcaciaLeaf = ObjectType.wrap(50);
+  ObjectType constant DarkOakLeaf = ObjectType.wrap(51);
+  ObjectType constant AzaleaLeaf = ObjectType.wrap(52);
+  ObjectType constant FloweringAzaleaLeaf = ObjectType.wrap(53);
+  ObjectType constant MangroveLeaf = ObjectType.wrap(54);
+  ObjectType constant MangroveRoots = ObjectType.wrap(55);
+  ObjectType constant MuddyMangroveRoots = ObjectType.wrap(56);
+  ObjectType constant AzaleaFlower = ObjectType.wrap(57);
+  ObjectType constant BellFlower = ObjectType.wrap(58);
+  ObjectType constant DandelionFlower = ObjectType.wrap(59);
+  ObjectType constant DaylilyFlower = ObjectType.wrap(60);
+  ObjectType constant LilacFlower = ObjectType.wrap(61);
+  ObjectType constant RoseFlower = ObjectType.wrap(62);
+  ObjectType constant FireFlower = ObjectType.wrap(63);
+  ObjectType constant MorninggloryFlower = ObjectType.wrap(64);
+  ObjectType constant PeonyFlower = ObjectType.wrap(65);
+  ObjectType constant Ultraviolet = ObjectType.wrap(66);
+  ObjectType constant SunFlower = ObjectType.wrap(67);
+  ObjectType constant FlyTrap = ObjectType.wrap(68);
+  ObjectType constant FescueGrass = ObjectType.wrap(69);
+  ObjectType constant SwitchGrass = ObjectType.wrap(70);
+  ObjectType constant VinesBush = ObjectType.wrap(71);
+  ObjectType constant IvyVine = ObjectType.wrap(72);
+  ObjectType constant HempBush = ObjectType.wrap(73);
+  ObjectType constant GoldenMushroom = ObjectType.wrap(74);
+  ObjectType constant RedMushroom = ObjectType.wrap(75);
+  ObjectType constant CoffeeBush = ObjectType.wrap(76);
+  ObjectType constant StrawberryBush = ObjectType.wrap(77);
+  ObjectType constant RaspberryBush = ObjectType.wrap(78);
+  ObjectType constant Wheat = ObjectType.wrap(79);
+  ObjectType constant CottonBush = ObjectType.wrap(80);
+  ObjectType constant Pumpkin = ObjectType.wrap(81);
+  ObjectType constant Melon = ObjectType.wrap(82);
+  ObjectType constant RedMushroomBlock = ObjectType.wrap(83);
+  ObjectType constant BrownMushroomBlock = ObjectType.wrap(84);
+  ObjectType constant MushroomStem = ObjectType.wrap(85);
+  ObjectType constant BambooBush = ObjectType.wrap(86);
+  ObjectType constant Cactus = ObjectType.wrap(87);
+  ObjectType constant Coral = ObjectType.wrap(88);
+  ObjectType constant SeaAnemone = ObjectType.wrap(89);
+  ObjectType constant Algae = ObjectType.wrap(90);
+  ObjectType constant HornCoralBlock = ObjectType.wrap(91);
+  ObjectType constant FireCoralBlock = ObjectType.wrap(92);
+  ObjectType constant TubeCoralBlock = ObjectType.wrap(93);
+  ObjectType constant BubbleCoralBlock = ObjectType.wrap(94);
+  ObjectType constant BrainCoralBlock = ObjectType.wrap(95);
+  ObjectType constant Snow = ObjectType.wrap(96);
+  ObjectType constant Ice = ObjectType.wrap(97);
+  ObjectType constant Lava = ObjectType.wrap(98);
+  ObjectType constant SpiderWeb = ObjectType.wrap(99);
+  ObjectType constant Bone = ObjectType.wrap(100);
+  ObjectType constant CoalOre = ObjectType.wrap(101);
+  ObjectType constant CopperOre = ObjectType.wrap(102);
+  ObjectType constant IronOre = ObjectType.wrap(103);
+  ObjectType constant GoldOre = ObjectType.wrap(104);
+  ObjectType constant DiamondOre = ObjectType.wrap(105);
+  ObjectType constant NeptuniumOre = ObjectType.wrap(106);
+  ObjectType constant TextSign = ObjectType.wrap(107);
+  ObjectType constant OakPlanks = ObjectType.wrap(108);
+  ObjectType constant BirchPlanks = ObjectType.wrap(109);
+  ObjectType constant JunglePlanks = ObjectType.wrap(110);
+  ObjectType constant SakuraPlanks = ObjectType.wrap(111);
+  ObjectType constant SprucePlanks = ObjectType.wrap(112);
+  ObjectType constant AcaciaPlanks = ObjectType.wrap(113);
+  ObjectType constant DarkOakPlanks = ObjectType.wrap(114);
+  ObjectType constant MangrovePlanks = ObjectType.wrap(115);
+  ObjectType constant CopperBlock = ObjectType.wrap(116);
+  ObjectType constant IronBlock = ObjectType.wrap(117);
+  ObjectType constant GoldBlock = ObjectType.wrap(118);
+  ObjectType constant DiamondBlock = ObjectType.wrap(119);
+  ObjectType constant NeptuniumBlock = ObjectType.wrap(120);
+  ObjectType constant WheatSeed = ObjectType.wrap(121);
+  ObjectType constant PumpkinSeed = ObjectType.wrap(122);
+  ObjectType constant MelonSeed = ObjectType.wrap(123);
+  ObjectType constant OakSapling = ObjectType.wrap(124);
+  ObjectType constant BirchSapling = ObjectType.wrap(125);
+  ObjectType constant JungleSapling = ObjectType.wrap(126);
+  ObjectType constant SakuraSapling = ObjectType.wrap(127);
+  ObjectType constant AcaciaSapling = ObjectType.wrap(128);
+  ObjectType constant SpruceSapling = ObjectType.wrap(129);
+  ObjectType constant DarkOakSapling = ObjectType.wrap(130);
+  ObjectType constant MangroveSapling = ObjectType.wrap(131);
+  ObjectType constant ForceField = ObjectType.wrap(132);
+  ObjectType constant Chest = ObjectType.wrap(133);
+  ObjectType constant SpawnTile = ObjectType.wrap(134);
+  ObjectType constant Bed = ObjectType.wrap(135);
+  ObjectType constant Workbench = ObjectType.wrap(136);
+  ObjectType constant Powerstone = ObjectType.wrap(137);
+  ObjectType constant Furnace = ObjectType.wrap(138);
+  ObjectType constant Stonecutter = ObjectType.wrap(139);
+  ObjectType constant Torch = ObjectType.wrap(140);
+  ObjectType constant StoneBricks = ObjectType.wrap(141);
+  ObjectType constant TuffBricks = ObjectType.wrap(142);
+  ObjectType constant DeepslateBricks = ObjectType.wrap(143);
+  ObjectType constant PolishedAndesite = ObjectType.wrap(144);
+  ObjectType constant PolishedGranite = ObjectType.wrap(145);
+  ObjectType constant PolishedDiorite = ObjectType.wrap(146);
+  ObjectType constant PolishedTuff = ObjectType.wrap(147);
+  ObjectType constant PolishedBasalt = ObjectType.wrap(148);
+  ObjectType constant PolishedBlackstone = ObjectType.wrap(149);
+  ObjectType constant ChiseledStoneBricks = ObjectType.wrap(150);
+  ObjectType constant ChiseledTuffBricks = ObjectType.wrap(151);
+  ObjectType constant ChiseledDeepslate = ObjectType.wrap(152);
+  ObjectType constant ChiseledPolishedBlackstone = ObjectType.wrap(153);
+  ObjectType constant ChiseledSandstone = ObjectType.wrap(154);
+  ObjectType constant ChiseledRedSandstone = ObjectType.wrap(155);
+  ObjectType constant CrackedStoneBricks = ObjectType.wrap(156);
+  ObjectType constant CrackedTuffBricks = ObjectType.wrap(157);
+  ObjectType constant CrackedDeepslateBricks = ObjectType.wrap(158);
+  ObjectType constant SmoothSandstone = ObjectType.wrap(159);
+  ObjectType constant SmoothRedSandstone = ObjectType.wrap(160);
+  ObjectType constant SmoothStone = ObjectType.wrap(161);
+  ObjectType constant Terracotta = ObjectType.wrap(162);
+  ObjectType constant BrownTerracotta = ObjectType.wrap(163);
+  ObjectType constant OrangeTerracotta = ObjectType.wrap(164);
+  ObjectType constant WhiteTerracotta = ObjectType.wrap(165);
+  ObjectType constant LightGrayTerracotta = ObjectType.wrap(166);
+  ObjectType constant YellowTerracotta = ObjectType.wrap(167);
+  ObjectType constant RedTerracotta = ObjectType.wrap(168);
+  ObjectType constant LightBlueTerracotta = ObjectType.wrap(169);
+  ObjectType constant CyanTerracotta = ObjectType.wrap(170);
+  ObjectType constant BlackTerracotta = ObjectType.wrap(171);
+  ObjectType constant PurpleTerracotta = ObjectType.wrap(172);
+  ObjectType constant BlueTerracotta = ObjectType.wrap(173);
+  ObjectType constant MagentaTerracotta = ObjectType.wrap(174);
+  ObjectType constant Cotton = ObjectType.wrap(175);
+  ObjectType constant CottonSeed = ObjectType.wrap(176);
+  ObjectType constant Glass = ObjectType.wrap(177);
+  ObjectType constant Brick = ObjectType.wrap(178);
+  ObjectType constant BrickBlock = ObjectType.wrap(179);
+  ObjectType constant MudBricks = ObjectType.wrap(180);
+  ObjectType constant Paper = ObjectType.wrap(181);
+  ObjectType constant Book = ObjectType.wrap(182);
+  ObjectType constant Stick = ObjectType.wrap(183);
+  ObjectType constant RedDye = ObjectType.wrap(184);
+  ObjectType constant YellowDye = ObjectType.wrap(185);
+  ObjectType constant BlueDye = ObjectType.wrap(186);
+  ObjectType constant GreenDye = ObjectType.wrap(187);
+  ObjectType constant WhiteDye = ObjectType.wrap(188);
+  ObjectType constant BlackDye = ObjectType.wrap(189);
+  ObjectType constant BrownDye = ObjectType.wrap(190);
+  ObjectType constant OrangeDye = ObjectType.wrap(191);
+  ObjectType constant PinkDye = ObjectType.wrap(192);
+  ObjectType constant LimeDye = ObjectType.wrap(193);
+  ObjectType constant CyanDye = ObjectType.wrap(194);
+  ObjectType constant GrayDye = ObjectType.wrap(195);
+  ObjectType constant PurpleDye = ObjectType.wrap(196);
+  ObjectType constant WhiteConcretePowder = ObjectType.wrap(197);
+  ObjectType constant OrangeConcretePowder = ObjectType.wrap(198);
+  ObjectType constant MagentaConcretePowder = ObjectType.wrap(199);
+  ObjectType constant LightBlueConcretePowder = ObjectType.wrap(200);
+  ObjectType constant YellowConcretePowder = ObjectType.wrap(201);
+  ObjectType constant LimeConcretePowder = ObjectType.wrap(202);
+  ObjectType constant PinkConcretePowder = ObjectType.wrap(203);
+  ObjectType constant GrayConcretePowder = ObjectType.wrap(204);
+  ObjectType constant LightGrayConcretePowder = ObjectType.wrap(205);
+  ObjectType constant CyanConcretePowder = ObjectType.wrap(206);
+  ObjectType constant PurpleConcretePowder = ObjectType.wrap(207);
+  ObjectType constant BlueConcretePowder = ObjectType.wrap(208);
+  ObjectType constant BrownConcretePowder = ObjectType.wrap(209);
+  ObjectType constant GreenConcretePowder = ObjectType.wrap(210);
+  ObjectType constant RedConcretePowder = ObjectType.wrap(211);
+  ObjectType constant BlackConcretePowder = ObjectType.wrap(212);
+  ObjectType constant WhiteConcrete = ObjectType.wrap(213);
+  ObjectType constant OrangeConcrete = ObjectType.wrap(214);
+  ObjectType constant MagentaConcrete = ObjectType.wrap(215);
+  ObjectType constant LightBlueConcrete = ObjectType.wrap(216);
+  ObjectType constant YellowConcrete = ObjectType.wrap(217);
+  ObjectType constant LimeConcrete = ObjectType.wrap(218);
+  ObjectType constant PinkConcrete = ObjectType.wrap(219);
+  ObjectType constant GrayConcrete = ObjectType.wrap(220);
+  ObjectType constant LightGrayConcrete = ObjectType.wrap(221);
+  ObjectType constant CyanConcrete = ObjectType.wrap(222);
+  ObjectType constant PurpleConcrete = ObjectType.wrap(223);
+  ObjectType constant BlueConcrete = ObjectType.wrap(224);
+  ObjectType constant BrownConcrete = ObjectType.wrap(225);
+  ObjectType constant GreenConcrete = ObjectType.wrap(226);
+  ObjectType constant RedConcrete = ObjectType.wrap(227);
+  ObjectType constant BlackConcrete = ObjectType.wrap(228);
+  ObjectType constant GlassPane = ObjectType.wrap(229);
+  ObjectType constant OakDoor = ObjectType.wrap(230);
+  ObjectType constant BirchDoor = ObjectType.wrap(231);
+  ObjectType constant JungleDoor = ObjectType.wrap(232);
+  ObjectType constant SakuraDoor = ObjectType.wrap(233);
+  ObjectType constant AcaciaDoor = ObjectType.wrap(234);
+  ObjectType constant SpruceDoor = ObjectType.wrap(235);
+  ObjectType constant DarkOakDoor = ObjectType.wrap(236);
+  ObjectType constant MangroveDoor = ObjectType.wrap(237);
+  ObjectType constant IronDoor = ObjectType.wrap(238);
+  ObjectType constant OakTrapdoor = ObjectType.wrap(239);
+  ObjectType constant BirchTrapdoor = ObjectType.wrap(240);
+  ObjectType constant JungleTrapdoor = ObjectType.wrap(241);
+  ObjectType constant SakuraTrapdoor = ObjectType.wrap(242);
+  ObjectType constant AcaciaTrapdoor = ObjectType.wrap(243);
+  ObjectType constant SpruceTrapdoor = ObjectType.wrap(244);
+  ObjectType constant DarkOakTrapdoor = ObjectType.wrap(245);
+  ObjectType constant MangroveTrapdoor = ObjectType.wrap(246);
+  ObjectType constant IronTrapdoor = ObjectType.wrap(247);
+  ObjectType constant OakFence = ObjectType.wrap(248);
+  ObjectType constant BirchFence = ObjectType.wrap(249);
+  ObjectType constant JungleFence = ObjectType.wrap(250);
+  ObjectType constant SakuraFence = ObjectType.wrap(251);
+  ObjectType constant AcaciaFence = ObjectType.wrap(252);
+  ObjectType constant SpruceFence = ObjectType.wrap(253);
+  ObjectType constant DarkOakFence = ObjectType.wrap(254);
+  ObjectType constant MangroveFence = ObjectType.wrap(255);
+  ObjectType constant OakFenceGate = ObjectType.wrap(256);
+  ObjectType constant BirchFenceGate = ObjectType.wrap(257);
+  ObjectType constant JungleFenceGate = ObjectType.wrap(258);
+  ObjectType constant SakuraFenceGate = ObjectType.wrap(259);
+  ObjectType constant AcaciaFenceGate = ObjectType.wrap(260);
+  ObjectType constant SpruceFenceGate = ObjectType.wrap(261);
+  ObjectType constant DarkOakFenceGate = ObjectType.wrap(262);
+  ObjectType constant MangroveFenceGate = ObjectType.wrap(263);
+  ObjectType constant IronBars = ObjectType.wrap(264);
+  ObjectType constant Lantern = ObjectType.wrap(265);
+  ObjectType constant Ladder = ObjectType.wrap(266);
+  ObjectType constant Barrel = ObjectType.wrap(267);
+  ObjectType constant Bookshelf = ObjectType.wrap(268);
+  ObjectType constant Carpet = ObjectType.wrap(269);
+  ObjectType constant FlowerPot = ObjectType.wrap(270);
+  ObjectType constant Lodestone = ObjectType.wrap(271);
+  ObjectType constant StoneStairs = ObjectType.wrap(272);
+  ObjectType constant CobblestoneStairs = ObjectType.wrap(273);
+  ObjectType constant MossyCobblestoneStairs = ObjectType.wrap(274);
+  ObjectType constant StoneBricksStairs = ObjectType.wrap(275);
+  ObjectType constant SmoothStoneStairs = ObjectType.wrap(276);
+  ObjectType constant AndesiteStairs = ObjectType.wrap(277);
+  ObjectType constant GraniteStairs = ObjectType.wrap(278);
+  ObjectType constant DioriteStairs = ObjectType.wrap(279);
+  ObjectType constant TuffStairs = ObjectType.wrap(280);
+  ObjectType constant BasaltStairs = ObjectType.wrap(281);
+  ObjectType constant BlackstoneStairs = ObjectType.wrap(282);
+  ObjectType constant PolishedAndesiteStairs = ObjectType.wrap(283);
+  ObjectType constant PolishedGraniteStairs = ObjectType.wrap(284);
+  ObjectType constant PolishedDioriteStairs = ObjectType.wrap(285);
+  ObjectType constant PolishedTuffStairs = ObjectType.wrap(286);
+  ObjectType constant PolishedBasaltStairs = ObjectType.wrap(287);
+  ObjectType constant PolishedBlackstoneStairs = ObjectType.wrap(288);
+  ObjectType constant DeepslateStairs = ObjectType.wrap(289);
+  ObjectType constant CobbledDeepslateStairs = ObjectType.wrap(290);
+  ObjectType constant DeepslateBricksStairs = ObjectType.wrap(291);
+  ObjectType constant SandstoneStairs = ObjectType.wrap(292);
+  ObjectType constant RedSandstoneStairs = ObjectType.wrap(293);
+  ObjectType constant SmoothSandstoneStairs = ObjectType.wrap(294);
+  ObjectType constant SmoothRedSandstoneStairs = ObjectType.wrap(295);
+  ObjectType constant BrickBlockStairs = ObjectType.wrap(296);
+  ObjectType constant MudBricksStairs = ObjectType.wrap(297);
+  ObjectType constant TuffBricksStairs = ObjectType.wrap(298);
+  ObjectType constant OakPlanksStairs = ObjectType.wrap(299);
+  ObjectType constant BirchPlanksStairs = ObjectType.wrap(300);
+  ObjectType constant JunglePlanksStairs = ObjectType.wrap(301);
+  ObjectType constant SakuraPlanksStairs = ObjectType.wrap(302);
+  ObjectType constant AcaciaPlanksStairs = ObjectType.wrap(303);
+  ObjectType constant SprucePlanksStairs = ObjectType.wrap(304);
+  ObjectType constant DarkOakPlanksStairs = ObjectType.wrap(305);
+  ObjectType constant MangrovePlanksStairs = ObjectType.wrap(306);
+  ObjectType constant StoneSlab = ObjectType.wrap(307);
+  ObjectType constant CobblestoneSlab = ObjectType.wrap(308);
+  ObjectType constant MossyCobblestoneSlab = ObjectType.wrap(309);
+  ObjectType constant StoneBricksSlab = ObjectType.wrap(310);
+  ObjectType constant SmoothStoneSlab = ObjectType.wrap(311);
+  ObjectType constant AndesiteSlab = ObjectType.wrap(312);
+  ObjectType constant GraniteSlab = ObjectType.wrap(313);
+  ObjectType constant DioriteSlab = ObjectType.wrap(314);
+  ObjectType constant TuffSlab = ObjectType.wrap(315);
+  ObjectType constant BasaltSlab = ObjectType.wrap(316);
+  ObjectType constant BlackstoneSlab = ObjectType.wrap(317);
+  ObjectType constant PolishedAndesiteSlab = ObjectType.wrap(318);
+  ObjectType constant PolishedGraniteSlab = ObjectType.wrap(319);
+  ObjectType constant PolishedDioriteSlab = ObjectType.wrap(320);
+  ObjectType constant PolishedTuffSlab = ObjectType.wrap(321);
+  ObjectType constant PolishedBasaltSlab = ObjectType.wrap(322);
+  ObjectType constant PolishedBlackstoneSlab = ObjectType.wrap(323);
+  ObjectType constant DeepslateSlab = ObjectType.wrap(324);
+  ObjectType constant CobbledDeepslateSlab = ObjectType.wrap(325);
+  ObjectType constant DeepslateBricksSlab = ObjectType.wrap(326);
+  ObjectType constant SandstoneSlab = ObjectType.wrap(327);
+  ObjectType constant RedSandstoneSlab = ObjectType.wrap(328);
+  ObjectType constant SmoothSandstoneSlab = ObjectType.wrap(329);
+  ObjectType constant SmoothRedSandstoneSlab = ObjectType.wrap(330);
+  ObjectType constant BrickBlockSlab = ObjectType.wrap(331);
+  ObjectType constant MudBricksSlab = ObjectType.wrap(332);
+  ObjectType constant TuffBricksSlab = ObjectType.wrap(333);
+  ObjectType constant OakPlanksSlab = ObjectType.wrap(334);
+  ObjectType constant BirchPlanksSlab = ObjectType.wrap(335);
+  ObjectType constant JunglePlanksSlab = ObjectType.wrap(336);
+  ObjectType constant SakuraPlanksSlab = ObjectType.wrap(337);
+  ObjectType constant AcaciaPlanksSlab = ObjectType.wrap(338);
+  ObjectType constant SprucePlanksSlab = ObjectType.wrap(339);
+  ObjectType constant DarkOakPlanksSlab = ObjectType.wrap(340);
+  ObjectType constant MangrovePlanksSlab = ObjectType.wrap(341);
+  ObjectType constant StoneWall = ObjectType.wrap(342);
+  ObjectType constant CobblestoneWall = ObjectType.wrap(343);
+  ObjectType constant MossyCobblestoneWall = ObjectType.wrap(344);
+  ObjectType constant StoneBricksWall = ObjectType.wrap(345);
+  ObjectType constant AndesiteWall = ObjectType.wrap(346);
+  ObjectType constant GraniteWall = ObjectType.wrap(347);
+  ObjectType constant DioriteWall = ObjectType.wrap(348);
+  ObjectType constant TuffWall = ObjectType.wrap(349);
+  ObjectType constant BasaltWall = ObjectType.wrap(350);
+  ObjectType constant BlackstoneWall = ObjectType.wrap(351);
+  ObjectType constant PolishedAndesiteWall = ObjectType.wrap(352);
+  ObjectType constant PolishedGraniteWall = ObjectType.wrap(353);
+  ObjectType constant PolishedDioriteWall = ObjectType.wrap(354);
+  ObjectType constant PolishedTuffWall = ObjectType.wrap(355);
+  ObjectType constant PolishedBasaltWall = ObjectType.wrap(356);
+  ObjectType constant PolishedBlackstoneWall = ObjectType.wrap(357);
+  ObjectType constant DeepslateWall = ObjectType.wrap(358);
+  ObjectType constant CobbledDeepslateWall = ObjectType.wrap(359);
+  ObjectType constant DeepslateBricksWall = ObjectType.wrap(360);
+  ObjectType constant SandstoneWall = ObjectType.wrap(361);
+  ObjectType constant RedSandstoneWall = ObjectType.wrap(362);
+  ObjectType constant BrickBlockWall = ObjectType.wrap(363);
+  ObjectType constant MudBricksWall = ObjectType.wrap(364);
+  ObjectType constant TuffBricksWall = ObjectType.wrap(365);
   ObjectType constant WoodenPick = ObjectType.wrap(32768);
   ObjectType constant CopperPick = ObjectType.wrap(32769);
   ObjectType constant IronPick = ObjectType.wrap(32770);
@@ -460,15 +460,8 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x3fffffffffffffffc00001ffffffff0), 1)
+        let bit := and(shr(self, 0x7ffc000017fffffffffbfffffffffffffffffffffff0), 1)
         ok := bit
-      }
-
-      // IDs in [313..568]
-      {
-        let off := sub(self, 313)
-        let bit := and(shr(off, 0x1bfffffffffbff), 1)
-        ok := or(ok, bit)
       }
     }
   }
@@ -478,7 +471,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x7ffc00000000000000), 1)
+        let bit := and(shr(self, 0x7ffc0000000000000000000000000000000000000000), 1)
         ok := bit
       }
     }
@@ -487,10 +480,9 @@ library ObjectTypeLib {
   function isOre(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      // IDs in [326..581]
+      // IDs in [0..255]
       {
-        let off := sub(self, 326)
-        let bit := and(shr(off, 0x3f), 1)
+        let bit := and(shr(self, 0x7e0000000000000000000000000), 1)
         ok := bit
       }
     }
@@ -501,7 +493,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x7f800000000000000000), 1)
+        let bit := and(shr(self, 0x1fe000000000), 1)
         ok := bit
       }
     }
@@ -512,7 +504,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x1ff80000000000000000000), 1)
+        let bit := and(shr(self, 0x7fe00000000000), 1)
         ok := bit
       }
     }
@@ -521,10 +513,9 @@ library ObjectTypeLib {
   function isPlank(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      // IDs in [333..588]
+      // IDs in [0..255]
       {
-        let off := sub(self, 333)
-        let bit := and(shr(off, 0xff), 1)
+        let bit := and(shr(self, 0xff000000000000000000000000000), 1)
         ok := bit
       }
     }
@@ -533,10 +524,9 @@ library ObjectTypeLib {
   function isSeed(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      // IDs in [346..601]
+      // IDs in [0..255]
       {
-        let off := sub(self, 346)
-        let bit := and(shr(off, 0x7), 1)
+        let bit := and(shr(self, 0xe000000000000000000000000000000), 1)
         ok := bit
       }
     }
@@ -545,10 +535,9 @@ library ObjectTypeLib {
   function isSapling(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      // IDs in [349..604]
+      // IDs in [0..255]
       {
-        let off := sub(self, 349)
-        let bit := and(shr(off, 0xff), 1)
+        let bit := and(shr(self, 0xff0000000000000000000000000000000), 1)
         ok := bit
       }
     }
@@ -557,10 +546,9 @@ library ObjectTypeLib {
   function isSmartEntity(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      // IDs in [177..432]
+      // IDs in [0..255]
       {
-        let off := sub(self, 177)
-        let bit := and(shr(off, 0xf00000080000000000000000000000000000000003ffff), 1)
+        let bit := and(shr(self, 0xffffc00000000000000000000000f000000800000000000000000000000000), 1)
         ok := bit
       }
 
@@ -576,10 +564,9 @@ library ObjectTypeLib {
   function isStation(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      // IDs in [361..616]
+      // IDs in [0..255]
       {
-        let off := sub(self, 361)
-        let bit := and(shr(off, 0xf), 1)
+        let bit := and(shr(self, 0xf0000000000000000000000000000000000), 1)
         ok := bit
       }
     }
@@ -686,7 +673,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x1e0180013f80000000000000000000), 1)
+        let bit := and(shr(self, 0x78060004fe00000000000), 1)
         ok := bit
       }
     }
@@ -697,15 +684,8 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x3f8000007ffff800000000000000000), 1)
+        let bit := and(shr(self, 0x11e0000ff80000fe000001ffffe000000000), 1)
         ok := bit
-      }
-
-      // IDs in [332..587]
-      {
-        let off := sub(self, 332)
-        let bit := and(shr(off, 0x23c0001ff), 1)
-        ok := or(ok, bit)
       }
     }
   }
@@ -715,15 +695,8 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x7ffc000000001ffff0), 1)
+        let bit := and(shr(self, 0x7ffc0000061001f007e00000000000000000001ffff0), 1)
         ok := bit
-      }
-
-      // IDs in [326..581]
-      {
-        let off := sub(self, 326)
-        let bit := and(shr(off, 0x50800f803f), 1)
-        ok := or(ok, bit)
       }
     }
   }
@@ -745,15 +718,8 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x107fffff80000000000000000000006), 1)
+        let bit := and(shr(self, 0x100ffe0000000741fffffe00000000000006), 1)
         ok := bit
-      }
-
-      // IDs in [313..568]
-      {
-        let off := sub(self, 313)
-        let bit := and(shr(off, 0x100ffe00000007), 1)
-        ok := or(ok, bit)
       }
     }
   }
@@ -761,10 +727,9 @@ library ObjectTypeLib {
   function isGrowable(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      // IDs in [346..601]
+      // IDs in [0..255]
       {
-        let off := sub(self, 346)
-        let bit := and(shr(off, 0x7ff), 1)
+        let bit := and(shr(self, 0xffe000000000000000000000000000000), 1)
         ok := bit
       }
     }
@@ -773,10 +738,9 @@ library ObjectTypeLib {
   function isLandbound(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      // IDs in [113..368]
+      // IDs in [0..255]
       {
-        let off := sub(self, 113)
-        let bit := and(shr(off, 0xffe0000000000000000000000000000000000000000000000000000000001), 1)
+        let bit := and(shr(self, 0xffe000000000080000000000000000000), 1)
         ok := bit
       }
     }
@@ -785,10 +749,9 @@ library ObjectTypeLib {
   function isUniqueObject(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      // IDs in [357..612]
+      // IDs in [0..255]
       {
-        let off := sub(self, 357)
-        let bit := and(shr(off, 0xd), 1)
+        let bit := and(shr(self, 0xd000000000000000000000000000000000), 1)
         ok := bit
       }
 
@@ -827,10 +790,9 @@ library ObjectTypeLib {
   function isMachine(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      // IDs in [357..612]
+      // IDs in [0..255]
       {
-        let off := sub(self, 357)
-        let bit := and(shr(off, 0x1), 1)
+        let bit := and(shr(self, 0x1000000000000000000000000000000000), 1)
         ok := bit
       }
     }
@@ -841,15 +803,8 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x4), 1)
+        let bit := and(shr(self, 0x4ff0000000000000000000004), 1)
         ok := bit
-      }
-
-      // IDs in [313..568]
-      {
-        let off := sub(self, 313)
-        let bit := and(shr(off, 0x4ff), 1)
-        ok := or(ok, bit)
       }
     }
   }
@@ -859,15 +814,8 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x7fffffffc00001f8dfffff0), 1)
+        let bit := and(shr(self, 0x7ffc0000137001fffff2ff00000001ffffff8dfffff0), 1)
         ok := bit
-      }
-
-      // IDs in [313..568]
-      {
-        let off := sub(self, 313)
-        let bit := and(shr(off, 0x137001fffff2ff), 1)
-        ok := or(ok, bit)
       }
     }
   }
@@ -1632,14 +1580,6 @@ library ObjectTypeLib {
   }
 
   function isOrientationSupported(ObjectType self, Orientation orientation) internal pure returns (bool) {
-    if (self == ObjectTypes.OakDoor) {
-      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
-        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
-    }
-    if (self == ObjectTypes.IronDoor) {
-      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
-        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
-    }
     if (self == ObjectTypes.TextSign) {
       return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
         || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
@@ -1667,11 +1607,19 @@ library ObjectTypeLib {
       return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
         || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
     }
+    if (self == ObjectTypes.Furnace) {
+      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
+        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    }
     if (self == ObjectTypes.Stonecutter) {
       return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
         || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
     }
-    if (self == ObjectTypes.Furnace) {
+    if (self == ObjectTypes.OakDoor) {
+      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
+        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    }
+    if (self == ObjectTypes.IronDoor) {
       return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
         || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
     }
