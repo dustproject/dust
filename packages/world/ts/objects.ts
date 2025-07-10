@@ -747,6 +747,7 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
       getOrientation("NegativeZ"),
     ],
   },
+  { name: "Torch", mass: 1125000000000000n },
   {
     name: "Stonecutter",
     mass: 711000000000000000n,
@@ -757,7 +758,6 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
       getOrientation("NegativeZ"),
     ],
   },
-  { name: "Torch", mass: 1125000000000000n },
 
   { name: "StoneBricks", mass: 12000000000000000n },
   { name: "TuffBricks", mass: 15000000000000000n },
