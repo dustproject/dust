@@ -310,10 +310,12 @@ export const recipes: Recipe[] = [
     outputs: [["Stonecutter", 1]],
   },
   {
+    station: "Workbench",
     inputs: [["BambooBush", 1]],
     outputs: [["Paper", 1]],
   },
   {
+    station: "Workbench",
     inputs: [
       ["Paper", 3],
       ["Cotton", 1],
@@ -336,12 +338,14 @@ export const recipes: Recipe[] = [
     ],
     outputs: [["Brick", 1]],
   },
+  // Note: Commented out due to mass mismatch - Clay (2400000000000000) != Terracotta (37500000000000000)
+  // {
+  //   station: "Furnace",
+  //   inputs: [["Clay", 1]],
+  //   outputs: [["Terracotta", 1]],
+  // },
   {
-    station: "Furnace",
-    inputs: [["Clay", 1]],
-    outputs: [["Terracotta", 1]],
-  },
-  {
+    station: "Stonecutter",
     inputs: [["Brick", 4]],
     outputs: [["BrickBlock", 1]],
   },
@@ -775,14 +779,17 @@ export const recipes: Recipe[] = [
   // },
   // Construction blocks
   {
+    station: "Stonecutter",
     inputs: [["Stone", 1]],
     outputs: [["StoneBricks", 1]],
   },
   {
+    station: "Stonecutter",
     inputs: [["Tuff", 1]],
     outputs: [["TuffBricks", 1]],
   },
   {
+    station: "Stonecutter",
     inputs: [["CobbledDeepslate", 1]],
     outputs: [["DeepslateBricks", 1]],
   },

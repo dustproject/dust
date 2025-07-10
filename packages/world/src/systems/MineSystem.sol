@@ -295,6 +295,10 @@ contract MineSystem is System {
     if (minedType == ObjectTypes.Farmland || minedType == ObjectTypes.WetFarmland) {
       minedType = ObjectTypes.Dirt;
     }
+    // If cotton bush, convert to cotton fiber
+    if (minedType == ObjectTypes.CottonBush) {
+      minedType = ObjectTypes.Cotton;
+    }
 
     _addToInventoryOrDrop(caller, mined, minedType, 1);
   }

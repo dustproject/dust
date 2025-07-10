@@ -94,6 +94,7 @@ import { IMachineSystem } from "../codegen/world/IMachineSystem.sol";
 import { ITransferSystem } from "../codegen/world/ITransferSystem.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
 import { Orientation } from "./Orientation.sol";
+import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 
 type ObjectType is uint16;
 
@@ -288,7 +289,8 @@ ${Object.entries(categories)
     return 0;
   }
 
-  function getGrowableEnergy(ObjectType self) public pure returns(uint128) {
+  function getGrowableEnergy(ObjectType self) public view returns(uint128) {
+    // First check explicit growableEnergy (for saplings)
     ${objects
       .filter((obj) => obj.growableEnergy)
       .map(
@@ -296,6 +298,13 @@ ${Object.entries(categories)
           `if (self == ObjectTypes.${obj.name}) return ${obj.growableEnergy};`,
       )
       .join("\n    ")}
+
+    // If no explicit growableEnergy, derive from crop's mass+energy (for seeds)
+    ObjectType crop = self.getCrop();
+    if (!crop.isNull()) {
+      return ObjectPhysics._getMass(crop) + ObjectPhysics._getEnergy(crop);
+    }
+
     return 0;
   }
 

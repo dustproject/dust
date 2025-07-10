@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { IMachineSystem } from "../codegen/world/IMachineSystem.sol";
 import { ITransferSystem } from "../codegen/world/ITransferSystem.sol";
-
 import { Orientation } from "./Orientation.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
 
@@ -526,7 +526,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x1c000000000000000000000000000000000), 1)
+        let bit := and(shr(self, 0x10000000001c000000000000000000000000000000000), 1)
         ok := bit
       }
     }
@@ -729,7 +729,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x1ffc000000000000000000000000000000000), 1)
+        let bit := and(shr(self, 0x100000001ffc000000000000000000000000000000000), 1)
         ok := bit
       }
     }
@@ -1063,8 +1063,8 @@ library ObjectTypeLib {
     ];
   }
 
-  function getSeedTypes() internal pure returns (ObjectType[3] memory) {
-    return [ObjectTypes.WheatSeed, ObjectTypes.PumpkinSeed, ObjectTypes.MelonSeed];
+  function getSeedTypes() internal pure returns (ObjectType[4] memory) {
+    return [ObjectTypes.WheatSeed, ObjectTypes.PumpkinSeed, ObjectTypes.MelonSeed, ObjectTypes.CottonSeed];
   }
 
   function getSaplingTypes() internal pure returns (ObjectType[8] memory) {
@@ -1324,11 +1324,12 @@ library ObjectTypeLib {
     ];
   }
 
-  function getGrowableTypes() internal pure returns (ObjectType[11] memory) {
+  function getGrowableTypes() internal pure returns (ObjectType[12] memory) {
     return [
       ObjectTypes.WheatSeed,
       ObjectTypes.PumpkinSeed,
       ObjectTypes.MelonSeed,
+      ObjectTypes.CottonSeed,
       ObjectTypes.OakSapling,
       ObjectTypes.BirchSapling,
       ObjectTypes.JungleSapling,
@@ -1697,6 +1698,7 @@ library ObjectTypeLib {
     if (self == ObjectTypes.WheatSeed) return ObjectTypes.Wheat;
     if (self == ObjectTypes.PumpkinSeed) return ObjectTypes.Pumpkin;
     if (self == ObjectTypes.MelonSeed) return ObjectTypes.Melon;
+    if (self == ObjectTypes.CottonSeed) return ObjectTypes.CottonBush;
     return ObjectTypes.Null;
   }
 
@@ -1724,13 +1726,12 @@ library ObjectTypeLib {
     if (self == ObjectTypes.SpruceSapling) return 76800;
     if (self == ObjectTypes.DarkOakSapling) return 60600;
     if (self == ObjectTypes.MangroveSapling) return 69600;
+    if (self == ObjectTypes.CottonSeed) return 7200;
     return 0;
   }
 
-  function getGrowableEnergy(ObjectType self) public pure returns (uint128) {
-    if (self == ObjectTypes.WheatSeed) return 4300000000000000;
-    if (self == ObjectTypes.PumpkinSeed) return 34300000000000000;
-    if (self == ObjectTypes.MelonSeed) return 34300000000000000;
+  function getGrowableEnergy(ObjectType self) public view returns (uint128) {
+    // First check explicit growableEnergy (for saplings)
     if (self == ObjectTypes.OakSapling) return 148000000000000000;
     if (self == ObjectTypes.BirchSapling) return 139000000000000000;
     if (self == ObjectTypes.JungleSapling) return 300000000000000000;
@@ -1739,6 +1740,13 @@ library ObjectTypeLib {
     if (self == ObjectTypes.SpruceSapling) return 256000000000000000;
     if (self == ObjectTypes.DarkOakSapling) return 202000000000000000;
     if (self == ObjectTypes.MangroveSapling) return 232000000000000000;
+
+    // If no explicit growableEnergy, derive from crop's mass+energy (for seeds)
+    ObjectType crop = self.getCrop();
+    if (!crop.isNull()) {
+      return ObjectPhysics._getMass(crop) + ObjectPhysics._getEnergy(crop);
+    }
+
     return 0;
   }
 

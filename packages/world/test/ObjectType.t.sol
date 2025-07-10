@@ -3219,6 +3219,7 @@ contract ObjectTypeTest is DustTest {
       assertTrue(ObjectTypes.WheatSeed.isSeed(), "isSeed");
       assertTrue(ObjectTypes.PumpkinSeed.isSeed(), "isSeed");
       assertTrue(ObjectTypes.MelonSeed.isSeed(), "isSeed");
+      assertTrue(ObjectTypes.CottonSeed.isSeed(), "isSeed");
       assertFalse(ObjectTypes.Null.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.Air.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.Water.isSeed(), "!isSeed");
@@ -3396,7 +3397,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.SmoothRedSandstone.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.SmoothStone.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.Cotton.isSeed(), "!isSeed");
-      assertFalse(ObjectTypes.CottonSeed.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.Glass.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.Brick.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.BrickBlock.isSeed(), "!isSeed");
@@ -10036,6 +10036,7 @@ contract ObjectTypeTest is DustTest {
       assertTrue(ObjectTypes.WheatSeed.isGrowable(), "isGrowable");
       assertTrue(ObjectTypes.PumpkinSeed.isGrowable(), "isGrowable");
       assertTrue(ObjectTypes.MelonSeed.isGrowable(), "isGrowable");
+      assertTrue(ObjectTypes.CottonSeed.isGrowable(), "isGrowable");
       assertTrue(ObjectTypes.OakSapling.isGrowable(), "isGrowable");
       assertTrue(ObjectTypes.BirchSapling.isGrowable(), "isGrowable");
       assertTrue(ObjectTypes.JungleSapling.isGrowable(), "isGrowable");
@@ -10213,7 +10214,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.SmoothRedSandstone.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.SmoothStone.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.Cotton.isGrowable(), "!isGrowable");
-      assertFalse(ObjectTypes.CottonSeed.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.Glass.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.Brick.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.BrickBlock.isGrowable(), "!isGrowable");

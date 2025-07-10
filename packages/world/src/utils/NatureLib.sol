@@ -19,6 +19,7 @@ import {
   MAX_BIRCH_SAPLING,
   MAX_COAL,
   MAX_COPPER,
+  MAX_COTTON_SEED,
   MAX_DARK_OAK_SAPLING,
   MAX_DIAMOND,
   MAX_GOLD,
@@ -61,6 +62,7 @@ library NatureLib {
     if (objectType == ObjectTypes.WheatSeed) return MAX_WHEAT_SEED;
     if (objectType == ObjectTypes.MelonSeed) return MAX_MELON_SEED;
     if (objectType == ObjectTypes.PumpkinSeed) return MAX_PUMPKIN_SEED;
+    if (objectType == ObjectTypes.CottonSeed) return MAX_COTTON_SEED;
     if (objectType == ObjectTypes.OakSapling) return MAX_OAK_SAPLING;
     if (objectType == ObjectTypes.SpruceSapling) return MAX_SPRUCE_SAPLING;
     if (objectType == ObjectTypes.MangroveSapling) return MAX_MANGROVE_SAPLING;

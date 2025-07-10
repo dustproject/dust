@@ -40,13 +40,13 @@ function validateSeeds() {
     if (seed.mass !== undefined) {
       throw new Error(`Seed ${seed.name} has mass`);
     }
-    if (seed.growableEnergy === undefined) {
-      throw new Error(`Seed ${seed.name} has no energy`);
-    }
-    const totalOutputMassEnergy = seed.growableEnergy;
-    if (totalInputMassEnergy !== totalOutputMassEnergy) {
+
+    // Use dynamic growableEnergy calculation (like in genObjectTypeSol.ts)
+    const growableEnergy = seed.growableEnergy ?? totalInputMassEnergy;
+
+    if (totalInputMassEnergy !== growableEnergy) {
       throw new Error(
-        `Seed ${seed.name} does not maintain mass+energy balance ${totalInputMassEnergy} != ${totalOutputMassEnergy}`,
+        `Seed ${seed.name} does not maintain mass+energy balance ${totalInputMassEnergy} != ${growableEnergy}`,
       );
     }
   }
