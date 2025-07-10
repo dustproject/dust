@@ -143,8 +143,8 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.Workbench, ObjectPhysicsData({ mass: 18000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Powerstone, ObjectPhysicsData({ mass: 80000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Furnace, ObjectPhysicsData({ mass: 108000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.Stonecutter, ObjectPhysicsData({ mass: 711000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Torch, ObjectPhysicsData({ mass: 1125000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Stonecutter, ObjectPhysicsData({ mass: 711000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.StoneBricks, ObjectPhysicsData({ mass: 12000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.TuffBricks, ObjectPhysicsData({ mass: 15000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.DeepslateBricks, ObjectPhysicsData({ mass: 100000000000000000, energy: 0 }));

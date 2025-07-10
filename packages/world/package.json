@@ -17,7 +17,7 @@
   },
   "files": ["src", "out", "dist", "worlds.json"],
   "scripts": {
-    "build": "pnpm run codegen && pnpm run build:mud && pnpm run build:js",
+    "build": "pnpm run validate-object-ids && pnpm run codegen && pnpm run build:mud && pnpm run build:js",
     "build:js": "tsc",
     "build:mud": "mud build && abi-ts --extension .ts",
     "clean": "forge clean && shx rm -rf src/**/codegen",
@@ -37,6 +37,7 @@
     "script:teleport": "./runForgeScript.bash script/debug/TeleportScript.s.sol",
     "test": "./runTests.bash",
     "test:js": "vitest",
+    "validate-object-ids": "tsx ./ts/scripts/validateObjectIds.ts",
     "world:set-paused": "forge script SetPausedScript --aws --broadcast --sig 'run(bool)'"
   },
   "dependencies": {

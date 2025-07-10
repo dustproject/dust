@@ -171,8 +171,8 @@ library ObjectTypes {
   ObjectType constant Workbench = ObjectType.wrap(149);
   ObjectType constant Powerstone = ObjectType.wrap(150);
   ObjectType constant Furnace = ObjectType.wrap(151);
-  ObjectType constant Stonecutter = ObjectType.wrap(152);
-  ObjectType constant Torch = ObjectType.wrap(153);
+  ObjectType constant Torch = ObjectType.wrap(152);
+  ObjectType constant Stonecutter = ObjectType.wrap(153);
   ObjectType constant StoneBricks = ObjectType.wrap(154);
   ObjectType constant TuffBricks = ObjectType.wrap(155);
   ObjectType constant DeepslateBricks = ObjectType.wrap(156);
@@ -460,7 +460,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x2ffffffffff7ffffffffffffffffffffffffff0), 1)
+        let bit := and(shr(self, 0x1ffffffffff7ffffffffffffffffffffffffff0), 1)
         ok := bit
       }
     }
@@ -566,7 +566,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x1e0000000000000000000000000000000000000), 1)
+        let bit := and(shr(self, 0x2e0000000000000000000000000000000000000), 1)
         ok := bit
       }
     }
@@ -684,7 +684,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x23c0001ff00001fc000003ffffc000000000000), 1)
+        let bit := and(shr(self, 0x13c0001ff00001fc000003ffffc000000000000), 1)
         ok := bit
       }
     }
@@ -718,7 +718,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x201ffc0000000e83fffffc00000000000000006), 1)
+        let bit := and(shr(self, 0x101ffc0000000e83fffffc00000000000000006), 1)
         ok := bit
       }
     }
@@ -814,7 +814,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x26e003ffffe5fe00000003fffffffff8dfffff0), 1)
+        let bit := and(shr(self, 0x16e003ffffe5fe00000003fffffffff8dfffff0), 1)
         ok := bit
       }
     }

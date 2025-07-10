@@ -1723,18 +1723,24 @@ export const recipes: Recipe[] = [
 
 // Get recipes where an object is used as input
 export function getRecipesByInput(objectType: ObjectName): Recipe[] {
-  return recipes.filter((recipe) => recipe.inputs.some((input) => input[0] === objectType));
+  return recipes.filter((recipe) =>
+    recipe.inputs.some((input) => input[0] === objectType),
+  );
 }
 
 // Get recipes where an object is produced as output
 export function getRecipesByOutput(objectType: ObjectName): Recipe[] {
-  return recipes.filter((recipe) => recipe.outputs.some((output) => output[0] === objectType));
+  return recipes.filter((recipe) =>
+    recipe.outputs.some((output) => output[0] === objectType),
+  );
 }
 
 // Validate that a recipe maintains mass+energy balance
 export function validateRecipe(recipe: Recipe) {
   // Check if this is a dye-related recipe (outputs include dyes)
-  const isDyeRecipe = recipe.outputs.some(([objectType]) => objectType.endsWith("Dye"));
+  const isDyeRecipe = recipe.outputs.some(([objectType]) =>
+    objectType.endsWith("Dye"),
+  );
 
   // Skip validation for dye recipes since dyes have 0 mass by design
   if (isDyeRecipe) {
@@ -1742,7 +1748,10 @@ export function validateRecipe(recipe: Recipe) {
   }
 
   // Filter out coal inputs as they should not be added to the output's mass
-  const inputs = recipe.station !== "Furnace" ? recipe.inputs : recipe.inputs.filter((input) => input[0] !== "CoalOre");
+  const inputs =
+    recipe.station !== "Furnace"
+      ? recipe.inputs
+      : recipe.inputs.filter((input) => input[0] !== "CoalOre");
   const totalInputMassEnergy = getTotalMassEnergy(inputs);
   const totalOutputMassEnergy = getTotalMassEnergy(recipe.outputs);
   if (totalInputMassEnergy !== totalOutputMassEnergy) {
