@@ -310,8 +310,8 @@ export const recipes: Recipe[] = [
     outputs: [["Stonecutter", 1]],
   },
   {
-    inputs: [["BambooBush", 3]],
-    outputs: [["Paper", 3]],
+    inputs: [["BambooBush", 1]],
+    outputs: [["Paper", 1]],
   },
   {
     inputs: [
@@ -346,8 +346,8 @@ export const recipes: Recipe[] = [
     outputs: [["BrickBlock", 1]],
   },
   {
-    inputs: [["AnyPlank", 2]],
-    outputs: [["Stick", 4]],
+    inputs: [["AnyPlank", 1]],
+    outputs: [["Stick", 2]],
   },
   // Primary dye recipes
   {
@@ -783,8 +783,8 @@ export const recipes: Recipe[] = [
     outputs: [["TuffBricks", 1]],
   },
   {
-    inputs: [["CobbledDeepslate", 4]],
-    outputs: [["DeepslateBricks", 4]],
+    inputs: [["CobbledDeepslate", 1]],
+    outputs: [["DeepslateBricks", 1]],
   },
   // Note: Commented out due to mass mismatch - Sand (4000000000000000) × 4 != Sandstone (30000000000000000) × 4
   // {
@@ -1029,76 +1029,76 @@ export const recipes: Recipe[] = [
   // Functional objects recipes
   {
     station: "Workbench",
-    inputs: [["Glass", 6]],
-    outputs: [["GlassPane", 16]],
+    inputs: [["Glass", 3]],
+    outputs: [["GlassPane", 8]],
   },
   {
-    inputs: [["OakPlanks", 6]],
-    outputs: [["OakDoor", 3]],
+    inputs: [["OakPlanks", 2]],
+    outputs: [["OakDoor", 1]],
   },
   {
-    inputs: [["BirchPlanks", 6]],
-    outputs: [["BirchDoor", 3]],
+    inputs: [["BirchPlanks", 2]],
+    outputs: [["BirchDoor", 1]],
   },
   {
-    inputs: [["JunglePlanks", 6]],
-    outputs: [["JungleDoor", 3]],
+    inputs: [["JunglePlanks", 2]],
+    outputs: [["JungleDoor", 1]],
   },
   {
-    inputs: [["SakuraPlanks", 6]],
-    outputs: [["SakuraDoor", 3]],
+    inputs: [["SakuraPlanks", 2]],
+    outputs: [["SakuraDoor", 1]],
   },
   {
-    inputs: [["AcaciaPlanks", 6]],
-    outputs: [["AcaciaDoor", 3]],
+    inputs: [["AcaciaPlanks", 2]],
+    outputs: [["AcaciaDoor", 1]],
   },
   {
-    inputs: [["SprucePlanks", 6]],
-    outputs: [["SpruceDoor", 3]],
+    inputs: [["SprucePlanks", 2]],
+    outputs: [["SpruceDoor", 1]],
   },
   {
-    inputs: [["DarkOakPlanks", 6]],
-    outputs: [["DarkOakDoor", 3]],
+    inputs: [["DarkOakPlanks", 2]],
+    outputs: [["DarkOakDoor", 1]],
   },
   {
-    inputs: [["MangrovePlanks", 6]],
-    outputs: [["MangroveDoor", 3]],
+    inputs: [["MangrovePlanks", 2]],
+    outputs: [["MangroveDoor", 1]],
   },
   {
-    inputs: [["IronBar", 6]],
-    outputs: [["IronDoor", 3]],
+    inputs: [["IronBar", 2]],
+    outputs: [["IronDoor", 1]],
   },
   {
-    inputs: [["OakPlanks", 6]],
-    outputs: [["OakTrapdoor", 2]],
+    inputs: [["OakPlanks", 3]],
+    outputs: [["OakTrapdoor", 1]],
   },
   {
-    inputs: [["BirchPlanks", 6]],
-    outputs: [["BirchTrapdoor", 2]],
+    inputs: [["BirchPlanks", 3]],
+    outputs: [["BirchTrapdoor", 1]],
   },
   {
-    inputs: [["JunglePlanks", 6]],
-    outputs: [["JungleTrapdoor", 2]],
+    inputs: [["JunglePlanks", 3]],
+    outputs: [["JungleTrapdoor", 1]],
   },
   {
-    inputs: [["SakuraPlanks", 6]],
-    outputs: [["SakuraTrapdoor", 2]],
+    inputs: [["SakuraPlanks", 3]],
+    outputs: [["SakuraTrapdoor", 1]],
   },
   {
-    inputs: [["AcaciaPlanks", 6]],
-    outputs: [["AcaciaTrapdoor", 2]],
+    inputs: [["AcaciaPlanks", 3]],
+    outputs: [["AcaciaTrapdoor", 1]],
   },
   {
-    inputs: [["SprucePlanks", 6]],
-    outputs: [["SpruceTrapdoor", 2]],
+    inputs: [["SprucePlanks", 3]],
+    outputs: [["SpruceTrapdoor", 1]],
   },
   {
-    inputs: [["DarkOakPlanks", 6]],
-    outputs: [["DarkOakTrapdoor", 2]],
+    inputs: [["DarkOakPlanks", 3]],
+    outputs: [["DarkOakTrapdoor", 1]],
   },
   {
-    inputs: [["MangrovePlanks", 6]],
-    outputs: [["MangroveTrapdoor", 2]],
+    inputs: [["MangrovePlanks", 3]],
+    outputs: [["MangroveTrapdoor", 1]],
   },
   {
     inputs: [["IronBar", 4]],
@@ -1217,8 +1217,8 @@ export const recipes: Recipe[] = [
     outputs: [["MangroveFenceGate", 1]],
   },
   {
-    inputs: [["IronBar", 6]],
-    outputs: [["IronBars", 16]],
+    inputs: [["IronBar", 3]],
+    outputs: [["IronBars", 8]],
   },
   {
     inputs: [
@@ -1398,36 +1398,36 @@ export const recipes: Recipe[] = [
   },
   // Wooden stairs
   {
-    inputs: [["OakPlanks", 6]],
-    outputs: [["OakPlanksStairs", 6]],
+    inputs: [["OakPlanks", 1]],
+    outputs: [["OakPlanksStairs", 1]],
   },
   {
-    inputs: [["BirchPlanks", 6]],
-    outputs: [["BirchPlanksStairs", 6]],
+    inputs: [["BirchPlanks", 1]],
+    outputs: [["BirchPlanksStairs", 1]],
   },
   {
-    inputs: [["JunglePlanks", 6]],
-    outputs: [["JunglePlanksStairs", 6]],
+    inputs: [["JunglePlanks", 1]],
+    outputs: [["JunglePlanksStairs", 1]],
   },
   {
-    inputs: [["SakuraPlanks", 6]],
-    outputs: [["SakuraPlanksStairs", 6]],
+    inputs: [["SakuraPlanks", 1]],
+    outputs: [["SakuraPlanksStairs", 1]],
   },
   {
-    inputs: [["AcaciaPlanks", 6]],
-    outputs: [["AcaciaPlanksStairs", 6]],
+    inputs: [["AcaciaPlanks", 1]],
+    outputs: [["AcaciaPlanksStairs", 1]],
   },
   {
-    inputs: [["SprucePlanks", 6]],
-    outputs: [["SprucePlanksStairs", 6]],
+    inputs: [["SprucePlanks", 1]],
+    outputs: [["SprucePlanksStairs", 1]],
   },
   {
-    inputs: [["DarkOakPlanks", 6]],
-    outputs: [["DarkOakPlanksStairs", 6]],
+    inputs: [["DarkOakPlanks", 1]],
+    outputs: [["DarkOakPlanksStairs", 1]],
   },
   {
-    inputs: [["MangrovePlanks", 6]],
-    outputs: [["MangrovePlanksStairs", 6]],
+    inputs: [["MangrovePlanks", 1]],
+    outputs: [["MangrovePlanksStairs", 1]],
   },
   // Slab recipes
   {
@@ -1567,36 +1567,36 @@ export const recipes: Recipe[] = [
   },
   // Wooden slabs
   {
-    inputs: [["OakPlanks", 3]],
-    outputs: [["OakPlanksSlab", 6]],
+    inputs: [["OakPlanks", 1]],
+    outputs: [["OakPlanksSlab", 2]],
   },
   {
-    inputs: [["BirchPlanks", 3]],
-    outputs: [["BirchPlanksSlab", 6]],
+    inputs: [["BirchPlanks", 1]],
+    outputs: [["BirchPlanksSlab", 2]],
   },
   {
-    inputs: [["JunglePlanks", 3]],
-    outputs: [["JunglePlanksSlab", 6]],
+    inputs: [["JunglePlanks", 1]],
+    outputs: [["JunglePlanksSlab", 2]],
   },
   {
-    inputs: [["SakuraPlanks", 3]],
-    outputs: [["SakuraPlanksSlab", 6]],
+    inputs: [["SakuraPlanks", 1]],
+    outputs: [["SakuraPlanksSlab", 2]],
   },
   {
-    inputs: [["AcaciaPlanks", 3]],
-    outputs: [["AcaciaPlanksSlab", 6]],
+    inputs: [["AcaciaPlanks", 1]],
+    outputs: [["AcaciaPlanksSlab", 2]],
   },
   {
-    inputs: [["SprucePlanks", 3]],
-    outputs: [["SprucePlanksSlab", 6]],
+    inputs: [["SprucePlanks", 1]],
+    outputs: [["SprucePlanksSlab", 2]],
   },
   {
-    inputs: [["DarkOakPlanks", 3]],
-    outputs: [["DarkOakPlanksSlab", 6]],
+    inputs: [["DarkOakPlanks", 1]],
+    outputs: [["DarkOakPlanksSlab", 2]],
   },
   {
-    inputs: [["MangrovePlanks", 3]],
-    outputs: [["MangrovePlanksSlab", 6]],
+    inputs: [["MangrovePlanks", 1]],
+    outputs: [["MangrovePlanksSlab", 2]],
   },
   // Wall recipes
   {
