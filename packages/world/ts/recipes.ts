@@ -338,12 +338,14 @@ export const recipes: Recipe[] = [
     ],
     outputs: [["Brick", 1]],
   },
-  // Note: Commented out due to mass mismatch - Clay (2400000000000000) != Terracotta (37500000000000000)
-  // {
-  //   station: "Furnace",
-  //   inputs: [["Clay", 1]],
-  //   outputs: [["Terracotta", 1]],
-  // },
+  {
+    station: "Furnace",
+    inputs: [
+      ["Clay", 1],
+      ["CoalOre", 1],
+    ],
+    outputs: [["Terracotta", 1]],
+  },
   {
     station: "Stonecutter",
     inputs: [["Brick", 4]],

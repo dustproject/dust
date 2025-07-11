@@ -8,9 +8,11 @@ import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
+
+import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { Recipes, RecipesData } from "../codegen/tables/Recipes.sol";
 
-import { transferEnergyToPool } from "../utils/EnergyUtils.sol";
+import { addEnergyToLocalPool, transferEnergyToPool } from "../utils/EnergyUtils.sol";
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils, SlotAmount, SlotData } from "../utils/InventoryUtils.sol";
 import { CraftNotification, notify } from "../utils/NotifUtils.sol";
@@ -39,6 +41,7 @@ contract CraftSystem is System {
 
     CraftLib._consumeRecipeInputs(caller, recipe, inputs);
     CraftLib._createRecipeOutputs(caller, recipe);
+    CraftLib._handleEnergyConservation(caller, recipe);
 
     notify(caller, CraftNotification({ recipeId: recipeId, station: station }));
   }
@@ -107,5 +110,43 @@ library CraftLib {
     }
 
     return withdrawals;
+  }
+
+  function _handleEnergyConservation(EntityId caller, RecipesData memory recipe) public {
+    // Calculate total input mass+energy (excluding coal for furnace recipes)
+    uint128 totalInputMassEnergy = 0;
+    for (uint256 i = 0; i < recipe.inputTypes.length; i++) {
+      ObjectType inputType = ObjectType.wrap(recipe.inputTypes[i]);
+      uint16 inputAmount = recipe.inputAmounts[i];
+
+      // Skip coal in furnace recipes as it's consumed for fuel
+      if (recipe.stationTypeId == ObjectTypes.Furnace && inputType == ObjectTypes.CoalOre) {
+        continue;
+      }
+
+      uint128 mass = ObjectPhysics._getMass(inputType);
+      uint128 energy = ObjectPhysics._getEnergy(inputType);
+      totalInputMassEnergy += (mass + energy) * inputAmount;
+    }
+
+    // Calculate total output mass+energy
+    uint128 totalOutputMassEnergy = 0;
+    for (uint256 i = 0; i < recipe.outputTypes.length; i++) {
+      ObjectType outputType = ObjectType.wrap(recipe.outputTypes[i]);
+      uint16 outputAmount = recipe.outputAmounts[i];
+
+      uint128 mass = ObjectPhysics._getMass(outputType);
+      uint128 energy = ObjectPhysics._getEnergy(outputType);
+      totalOutputMassEnergy += (mass + energy) * outputAmount;
+    }
+
+    require(totalInputMassEnergy >= totalOutputMassEnergy, "Insufficient input mass+energy");
+
+    // If there's excess input energy (like when creating dyes from flowers),
+    // transfer it to the local energy pool
+    if (totalInputMassEnergy > totalOutputMassEnergy) {
+      uint128 excessEnergy = totalInputMassEnergy - totalOutputMassEnergy;
+      addEnergyToLocalPool(caller._getPosition(), excessEnergy);
+    }
   }
 }

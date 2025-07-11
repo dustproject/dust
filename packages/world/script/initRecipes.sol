@@ -1076,6 +1076,26 @@ function initRecipes() {
     );
   }
   {
+    uint16[] memory inputTypes = new uint16[](2);
+    uint16[] memory inputAmounts = new uint16[](2);
+    (inputTypes[0], inputAmounts[0]) = (ObjectTypes.Clay.unwrap(), 1);
+    (inputTypes[1], inputAmounts[1]) = (ObjectTypes.CoalOre.unwrap(), 1);
+
+    uint16[] memory outputTypes = new uint16[](1);
+    uint16[] memory outputAmounts = new uint16[](1);
+    (outputTypes[0], outputAmounts[0]) = (ObjectTypes.Terracotta.unwrap(), 1);
+
+    Recipes.set(
+      keccak256(abi.encode(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      ObjectTypes.Furnace,
+      0,
+      inputTypes,
+      inputAmounts,
+      outputTypes,
+      outputAmounts
+    );
+  }
+  {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
     (inputTypes[0], inputAmounts[0]) = (ObjectTypes.Brick.unwrap(), 4);
