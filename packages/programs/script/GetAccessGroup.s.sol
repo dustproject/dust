@@ -18,6 +18,7 @@ import { ForceFieldProgram } from "../src/programs/ForceFieldProgram.sol";
 import { SpawnTileProgram } from "../src/programs/SpawnTileProgram.sol";
 import { TextSignProgram } from "../src/programs/TextSignProgram.sol";
 
+import { getForceField } from "../src/getForceField.sol";
 import { getGroupId } from "../src/getGroupId.sol";
 import { isAllowed } from "../src/isAllowed.sol";
 
@@ -27,8 +28,15 @@ contract GetAccessGroup is DustScript {
 
     (uint256 groupId, bool dd) = getGroupId(target);
 
+    (EntityId forceField, bool isProtected) = getForceField(target);
     console.log("Group ID:", groupId);
     console.log("Default Deny:", dd);
+    console.log("Force Field:");
+    console.logBytes32(forceField.unwrap());
+    console.log("Is Protected:", isProtected);
+    (uint256 ffGroupId, bool ffDd) = getGroupId(forceField);
+    console.log("Force Field Group ID:", ffGroupId);
+    console.log("Force Field Default Deny:", ffDd);
   }
 
   function run(address worldAddress, EntityId target, EntityId caller) external {
