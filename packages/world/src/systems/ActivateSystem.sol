@@ -25,9 +25,11 @@ contract ActivateSystem is System {
 
     if (objectType == ObjectTypes.Player) {
       updatePlayerEnergy(base);
-    } else {
+    } else if (objectType.isMachine()) {
       // if there's no program, it'll just do nothing
       updateMachineEnergy(base);
+    } else {
+      revert("Entity is not a player or machine");
     }
   }
 
