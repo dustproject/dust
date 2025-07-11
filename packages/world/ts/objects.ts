@@ -7,6 +7,19 @@ export interface Category {
   checkName?: string;
 }
 
+function validateUniqueIds<T extends readonly ObjectDefinition[]>(
+  objects: T,
+): T {
+  const ids = new Set<number>();
+  for (const obj of objects) {
+    if (ids.has(obj.id)) {
+      throw new Error(`Duplicate ID found: ${obj.id} for object ${obj.name}`);
+    }
+    ids.add(obj.id);
+  }
+  return objects;
+}
+
 export const objectNames = [
   "Null",
   "Air",
@@ -447,9 +460,7 @@ export interface ObjectDefinition {
   supportedOrientations?: number[];
 }
 
-type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
-
-export const objectDef: Optional<ObjectDefinition, "id">[] = [
+export const objects: readonly ObjectDefinition[] = validateUniqueIds([
   { name: "Null", id: 0 },
   { name: "Air", id: 1 },
   { name: "Water", id: 2 },
@@ -1240,13 +1251,7 @@ export const objectDef: Optional<ObjectDefinition, "id">[] = [
   },
   { name: "Player", id: 32798 },
   { name: "Fragment", id: 32799 },
-] as const;
-
-let current = 0;
-export const objects: ObjectDefinition[] = objectDef.map((obj) => {
-  current = obj.id ?? current;
-  return { ...obj, id: current++ };
-});
+] as const);
 
 export type ObjectAmount = [ObjectName, number | bigint];
 
