@@ -61,4 +61,19 @@ export type ClientRpcSchema = RpcSchema.From<
         z: number;
       };
     }
+  | {
+      Request: {
+        method: "setBlueprint";
+        params: {
+          blocks: {
+            objectTypeId: number;
+            x: number;
+            y: number;
+            z: number;
+            orientation: number;
+          }[];
+        };
+      };
+      ReturnType: void;
+    }
 >;
