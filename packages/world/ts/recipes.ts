@@ -357,7 +357,6 @@ export const recipes: Recipe[] = [
   //   outputs: [["Terracotta", 1]],
   // },
   {
-    station: "Stonecutter",
     inputs: [["Brick", 4]],
     outputs: [["BrickBlock", 1]],
   },
