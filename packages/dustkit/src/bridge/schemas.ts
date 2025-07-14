@@ -65,12 +65,14 @@ export type ClientRpcSchema = RpcSchema.From<
       Request: {
         method: "setBlueprint";
         params: {
-          objectTypeId: number;
-          x: number;
-          y: number;
-          z: number;
-          rotation: number;
-        }[];
+          blocks: {
+            objectTypeId: number;
+            x: number;
+            y: number;
+            z: number;
+            orientation: number;
+          }[];
+        };
       };
       ReturnType: void;
     }
