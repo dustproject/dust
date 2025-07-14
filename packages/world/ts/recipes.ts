@@ -1205,6 +1205,38 @@ export const recipes: Recipe[] = [
     ],
     outputs: [["LightBlueTerracotta", 8]],
   },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Terracotta", 8],
+      ["GreenDye", 1],
+    ],
+    outputs: [["GreenTerracotta", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Terracotta", 8],
+      ["PinkDye", 1],
+    ],
+    outputs: [["PinkTerracotta", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Terracotta", 8],
+      ["LimeDye", 1],
+    ],
+    outputs: [["LimeTerracotta", 8]],
+  },
+  {
+    station: "Workbench",
+    inputs: [
+      ["Terracotta", 8],
+      ["GrayDye", 1],
+    ],
+    outputs: [["GrayTerracotta", 8]],
+  },
   // Colored glass recipes
   {
     station: "Workbench",

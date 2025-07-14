@@ -2939,6 +2939,86 @@ function initRecipes() {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
+    (inputTypes[0], inputAmounts[0]) = (ObjectTypes.Terracotta.unwrap(), 8);
+    (inputTypes[1], inputAmounts[1]) = (ObjectTypes.GreenDye.unwrap(), 1);
+
+    uint16[] memory outputTypes = new uint16[](1);
+    uint16[] memory outputAmounts = new uint16[](1);
+    (outputTypes[0], outputAmounts[0]) = (ObjectTypes.GreenTerracotta.unwrap(), 8);
+
+    Recipes.set(
+      keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      ObjectTypes.Workbench,
+      0,
+      inputTypes,
+      inputAmounts,
+      outputTypes,
+      outputAmounts
+    );
+  }
+  {
+    uint16[] memory inputTypes = new uint16[](2);
+    uint16[] memory inputAmounts = new uint16[](2);
+    (inputTypes[0], inputAmounts[0]) = (ObjectTypes.Terracotta.unwrap(), 8);
+    (inputTypes[1], inputAmounts[1]) = (ObjectTypes.PinkDye.unwrap(), 1);
+
+    uint16[] memory outputTypes = new uint16[](1);
+    uint16[] memory outputAmounts = new uint16[](1);
+    (outputTypes[0], outputAmounts[0]) = (ObjectTypes.PinkTerracotta.unwrap(), 8);
+
+    Recipes.set(
+      keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      ObjectTypes.Workbench,
+      0,
+      inputTypes,
+      inputAmounts,
+      outputTypes,
+      outputAmounts
+    );
+  }
+  {
+    uint16[] memory inputTypes = new uint16[](2);
+    uint16[] memory inputAmounts = new uint16[](2);
+    (inputTypes[0], inputAmounts[0]) = (ObjectTypes.Terracotta.unwrap(), 8);
+    (inputTypes[1], inputAmounts[1]) = (ObjectTypes.LimeDye.unwrap(), 1);
+
+    uint16[] memory outputTypes = new uint16[](1);
+    uint16[] memory outputAmounts = new uint16[](1);
+    (outputTypes[0], outputAmounts[0]) = (ObjectTypes.LimeTerracotta.unwrap(), 8);
+
+    Recipes.set(
+      keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      ObjectTypes.Workbench,
+      0,
+      inputTypes,
+      inputAmounts,
+      outputTypes,
+      outputAmounts
+    );
+  }
+  {
+    uint16[] memory inputTypes = new uint16[](2);
+    uint16[] memory inputAmounts = new uint16[](2);
+    (inputTypes[0], inputAmounts[0]) = (ObjectTypes.Terracotta.unwrap(), 8);
+    (inputTypes[1], inputAmounts[1]) = (ObjectTypes.GrayDye.unwrap(), 1);
+
+    uint16[] memory outputTypes = new uint16[](1);
+    uint16[] memory outputAmounts = new uint16[](1);
+    (outputTypes[0], outputAmounts[0]) = (ObjectTypes.GrayTerracotta.unwrap(), 8);
+
+    Recipes.set(
+      keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      ObjectTypes.Workbench,
+      0,
+      inputTypes,
+      inputAmounts,
+      outputTypes,
+      outputAmounts
+    );
+  }
+  {
+    uint16[] memory inputTypes = new uint16[](2);
+    uint16[] memory inputAmounts = new uint16[](2);
     (inputTypes[0], inputAmounts[0]) = (ObjectTypes.Glass.unwrap(), 8);
     (inputTypes[1], inputAmounts[1]) = (ObjectTypes.WhiteDye.unwrap(), 1);
 

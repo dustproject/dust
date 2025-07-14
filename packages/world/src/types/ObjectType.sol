@@ -172,6 +172,10 @@ library ObjectTypes {
   ObjectType constant Powerstone = ObjectType.wrap(150);
   ObjectType constant Furnace = ObjectType.wrap(151);
   ObjectType constant Torch = ObjectType.wrap(152);
+  ObjectType constant GreenTerracotta = ObjectType.wrap(153);
+  ObjectType constant PinkTerracotta = ObjectType.wrap(154);
+  ObjectType constant LimeTerracotta = ObjectType.wrap(155);
+  ObjectType constant GrayTerracotta = ObjectType.wrap(156);
   ObjectType constant Stonecutter = ObjectType.wrap(256);
   ObjectType constant StoneBricks = ObjectType.wrap(257);
   ObjectType constant TuffBricks = ObjectType.wrap(258);
@@ -347,7 +351,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x1ffffffffff7ffffffffffffffffffffffffff0), 1)
+        let bit := and(shr(self, 0x1fffffffffff7ffffffffffffffffffffffffff0), 1)
         ok := bit
       }
 
@@ -365,7 +369,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x3ffe000000000), 1)
+        let bit := and(shr(self, 0x1e00000000000000000000000003ffe000000000), 1)
         ok := bit
       }
     }
@@ -716,7 +720,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x16e003ffffe5fe00000003fffffffff8dfffff0), 1)
+        let bit := and(shr(self, 0x1f6e003ffffe5fe00000003fffffffff8dfffff0), 1)
         ok := bit
       }
 
@@ -749,7 +753,7 @@ library ObjectTypeLib {
     return [ObjectTypes.AnyPlank, ObjectTypes.AnyLog, ObjectTypes.AnyLeaf, ObjectTypes.AnyTerracotta];
   }
 
-  function getBlockTypes() internal pure returns (ObjectType[229] memory) {
+  function getBlockTypes() internal pure returns (ObjectType[233] memory) {
     return [
       ObjectTypes.Stone,
       ObjectTypes.Deepslate,
@@ -805,6 +809,10 @@ library ObjectTypeLib {
       ObjectTypes.PurpleTerracotta,
       ObjectTypes.BlueTerracotta,
       ObjectTypes.MagentaTerracotta,
+      ObjectTypes.GreenTerracotta,
+      ObjectTypes.PinkTerracotta,
+      ObjectTypes.LimeTerracotta,
+      ObjectTypes.GrayTerracotta,
       ObjectTypes.OakLog,
       ObjectTypes.BirchLog,
       ObjectTypes.JungleLog,
@@ -983,7 +991,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function getTerracottaTypes() internal pure returns (ObjectType[13] memory) {
+  function getTerracottaTypes() internal pure returns (ObjectType[17] memory) {
     return [
       ObjectTypes.Terracotta,
       ObjectTypes.BrownTerracotta,
@@ -997,7 +1005,11 @@ library ObjectTypeLib {
       ObjectTypes.BlackTerracotta,
       ObjectTypes.PurpleTerracotta,
       ObjectTypes.BlueTerracotta,
-      ObjectTypes.MagentaTerracotta
+      ObjectTypes.MagentaTerracotta,
+      ObjectTypes.GreenTerracotta,
+      ObjectTypes.PinkTerracotta,
+      ObjectTypes.LimeTerracotta,
+      ObjectTypes.GrayTerracotta
     ];
   }
 
@@ -1481,7 +1493,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function getWaterloggableTypes() internal pure returns (ObjectType[179] memory) {
+  function getWaterloggableTypes() internal pure returns (ObjectType[183] memory) {
     return [
       ObjectTypes.Stone,
       ObjectTypes.Deepslate,
@@ -1532,6 +1544,10 @@ library ObjectTypeLib {
       ObjectTypes.PurpleTerracotta,
       ObjectTypes.BlueTerracotta,
       ObjectTypes.MagentaTerracotta,
+      ObjectTypes.GreenTerracotta,
+      ObjectTypes.PinkTerracotta,
+      ObjectTypes.LimeTerracotta,
+      ObjectTypes.GrayTerracotta,
       ObjectTypes.OakLog,
       ObjectTypes.BirchLog,
       ObjectTypes.JungleLog,
