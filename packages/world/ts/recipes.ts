@@ -308,6 +308,7 @@ export const recipes: Recipe[] = [
       ["Stone", 3],
     ],
     outputs: [["Stonecutter", 1]],
+    station: "Workbench",
   },
   {
     station: "Workbench",
@@ -337,6 +338,14 @@ export const recipes: Recipe[] = [
       ["CoalOre", 1],
     ],
     outputs: [["Brick", 1]],
+  },
+  {
+    station: "Furnace",
+    inputs: [
+      ["Basalt", 1],
+      ["CoalOre", 1],
+    ],
+    outputs: [["SmoothBasalt", 1]],
   },
   // Commented due to mass mismatch - Clay != Terracotta
   // {
@@ -937,20 +946,29 @@ export const recipes: Recipe[] = [
     ],
     outputs: [["CrackedPolishedBlackstoneBricks", 1]],
   },
-  // Smooth blocks (Stonecutter)
+  // Smooth blocks (Furnace - smelting recipes)
   {
-    station: "Stonecutter",
-    inputs: [["Sandstone", 1]],
+    station: "Furnace",
+    inputs: [
+      ["Sandstone", 1],
+      ["CoalOre", 1],
+    ],
     outputs: [["SmoothSandstone", 1]],
   },
   {
-    station: "Stonecutter",
-    inputs: [["RedSandstone", 1]],
+    station: "Furnace",
+    inputs: [
+      ["RedSandstone", 1],
+      ["CoalOre", 1],
+    ],
     outputs: [["SmoothRedSandstone", 1]],
   },
   {
-    station: "Stonecutter",
-    inputs: [["Stone", 1]],
+    station: "Furnace",
+    inputs: [
+      ["Stone", 1],
+      ["CoalOre", 1],
+    ],
     outputs: [["SmoothStone", 1]],
   },
   // Mossy blocks recipes
@@ -1550,6 +1568,7 @@ export const recipes: Recipe[] = [
       ["IronBar", 1],
     ],
     outputs: [["Lodestone", 1]],
+    station: "Workbench",
   },
   // Stairs recipes
   // {
