@@ -1,9 +1,14 @@
 # Changelog
 
+## 2024-07-09
+
+- Add back DefaultProgramSystem function to get group id.
+
 ## 2024-07-08
 
-- Fix access control for settin entity access group.
+- Fix access control for setting entity access group.
 - Support setting access group by smart entity programs.
+- Add overloaded functions to DefaultProgramSystem that don't recieve a caller.
 
 ## 2024-07-07
 

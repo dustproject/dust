@@ -1085,8 +1085,8 @@ function initRecipes() {
     (outputTypes[0], outputAmounts[0]) = (ObjectTypes.BrickBlock.unwrap(), 1);
 
     Recipes.set(
-      keccak256(abi.encode(ObjectTypes.Stonecutter, inputTypes, inputAmounts, outputTypes, outputAmounts)),
-      ObjectTypes.Stonecutter,
+      keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      ObjectTypes.Null,
       0,
       inputTypes,
       inputAmounts,
