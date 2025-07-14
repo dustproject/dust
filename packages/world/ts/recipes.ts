@@ -381,16 +381,12 @@ export const recipes: Recipe[] = [
     outputs: [["BlueDye", 2]],
   },
   {
-    inputs: [["AnyLeaf", 1]],
+    inputs: [["SwitchGrass", 1]],
     outputs: [["GreenDye", 1]],
   },
   {
-    inputs: [["Moss", 1]],
+    inputs: [["FescueGrass", 1]],
     outputs: [["GreenDye", 1]],
-  },
-  {
-    inputs: [["Calcite", 1]],
-    outputs: [["WhiteDye", 3]],
   },
   {
     inputs: [["Bone", 1]],
@@ -813,15 +809,15 @@ export const recipes: Recipe[] = [
     inputs: [["CobbledDeepslate", 1]],
     outputs: [["DeepslateBricks", 1]],
   },
-  // Note: Commented out due to mass mismatch - Sand (4000000000000000) × 4 != Sandstone (30000000000000000) × 4
+  // Note: Commented out due to mass mismatch - Sand (4000000000000000) != Sandstone (30000000000000000)
   // {
-  //   inputs: [["Sand", 4]],
-  //   outputs: [["Sandstone", 4]],
+  //   inputs: [["Sand", 1]],
+  //   outputs: [["Sandstone", 1]],
   // },
-  // Note: Commented out due to mass mismatch - RedSand (5000000000000000) × 4 != RedSandstone (37500000000000000) × 4
+  // Note: Commented out due to mass mismatch - RedSand (5000000000000000) != RedSandstone (37500000000000000)
   // {
-  //   inputs: [["RedSand", 4]],
-  //   outputs: [["RedSandstone", 4]],
+  //   inputs: [["RedSand", 1]],
+  //   outputs: [["RedSandstone", 1]],
   // },
   // Polished blocks (Stonecutter)
   {
