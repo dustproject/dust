@@ -1753,7 +1753,7 @@ library ObjectTypeLib {
     return 0;
   }
 
-  function getGrowableEnergy(ObjectType self) public view returns (uint128) {
+  function getGrowableEnergy(ObjectType self) public pure returns (uint128) {
     // First check explicit growableEnergy (for saplings)
     if (self == ObjectTypes.WheatSeed) return 4300000000000000;
     if (self == ObjectTypes.PumpkinSeed) return 34300000000000000;

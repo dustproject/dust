@@ -35,18 +35,17 @@ function validateSeeds() {
         `Seed ${seed.name} grows into ${seed.crop} but object does not exist`,
       );
     }
-    const totalInputMassEnergy =
-      (growsInto.mass ?? 0n) + (growsInto.energy ?? 0n);
+
     if (seed.mass !== undefined) {
       throw new Error(`Seed ${seed.name} has mass`);
     }
 
-    // Use dynamic growableEnergy calculation (like in genObjectTypeSol.ts)
-    const growableEnergy = seed.growableEnergy ?? totalInputMassEnergy;
+    const totalCropEnergy = (growsInto.mass ?? 0n) + (growsInto.energy ?? 0n);
+    const growableEnergy = seed.growableEnergy;
 
-    if (totalInputMassEnergy !== growableEnergy) {
+    if (totalCropEnergy !== growableEnergy) {
       throw new Error(
-        `Seed ${seed.name} does not maintain mass+energy balance ${totalInputMassEnergy} != ${growableEnergy}`,
+        `Seed ${seed.name} does not maintain mass+energy balance ${totalCropEnergy} != ${growableEnergy}`,
       );
     }
   }
