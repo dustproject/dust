@@ -431,7 +431,6 @@ contract FarmingTest is DustTest {
     (cropEntityId,) = TestEntityUtils.getBlockAt(cropCoord);
     fullyGrownAt = SeedGrowth.getFullyGrownAt(cropEntityId);
 
-    console.log(ResourceCount.get(ObjectTypes.WheatSeed));
     // Full growth - Warp past the full growth time
     vm.roll(vm.getBlockNumber() + CHUNK_COMMIT_EXPIRY_BLOCKS + 1);
     vm.warp(fullyGrownAt + 1);

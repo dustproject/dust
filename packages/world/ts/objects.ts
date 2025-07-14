@@ -772,18 +772,21 @@ export const objects: readonly ObjectDefinition[] = validateUniqueIds([
     id: 134,
     timeToGrow: 17n * MINUTES,
     crop: "Wheat",
+    growableEnergy: 4300000000000000n, // Wheat mass (300000000000000n) + energy (4000000000000000n)
   },
   {
     name: "PumpkinSeed",
     id: 135,
     timeToGrow: 171n * MINUTES,
     crop: "Pumpkin",
+    growableEnergy: 34300000000000000n, // Pumpkin mass (1300000000000000n) + energy (33000000000000000n)
   },
   {
     name: "MelonSeed",
     id: 136,
     timeToGrow: 171n * MINUTES,
     crop: "Melon",
+    growableEnergy: 34300000000000000n, // Melon mass (1300000000000000n) + energy (33000000000000000n)
   },
   {
     name: "OakSapling",
@@ -1056,16 +1059,16 @@ export const objects: readonly ObjectDefinition[] = validateUniqueIds([
   { name: "BrickBlock", id: 369, mass: 9600000000000000n },
   { name: "MudBricks", id: 370, mass: 5000000000000000n },
   { name: "Paper", id: 371, mass: 200000000000000n },
-  { name: "Stick", id: 373, mass: 2250000000000000n },
-  { name: "Barrel", id: 377, mass: 31500000000000000n },
-  { name: "Lodestone", id: 380, mass: 771000000000000000n },
-  { name: "FlowerPot", id: 381, mass: 7200000000000000n },
+  { name: "Stick", id: 372, mass: 2250000000000000n },
+  { name: "Lodestone", id: 373, mass: 771000000000000000n },
+  { name: "FlowerPot", id: 374, mass: 7200000000000000n },
+  // { name: "Barrel", id: 375, mass: 31500000000000000n },
   // { name: "Ladder", id: 376, mass: 5250000000000000n },
-  // { name: "Lantern", id: 375, mass: 676125000000000000n },
-  // { name: "Carpet", id: 379, mass: 200000000000000n },
-  // { name: "Book", id: 372, mass: 900000000000000n },
-  // { name: "Bookshelf", id: 378, mass: 29700000000000000n },
-  // { name: "IronBars", id: 374, mass: 253125000000000000n },
+  // { name: "Lantern", id: 377, mass: 676125000000000000n },
+  // { name: "Carpet", id: 378, mass: 200000000000000n },
+  // { name: "Book", id: 379, mass: 900000000000000n },
+  // { name: "Bookshelf", id: 380, mass: 29700000000000000n },
+  // { name: "IronBars", id: 381, mass: 253125000000000000n },
 
   // Shape variants - Stairs (same mass as base material)
   // { name: "StoneStairs", id: 382, mass: 12000000000000000n },

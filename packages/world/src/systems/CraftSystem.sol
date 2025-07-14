@@ -113,14 +113,14 @@ library CraftLib {
   }
 
   function _handleEnergyConservation(EntityId caller, RecipesData memory recipe) public {
-    // Calculate total input mass+energy (excluding coal for furnace recipes)
+    // Calculate total input mass+energy (excluding coal recipes)
     uint128 totalInputMassEnergy = 0;
     for (uint256 i = 0; i < recipe.inputTypes.length; i++) {
       ObjectType inputType = ObjectType.wrap(recipe.inputTypes[i]);
       uint16 inputAmount = recipe.inputAmounts[i];
 
-      // Skip coal in furnace recipes as it's consumed for fuel
-      if (recipe.stationTypeId == ObjectTypes.Furnace && inputType == ObjectTypes.CoalOre) {
+      // Skip coal as it is burned and does not contribute to mass+energy conservation
+      if (inputType == ObjectTypes.CoalOre) {
         continue;
       }
 

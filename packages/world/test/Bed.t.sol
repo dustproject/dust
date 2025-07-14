@@ -787,8 +787,6 @@ contract BedTest is DustTest {
     (address bob, EntityId bobEntityId) = createTestPlayer(coord + vec3(1, 0, 0));
     (address charlie, EntityId charlieEntityId) = createTestPlayer(coord + vec3(2, 0, 0));
 
-    console.log(coord.toString());
-
     Vec3 bed1Coord = coord - vec3(2, 0, 0);
     Vec3 bed2Coord = coord - vec3(4, 0, 0);
     Vec3 forcefieldCoord = coord - vec3(1, 0, 0);

@@ -289,7 +289,7 @@ ${Object.entries(categories)
     return 0;
   }
 
-  function getGrowableEnergy(ObjectType self) public view returns(uint128) {
+  function getGrowableEnergy(ObjectType self) public pure returns(uint128) {
     // First check explicit growableEnergy (for saplings)
     ${objects
       .filter((obj) => obj.growableEnergy)
@@ -298,12 +298,6 @@ ${Object.entries(categories)
           `if (self == ObjectTypes.${obj.name}) return ${obj.growableEnergy};`,
       )
       .join("\n    ")}
-
-    // If no explicit growableEnergy, derive from crop's mass+energy (for seeds)
-    ObjectType crop = self.getCrop();
-    if (!crop.isNull()) {
-      return ObjectPhysics._getMass(crop) + ObjectPhysics._getEnergy(crop);
-    }
 
     return 0;
   }

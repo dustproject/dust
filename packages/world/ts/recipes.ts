@@ -401,6 +401,13 @@ export const recipes: Recipe[] = [
     inputs: [["BrownMushroomBlock", 1]],
     outputs: [["BrownDye", 2]],
   },
+  {
+    inputs: [
+      ["GreenDye", 1],
+      ["RedDye", 1],
+    ],
+    outputs: [["BrownDye", 2]],
+  },
   // Mixed dye recipes
   {
     inputs: [

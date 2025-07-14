@@ -270,10 +270,9 @@ library ObjectTypes {
   ObjectType constant BrickBlock = ObjectType.wrap(369);
   ObjectType constant MudBricks = ObjectType.wrap(370);
   ObjectType constant Paper = ObjectType.wrap(371);
-  ObjectType constant Stick = ObjectType.wrap(373);
-  ObjectType constant Barrel = ObjectType.wrap(377);
-  ObjectType constant Lodestone = ObjectType.wrap(380);
-  ObjectType constant FlowerPot = ObjectType.wrap(381);
+  ObjectType constant Stick = ObjectType.wrap(372);
+  ObjectType constant Lodestone = ObjectType.wrap(373);
+  ObjectType constant FlowerPot = ObjectType.wrap(374);
   ObjectType constant WoodenPick = ObjectType.wrap(32768);
   ObjectType constant CopperPick = ObjectType.wrap(32769);
   ObjectType constant IronPick = ObjectType.wrap(32770);
@@ -1756,6 +1755,9 @@ library ObjectTypeLib {
 
   function getGrowableEnergy(ObjectType self) public view returns (uint128) {
     // First check explicit growableEnergy (for saplings)
+    if (self == ObjectTypes.WheatSeed) return 4300000000000000;
+    if (self == ObjectTypes.PumpkinSeed) return 34300000000000000;
+    if (self == ObjectTypes.MelonSeed) return 34300000000000000;
     if (self == ObjectTypes.OakSapling) return 148000000000000000;
     if (self == ObjectTypes.BirchSapling) return 139000000000000000;
     if (self == ObjectTypes.JungleSapling) return 300000000000000000;
@@ -1764,12 +1766,6 @@ library ObjectTypeLib {
     if (self == ObjectTypes.SpruceSapling) return 256000000000000000;
     if (self == ObjectTypes.DarkOakSapling) return 202000000000000000;
     if (self == ObjectTypes.MangroveSapling) return 232000000000000000;
-
-    // If no explicit growableEnergy, derive from crop's mass+energy (for seeds)
-    ObjectType crop = self.getCrop();
-    if (!crop.isNull()) {
-      return ObjectPhysics._getMass(crop) + ObjectPhysics._getEnergy(crop);
-    }
 
     return 0;
   }

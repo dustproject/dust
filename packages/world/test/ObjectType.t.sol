@@ -260,7 +260,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isNonSolid(), "!isNonSolid");
       assertFalse(ObjectTypes.Paper.isNonSolid(), "!isNonSolid");
       assertFalse(ObjectTypes.Stick.isNonSolid(), "!isNonSolid");
-      assertFalse(ObjectTypes.Barrel.isNonSolid(), "!isNonSolid");
       assertFalse(ObjectTypes.Lodestone.isNonSolid(), "!isNonSolid");
       assertFalse(ObjectTypes.FlowerPot.isNonSolid(), "!isNonSolid");
       assertFalse(ObjectTypes.WoodenPick.isNonSolid(), "!isNonSolid");
@@ -554,7 +553,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isAny(), "!isAny");
       assertFalse(ObjectTypes.Paper.isAny(), "!isAny");
       assertFalse(ObjectTypes.Stick.isAny(), "!isAny");
-      assertFalse(ObjectTypes.Barrel.isAny(), "!isAny");
       assertFalse(ObjectTypes.Lodestone.isAny(), "!isAny");
       assertFalse(ObjectTypes.FlowerPot.isAny(), "!isAny");
       assertFalse(ObjectTypes.WoodenPick.isAny(), "!isAny");
@@ -840,7 +838,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Brick.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.Paper.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.Stick.isBlock(), "!isBlock");
-      assertFalse(ObjectTypes.Barrel.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.Lodestone.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.FlowerPot.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.WoodenPick.isBlock(), "!isBlock");
@@ -1130,7 +1127,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isTerracotta(), "!isTerracotta");
       assertFalse(ObjectTypes.Paper.isTerracotta(), "!isTerracotta");
       assertFalse(ObjectTypes.Stick.isTerracotta(), "!isTerracotta");
-      assertFalse(ObjectTypes.Barrel.isTerracotta(), "!isTerracotta");
       assertFalse(ObjectTypes.Lodestone.isTerracotta(), "!isTerracotta");
       assertFalse(ObjectTypes.FlowerPot.isTerracotta(), "!isTerracotta");
       assertFalse(ObjectTypes.WoodenPick.isTerracotta(), "!isTerracotta");
@@ -1420,7 +1416,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isOre(), "!isOre");
       assertFalse(ObjectTypes.Paper.isOre(), "!isOre");
       assertFalse(ObjectTypes.Stick.isOre(), "!isOre");
-      assertFalse(ObjectTypes.Barrel.isOre(), "!isOre");
       assertFalse(ObjectTypes.Lodestone.isOre(), "!isOre");
       assertFalse(ObjectTypes.FlowerPot.isOre(), "!isOre");
       assertFalse(ObjectTypes.WoodenPick.isOre(), "!isOre");
@@ -1710,7 +1705,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isLog(), "!isLog");
       assertFalse(ObjectTypes.Paper.isLog(), "!isLog");
       assertFalse(ObjectTypes.Stick.isLog(), "!isLog");
-      assertFalse(ObjectTypes.Barrel.isLog(), "!isLog");
       assertFalse(ObjectTypes.Lodestone.isLog(), "!isLog");
       assertFalse(ObjectTypes.FlowerPot.isLog(), "!isLog");
       assertFalse(ObjectTypes.WoodenPick.isLog(), "!isLog");
@@ -2000,7 +1994,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.Paper.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.Stick.isLeaf(), "!isLeaf");
-      assertFalse(ObjectTypes.Barrel.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.Lodestone.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.FlowerPot.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.WoodenPick.isLeaf(), "!isLeaf");
@@ -2290,7 +2283,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isPlank(), "!isPlank");
       assertFalse(ObjectTypes.Paper.isPlank(), "!isPlank");
       assertFalse(ObjectTypes.Stick.isPlank(), "!isPlank");
-      assertFalse(ObjectTypes.Barrel.isPlank(), "!isPlank");
       assertFalse(ObjectTypes.Lodestone.isPlank(), "!isPlank");
       assertFalse(ObjectTypes.FlowerPot.isPlank(), "!isPlank");
       assertFalse(ObjectTypes.WoodenPick.isPlank(), "!isPlank");
@@ -2580,7 +2572,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.Paper.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.Stick.isSeed(), "!isSeed");
-      assertFalse(ObjectTypes.Barrel.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.Lodestone.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.FlowerPot.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.WoodenPick.isSeed(), "!isSeed");
@@ -2870,7 +2861,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isSapling(), "!isSapling");
       assertFalse(ObjectTypes.Paper.isSapling(), "!isSapling");
       assertFalse(ObjectTypes.Stick.isSapling(), "!isSapling");
-      assertFalse(ObjectTypes.Barrel.isSapling(), "!isSapling");
       assertFalse(ObjectTypes.Lodestone.isSapling(), "!isSapling");
       assertFalse(ObjectTypes.FlowerPot.isSapling(), "!isSapling");
       assertFalse(ObjectTypes.WoodenPick.isSapling(), "!isSapling");
@@ -3161,7 +3151,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.Paper.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.Stick.isSmartEntity(), "!isSmartEntity");
-      assertFalse(ObjectTypes.Barrel.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.Lodestone.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.FlowerPot.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.WoodenPick.isSmartEntity(), "!isSmartEntity");
@@ -3450,7 +3439,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isStation(), "!isStation");
       assertFalse(ObjectTypes.Paper.isStation(), "!isStation");
       assertFalse(ObjectTypes.Stick.isStation(), "!isStation");
-      assertFalse(ObjectTypes.Barrel.isStation(), "!isStation");
       assertFalse(ObjectTypes.Lodestone.isStation(), "!isStation");
       assertFalse(ObjectTypes.FlowerPot.isStation(), "!isStation");
       assertFalse(ObjectTypes.WoodenPick.isStation(), "!isStation");
@@ -3746,7 +3734,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isPick(), "!isPick");
       assertFalse(ObjectTypes.Paper.isPick(), "!isPick");
       assertFalse(ObjectTypes.Stick.isPick(), "!isPick");
-      assertFalse(ObjectTypes.Barrel.isPick(), "!isPick");
       assertFalse(ObjectTypes.Lodestone.isPick(), "!isPick");
       assertFalse(ObjectTypes.FlowerPot.isPick(), "!isPick");
       assertFalse(ObjectTypes.WoodenAxe.isPick(), "!isPick");
@@ -4036,7 +4023,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isAxe(), "!isAxe");
       assertFalse(ObjectTypes.Paper.isAxe(), "!isAxe");
       assertFalse(ObjectTypes.Stick.isAxe(), "!isAxe");
-      assertFalse(ObjectTypes.Barrel.isAxe(), "!isAxe");
       assertFalse(ObjectTypes.Lodestone.isAxe(), "!isAxe");
       assertFalse(ObjectTypes.FlowerPot.isAxe(), "!isAxe");
       assertFalse(ObjectTypes.WoodenPick.isAxe(), "!isAxe");
@@ -4321,7 +4307,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isHoe(), "!isHoe");
       assertFalse(ObjectTypes.Paper.isHoe(), "!isHoe");
       assertFalse(ObjectTypes.Stick.isHoe(), "!isHoe");
-      assertFalse(ObjectTypes.Barrel.isHoe(), "!isHoe");
       assertFalse(ObjectTypes.Lodestone.isHoe(), "!isHoe");
       assertFalse(ObjectTypes.FlowerPot.isHoe(), "!isHoe");
       assertFalse(ObjectTypes.WoodenPick.isHoe(), "!isHoe");
@@ -4613,7 +4598,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isWhacker(), "!isWhacker");
       assertFalse(ObjectTypes.Paper.isWhacker(), "!isWhacker");
       assertFalse(ObjectTypes.Stick.isWhacker(), "!isWhacker");
-      assertFalse(ObjectTypes.Barrel.isWhacker(), "!isWhacker");
       assertFalse(ObjectTypes.Lodestone.isWhacker(), "!isWhacker");
       assertFalse(ObjectTypes.FlowerPot.isWhacker(), "!isWhacker");
       assertFalse(ObjectTypes.WoodenPick.isWhacker(), "!isWhacker");
@@ -4904,7 +4888,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isOreBar(), "!isOreBar");
       assertFalse(ObjectTypes.Paper.isOreBar(), "!isOreBar");
       assertFalse(ObjectTypes.Stick.isOreBar(), "!isOreBar");
-      assertFalse(ObjectTypes.Barrel.isOreBar(), "!isOreBar");
       assertFalse(ObjectTypes.Lodestone.isOreBar(), "!isOreBar");
       assertFalse(ObjectTypes.FlowerPot.isOreBar(), "!isOreBar");
       assertFalse(ObjectTypes.WoodenPick.isOreBar(), "!isOreBar");
@@ -5193,7 +5176,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isFood(), "!isFood");
       assertFalse(ObjectTypes.Paper.isFood(), "!isFood");
       assertFalse(ObjectTypes.Stick.isFood(), "!isFood");
-      assertFalse(ObjectTypes.Barrel.isFood(), "!isFood");
       assertFalse(ObjectTypes.Lodestone.isFood(), "!isFood");
       assertFalse(ObjectTypes.FlowerPot.isFood(), "!isFood");
       assertFalse(ObjectTypes.WoodenPick.isFood(), "!isFood");
@@ -5481,7 +5463,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isFuel(), "!isFuel");
       assertFalse(ObjectTypes.Paper.isFuel(), "!isFuel");
       assertFalse(ObjectTypes.Stick.isFuel(), "!isFuel");
-      assertFalse(ObjectTypes.Barrel.isFuel(), "!isFuel");
       assertFalse(ObjectTypes.Lodestone.isFuel(), "!isFuel");
       assertFalse(ObjectTypes.FlowerPot.isFuel(), "!isFuel");
       assertFalse(ObjectTypes.WoodenPick.isFuel(), "!isFuel");
@@ -5771,7 +5752,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isPlayer(), "!isPlayer");
       assertFalse(ObjectTypes.Paper.isPlayer(), "!isPlayer");
       assertFalse(ObjectTypes.Stick.isPlayer(), "!isPlayer");
-      assertFalse(ObjectTypes.Barrel.isPlayer(), "!isPlayer");
       assertFalse(ObjectTypes.Lodestone.isPlayer(), "!isPlayer");
       assertFalse(ObjectTypes.FlowerPot.isPlayer(), "!isPlayer");
       assertFalse(ObjectTypes.WoodenPick.isPlayer(), "!isPlayer");
@@ -6060,7 +6040,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.hasExtraDrops(), "!hasExtraDrops");
       assertFalse(ObjectTypes.Paper.hasExtraDrops(), "!hasExtraDrops");
       assertFalse(ObjectTypes.Stick.hasExtraDrops(), "!hasExtraDrops");
-      assertFalse(ObjectTypes.Barrel.hasExtraDrops(), "!hasExtraDrops");
       assertFalse(ObjectTypes.Lodestone.hasExtraDrops(), "!hasExtraDrops");
       assertFalse(ObjectTypes.FlowerPot.hasExtraDrops(), "!hasExtraDrops");
       assertFalse(ObjectTypes.WoodenPick.hasExtraDrops(), "!hasExtraDrops");
@@ -6350,7 +6329,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.hasAxeMultiplier(), "!hasAxeMultiplier");
       assertFalse(ObjectTypes.Paper.hasAxeMultiplier(), "!hasAxeMultiplier");
       assertFalse(ObjectTypes.Stick.hasAxeMultiplier(), "!hasAxeMultiplier");
-      assertFalse(ObjectTypes.Barrel.hasAxeMultiplier(), "!hasAxeMultiplier");
       assertFalse(ObjectTypes.Lodestone.hasAxeMultiplier(), "!hasAxeMultiplier");
       assertFalse(ObjectTypes.FlowerPot.hasAxeMultiplier(), "!hasAxeMultiplier");
       assertFalse(ObjectTypes.WoodenPick.hasAxeMultiplier(), "!hasAxeMultiplier");
@@ -6640,7 +6618,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Brick.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.Paper.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.Stick.hasPickMultiplier(), "!hasPickMultiplier");
-      assertFalse(ObjectTypes.Barrel.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.Lodestone.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.FlowerPot.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.WoodenPick.hasPickMultiplier(), "!hasPickMultiplier");
@@ -6934,7 +6911,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isWoodenTool(), "!isWoodenTool");
       assertFalse(ObjectTypes.Paper.isWoodenTool(), "!isWoodenTool");
       assertFalse(ObjectTypes.Stick.isWoodenTool(), "!isWoodenTool");
-      assertFalse(ObjectTypes.Barrel.isWoodenTool(), "!isWoodenTool");
       assertFalse(ObjectTypes.Lodestone.isWoodenTool(), "!isWoodenTool");
       assertFalse(ObjectTypes.FlowerPot.isWoodenTool(), "!isWoodenTool");
       assertFalse(ObjectTypes.CopperPick.isWoodenTool(), "!isWoodenTool");
@@ -7220,7 +7196,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.Paper.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.Stick.isPassThrough(), "!isPassThrough");
-      assertFalse(ObjectTypes.Barrel.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.Lodestone.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.FlowerPot.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.WoodenPick.isPassThrough(), "!isPassThrough");
@@ -7510,7 +7485,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.Paper.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.Stick.isGrowable(), "!isGrowable");
-      assertFalse(ObjectTypes.Barrel.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.Lodestone.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.FlowerPot.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.WoodenPick.isGrowable(), "!isGrowable");
@@ -7800,7 +7774,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isLandbound(), "!isLandbound");
       assertFalse(ObjectTypes.Paper.isLandbound(), "!isLandbound");
       assertFalse(ObjectTypes.Stick.isLandbound(), "!isLandbound");
-      assertFalse(ObjectTypes.Barrel.isLandbound(), "!isLandbound");
       assertFalse(ObjectTypes.Lodestone.isLandbound(), "!isLandbound");
       assertFalse(ObjectTypes.FlowerPot.isLandbound(), "!isLandbound");
       assertFalse(ObjectTypes.WoodenPick.isLandbound(), "!isLandbound");
@@ -8108,7 +8081,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isUniqueObject(), "!isUniqueObject");
       assertFalse(ObjectTypes.Paper.isUniqueObject(), "!isUniqueObject");
       assertFalse(ObjectTypes.Stick.isUniqueObject(), "!isUniqueObject");
-      assertFalse(ObjectTypes.Barrel.isUniqueObject(), "!isUniqueObject");
       assertFalse(ObjectTypes.Lodestone.isUniqueObject(), "!isUniqueObject");
       assertFalse(ObjectTypes.FlowerPot.isUniqueObject(), "!isUniqueObject");
       assertFalse(ObjectTypes.GoldBar.isUniqueObject(), "!isUniqueObject");
@@ -8396,7 +8368,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isTool(), "!isTool");
       assertFalse(ObjectTypes.Paper.isTool(), "!isTool");
       assertFalse(ObjectTypes.Stick.isTool(), "!isTool");
-      assertFalse(ObjectTypes.Barrel.isTool(), "!isTool");
       assertFalse(ObjectTypes.Lodestone.isTool(), "!isTool");
       assertFalse(ObjectTypes.FlowerPot.isTool(), "!isTool");
       assertFalse(ObjectTypes.GoldBar.isTool(), "!isTool");
@@ -8670,7 +8641,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isTillable(), "!isTillable");
       assertFalse(ObjectTypes.Paper.isTillable(), "!isTillable");
       assertFalse(ObjectTypes.Stick.isTillable(), "!isTillable");
-      assertFalse(ObjectTypes.Barrel.isTillable(), "!isTillable");
       assertFalse(ObjectTypes.Lodestone.isTillable(), "!isTillable");
       assertFalse(ObjectTypes.FlowerPot.isTillable(), "!isTillable");
       assertFalse(ObjectTypes.WoodenPick.isTillable(), "!isTillable");
@@ -8960,7 +8930,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isMachine(), "!isMachine");
       assertFalse(ObjectTypes.Paper.isMachine(), "!isMachine");
       assertFalse(ObjectTypes.Stick.isMachine(), "!isMachine");
-      assertFalse(ObjectTypes.Barrel.isMachine(), "!isMachine");
       assertFalse(ObjectTypes.Lodestone.isMachine(), "!isMachine");
       assertFalse(ObjectTypes.FlowerPot.isMachine(), "!isMachine");
       assertFalse(ObjectTypes.WoodenPick.isMachine(), "!isMachine");
@@ -9250,7 +9219,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.spawnsWithFluid(), "!spawnsWithFluid");
       assertFalse(ObjectTypes.Paper.spawnsWithFluid(), "!spawnsWithFluid");
       assertFalse(ObjectTypes.Stick.spawnsWithFluid(), "!spawnsWithFluid");
-      assertFalse(ObjectTypes.Barrel.spawnsWithFluid(), "!spawnsWithFluid");
       assertFalse(ObjectTypes.Lodestone.spawnsWithFluid(), "!spawnsWithFluid");
       assertFalse(ObjectTypes.FlowerPot.spawnsWithFluid(), "!spawnsWithFluid");
       assertFalse(ObjectTypes.WoodenPick.spawnsWithFluid(), "!spawnsWithFluid");
@@ -9540,7 +9508,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.Brick.isWaterloggable(), "!isWaterloggable");
       assertFalse(ObjectTypes.Paper.isWaterloggable(), "!isWaterloggable");
       assertFalse(ObjectTypes.Stick.isWaterloggable(), "!isWaterloggable");
-      assertFalse(ObjectTypes.Barrel.isWaterloggable(), "!isWaterloggable");
       assertFalse(ObjectTypes.Lodestone.isWaterloggable(), "!isWaterloggable");
       assertFalse(ObjectTypes.FlowerPot.isWaterloggable(), "!isWaterloggable");
       assertFalse(ObjectTypes.WoodenPick.isWaterloggable(), "!isWaterloggable");
@@ -9830,7 +9797,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MudBricks.isPreferredSpawn(), "!isPreferredSpawn");
       assertFalse(ObjectTypes.Paper.isPreferredSpawn(), "!isPreferredSpawn");
       assertFalse(ObjectTypes.Stick.isPreferredSpawn(), "!isPreferredSpawn");
-      assertFalse(ObjectTypes.Barrel.isPreferredSpawn(), "!isPreferredSpawn");
       assertFalse(ObjectTypes.Lodestone.isPreferredSpawn(), "!isPreferredSpawn");
       assertFalse(ObjectTypes.FlowerPot.isPreferredSpawn(), "!isPreferredSpawn");
       assertFalse(ObjectTypes.WoodenPick.isPreferredSpawn(), "!isPreferredSpawn");
