@@ -65,11 +65,11 @@ export type ClientRpcSchema = RpcSchema.From<
       Request: {
         method: "setBlueprint";
         params: {
-          creationId: bigint;
-          objectTypeIds: number[];
-          relativePositions: [number, number, number][];
-          baseWorldCoord: [number, number, number] | undefined;
-          displayName: string;
+          objectTypeId: number;
+          x: number;
+          y: number;
+          z: number;
+          rotation: number;
         }[];
       };
       ReturnType: void;
