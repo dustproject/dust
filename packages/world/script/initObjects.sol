@@ -191,7 +191,6 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.GreenGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.RedGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.BlackGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.GlassPane, ObjectPhysicsData({ mass: 1500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.WhiteConcretePowder, ObjectPhysicsData({ mass: 3200000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.OrangeConcretePowder, ObjectPhysicsData({ mass: 3200000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.MagentaConcretePowder, ObjectPhysicsData({ mass: 3200000000000000, energy: 0 }));

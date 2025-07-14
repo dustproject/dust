@@ -987,8 +987,8 @@ function initRecipes() {
     (outputTypes[0], outputAmounts[0]) = (ObjectTypes.Stonecutter.unwrap(), 1);
 
     Recipes.set(
-      keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
-      ObjectTypes.Null,
+      keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      ObjectTypes.Workbench,
       0,
       inputTypes,
       inputAmounts,
@@ -1044,6 +1044,26 @@ function initRecipes() {
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
     (outputTypes[0], outputAmounts[0]) = (ObjectTypes.Brick.unwrap(), 1);
+
+    Recipes.set(
+      keccak256(abi.encode(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      ObjectTypes.Furnace,
+      0,
+      inputTypes,
+      inputAmounts,
+      outputTypes,
+      outputAmounts
+    );
+  }
+  {
+    uint16[] memory inputTypes = new uint16[](2);
+    uint16[] memory inputAmounts = new uint16[](2);
+    (inputTypes[0], inputAmounts[0]) = (ObjectTypes.Basalt.unwrap(), 1);
+    (inputTypes[1], inputAmounts[1]) = (ObjectTypes.CoalOre.unwrap(), 1);
+
+    uint16[] memory outputTypes = new uint16[](1);
+    uint16[] memory outputAmounts = new uint16[](1);
+    (outputTypes[0], outputAmounts[0]) = (ObjectTypes.SmoothBasalt.unwrap(), 1);
 
     Recipes.set(
       keccak256(abi.encode(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts)),
@@ -2597,17 +2617,18 @@ function initRecipes() {
     );
   }
   {
-    uint16[] memory inputTypes = new uint16[](1);
-    uint16[] memory inputAmounts = new uint16[](1);
+    uint16[] memory inputTypes = new uint16[](2);
+    uint16[] memory inputAmounts = new uint16[](2);
     (inputTypes[0], inputAmounts[0]) = (ObjectTypes.Sandstone.unwrap(), 1);
+    (inputTypes[1], inputAmounts[1]) = (ObjectTypes.CoalOre.unwrap(), 1);
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
     (outputTypes[0], outputAmounts[0]) = (ObjectTypes.SmoothSandstone.unwrap(), 1);
 
     Recipes.set(
-      keccak256(abi.encode(ObjectTypes.Stonecutter, inputTypes, inputAmounts, outputTypes, outputAmounts)),
-      ObjectTypes.Stonecutter,
+      keccak256(abi.encode(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      ObjectTypes.Furnace,
       0,
       inputTypes,
       inputAmounts,
@@ -2616,17 +2637,18 @@ function initRecipes() {
     );
   }
   {
-    uint16[] memory inputTypes = new uint16[](1);
-    uint16[] memory inputAmounts = new uint16[](1);
+    uint16[] memory inputTypes = new uint16[](2);
+    uint16[] memory inputAmounts = new uint16[](2);
     (inputTypes[0], inputAmounts[0]) = (ObjectTypes.RedSandstone.unwrap(), 1);
+    (inputTypes[1], inputAmounts[1]) = (ObjectTypes.CoalOre.unwrap(), 1);
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
     (outputTypes[0], outputAmounts[0]) = (ObjectTypes.SmoothRedSandstone.unwrap(), 1);
 
     Recipes.set(
-      keccak256(abi.encode(ObjectTypes.Stonecutter, inputTypes, inputAmounts, outputTypes, outputAmounts)),
-      ObjectTypes.Stonecutter,
+      keccak256(abi.encode(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      ObjectTypes.Furnace,
       0,
       inputTypes,
       inputAmounts,
@@ -2635,17 +2657,18 @@ function initRecipes() {
     );
   }
   {
-    uint16[] memory inputTypes = new uint16[](1);
-    uint16[] memory inputAmounts = new uint16[](1);
+    uint16[] memory inputTypes = new uint16[](2);
+    uint16[] memory inputAmounts = new uint16[](2);
     (inputTypes[0], inputAmounts[0]) = (ObjectTypes.Stone.unwrap(), 1);
+    (inputTypes[1], inputAmounts[1]) = (ObjectTypes.CoalOre.unwrap(), 1);
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
     (outputTypes[0], outputAmounts[0]) = (ObjectTypes.SmoothStone.unwrap(), 1);
 
     Recipes.set(
-      keccak256(abi.encode(ObjectTypes.Stonecutter, inputTypes, inputAmounts, outputTypes, outputAmounts)),
-      ObjectTypes.Stonecutter,
+      keccak256(abi.encode(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      ObjectTypes.Furnace,
       0,
       inputTypes,
       inputAmounts,
@@ -3236,25 +3259,6 @@ function initRecipes() {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    (inputTypes[0], inputAmounts[0]) = (ObjectTypes.Glass.unwrap(), 3);
-
-    uint16[] memory outputTypes = new uint16[](1);
-    uint16[] memory outputAmounts = new uint16[](1);
-    (outputTypes[0], outputAmounts[0]) = (ObjectTypes.GlassPane.unwrap(), 8);
-
-    Recipes.set(
-      keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
-      ObjectTypes.Workbench,
-      0,
-      inputTypes,
-      inputAmounts,
-      outputTypes,
-      outputAmounts
-    );
-  }
-  {
-    uint16[] memory inputTypes = new uint16[](1);
-    uint16[] memory inputAmounts = new uint16[](1);
     (inputTypes[0], inputAmounts[0]) = (ObjectTypes.Brick.unwrap(), 3);
 
     uint16[] memory outputTypes = new uint16[](1);
@@ -3282,8 +3286,8 @@ function initRecipes() {
     (outputTypes[0], outputAmounts[0]) = (ObjectTypes.Lodestone.unwrap(), 1);
 
     Recipes.set(
-      keccak256(abi.encode(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts)),
-      ObjectTypes.Null,
+      keccak256(abi.encode(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts)),
+      ObjectTypes.Workbench,
       0,
       inputTypes,
       inputAmounts,

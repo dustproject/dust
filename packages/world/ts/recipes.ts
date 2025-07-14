@@ -1336,11 +1336,11 @@ export const recipes: Recipe[] = [
     outputs: [["BlackGlass", 8]],
   },
   // Functional objects recipes
-  {
-    station: "Workbench",
-    inputs: [["Glass", 3]],
-    outputs: [["GlassPane", 8]],
-  },
+  // {
+  //   station: "Workbench",
+  //   inputs: [["Glass", 3]],
+  //   outputs: [["GlassPane", 8]],
+  // },
   // {
   //   inputs: [["OakPlanks", 2]],
   //   outputs: [["OakDoor", 1]],

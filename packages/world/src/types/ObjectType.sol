@@ -233,46 +233,45 @@ library ObjectTypes {
   ObjectType constant GreenGlass = ObjectType.wrap(332);
   ObjectType constant RedGlass = ObjectType.wrap(333);
   ObjectType constant BlackGlass = ObjectType.wrap(334);
-  ObjectType constant GlassPane = ObjectType.wrap(335);
-  ObjectType constant WhiteConcretePowder = ObjectType.wrap(336);
-  ObjectType constant OrangeConcretePowder = ObjectType.wrap(337);
-  ObjectType constant MagentaConcretePowder = ObjectType.wrap(338);
-  ObjectType constant LightBlueConcretePowder = ObjectType.wrap(339);
-  ObjectType constant YellowConcretePowder = ObjectType.wrap(340);
-  ObjectType constant LimeConcretePowder = ObjectType.wrap(341);
-  ObjectType constant PinkConcretePowder = ObjectType.wrap(342);
-  ObjectType constant GrayConcretePowder = ObjectType.wrap(343);
-  ObjectType constant LightGrayConcretePowder = ObjectType.wrap(344);
-  ObjectType constant CyanConcretePowder = ObjectType.wrap(345);
-  ObjectType constant PurpleConcretePowder = ObjectType.wrap(346);
-  ObjectType constant BlueConcretePowder = ObjectType.wrap(347);
-  ObjectType constant BrownConcretePowder = ObjectType.wrap(348);
-  ObjectType constant GreenConcretePowder = ObjectType.wrap(349);
-  ObjectType constant RedConcretePowder = ObjectType.wrap(350);
-  ObjectType constant BlackConcretePowder = ObjectType.wrap(351);
-  ObjectType constant WhiteConcrete = ObjectType.wrap(352);
-  ObjectType constant OrangeConcrete = ObjectType.wrap(353);
-  ObjectType constant MagentaConcrete = ObjectType.wrap(354);
-  ObjectType constant LightBlueConcrete = ObjectType.wrap(355);
-  ObjectType constant YellowConcrete = ObjectType.wrap(356);
-  ObjectType constant LimeConcrete = ObjectType.wrap(357);
-  ObjectType constant PinkConcrete = ObjectType.wrap(358);
-  ObjectType constant GrayConcrete = ObjectType.wrap(359);
-  ObjectType constant LightGrayConcrete = ObjectType.wrap(360);
-  ObjectType constant CyanConcrete = ObjectType.wrap(361);
-  ObjectType constant PurpleConcrete = ObjectType.wrap(362);
-  ObjectType constant BlueConcrete = ObjectType.wrap(363);
-  ObjectType constant BrownConcrete = ObjectType.wrap(364);
-  ObjectType constant GreenConcrete = ObjectType.wrap(365);
-  ObjectType constant RedConcrete = ObjectType.wrap(366);
-  ObjectType constant BlackConcrete = ObjectType.wrap(367);
-  ObjectType constant Brick = ObjectType.wrap(368);
-  ObjectType constant BrickBlock = ObjectType.wrap(369);
-  ObjectType constant MudBricks = ObjectType.wrap(370);
-  ObjectType constant Paper = ObjectType.wrap(371);
-  ObjectType constant Stick = ObjectType.wrap(372);
-  ObjectType constant Lodestone = ObjectType.wrap(373);
-  ObjectType constant FlowerPot = ObjectType.wrap(374);
+  ObjectType constant WhiteConcretePowder = ObjectType.wrap(352);
+  ObjectType constant OrangeConcretePowder = ObjectType.wrap(353);
+  ObjectType constant MagentaConcretePowder = ObjectType.wrap(354);
+  ObjectType constant LightBlueConcretePowder = ObjectType.wrap(355);
+  ObjectType constant YellowConcretePowder = ObjectType.wrap(356);
+  ObjectType constant LimeConcretePowder = ObjectType.wrap(357);
+  ObjectType constant PinkConcretePowder = ObjectType.wrap(358);
+  ObjectType constant GrayConcretePowder = ObjectType.wrap(359);
+  ObjectType constant LightGrayConcretePowder = ObjectType.wrap(360);
+  ObjectType constant CyanConcretePowder = ObjectType.wrap(361);
+  ObjectType constant PurpleConcretePowder = ObjectType.wrap(362);
+  ObjectType constant BlueConcretePowder = ObjectType.wrap(363);
+  ObjectType constant BrownConcretePowder = ObjectType.wrap(364);
+  ObjectType constant GreenConcretePowder = ObjectType.wrap(365);
+  ObjectType constant RedConcretePowder = ObjectType.wrap(366);
+  ObjectType constant BlackConcretePowder = ObjectType.wrap(367);
+  ObjectType constant WhiteConcrete = ObjectType.wrap(368);
+  ObjectType constant OrangeConcrete = ObjectType.wrap(369);
+  ObjectType constant MagentaConcrete = ObjectType.wrap(370);
+  ObjectType constant LightBlueConcrete = ObjectType.wrap(371);
+  ObjectType constant YellowConcrete = ObjectType.wrap(372);
+  ObjectType constant LimeConcrete = ObjectType.wrap(373);
+  ObjectType constant PinkConcrete = ObjectType.wrap(374);
+  ObjectType constant GrayConcrete = ObjectType.wrap(375);
+  ObjectType constant LightGrayConcrete = ObjectType.wrap(376);
+  ObjectType constant CyanConcrete = ObjectType.wrap(377);
+  ObjectType constant PurpleConcrete = ObjectType.wrap(378);
+  ObjectType constant BlueConcrete = ObjectType.wrap(379);
+  ObjectType constant BrownConcrete = ObjectType.wrap(380);
+  ObjectType constant GreenConcrete = ObjectType.wrap(381);
+  ObjectType constant RedConcrete = ObjectType.wrap(382);
+  ObjectType constant BlackConcrete = ObjectType.wrap(383);
+  ObjectType constant Brick = ObjectType.wrap(384);
+  ObjectType constant BrickBlock = ObjectType.wrap(385);
+  ObjectType constant MudBricks = ObjectType.wrap(386);
+  ObjectType constant Paper = ObjectType.wrap(387);
+  ObjectType constant Stick = ObjectType.wrap(388);
+  ObjectType constant Lodestone = ObjectType.wrap(389);
+  ObjectType constant FlowerPot = ObjectType.wrap(390);
   ObjectType constant WoodenPick = ObjectType.wrap(32768);
   ObjectType constant CopperPick = ObjectType.wrap(32769);
   ObjectType constant IronPick = ObjectType.wrap(32770);
@@ -355,7 +354,7 @@ library ObjectTypeLib {
       // IDs in [256..511]
       {
         let off := sub(self, 256)
-        let bit := and(shr(off, 0x6ffff00007fffc00000000fffffff), 1)
+        let bit := and(shr(off, 0x6ffff000000007fffc00000000fffffff), 1)
         ok := or(ok, bit)
       }
     }
@@ -598,7 +597,7 @@ library ObjectTypeLib {
       // IDs in [256..511]
       {
         let off := sub(self, 256)
-        let bit := and(shr(off, 0x6000000000000000000000fffffff), 1)
+        let bit := and(shr(off, 0x60000000000000000000000000fffffff), 1)
         ok := or(ok, bit)
       }
     }
@@ -724,7 +723,7 @@ library ObjectTypeLib {
       // IDs in [256..511]
       {
         let off := sub(self, 256)
-        let bit := and(shr(off, 0x6000000007fffc00000000fffffff), 1)
+        let bit := and(shr(off, 0x60000000000007fffc00000000fffffff), 1)
         ok := or(ok, bit)
       }
     }

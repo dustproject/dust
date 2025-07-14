@@ -222,7 +222,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isNonSolid(), "!isNonSolid");
       assertFalse(ObjectTypes.RedGlass.isNonSolid(), "!isNonSolid");
       assertFalse(ObjectTypes.BlackGlass.isNonSolid(), "!isNonSolid");
-      assertFalse(ObjectTypes.GlassPane.isNonSolid(), "!isNonSolid");
       assertFalse(ObjectTypes.WhiteConcretePowder.isNonSolid(), "!isNonSolid");
       assertFalse(ObjectTypes.OrangeConcretePowder.isNonSolid(), "!isNonSolid");
       assertFalse(ObjectTypes.MagentaConcretePowder.isNonSolid(), "!isNonSolid");
@@ -515,7 +514,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isAny(), "!isAny");
       assertFalse(ObjectTypes.RedGlass.isAny(), "!isAny");
       assertFalse(ObjectTypes.BlackGlass.isAny(), "!isAny");
-      assertFalse(ObjectTypes.GlassPane.isAny(), "!isAny");
       assertFalse(ObjectTypes.WhiteConcretePowder.isAny(), "!isAny");
       assertFalse(ObjectTypes.OrangeConcretePowder.isAny(), "!isAny");
       assertFalse(ObjectTypes.MagentaConcretePowder.isAny(), "!isAny");
@@ -818,7 +816,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MagentaDye.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.LightBlueDye.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.LightGrayDye.isBlock(), "!isBlock");
-      assertFalse(ObjectTypes.GlassPane.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.WhiteConcretePowder.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.OrangeConcretePowder.isBlock(), "!isBlock");
       assertFalse(ObjectTypes.MagentaConcretePowder.isBlock(), "!isBlock");
@@ -1089,7 +1086,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isTerracotta(), "!isTerracotta");
       assertFalse(ObjectTypes.RedGlass.isTerracotta(), "!isTerracotta");
       assertFalse(ObjectTypes.BlackGlass.isTerracotta(), "!isTerracotta");
-      assertFalse(ObjectTypes.GlassPane.isTerracotta(), "!isTerracotta");
       assertFalse(ObjectTypes.WhiteConcretePowder.isTerracotta(), "!isTerracotta");
       assertFalse(ObjectTypes.OrangeConcretePowder.isTerracotta(), "!isTerracotta");
       assertFalse(ObjectTypes.MagentaConcretePowder.isTerracotta(), "!isTerracotta");
@@ -1378,7 +1374,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isOre(), "!isOre");
       assertFalse(ObjectTypes.RedGlass.isOre(), "!isOre");
       assertFalse(ObjectTypes.BlackGlass.isOre(), "!isOre");
-      assertFalse(ObjectTypes.GlassPane.isOre(), "!isOre");
       assertFalse(ObjectTypes.WhiteConcretePowder.isOre(), "!isOre");
       assertFalse(ObjectTypes.OrangeConcretePowder.isOre(), "!isOre");
       assertFalse(ObjectTypes.MagentaConcretePowder.isOre(), "!isOre");
@@ -1667,7 +1662,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isLog(), "!isLog");
       assertFalse(ObjectTypes.RedGlass.isLog(), "!isLog");
       assertFalse(ObjectTypes.BlackGlass.isLog(), "!isLog");
-      assertFalse(ObjectTypes.GlassPane.isLog(), "!isLog");
       assertFalse(ObjectTypes.WhiteConcretePowder.isLog(), "!isLog");
       assertFalse(ObjectTypes.OrangeConcretePowder.isLog(), "!isLog");
       assertFalse(ObjectTypes.MagentaConcretePowder.isLog(), "!isLog");
@@ -1956,7 +1950,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.RedGlass.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.BlackGlass.isLeaf(), "!isLeaf");
-      assertFalse(ObjectTypes.GlassPane.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.WhiteConcretePowder.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.OrangeConcretePowder.isLeaf(), "!isLeaf");
       assertFalse(ObjectTypes.MagentaConcretePowder.isLeaf(), "!isLeaf");
@@ -2245,7 +2238,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isPlank(), "!isPlank");
       assertFalse(ObjectTypes.RedGlass.isPlank(), "!isPlank");
       assertFalse(ObjectTypes.BlackGlass.isPlank(), "!isPlank");
-      assertFalse(ObjectTypes.GlassPane.isPlank(), "!isPlank");
       assertFalse(ObjectTypes.WhiteConcretePowder.isPlank(), "!isPlank");
       assertFalse(ObjectTypes.OrangeConcretePowder.isPlank(), "!isPlank");
       assertFalse(ObjectTypes.MagentaConcretePowder.isPlank(), "!isPlank");
@@ -2534,7 +2526,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.RedGlass.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.BlackGlass.isSeed(), "!isSeed");
-      assertFalse(ObjectTypes.GlassPane.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.WhiteConcretePowder.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.OrangeConcretePowder.isSeed(), "!isSeed");
       assertFalse(ObjectTypes.MagentaConcretePowder.isSeed(), "!isSeed");
@@ -2823,7 +2814,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isSapling(), "!isSapling");
       assertFalse(ObjectTypes.RedGlass.isSapling(), "!isSapling");
       assertFalse(ObjectTypes.BlackGlass.isSapling(), "!isSapling");
-      assertFalse(ObjectTypes.GlassPane.isSapling(), "!isSapling");
       assertFalse(ObjectTypes.WhiteConcretePowder.isSapling(), "!isSapling");
       assertFalse(ObjectTypes.OrangeConcretePowder.isSapling(), "!isSapling");
       assertFalse(ObjectTypes.MagentaConcretePowder.isSapling(), "!isSapling");
@@ -3113,7 +3103,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.RedGlass.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.BlackGlass.isSmartEntity(), "!isSmartEntity");
-      assertFalse(ObjectTypes.GlassPane.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.WhiteConcretePowder.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.OrangeConcretePowder.isSmartEntity(), "!isSmartEntity");
       assertFalse(ObjectTypes.MagentaConcretePowder.isSmartEntity(), "!isSmartEntity");
@@ -3401,7 +3390,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isStation(), "!isStation");
       assertFalse(ObjectTypes.RedGlass.isStation(), "!isStation");
       assertFalse(ObjectTypes.BlackGlass.isStation(), "!isStation");
-      assertFalse(ObjectTypes.GlassPane.isStation(), "!isStation");
       assertFalse(ObjectTypes.WhiteConcretePowder.isStation(), "!isStation");
       assertFalse(ObjectTypes.OrangeConcretePowder.isStation(), "!isStation");
       assertFalse(ObjectTypes.MagentaConcretePowder.isStation(), "!isStation");
@@ -3696,7 +3684,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isPick(), "!isPick");
       assertFalse(ObjectTypes.RedGlass.isPick(), "!isPick");
       assertFalse(ObjectTypes.BlackGlass.isPick(), "!isPick");
-      assertFalse(ObjectTypes.GlassPane.isPick(), "!isPick");
       assertFalse(ObjectTypes.WhiteConcretePowder.isPick(), "!isPick");
       assertFalse(ObjectTypes.OrangeConcretePowder.isPick(), "!isPick");
       assertFalse(ObjectTypes.MagentaConcretePowder.isPick(), "!isPick");
@@ -3985,7 +3972,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isAxe(), "!isAxe");
       assertFalse(ObjectTypes.RedGlass.isAxe(), "!isAxe");
       assertFalse(ObjectTypes.BlackGlass.isAxe(), "!isAxe");
-      assertFalse(ObjectTypes.GlassPane.isAxe(), "!isAxe");
       assertFalse(ObjectTypes.WhiteConcretePowder.isAxe(), "!isAxe");
       assertFalse(ObjectTypes.OrangeConcretePowder.isAxe(), "!isAxe");
       assertFalse(ObjectTypes.MagentaConcretePowder.isAxe(), "!isAxe");
@@ -4269,7 +4255,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isHoe(), "!isHoe");
       assertFalse(ObjectTypes.RedGlass.isHoe(), "!isHoe");
       assertFalse(ObjectTypes.BlackGlass.isHoe(), "!isHoe");
-      assertFalse(ObjectTypes.GlassPane.isHoe(), "!isHoe");
       assertFalse(ObjectTypes.WhiteConcretePowder.isHoe(), "!isHoe");
       assertFalse(ObjectTypes.OrangeConcretePowder.isHoe(), "!isHoe");
       assertFalse(ObjectTypes.MagentaConcretePowder.isHoe(), "!isHoe");
@@ -4560,7 +4545,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isWhacker(), "!isWhacker");
       assertFalse(ObjectTypes.RedGlass.isWhacker(), "!isWhacker");
       assertFalse(ObjectTypes.BlackGlass.isWhacker(), "!isWhacker");
-      assertFalse(ObjectTypes.GlassPane.isWhacker(), "!isWhacker");
       assertFalse(ObjectTypes.WhiteConcretePowder.isWhacker(), "!isWhacker");
       assertFalse(ObjectTypes.OrangeConcretePowder.isWhacker(), "!isWhacker");
       assertFalse(ObjectTypes.MagentaConcretePowder.isWhacker(), "!isWhacker");
@@ -4850,7 +4834,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isOreBar(), "!isOreBar");
       assertFalse(ObjectTypes.RedGlass.isOreBar(), "!isOreBar");
       assertFalse(ObjectTypes.BlackGlass.isOreBar(), "!isOreBar");
-      assertFalse(ObjectTypes.GlassPane.isOreBar(), "!isOreBar");
       assertFalse(ObjectTypes.WhiteConcretePowder.isOreBar(), "!isOreBar");
       assertFalse(ObjectTypes.OrangeConcretePowder.isOreBar(), "!isOreBar");
       assertFalse(ObjectTypes.MagentaConcretePowder.isOreBar(), "!isOreBar");
@@ -5138,7 +5121,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isFood(), "!isFood");
       assertFalse(ObjectTypes.RedGlass.isFood(), "!isFood");
       assertFalse(ObjectTypes.BlackGlass.isFood(), "!isFood");
-      assertFalse(ObjectTypes.GlassPane.isFood(), "!isFood");
       assertFalse(ObjectTypes.WhiteConcretePowder.isFood(), "!isFood");
       assertFalse(ObjectTypes.OrangeConcretePowder.isFood(), "!isFood");
       assertFalse(ObjectTypes.MagentaConcretePowder.isFood(), "!isFood");
@@ -5425,7 +5407,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isFuel(), "!isFuel");
       assertFalse(ObjectTypes.RedGlass.isFuel(), "!isFuel");
       assertFalse(ObjectTypes.BlackGlass.isFuel(), "!isFuel");
-      assertFalse(ObjectTypes.GlassPane.isFuel(), "!isFuel");
       assertFalse(ObjectTypes.WhiteConcretePowder.isFuel(), "!isFuel");
       assertFalse(ObjectTypes.OrangeConcretePowder.isFuel(), "!isFuel");
       assertFalse(ObjectTypes.MagentaConcretePowder.isFuel(), "!isFuel");
@@ -5714,7 +5695,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isPlayer(), "!isPlayer");
       assertFalse(ObjectTypes.RedGlass.isPlayer(), "!isPlayer");
       assertFalse(ObjectTypes.BlackGlass.isPlayer(), "!isPlayer");
-      assertFalse(ObjectTypes.GlassPane.isPlayer(), "!isPlayer");
       assertFalse(ObjectTypes.WhiteConcretePowder.isPlayer(), "!isPlayer");
       assertFalse(ObjectTypes.OrangeConcretePowder.isPlayer(), "!isPlayer");
       assertFalse(ObjectTypes.MagentaConcretePowder.isPlayer(), "!isPlayer");
@@ -6002,7 +5982,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.hasExtraDrops(), "!hasExtraDrops");
       assertFalse(ObjectTypes.RedGlass.hasExtraDrops(), "!hasExtraDrops");
       assertFalse(ObjectTypes.BlackGlass.hasExtraDrops(), "!hasExtraDrops");
-      assertFalse(ObjectTypes.GlassPane.hasExtraDrops(), "!hasExtraDrops");
       assertFalse(ObjectTypes.WhiteConcretePowder.hasExtraDrops(), "!hasExtraDrops");
       assertFalse(ObjectTypes.OrangeConcretePowder.hasExtraDrops(), "!hasExtraDrops");
       assertFalse(ObjectTypes.MagentaConcretePowder.hasExtraDrops(), "!hasExtraDrops");
@@ -6291,7 +6270,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.hasAxeMultiplier(), "!hasAxeMultiplier");
       assertFalse(ObjectTypes.RedGlass.hasAxeMultiplier(), "!hasAxeMultiplier");
       assertFalse(ObjectTypes.BlackGlass.hasAxeMultiplier(), "!hasAxeMultiplier");
-      assertFalse(ObjectTypes.GlassPane.hasAxeMultiplier(), "!hasAxeMultiplier");
       assertFalse(ObjectTypes.WhiteConcretePowder.hasAxeMultiplier(), "!hasAxeMultiplier");
       assertFalse(ObjectTypes.OrangeConcretePowder.hasAxeMultiplier(), "!hasAxeMultiplier");
       assertFalse(ObjectTypes.MagentaConcretePowder.hasAxeMultiplier(), "!hasAxeMultiplier");
@@ -6582,7 +6560,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.RedGlass.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.BlackGlass.hasPickMultiplier(), "!hasPickMultiplier");
-      assertFalse(ObjectTypes.GlassPane.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.WhiteConcretePowder.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.OrangeConcretePowder.hasPickMultiplier(), "!hasPickMultiplier");
       assertFalse(ObjectTypes.MagentaConcretePowder.hasPickMultiplier(), "!hasPickMultiplier");
@@ -6873,7 +6850,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isWoodenTool(), "!isWoodenTool");
       assertFalse(ObjectTypes.RedGlass.isWoodenTool(), "!isWoodenTool");
       assertFalse(ObjectTypes.BlackGlass.isWoodenTool(), "!isWoodenTool");
-      assertFalse(ObjectTypes.GlassPane.isWoodenTool(), "!isWoodenTool");
       assertFalse(ObjectTypes.WhiteConcretePowder.isWoodenTool(), "!isWoodenTool");
       assertFalse(ObjectTypes.OrangeConcretePowder.isWoodenTool(), "!isWoodenTool");
       assertFalse(ObjectTypes.MagentaConcretePowder.isWoodenTool(), "!isWoodenTool");
@@ -7158,7 +7134,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.RedGlass.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.BlackGlass.isPassThrough(), "!isPassThrough");
-      assertFalse(ObjectTypes.GlassPane.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.WhiteConcretePowder.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.OrangeConcretePowder.isPassThrough(), "!isPassThrough");
       assertFalse(ObjectTypes.MagentaConcretePowder.isPassThrough(), "!isPassThrough");
@@ -7447,7 +7422,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.RedGlass.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.BlackGlass.isGrowable(), "!isGrowable");
-      assertFalse(ObjectTypes.GlassPane.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.WhiteConcretePowder.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.OrangeConcretePowder.isGrowable(), "!isGrowable");
       assertFalse(ObjectTypes.MagentaConcretePowder.isGrowable(), "!isGrowable");
@@ -7736,7 +7710,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isLandbound(), "!isLandbound");
       assertFalse(ObjectTypes.RedGlass.isLandbound(), "!isLandbound");
       assertFalse(ObjectTypes.BlackGlass.isLandbound(), "!isLandbound");
-      assertFalse(ObjectTypes.GlassPane.isLandbound(), "!isLandbound");
       assertFalse(ObjectTypes.WhiteConcretePowder.isLandbound(), "!isLandbound");
       assertFalse(ObjectTypes.OrangeConcretePowder.isLandbound(), "!isLandbound");
       assertFalse(ObjectTypes.MagentaConcretePowder.isLandbound(), "!isLandbound");
@@ -8043,7 +8016,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isUniqueObject(), "!isUniqueObject");
       assertFalse(ObjectTypes.RedGlass.isUniqueObject(), "!isUniqueObject");
       assertFalse(ObjectTypes.BlackGlass.isUniqueObject(), "!isUniqueObject");
-      assertFalse(ObjectTypes.GlassPane.isUniqueObject(), "!isUniqueObject");
       assertFalse(ObjectTypes.WhiteConcretePowder.isUniqueObject(), "!isUniqueObject");
       assertFalse(ObjectTypes.OrangeConcretePowder.isUniqueObject(), "!isUniqueObject");
       assertFalse(ObjectTypes.MagentaConcretePowder.isUniqueObject(), "!isUniqueObject");
@@ -8330,7 +8302,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isTool(), "!isTool");
       assertFalse(ObjectTypes.RedGlass.isTool(), "!isTool");
       assertFalse(ObjectTypes.BlackGlass.isTool(), "!isTool");
-      assertFalse(ObjectTypes.GlassPane.isTool(), "!isTool");
       assertFalse(ObjectTypes.WhiteConcretePowder.isTool(), "!isTool");
       assertFalse(ObjectTypes.OrangeConcretePowder.isTool(), "!isTool");
       assertFalse(ObjectTypes.MagentaConcretePowder.isTool(), "!isTool");
@@ -8603,7 +8574,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isTillable(), "!isTillable");
       assertFalse(ObjectTypes.RedGlass.isTillable(), "!isTillable");
       assertFalse(ObjectTypes.BlackGlass.isTillable(), "!isTillable");
-      assertFalse(ObjectTypes.GlassPane.isTillable(), "!isTillable");
       assertFalse(ObjectTypes.WhiteConcretePowder.isTillable(), "!isTillable");
       assertFalse(ObjectTypes.OrangeConcretePowder.isTillable(), "!isTillable");
       assertFalse(ObjectTypes.MagentaConcretePowder.isTillable(), "!isTillable");
@@ -8892,7 +8862,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isMachine(), "!isMachine");
       assertFalse(ObjectTypes.RedGlass.isMachine(), "!isMachine");
       assertFalse(ObjectTypes.BlackGlass.isMachine(), "!isMachine");
-      assertFalse(ObjectTypes.GlassPane.isMachine(), "!isMachine");
       assertFalse(ObjectTypes.WhiteConcretePowder.isMachine(), "!isMachine");
       assertFalse(ObjectTypes.OrangeConcretePowder.isMachine(), "!isMachine");
       assertFalse(ObjectTypes.MagentaConcretePowder.isMachine(), "!isMachine");
@@ -9181,7 +9150,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.spawnsWithFluid(), "!spawnsWithFluid");
       assertFalse(ObjectTypes.RedGlass.spawnsWithFluid(), "!spawnsWithFluid");
       assertFalse(ObjectTypes.BlackGlass.spawnsWithFluid(), "!spawnsWithFluid");
-      assertFalse(ObjectTypes.GlassPane.spawnsWithFluid(), "!spawnsWithFluid");
       assertFalse(ObjectTypes.WhiteConcretePowder.spawnsWithFluid(), "!spawnsWithFluid");
       assertFalse(ObjectTypes.OrangeConcretePowder.spawnsWithFluid(), "!spawnsWithFluid");
       assertFalse(ObjectTypes.MagentaConcretePowder.spawnsWithFluid(), "!spawnsWithFluid");
@@ -9472,7 +9440,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.MagentaDye.isWaterloggable(), "!isWaterloggable");
       assertFalse(ObjectTypes.LightBlueDye.isWaterloggable(), "!isWaterloggable");
       assertFalse(ObjectTypes.LightGrayDye.isWaterloggable(), "!isWaterloggable");
-      assertFalse(ObjectTypes.GlassPane.isWaterloggable(), "!isWaterloggable");
       assertFalse(ObjectTypes.WhiteConcretePowder.isWaterloggable(), "!isWaterloggable");
       assertFalse(ObjectTypes.OrangeConcretePowder.isWaterloggable(), "!isWaterloggable");
       assertFalse(ObjectTypes.MagentaConcretePowder.isWaterloggable(), "!isWaterloggable");
@@ -9759,7 +9726,6 @@ contract ObjectTypeTest is DustTest {
       assertFalse(ObjectTypes.GreenGlass.isPreferredSpawn(), "!isPreferredSpawn");
       assertFalse(ObjectTypes.RedGlass.isPreferredSpawn(), "!isPreferredSpawn");
       assertFalse(ObjectTypes.BlackGlass.isPreferredSpawn(), "!isPreferredSpawn");
-      assertFalse(ObjectTypes.GlassPane.isPreferredSpawn(), "!isPreferredSpawn");
       assertFalse(ObjectTypes.WhiteConcretePowder.isPreferredSpawn(), "!isPreferredSpawn");
       assertFalse(ObjectTypes.OrangeConcretePowder.isPreferredSpawn(), "!isPreferredSpawn");
       assertFalse(ObjectTypes.MagentaConcretePowder.isPreferredSpawn(), "!isPreferredSpawn");
