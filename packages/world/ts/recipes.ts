@@ -366,10 +366,6 @@ export const recipes: Recipe[] = [
     outputs: [["RedDye", 2]],
   },
   {
-    inputs: [["StrawberryBush", 1]],
-    outputs: [["RedDye", 2]],
-  },
-  {
     inputs: [["SunFlower", 1]],
     outputs: [["YellowDye", 2]],
   },
