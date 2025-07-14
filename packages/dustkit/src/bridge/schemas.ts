@@ -61,4 +61,17 @@ export type ClientRpcSchema = RpcSchema.From<
         z: number;
       };
     }
+  | {
+      Request: {
+        method: "setBlueprint";
+        params: {
+          creationId: bigint;
+          objectTypeIds: number[];
+          relativePositions: [number, number, number][];
+          baseWorldCoord: [number, number, number] | undefined;
+          displayName: string;
+        }[];
+      };
+      ReturnType: void;
+    }
 >;
