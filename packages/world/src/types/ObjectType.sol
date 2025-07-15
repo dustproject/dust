@@ -267,7 +267,6 @@ library ObjectTypes {
   ObjectType constant Paper = ObjectType.wrap(387);
   ObjectType constant Stick = ObjectType.wrap(388);
   ObjectType constant Lodestone = ObjectType.wrap(389);
-  ObjectType constant FlowerPot = ObjectType.wrap(390);
   ObjectType constant WoodenPick = ObjectType.wrap(32768);
   ObjectType constant CopperPick = ObjectType.wrap(32769);
   ObjectType constant IronPick = ObjectType.wrap(32770);
@@ -350,7 +349,7 @@ library ObjectTypeLib {
       // IDs in [256..511]
       {
         let off := sub(self, 256)
-        let bit := and(shr(off, 0x66ffffffff00007629c00000000ffdffff), 1)
+        let bit := and(shr(off, 0x26ffffffff00007629c00000000ffdffff), 1)
         ok := or(ok, bit)
       }
     }
@@ -593,7 +592,7 @@ library ObjectTypeLib {
       // IDs in [256..511]
       {
         let off := sub(self, 256)
-        let bit := and(shr(off, 0x66ffffffff00007629c00000000ffdffff), 1)
+        let bit := and(shr(off, 0x26ffffffff00007629c00000000ffdffff), 1)
         ok := or(ok, bit)
       }
     }
@@ -719,7 +718,7 @@ library ObjectTypeLib {
       // IDs in [256..511]
       {
         let off := sub(self, 256)
-        let bit := and(shr(off, 0x66ffffffff00007629c00000000ffdffff), 1)
+        let bit := and(shr(off, 0x26ffffffff00007629c00000000ffdffff), 1)
         ok := or(ok, bit)
       }
     }
@@ -745,7 +744,7 @@ library ObjectTypeLib {
     return [ObjectTypes.AnyPlank, ObjectTypes.AnyLog, ObjectTypes.AnyLeaf, ObjectTypes.AnyTerracotta];
   }
 
-  function getBlockTypes() internal pure returns (ObjectType[225] memory) {
+  function getBlockTypes() internal pure returns (ObjectType[224] memory) {
     return [
       ObjectTypes.Stone,
       ObjectTypes.Deepslate,
@@ -939,7 +938,6 @@ library ObjectTypeLib {
       ObjectTypes.BrickBlock,
       ObjectTypes.MudBricks,
       ObjectTypes.Lodestone,
-      ObjectTypes.FlowerPot,
       ObjectTypes.WhiteConcretePowder,
       ObjectTypes.OrangeConcretePowder,
       ObjectTypes.MagentaConcretePowder,
@@ -1191,7 +1189,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function getPickMultiplierTypes() internal pure returns (ObjectType[119] memory) {
+  function getPickMultiplierTypes() internal pure returns (ObjectType[118] memory) {
     return [
       ObjectTypes.CoalOre,
       ObjectTypes.CopperOre,
@@ -1269,7 +1267,6 @@ library ObjectTypeLib {
       ObjectTypes.BrickBlock,
       ObjectTypes.MudBricks,
       ObjectTypes.Lodestone,
-      ObjectTypes.FlowerPot,
       ObjectTypes.WhiteConcrete,
       ObjectTypes.OrangeConcrete,
       ObjectTypes.MagentaConcrete,
@@ -1469,7 +1466,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function getWaterloggableTypes() internal pure returns (ObjectType[175] memory) {
+  function getWaterloggableTypes() internal pure returns (ObjectType[174] memory) {
     return [
       ObjectTypes.Stone,
       ObjectTypes.Deepslate,
@@ -1644,8 +1641,7 @@ library ObjectTypeLib {
       ObjectTypes.GreenConcretePowder,
       ObjectTypes.RedConcretePowder,
       ObjectTypes.BlackConcretePowder,
-      ObjectTypes.Lodestone,
-      ObjectTypes.FlowerPot
+      ObjectTypes.Lodestone
     ];
   }
 

@@ -338,7 +338,7 @@ export const objectNames = [
   "Barrel",
   "Bookshelf",
   "Carpet",
-  "FlowerPot",
+  // "FlowerPot",
   "Lodestone",
 
   // Stairs
@@ -1101,7 +1101,7 @@ export const objects: readonly ObjectDefinition[] = validateUniqueIds([
   { name: "Paper", id: 387, mass: 200000000000000n },
   { name: "Stick", id: 388, mass: 2250000000000000n },
   { name: "Lodestone", id: 389, mass: 771000000000000000n },
-  { name: "FlowerPot", id: 390, mass: 7200000000000000n },
+  // { name: "FlowerPot", id: 390, mass: 7200000000000000n },
 
   // { name: "Barrel", id: 375, mass: 31500000000000000n },
   // { name: "Ladder", id: 376, mass: 5250000000000000n },
@@ -1629,7 +1629,7 @@ export const categories = {
       "BrickBlock",
       "MudBricks",
       "Lodestone",
-      "FlowerPot",
+      // "FlowerPot",
       // Concrete powder
       "WhiteConcretePowder",
       "OrangeConcretePowder",
@@ -1964,7 +1964,7 @@ export const categories = {
       "BrickBlock",
       "MudBricks",
       "Lodestone",
-      "FlowerPot",
+      // "FlowerPot",
       // Concrete blocks
       "WhiteConcrete",
       "OrangeConcrete",
@@ -2406,7 +2406,7 @@ export const categories = {
       "BlackConcretePowder",
       // Other blocks
       "Lodestone",
-      "FlowerPot",
+      // "FlowerPot",
     ],
   },
   PreferredSpawn: {

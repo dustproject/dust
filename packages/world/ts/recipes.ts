@@ -1589,10 +1589,10 @@ export const recipes: Recipe[] = [
   //   inputs: [["Cotton", 2]],
   //   outputs: [["Carpet", 3]],
   // },
-  {
-    inputs: [["Brick", 3]],
-    outputs: [["FlowerPot", 1]],
-  },
+  // {
+  //   inputs: [["Brick", 3]],
+  //   outputs: [["FlowerPot", 1]],
+  // },
   {
     inputs: [
       ["Stone", 8],
