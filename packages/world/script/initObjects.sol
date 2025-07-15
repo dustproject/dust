@@ -165,7 +165,6 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.ChiseledSandstone, ObjectPhysicsData({ mass: 30000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.ChiseledRedSandstone, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.CrackedStoneBricks, ObjectPhysicsData({ mass: 12000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.CrackedTuffBricks, ObjectPhysicsData({ mass: 15000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.CrackedDeepslateBricks, ObjectPhysicsData({ mass: 100000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.SmoothSandstone, ObjectPhysicsData({ mass: 30000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.SmoothRedSandstone, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
@@ -181,17 +180,10 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.Glass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.WhiteGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.OrangeGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.MagentaGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.LightBlueGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.YellowGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.LimeGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.PinkGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.GrayGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.LightGrayGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.CyanGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.PurpleGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.BlueGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.BrownGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.GreenGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.RedGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.BlackGlass, ObjectPhysicsData({ mass: 4000000000000000, energy: 0 }));

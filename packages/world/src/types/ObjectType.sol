@@ -193,7 +193,6 @@ library ObjectTypes {
   ObjectType constant ChiseledSandstone = ObjectType.wrap(270);
   ObjectType constant ChiseledRedSandstone = ObjectType.wrap(271);
   ObjectType constant CrackedStoneBricks = ObjectType.wrap(272);
-  ObjectType constant CrackedTuffBricks = ObjectType.wrap(273);
   ObjectType constant CrackedDeepslateBricks = ObjectType.wrap(274);
   ObjectType constant SmoothSandstone = ObjectType.wrap(275);
   ObjectType constant SmoothRedSandstone = ObjectType.wrap(276);
@@ -223,17 +222,10 @@ library ObjectTypes {
   ObjectType constant Glass = ObjectType.wrap(318);
   ObjectType constant WhiteGlass = ObjectType.wrap(319);
   ObjectType constant OrangeGlass = ObjectType.wrap(320);
-  ObjectType constant MagentaGlass = ObjectType.wrap(321);
-  ObjectType constant LightBlueGlass = ObjectType.wrap(322);
   ObjectType constant YellowGlass = ObjectType.wrap(323);
-  ObjectType constant LimeGlass = ObjectType.wrap(324);
   ObjectType constant PinkGlass = ObjectType.wrap(325);
-  ObjectType constant GrayGlass = ObjectType.wrap(326);
-  ObjectType constant LightGrayGlass = ObjectType.wrap(327);
-  ObjectType constant CyanGlass = ObjectType.wrap(328);
   ObjectType constant PurpleGlass = ObjectType.wrap(329);
   ObjectType constant BlueGlass = ObjectType.wrap(330);
-  ObjectType constant BrownGlass = ObjectType.wrap(331);
   ObjectType constant GreenGlass = ObjectType.wrap(332);
   ObjectType constant RedGlass = ObjectType.wrap(333);
   ObjectType constant BlackGlass = ObjectType.wrap(334);
@@ -358,7 +350,7 @@ library ObjectTypeLib {
       // IDs in [256..511]
       {
         let off := sub(self, 256)
-        let bit := and(shr(off, 0x66ffffffff00007fffc00000000fffffff), 1)
+        let bit := and(shr(off, 0x66ffffffff00007629c00000000ffdffff), 1)
         ok := or(ok, bit)
       }
     }
@@ -601,7 +593,7 @@ library ObjectTypeLib {
       // IDs in [256..511]
       {
         let off := sub(self, 256)
-        let bit := and(shr(off, 0x66ffffffff00007fffc00000000fffffff), 1)
+        let bit := and(shr(off, 0x66ffffffff00007629c00000000ffdffff), 1)
         ok := or(ok, bit)
       }
     }
@@ -727,7 +719,7 @@ library ObjectTypeLib {
       // IDs in [256..511]
       {
         let off := sub(self, 256)
-        let bit := and(shr(off, 0x66ffffffff00007fffc00000000fffffff), 1)
+        let bit := and(shr(off, 0x66ffffffff00007629c00000000ffdffff), 1)
         ok := or(ok, bit)
       }
     }
@@ -753,7 +745,7 @@ library ObjectTypeLib {
     return [ObjectTypes.AnyPlank, ObjectTypes.AnyLog, ObjectTypes.AnyLeaf, ObjectTypes.AnyTerracotta];
   }
 
-  function getBlockTypes() internal pure returns (ObjectType[233] memory) {
+  function getBlockTypes() internal pure returns (ObjectType[225] memory) {
     return [
       ObjectTypes.Stone,
       ObjectTypes.Deepslate,
@@ -924,7 +916,6 @@ library ObjectTypeLib {
       ObjectTypes.ChiseledSandstone,
       ObjectTypes.ChiseledRedSandstone,
       ObjectTypes.CrackedStoneBricks,
-      ObjectTypes.CrackedTuffBricks,
       ObjectTypes.CrackedDeepslateBricks,
       ObjectTypes.SmoothSandstone,
       ObjectTypes.SmoothRedSandstone,
@@ -938,17 +929,10 @@ library ObjectTypeLib {
       ObjectTypes.Glass,
       ObjectTypes.WhiteGlass,
       ObjectTypes.OrangeGlass,
-      ObjectTypes.MagentaGlass,
-      ObjectTypes.LightBlueGlass,
       ObjectTypes.YellowGlass,
-      ObjectTypes.LimeGlass,
       ObjectTypes.PinkGlass,
-      ObjectTypes.GrayGlass,
-      ObjectTypes.LightGrayGlass,
-      ObjectTypes.CyanGlass,
       ObjectTypes.PurpleGlass,
       ObjectTypes.BlueGlass,
-      ObjectTypes.BrownGlass,
       ObjectTypes.GreenGlass,
       ObjectTypes.RedGlass,
       ObjectTypes.BlackGlass,
@@ -1207,7 +1191,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function getPickMultiplierTypes() internal pure returns (ObjectType[127] memory) {
+  function getPickMultiplierTypes() internal pure returns (ObjectType[119] memory) {
     return [
       ObjectTypes.CoalOre,
       ObjectTypes.CopperOre,
@@ -1270,7 +1254,6 @@ library ObjectTypeLib {
       ObjectTypes.ChiseledSandstone,
       ObjectTypes.ChiseledRedSandstone,
       ObjectTypes.CrackedStoneBricks,
-      ObjectTypes.CrackedTuffBricks,
       ObjectTypes.CrackedDeepslateBricks,
       ObjectTypes.SmoothSandstone,
       ObjectTypes.SmoothRedSandstone,
@@ -1306,17 +1289,10 @@ library ObjectTypeLib {
       ObjectTypes.Glass,
       ObjectTypes.WhiteGlass,
       ObjectTypes.OrangeGlass,
-      ObjectTypes.MagentaGlass,
-      ObjectTypes.LightBlueGlass,
       ObjectTypes.YellowGlass,
-      ObjectTypes.LimeGlass,
       ObjectTypes.PinkGlass,
-      ObjectTypes.GrayGlass,
-      ObjectTypes.LightGrayGlass,
-      ObjectTypes.CyanGlass,
       ObjectTypes.PurpleGlass,
       ObjectTypes.BlueGlass,
-      ObjectTypes.BrownGlass,
       ObjectTypes.GreenGlass,
       ObjectTypes.RedGlass,
       ObjectTypes.BlackGlass,
@@ -1493,7 +1469,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function getWaterloggableTypes() internal pure returns (ObjectType[183] memory) {
+  function getWaterloggableTypes() internal pure returns (ObjectType[175] memory) {
     return [
       ObjectTypes.Stone,
       ObjectTypes.Deepslate,
@@ -1614,7 +1590,6 @@ library ObjectTypeLib {
       ObjectTypes.ChiseledSandstone,
       ObjectTypes.ChiseledRedSandstone,
       ObjectTypes.CrackedStoneBricks,
-      ObjectTypes.CrackedTuffBricks,
       ObjectTypes.CrackedDeepslateBricks,
       ObjectTypes.SmoothSandstone,
       ObjectTypes.SmoothRedSandstone,
@@ -1630,17 +1605,10 @@ library ObjectTypeLib {
       ObjectTypes.Glass,
       ObjectTypes.WhiteGlass,
       ObjectTypes.OrangeGlass,
-      ObjectTypes.MagentaGlass,
-      ObjectTypes.LightBlueGlass,
       ObjectTypes.YellowGlass,
-      ObjectTypes.LimeGlass,
       ObjectTypes.PinkGlass,
-      ObjectTypes.GrayGlass,
-      ObjectTypes.LightGrayGlass,
-      ObjectTypes.CyanGlass,
       ObjectTypes.PurpleGlass,
       ObjectTypes.BlueGlass,
-      ObjectTypes.BrownGlass,
       ObjectTypes.GreenGlass,
       ObjectTypes.RedGlass,
       ObjectTypes.BlackGlass,

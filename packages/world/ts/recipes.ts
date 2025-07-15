@@ -921,14 +921,14 @@ export const recipes: Recipe[] = [
     ],
     outputs: [["CrackedStoneBricks", 1]],
   },
-  {
-    station: "Furnace",
-    inputs: [
-      ["TuffBricks", 1],
-      ["CoalOre", 1],
-    ],
-    outputs: [["CrackedTuffBricks", 1]],
-  },
+  // {
+  //   station: "Furnace",
+  //   inputs: [
+  //     ["TuffBricks", 1],
+  //     ["CoalOre", 1],
+  //   ],
+  //   outputs: [["CrackedTuffBricks", 1]],
+  // },
   {
     station: "Furnace",
     inputs: [
@@ -1254,22 +1254,22 @@ export const recipes: Recipe[] = [
     ],
     outputs: [["OrangeGlass", 8]],
   },
-  {
-    station: "Workbench",
-    inputs: [
-      ["Glass", 8],
-      ["MagentaDye", 1],
-    ],
-    outputs: [["MagentaGlass", 8]],
-  },
-  {
-    station: "Workbench",
-    inputs: [
-      ["Glass", 8],
-      ["LightBlueDye", 1],
-    ],
-    outputs: [["LightBlueGlass", 8]],
-  },
+  // {
+  //   station: "Workbench",
+  //   inputs: [
+  //     ["Glass", 8],
+  //     ["MagentaDye", 1],
+  //   ],
+  //   outputs: [["MagentaGlass", 8]],
+  // },
+  // {
+  //   station: "Workbench",
+  //   inputs: [
+  //     ["Glass", 8],
+  //     ["LightBlueDye", 1],
+  //   ],
+  //   outputs: [["LightBlueGlass", 8]],
+  // },
   {
     station: "Workbench",
     inputs: [
@@ -1278,14 +1278,14 @@ export const recipes: Recipe[] = [
     ],
     outputs: [["YellowGlass", 8]],
   },
-  {
-    station: "Workbench",
-    inputs: [
-      ["Glass", 8],
-      ["LimeDye", 1],
-    ],
-    outputs: [["LimeGlass", 8]],
-  },
+  // {
+  //   station: "Workbench",
+  //   inputs: [
+  //     ["Glass", 8],
+  //     ["LimeDye", 1],
+  //   ],
+  //   outputs: [["LimeGlass", 8]],
+  // },
   {
     station: "Workbench",
     inputs: [
@@ -1294,30 +1294,30 @@ export const recipes: Recipe[] = [
     ],
     outputs: [["PinkGlass", 8]],
   },
-  {
-    station: "Workbench",
-    inputs: [
-      ["Glass", 8],
-      ["GrayDye", 1],
-    ],
-    outputs: [["GrayGlass", 8]],
-  },
-  {
-    station: "Workbench",
-    inputs: [
-      ["Glass", 8],
-      ["LightGrayDye", 1],
-    ],
-    outputs: [["LightGrayGlass", 8]],
-  },
-  {
-    station: "Workbench",
-    inputs: [
-      ["Glass", 8],
-      ["CyanDye", 1],
-    ],
-    outputs: [["CyanGlass", 8]],
-  },
+  // {
+  //   station: "Workbench",
+  //   inputs: [
+  //     ["Glass", 8],
+  //     ["GrayDye", 1],
+  //   ],
+  //   outputs: [["GrayGlass", 8]],
+  // },
+  // {
+  //   station: "Workbench",
+  //   inputs: [
+  //     ["Glass", 8],
+  //     ["LightGrayDye", 1],
+  //   ],
+  //   outputs: [["LightGrayGlass", 8]],
+  // },
+  // {
+  //   station: "Workbench",
+  //   inputs: [
+  //     ["Glass", 8],
+  //     ["CyanDye", 1],
+  //   ],
+  //   outputs: [["CyanGlass", 8]],
+  // },
   {
     station: "Workbench",
     inputs: [
@@ -1334,14 +1334,14 @@ export const recipes: Recipe[] = [
     ],
     outputs: [["BlueGlass", 8]],
   },
-  {
-    station: "Workbench",
-    inputs: [
-      ["Glass", 8],
-      ["BrownDye", 1],
-    ],
-    outputs: [["BrownGlass", 8]],
-  },
+  // {
+  //   station: "Workbench",
+  //   inputs: [
+  //     ["Glass", 8],
+  //     ["BrownDye", 1],
+  //   ],
+  //   outputs: [["BrownGlass", 8]],
+  // },
   {
     station: "Workbench",
     inputs: [
