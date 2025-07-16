@@ -450,7 +450,14 @@ library ObjectTypeLib {
       // IDs in [256..511]
       {
         let off := sub(self, 256)
-        let bit := and(shr(off, 0x26ffffffff00007629c00000000ffdffff), 1)
+        let bit := and(shr(off, 0xc0000fffffffffffffffffffffffc026ffffffff00007629c00000000ffdffff), 1)
+        ok := or(ok, bit)
+      }
+
+      // IDs in [512..767]
+      {
+        let off := sub(self, 512)
+        let bit := and(shr(off, 0x3f), 1)
         ok := or(ok, bit)
       }
     }
@@ -856,7 +863,7 @@ library ObjectTypeLib {
     return [ObjectTypes.AnyPlank, ObjectTypes.AnyLog, ObjectTypes.AnyLeaf, ObjectTypes.AnyTerracotta];
   }
 
-  function getBlockTypes() internal pure returns (ObjectType[224] memory) {
+  function getBlockTypes() internal pure returns (ObjectType[326] memory) {
     return [
       ObjectTypes.Stone,
       ObjectTypes.Deepslate,
@@ -1081,7 +1088,109 @@ library ObjectTypeLib {
       ObjectTypes.BrownConcrete,
       ObjectTypes.GreenConcrete,
       ObjectTypes.RedConcrete,
-      ObjectTypes.BlackConcrete
+      ObjectTypes.BlackConcrete,
+      ObjectTypes.StoneStairs,
+      ObjectTypes.CobblestoneStairs,
+      ObjectTypes.MossyCobblestoneStairs,
+      ObjectTypes.StoneBricksStairs,
+      ObjectTypes.SmoothStoneStairs,
+      ObjectTypes.AndesiteStairs,
+      ObjectTypes.GraniteStairs,
+      ObjectTypes.DioriteStairs,
+      ObjectTypes.TuffStairs,
+      ObjectTypes.BasaltStairs,
+      ObjectTypes.BlackstoneStairs,
+      ObjectTypes.PolishedAndesiteStairs,
+      ObjectTypes.PolishedGraniteStairs,
+      ObjectTypes.PolishedDioriteStairs,
+      ObjectTypes.PolishedTuffStairs,
+      ObjectTypes.PolishedBasaltStairs,
+      ObjectTypes.PolishedBlackstoneStairs,
+      ObjectTypes.DeepslateStairs,
+      ObjectTypes.CobbledDeepslateStairs,
+      ObjectTypes.DeepslateBricksStairs,
+      ObjectTypes.SandstoneStairs,
+      ObjectTypes.RedSandstoneStairs,
+      ObjectTypes.SmoothSandstoneStairs,
+      ObjectTypes.SmoothRedSandstoneStairs,
+      ObjectTypes.BrickBlockStairs,
+      ObjectTypes.MudBricksStairs,
+      ObjectTypes.TuffBricksStairs,
+      ObjectTypes.OakPlanksStairs,
+      ObjectTypes.BirchPlanksStairs,
+      ObjectTypes.JunglePlanksStairs,
+      ObjectTypes.SakuraPlanksStairs,
+      ObjectTypes.AcaciaPlanksStairs,
+      ObjectTypes.SprucePlanksStairs,
+      ObjectTypes.DarkOakPlanksStairs,
+      ObjectTypes.MangrovePlanksStairs,
+      ObjectTypes.StoneSlab,
+      ObjectTypes.CobblestoneSlab,
+      ObjectTypes.MossyCobblestoneSlab,
+      ObjectTypes.StoneBricksSlab,
+      ObjectTypes.SmoothStoneSlab,
+      ObjectTypes.AndesiteSlab,
+      ObjectTypes.GraniteSlab,
+      ObjectTypes.DioriteSlab,
+      ObjectTypes.TuffSlab,
+      ObjectTypes.BasaltSlab,
+      ObjectTypes.BlackstoneSlab,
+      ObjectTypes.PolishedAndesiteSlab,
+      ObjectTypes.PolishedGraniteSlab,
+      ObjectTypes.PolishedDioriteSlab,
+      ObjectTypes.PolishedTuffSlab,
+      ObjectTypes.PolishedBasaltSlab,
+      ObjectTypes.PolishedBlackstoneSlab,
+      ObjectTypes.DeepslateSlab,
+      ObjectTypes.CobbledDeepslateSlab,
+      ObjectTypes.DeepslateBricksSlab,
+      ObjectTypes.SandstoneSlab,
+      ObjectTypes.RedSandstoneSlab,
+      ObjectTypes.SmoothSandstoneSlab,
+      ObjectTypes.SmoothRedSandstoneSlab,
+      ObjectTypes.BrickBlockSlab,
+      ObjectTypes.MudBricksSlab,
+      ObjectTypes.TuffBricksSlab,
+      ObjectTypes.OakPlanksSlab,
+      ObjectTypes.BirchPlanksSlab,
+      ObjectTypes.JunglePlanksSlab,
+      ObjectTypes.SakuraPlanksSlab,
+      ObjectTypes.AcaciaPlanksSlab,
+      ObjectTypes.SprucePlanksSlab,
+      ObjectTypes.DarkOakPlanksSlab,
+      ObjectTypes.MangrovePlanksSlab,
+      ObjectTypes.StoneWall,
+      ObjectTypes.CobblestoneWall,
+      ObjectTypes.MossyCobblestoneWall,
+      ObjectTypes.StoneBricksWall,
+      ObjectTypes.AndesiteWall,
+      ObjectTypes.GraniteWall,
+      ObjectTypes.DioriteWall,
+      ObjectTypes.TuffWall,
+      ObjectTypes.BasaltWall,
+      ObjectTypes.BlackstoneWall,
+      ObjectTypes.PolishedAndesiteWall,
+      ObjectTypes.PolishedGraniteWall,
+      ObjectTypes.PolishedDioriteWall,
+      ObjectTypes.PolishedTuffWall,
+      ObjectTypes.PolishedBasaltWall,
+      ObjectTypes.PolishedBlackstoneWall,
+      ObjectTypes.DeepslateWall,
+      ObjectTypes.CobbledDeepslateWall,
+      ObjectTypes.DeepslateBricksWall,
+      ObjectTypes.SandstoneWall,
+      ObjectTypes.RedSandstoneWall,
+      ObjectTypes.BrickBlockWall,
+      ObjectTypes.MudBricksWall,
+      ObjectTypes.TuffBricksWall,
+      ObjectTypes.OakFence,
+      ObjectTypes.BirchFence,
+      ObjectTypes.JungleFence,
+      ObjectTypes.SakuraFence,
+      ObjectTypes.AcaciaFence,
+      ObjectTypes.SpruceFence,
+      ObjectTypes.DarkOakFence,
+      ObjectTypes.MangroveFence
     ];
   }
 
