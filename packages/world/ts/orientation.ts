@@ -166,3 +166,23 @@ export function decodeOrientation(
   const reflIdx = orientation & 7;
   return [PERMUTATIONS[permIdx]!, REFLECTIONS[reflIdx]!];
 }
+
+// All possible orientations (0-47)
+export const ALL_ORIENTATIONS: readonly Orientation[] = Array.from(
+  { length: 48 },
+  (_, i) => i,
+);
+
+// Common orientation sets for different object types
+export const CARDINAL_ORIENTATIONS: readonly Orientation[] = [0, 1, 40, 44];
+export const STAIR_ORIENTATIONS: readonly Orientation[] = [
+  0,
+  1,
+  2,
+  3,
+  40,
+  41,
+  42,
+  43, // 8 orientations for stairs (4 directions × 2 for upside-down)
+];
+export const SLAB_ORIENTATIONS: readonly Orientation[] = [0, 2]; // Bottom and top slabs
