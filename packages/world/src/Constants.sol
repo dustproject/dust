@@ -74,6 +74,7 @@ uint128 constant HIT_ACTION_MODIFIER = ACTION_MODIFIER_DENOMINATOR / 100; // ~1/
 uint256 constant MAX_WHEAT_SEED = 29_659;
 uint256 constant MAX_MELON_SEED = 7_493;
 uint256 constant MAX_PUMPKIN_SEED = 1_410;
+// uint256 constant MAX_COTTON_SEED = 20_000;
 
 uint256 constant MAX_OAK_SAPLING = 44_745;
 uint256 constant MAX_BIRCH_SAPLING = 35_656;

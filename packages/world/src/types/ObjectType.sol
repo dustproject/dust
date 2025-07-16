@@ -172,6 +172,101 @@ library ObjectTypes {
   ObjectType constant Powerstone = ObjectType.wrap(150);
   ObjectType constant Furnace = ObjectType.wrap(151);
   ObjectType constant Torch = ObjectType.wrap(152);
+  ObjectType constant GreenTerracotta = ObjectType.wrap(153);
+  ObjectType constant PinkTerracotta = ObjectType.wrap(154);
+  ObjectType constant LimeTerracotta = ObjectType.wrap(155);
+  ObjectType constant GrayTerracotta = ObjectType.wrap(156);
+  ObjectType constant Stonecutter = ObjectType.wrap(256);
+  ObjectType constant StoneBricks = ObjectType.wrap(257);
+  ObjectType constant TuffBricks = ObjectType.wrap(258);
+  ObjectType constant DeepslateBricks = ObjectType.wrap(259);
+  ObjectType constant PolishedAndesite = ObjectType.wrap(260);
+  ObjectType constant PolishedGranite = ObjectType.wrap(261);
+  ObjectType constant PolishedDiorite = ObjectType.wrap(262);
+  ObjectType constant PolishedTuff = ObjectType.wrap(263);
+  ObjectType constant PolishedBasalt = ObjectType.wrap(264);
+  ObjectType constant PolishedBlackstone = ObjectType.wrap(265);
+  ObjectType constant ChiseledStoneBricks = ObjectType.wrap(266);
+  ObjectType constant ChiseledTuffBricks = ObjectType.wrap(267);
+  ObjectType constant ChiseledDeepslate = ObjectType.wrap(268);
+  ObjectType constant ChiseledPolishedBlackstone = ObjectType.wrap(269);
+  ObjectType constant ChiseledSandstone = ObjectType.wrap(270);
+  ObjectType constant ChiseledRedSandstone = ObjectType.wrap(271);
+  ObjectType constant CrackedStoneBricks = ObjectType.wrap(272);
+  ObjectType constant CrackedDeepslateBricks = ObjectType.wrap(274);
+  ObjectType constant SmoothSandstone = ObjectType.wrap(275);
+  ObjectType constant SmoothRedSandstone = ObjectType.wrap(276);
+  ObjectType constant SmoothStone = ObjectType.wrap(277);
+  ObjectType constant PolishedDeepslate = ObjectType.wrap(278);
+  ObjectType constant PolishedBlackstoneBricks = ObjectType.wrap(279);
+  ObjectType constant CrackedPolishedBlackstoneBricks = ObjectType.wrap(280);
+  ObjectType constant MossyStoneBricks = ObjectType.wrap(281);
+  ObjectType constant CutSandstone = ObjectType.wrap(282);
+  ObjectType constant CutRedSandstone = ObjectType.wrap(283);
+  ObjectType constant RedDye = ObjectType.wrap(284);
+  ObjectType constant YellowDye = ObjectType.wrap(285);
+  ObjectType constant BlueDye = ObjectType.wrap(286);
+  ObjectType constant GreenDye = ObjectType.wrap(287);
+  ObjectType constant WhiteDye = ObjectType.wrap(288);
+  ObjectType constant BlackDye = ObjectType.wrap(289);
+  ObjectType constant BrownDye = ObjectType.wrap(290);
+  ObjectType constant OrangeDye = ObjectType.wrap(291);
+  ObjectType constant PinkDye = ObjectType.wrap(292);
+  ObjectType constant LimeDye = ObjectType.wrap(293);
+  ObjectType constant CyanDye = ObjectType.wrap(294);
+  ObjectType constant GrayDye = ObjectType.wrap(295);
+  ObjectType constant PurpleDye = ObjectType.wrap(296);
+  ObjectType constant MagentaDye = ObjectType.wrap(297);
+  ObjectType constant LightBlueDye = ObjectType.wrap(298);
+  ObjectType constant LightGrayDye = ObjectType.wrap(299);
+  ObjectType constant Glass = ObjectType.wrap(318);
+  ObjectType constant WhiteGlass = ObjectType.wrap(319);
+  ObjectType constant OrangeGlass = ObjectType.wrap(320);
+  ObjectType constant YellowGlass = ObjectType.wrap(323);
+  ObjectType constant PinkGlass = ObjectType.wrap(325);
+  ObjectType constant PurpleGlass = ObjectType.wrap(329);
+  ObjectType constant BlueGlass = ObjectType.wrap(330);
+  ObjectType constant GreenGlass = ObjectType.wrap(332);
+  ObjectType constant RedGlass = ObjectType.wrap(333);
+  ObjectType constant BlackGlass = ObjectType.wrap(334);
+  ObjectType constant WhiteConcretePowder = ObjectType.wrap(352);
+  ObjectType constant OrangeConcretePowder = ObjectType.wrap(353);
+  ObjectType constant MagentaConcretePowder = ObjectType.wrap(354);
+  ObjectType constant LightBlueConcretePowder = ObjectType.wrap(355);
+  ObjectType constant YellowConcretePowder = ObjectType.wrap(356);
+  ObjectType constant LimeConcretePowder = ObjectType.wrap(357);
+  ObjectType constant PinkConcretePowder = ObjectType.wrap(358);
+  ObjectType constant GrayConcretePowder = ObjectType.wrap(359);
+  ObjectType constant LightGrayConcretePowder = ObjectType.wrap(360);
+  ObjectType constant CyanConcretePowder = ObjectType.wrap(361);
+  ObjectType constant PurpleConcretePowder = ObjectType.wrap(362);
+  ObjectType constant BlueConcretePowder = ObjectType.wrap(363);
+  ObjectType constant BrownConcretePowder = ObjectType.wrap(364);
+  ObjectType constant GreenConcretePowder = ObjectType.wrap(365);
+  ObjectType constant RedConcretePowder = ObjectType.wrap(366);
+  ObjectType constant BlackConcretePowder = ObjectType.wrap(367);
+  ObjectType constant WhiteConcrete = ObjectType.wrap(368);
+  ObjectType constant OrangeConcrete = ObjectType.wrap(369);
+  ObjectType constant MagentaConcrete = ObjectType.wrap(370);
+  ObjectType constant LightBlueConcrete = ObjectType.wrap(371);
+  ObjectType constant YellowConcrete = ObjectType.wrap(372);
+  ObjectType constant LimeConcrete = ObjectType.wrap(373);
+  ObjectType constant PinkConcrete = ObjectType.wrap(374);
+  ObjectType constant GrayConcrete = ObjectType.wrap(375);
+  ObjectType constant LightGrayConcrete = ObjectType.wrap(376);
+  ObjectType constant CyanConcrete = ObjectType.wrap(377);
+  ObjectType constant PurpleConcrete = ObjectType.wrap(378);
+  ObjectType constant BlueConcrete = ObjectType.wrap(379);
+  ObjectType constant BrownConcrete = ObjectType.wrap(380);
+  ObjectType constant GreenConcrete = ObjectType.wrap(381);
+  ObjectType constant RedConcrete = ObjectType.wrap(382);
+  ObjectType constant BlackConcrete = ObjectType.wrap(383);
+  ObjectType constant Brick = ObjectType.wrap(384);
+  ObjectType constant BrickBlock = ObjectType.wrap(385);
+  ObjectType constant MudBricks = ObjectType.wrap(386);
+  ObjectType constant Paper = ObjectType.wrap(387);
+  ObjectType constant Stick = ObjectType.wrap(388);
+  ObjectType constant Lodestone = ObjectType.wrap(389);
   ObjectType constant WoodenPick = ObjectType.wrap(32768);
   ObjectType constant CopperPick = ObjectType.wrap(32769);
   ObjectType constant IronPick = ObjectType.wrap(32770);
@@ -247,8 +342,15 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x1ffffffffff7ffffffffffffffffffffffffff0), 1)
+        let bit := and(shr(self, 0x1fffffffffff7ffffffffffffffffffffffffff0), 1)
         ok := bit
+      }
+
+      // IDs in [256..511]
+      {
+        let off := sub(self, 256)
+        let bit := and(shr(off, 0x26ffffffff00007629c00000000ffdffff), 1)
+        ok := or(ok, bit)
       }
     }
   }
@@ -258,7 +360,7 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x3ffe000000000), 1)
+        let bit := and(shr(self, 0x1e00000000000000000000000003ffe000000000), 1)
         ok := bit
       }
     }
@@ -351,9 +453,10 @@ library ObjectTypeLib {
   function isStation(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      // IDs in [0..255]
+      // IDs in [149..404]
       {
-        let bit := and(shr(self, 0xe0000000000000000000000000000000000000), 1)
+        let off := sub(self, 149)
+        let bit := and(shr(off, 0x800000000000000000000000007), 1)
         ok := bit
       }
     }
@@ -482,8 +585,15 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0xc2003e00fc0000000000000003ffe0001ffff0), 1)
+        let bit := and(shr(self, 0xc2003e00fc0000000000000003ffec001ffff0), 1)
         ok := bit
+      }
+
+      // IDs in [256..511]
+      {
+        let off := sub(self, 256)
+        let bit := and(shr(off, 0x26ffffffff00007629c00000000ffdffff), 1)
+        ok := or(ok, bit)
       }
     }
   }
@@ -601,8 +711,15 @@ library ObjectTypeLib {
     assembly {
       // IDs in [0..255]
       {
-        let bit := and(shr(self, 0x16e003ffffe5fe00000003fffffffff8dfffff0), 1)
+        let bit := and(shr(self, 0x1f6e003ffffe5fe00000003fffffffff8dfffff0), 1)
         ok := bit
+      }
+
+      // IDs in [256..511]
+      {
+        let off := sub(self, 256)
+        let bit := and(shr(off, 0x26ffffffff00007629c00000000ffdffff), 1)
+        ok := or(ok, bit)
       }
     }
   }
@@ -618,6 +735,17 @@ library ObjectTypeLib {
     }
   }
 
+  function isBurnOnCraft(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      // IDs in [0..255]
+      {
+        let bit := and(shr(self, 0x300e80fffffc00000000000000000), 1)
+        ok := bit
+      }
+    }
+  }
+
   // Category getters
   function getNonSolidTypes() internal pure returns (ObjectType[2] memory) {
     return [ObjectTypes.Air, ObjectTypes.Water];
@@ -627,7 +755,7 @@ library ObjectTypeLib {
     return [ObjectTypes.AnyPlank, ObjectTypes.AnyLog, ObjectTypes.AnyLeaf, ObjectTypes.AnyTerracotta];
   }
 
-  function getBlockTypes() internal pure returns (ObjectType[148] memory) {
+  function getBlockTypes() internal pure returns (ObjectType[224] memory) {
     return [
       ObjectTypes.Stone,
       ObjectTypes.Deepslate,
@@ -683,6 +811,10 @@ library ObjectTypeLib {
       ObjectTypes.PurpleTerracotta,
       ObjectTypes.BlueTerracotta,
       ObjectTypes.MagentaTerracotta,
+      ObjectTypes.GreenTerracotta,
+      ObjectTypes.PinkTerracotta,
+      ObjectTypes.LimeTerracotta,
+      ObjectTypes.GrayTerracotta,
       ObjectTypes.OakLog,
       ObjectTypes.BirchLog,
       ObjectTypes.JungleLog,
@@ -776,11 +908,83 @@ library ObjectTypeLib {
       ObjectTypes.SpawnTile,
       ObjectTypes.Bed,
       ObjectTypes.TextSign,
-      ObjectTypes.Torch
+      ObjectTypes.Torch,
+      ObjectTypes.Stonecutter,
+      ObjectTypes.StoneBricks,
+      ObjectTypes.TuffBricks,
+      ObjectTypes.DeepslateBricks,
+      ObjectTypes.PolishedAndesite,
+      ObjectTypes.PolishedGranite,
+      ObjectTypes.PolishedDiorite,
+      ObjectTypes.PolishedTuff,
+      ObjectTypes.PolishedBasalt,
+      ObjectTypes.PolishedBlackstone,
+      ObjectTypes.ChiseledStoneBricks,
+      ObjectTypes.ChiseledTuffBricks,
+      ObjectTypes.ChiseledDeepslate,
+      ObjectTypes.ChiseledPolishedBlackstone,
+      ObjectTypes.ChiseledSandstone,
+      ObjectTypes.ChiseledRedSandstone,
+      ObjectTypes.CrackedStoneBricks,
+      ObjectTypes.CrackedDeepslateBricks,
+      ObjectTypes.SmoothSandstone,
+      ObjectTypes.SmoothRedSandstone,
+      ObjectTypes.SmoothStone,
+      ObjectTypes.PolishedDeepslate,
+      ObjectTypes.PolishedBlackstoneBricks,
+      ObjectTypes.CrackedPolishedBlackstoneBricks,
+      ObjectTypes.MossyStoneBricks,
+      ObjectTypes.CutSandstone,
+      ObjectTypes.CutRedSandstone,
+      ObjectTypes.Glass,
+      ObjectTypes.WhiteGlass,
+      ObjectTypes.OrangeGlass,
+      ObjectTypes.YellowGlass,
+      ObjectTypes.PinkGlass,
+      ObjectTypes.PurpleGlass,
+      ObjectTypes.BlueGlass,
+      ObjectTypes.GreenGlass,
+      ObjectTypes.RedGlass,
+      ObjectTypes.BlackGlass,
+      ObjectTypes.BrickBlock,
+      ObjectTypes.MudBricks,
+      ObjectTypes.Lodestone,
+      ObjectTypes.WhiteConcretePowder,
+      ObjectTypes.OrangeConcretePowder,
+      ObjectTypes.MagentaConcretePowder,
+      ObjectTypes.LightBlueConcretePowder,
+      ObjectTypes.YellowConcretePowder,
+      ObjectTypes.LimeConcretePowder,
+      ObjectTypes.PinkConcretePowder,
+      ObjectTypes.GrayConcretePowder,
+      ObjectTypes.LightGrayConcretePowder,
+      ObjectTypes.CyanConcretePowder,
+      ObjectTypes.PurpleConcretePowder,
+      ObjectTypes.BlueConcretePowder,
+      ObjectTypes.BrownConcretePowder,
+      ObjectTypes.GreenConcretePowder,
+      ObjectTypes.RedConcretePowder,
+      ObjectTypes.BlackConcretePowder,
+      ObjectTypes.WhiteConcrete,
+      ObjectTypes.OrangeConcrete,
+      ObjectTypes.MagentaConcrete,
+      ObjectTypes.LightBlueConcrete,
+      ObjectTypes.YellowConcrete,
+      ObjectTypes.LimeConcrete,
+      ObjectTypes.PinkConcrete,
+      ObjectTypes.GrayConcrete,
+      ObjectTypes.LightGrayConcrete,
+      ObjectTypes.CyanConcrete,
+      ObjectTypes.PurpleConcrete,
+      ObjectTypes.BlueConcrete,
+      ObjectTypes.BrownConcrete,
+      ObjectTypes.GreenConcrete,
+      ObjectTypes.RedConcrete,
+      ObjectTypes.BlackConcrete
     ];
   }
 
-  function getTerracottaTypes() internal pure returns (ObjectType[13] memory) {
+  function getTerracottaTypes() internal pure returns (ObjectType[17] memory) {
     return [
       ObjectTypes.Terracotta,
       ObjectTypes.BrownTerracotta,
@@ -794,7 +998,11 @@ library ObjectTypeLib {
       ObjectTypes.BlackTerracotta,
       ObjectTypes.PurpleTerracotta,
       ObjectTypes.BlueTerracotta,
-      ObjectTypes.MagentaTerracotta
+      ObjectTypes.MagentaTerracotta,
+      ObjectTypes.GreenTerracotta,
+      ObjectTypes.PinkTerracotta,
+      ObjectTypes.LimeTerracotta,
+      ObjectTypes.GrayTerracotta
     ];
   }
 
@@ -878,8 +1086,8 @@ library ObjectTypeLib {
     ];
   }
 
-  function getStationTypes() internal pure returns (ObjectType[3] memory) {
-    return [ObjectTypes.Workbench, ObjectTypes.Powerstone, ObjectTypes.Furnace];
+  function getStationTypes() internal pure returns (ObjectType[4] memory) {
+    return [ObjectTypes.Workbench, ObjectTypes.Powerstone, ObjectTypes.Furnace, ObjectTypes.Stonecutter];
   }
 
   function getPickTypes() internal pure returns (ObjectType[6] memory) {
@@ -992,7 +1200,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function getPickMultiplierTypes() internal pure returns (ObjectType[44] memory) {
+  function getPickMultiplierTypes() internal pure returns (ObjectType[118] memory) {
     return [
       ObjectTypes.CoalOre,
       ObjectTypes.CopperOre,
@@ -1037,7 +1245,81 @@ library ObjectTypeLib {
       ObjectTypes.NeptuniumBlock,
       ObjectTypes.Powerstone,
       ObjectTypes.Furnace,
-      ObjectTypes.ForceField
+      ObjectTypes.ForceField,
+      ObjectTypes.Stonecutter,
+      ObjectTypes.StoneBricks,
+      ObjectTypes.TuffBricks,
+      ObjectTypes.DeepslateBricks,
+      ObjectTypes.PolishedAndesite,
+      ObjectTypes.PolishedGranite,
+      ObjectTypes.PolishedDiorite,
+      ObjectTypes.PolishedTuff,
+      ObjectTypes.PolishedBasalt,
+      ObjectTypes.PolishedBlackstone,
+      ObjectTypes.ChiseledStoneBricks,
+      ObjectTypes.ChiseledTuffBricks,
+      ObjectTypes.ChiseledDeepslate,
+      ObjectTypes.ChiseledPolishedBlackstone,
+      ObjectTypes.ChiseledSandstone,
+      ObjectTypes.ChiseledRedSandstone,
+      ObjectTypes.CrackedStoneBricks,
+      ObjectTypes.CrackedDeepslateBricks,
+      ObjectTypes.SmoothSandstone,
+      ObjectTypes.SmoothRedSandstone,
+      ObjectTypes.SmoothStone,
+      ObjectTypes.PolishedDeepslate,
+      ObjectTypes.PolishedBlackstoneBricks,
+      ObjectTypes.CrackedPolishedBlackstoneBricks,
+      ObjectTypes.MossyStoneBricks,
+      ObjectTypes.CutSandstone,
+      ObjectTypes.CutRedSandstone,
+      ObjectTypes.Sandstone,
+      ObjectTypes.RedSandstone,
+      ObjectTypes.BrickBlock,
+      ObjectTypes.MudBricks,
+      ObjectTypes.Lodestone,
+      ObjectTypes.WhiteConcrete,
+      ObjectTypes.OrangeConcrete,
+      ObjectTypes.MagentaConcrete,
+      ObjectTypes.LightBlueConcrete,
+      ObjectTypes.YellowConcrete,
+      ObjectTypes.LimeConcrete,
+      ObjectTypes.PinkConcrete,
+      ObjectTypes.GrayConcrete,
+      ObjectTypes.LightGrayConcrete,
+      ObjectTypes.CyanConcrete,
+      ObjectTypes.PurpleConcrete,
+      ObjectTypes.BlueConcrete,
+      ObjectTypes.BrownConcrete,
+      ObjectTypes.GreenConcrete,
+      ObjectTypes.RedConcrete,
+      ObjectTypes.BlackConcrete,
+      ObjectTypes.Glass,
+      ObjectTypes.WhiteGlass,
+      ObjectTypes.OrangeGlass,
+      ObjectTypes.YellowGlass,
+      ObjectTypes.PinkGlass,
+      ObjectTypes.PurpleGlass,
+      ObjectTypes.BlueGlass,
+      ObjectTypes.GreenGlass,
+      ObjectTypes.RedGlass,
+      ObjectTypes.BlackGlass,
+      ObjectTypes.WhiteConcretePowder,
+      ObjectTypes.OrangeConcretePowder,
+      ObjectTypes.MagentaConcretePowder,
+      ObjectTypes.LightBlueConcretePowder,
+      ObjectTypes.YellowConcretePowder,
+      ObjectTypes.LimeConcretePowder,
+      ObjectTypes.PinkConcretePowder,
+      ObjectTypes.GrayConcretePowder,
+      ObjectTypes.LightGrayConcretePowder,
+      ObjectTypes.CyanConcretePowder,
+      ObjectTypes.PurpleConcretePowder,
+      ObjectTypes.BlueConcretePowder,
+      ObjectTypes.BrownConcretePowder,
+      ObjectTypes.GreenConcretePowder,
+      ObjectTypes.RedConcretePowder,
+      ObjectTypes.BlackConcretePowder
     ];
   }
 
@@ -1195,7 +1477,7 @@ library ObjectTypeLib {
     ];
   }
 
-  function getWaterloggableTypes() internal pure returns (ObjectType[98] memory) {
+  function getWaterloggableTypes() internal pure returns (ObjectType[174] memory) {
     return [
       ObjectTypes.Stone,
       ObjectTypes.Deepslate,
@@ -1246,6 +1528,10 @@ library ObjectTypeLib {
       ObjectTypes.PurpleTerracotta,
       ObjectTypes.BlueTerracotta,
       ObjectTypes.MagentaTerracotta,
+      ObjectTypes.GreenTerracotta,
+      ObjectTypes.PinkTerracotta,
+      ObjectTypes.LimeTerracotta,
+      ObjectTypes.GrayTerracotta,
       ObjectTypes.OakLog,
       ObjectTypes.BirchLog,
       ObjectTypes.JungleLog,
@@ -1294,12 +1580,117 @@ library ObjectTypeLib {
       ObjectTypes.Chest,
       ObjectTypes.SpawnTile,
       ObjectTypes.TextSign,
-      ObjectTypes.Torch
+      ObjectTypes.Torch,
+      ObjectTypes.Stonecutter,
+      ObjectTypes.StoneBricks,
+      ObjectTypes.TuffBricks,
+      ObjectTypes.DeepslateBricks,
+      ObjectTypes.PolishedAndesite,
+      ObjectTypes.PolishedGranite,
+      ObjectTypes.PolishedDiorite,
+      ObjectTypes.PolishedTuff,
+      ObjectTypes.PolishedBasalt,
+      ObjectTypes.PolishedBlackstone,
+      ObjectTypes.ChiseledStoneBricks,
+      ObjectTypes.ChiseledTuffBricks,
+      ObjectTypes.ChiseledDeepslate,
+      ObjectTypes.ChiseledPolishedBlackstone,
+      ObjectTypes.ChiseledSandstone,
+      ObjectTypes.ChiseledRedSandstone,
+      ObjectTypes.CrackedStoneBricks,
+      ObjectTypes.CrackedDeepslateBricks,
+      ObjectTypes.SmoothSandstone,
+      ObjectTypes.SmoothRedSandstone,
+      ObjectTypes.SmoothStone,
+      ObjectTypes.PolishedDeepslate,
+      ObjectTypes.PolishedBlackstoneBricks,
+      ObjectTypes.CrackedPolishedBlackstoneBricks,
+      ObjectTypes.MossyStoneBricks,
+      ObjectTypes.CutSandstone,
+      ObjectTypes.CutRedSandstone,
+      ObjectTypes.BrickBlock,
+      ObjectTypes.MudBricks,
+      ObjectTypes.Glass,
+      ObjectTypes.WhiteGlass,
+      ObjectTypes.OrangeGlass,
+      ObjectTypes.YellowGlass,
+      ObjectTypes.PinkGlass,
+      ObjectTypes.PurpleGlass,
+      ObjectTypes.BlueGlass,
+      ObjectTypes.GreenGlass,
+      ObjectTypes.RedGlass,
+      ObjectTypes.BlackGlass,
+      ObjectTypes.WhiteConcrete,
+      ObjectTypes.OrangeConcrete,
+      ObjectTypes.MagentaConcrete,
+      ObjectTypes.LightBlueConcrete,
+      ObjectTypes.YellowConcrete,
+      ObjectTypes.LimeConcrete,
+      ObjectTypes.PinkConcrete,
+      ObjectTypes.GrayConcrete,
+      ObjectTypes.LightGrayConcrete,
+      ObjectTypes.CyanConcrete,
+      ObjectTypes.PurpleConcrete,
+      ObjectTypes.BlueConcrete,
+      ObjectTypes.BrownConcrete,
+      ObjectTypes.GreenConcrete,
+      ObjectTypes.RedConcrete,
+      ObjectTypes.BlackConcrete,
+      ObjectTypes.WhiteConcretePowder,
+      ObjectTypes.OrangeConcretePowder,
+      ObjectTypes.MagentaConcretePowder,
+      ObjectTypes.LightBlueConcretePowder,
+      ObjectTypes.YellowConcretePowder,
+      ObjectTypes.LimeConcretePowder,
+      ObjectTypes.PinkConcretePowder,
+      ObjectTypes.GrayConcretePowder,
+      ObjectTypes.LightGrayConcretePowder,
+      ObjectTypes.CyanConcretePowder,
+      ObjectTypes.PurpleConcretePowder,
+      ObjectTypes.BlueConcretePowder,
+      ObjectTypes.BrownConcretePowder,
+      ObjectTypes.GreenConcretePowder,
+      ObjectTypes.RedConcretePowder,
+      ObjectTypes.BlackConcretePowder,
+      ObjectTypes.Lodestone
     ];
   }
 
   function getPreferredSpawnTypes() internal pure returns (ObjectType[4] memory) {
     return [ObjectTypes.Dirt, ObjectTypes.Grass, ObjectTypes.Sand, ObjectTypes.Stone];
+  }
+
+  function getBurnOnCraftTypes() internal pure returns (ObjectType[28] memory) {
+    return [
+      ObjectTypes.AzaleaFlower,
+      ObjectTypes.BellFlower,
+      ObjectTypes.DandelionFlower,
+      ObjectTypes.DaylilyFlower,
+      ObjectTypes.LilacFlower,
+      ObjectTypes.RoseFlower,
+      ObjectTypes.FireFlower,
+      ObjectTypes.MorninggloryFlower,
+      ObjectTypes.PeonyFlower,
+      ObjectTypes.Ultraviolet,
+      ObjectTypes.SunFlower,
+      ObjectTypes.FlyTrap,
+      ObjectTypes.FescueGrass,
+      ObjectTypes.SwitchGrass,
+      ObjectTypes.VinesBush,
+      ObjectTypes.IvyVine,
+      ObjectTypes.HempBush,
+      ObjectTypes.Coral,
+      ObjectTypes.SeaAnemone,
+      ObjectTypes.Algae,
+      ObjectTypes.SpiderWeb,
+      ObjectTypes.Bone,
+      ObjectTypes.GoldenMushroom,
+      ObjectTypes.RedMushroom,
+      ObjectTypes.CoffeeBush,
+      ObjectTypes.StrawberryBush,
+      ObjectTypes.RaspberryBush,
+      ObjectTypes.BambooBush
+    ];
   }
 
   // Specialized getters
@@ -1376,6 +1767,10 @@ library ObjectTypeLib {
         || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
     }
     if (self == ObjectTypes.Furnace) {
+      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
+        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    }
+    if (self == ObjectTypes.Stonecutter) {
       return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
         || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
     }
@@ -1480,7 +1875,8 @@ library ObjectTypeLib {
     if (self == ObjectTypes.SpruceSapling) return 76800;
     if (self == ObjectTypes.DarkOakSapling) return 60600;
     if (self == ObjectTypes.MangroveSapling) return 69600;
-    return 0;
+
+    revert("Object is not growable");
   }
 
   function getGrowableEnergy(ObjectType self) public pure returns (uint128) {
@@ -1495,7 +1891,8 @@ library ObjectTypeLib {
     if (self == ObjectTypes.SpruceSapling) return 256000000000000000;
     if (self == ObjectTypes.DarkOakSapling) return 202000000000000000;
     if (self == ObjectTypes.MangroveSapling) return 232000000000000000;
-    return 0;
+
+    revert("Object is not growable");
   }
 
   function isPlantableOn(ObjectType self, ObjectType on) internal pure returns (bool) {
