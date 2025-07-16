@@ -2,11 +2,102 @@
 
 ## 2024-07-16
 
-- Add new objects (95) and their recipes:
-  - New Stonecutter station
-  - New Stonecutter recipes
-  - Dyes from flowers and bones
-  - Many more!
+- Add new objects and their recipes:
+  - GreenTerracotta
+  - PinkTerracotta
+  - LimeTerracotta
+  - GrayTerracotta
+  - Stonecutter
+  - StoneBricks
+  - TuffBricks
+  - DeepslateBricks
+  - PolishedAndesite
+  - PolishedGranite
+  - PolishedDiorite
+  - PolishedTuff
+  - PolishedBasalt
+  - PolishedBlackstone
+  - ChiseledStoneBricks
+  - ChiseledTuffBricks
+  - ChiseledDeepslate
+  - ChiseledPolishedBlackstone
+  - ChiseledSandstone
+  - ChiseledRedSandstone
+  - CrackedStoneBricks
+  - CrackedDeepslateBricks
+  - SmoothSandstone
+  - SmoothRedSandstone
+  - SmoothStone
+  - PolishedDeepslate
+  - PolishedBlackstoneBricks
+  - CrackedPolishedBlackstoneBricks
+  - MossyStoneBricks
+  - CutSandstone
+  - CutRedSandstone
+  - RedDye
+  - YellowDye
+  - BlueDye
+  - GreenDye
+  - WhiteDye
+  - BlackDye
+  - BrownDye
+  - OrangeDye
+  - PinkDye
+  - LimeDye
+  - CyanDye
+  - GrayDye
+  - PurpleDye
+  - MagentaDye
+  - LightBlueDye
+  - LightGrayDye
+  - WhiteConcretePowder
+  - OrangeConcretePowder
+  - MagentaConcretePowder
+  - LightBlueConcretePowder
+  - YellowConcretePowder
+  - LimeConcretePowder
+  - PinkConcretePowder
+  - GrayConcretePowder
+  - LightGrayConcretePowder
+  - CyanConcretePowder
+  - PurpleConcretePowder
+  - BlueConcretePowder
+  - BrownConcretePowder
+  - GreenConcretePowder
+  - RedConcretePowder
+  - BlackConcretePowder
+  - WhiteConcrete
+  - OrangeConcrete
+  - MagentaConcrete
+  - LightBlueConcrete
+  - YellowConcrete
+  - LimeConcrete
+  - PinkConcrete
+  - GrayConcrete
+  - LightGrayConcrete
+  - CyanConcrete
+  - PurpleConcrete
+  - BlueConcrete
+  - BrownConcrete
+  - GreenConcrete
+  - RedConcrete
+  - BlackConcrete
+  - Brick
+  - BrickBlock
+  - MudBricks
+  - Paper
+  - Stick
+  - Lodestone
+  - Glass
+  - WhiteGlass
+  - OrangeGlass
+  - YellowGlass
+  - PinkGlass
+  - PurpleGlass
+  - BlueGlass
+  - GreenGlass
+  - RedGlass
+  - BlackGlass
 
 ## 2024-07-09
 
