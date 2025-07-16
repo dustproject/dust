@@ -1,5 +1,13 @@
 # Changelog
 
+## 2024-07-16
+
+- Add new objects (95) and their recipes:
+  - New Stonecutter station
+  - New Stonecutter recipes
+  - Dyes from flowers and bones
+  - Many more!
+
 ## 2024-07-09
 
 - Add back DefaultProgramSystem function to get group id.
