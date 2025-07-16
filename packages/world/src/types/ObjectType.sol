@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { IMachineSystem } from "../codegen/world/IMachineSystem.sol";
 import { ITransferSystem } from "../codegen/world/ITransferSystem.sol";
+
 import { Orientation } from "./Orientation.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
 
@@ -1875,11 +1875,11 @@ library ObjectTypeLib {
     if (self == ObjectTypes.SpruceSapling) return 76800;
     if (self == ObjectTypes.DarkOakSapling) return 60600;
     if (self == ObjectTypes.MangroveSapling) return 69600;
-    return 0;
+
+    revert("Object is not growable");
   }
 
   function getGrowableEnergy(ObjectType self) public pure returns (uint128) {
-    // First check explicit growableEnergy (for saplings)
     if (self == ObjectTypes.WheatSeed) return 4300000000000000;
     if (self == ObjectTypes.PumpkinSeed) return 34300000000000000;
     if (self == ObjectTypes.MelonSeed) return 34300000000000000;
@@ -1892,7 +1892,7 @@ library ObjectTypeLib {
     if (self == ObjectTypes.DarkOakSapling) return 202000000000000000;
     if (self == ObjectTypes.MangroveSapling) return 232000000000000000;
 
-    return 0;
+    revert("Object is not growable");
   }
 
   function isPlantableOn(ObjectType self, ObjectType on) internal pure returns (bool) {
