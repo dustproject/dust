@@ -85,6 +85,15 @@ library NatureLib {
     return (cap, mined >= cap ? 0 : cap - mined);
   }
 
+  function burnResource(ObjectType objectType, uint256 amount) internal {
+    require(amount > 0, "Burn amount must be greater than 0");
+    require(objectType != ObjectTypes.Null, "Cannot burn null object type");
+
+    // Update the burned resource count
+    uint256 burnedCount = BurnedResourceCount._get(objectType);
+    BurnedResourceCount._set(objectType, burnedCount + amount);
+  }
+
   function growSeed(Vec3 coord, EntityId seed, ObjectType objectType) public returns (ObjectType) {
     // When a seed grows, it's removed from circulation
     // We only update ResourceCount since seeds don't participate in respawning (no need to track positions

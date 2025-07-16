@@ -11,6 +11,7 @@ import { EntityId } from "../src/types/EntityId.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 
+import { BurnedResourceCount } from "../src/codegen/tables/BurnedResourceCount.sol";
 import { LocalEnergyPool } from "../src/codegen/tables/LocalEnergyPool.sol";
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 
@@ -717,5 +718,42 @@ contract CraftTest is DustTest {
     // Verify the output was created in the same slot as the input
     assertInventoryHasObject(aliceEntityId, outputTypes[0], outputAmounts[0]);
     assertInventoryHasObject(aliceEntityId, inputTypes[0], 0);
+  }
+
+  function testCraftBurnOnCraft() public {
+    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+
+    // Setup red mushroom to red dye recipe
+    ObjectType[] memory inputTypes = new ObjectType[](1);
+    inputTypes[0] = ObjectTypes.RedMushroom;
+    uint16[] memory inputAmounts = new uint16[](1);
+    inputAmounts[0] = 1;
+    ObjectType[] memory outputTypes = new ObjectType[](1);
+    outputTypes[0] = ObjectTypes.RedDye;
+    uint16[] memory outputAmounts = new uint16[](1);
+    outputAmounts[0] = 2;
+    bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
+
+    // Add mushrooms to inventory
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.RedMushroom, 5);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.RedMushroom, 5);
+
+    // Check initial burned count
+    uint256 initialBurnedCount = BurnedResourceCount.get(ObjectTypes.RedMushroom);
+
+    // Craft red dye from red mushroom
+    SlotAmount[] memory inputs = new SlotAmount[](1);
+    inputs[0] = SlotAmount({ slot: 0, amount: 1 });
+
+    vm.prank(alice);
+    world.craft(aliceEntityId, recipeId, inputs);
+
+    // Verify mushroom was consumed and dye was created
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.RedMushroom, 4);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.RedDye, 2);
+
+    // Verify burned count was incremented
+    uint256 newBurnedCount = BurnedResourceCount.get(ObjectTypes.RedMushroom);
+    assertEq(newBurnedCount, initialBurnedCount + 1, "Burned count should be incremented by 1");
   }
 }

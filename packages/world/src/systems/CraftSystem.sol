@@ -9,7 +9,7 @@ import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
 
-import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
+import { ObjectPhysics, ObjectPhysicsData } from "../codegen/tables/ObjectPhysics.sol";
 import { Recipes, RecipesData } from "../codegen/tables/Recipes.sol";
 
 import { addEnergyToLocalPool, transferEnergyToPool } from "../utils/EnergyUtils.sol";
@@ -23,6 +23,8 @@ import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 
 import { Vec3 } from "../types/Vec3.sol";
+
+import { NatureLib } from "../utils/NatureLib.sol";
 import { OreLib } from "../utils/OreLib.sol";
 
 contract CraftSystem is System {
@@ -71,6 +73,9 @@ library CraftLib {
         // TODO: this should be removed once craftingTime is implemented
         if (recipeType == ObjectTypes.CoalOre) {
           OreLib.burnOre(recipeType, recipe.inputAmounts[i]);
+        } else if (recipeType.isBurnOnCraft()) {
+          // Allow this object to respawn
+          NatureLib.burnResource(recipeType, amount);
         }
 
         InventoryUtils.removeObjectFromSlot(caller, inputs[currentInput].slot, amount);
@@ -124,9 +129,8 @@ library CraftLib {
         continue;
       }
 
-      uint128 mass = ObjectPhysics._getMass(inputType);
-      uint128 energy = ObjectPhysics._getEnergy(inputType);
-      totalInputMassEnergy += (mass + energy) * inputAmount;
+      ObjectPhysicsData memory physics = ObjectPhysics._get(inputType);
+      totalInputMassEnergy += (physics.mass + physics.energy) * inputAmount;
     }
 
     // Calculate total output mass+energy
@@ -135,9 +139,8 @@ library CraftLib {
       ObjectType outputType = ObjectType.wrap(recipe.outputTypes[i]);
       uint16 outputAmount = recipe.outputAmounts[i];
 
-      uint128 mass = ObjectPhysics._getMass(outputType);
-      uint128 energy = ObjectPhysics._getEnergy(outputType);
-      totalOutputMassEnergy += (mass + energy) * outputAmount;
+      ObjectPhysicsData memory physics = ObjectPhysics._get(outputType);
+      totalOutputMassEnergy += (physics.mass + physics.energy) * outputAmount;
     }
 
     require(totalInputMassEnergy >= totalOutputMassEnergy, "Insufficient input mass+energy");

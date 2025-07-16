@@ -402,10 +402,6 @@ export const recipes: Recipe[] = [
     outputs: [["BlackDye", 2]],
   },
   {
-    inputs: [["BrownMushroomBlock", 1]],
-    outputs: [["BrownDye", 2]],
-  },
-  {
     inputs: [
       ["GreenDye", 1],
       ["RedDye", 1],
