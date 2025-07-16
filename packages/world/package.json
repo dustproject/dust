@@ -37,7 +37,8 @@
     "script:teleport": "./runForgeScript.bash script/debug/TeleportScript.s.sol",
     "test": "./runTests.bash",
     "test:js": "vitest",
-    "world:set-paused": "forge script SetPausedScript --aws --broadcast --sig 'run(bool)'"
+    "world:set-paused": "forge script SetPausedScript --aws --broadcast --sig 'run(bool)'",
+    "world:upgrade": "export FOUNDRY_PROFILE=redstone && pnpm build && pnpm world:set-paused true && mud deploy --profile=redstone --rpcBatch --worldAddress=0x253eb85B3C953bFE3827CC14a151262482E7189C --kms && pnpm world:set-paused false"
   },
   "dependencies": {
     "@latticexyz/common": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
