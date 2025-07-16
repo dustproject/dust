@@ -94,7 +94,6 @@ import { IMachineSystem } from "../codegen/world/IMachineSystem.sol";
 import { ITransferSystem } from "../codegen/world/ITransferSystem.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
 import { Orientation } from "./Orientation.sol";
-import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 
 type ObjectType is uint16;
 
@@ -286,11 +285,11 @@ ${Object.entries(categories)
           `if (self == ObjectTypes.${obj.name}) return ${obj.timeToGrow};`,
       )
       .join("\n    ")}
-    return 0;
+
+    revert("Object is not growable");
   }
 
   function getGrowableEnergy(ObjectType self) public pure returns(uint128) {
-    // First check explicit growableEnergy (for saplings)
     ${objects
       .filter((obj) => obj.growableEnergy)
       .map(
@@ -299,7 +298,7 @@ ${Object.entries(categories)
       )
       .join("\n    ")}
 
-    return 0;
+    revert("Object is not growable");
   }
 
   function isPlantableOn(ObjectType self, ObjectType on) internal pure returns (bool) {
