@@ -1,5 +1,8 @@
 # Changelog
 
+## 2024-07-17
+- Add view function for getting object type at coordinate
+
 ## 2024-07-16
 
 - Add new objects and their recipes:
