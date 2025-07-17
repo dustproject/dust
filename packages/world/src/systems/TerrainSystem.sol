@@ -5,6 +5,8 @@ import { CHUNK_SIZE, INITIAL_ENERGY_PER_VEGETATION, INITIAL_LOCAL_ENERGY_BUFFER,
 
 import { RegionMerkleRoot } from "../codegen/tables/RegionMerkleRoot.sol";
 import { SurfaceChunkCount } from "../codegen/tables/SurfaceChunkCount.sol";
+
+import { ObjectType } from "../types/ObjectType.sol";
 import { Vec3 } from "../types/Vec3.sol";
 import { SSTORE2 } from "../utils/SSTORE2.sol";
 import { ExploredChunk, InitialEnergyPool, LocalEnergyPool, SurfaceChunkByIndex } from "../utils/Vec3Storage.sol";
@@ -12,9 +14,14 @@ import { System } from "@latticexyz/world/src/System.sol";
 
 import { MerkleProof } from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
+import { EntityUtils } from "../utils/EntityUtils.sol";
 import { TerrainLib } from "./libraries/TerrainLib.sol";
 
 contract TerrainSystem is System {
+  function getObjectTypeAt(Vec3 coord) public view returns (ObjectType) {
+    return EntityUtils.getObjectTypeAt(coord);
+  }
+
   function exploreChunk(Vec3 chunkCoord, bytes memory chunkData, bytes32[] memory merkleProof) public {
     require(ExploredChunk._get(chunkCoord) == address(0), "Chunk already explored");
 
