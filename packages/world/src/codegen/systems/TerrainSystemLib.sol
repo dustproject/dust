@@ -5,6 +5,7 @@ pragma solidity >=0.8.24;
 
 import { TerrainSystem } from "../../systems/TerrainSystem.sol";
 import { Vec3 } from "../../types/Vec3.sol";
+import { ObjectType } from "../../types/ObjectType.sol";
 import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 import { IWorldCall } from "@latticexyz/world/src/IWorldKernel.sol";
 import { SystemCall } from "@latticexyz/world/src/SystemCall.sol";
@@ -38,6 +39,10 @@ struct RootCallWrapper {
 library TerrainSystemLib {
   error TerrainSystemLib_CallingFromRootSystem();
 
+  function getObjectTypeAt(TerrainSystemType self, Vec3 coord) internal view returns (ObjectType) {
+    return CallWrapper(self.toResourceId(), address(0)).getObjectTypeAt(coord);
+  }
+
   function exploreChunk(
     TerrainSystemType self,
     Vec3 chunkCoord,
@@ -54,6 +59,21 @@ library TerrainSystemLib {
     bytes32[] memory merkleProof
   ) internal {
     return CallWrapper(self.toResourceId(), address(0)).exploreRegionEnergy(regionCoord, vegetationCount, merkleProof);
+  }
+
+  function getObjectTypeAt(CallWrapper memory self, Vec3 coord) internal view returns (ObjectType) {
+    // if the contract calling this function is a root system, it should use `callAsRoot`
+    if (address(_world()) == address(this)) revert TerrainSystemLib_CallingFromRootSystem();
+
+    bytes memory systemCall = abi.encodeCall(_getObjectTypeAt_Vec3.getObjectTypeAt, (coord));
+    bytes memory worldCall = self.from == address(0)
+      ? abi.encodeCall(IWorldCall.call, (self.systemId, systemCall))
+      : abi.encodeCall(IWorldCall.callFrom, (self.from, self.systemId, systemCall));
+    (bool success, bytes memory returnData) = address(_world()).staticcall(worldCall);
+    if (!success) revertWithBytes(returnData);
+
+    bytes memory result = abi.decode(returnData, (bytes));
+    return abi.decode(result, (ObjectType));
   }
 
   function exploreChunk(
@@ -155,6 +175,10 @@ library TerrainSystemLib {
  *
  * Each interface is uniquely named based on the function name and parameters to prevent collisions.
  */
+
+interface _getObjectTypeAt_Vec3 {
+  function getObjectTypeAt(Vec3 coord) external;
+}
 
 interface _exploreChunk_Vec3_bytes_bytes32Array {
   function exploreChunk(Vec3 chunkCoord, bytes memory chunkData, bytes32[] memory merkleProof) external;
