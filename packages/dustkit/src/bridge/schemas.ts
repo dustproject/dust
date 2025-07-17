@@ -76,4 +76,17 @@ export type ClientRpcSchema = RpcSchema.From<
       };
       ReturnType: void;
     }
+  | {
+      Request: {
+        method: "getSelectedHotbarSlot";
+      };
+      ReturnType: {
+        idx: number;
+        kind: "hotbar";
+        item?: {
+          id: number;
+          payload?: Record<number, unknown>;
+        };
+      };
+    }
 >;
