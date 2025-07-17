@@ -2,7 +2,7 @@ import config from "../mud.config";
 
 // Ensure Direction is the union of enum values
 const directionEnum = config.enums.Direction as readonly string[];
-type Direction = (typeof directionEnum)[number];
+export type Direction = (typeof directionEnum)[number];
 
 /**
  * Packs an array of directions into a single uint256 for the moveDirectionsPacked function.

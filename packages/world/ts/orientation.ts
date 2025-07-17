@@ -1,10 +1,5 @@
-import config from "../mud.config";
+import type { Direction } from "./moveUtils";
 import type { Vec3 } from "./vec3";
-
-// Direction is an array of strings
-config.enums.Direction;
-
-type Direction = (typeof config.enums.Direction)[number];
 
 const SUPPORTED_DIRECTION_VECTORS: {
   [key in Direction]?: [number, number, number];
