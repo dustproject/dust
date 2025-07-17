@@ -76,4 +76,10 @@ export type ClientRpcSchema = RpcSchema.From<
       };
       ReturnType: void;
     }
+  | {
+      Request: {
+        method: "getSelectedObjectType";
+      };
+      ReturnType: number;
+    }
 >;
