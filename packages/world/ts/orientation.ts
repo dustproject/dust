@@ -4,7 +4,7 @@ import type { Vec3 } from "./vec3";
 // Direction is an array of strings
 config.enums.Direction;
 
-type Direction = (typeof config.enums.Direction)[number];
+export type Direction = (typeof config.enums.Direction)[number];
 
 const SUPPORTED_DIRECTION_VECTORS: {
   [key in Direction]?: [number, number, number];
@@ -178,11 +178,11 @@ export const CARDINAL_ORIENTATIONS: readonly Orientation[] = [0, 1, 40, 44];
 export const STAIR_ORIENTATIONS: readonly Orientation[] = [
   0,
   1,
+  40,
+  44,
   2,
   3,
-  40,
-  41,
   42,
-  43, // 8 orientations for stairs (4 directions × 2 for upside-down)
+  46, // 8 orientations for stairs (4 directions × 2 for upside-down)
 ];
 export const SLAB_ORIENTATIONS: readonly Orientation[] = [0, 2]; // Bottom and top slabs
