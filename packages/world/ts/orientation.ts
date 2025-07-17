@@ -4,7 +4,7 @@ import type { Vec3 } from "./vec3";
 // Direction is an array of strings
 config.enums.Direction;
 
-type Direction = (typeof config.enums.Direction)[number];
+export type Direction = (typeof config.enums.Direction)[number];
 
 const SUPPORTED_DIRECTION_VECTORS: {
   [key in Direction]?: [number, number, number];
@@ -63,8 +63,8 @@ export const REFLECTIONS: readonly [
   [1, 1, 1], // Reflect all axes
 ] as const;
 
-const CANONICAL_UP: Vec3 = [0, 1, 0];
-const CANONICAL_FORWARD: Vec3 = [1, 0, 0];
+export const CANONICAL_UP: Vec3 = [0, 1, 0];
+export const CANONICAL_FORWARD: Vec3 = [1, 0, 0];
 
 export function applyOrientation(v: Vec3, perm: Permute, refl: Reflect): Vec3 {
   const out: Vec3 = [v[perm[0]]!, v[perm[1]]!, v[perm[2]]!];
@@ -166,3 +166,29 @@ export function decodeOrientation(
   const reflIdx = orientation & 7;
   return [PERMUTATIONS[permIdx]!, REFLECTIONS[reflIdx]!];
 }
+
+export function isUpsideDown(orientation: Orientation): boolean {
+  const [perm, refl] = decodeOrientation(orientation);
+  const up = applyOrientation(CANONICAL_UP, perm, refl);
+  return up[0] === 0 && up[1] === -1 && up[2] === 0;
+}
+
+// All possible orientations (0-47)
+export const ALL_ORIENTATIONS: readonly Orientation[] = Array.from(
+  { length: 48 },
+  (_, i) => i,
+);
+
+// Common orientation sets for different object types
+export const CARDINAL_ORIENTATIONS: readonly Orientation[] = [0, 1, 40, 44];
+export const STAIR_ORIENTATIONS: readonly Orientation[] = [
+  0,
+  1,
+  40,
+  44,
+  2,
+  3,
+  42,
+  46, // 8 orientations for stairs (4 directions × 2 for upside-down)
+];
+export const SLAB_ORIENTATIONS: readonly Orientation[] = [0, 2]; // Bottom and top slabs

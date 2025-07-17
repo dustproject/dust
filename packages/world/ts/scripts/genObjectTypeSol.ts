@@ -92,8 +92,8 @@ pragma solidity >=0.8.24;
 
 import { IMachineSystem } from "../codegen/world/IMachineSystem.sol";
 import { ITransferSystem } from "../codegen/world/ITransferSystem.sol";
-import { Vec3, vec3 } from "./Vec3.sol";
 import { Orientation } from "./Orientation.sol";
+import { Vec3, vec3 } from "./Vec3.sol";
 
 type ObjectType is uint16;
 
@@ -192,16 +192,18 @@ ${Object.entries(categories)
   }
 
   function isOrientationSupported(ObjectType self, Orientation orientation) internal pure returns (bool) {
-    ${objects
-      .filter((obj) => obj.supportedOrientations !== undefined)
-      .map((obj) => {
-        return `if (self == ObjectTypes.${obj.name}) {
-          return ${obj.supportedOrientations!.map((orientation) => `orientation == Orientation.wrap(${orientation})`).join(" || ")};
-        }`;
-      })
-      .join("\n    ")}
+    uint8 orientationValue = Orientation.unwrap(orientation);
 
-    return orientation == Orientation.wrap(0);
+    // Check if orientation is valid (0-47)
+    if (orientationValue >= 48) return false;
+
+    uint64 orientationBit = uint64(1) << orientationValue;
+    uint16 selfId = self.unwrap();
+
+    ${generateOrientationChecks()}
+
+    // Default: only orientation 0 is supported
+    return orientationValue == 0;
   }
 
   function getRelativeCoords(ObjectType self, Vec3 baseCoord) internal pure returns (Vec3[] memory) {
@@ -332,6 +334,90 @@ using { eq as ==, neq as != } for ObjectType global;
 
 using ObjectTypeLib for ObjectType global;
 `;
+}
+
+// Helper function to format orientation list
+function getOrientationDescription(orientations: number[]): string {
+  return `[${orientations.sort((a, b) => a - b).join(", ")}]`;
+}
+
+// Helper function to generate orientation checks
+function generateOrientationChecks(): string {
+  // Group objects by their orientation mask
+  const orientationGroups = new Map<
+    string,
+    { objects: (typeof objects)[0][]; orientations: number[] }
+  >();
+
+  // Process all objects with supported orientations
+  for (const obj of objects) {
+    if (obj.supportedOrientations && obj.supportedOrientations.length > 0) {
+      // Create a bitmask for this object's supported orientations
+      let mask = 0n;
+      for (const orientation of obj.supportedOrientations) {
+        mask |= 1n << BigInt(orientation);
+      }
+
+      const maskKey = mask.toString(16);
+      if (!orientationGroups.has(maskKey)) {
+        orientationGroups.set(maskKey, {
+          objects: [],
+          orientations: [...obj.supportedOrientations],
+        });
+      }
+      orientationGroups.get(maskKey)!.objects.push(obj);
+    }
+  }
+
+  // Generate checks for each orientation group
+  const checks: string[] = [];
+
+  for (const [maskHex, group] of orientationGroups) {
+    const { objects: groupObjects, orientations } = group;
+
+    // Group objects by ID ranges for more efficient checks
+    const idRanges: { start: number; end: number }[] = [];
+    const sortedObjects = [...groupObjects].sort((a, b) => a.id - b.id);
+
+    let currentRange: { start: number; end: number } | null = null;
+    for (const obj of sortedObjects) {
+      if (!currentRange || obj.id > currentRange.end + 1) {
+        currentRange = { start: obj.id, end: obj.id };
+        idRanges.push(currentRange);
+      } else {
+        currentRange.end = obj.id;
+      }
+    }
+
+    // Generate conditions for this mask
+    const conditions: string[] = [];
+
+    for (const range of idRanges) {
+      if (range.start === range.end) {
+        conditions.push(`selfId == ${range.start}`);
+      } else {
+        conditions.push(`(selfId >= ${range.start} && selfId <= ${range.end})`);
+      }
+    }
+
+    if (conditions.length > 0) {
+      const objectNames =
+        groupObjects
+          .slice(0, 3)
+          .map((o) => o.name)
+          .join(", ") + (groupObjects.length > 3 ? "..." : "");
+
+      const orientationDesc = getOrientationDescription(orientations);
+
+      const comment = `// Orientations ${orientationDesc}: ${objectNames}`;
+      checks.push(`${comment}
+    if (${conditions.join(" || ")}) {
+      return (orientationBit & 0x${maskHex}) != 0;
+    }`);
+    }
+  }
+
+  return checks.join("\n    ");
 }
 
 console.info(generateObjectTypeSol());
