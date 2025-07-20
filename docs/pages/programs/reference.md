@@ -18,3 +18,7 @@ TODO
 ## Bed
 
 - Decide who can sleep in the bed and react to it
+
+## Sign
+
+- Show text
