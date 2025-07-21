@@ -82,4 +82,27 @@ export type ClientRpcSchema = RpcSchema.From<
       };
       ReturnType: number;
     }
+  | {
+      Request: {
+        method: "getForceFieldAt";
+        params: {
+          x: number;
+          y: number;
+          z: number;
+        };
+      };
+      ReturnType:
+        | {
+            forceFieldId: Hex;
+            fragmentId: Hex;
+            fragmentPos: {
+              x: number;
+              y: number;
+              z: number;
+            };
+            forceFieldCreatedAt: bigint;
+            extraDrainRate: bigint;
+          }
+        | undefined;
+    }
 >;
