@@ -95,7 +95,11 @@ export type ClientRpcSchema = RpcSchema.From<
         | {
             forceFieldId: Hex;
             fragmentId: Hex;
-            fragmentPos: [number, number, number];
+            fragmentPos: {
+              x: number;
+              y: number;
+              z: number;
+            };
             forceFieldCreatedAt: bigint;
             extraDrainRate: bigint;
           }
