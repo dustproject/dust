@@ -72,6 +72,12 @@ export type ClientRpcSchema = RpcSchema.From<
             z: number;
             orientation: number;
           }[];
+          options:
+            | {
+                showBlocksToMine: boolean;
+                showBlocksToBuild: boolean;
+              }
+            | undefined;
         };
       };
       ReturnType: void;
