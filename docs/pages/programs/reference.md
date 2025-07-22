@@ -1,6 +1,6 @@
 # Reference
 
-TODO
+TODO: available hooks for each type of entity
 
 ## Force field
 
