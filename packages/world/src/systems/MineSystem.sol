@@ -112,7 +112,7 @@ contract MineSystem is System {
     (EntityId mined, ObjectType minedType) = EntityUtils.getOrCreateBlockAt(coord);
     require(minedType.isBlock(), "Object is not mineable");
 
-    mined = mined.baseEntityId();
+    mined = mined._baseEntityId();
     Vec3 baseCoord = mined._getPosition();
 
     minedType = _prepareBlock(mined, minedType, coord);
