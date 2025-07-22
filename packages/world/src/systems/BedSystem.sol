@@ -41,7 +41,7 @@ contract BedSystem is System {
 
     require(bed._getObjectType() == ObjectTypes.Bed, "Not a bed");
 
-    bed = bed.baseEntityId();
+    bed = bed._baseEntityId();
 
     require(!BedPlayer._getPlayerEntityId(bed)._exists(), "Bed full");
 

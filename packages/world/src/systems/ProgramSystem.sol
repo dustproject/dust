@@ -55,7 +55,7 @@ contract ProgramSystem is System {
   function _validateTarget(EntityId target) internal view returns (EntityId) {
     ObjectType targetType = target._getObjectType();
     require(targetType.isSmartEntity(), "Target is not a smart entity");
-    return target.baseEntityId();
+    return target._baseEntityId();
   }
 
   function _getValidatorCoord(EntityId caller, EntityId target) internal view returns (Vec3) {

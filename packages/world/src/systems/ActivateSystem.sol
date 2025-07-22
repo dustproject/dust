@@ -19,7 +19,7 @@ contract ActivateSystem is System {
     checkWorldStatus();
 
     require(entityId._exists(), "Entity does not exist");
-    EntityId base = entityId.baseEntityId();
+    EntityId base = entityId._baseEntityId();
     ObjectType objectType = base._getObjectType();
     require(!objectType.isNull(), "Entity has no object type");
 

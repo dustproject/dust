@@ -31,7 +31,7 @@ contract MachineSystem is System {
     require(slots.length > 0, "Must provide at least one slot");
     caller.requireConnected(machine);
 
-    machine = machine.baseEntityId();
+    machine = machine._baseEntityId();
 
     ObjectType objectType = machine._getObjectType();
     require(objectType.isMachine(), "Can only fuel machines");
