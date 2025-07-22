@@ -11,7 +11,6 @@ import { Machine, MachineData } from "../codegen/tables/Machine.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
-import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { LocalEnergyPool } from "../utils/Vec3Storage.sol";
 

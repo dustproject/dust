@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { console } from "forge-std/console.sol";
-
 import { DustTest } from "./DustTest.sol";
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
@@ -16,7 +14,7 @@ import { MAX_PLAYER_ENERGY } from "../src/Constants.sol";
 import { EntityId } from "../src/types/EntityId.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";
-import { Vec3, vec3 } from "../src/types/Vec3.sol";
+import { Vec3 } from "../src/types/Vec3.sol";
 
 contract FoodTest is DustTest {
   function testEatFood() public {

@@ -1,11 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { Action } from "../codegen/common.sol";
-import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
-import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
-
-import { LocalEnergyPool } from "../codegen/tables/LocalEnergyPool.sol";
+import { EnergyData } from "../codegen/tables/Energy.sol";
 import { System } from "@latticexyz/world/src/System.sol";
 
 import {
@@ -18,20 +14,11 @@ import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 
 import { Math } from "../utils/Math.sol";
 import { HitMachineNotification, notify } from "../utils/NotifUtils.sol";
-import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
-import {
-  DEFAULT_HIT_ENERGY_COST,
-  HIT_ACTION_MODIFIER,
-  ORE_TOOL_BASE_MULTIPLIER,
-  SAFE_PROGRAM_GAS,
-  SPECIALIZATION_MULTIPLIER,
-  TOOL_HIT_ENERGY_COST,
-  WOODEN_TOOL_BASE_MULTIPLIER
-} from "../Constants.sol";
+import { DEFAULT_HIT_ENERGY_COST, HIT_ACTION_MODIFIER, SAFE_PROGRAM_GAS, TOOL_HIT_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../types/EntityId.sol";
-import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
+import { ObjectType } from "../types/ObjectType.sol";
 
 import "../ProgramHooks.sol" as Hooks;
 import { ProgramId } from "../types/ProgramId.sol";

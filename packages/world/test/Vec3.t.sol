@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { DustTest, console } from "./DustTest.sol";
+import { DustTest } from "./DustTest.sol";
 
 import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
@@ -9,7 +9,7 @@ import { EntityId } from "../src/types/EntityId.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 
 import { Orientation } from "../src/types/Orientation.sol";
-import { Vec3, Vec3Lib, vec3 } from "../src/types/Vec3.sol";
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 contract Vec3Test is DustTest {
   function testVec3Encoding() public pure {

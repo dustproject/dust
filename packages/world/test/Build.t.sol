@@ -1,23 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
-import { console } from "forge-std/console.sol";
-
 import { EntityId } from "../src/types/EntityId.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
-import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
-import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 
-import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
+import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
 import { BUILD_ENERGY_COST, CHUNK_SIZE, MAX_ENTITY_INFLUENCE_RADIUS, MAX_FLUID_LEVEL } from "../src/Constants.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
@@ -25,9 +20,8 @@ import { ObjectType } from "../src/types/ObjectType.sol";
 import { NonPassableBlock } from "../src/systems/libraries/MoveLib.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 
-import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
-import { EntityId, EntityTypeLib } from "../src/types/EntityId.sol";
+import { EntityId } from "../src/types/EntityId.sol";
 import { Orientation } from "../src/types/Orientation.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";

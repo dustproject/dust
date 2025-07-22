@@ -4,29 +4,23 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
-import { console } from "forge-std/console.sol";
 
 import { EntityId } from "../src/types/EntityId.sol";
 
-import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
-import { LocalEnergyPool } from "../src/codegen/tables/LocalEnergyPool.sol";
-
+import { EnergyData } from "../src/codegen/tables/Energy.sol";
 import { EntityProgram } from "../src/codegen/tables/EntityProgram.sol";
 
-import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 
-import { CHUNK_SIZE } from "../src/Constants.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
 
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 
-import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { ProgramId } from "../src/types/ProgramId.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
-import { SlotData, SlotTransfer } from "../src/utils/InventoryUtils.sol";
+import { SlotTransfer } from "../src/utils/InventoryUtils.sol";
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract TestProgram is System {

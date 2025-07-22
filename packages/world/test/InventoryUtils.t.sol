@@ -3,21 +3,18 @@ pragma solidity >=0.8.24;
 
 import { LibBit } from "solady/utils/LibBit.sol";
 
-import { DustTest, console } from "./DustTest.sol";
+import { DustTest } from "./DustTest.sol";
 
-import { ACTION_MODIFIER_DENOMINATOR } from "../src/Constants.sol";
 import { EntityId } from "../src/types/EntityId.sol";
-import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
-import { Vec3, vec3 } from "../src/types/Vec3.sol";
+import { ObjectTypes } from "../src/types/ObjectType.sol";
+import { vec3 } from "../src/types/Vec3.sol";
 
 import { InventoryBitmap } from "../src/codegen/tables/InventoryBitmap.sol";
-import { Math } from "../src/utils/Math.sol";
 
 import { InventorySlot, InventorySlotData } from "../src/codegen/tables/InventorySlot.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
-import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
-import { SlotAmount, SlotTransfer, TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
+import { SlotAmount, SlotTransfer, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract InventoryUtilsTest is DustTest {
   function testMultipleTransferAll() public {

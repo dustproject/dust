@@ -5,7 +5,7 @@ import { AccessControl } from "@latticexyz/world/src/AccessControl.sol";
 import { System } from "@latticexyz/world/src/System.sol";
 import { ROOT_NAMESPACE_ID } from "@latticexyz/world/src/constants.sol";
 
-import { Vec3, vec3 } from "../../types/Vec3.sol";
+import { Vec3 } from "../../types/Vec3.sol";
 
 import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
 
@@ -17,7 +17,6 @@ import { ObjectTypes } from "../../types/ObjectType.sol";
 import { MoveLib } from "../../systems/libraries/MoveLib.sol";
 import { EntityUtils } from "../../utils/EntityUtils.sol";
 import { InventoryUtils } from "../../utils/InventoryUtils.sol";
-import { PlayerUtils } from "../../utils/PlayerUtils.sol";
 
 // Only for debugging purposes, not deployed to production
 contract DebugSystem is System {

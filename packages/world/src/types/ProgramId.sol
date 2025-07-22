@@ -1,14 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { WorldContextConsumerLib, WorldContextProviderLib } from "@latticexyz/world/src/WorldContext.sol";
+import { WorldContextProviderLib } from "@latticexyz/world/src/WorldContext.sol";
 import { ResourceId } from "@latticexyz/world/src/WorldResourceId.sol";
 import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
 import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
-
-import { EntityId } from "./EntityId.sol";
-import { ObjectType } from "./ObjectType.sol";
-import { Vec3 } from "./Vec3.sol";
 
 type ProgramId is bytes32;
 
