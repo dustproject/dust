@@ -112,7 +112,7 @@ Sets a blueprint with block positions and options.
   }
   [];
   ```
-- `options` (optional): Blueprint display options:
+- `options` (optional, defaults to true for both): Blueprint display options:
   ```typescript
   {
     showBlocksToMine: boolean;
