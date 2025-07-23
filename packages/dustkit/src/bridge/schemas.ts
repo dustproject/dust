@@ -111,4 +111,16 @@ export type ClientRpcSchema = RpcSchema.From<
           }
         | undefined;
     }
+  | {
+      Request: {
+        method: "getCursorPosition";
+      };
+      ReturnType:
+        | {
+            x: number;
+            y: number;
+            z: number;
+          }
+        | undefined;
+    }
 >;
