@@ -3,6 +3,7 @@ pragma solidity >=0.8.24;
 
 import { EntityId } from "./types/EntityId.sol";
 import { ObjectType } from "./types/ObjectType.sol";
+import { Orientation } from "./types/Orientation.sol";
 import { ProgramId } from "./types/ProgramId.sol";
 import { Vec3 } from "./types/Vec3.sol";
 import { SlotData } from "./utils/InventoryUtils.sol";
@@ -13,169 +14,116 @@ import { SlotData } from "./utils/InventoryUtils.sol";
  * - target is the entity for which the function is being called
  */
 
-// Context structs for each hook type
-
-struct ValidateProgramContext {
+// Base context struct for all hooks
+struct HookContext {
   EntityId caller;
   EntityId target;
-  EntityId programmed;
-  ProgramId program;
-  bytes extraData;
-}
-
-struct AttachProgramContext {
-  EntityId caller;
-  EntityId target;
-  bytes extraData;
-}
-
-struct DetachProgramContext {
-  EntityId caller;
-  EntityId target;
-  bytes extraData;
-}
-
-struct TransferContext {
-  EntityId caller;
-  EntityId target;
-  SlotData[] deposits;
-  SlotData[] withdrawals;
-  bytes extraData;
-}
-
-struct HitContext {
-  EntityId caller;
-  EntityId target;
-  uint128 damage;
-  bytes extraData;
-}
-
-struct FuelContext {
-  EntityId caller;
-  EntityId target;
-  uint16 fuelAmount;
-  bytes extraData;
-}
-
-struct AddFragmentContext {
-  EntityId caller;
-  EntityId target;
-  EntityId added;
-  bytes extraData;
-}
-
-struct RemoveFragmentContext {
-  EntityId caller;
-  EntityId target;
-  EntityId removed;
-  bytes extraData;
-}
-
-struct BuildContext {
-  EntityId caller;
-  EntityId target;
-  ObjectType objectType;
-  Vec3 coord;
-  bytes extraData;
-}
-
-struct MineContext {
-  EntityId caller;
-  EntityId target;
-  ObjectType objectType;
-  Vec3 coord;
-  bytes extraData;
-}
-
-struct SpawnContext {
-  EntityId caller;
-  EntityId target;
-  uint128 spawnEnergy;
-  bytes extraData;
-}
-
-struct SleepContext {
-  EntityId caller;
-  EntityId target;
-  bytes extraData;
-}
-
-struct WakeupContext {
-  EntityId caller;
-  EntityId target;
-  bytes extraData;
-}
-
-struct OpenContext {
-  EntityId caller;
-  EntityId target;
-  bytes extraData;
-}
-
-struct CloseContext {
-  EntityId caller;
-  EntityId target;
+  bool canRevert;
   bytes extraData;
 }
 
 // Interfaces
 
 interface IProgramValidator {
-  function validateProgram(ValidateProgramContext calldata ctx) external view;
+  struct ProgramData {
+    EntityId programmed;
+    ProgramId program;
+  }
+
+  function validateProgram(HookContext calldata ctx, ProgramData calldata data) external view;
 }
 
 interface IAttachProgram {
-  function onAttachProgram(AttachProgramContext calldata ctx) external;
+  function onAttachProgram(HookContext calldata ctx) external;
 }
 
 interface IDetachProgram {
-  function onDetachProgram(DetachProgramContext calldata ctx) external;
+  function onDetachProgram(HookContext calldata ctx) external;
 }
 
 interface ITransfer {
-  function onTransfer(TransferContext calldata ctx) external;
+  struct TransferData {
+    SlotData[] deposits;
+    SlotData[] withdrawals;
+  }
+
+  function onTransfer(HookContext calldata ctx, TransferData calldata transfer) external;
 }
 
 interface IHit {
-  function onHit(HitContext calldata ctx) external;
+  struct HitData {
+    uint128 damage;
+  }
+
+  function onHit(HookContext calldata ctx, HitData calldata hit) external;
 }
 
-interface IFuel {
-  function onFuel(FuelContext calldata ctx) external;
+interface IEnergize {
+  struct EnergizeData {
+    uint128 amount;
+  }
+
+  function onEnergize(HookContext calldata ctx, EnergizeData calldata energize) external;
 }
 
 interface IAddFragment {
-  function onAddFragment(AddFragmentContext calldata ctx) external;
+  struct AddFragmentData {
+    EntityId added;
+  }
+
+  function onAddFragment(HookContext calldata ctx, AddFragmentData calldata fragment) external;
 }
 
 interface IRemoveFragment {
-  function onRemoveFragment(RemoveFragmentContext calldata ctx) external;
+  struct RemoveFragmentData {
+    EntityId removed;
+  }
+
+  function onRemoveFragment(HookContext calldata ctx, RemoveFragmentData calldata fragment) external;
 }
 
 interface IBuild {
-  function onBuild(BuildContext calldata ctx) external;
+  struct BuildData {
+    EntityId entity;
+    ObjectType objectType;
+    Vec3 coord;
+    Orientation orientation;
+  }
+
+  function onBuild(HookContext calldata ctx, BuildData calldata build) external;
 }
 
 interface IMine {
-  function onMine(MineContext calldata ctx) external;
+  struct MineData {
+    EntityId entity;
+    ObjectType objectType;
+    Vec3 coord;
+  }
+
+  function onMine(HookContext calldata ctx, MineData calldata mine) external;
 }
 
 interface ISpawn {
-  function onSpawn(SpawnContext calldata ctx) external;
+  struct SpawnData {
+    uint128 energy;
+    Vec3 coord;
+  }
+
+  function onSpawn(HookContext calldata ctx, SpawnData calldata spawn) external;
 }
 
 interface ISleep {
-  function onSleep(SleepContext calldata ctx) external;
+  function onSleep(HookContext calldata ctx) external;
 }
 
 interface IWakeup {
-  function onWakeup(WakeupContext calldata ctx) external;
+  function onWakeup(HookContext calldata ctx) external;
 }
 
 interface IOpen {
-  function onOpen(OpenContext calldata ctx) external;
+  function onOpen(HookContext calldata ctx) external;
 }
 
 interface IClose {
-  function onClose(CloseContext calldata ctx) external;
+  function onClose(HookContext calldata ctx) external;
 }
