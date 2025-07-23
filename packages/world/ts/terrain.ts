@@ -59,7 +59,7 @@ export async function getTerrainBlockType(
   });
 
   const bytecode = await publicClient.getCode({ address: chunkPointer });
-  if (!bytecode) throw new Error("InvalidPointer: no bytecode found");
+  if (!bytecode) throw new Error("Chunk not explored");
 
   // Read version byte
   const version = readBytes1(bytecode, 0);
