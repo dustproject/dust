@@ -100,32 +100,3 @@ function fuelMachine(EntityId callerEntityId, EntityId machineEntityId, uint16 f
 ```
 
 This allows machines to execute custom logic when they receive fuel, potentially triggering complex behaviors or state changes.
-
-## Practical Applications
-
-### Smart Entities
-
-Programs enable the creation of smart entities with custom behaviors:
-
-- **Smart Doors**: Doors that only open for specific entities or under certain conditions
-- **Resource Generators**: Machines that produce resources at regular intervals
-- **Security Systems**: Force fields that restrict actions based on complex rules
-- **Interactive NPCs**: Non-player characters with programmable behavior
-
-### Gameplay Mechanics
-
-Programs can implement complex gameplay mechanics:
-
-- **Quest Systems**: Programs that track player progress and reward completion
-- **Economic Systems**: Trading posts with dynamic pricing algorithms
-- **Combat Systems**: Custom combat mechanics for specific areas or entities
-- **Crafting Systems**: Advanced crafting pipelines that reward resource providers and periodically craft specific items
-
-### World Governance
-
-Programs can facilitate governance mechanisms:
-
-- **Access Control**: Programs that manage permissions for different areas
-- **Resource Management**: Systems that regulate resource distribution
-- **Voting Systems**: Mechanisms for collective decision-making
-- **Taxation Systems**: Automated collection and distribution of resources
