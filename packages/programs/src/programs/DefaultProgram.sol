@@ -2,7 +2,6 @@
 pragma solidity >=0.8.24;
 
 import { IBaseWorld, WorldConsumer } from "@latticexyz/world-consumer/src/experimental/WorldConsumer.sol";
-import { System, WorldContextConsumer } from "@latticexyz/world/src/System.sol";
 
 import { EntityId } from "@dust/world/src/types/EntityId.sol";
 
@@ -13,7 +12,6 @@ import { EntityAccessGroup } from "../codegen/tables/EntityAccessGroup.sol";
 import { createAccessGroup } from "../createAccessGroup.sol";
 import { getForceField } from "../getForceField.sol";
 
-import { getGroupId } from "../getGroupId.sol";
 import { isAllowed } from "../isAllowed.sol";
 
 abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, WorldConsumer {

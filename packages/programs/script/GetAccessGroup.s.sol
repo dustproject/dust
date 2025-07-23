@@ -4,19 +4,8 @@ pragma solidity >=0.8.24;
 import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 import { console } from "forge-std/console.sol";
 
-import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
-import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
-import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
-
 import { DustScript } from "@dust/world/script/DustScript.sol";
 import { EntityId } from "@dust/world/src/types/EntityId.sol";
-
-import { IWorld } from "../src/codegen/world/IWorld.sol";
-import { BedProgram } from "../src/programs/BedProgram.sol";
-import { ChestProgram } from "../src/programs/ChestProgram.sol";
-import { ForceFieldProgram } from "../src/programs/ForceFieldProgram.sol";
-import { SpawnTileProgram } from "../src/programs/SpawnTileProgram.sol";
-import { TextSignProgram } from "../src/programs/TextSignProgram.sol";
 
 import { getForceField } from "../src/getForceField.sol";
 import { getGroupId } from "../src/getGroupId.sol";
