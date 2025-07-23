@@ -6,10 +6,20 @@ Dustkit is the bridge between apps and the native Dust browser client.
 
 ### Setup
 
-TODO
+1. Add `dustkit` as a dependency to `package.json`. The tag at the end corresponds to the github commit on main
 
-- How to add dustkit to an existing app
-- How to verify it works
+```
+"dustkit": "https://pkg.pr.new/dustproject/dust/dustkit@27f724c"
+```
+
+2. Connect the dustkit client:
+
+```
+import { connectDustClient } from "dustkit/internal";
+const { appContext, provider } = await connectDustClient();
+```
+
+3. You can now access the methods on the `provider` object
 
 ## Reference
 
