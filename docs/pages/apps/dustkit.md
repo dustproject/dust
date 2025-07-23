@@ -164,3 +164,19 @@ Gets force field information at a specific coordinate.
   extraDrainRate: bigint;
 } | undefined
 ```
+
+### `getCursorPosition`
+
+Gets the current cursor position in the world, if available.
+
+**Parameters:** None
+
+**Returns:** Cursor position or undefined:
+
+```typescript
+{
+  x: number;
+  y: number;
+  z: number;
+} | undefined
+```
