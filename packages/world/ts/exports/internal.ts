@@ -5,3 +5,6 @@ export * from "../vec3";
 export * from "../entityid";
 export * from "../orientation";
 export * from "../moveUtils";
+export * from "../getCreate3Address";
+export * from "../terrain";
+export * from "../chunk";
