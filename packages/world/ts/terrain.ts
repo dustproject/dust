@@ -72,3 +72,28 @@ export async function getTerrainBlockType(
 
   return blockType;
 }
+
+export async function getBiome(
+  worldAddress: Hex,
+  publicClient: PublicClient,
+  [x, y, z]: Vec3,
+): Promise<number> {
+  const chunkCoord: Vec3 = voxelToChunkPos([x, y, z]);
+
+  const chunkPointer = getCreate3Address({
+    from: worldAddress,
+    salt: _getChunkSalt(chunkCoord),
+  });
+
+  const bytecode = await publicClient.getCode({ address: chunkPointer });
+  if (!bytecode) throw new Error("Chunk not explored");
+
+  // Read version byte
+  const version = readBytes1(bytecode, 0);
+  if (version !== EXPECTED_VERSION)
+    throw new Error("Unsupported chunk encoding version");
+
+  const biome = readBytes1(bytecode, 1);
+
+  return biome;
+}
