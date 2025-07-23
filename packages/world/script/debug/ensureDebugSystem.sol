@@ -3,10 +3,9 @@ pragma solidity >=0.8.24;
 
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
 
-import { ResourceId, WorldResourceIdInstance, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
+import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 
 import { FunctionSelectors } from "@latticexyz/world/src/codegen/tables/FunctionSelectors.sol";
-import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
 import { ROOT_NAMESPACE } from "@latticexyz/world/src/constants.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 

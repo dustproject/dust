@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { console } from "forge-std/console.sol";
-
 import {
   ACTION_MODIFIER_DENOMINATOR,
   DEFAULT_HIT_ENERGY_COST,
@@ -12,16 +10,14 @@ import {
   TOOL_HIT_ENERGY_COST
 } from "../src/Constants.sol";
 
-import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
+import { Energy } from "../src/codegen/tables/Energy.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 import { EntityId } from "../src/types/EntityId.sol";
-import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
+import { ObjectTypes } from "../src/types/ObjectType.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
-import { ForceFieldUtils } from "../src/utils/ForceFieldUtils.sol";
-import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 import { DustTest } from "./DustTest.sol";
 
-import { TestEnergyUtils, TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract HitMachineTest is DustTest {
   function testHitForceFieldWithoutTool() public {

@@ -1,15 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { console } from "forge-std/console.sol";
-
 import { GasReporter } from "@latticexyz/gas-report/src/GasReporter.sol";
 
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { NamespaceOwner } from "@latticexyz/world/src/codegen/tables/NamespaceOwner.sol";
 import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
-
-import { Direction } from "../src/codegen/common.sol";
 
 import {
   CHUNK_COMMIT_EXPIRY_BLOCKS,
@@ -33,7 +29,6 @@ import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
 import { EntityOrientation } from "../src/codegen/tables/EntityOrientation.sol";
-import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 
 import { Machine } from "../src/codegen/tables/Machine.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
@@ -47,7 +42,7 @@ import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 
 import { encodeChunk } from "./utils/encodeChunk.sol";
 
-import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
+import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import { DustAssertions } from "./DustAssertions.sol";
 import {

@@ -1,20 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
-import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
-import { console } from "forge-std/console.sol";
-
 import { EntityId } from "../src/types/EntityId.sol";
 
-import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
-
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-import { Mass } from "../src/codegen/tables/Mass.sol";
 
 import { MAX_ENTITY_INFLUENCE_RADIUS } from "../src/Constants.sol";
-import { ObjectType } from "../src/types/ObjectType.sol";
-
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";

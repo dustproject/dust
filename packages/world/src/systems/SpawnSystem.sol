@@ -4,15 +4,11 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 import { LibPRNG } from "solady/utils/LibPRNG.sol";
 
-import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
-
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
-
-import { Mass } from "../codegen/tables/Mass.sol";
 
 import { SurfaceChunkCount } from "../codegen/tables/SurfaceChunkCount.sol";
 
-import { ExploredChunk, ReverseMovablePosition, SurfaceChunkByIndex } from "../utils/Vec3Storage.sol";
+import { SurfaceChunkByIndex } from "../utils/Vec3Storage.sol";
 
 import {
   CHUNK_SIZE,
@@ -34,7 +30,6 @@ import { SpawnNotification, notify } from "../utils/NotifUtils.sol";
 
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { MoveLib } from "./libraries/MoveLib.sol";
-import { TerrainLib } from "./libraries/TerrainLib.sol";
 
 import "../ProgramHooks.sol" as Hooks;
 import { EntityId } from "../types/EntityId.sol";

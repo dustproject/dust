@@ -3,16 +3,13 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
-import { Action } from "../codegen/common.sol";
-import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
-import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+import { EnergyData } from "../codegen/tables/Energy.sol";
 
 import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
 
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { AddFragmentNotification, RemoveFragmentNotification, notify } from "../utils/NotifUtils.sol";
-import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { SAFE_PROGRAM_GAS } from "../Constants.sol";
 import { EntityId } from "../types/EntityId.sol";
@@ -22,7 +19,7 @@ import { ObjectTypes } from "../types/ObjectType.sol";
 
 import "../ProgramHooks.sol" as Hooks;
 import { ProgramId } from "../types/ProgramId.sol";
-import { Vec3, vec3 } from "../types/Vec3.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 contract ForceFieldSystem is System {
   /**

@@ -3,11 +3,7 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
-import { Action } from "../codegen/common.sol";
-import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
-import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
-import { Mass } from "../codegen/tables/Mass.sol";
 
 import { ObjectPhysics, ObjectPhysicsData } from "../codegen/tables/ObjectPhysics.sol";
 import { Recipes, RecipesData } from "../codegen/tables/Recipes.sol";
@@ -21,8 +17,6 @@ import { CRAFT_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../types/EntityId.sol";
 
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
-
-import { Vec3 } from "../types/Vec3.sol";
 
 import { NatureLib } from "../utils/NatureLib.sol";
 import { OreLib } from "../utils/OreLib.sol";

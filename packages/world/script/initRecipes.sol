@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { Recipes, RecipesData } from "../src/codegen/tables/Recipes.sol";
-import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
+import { Recipes } from "../src/codegen/tables/Recipes.sol";
+import { ObjectTypes } from "../src/types/ObjectType.sol";
 
 function initRecipes() {
   {

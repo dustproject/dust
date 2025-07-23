@@ -3,10 +3,9 @@ pragma solidity >=0.8.24;
 
 import { DustScript } from "../DustScript.sol";
 
-import { IWorld } from "../../src/codegen/world/IWorld.sol";
 import { Config, config } from "../utils/config.sol";
 import { Indexer, IndexerResult, indexer } from "../utils/indexer.sol";
-import { Vm, vm } from "../utils/vm.sol";
+import { vm } from "../utils/vm.sol";
 
 import { console } from "forge-std/console.sol";
 

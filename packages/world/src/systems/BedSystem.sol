@@ -5,7 +5,7 @@ import { System } from "@latticexyz/world/src/System.sol";
 
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 
-import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+import { EnergyData } from "../codegen/tables/Energy.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
 
 import { PlayerBed } from "../codegen/tables/PlayerBed.sol";
@@ -15,10 +15,7 @@ import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 import { checkWorldStatus } from "../utils/WorldUtils.sol";
 
 import {
-  decreaseFragmentDrainRate,
-  increaseFragmentDrainRate,
-  updateMachineEnergy,
-  updateSleepingPlayerEnergy
+  decreaseFragmentDrainRate, increaseFragmentDrainRate, updateSleepingPlayerEnergy
 } from "../utils/EnergyUtils.sol";
 
 import { EntityUtils } from "../utils/EntityUtils.sol";

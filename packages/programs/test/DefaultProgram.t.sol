@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { isAllowed } from "../src/isAllowed.sol";
 import { DefaultProgram, IBaseWorld } from "../src/programs/DefaultProgram.sol";
 
 import { Energy } from "@dust/world/src/codegen/tables/Energy.sol";
@@ -16,12 +15,10 @@ import { Vec3, vec3 } from "@dust/world/src/types/Vec3.sol";
 
 import { AccessGroupMember } from "../src/codegen/tables/AccessGroupMember.sol";
 import { EntityAccessGroup } from "../src/codegen/tables/EntityAccessGroup.sol";
-import { AttachProgramContext, DetachProgramContext, TransferContext } from "@dust/world/src/ProgramHooks.sol";
+import { AttachProgramContext, DetachProgramContext } from "@dust/world/src/ProgramHooks.sol";
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { NamespaceOwner } from "@latticexyz/world/src/codegen/tables/NamespaceOwner.sol";
-import { SystemRegistry } from "@latticexyz/world/src/codegen/tables/SystemRegistry.sol";
-import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
-import { ROOT_NAMESPACE_ID, WORLD_NAMESPACE_ID } from "@latticexyz/world/src/constants.sol";
+import { ROOT_NAMESPACE_ID } from "@latticexyz/world/src/constants.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 

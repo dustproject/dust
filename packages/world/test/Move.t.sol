@@ -1,24 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { console } from "forge-std/console.sol";
 
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
-import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
-import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 
 import { DustTest } from "./DustTest.sol";
 
 import { EntityId, EntityTypeLib } from "../src/types/EntityId.sol";
-import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
+import { EntityPosition, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
 import {
-  CHUNK_SIZE,
   LAVA_MOVE_ENERGY_COST,
   MAX_FLUID_LEVEL,
   MAX_PLAYER_GLIDES,
@@ -38,7 +33,6 @@ import { Orientation } from "../src/types/Orientation.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 import { NonPassableBlock } from "../src/systems/libraries/MoveLib.sol";
-import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 import { Direction } from "../src/codegen/common.sol";

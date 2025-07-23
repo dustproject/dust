@@ -3,7 +3,6 @@ pragma solidity >=0.8.24;
 
 import { console } from "forge-std/console.sol";
 
-import { Config, config } from "../../utils/config.sol";
 import { IndexerResult } from "../../utils/indexer.sol";
 
 import { ResourceCount } from "../../../src/codegen/tables/ResourceCount.sol";

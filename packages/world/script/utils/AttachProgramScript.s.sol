@@ -3,13 +3,11 @@ pragma solidity >=0.8.24;
 
 import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 import { Script } from "forge-std/Script.sol";
-import { console } from "forge-std/console.sol";
 
 import { IWorld } from "../../src/codegen/world/IWorld.sol";
 
 import { EntityId, EntityTypeLib } from "../../src/types/EntityId.sol";
 
-import { ObjectTypes } from "../../src/types/ObjectType.sol";
 import { ProgramId } from "../../src/types/ProgramId.sol";
 
 import { EntityProgram } from "../../src/codegen/tables/EntityProgram.sol";

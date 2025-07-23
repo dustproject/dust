@@ -1,30 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
-import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
-import { console } from "forge-std/console.sol";
-
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { EntityId } from "../src/types/EntityId.sol";
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
-import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
-import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 
 import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
-import {
-  CHUNK_SIZE,
-  DEFAULT_MINE_ENERGY_COST,
-  MOVE_ENERGY_COST,
-  PLAYER_FALL_ENERGY_COST,
-  WATER_MOVE_ENERGY_COST
-} from "../src/Constants.sol";
+import { DEFAULT_MINE_ENERGY_COST, MOVE_ENERGY_COST, PLAYER_FALL_ENERGY_COST } from "../src/Constants.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
 
 import { ObjectTypes } from "../src/types/ObjectType.sol";

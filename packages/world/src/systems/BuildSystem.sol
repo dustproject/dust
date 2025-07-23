@@ -3,19 +3,15 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
-import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
-import { EntityFluidLevel } from "../codegen/tables/EntityFluidLevel.sol";
 
 import { DisabledExtraDrops } from "../codegen/tables/DisabledExtraDrops.sol";
-import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+import { EnergyData } from "../codegen/tables/Energy.sol";
 
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
-import { Mass } from "../codegen/tables/Mass.sol";
 
 import { EntityOrientation } from "../codegen/tables/EntityOrientation.sol";
-import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
@@ -27,9 +23,8 @@ import { Math } from "../utils/Math.sol";
 import { BuildNotification, MoveNotification, notify } from "../utils/NotifUtils.sol";
 
 import { MoveLib } from "./libraries/MoveLib.sol";
-import { TerrainLib } from "./libraries/TerrainLib.sol";
 
-import { BUILD_ENERGY_COST, MAX_FLUID_LEVEL } from "../Constants.sol";
+import { BUILD_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 

@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { IERC165 } from "@latticexyz/world/src/IERC165.sol";
 import { System } from "@latticexyz/world/src/System.sol";
-
-import { WorldContextConsumer } from "@latticexyz/world/src/WorldContext.sol";
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
@@ -16,18 +13,14 @@ import { Fragment } from "../src/codegen/tables/Fragment.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Machine } from "../src/codegen/tables/Machine.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
-import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
-
-import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
-import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
-import { DustTest, console } from "./DustTest.sol";
+import { DustTest } from "./DustTest.sol";
 
-import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
+import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
-import { CHUNK_SIZE, MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
-import { EntityId, EntityIdLib } from "../src/types/EntityId.sol";
-import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
+import { MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
+import { EntityId } from "../src/types/EntityId.sol";
+import { ObjectTypes } from "../src/types/ObjectType.sol";
 
 import { Orientation } from "../src/types/Orientation.sol";
 import { ProgramId } from "../src/types/ProgramId.sol";

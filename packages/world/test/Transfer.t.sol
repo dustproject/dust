@@ -1,11 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { console } from "forge-std/console.sol";
-
-import { IERC165 } from "@latticexyz/world/src/IERC165.sol";
 import { System } from "@latticexyz/world/src/System.sol";
-import { WorldContextConsumer } from "@latticexyz/world/src/WorldContext.sol";
 
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
@@ -13,26 +9,17 @@ import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
 import { EntityId } from "../src/types/EntityId.sol";
 
-import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { EnergyData } from "../src/codegen/tables/Energy.sol";
 
-import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
-
-import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
-import { ReverseMovablePosition } from "../src/codegen/tables/ReverseMovablePosition.sol";
-import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
-import { ITransferSystem } from "../src/codegen/world/ITransferSystem.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { DustTest } from "./DustTest.sol";
 
-import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_RADIUS } from "../src/Constants.sol";
+import { MAX_ENTITY_INFLUENCE_RADIUS } from "../src/Constants.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
 
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 
-import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { Orientation } from "../src/types/Orientation.sol";
 import { ProgramId } from "../src/types/ProgramId.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
@@ -41,7 +28,7 @@ import "../src/ProgramHooks.sol" as Hooks;
 import { SlotAmount, SlotData, SlotTransfer } from "../src/utils/InventoryUtils.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
-import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract TestChestProgram is System {
   // Store the last inputs received by onTransfer

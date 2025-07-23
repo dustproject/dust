@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { console } from "forge-std/console.sol";
-
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
@@ -13,23 +11,14 @@ import { SeedGrowth } from "../src/codegen/tables/SeedGrowth.sol";
 
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 
-import { Machine } from "../src/codegen/tables/Machine.sol";
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
-
-import { BurnedResourceCount } from "../src/codegen/tables/BurnedResourceCount.sol";
 
 import { Death } from "../src/codegen/tables/Death.sol";
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 
-import {
-  ChunkCommitment,
-  EntityPosition,
-  LocalEnergyPool,
-  ResourcePosition,
-  ReverseMovablePosition
-} from "../src/utils/Vec3Storage.sol";
+import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import {
   ACTION_MODIFIER_DENOMINATOR,
@@ -48,7 +37,7 @@ import {
 import { ObjectAmount, ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 
 import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
-import { EntityId, EntityTypeLib } from "../src/types/EntityId.sol";
+import { EntityId } from "../src/types/EntityId.sol";
 
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { Orientation } from "../src/types/Orientation.sol";

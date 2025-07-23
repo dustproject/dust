@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
-
 import { WorldContextConsumerLib } from "@latticexyz/world/src/WorldContext.sol";
-import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
 
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
-import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+import { EnergyData } from "../codegen/tables/Energy.sol";
 
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { EntityProgram } from "../codegen/tables/EntityProgram.sol";

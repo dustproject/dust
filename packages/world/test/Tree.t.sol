@@ -1,11 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
-import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
-import { console } from "forge-std/console.sol";
-
-import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
+import { Energy } from "../src/codegen/tables/Energy.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
@@ -16,14 +12,7 @@ import { SeedGrowth } from "../src/codegen/tables/SeedGrowth.sol";
 
 import { LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
-import { EntityPosition } from "../src/utils/Vec3Storage.sol";
-
-import {
-  BUILD_ENERGY_COST,
-  CHUNK_COMMIT_EXPIRY_BLOCKS,
-  MAX_ENTITY_INFLUENCE_RADIUS,
-  TILL_ENERGY_COST
-} from "../src/Constants.sol";
+import { BUILD_ENERGY_COST } from "../src/Constants.sol";
 
 import { EntityId } from "../src/types/EntityId.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
@@ -31,7 +20,6 @@ import { ObjectType } from "../src/types/ObjectType.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 import { TreeData, TreeLib } from "../src/utils/TreeLib.sol";
 
-import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 import { DustTest } from "./DustTest.sol";

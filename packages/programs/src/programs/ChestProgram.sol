@@ -3,8 +3,6 @@ pragma solidity >=0.8.24;
 
 import { IBaseWorld } from "@latticexyz/world-consumer/src/experimental/WorldConsumer.sol";
 
-import { EntityId } from "@dust/world/src/types/EntityId.sol";
-
 import "@dust/world/src/ProgramHooks.sol" as Hooks;
 
 import { isAllowed } from "../isAllowed.sol";

@@ -3,14 +3,9 @@ pragma solidity >=0.8.24;
 
 import { GasReporter } from "@latticexyz/gas-report/src/GasReporter.sol";
 import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
-import { console } from "forge-std/console.sol";
 import { LibBit } from "solady/utils/LibBit.sol";
 
-import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
-import { NamespaceOwner } from "@latticexyz/world/src/codegen/tables/NamespaceOwner.sol";
-
-import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
-import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
+import { Energy } from "../src/codegen/tables/Energy.sol";
 import { InventoryBitmap } from "../src/codegen/tables/InventoryBitmap.sol";
 import { InventorySlot, InventorySlotData } from "../src/codegen/tables/InventorySlot.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
@@ -19,18 +14,13 @@ import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
-import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
-
 import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
 import { EntityId } from "../src/types/EntityId.sol";
 
-import { ObjectAmount, ObjectType, ObjectTypeLib, ObjectTypes } from "../src/types/ObjectType.sol";
+import { ObjectAmount, ObjectType, ObjectTypeLib } from "../src/types/ObjectType.sol";
 import { ProgramId } from "../src/types/ProgramId.sol";
 import { TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
-import { encodeChunk } from "./utils/encodeChunk.sol";
-
-import { IWorld } from "../src/codegen/world/IWorld.sol";
 
 abstract contract DustAssertions is MudTest, GasReporter {
   struct EnergyDataSnapshot {

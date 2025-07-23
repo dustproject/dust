@@ -1,22 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
-import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
-import { console } from "forge-std/console.sol";
-
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-import { Mass } from "../src/codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 import { SeedGrowth } from "../src/codegen/tables/SeedGrowth.sol";
 
 import { LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
-
-import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
 import {
   BUILD_ENERGY_COST,
@@ -30,7 +23,6 @@ import { ObjectType } from "../src/types/ObjectType.sol";
 
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 
-import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 import { DustTest } from "./DustTest.sol";

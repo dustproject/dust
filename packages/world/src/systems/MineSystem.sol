@@ -9,7 +9,6 @@ import { SafeCastLib } from "solady/utils/SafeCastLib.sol";
 
 import { DisabledExtraDrops } from "../codegen/tables/DisabledExtraDrops.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
-import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
 
 import { Death, DeathData } from "../codegen/tables/Death.sol";
@@ -44,17 +43,12 @@ import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
 import {
   DEFAULT_MINE_ENERGY_COST,
-  HIT_ACTION_MODIFIER,
   MACHINE_ENERGY_DRAIN_RATE,
-  MAX_PICKUP_RADIUS,
   MINE_ACTION_MODIFIER,
-  ORE_TOOL_BASE_MULTIPLIER,
   PLAYER_ENERGY_DRAIN_RATE,
   PRECISION_MULTIPLIER,
   SAFE_PROGRAM_GAS,
-  SPECIALIZATION_MULTIPLIER,
-  TOOL_MINE_ENERGY_COST,
-  WOODEN_TOOL_BASE_MULTIPLIER
+  TOOL_MINE_ENERGY_COST
 } from "../Constants.sol";
 
 import { EntityId } from "../types/EntityId.sol";

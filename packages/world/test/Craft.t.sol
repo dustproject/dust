@@ -1,39 +1,30 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
-import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
-import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
-import { console } from "forge-std/console.sol";
-
 import { EntityId } from "../src/types/EntityId.sol";
 
-import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
+import { Energy } from "../src/codegen/tables/Energy.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 
 import { BurnedResourceCount } from "../src/codegen/tables/BurnedResourceCount.sol";
-import { LocalEnergyPool } from "../src/codegen/tables/LocalEnergyPool.sol";
-import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
-import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 
-import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_RADIUS } from "../src/Constants.sol";
+import { MAX_ENTITY_INFLUENCE_RADIUS } from "../src/Constants.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
 
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 
-import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { Orientation } from "../src/types/Orientation.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { SlotAmount } from "../src/utils/InventoryUtils.sol";
 
-import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
 contract CraftTest is DustTest {
   function hashRecipe(
