@@ -18,6 +18,7 @@ TODO
 Sets a waypoint for a specific entity with a label.
 
 **Parameters:**
+
 - `entity` (EntityId): The entity to set the waypoint for
 - `label` (string): The label for the waypoint
 
@@ -28,29 +29,34 @@ Sets a waypoint for a specific entity with a label.
 Retrieves slot information for inventory operations.
 
 **Parameters:**
+
 - `entity` (EntityId): The entity to get slots for
 - `objectType` (number): The type of object
-- `amount` (number): The amount to operate with
-- `operationType` ("withdraw" | "deposit"): The type of operation
+- `amount` (number): The amount of objects
+- `operationType` ("withdraw" | "deposit"): "withdraw" means you want the slots where this object & amount exists and "deposit" means you want the slots where this object & amount will fit
 
 **Returns:**
+
 ```typescript
 {
   slots: {
     slot: number;
     amount: number;
-  }[];
+  }
+  [];
 }
 ```
 
 ### `systemCall`
 
-Executes a system call on the blockchain.
+Executes a system call in the world
 
 **Parameters:**
+
 - `params` (SystemCalls): The system call parameters
 
 **Returns:** Either a user operation receipt or transaction receipt:
+
 ```typescript
 {
   userOperationHash: Hex;
@@ -66,9 +72,11 @@ Executes a system call on the blockchain.
 Gets the 3D position of a player entity.
 
 **Parameters:**
+
 - `entity` (EntityId): The player entity
 
 **Returns:**
+
 ```typescript
 {
   x: number;
@@ -82,6 +90,7 @@ Gets the 3D position of a player entity.
 Sets a blueprint with block positions and options.
 
 **Parameters:**
+
 - `blocks`: Array of block definitions:
   ```typescript
   {
@@ -90,7 +99,8 @@ Sets a blueprint with block positions and options.
     y: number;
     z: number;
     orientation: number;
-  }[]
+  }
+  [];
   ```
 - `options` (optional): Blueprint display options:
   ```typescript
@@ -104,7 +114,7 @@ Sets a blueprint with block positions and options.
 
 ### `getSelectedObjectType`
 
-Gets the currently selected object type.
+Gets the currently selected object type in the players hotbar.
 
 **Parameters:** None
 
@@ -115,11 +125,13 @@ Gets the currently selected object type.
 Gets force field information at a specific coordinate.
 
 **Parameters:**
+
 - `x` (number): X coordinate
-- `y` (number): Y coordinate  
+- `y` (number): Y coordinate
 - `z` (number): Z coordinate
 
 **Returns:** Force field data or undefined:
+
 ```typescript
 {
   forceFieldId: Hex;
