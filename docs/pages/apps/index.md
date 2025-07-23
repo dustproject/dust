@@ -5,13 +5,9 @@ The Dust client supports embedded apps - web apps that integrate directly into t
 A Dust app is:
 
 - A web app hosted at a URL
-- Described by a JSON manifest ([schema](https://esm.sh/pr/dustproject/dust/dustkit@d9cb17b/json-schemas/app-config.json))
+- Described by a JSON manifest ([schema](https://raw.githubusercontent.com/dustproject/dust/refs/heads/main/packages/dustkit/json-schemas/app-config.json))
 - Registered onchain (once per manifest URL)
 - Launched manually (e.g. installing into client's "desktop" view) or contextually (e.g. opening a chest)
-
-## Getting started
-
-TODO
 
 ## Architecture Overview
 
