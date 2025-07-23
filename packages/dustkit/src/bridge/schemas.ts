@@ -72,6 +72,12 @@ export type ClientRpcSchema = RpcSchema.From<
             z: number;
             orientation: number;
           }[];
+          options:
+            | {
+                showBlocksToMine: boolean;
+                showBlocksToBuild: boolean;
+              }
+            | undefined;
         };
       };
       ReturnType: void;
@@ -102,6 +108,18 @@ export type ClientRpcSchema = RpcSchema.From<
             };
             forceFieldCreatedAt: bigint;
             extraDrainRate: bigint;
+          }
+        | undefined;
+    }
+  | {
+      Request: {
+        method: "getCursorPosition";
+      };
+      ReturnType:
+        | {
+            x: number;
+            y: number;
+            z: number;
           }
         | undefined;
     }
