@@ -19,7 +19,16 @@ import { connectDustClient } from "dustkit/internal";
 const { appContext, provider } = await connectDustClient();
 ```
 
-3. You can now access the methods on the `provider` object.
+3. You can now access the methods on the `provider` object. For example, to get the player's position:
+
+```typescript
+const position = await provider.request({
+  method: "getPlayerPosition",
+  params: {
+    entity: "0x",
+  },
+});
+```
 
 ## Reference
 
