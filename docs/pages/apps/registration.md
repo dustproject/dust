@@ -2,37 +2,47 @@
 
 ## Preview an app in the client
 
-TODO
+Before registering an app to make it available to everyone, you can preview your app in the production client by using the `debug-app` URL parameter.
 
-Draft:
-
-- Start app on localhost
-- Setup cloudflare tunnel (for https)
-- Add preview url parameter
+Example: `https://alpha.dustproject.org/?debug-app=https://your-dust-app.com/dust-app.json`
 
 ## Register a global app
 
-TODO
+To make an app available in everyone's client, you have to register it in the global app registry.
 
-Draft:
+1. Register a new MUD namespace.
 
-- Global apps can be opened from the Desktop view. It is not connected to any specific ingame entity.
-- Examples: a leaderboard, a map
+   ```solidity
+    import { ResourceId, WorldResourceIdInstance, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
+    import { ResourceIds } from "@latticexyz/store/src/codegen/tables/ResourceIds.sol";
+
+    IWorld world = IWorld(0x253eb85B3C953bFE3827CC14a151262482E7189C);
+    ResourceId appNamespaceId = WorldResourceIdLib.encodeNamespace(bytes14(bytes("your-dust-app")));
+    if (!ResourceIds.getExists(appNamespaceId)) {
+      world.registerNamespace(appNamespaceId);
+    }
+   ```
+
+2. Register by setting a resource tag that points to your ([app's manifest](https://esm.sh/pr/dustproject/dust/dustkit@d9cb17b/json-schemas/app-config.json))
+
+   ```solidity
+   import { metadataSystem } from
+   "@latticexyz/world-module-metadata/src/codegen/experimental/systems/MetadataSystemLib.sol";
+
+   metadataSystem.setResourceTag(appNamespaceId, "dust.appConfigUrl", bytes("https://your-dust-app.com/dust-app.json"));
+   ```
 
 ## Register a contextual app
 
-TODO
+To show a contextual app when interacting with an entity that has [your program installed](../programs/registration.md), your program needs to implement the [`appConfigURI` function](https://github.com/dustproject/dust/blob/main/packages/dustkit/contracts/IAppConfigURI.sol).
 
-Draft:
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.8.24;
 
-- Contextual apps are opened when a player interacts with a specific ingame entity (i.e. opening a chest). It replaces the native UI for that entity.
-- Examples: a shop chest, a locker chest
-
-## Register a spawn app
-
-TODO
-
-Draft:
-
-- Spawn apps are opened when a user clicks on the respective spawn point from the spawn screen.
-- Examples: a spawn tile that allows spawning for a fee
+contract CustomProgram {
+  function appConfigURI(EntityId viaEntity) external returns (string memory uri) {
+    return "https://your-dust-app.com/dust-app.json";
+  }
+}
+```
