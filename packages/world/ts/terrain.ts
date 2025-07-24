@@ -82,8 +82,14 @@ export async function getTerrainBlockType(
     chunkCoord,
   );
 
-  const index = getBlockIndex([x, y, z]);
-  return readBytes1(bytecode, index);
+  return readTerrainBlockType(bytecode, [x, y, z]);
+}
+
+export function readTerrainBlockType(
+  chunkBytecode: string,
+  [x, y, z]: Vec3,
+): number {
+  return readBytes1(chunkBytecode, getBlockIndex([x, y, z]));
 }
 
 export async function getBiome(
@@ -99,5 +105,9 @@ export async function getBiome(
     chunkCoord,
   );
 
-  return readBytes1(bytecode, 1);
+  return readBiome(bytecode);
+}
+
+export function readBiome(chunkBytecode: string): number {
+  return readBytes1(chunkBytecode, 1);
 }
