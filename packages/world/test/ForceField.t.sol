@@ -22,32 +22,32 @@ import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 import { FRAGMENT_SIZE, MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
 import { EntityId } from "../src/types/EntityId.sol";
 
-import "../src/ProgramHooks.sol" as Hooks;
+import { HookContext, IBuild, IMine, IProgramValidator, IRemoveFragment } from "../src/ProgramHooks.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 import { ProgramId } from "../src/types/ProgramId.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
-contract TestForceFieldProgram is System {
+contract TestForceFieldProgram is System, IProgramValidator, IBuild, IMine, IRemoveFragment {
   // Just for testing, real programs should use tables
   bool revertOnValidateProgram;
   bool revertOnBuild;
   bool revertOnMine;
   bool revertOnRemoveFragment;
 
-  function validateProgram(Hooks.ValidateProgramContext calldata) external view {
+  function validateProgram(HookContext calldata, ProgramData calldata) external view {
     require(!revertOnValidateProgram, "Not allowed by forcefield");
   }
 
-  function onBuild(Hooks.BuildContext calldata) external view {
+  function onBuild(HookContext calldata, BuildData calldata) external view {
     require(!revertOnBuild, "Not allowed by forcefield");
   }
 
-  function onMine(Hooks.MineContext calldata) external view {
+  function onMine(HookContext calldata, MineData calldata) external view {
     require(!revertOnMine, "Not allowed by forcefield");
   }
 
-  function onRemoveFragment(Hooks.RemoveFragmentContext calldata) external view {
+  function onRemoveFragment(HookContext calldata, RemoveFragmentData calldata) external view {
     require(!revertOnRemoveFragment, "Not allowed by forcefield");
   }
 
@@ -70,21 +70,21 @@ contract TestForceFieldProgram is System {
   fallback() external { }
 }
 
-contract TestFragmentProgram is System {
+contract TestFragmentProgram is System, IProgramValidator, IBuild, IMine {
   // Just for testing, real programs should use tables
   bool revertOnValidateProgram;
   bool revertOnBuild;
   bool revertOnMine;
 
-  function validateProgram(Hooks.ValidateProgramContext calldata) external view {
+  function validateProgram(HookContext calldata, ProgramData calldata) external view {
     require(!revertOnValidateProgram, "Not allowed by forcefield fragment");
   }
 
-  function onBuild(Hooks.BuildContext calldata) external view {
+  function onBuild(HookContext calldata, BuildData calldata) external view {
     require(!revertOnBuild, "Not allowed by forcefield fragment");
   }
 
-  function onMine(Hooks.MineContext calldata) external view {
+  function onMine(HookContext calldata, MineData calldata) external view {
     require(!revertOnMine, "Not allowed by forcefield fragment");
   }
 

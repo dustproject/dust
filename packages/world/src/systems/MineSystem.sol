@@ -119,6 +119,7 @@ contract MineSystem is System {
       return mined;
     }
 
+    ObjectAmount[] memory extraDrops;
     if (massLeft == 0) {
       // The block was fully mined
       Mass._deleteRecord(mined);
@@ -131,7 +132,7 @@ contract MineSystem is System {
       _removeRelativeBlocks(mined, minedType, baseCoord);
 
       // Handle drops
-      _handleDrop(caller, mined, minedType, baseCoord);
+      extraDrops = _handleDrop(caller, mined, minedType, baseCoord);
 
       // It is fine to destroy the entity before requiring mines allowed,
       // as machines can't be destroyed if they have energy
@@ -142,7 +143,7 @@ contract MineSystem is System {
       Mass._setMass(mined, massLeft);
     }
 
-    MineLib._requireMinesAllowed(caller, minedType, coord, extraData);
+    MineLib._requireMinesAllowed(caller, extraData, mined, minedType, coord, extraDrops);
 
     return mined;
   }
@@ -255,17 +256,16 @@ contract MineSystem is System {
     // Detach program if it exists
     ProgramId program = mined._getProgram();
     if (program.exists()) {
-      bytes memory onDetachProgram = abi.encodeCall(
-        Hooks.IDetachProgram.onDetachProgram,
-        (Hooks.DetachProgramContext({ caller: caller, target: mined, extraData: "" }))
-      );
-      program.call({ gas: SAFE_PROGRAM_GAS, hook: onDetachProgram });
+      program.hook({ caller: caller, target: mined, revertOnFailure: false, extraData: "" }).onDetachProgram();
 
       EntityProgram._deleteRecord(mined);
     }
   }
 
-  function _handleDrop(EntityId caller, EntityId mined, ObjectType minedType, Vec3 minedCoord) internal {
+  function _handleDrop(EntityId caller, EntityId mined, ObjectType minedType, Vec3 minedCoord)
+    internal
+    returns (ObjectAmount[] memory)
+  {
     // Get extra drops (seeds, saplings, etc)
     ObjectAmount[] memory extraDrops = RandomResourceLib._getExtraDrops(mined, minedType, minedCoord);
 
@@ -296,6 +296,7 @@ contract MineSystem is System {
     // }
 
     _addToInventoryOrDrop(caller, mined, minedType, 1);
+    return extraDrops;
   }
 
   function _addToInventoryOrDrop(EntityId caller, EntityId fallbackEntity, ObjectType objectType, uint128 amount)
@@ -356,7 +357,14 @@ library MineLib {
     revert("Coordinate is not reachable");
   }
 
-  function _requireMinesAllowed(EntityId caller, ObjectType objectType, Vec3 coord, bytes calldata extraData) public {
+  function _requireMinesAllowed(
+    EntityId caller,
+    bytes calldata extraData,
+    EntityId mined,
+    ObjectType objectType,
+    Vec3 coord,
+    ObjectAmount[] memory extraDrops
+  ) public {
     (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
     if (!forceField._exists()) {
       return;
@@ -376,17 +384,12 @@ library MineLib {
       }
     }
 
-    Hooks.MineContext memory ctx = Hooks.MineContext({
-      caller: caller,
-      target: forceField,
+    program.hook({ caller: caller, target: forceField, revertOnFailure: true, extraData: extraData }).onMine({
+      entity: mined,
       objectType: objectType,
       coord: coord,
-      extraData: extraData
+      extraDrops: extraDrops
     });
-
-    bytes memory onMine = abi.encodeCall(Hooks.IMine.onMine, ctx);
-
-    program.callOrRevert(onMine);
   }
 }
 
@@ -471,11 +474,7 @@ library MineBedLib {
     // Run gravity on the bed coordinate to ensure the player is placed correctly
     MoveLib.runGravity(bedCoord);
 
-    bytes memory onWakeup = abi.encodeCall(
-      Hooks.IWakeup.onWakeup, (Hooks.WakeupContext({ caller: sleepingPlayer, target: bed, extraData: "" }))
-    );
-
-    bed._getProgram().call({ gas: SAFE_PROGRAM_GAS, hook: onWakeup });
+    bed._getProgram().hook({ caller: sleepingPlayer, target: bed, revertOnFailure: false, extraData: "" }).onWakeup();
 
     notify(sleepingPlayer, WakeupNotification({ bed: bed, bedCoord: bedCoord }));
   }

@@ -48,9 +48,7 @@ contract BedSystem is System {
 
     PlayerUtils.removePlayerFromGrid(caller, callerCoord);
 
-    bytes memory onSleep =
-      abi.encodeCall(Hooks.ISleep.onSleep, (Hooks.SleepContext({ caller: caller, target: bed, extraData: extraData })));
-    bed._getProgram().callOrRevert(onSleep);
+    bed._getProgram().hook({ caller: caller, target: bed, revertOnFailure: true, extraData: extraData }).onSleep();
 
     notify(caller, SleepNotification({ bed: bed, bedCoord: bedCoord }));
   }
@@ -81,10 +79,7 @@ contract BedSystem is System {
 
     PlayerUtils.addPlayerToGrid(caller, spawnCoord);
 
-    bytes memory onWakeup = abi.encodeCall(
-      Hooks.IWakeup.onWakeup, (Hooks.WakeupContext({ caller: caller, target: bed, extraData: extraData }))
-    );
-    bed._getProgram().callOrRevert(onWakeup);
+    bed._getProgram().hook({ caller: caller, target: bed, revertOnFailure: true, extraData: extraData }).onWakeup();
 
     notify(caller, WakeupNotification({ bed: bed, bedCoord: bedCoord }));
   }

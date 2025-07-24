@@ -102,17 +102,8 @@ contract TransferSystem is System {
       require(targetType != ObjectTypes.Player, "Cannot access another player's inventory");
       require(!targetType.isPassThrough(), "Cannot transfer directly to pass-through object");
 
-      Hooks.TransferContext memory ctx = Hooks.TransferContext({
-        caller: caller,
-        target: target,
-        deposits: deposits,
-        withdrawals: withdrawals,
-        extraData: extraData
-      });
-
-      bytes memory onTransfer = abi.encodeCall(Hooks.ITransfer.onTransfer, (ctx));
-
-      target._getProgram().callOrRevert(onTransfer);
+      target._getProgram().hook({ caller: caller, target: target, revertOnFailure: true, extraData: extraData })
+        .onTransfer(deposits, withdrawals);
     }
 
     notify(caller, TransferNotification({ transferEntityId: target, deposits: deposits, withdrawals: withdrawals }));

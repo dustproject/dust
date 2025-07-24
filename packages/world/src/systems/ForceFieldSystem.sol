@@ -114,12 +114,12 @@ contract ForceFieldSystem is System {
 
     ForceFieldUtils.addFragment(forceField, fragment);
 
-    bytes memory onAddFragment = abi.encodeCall(
-      Hooks.IAddFragment.onAddFragment,
-      (Hooks.AddFragmentContext({ caller: caller, target: forceField, added: fragment, extraData: extraData }))
-    );
-
-    _callForceFieldHook(forceField, onAddFragment);
+    ProgramId program = forceField._getProgram();
+    if (program.exists()) {
+      EnergyData memory machineData = updateMachineEnergy(forceField);
+      program.hook({ caller: caller, target: forceField, revertOnFailure: machineData.energy > 0, extraData: extraData })
+        .onAddFragment(fragment);
+    }
 
     notify(caller, AddFragmentNotification({ forceField: forceField }));
   }
@@ -162,27 +162,13 @@ contract ForceFieldSystem is System {
 
     ForceFieldUtils.removeFragment(forceField, fragment);
 
-    bytes memory onRemoveFragment = abi.encodeCall(
-      Hooks.IRemoveFragment.onRemoveFragment,
-      (Hooks.RemoveFragmentContext({ caller: caller, target: forceField, removed: fragment, extraData: extraData }))
-    );
-
-    _callForceFieldHook(forceField, onRemoveFragment);
+    ProgramId program = forceField._getProgram();
+    if (program.exists()) {
+      EnergyData memory machineData = updateMachineEnergy(forceField);
+      program.hook({ caller: caller, target: forceField, revertOnFailure: machineData.energy > 0, extraData: extraData })
+        .onRemoveFragment(fragment);
+    }
 
     notify(caller, RemoveFragmentNotification({ forceField: forceField }));
-  }
-
-  function _callForceFieldHook(EntityId forceField, bytes memory hook) private {
-    ProgramId program = forceField._getProgram();
-    if (!program.exists()) {
-      return;
-    }
-
-    EnergyData memory machineData = updateMachineEnergy(forceField);
-    if (machineData.energy > 0) {
-      program.callOrRevert(hook);
-    } else {
-      program.call({ gas: SAFE_PROGRAM_GAS, hook: hook });
-    }
   }
 }

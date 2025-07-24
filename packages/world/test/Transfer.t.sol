@@ -24,13 +24,13 @@ import { Orientation } from "../src/types/Orientation.sol";
 import { ProgramId } from "../src/types/ProgramId.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
-import "../src/ProgramHooks.sol" as Hooks;
+import { HookContext, ITransfer } from "../src/ProgramHooks.sol";
 import { SlotAmount, SlotData, SlotTransfer } from "../src/utils/InventoryUtils.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
 import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
-contract TestChestProgram is System {
+contract TestChestProgram is System, ITransfer {
   // Store the last inputs received by onTransfer
   EntityId public lastCaller;
   EntityId public lastTarget;
@@ -41,7 +41,7 @@ contract TestChestProgram is System {
   // Flag to control whether the hook should revert
   bool public shouldRevert;
 
-  function onTransfer(Hooks.TransferContext calldata ctx) external {
+  function onTransfer(HookContext calldata ctx, TransferData calldata transfer) external {
     require(!shouldRevert, "Transfer not allowed by chest");
 
     lastCaller = ctx.caller;
@@ -51,12 +51,12 @@ contract TestChestProgram is System {
     delete _lastDeposits;
     delete _lastWithdrawals;
 
-    for (uint256 i = 0; i < ctx.deposits.length; i++) {
-      _lastDeposits.push(ctx.deposits[i]);
+    for (uint256 i = 0; i < transfer.deposits.length; i++) {
+      _lastDeposits.push(transfer.deposits[i]);
     }
 
-    for (uint256 i = 0; i < ctx.withdrawals.length; i++) {
-      _lastWithdrawals.push(ctx.withdrawals[i]);
+    for (uint256 i = 0; i < transfer.withdrawals.length; i++) {
+      _lastWithdrawals.push(transfer.withdrawals[i]);
     }
   }
 

@@ -64,13 +64,11 @@ contract HitMachineSystem is System {
     addEnergyToLocalPool(forceFieldCoord, machineEnergyReduction + playerEnergyReduction);
 
     {
-      Hooks.HitContext memory ctx =
-        Hooks.HitContext({ caller: caller, target: forceField, damage: machineEnergyReduction, extraData: "" });
       ProgramId program = forceField._getProgram();
-      bytes memory onHit = abi.encodeCall(Hooks.IHit.onHit, ctx);
-
-      // Don't revert and use a fixed amount of gas so the program can't prevent hitting
-      program.call({ gas: SAFE_PROGRAM_GAS, hook: onHit });
+      // Don't revert so the program can't prevent hitting
+      program.hook({ caller: caller, target: forceField, revertOnFailure: false, extraData: "" }).onHit(
+        machineEnergyReduction
+      );
     }
 
     notify(caller, HitMachineNotification({ machine: forceField, machineCoord: forceFieldCoord }));

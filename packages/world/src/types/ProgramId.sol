@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { HooksLib } from "../ProgramHooks.sol";
 import { WorldContextProviderLib } from "@latticexyz/world/src/WorldContext.sol";
 import { ResourceId } from "@latticexyz/world/src/WorldResourceId.sol";
 import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
@@ -94,3 +95,4 @@ function eq(ProgramId a, ProgramId b) pure returns (bool) {
 
 using { eq as == } for ProgramId global;
 using ProgramIdLib for ProgramId global;
+using HooksLib for ProgramId global;

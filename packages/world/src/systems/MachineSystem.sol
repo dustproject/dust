@@ -46,11 +46,8 @@ contract MachineSystem is System {
     Energy._setEnergy(machine, newEnergyLevel);
 
     ProgramId program = machine._getProgram();
-    program.callOrRevert(
-      abi.encodeCall(
-        Hooks.IFuel.onFuel,
-        (Hooks.FuelContext({ caller: caller, target: machine, fuelAmount: fuelAmount, extraData: extraData }))
-      )
+    program.hook({ caller: caller, target: machine, revertOnFailure: true, extraData: extraData }).onEnergize(
+      uint128(fuelAmount) * ObjectPhysics._getEnergy(ObjectTypes.Battery)
     );
 
     notify(caller, FuelMachineNotification({ machine: machine, fuelAmount: fuelAmount }));

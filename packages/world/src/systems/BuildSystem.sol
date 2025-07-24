@@ -174,19 +174,11 @@ contract BuildSystem is System {
         program = forceField._getProgram();
       }
 
-      program.callOrRevert(
-        abi.encodeCall(
-          Hooks.IBuild.onBuild,
-          (
-            Hooks.BuildContext({
-              caller: ctx.caller,
-              target: forceField,
-              objectType: ctx.buildType,
-              coord: coord,
-              extraData: extraData
-            })
-          )
-        )
+      program.hook({ caller: ctx.caller, target: forceField, revertOnFailure: true, extraData: extraData }).onBuild(
+        EntityId.wrap(0), // entity will be set by the actual build
+        ctx.buildType,
+        coord,
+        ctx.orientation
       );
     }
   }

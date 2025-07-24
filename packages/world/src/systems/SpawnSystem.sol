@@ -152,11 +152,8 @@ contract SpawnSystem is System {
 
     EntityId player = _spawnPlayer(spawnCoord, spawnEnergy);
 
-    bytes memory onSpawn = abi.encodeCall(
-      Hooks.ISpawn.onSpawn,
-      (Hooks.SpawnContext({ caller: player, target: spawnTile, spawnEnergy: spawnEnergy, extraData: extraData }))
-    );
-    spawnTile._getProgram().callOrRevert(onSpawn);
+    spawnTile._getProgram().hook({ caller: player, target: spawnTile, revertOnFailure: true, extraData: extraData })
+      .onSpawn(spawnEnergy, spawnCoord);
 
     return player;
   }
