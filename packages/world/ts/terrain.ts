@@ -1,5 +1,5 @@
 import { type Hex, type PublicClient, pad, toBytes } from "viem";
-import { chunkSize, voxelToChunkPos } from "./chunk";
+import { CHUNK_SIZE, voxelToChunkPos } from "./chunk";
 import { getCreate3Address } from "./getCreate3Address";
 import { type Vec3, packVec3 } from "./vec3";
 
@@ -12,7 +12,7 @@ const VERSION_PADDING = 1;
 const BIOME_PADDING = 1;
 const SURFACE_PADDING = 1;
 
-function _getChunkSalt(coord: Vec3) {
+function getChunkSalt(coord: Vec3) {
   return pad(toBytes(packVec3(coord)), { size: 32 });
 }
 
@@ -20,18 +20,18 @@ function mod(a: number, b: number): number {
   return ((a % b) + b) % b;
 }
 
-function _getRelativeCoord([x, y, z]: Vec3): Vec3 {
-  return [mod(x, chunkSize), mod(y, chunkSize), mod(z, chunkSize)];
+function getRelativeCoord([x, y, z]: Vec3): Vec3 {
+  return [mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE)];
 }
 
-function _getBlockIndex([x, y, z]: Vec3): number {
-  const [rx, ry, rz] = _getRelativeCoord([x, y, z]);
+function getBlockIndex([x, y, z]: Vec3): number {
+  const [rx, ry, rz] = getRelativeCoord([x, y, z]);
   const index =
     VERSION_PADDING +
     BIOME_PADDING +
     SURFACE_PADDING +
-    rx * chunkSize ** 2 +
-    ry * chunkSize +
+    rx * CHUNK_SIZE ** 2 +
+    ry * CHUNK_SIZE +
     rz;
   return index;
 }
@@ -54,7 +54,7 @@ export async function getChunkBytecode(
 ): Promise<string> {
   const chunkPointer = getCreate3Address({
     from: worldAddress,
-    salt: _getChunkSalt(chunkCoord),
+    salt: getChunkSalt(chunkCoord),
   });
 
   const bytecode = await publicClient.getCode({ address: chunkPointer });
@@ -82,7 +82,7 @@ export async function getTerrainBlockType(
     chunkCoord,
   );
 
-  const index = _getBlockIndex([x, y, z]);
+  const index = getBlockIndex([x, y, z]);
   return readBytes1(bytecode, index);
 }
 
