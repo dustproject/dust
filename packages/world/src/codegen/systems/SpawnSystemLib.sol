@@ -55,11 +55,15 @@ library SpawnSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).getRandomSpawnChunk(blockNumber, sender);
   }
 
-  function isValidSpawn(SpawnSystemType self, Vec3 spawnCoord) internal view returns (bool) {
+  function isValidSpawn(SpawnSystemType self, Vec3 spawnCoord) internal view returns (bool __auxRet0) {
     return CallWrapper(self.toResourceId(), address(0)).isValidSpawn(spawnCoord);
   }
 
-  function randomSpawn(SpawnSystemType self, uint256 blockNumber, Vec3 spawnCoord) internal returns (EntityId) {
+  function randomSpawn(
+    SpawnSystemType self,
+    uint256 blockNumber,
+    Vec3 spawnCoord
+  ) internal returns (EntityId __auxRet0) {
     return CallWrapper(self.toResourceId(), address(0)).randomSpawn(blockNumber, spawnCoord);
   }
 
@@ -69,7 +73,7 @@ library SpawnSystemLib {
     Vec3 spawnCoord,
     uint128 spawnEnergy,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     return CallWrapper(self.toResourceId(), address(0)).spawn(spawnTile, spawnCoord, spawnEnergy, extraData);
   }
 
@@ -92,7 +96,10 @@ library SpawnSystemLib {
     if (!success) revertWithBytes(returnData);
 
     bytes memory result = abi.decode(returnData, (bytes));
-    return abi.decode(result, (Vec3));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (Vec3));
+    }
   }
 
   function getRandomSpawnChunk(
@@ -114,10 +121,13 @@ library SpawnSystemLib {
     if (!success) revertWithBytes(returnData);
 
     bytes memory result = abi.decode(returnData, (bytes));
-    return abi.decode(result, (Vec3));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (Vec3));
+    }
   }
 
-  function isValidSpawn(CallWrapper memory self, Vec3 spawnCoord) internal view returns (bool) {
+  function isValidSpawn(CallWrapper memory self, Vec3 spawnCoord) internal view returns (bool __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert SpawnSystemLib_CallingFromRootSystem();
 
@@ -129,10 +139,17 @@ library SpawnSystemLib {
     if (!success) revertWithBytes(returnData);
 
     bytes memory result = abi.decode(returnData, (bytes));
-    return abi.decode(result, (bool));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (bool));
+    }
   }
 
-  function randomSpawn(CallWrapper memory self, uint256 blockNumber, Vec3 spawnCoord) internal returns (EntityId) {
+  function randomSpawn(
+    CallWrapper memory self,
+    uint256 blockNumber,
+    Vec3 spawnCoord
+  ) internal returns (EntityId __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert SpawnSystemLib_CallingFromRootSystem();
 
@@ -141,7 +158,10 @@ library SpawnSystemLib {
     bytes memory result = self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function spawn(
@@ -150,7 +170,7 @@ library SpawnSystemLib {
     Vec3 spawnCoord,
     uint128 spawnEnergy,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert SpawnSystemLib_CallingFromRootSystem();
 
@@ -162,14 +182,24 @@ library SpawnSystemLib {
     bytes memory result = self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
-  function randomSpawn(RootCallWrapper memory self, uint256 blockNumber, Vec3 spawnCoord) internal returns (EntityId) {
+  function randomSpawn(
+    RootCallWrapper memory self,
+    uint256 blockNumber,
+    Vec3 spawnCoord
+  ) internal returns (EntityId __auxRet0) {
     bytes memory systemCall = abi.encodeCall(_randomSpawn_uint256_Vec3.randomSpawn, (blockNumber, spawnCoord));
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function spawn(
@@ -178,14 +208,17 @@ library SpawnSystemLib {
     Vec3 spawnCoord,
     uint128 spawnEnergy,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     bytes memory systemCall = abi.encodeCall(
       _spawn_EntityId_Vec3_uint128_bytes.spawn,
       (spawnTile, spawnCoord, spawnEnergy, extraData)
     );
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function callFrom(SpawnSystemType self, address from) internal pure returns (CallWrapper memory) {

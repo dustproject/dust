@@ -40,7 +40,7 @@ struct RootCallWrapper {
 library MineSystemLib {
   error MineSystemLib_CallingFromRootSystem();
 
-  function getRandomOreType(MineSystemType self, Vec3 coord) internal view returns (ObjectType) {
+  function getRandomOreType(MineSystemType self, Vec3 coord) internal view returns (ObjectType __auxRet0) {
     return CallWrapper(self.toResourceId(), address(0)).getRandomOreType(coord);
   }
 
@@ -50,11 +50,16 @@ library MineSystemLib {
     Vec3 coord,
     uint16 toolSlot,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     return CallWrapper(self.toResourceId(), address(0)).mine(caller, coord, toolSlot, extraData);
   }
 
-  function mine(MineSystemType self, EntityId caller, Vec3 coord, bytes memory extraData) internal returns (EntityId) {
+  function mine(
+    MineSystemType self,
+    EntityId caller,
+    Vec3 coord,
+    bytes memory extraData
+  ) internal returns (EntityId __auxRet0) {
     return CallWrapper(self.toResourceId(), address(0)).mine(caller, coord, extraData);
   }
 
@@ -72,7 +77,7 @@ library MineSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).mineUntilDestroyed(caller, coord, extraData);
   }
 
-  function getRandomOreType(CallWrapper memory self, Vec3 coord) internal view returns (ObjectType) {
+  function getRandomOreType(CallWrapper memory self, Vec3 coord) internal view returns (ObjectType __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert MineSystemLib_CallingFromRootSystem();
 
@@ -84,7 +89,10 @@ library MineSystemLib {
     if (!success) revertWithBytes(returnData);
 
     bytes memory result = abi.decode(returnData, (bytes));
-    return abi.decode(result, (ObjectType));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (ObjectType));
+    }
   }
 
   function mine(
@@ -93,7 +101,7 @@ library MineSystemLib {
     Vec3 coord,
     uint16 toolSlot,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert MineSystemLib_CallingFromRootSystem();
 
@@ -105,7 +113,10 @@ library MineSystemLib {
     bytes memory result = self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function mine(
@@ -113,7 +124,7 @@ library MineSystemLib {
     EntityId caller,
     Vec3 coord,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert MineSystemLib_CallingFromRootSystem();
 
@@ -122,7 +133,10 @@ library MineSystemLib {
     bytes memory result = self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function mineUntilDestroyed(
@@ -163,14 +177,17 @@ library MineSystemLib {
     Vec3 coord,
     uint16 toolSlot,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     bytes memory systemCall = abi.encodeCall(
       _mine_EntityId_Vec3_uint16_bytes.mine,
       (caller, coord, toolSlot, extraData)
     );
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function mine(
@@ -178,11 +195,14 @@ library MineSystemLib {
     EntityId caller,
     Vec3 coord,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     bytes memory systemCall = abi.encodeCall(_mine_EntityId_Vec3_bytes.mine, (caller, coord, extraData));
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function mineUntilDestroyed(
