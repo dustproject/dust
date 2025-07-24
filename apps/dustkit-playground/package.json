@@ -3,7 +3,7 @@
   "name": "dustkit-playground",
   "type": "module",
   "scripts": {
-    "dev": "mprocs",
+    "dev": "echo clearing anvil cache... && shx rm -rf ~/.foundry/anvil/tmp ../../packages/world/deploys/31337/latest.json && mprocs",
     "test": "tsc --noEmit"
   },
   "devDependencies": {
