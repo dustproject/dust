@@ -12,7 +12,7 @@ import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { AttachProgramNotification, DetachProgramNotification, notify } from "../utils/NotifUtils.sol";
 
 import { SAFE_PROGRAM_GAS } from "../Constants.sol";
-import { EntityId } from "../types/EntityId.sol";
+import { EntityId, EntityTypeLib } from "../types/EntityId.sol";
 import { ObjectType } from "../types/ObjectType.sol";
 
 import { ObjectTypes } from "../types/ObjectType.sol";
@@ -32,6 +32,11 @@ contract ProgramSystem is System {
 
     // Attach new program
     _attachProgram(caller, target, newProgram, extraData);
+  }
+
+  function updateProgram(EntityId target, ProgramId newProgram, bytes calldata extraData) public {
+    EntityId caller = EntityTypeLib.encodePlayer(_msgSender());
+    updateProgram(caller, target, newProgram, extraData);
   }
 
   function attachProgram(EntityId caller, EntityId target, ProgramId program, bytes calldata extraData) public {
