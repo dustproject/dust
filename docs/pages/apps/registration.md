@@ -49,7 +49,7 @@ contract CustomProgram {
 
 ## Register a spawn app
 
-Spawn apps are displayed in a list on the spawn screen and are intended to implement spawning functionality for custom spawn tiles.
+Spawn apps are displayed on the spawn screen and should implement spawning functionality for custom spawn tiles.
 Registering them is very similar to registering global apps, just using the `dust.spawnAppConfigUrl` resource tag instead.
 
 1. Register a new MUD namespace.
