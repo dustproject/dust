@@ -49,6 +49,15 @@ library ProgramSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).updateProgram(caller, target, newProgram, extraData);
   }
 
+  function updateProgram(
+    ProgramSystemType self,
+    EntityId target,
+    ProgramId newProgram,
+    bytes memory extraData
+  ) internal {
+    return CallWrapper(self.toResourceId(), address(0)).updateProgram(target, newProgram, extraData);
+  }
+
   function attachProgram(
     ProgramSystemType self,
     EntityId caller,
@@ -76,6 +85,24 @@ library ProgramSystemLib {
     bytes memory systemCall = abi.encodeCall(
       _updateProgram_EntityId_EntityId_ProgramId_bytes.updateProgram,
       (caller, target, newProgram, extraData)
+    );
+    self.from == address(0)
+      ? _world().call(self.systemId, systemCall)
+      : _world().callFrom(self.from, self.systemId, systemCall);
+  }
+
+  function updateProgram(
+    CallWrapper memory self,
+    EntityId target,
+    ProgramId newProgram,
+    bytes memory extraData
+  ) internal {
+    // if the contract calling this function is a root system, it should use `callAsRoot`
+    if (address(_world()) == address(this)) revert ProgramSystemLib_CallingFromRootSystem();
+
+    bytes memory systemCall = abi.encodeCall(
+      _updateProgram_EntityId_ProgramId_bytes.updateProgram,
+      (target, newProgram, extraData)
     );
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
@@ -124,6 +151,19 @@ library ProgramSystemLib {
     bytes memory systemCall = abi.encodeCall(
       _updateProgram_EntityId_EntityId_ProgramId_bytes.updateProgram,
       (caller, target, newProgram, extraData)
+    );
+    SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
+  }
+
+  function updateProgram(
+    RootCallWrapper memory self,
+    EntityId target,
+    ProgramId newProgram,
+    bytes memory extraData
+  ) internal {
+    bytes memory systemCall = abi.encodeCall(
+      _updateProgram_EntityId_ProgramId_bytes.updateProgram,
+      (target, newProgram, extraData)
     );
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
@@ -195,6 +235,10 @@ library ProgramSystemLib {
 
 interface _updateProgram_EntityId_EntityId_ProgramId_bytes {
   function updateProgram(EntityId caller, EntityId target, ProgramId newProgram, bytes memory extraData) external;
+}
+
+interface _updateProgram_EntityId_ProgramId_bytes {
+  function updateProgram(EntityId target, ProgramId newProgram, bytes memory extraData) external;
 }
 
 interface _attachProgram_EntityId_EntityId_ProgramId_bytes {
