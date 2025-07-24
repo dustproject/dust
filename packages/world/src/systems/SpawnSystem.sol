@@ -32,7 +32,6 @@ import { SpawnNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { MoveLib } from "./libraries/MoveLib.sol";
 
-import "../ProgramHooks.sol" as Hooks;
 import { EntityId } from "../types/EntityId.sol";
 
 contract SpawnSystem is System {

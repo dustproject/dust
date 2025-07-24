@@ -11,8 +11,6 @@ import { ObjectType } from "../types/ObjectType.sol";
 
 import { ObjectTypes } from "../types/ObjectType.sol";
 
-import "../ProgramHooks.sol" as Hooks;
-
 contract TransferSystem is System {
   function transfer(
     EntityId caller,

@@ -16,11 +16,12 @@ import { FuelMachineNotification, notify } from "../utils/NotifUtils.sol";
 
 import { ObjectTypes } from "../types/ObjectType.sol";
 
-import "../ProgramHooks.sol" as Hooks;
 import { ProgramId } from "../types/ProgramId.sol";
 
 contract MachineSystem is System {
-  function fuelMachine(EntityId caller, EntityId machine, SlotAmount[] memory slots, bytes calldata extraData) external {
+  function energizeMachine(EntityId caller, EntityId machine, SlotAmount[] calldata slots, bytes calldata extraData)
+    public
+  {
     caller.activate();
     require(slots.length > 0, "Must provide at least one slot");
     caller.requireConnected(machine);
@@ -41,15 +42,23 @@ contract MachineSystem is System {
 
     EnergyData memory machineData = updateMachineEnergy(machine);
 
-    uint128 newEnergyLevel = machineData.energy + uint128(fuelAmount) * ObjectPhysics._getEnergy(ObjectTypes.Battery);
+    uint128 energyProvided = uint128(fuelAmount) * ObjectPhysics._getEnergy(ObjectTypes.Battery);
+    uint128 newEnergyLevel = machineData.energy + energyProvided;
 
     Energy._setEnergy(machine, newEnergyLevel);
 
     ProgramId program = machine._getProgram();
     program.hook({ caller: caller, target: machine, revertOnFailure: true, extraData: extraData }).onEnergize(
-      uint128(fuelAmount) * ObjectPhysics._getEnergy(ObjectTypes.Battery)
+      energyProvided
     );
 
     notify(caller, FuelMachineNotification({ machine: machine, fuelAmount: fuelAmount }));
+  }
+
+  /// @notice deprecated
+  function fuelMachine(EntityId caller, EntityId machine, SlotAmount[] calldata slots, bytes calldata extraData)
+    external
+  {
+    energizeMachine(caller, machine, slots, extraData);
   }
 }

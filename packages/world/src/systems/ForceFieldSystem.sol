@@ -13,7 +13,6 @@ import { AddFragmentNotification, RemoveFragmentNotification, notify } from "../
 
 import { EntityId } from "../types/EntityId.sol";
 
-import { ObjectType } from "../types/ObjectType.sol";
 import { ObjectTypes } from "../types/ObjectType.sol";
 
 import { ProgramId } from "../types/ProgramId.sol";

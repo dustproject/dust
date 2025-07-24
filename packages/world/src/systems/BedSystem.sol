@@ -26,7 +26,6 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { MoveLib } from "./libraries/MoveLib.sol";
 
-import "../ProgramHooks.sol" as Hooks;
 import { EntityId } from "../types/EntityId.sol";
 import { Vec3 } from "../types/Vec3.sol";
 
