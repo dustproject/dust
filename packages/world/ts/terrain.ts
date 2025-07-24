@@ -3,10 +3,11 @@ import { chunkSize, voxelToChunkPos } from "./chunk";
 import { getCreate3Address } from "./getCreate3Address";
 import { type Vec3, packVec3 } from "./vec3";
 
+// Should match SSTORE2.sol
 const DATA_OFFSET = 1;
 
+// Should match TerrainLib.sol
 const EXPECTED_VERSION = 0x00;
-
 const VERSION_PADDING = 1;
 const BIOME_PADDING = 1;
 const SURFACE_PADDING = 1;
@@ -46,13 +47,11 @@ function readBytes1(bytecode: string, offset: number): number {
   return Number.parseInt(hexByte, 16);
 }
 
-export async function getTerrainBlockType(
-  worldAddress: Hex,
+export async function getChunkBytecode(
   publicClient: PublicClient,
-  [x, y, z]: Vec3,
-): Promise<number> {
-  const chunkCoord: Vec3 = voxelToChunkPos([x, y, z]);
-
+  worldAddress: Hex,
+  chunkCoord: Vec3,
+): Promise<string> {
   const chunkPointer = getCreate3Address({
     from: worldAddress,
     salt: _getChunkSalt(chunkCoord),
@@ -63,14 +62,28 @@ export async function getTerrainBlockType(
 
   // Read version byte
   const version = readBytes1(bytecode, 0);
-  if (version !== EXPECTED_VERSION)
+  if (version !== EXPECTED_VERSION) {
     throw new Error("Unsupported chunk encoding version");
+  }
 
-  // Get block index
+  return bytecode;
+}
+
+export async function getTerrainBlockType(
+  publicClient: PublicClient,
+  worldAddress: Hex,
+  [x, y, z]: Vec3,
+): Promise<number> {
+  const chunkCoord: Vec3 = voxelToChunkPos([x, y, z]);
+
+  const bytecode = await getChunkBytecode(
+    publicClient,
+    worldAddress,
+    chunkCoord,
+  );
+
   const index = _getBlockIndex([x, y, z]);
-  const blockType = readBytes1(bytecode, index);
-
-  return blockType;
+  return readBytes1(bytecode, index);
 }
 
 export async function getBiome(
@@ -80,20 +93,11 @@ export async function getBiome(
 ): Promise<number> {
   const chunkCoord: Vec3 = voxelToChunkPos([x, y, z]);
 
-  const chunkPointer = getCreate3Address({
-    from: worldAddress,
-    salt: _getChunkSalt(chunkCoord),
-  });
+  const bytecode = await getChunkBytecode(
+    publicClient,
+    worldAddress,
+    chunkCoord,
+  );
 
-  const bytecode = await publicClient.getCode({ address: chunkPointer });
-  if (!bytecode) throw new Error("Chunk not explored");
-
-  // Read version byte
-  const version = readBytes1(bytecode, 0);
-  if (version !== EXPECTED_VERSION)
-    throw new Error("Unsupported chunk encoding version");
-
-  const biome = readBytes1(bytecode, 1);
-
-  return biome;
+  return readBytes1(bytecode, 1);
 }
