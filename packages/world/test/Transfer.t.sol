@@ -509,9 +509,9 @@ contract TransferTest is DustTest {
     SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: numToTransfer });
 
-    program.call(
-      world, abi.encodeCall(world.transfer, (chestEntityId, chestEntityId, otherChestEntityId, slotsToTransfer, ""))
-    );
+    // Use the program to transfer between chests
+    vm.prank(address(program));
+    world.transfer(chestEntityId, chestEntityId, otherChestEntityId, slotsToTransfer, "");
 
     assertInventoryHasObject(chestEntityId, transferObjectType, 0);
     assertInventoryHasObject(otherChestEntityId, transferObjectType, numToTransfer);
@@ -541,10 +541,10 @@ contract TransferTest is DustTest {
     SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: numToTransfer });
 
+    // Use the program to transfer between chests
+    vm.prank(address(program));
     vm.expectRevert("Entity is too far");
-    program.call(
-      world, abi.encodeCall(world.transfer, (chestEntityId, chestEntityId, otherChestEntityId, slotsToTransfer, ""))
-    );
+    world.transfer(chestEntityId, chestEntityId, otherChestEntityId, slotsToTransfer, "");
   }
 
   function testSwapPartiallyFilledSlots() public {

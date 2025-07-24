@@ -5,7 +5,15 @@ import { IBaseWorld } from "@latticexyz/world-consumer/src/experimental/WorldCon
 
 import { EntityId } from "@dust/world/src/types/EntityId.sol";
 
-import "@dust/world/src/ProgramHooks.sol" as Hooks;
+import {
+  HookContext,
+  IAddFragment,
+  IBuild,
+  IEnergize,
+  IMine,
+  IProgramValidator,
+  IRemoveFragment
+} from "@dust/world/src/ProgramHooks.sol";
 
 import { AccessGroupOwner } from "../codegen/tables/AccessGroupOwner.sol";
 
@@ -14,22 +22,21 @@ import { isAllowed } from "../isAllowed.sol";
 import { DefaultProgram } from "./DefaultProgram.sol";
 
 contract ForceFieldProgram is
-  Hooks.IProgramValidator,
-  Hooks.IAddFragment,
-  Hooks.IRemoveFragment,
-  Hooks.IFuel,
-  Hooks.IBuild,
-  Hooks.IMine,
+  IProgramValidator,
+  IAddFragment,
+  IRemoveFragment,
+  IEnergize,
+  IBuild,
+  IMine,
   DefaultProgram
 {
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
 
-  function validateProgram(Hooks.ValidateProgramContext calldata ctx) external view onlyWorld {
+  function validateProgram(HookContext memory ctx, ValidateData calldata program) external view onlyWorld {
     // Allow all programs
-    // TODO: should we add a method to restrict programs?
   }
 
-  function onFuel(Hooks.FuelContext calldata ctx) external view onlyWorld {
+  function onEnergize(HookContext memory ctx, EnergizeData calldata energize) external view onlyWorld {
     // Allow anyone to fuel the force field
   }
 

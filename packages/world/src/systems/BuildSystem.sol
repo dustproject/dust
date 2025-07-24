@@ -28,7 +28,6 @@ import { BUILD_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 
-import "../ProgramHooks.sol" as Hooks;
 import { ProgramId } from "../types/ProgramId.sol";
 import { Orientation, Vec3, vec3 } from "../types/Vec3.sol";
 
@@ -153,34 +152,47 @@ contract BuildSystem is System {
   {
     for (uint256 i = 0; i < coords.length; i++) {
       Vec3 coord = coords[i];
-      (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
+
+      (ProgramId program, EntityId target) = _getHookTarget(coord);
 
       if (ctx.buildType == ObjectTypes.ForceField) {
-        require(!forceField._exists(), "Force field overlaps with another force field");
+        require(!target._exists(), "Force field overlaps with another force field");
         ForceFieldUtils.setupForceField(base, coord);
+        // Return early as it is not possible for a new forcefield to have a program
+        return;
       }
 
-      if (!forceField._exists()) {
-        continue;
-      }
-
-      EnergyData memory machineData = updateMachineEnergy(forceField);
-      if (machineData.energy == 0) {
-        continue;
-      }
-
-      ProgramId program = fragment._getProgram();
       if (!program.exists()) {
-        program = forceField._getProgram();
+        continue;
       }
 
-      program.hook({ caller: ctx.caller, target: forceField, revertOnFailure: true, extraData: extraData }).onBuild(
-        EntityId.wrap(0), // entity will be set by the actual build
-        ctx.buildType,
-        coord,
-        ctx.orientation
-      );
+      program.hook({ caller: ctx.caller, target: target, revertOnFailure: true, extraData: extraData }).onBuild({
+        entity: base,
+        objectType: ctx.buildType,
+        coord: coord,
+        orientation: ctx.orientation
+      });
     }
+  }
+
+  function _getHookTarget(Vec3 coord) internal returns (ProgramId, EntityId) {
+    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
+    if (!forceField._exists()) {
+      return (ProgramId.wrap(0), forceField);
+    }
+
+    EnergyData memory machineData = updateMachineEnergy(forceField);
+    if (machineData.energy == 0) {
+      return (ProgramId.wrap(0), forceField);
+    }
+
+    // We know fragment is active because its forcefield exists, so we can use its program
+    ProgramId program = fragment._getProgram();
+    if (program.exists()) {
+      return (program, fragment);
+    }
+
+    return (forceField._getProgram(), forceField);
   }
 }
 

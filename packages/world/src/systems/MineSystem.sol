@@ -365,31 +365,38 @@ library MineLib {
     Vec3 coord,
     ObjectAmount[] memory extraDrops
   ) public {
-    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
-    if (!forceField._exists()) {
-      return;
-    }
+    (ProgramId program, EntityId target) = _getHookTarget(coord);
 
-    EnergyData memory machineData = updateMachineEnergy(forceField);
-    if (machineData.energy == 0) {
-      return;
-    }
-
-    // We know fragment is active because its forcefield exists, so we can use its program
-    ProgramId program = fragment._getProgram();
     if (!program.exists()) {
-      program = forceField._getProgram();
-      if (!program.exists()) {
-        return;
-      }
+      return;
     }
 
-    program.hook({ caller: caller, target: forceField, revertOnFailure: true, extraData: extraData }).onMine({
+    program.hook({ caller: caller, target: target, revertOnFailure: true, extraData: extraData }).onMine({
       entity: mined,
       objectType: objectType,
       coord: coord,
       extraDrops: extraDrops
     });
+  }
+
+  function _getHookTarget(Vec3 coord) internal returns (ProgramId, EntityId) {
+    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
+    if (!forceField._exists()) {
+      return (ProgramId.wrap(0), forceField);
+    }
+
+    EnergyData memory machineData = updateMachineEnergy(forceField);
+    if (machineData.energy == 0) {
+      return (ProgramId.wrap(0), forceField);
+    }
+
+    // We know fragment is active because its forcefield exists, so we can use its program
+    ProgramId program = fragment._getProgram();
+    if (program.exists()) {
+      return (program, fragment);
+    }
+
+    return (forceField._getProgram(), forceField);
   }
 }
 

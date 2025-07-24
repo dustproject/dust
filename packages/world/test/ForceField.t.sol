@@ -913,17 +913,12 @@ contract ForceFieldTest is DustTest {
     world.registerNamespace(namespaceId);
     world.registerSystem(programSystemId, chestProgram, false);
 
-    // Expect the forcefield program's onProgramAttached to be called with the correct parameters
+    // Expect the forcefield program's validateProgram to be called with the correct parameters
     bytes memory expectedCallData = abi.encodeCall(
       TestForceFieldProgram.validateProgram,
       (
-        Hooks.ValidateProgramContext({
-          caller: aliceEntityId,
-          target: forceFieldEntityId,
-          programmed: chestEntityId,
-          program: ProgramId.wrap(programSystemId.unwrap()),
-          extraData: bytes("")
-        })
+        HookContext({ caller: aliceEntityId, target: forceFieldEntityId, revertOnFailure: true, extraData: bytes("") }),
+        IProgramValidator.ProgramData({ programmed: chestEntityId, program: ProgramId.wrap(programSystemId.unwrap()) })
       )
     );
     vm.expectCall(address(forceFieldProgram), expectedCallData);

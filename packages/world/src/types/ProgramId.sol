@@ -2,10 +2,8 @@
 pragma solidity >=0.8.24;
 
 import { HooksLib } from "../ProgramHooks.sol";
-import { WorldContextProviderLib } from "@latticexyz/world/src/WorldContext.sol";
 import { ResourceId } from "@latticexyz/world/src/WorldResourceId.sol";
 import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
-import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 
 type ProgramId is bytes32;
 
@@ -36,56 +34,6 @@ library ProgramIdLib {
     }
     (address programAddress,) = Systems.get(self.toResourceId());
     return programAddress;
-  }
-
-  function call(ProgramId self, bytes memory hook, uint256 gas) internal returns (bool, bytes memory) {
-    // If no program set, allow the call
-    address programAddress = self.getAddress();
-    if (programAddress == address(0)) {
-      return (true, "");
-    }
-
-    return programAddress.call{ gas: gas }(_hookContext(hook));
-  }
-
-  function call(ProgramId self, bytes memory hook) internal returns (bool, bytes memory) {
-    address programAddress = self.getAddress();
-    if (programAddress == address(0)) {
-      return (true, "");
-    }
-
-    return programAddress.call(_hookContext(hook));
-  }
-
-  function callOrRevert(ProgramId self, bytes memory callData) internal returns (bytes memory) {
-    (bool success, bytes memory returnData) = self.call(callData);
-    if (!success) {
-      revertWithBytes(returnData);
-    }
-    return returnData;
-  }
-
-  function staticcall(ProgramId self, bytes memory hook) internal view returns (bool, bytes memory) {
-    // If no program set, allow the call
-    address programAddress = self.getAddress();
-    if (programAddress == address(0)) {
-      return (true, "");
-    }
-
-    // If program is set, call it and return the result
-    return programAddress.staticcall(_hookContext(hook));
-  }
-
-  function staticcallOrRevert(ProgramId self, bytes memory callData) internal view returns (bytes memory) {
-    (bool success, bytes memory returnData) = self.staticcall(callData);
-    if (!success) {
-      revertWithBytes(returnData);
-    }
-    return returnData;
-  }
-
-  function _hookContext(bytes memory hook) private pure returns (bytes memory) {
-    return WorldContextProviderLib.appendContext({ callData: hook, msgSender: address(0), msgValue: 0 });
   }
 }
 

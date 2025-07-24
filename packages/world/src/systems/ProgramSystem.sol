@@ -11,13 +11,11 @@ import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { AttachProgramNotification, DetachProgramNotification, notify } from "../utils/NotifUtils.sol";
 
-import { SAFE_PROGRAM_GAS } from "../Constants.sol";
 import { EntityId, EntityTypeLib } from "../types/EntityId.sol";
 import { ObjectType } from "../types/ObjectType.sol";
 
 import { ObjectTypes } from "../types/ObjectType.sol";
 
-import "../ProgramHooks.sol" as Hooks;
 import { ProgramId } from "../types/ProgramId.sol";
 import { Vec3 } from "../types/Vec3.sol";
 
@@ -81,23 +79,9 @@ contract ProgramSystem is System {
 
     (EntityId validator, ProgramId validatorProgram) = _getValidatorProgram(validatorCoord);
 
-    bytes memory validateProgram = abi.encodeCall(
-      Hooks.IProgramValidator.validateProgram,
-      (
-        Hooks.ValidateProgramContext({
-          caller: caller,
-          target: validator,
-          programmed: target,
-          program: program,
-          extraData: extraData
-        })
-      )
-    );
-
     // The validateProgram view function should revert if the program is not allowed
-    validatorProgram.hook({ caller: caller, target: validator, revertOnFailure: true, extraData: "" }).validateProgram(
-      target, program
-    );
+    validatorProgram.hook({ caller: caller, target: validator, revertOnFailure: true, extraData: extraData })
+      .validateProgram({ programmed: target, program: program });
 
     EntityProgram._set(target, program);
 

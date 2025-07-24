@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { WorldContextProviderLib } from "@latticexyz/world/src/WorldContext.sol";
+import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
+
 import { SAFE_PROGRAM_GAS } from "./Constants.sol";
 import { EntityId } from "./types/EntityId.sol";
 import { ObjectAmount, ObjectType } from "./types/ObjectType.sol";
@@ -239,13 +242,17 @@ library HooksLib {
    * @param hookData The calldata to use for the program call
    */
   function _call(Hook memory self, bytes memory hookData) private {
-    if (self.ctx.revertOnFailure) {
-      // If reverting on failure, bubble up error
-      self.program.callOrRevert(hookData);
-    } else {
-      // If not reverting, use fixed gas limit to prevent griefing
-      self.program.call({ hook: hookData, gas: SAFE_PROGRAM_GAS });
+    address programAddress = self.program.getAddress();
+    if (programAddress == address(0)) {
+      return;
     }
+
+    bytes memory data = _hookWorldContext(hookData);
+    bool revertOnFailure = self.ctx.revertOnFailure;
+    uint256 gas = revertOnFailure ? gasleft() : SAFE_PROGRAM_GAS;
+    (bool success, bytes memory returnData) = programAddress.call{ gas: gas }(data);
+
+    if (revertOnFailure && !success) revertWithBytes(returnData);
   }
 
   /**
@@ -254,13 +261,21 @@ library HooksLib {
    * @param hookData The calldata to use for the program staticcall
    */
   function _staticcall(Hook memory self, bytes memory hookData) private view {
-    if (self.ctx.revertOnFailure) {
-      // If reverting on failure, bubble up error
-      self.program.staticcallOrRevert(hookData);
-    } else {
-      // If not reverting, ignore failures
-      self.program.staticcall(hookData);
+    address programAddress = self.program.getAddress();
+    if (programAddress == address(0)) {
+      return;
     }
+
+    bytes memory data = _hookWorldContext(hookData);
+    bool revertOnFailure = self.ctx.revertOnFailure;
+    uint256 gas = revertOnFailure ? gasleft() : SAFE_PROGRAM_GAS;
+    (bool success, bytes memory returnData) = programAddress.staticcall{ gas: gas }(data);
+
+    if (revertOnFailure && !success) revertWithBytes(returnData);
+  }
+
+  function _hookWorldContext(bytes memory hookData) private pure returns (bytes memory) {
+    return WorldContextProviderLib.appendContext({ callData: hookData, msgSender: address(0), msgValue: 0 });
   }
 }
 
