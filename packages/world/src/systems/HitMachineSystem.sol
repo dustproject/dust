@@ -16,11 +16,10 @@ import { Math } from "../utils/Math.sol";
 import { HitMachineNotification, notify } from "../utils/NotifUtils.sol";
 import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
-import { DEFAULT_HIT_ENERGY_COST, HIT_ACTION_MODIFIER, SAFE_PROGRAM_GAS, TOOL_HIT_ENERGY_COST } from "../Constants.sol";
+import { DEFAULT_HIT_ENERGY_COST, HIT_ACTION_MODIFIER, TOOL_HIT_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType } from "../types/ObjectType.sol";
 
-import "../ProgramHooks.sol" as Hooks;
 import { ProgramId } from "../types/ProgramId.sol";
 import { Vec3 } from "../types/Vec3.sol";
 
@@ -39,30 +38,28 @@ contract HitMachineSystem is System {
     (EntityId forceField,) = ForceFieldUtils.getForceField(coord);
     require(forceField._exists(), "No force field at this location");
 
-    EnergyData memory machineData = updateMachineEnergy(forceField);
-    uint128 energyLeft = machineData.energy;
+    uint128 energyLeft = updateMachineEnergy(forceField).energy;
     require(energyLeft > 0, "Cannot hit depleted forcefield");
 
     ToolData memory toolData = ToolUtils.getToolData(caller, toolSlot);
     uint128 playerEnergyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, energyLeft);
 
-    Vec3 forceFieldCoord = forceField._getPosition();
-
     // Return early if player died
     if (playerEnergyReduction > 0 && decreasePlayerEnergy(caller, callerCoord, playerEnergyReduction) == 0) {
-      addEnergyToLocalPool(forceFieldCoord, playerEnergyReduction);
+      addEnergyToLocalPool(forceField._getPosition(), playerEnergyReduction);
       return;
     }
 
     energyLeft -= playerEnergyReduction;
 
     uint128 massReduction = toolData.use(energyLeft, HIT_ACTION_MODIFIER, toolData.toolType.isWhacker());
-
     uint128 machineEnergyReduction = playerEnergyReduction + massReduction;
 
+    Vec3 forceFieldCoord = forceField._getPosition();
     decreaseMachineEnergy(forceField, machineEnergyReduction);
     addEnergyToLocalPool(forceFieldCoord, machineEnergyReduction + playerEnergyReduction);
 
+    caller;
     {
       ProgramId program = forceField._getProgram();
       // Don't revert so the program can't prevent hitting

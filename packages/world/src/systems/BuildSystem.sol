@@ -33,12 +33,12 @@ import { Orientation, Vec3, vec3 } from "../types/Vec3.sol";
 
 struct BuildContext {
   EntityId caller;
-  Vec3 coord;
-  uint16 slot;
-  Orientation orientation;
-  uint128 callerEnergy;
   ObjectType slotType;
   ObjectType buildType;
+  Vec3 coord;
+  uint128 callerEnergy;
+  uint16 slot;
+  Orientation orientation;
 }
 
 contract BuildSystem is System {

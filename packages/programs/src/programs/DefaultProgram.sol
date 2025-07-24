@@ -5,7 +5,7 @@ import { IBaseWorld, WorldConsumer } from "@latticexyz/world-consumer/src/experi
 
 import { EntityId } from "@dust/world/src/types/EntityId.sol";
 
-import "@dust/world/src/ProgramHooks.sol" as Hooks;
+import { HookContext, IAttachProgram, IDetachProgram } from "@dust/world/src/ProgramHooks.sol";
 
 import { EntityAccessGroup } from "../codegen/tables/EntityAccessGroup.sol";
 
@@ -14,10 +14,10 @@ import { getForceField } from "../getForceField.sol";
 
 import { isAllowed } from "../isAllowed.sol";
 
-abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, WorldConsumer {
+abstract contract DefaultProgram is IAttachProgram, IDetachProgram, WorldConsumer {
   constructor(IBaseWorld _world) WorldConsumer(_world) { }
 
-  function onAttachProgram(Hooks.AttachProgramContext calldata ctx) external onlyWorld {
+  function onAttachProgram(HookContext calldata ctx) external onlyWorld {
     (EntityId forceField,) = getForceField(ctx.target);
 
     // Sanity check to ensure the target's access group is not already set
@@ -35,7 +35,7 @@ abstract contract DefaultProgram is Hooks.IAttachProgram, Hooks.IDetachProgram, 
     // Access control is handled by getGroupId which locks entities in custom forcefields
   }
 
-  function onDetachProgram(Hooks.DetachProgramContext calldata ctx) external onlyWorld {
+  function onDetachProgram(HookContext calldata ctx) external onlyWorld {
     (, bool isProtected) = getForceField(ctx.target);
     require(!isProtected || _canDetach(ctx.caller, ctx.target), "Caller not authorized to detach this program");
 

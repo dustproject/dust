@@ -11,13 +11,11 @@ import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { AddFragmentNotification, RemoveFragmentNotification, notify } from "../utils/NotifUtils.sol";
 
-import { SAFE_PROGRAM_GAS } from "../Constants.sol";
 import { EntityId } from "../types/EntityId.sol";
 
 import { ObjectType } from "../types/ObjectType.sol";
 import { ObjectTypes } from "../types/ObjectType.sol";
 
-import "../ProgramHooks.sol" as Hooks;
 import { ProgramId } from "../types/ProgramId.sol";
 import { Vec3 } from "../types/Vec3.sol";
 
@@ -101,8 +99,7 @@ contract ForceFieldSystem is System {
     caller.activate();
     caller.requireAdjacentToFragment(fragmentCoord);
 
-    ObjectType objectType = forceField._getObjectType();
-    require(objectType == ObjectTypes.ForceField, "Invalid object type");
+    require(forceField._getObjectType() == ObjectTypes.ForceField, "Invalid object type");
 
     require(
       refFragmentCoord.inVonNeumannNeighborhood(fragmentCoord), "Reference fragment is not adjacent to new fragment"
@@ -141,11 +138,8 @@ contract ForceFieldSystem is System {
     caller.activate();
     caller.requireAdjacentToFragment(fragmentCoord);
 
-    ObjectType objectType = forceField._getObjectType();
-    require(objectType == ObjectTypes.ForceField, "Invalid object type");
-
-    Vec3 forceFieldFragmentCoord = forceField._getPosition().toFragmentCoord();
-    require(forceFieldFragmentCoord != fragmentCoord, "Can't remove forcefield's fragment");
+    require(forceField._getObjectType() == ObjectTypes.ForceField, "Invalid object type");
+    require(forceField._getPosition().toFragmentCoord() != fragmentCoord, "Can't remove forcefield's fragment");
 
     EntityId fragment = EntityUtils.getFragmentAt(fragmentCoord);
     require(ForceFieldUtils.isFragment(forceField, fragment), "Fragment is not part of forcefield");

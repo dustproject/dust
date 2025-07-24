@@ -47,7 +47,6 @@ import {
   MINE_ACTION_MODIFIER,
   PLAYER_ENERGY_DRAIN_RATE,
   PRECISION_MULTIPLIER,
-  SAFE_PROGRAM_GAS,
   TOOL_MINE_ENERGY_COST
 } from "../Constants.sol";
 
@@ -60,7 +59,6 @@ import { NatureLib } from "../utils/NatureLib.sol";
 import { ObjectTypes } from "../types/ObjectType.sol";
 import { OreLib } from "../utils/OreLib.sol";
 
-import "../ProgramHooks.sol" as Hooks;
 import { ProgramId } from "../types/ProgramId.sol";
 import { Vec3, vec3 } from "../types/Vec3.sol";
 
@@ -103,16 +101,10 @@ contract MineSystem is System {
     caller.requireConnected(coord);
     MineLib._requireReachable(coord);
 
-    (EntityId mined, ObjectType minedType) = EntityUtils.getOrCreateBlockAt(coord);
-    require(minedType.isBlock(), "Object is not mineable");
-
-    mined = mined._baseEntityId();
-    Vec3 baseCoord = mined._getPosition();
-
-    minedType = _prepareBlock(mined, minedType, coord);
+    (EntityId mined, ObjectType minedType) = _prepareBlock(coord);
 
     (uint128 massLeft, bool canMine) =
-      MinePhysicsLib._applyMassReduction(caller, callerEnergy, toolSlot, minedType, Mass._getMass(mined));
+      MinePhysicsLib._applyMassReduction(caller, callerEnergy, toolSlot, mined, minedType);
 
     if (!canMine) {
       // Player died, return early
@@ -122,33 +114,23 @@ contract MineSystem is System {
     ObjectAmount[] memory extraDrops;
     if (massLeft == 0) {
       // The block was fully mined
-      Mass._deleteRecord(mined);
-
-      // Handle landbound and growable blocks on top of the mined block
-      _handleAbove(caller, baseCoord);
-
-      // Remove the block and all relative blocks
-      _removeBlock(mined, minedType, baseCoord);
-      _removeRelativeBlocks(mined, minedType, baseCoord);
-
-      // Handle drops
-      extraDrops = _handleDrop(caller, mined, minedType, baseCoord);
-
-      // It is fine to destroy the entity before requiring mines allowed,
-      // as machines can't be destroyed if they have energy
-      _cleanupEntity(caller, mined, minedType, baseCoord);
-
+      extraDrops = _destroyObject(caller, mined, minedType);
       notify(caller, MineNotification({ mineEntityId: mined, mineCoord: coord, mineObjectType: minedType }));
     } else {
       Mass._setMass(mined, massLeft);
     }
 
-    MineLib._requireMinesAllowed(caller, extraData, mined, minedType, coord, extraDrops);
+    MineLib._requireMinesAllowed(caller, coord, extraData, mined, minedType, extraDrops);
 
     return mined;
   }
 
-  function _prepareBlock(EntityId mined, ObjectType minedType, Vec3 coord) internal returns (ObjectType) {
+  function _prepareBlock(Vec3 coord) internal returns (EntityId, ObjectType) {
+    (EntityId mined, ObjectType minedType) = EntityUtils.getOrCreateBlockAt(coord);
+    require(minedType.isBlock(), "Object is not mineable");
+
+    mined = mined._baseEntityId();
+
     if (Mass._get(mined) == 0) {
       // If the mass is 0, we assume the block was not correctly setup (e.g. missing mass)
       // NOTE: This currently targets the issue where grown seeds/saplings were not given mass
@@ -165,19 +147,52 @@ contract MineSystem is System {
         _requireNoSleepingPlayers(mined);
       }
 
-      return minedType;
+      return (mined, minedType);
     }
 
     if (minedType == ObjectTypes.UnrevealedOre) {
-      return RandomResourceLib._collapseRandomOre(mined, coord);
+      return (mined, RandomResourceLib._collapseRandomOre(mined, coord));
     }
 
     if (minedType.isGrowable() && SeedGrowth._getFullyGrownAt(mined) <= block.timestamp) {
       // If the seed is fully grown, grow it
-      return NatureLib.growSeed(coord, mined, minedType);
+      return (mined, NatureLib.growSeed(coord, mined, minedType));
     }
 
-    return minedType;
+    return (mined, minedType);
+  }
+
+  function _destroyObject(EntityId caller, EntityId mined, ObjectType minedType)
+    internal
+    returns (ObjectAmount[] memory extraDrops)
+  {
+    Mass._deleteRecord(mined);
+
+    Vec3 baseCoord = mined._getPosition();
+
+    // Get all coords: index 0 is base, rest are relatives
+    Vec3[] memory coords = minedType.getRelativeCoords(baseCoord, EntityOrientation._get(mined));
+
+    for (uint256 i = 0; i < coords.length; i++) {
+      Vec3 coord = coords[i];
+      _handleAbove(caller, coord);
+
+      (EntityId entity, ObjectType objectType) = EntityUtils.getBlockAt(coord);
+
+      // Delete BaseEntity only for relatives (i > 0)
+      if (i > 0) {
+        BaseEntity._deleteRecord(entity);
+      }
+
+      _removeBlock(entity, objectType, coord);
+    }
+
+    // Handle drops
+    extraDrops = _handleDrop(caller, mined, minedType, baseCoord);
+
+    // It is fine to destroy the entity before requiring mines allowed,
+    // as machines can't be destroyed if they have energy
+    _cleanupEntity(caller, mined, minedType, baseCoord);
   }
 
   function _removeBlock(EntityId entityId, ObjectType objectType, Vec3 coord) internal {
@@ -196,20 +211,6 @@ contract MineSystem is System {
     // but if we add other types of movable entities we should check that it is a base entity
     if (above._exists()) {
       MoveLib.runGravity(aboveCoord);
-    }
-  }
-
-  function _removeRelativeBlocks(EntityId mined, ObjectType minedType, Vec3 baseCoord) internal {
-    // First coord will be the base coord, the rest is relative schema coords
-    Vec3[] memory coords = minedType.getRelativeCoords(baseCoord, EntityOrientation._get(mined));
-
-    // Only iterate through relative schema coords
-    for (uint256 i = 1; i < coords.length; i++) {
-      Vec3 relativeCoord = coords[i];
-      (EntityId relative, ObjectType relativeType) = EntityUtils.getBlockAt(relativeCoord);
-      BaseEntity._deleteRecord(relative);
-
-      _removeBlock(relative, relativeType, relativeCoord);
     }
   }
 
@@ -359,10 +360,10 @@ library MineLib {
 
   function _requireMinesAllowed(
     EntityId caller,
+    Vec3 coord,
     bytes calldata extraData,
     EntityId mined,
     ObjectType objectType,
-    Vec3 coord,
     ObjectAmount[] memory extraDrops
   ) public {
     (ProgramId program, EntityId target) = _getHookTarget(coord);
@@ -405,9 +406,10 @@ library MinePhysicsLib {
     EntityId caller,
     uint128 callerEnergy,
     uint16 toolSlot,
-    ObjectType minedType,
-    uint128 massLeft
+    EntityId mined,
+    ObjectType minedType
   ) public returns (uint128, bool) {
+    uint128 massLeft = Mass._get(mined);
     if (massLeft == 0) {
       return (0, true);
     }
