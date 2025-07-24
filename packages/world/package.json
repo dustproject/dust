@@ -41,22 +41,22 @@
     "world:upgrade": "export FOUNDRY_PROFILE=redstone && pnpm build && pnpm world:set-paused true && mud deploy --profile=redstone --rpcBatch --worldAddress=0x253eb85B3C953bFE3827CC14a151262482E7189C --kms && pnpm world:set-paused false"
   },
   "dependencies": {
-    "@latticexyz/common": "2.2.23-122945eb02d5d8b6475aec2e88f72340ea81f2d6",
-    "@latticexyz/config": "2.2.23-122945eb02d5d8b6475aec2e88f72340ea81f2d6",
-    "@latticexyz/schema-type": "2.2.23-122945eb02d5d8b6475aec2e88f72340ea81f2d6",
-    "@latticexyz/store": "2.2.23-122945eb02d5d8b6475aec2e88f72340ea81f2d6",
-    "@latticexyz/world": "2.2.23-122945eb02d5d8b6475aec2e88f72340ea81f2d6",
-    "@latticexyz/world-consumer": "2.2.23-122945eb02d5d8b6475aec2e88f72340ea81f2d6",
+    "@latticexyz/common": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
+    "@latticexyz/config": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
+    "@latticexyz/schema-type": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
+    "@latticexyz/store": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
+    "@latticexyz/world": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
+    "@latticexyz/world-consumer": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
     "@openzeppelin/contracts": "^4.9.6",
     "solady": "^0.1.12",
     "viem": "2.30.6"
   },
   "devDependencies": {
-    "@latticexyz/gas-report": "2.2.23-122945eb02d5d8b6475aec2e88f72340ea81f2d6",
+    "@latticexyz/gas-report": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
     "forge-std": "https://github.com/foundry-rs/forge-std.git#3b20d60d14b343ee4f908cb8079495c07f5e8981",
     "solhint": "^6.0.0",
-    "solhint-config-mud": "2.2.23-122945eb02d5d8b6475aec2e88f72340ea81f2d6",
-    "solhint-plugin-mud": "2.2.23-122945eb02d5d8b6475aec2e88f72340ea81f2d6",
+    "solhint-config-mud": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
+    "solhint-plugin-mud": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3",
     "vitest": "^3.1.3"
