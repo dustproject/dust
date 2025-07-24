@@ -1,7 +1,7 @@
 import { type Hex, type PublicClient, pad, toBytes } from "viem";
 import { CHUNK_SIZE, voxelToChunkPos } from "./chunk";
 import { getCreate3Address } from "./getCreate3Address";
-import { type Vec3, packVec3 } from "./vec3";
+import { type ReadonlyVec3, type Vec3, packVec3 } from "./vec3";
 
 // Should match SSTORE2.sol
 const DATA_OFFSET = 1;
@@ -12,7 +12,7 @@ const VERSION_PADDING = 1;
 const BIOME_PADDING = 1;
 const SURFACE_PADDING = 1;
 
-function getChunkSalt(coord: Vec3) {
+function getChunkSalt(coord: ReadonlyVec3) {
   return pad(toBytes(packVec3(coord)), { size: 32 });
 }
 
@@ -20,11 +20,11 @@ function mod(a: number, b: number): number {
   return ((a % b) + b) % b;
 }
 
-function getRelativeCoord([x, y, z]: Vec3): Vec3 {
+function getRelativeCoord([x, y, z]: ReadonlyVec3): ReadonlyVec3 {
   return [mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE)];
 }
 
-function getBlockIndex([x, y, z]: Vec3): number {
+function getBlockIndex([x, y, z]: ReadonlyVec3): number {
   const [rx, ry, rz] = getRelativeCoord([x, y, z]);
   const index =
     VERSION_PADDING +
@@ -50,7 +50,7 @@ function readBytes1(bytecode: string, offset: number): number {
 export async function getChunkBytecode(
   publicClient: PublicClient,
   worldAddress: Hex,
-  chunkCoord: Vec3,
+  chunkCoord: ReadonlyVec3,
 ): Promise<string> {
   const chunkPointer = getCreate3Address({
     from: worldAddress,
@@ -74,7 +74,7 @@ export async function getTerrainBlockType(
   worldAddress: Hex,
   [x, y, z]: Vec3,
 ): Promise<number> {
-  const chunkCoord: Vec3 = voxelToChunkPos([x, y, z]);
+  const chunkCoord = voxelToChunkPos([x, y, z]);
 
   const bytecode = await getChunkBytecode(
     publicClient,
@@ -91,7 +91,7 @@ export async function getBiome(
   publicClient: PublicClient,
   [x, y, z]: Vec3,
 ): Promise<number> {
-  const chunkCoord: Vec3 = voxelToChunkPos([x, y, z]);
+  const chunkCoord = voxelToChunkPos([x, y, z]);
 
   const bytecode = await getChunkBytecode(
     publicClient,
