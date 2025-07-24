@@ -46,3 +46,30 @@ contract CustomProgram {
   }
 }
 ```
+
+## Register a spawn app
+
+Spawn apps are displayed on the spawn screen and should implement spawning functionality for custom spawn tiles.
+Registering them is very similar to registering global apps, just using the `dust.spawnAppConfigUrl` resource tag instead.
+
+1. Register a new MUD namespace.
+
+   ```solidity
+    import { ResourceId, WorldResourceIdInstance, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
+    import { ResourceIds } from "@latticexyz/store/src/codegen/tables/ResourceIds.sol";
+
+    IWorld world = IWorld(0x253eb85B3C953bFE3827CC14a151262482E7189C);
+    ResourceId appNamespaceId = WorldResourceIdLib.encodeNamespace(bytes14(bytes("your-dust-app")));
+    if (!ResourceIds.getExists(appNamespaceId)) {
+      world.registerNamespace(appNamespaceId);
+    }
+   ```
+
+2. Register by setting a resource tag that points to your ([spawn app's manifest](https://esm.sh/pr/dustproject/dust/dustkit@d9cb17b/json-schemas/app-config.json))
+
+   ```solidity
+   import { metadataSystem } from
+   "@latticexyz/world-module-metadata/src/codegen/experimental/systems/MetadataSystemLib.sol";
+
+   metadataSystem.setResourceTag(appNamespaceId, "dust.spawnAppConfigUrl", bytes("https://your-dust-spawn-app.com/dust-app.json"));
+   ```
