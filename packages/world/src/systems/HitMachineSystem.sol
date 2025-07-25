@@ -58,14 +58,10 @@ contract HitMachineSystem is System {
     decreaseMachineEnergy(forceField, machineEnergyReduction);
     addEnergyToLocalPool(forceFieldCoord, machineEnergyReduction + playerEnergyReduction);
 
-    caller;
-    {
-      ProgramId program = forceField._getProgram();
-      // Don't revert so the program can't prevent hitting
-      program.hook({ caller: caller, target: forceField, revertOnFailure: false, extraData: "" }).onHit(
-        machineEnergyReduction
-      );
-    }
+    // Don't revert so the program can't prevent hitting
+    forceField._getProgram().hook({ caller: caller, target: forceField, revertOnFailure: false, extraData: "" }).onHit(
+      toolData.tool, machineEnergyReduction
+    );
 
     notify(caller, HitMachineNotification({ machine: forceField, machineCoord: forceFieldCoord }));
   }

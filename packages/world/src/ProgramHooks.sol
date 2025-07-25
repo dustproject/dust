@@ -56,6 +56,7 @@ interface ITransfer {
 
 interface IHit {
   struct HitData {
+    EntityId tool;
     uint128 damage;
   }
 
@@ -89,8 +90,9 @@ interface IRemoveFragment {
 interface IBuild {
   struct BuildData {
     EntityId entity;
-    ObjectType objectType;
     Vec3 coord;
+    ObjectType slotType;
+    ObjectType objectType;
     Orientation orientation;
   }
 
@@ -100,9 +102,10 @@ interface IBuild {
 interface IMine {
   struct MineData {
     EntityId entity;
-    ObjectType objectType;
+    EntityId tool;
     Vec3 coord;
-    ObjectAmount[] extraDrops;
+    ObjectType objectType;
+    ObjectAmount[] drops;
   }
 
   function onMine(HookContext calldata ctx, MineData calldata mine) external;
@@ -168,8 +171,8 @@ library HooksLib {
     _call(self, abi.encodeCall(ITransfer.onTransfer, (self.ctx, transfer)));
   }
 
-  function onHit(Hook memory self, uint128 damage) internal {
-    IHit.HitData memory hit = IHit.HitData({ damage: damage });
+  function onHit(Hook memory self, EntityId tool, uint128 damage) internal {
+    IHit.HitData memory hit = IHit.HitData({ tool: tool, damage: damage });
 
     _call(self, abi.encodeCall(IHit.onHit, (self.ctx, hit)));
   }
@@ -195,21 +198,32 @@ library HooksLib {
   function onMine(
     Hook memory self,
     EntityId entity,
+    EntityId tool,
     ObjectType objectType,
     Vec3 coord,
-    ObjectAmount[] memory extraDrops
+    ObjectAmount[] memory drops
   ) internal {
     IMine.MineData memory mine =
-      IMine.MineData({ entity: entity, objectType: objectType, coord: coord, extraDrops: extraDrops });
+      IMine.MineData({ entity: entity, tool: tool, objectType: objectType, coord: coord, drops: drops });
 
     _call(self, abi.encodeCall(IMine.onMine, (self.ctx, mine)));
   }
 
-  function onBuild(Hook memory self, EntityId entity, ObjectType objectType, Vec3 coord, Orientation orientation)
-    internal
-  {
-    IBuild.BuildData memory build =
-      IBuild.BuildData({ entity: entity, objectType: objectType, coord: coord, orientation: orientation });
+  function onBuild(
+    Hook memory self,
+    EntityId entity,
+    Vec3 coord,
+    ObjectType slotType,
+    ObjectType objectType,
+    Orientation orientation
+  ) internal {
+    IBuild.BuildData memory build = IBuild.BuildData({
+      entity: entity,
+      coord: coord,
+      slotType: slotType,
+      objectType: objectType,
+      orientation: orientation
+    });
 
     _call(self, abi.encodeCall(IBuild.onBuild, (self.ctx, build)));
   }

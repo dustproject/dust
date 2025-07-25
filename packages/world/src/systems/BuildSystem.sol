@@ -93,7 +93,7 @@ contract BuildSystem is System {
       return base;
     }
 
-    _handleSpecialBlockTypes(base, ctx.buildType, ctx.coord);
+    _handleSpecialBlockTypes(ctx, base);
 
     _requireBuildsAllowed(ctx, base, coords, extraData);
 
@@ -131,15 +131,15 @@ contract BuildSystem is System {
   /**
    * @dev Handles special initialization for specific block types (growables, extra drops)
    */
-  function _handleSpecialBlockTypes(EntityId base, ObjectType buildType, Vec3 coord) internal {
-    if (buildType.isGrowable()) {
-      ObjectType belowType = EntityUtils.getObjectTypeAt(coord - vec3(0, 1, 0));
-      require(buildType.isPlantableOn(belowType), "Cannot plant on this block");
+  function _handleSpecialBlockTypes(BuildContext memory ctx, EntityId base) internal {
+    if (ctx.buildType.isGrowable()) {
+      ObjectType belowType = EntityUtils.getObjectTypeAt(ctx.coord - vec3(0, 1, 0));
+      require(ctx.buildType.isPlantableOn(belowType), "Cannot plant on this block");
 
-      removeEnergyFromLocalPool(coord, buildType.getGrowableEnergy());
+      removeEnergyFromLocalPool(ctx.coord, ctx.buildType.getGrowableEnergy());
 
-      SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildType.getTimeToGrow());
-    } else if (buildType.hasExtraDrops()) {
+      SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + ctx.buildType.getTimeToGrow());
+    } else if (ctx.buildType.hasExtraDrops()) {
       DisabledExtraDrops._set(base, true);
     }
   }
@@ -168,8 +168,9 @@ contract BuildSystem is System {
 
       program.hook({ caller: ctx.caller, target: target, revertOnFailure: true, extraData: extraData }).onBuild({
         entity: base,
-        objectType: ctx.buildType,
         coord: coord,
+        slotType: ctx.slotType,
+        objectType: ctx.buildType,
         orientation: ctx.orientation
       });
     }
