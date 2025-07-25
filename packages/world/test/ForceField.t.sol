@@ -30,10 +30,10 @@ import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 contract TestForceFieldProgram is System, IProgramValidator, IBuild, IMine, IRemoveFragment {
   // Just for testing, real programs should use tables
-  bool revertOnValidateProgram;
-  bool revertOnBuild;
-  bool revertOnMine;
-  bool revertOnRemoveFragment;
+  bool public revertOnValidateProgram;
+  bool public revertOnBuild;
+  bool public revertOnMine;
+  bool public revertOnRemoveFragment;
 
   function validateProgram(HookContext calldata, ProgramData calldata) external view {
     require(!revertOnValidateProgram, "Not allowed by forcefield");
@@ -72,9 +72,9 @@ contract TestForceFieldProgram is System, IProgramValidator, IBuild, IMine, IRem
 
 contract TestFragmentProgram is System, IProgramValidator, IBuild, IMine {
   // Just for testing, real programs should use tables
-  bool revertOnValidateProgram;
-  bool revertOnBuild;
-  bool revertOnMine;
+  bool public revertOnValidateProgram;
+  bool public revertOnBuild;
+  bool public revertOnMine;
 
   function validateProgram(HookContext calldata, ProgramData calldata) external view {
     require(!revertOnValidateProgram, "Not allowed by forcefield fragment");

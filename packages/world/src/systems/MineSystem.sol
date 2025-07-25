@@ -126,10 +126,10 @@ contract MineSystem is System {
       return ctx.mined;
     }
 
-    ObjectAmount[] memory drops;
     if (massLeft == 0) {
       // The block was fully mined
-      drops = _destroyObject(ctx);
+      _destroyObject(ctx);
+
       notify(
         caller, MineNotification({ mineEntityId: ctx.mined, mineCoord: ctx.coord, mineObjectType: ctx.objectType })
       );
@@ -137,7 +137,7 @@ contract MineSystem is System {
       Mass._setMass(ctx.mined, massLeft);
     }
 
-    MineLib._requireMinesAllowed(ctx, drops);
+    MineLib._requireMinesAllowed(ctx);
 
     return ctx.mined;
   }
@@ -196,7 +196,7 @@ contract MineSystem is System {
     return (mined, objectType);
   }
 
-  function _destroyObject(MineContext memory ctx) internal returns (ObjectAmount[] memory drops) {
+  function _destroyObject(MineContext memory ctx) internal {
     Mass._deleteRecord(ctx.mined);
 
     Vec3 baseCoord = ctx.mined._getPosition();
@@ -219,8 +219,7 @@ contract MineSystem is System {
     }
 
     // Handle drops from the mined object itself
-    // NOTE: we are only including drops from the base entity in the drops array
-    drops = MineDropLib._handleDrop(ctx.caller, ctx.mined, ctx.objectType, baseCoord);
+    MineDropLib._handleDrop(ctx.caller, ctx.mined, ctx.objectType, baseCoord);
 
     // It is fine to destroy the entity before requiring mines allowed,
     // as machines can't be destroyed if they have energy
@@ -343,7 +342,7 @@ library MineLib {
     revert("Coordinate is not reachable");
   }
 
-  function _requireMinesAllowed(MineContext calldata ctx, ObjectAmount[] memory drops) public {
+  function _requireMinesAllowed(MineContext calldata ctx) public {
     (ProgramId program, EntityId target) = _getHookTarget(ctx.coord);
 
     if (!program.exists()) {
@@ -354,8 +353,7 @@ library MineLib {
       entity: ctx.mined,
       tool: ctx.toolData.tool,
       objectType: ctx.objectType,
-      coord: ctx.coord,
-      drops: drops
+      coord: ctx.coord
     });
   }
 
@@ -461,10 +459,7 @@ library MineBedLib {
 }
 
 library MineDropLib {
-  function _handleDrop(EntityId caller, EntityId mined, ObjectType minedType, Vec3 minedCoord)
-    public
-    returns (ObjectAmount[] memory drops)
-  {
+  function _handleDrop(EntityId caller, EntityId mined, ObjectType minedType, Vec3 minedCoord) public {
     // Get extra drops (seeds, saplings, etc)
     ObjectAmount[] memory extraDrops = MineRandomLib._getExtraDrops(mined, minedType, minedCoord);
 
@@ -495,13 +490,6 @@ library MineDropLib {
     // }
 
     _addToInventoryOrDrop(caller, mined, minedType, 1);
-
-    drops = new ObjectAmount[](extraDrops.length + 1);
-    drops[0] = ObjectAmount(minedType, 1);
-    for (uint256 i; i < extraDrops.length; ++i) {
-      drops[i + 1] = extraDrops[i];
-    }
-    return drops;
   }
 
   function _addToInventoryOrDrop(EntityId caller, EntityId fallbackEntity, ObjectType objectType, uint128 amount)

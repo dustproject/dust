@@ -105,7 +105,6 @@ interface IMine {
     EntityId tool;
     Vec3 coord;
     ObjectType objectType;
-    ObjectAmount[] drops;
   }
 
   function onMine(HookContext calldata ctx, MineData calldata mine) external;
@@ -195,16 +194,8 @@ library HooksLib {
     _call(self, abi.encodeCall(IRemoveFragment.onRemoveFragment, (self.ctx, fragment)));
   }
 
-  function onMine(
-    Hook memory self,
-    EntityId entity,
-    EntityId tool,
-    ObjectType objectType,
-    Vec3 coord,
-    ObjectAmount[] memory drops
-  ) internal {
-    IMine.MineData memory mine =
-      IMine.MineData({ entity: entity, tool: tool, objectType: objectType, coord: coord, drops: drops });
+  function onMine(Hook memory self, EntityId entity, EntityId tool, ObjectType objectType, Vec3 coord) internal {
+    IMine.MineData memory mine = IMine.MineData({ entity: entity, tool: tool, objectType: objectType, coord: coord });
 
     _call(self, abi.encodeCall(IMine.onMine, (self.ctx, mine)));
   }
