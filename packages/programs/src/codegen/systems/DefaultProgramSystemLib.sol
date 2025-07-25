@@ -38,7 +38,7 @@ struct RootCallWrapper {
 library DefaultProgramSystemLib {
   error DefaultProgramSystemLib_CallingFromRootSystem();
 
-  function newAccessGroup(DefaultProgramSystemType self, EntityId owner) internal returns (uint256) {
+  function newAccessGroup(DefaultProgramSystemType self, EntityId owner) internal returns (uint256 __auxRet0) {
     return CallWrapper(self.toResourceId(), address(0)).newAccessGroup(owner);
   }
 
@@ -120,7 +120,7 @@ library DefaultProgramSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).setTextSignContent(target, content);
   }
 
-  function newAccessGroup(CallWrapper memory self, EntityId owner) internal returns (uint256) {
+  function newAccessGroup(CallWrapper memory self, EntityId owner) internal returns (uint256 __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert DefaultProgramSystemLib_CallingFromRootSystem();
 
@@ -129,7 +129,10 @@ library DefaultProgramSystemLib {
     bytes memory result = self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
-    return abi.decode(result, (uint256));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (uint256));
+    }
   }
 
   function getAccessGroupId(CallWrapper memory self, EntityId entity)
@@ -148,7 +151,10 @@ library DefaultProgramSystemLib {
     if (!success) revertWithBytes(returnData);
 
     bytes memory result = abi.decode(returnData, (bytes));
-    return abi.decode(result, (uint256, bool));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (uint256, bool));
+    }
   }
 
   function setAccessGroup(CallWrapper memory self, EntityId caller, address groupOwner) internal {
@@ -321,11 +327,14 @@ library DefaultProgramSystemLib {
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
-  function newAccessGroup(RootCallWrapper memory self, EntityId owner) internal returns (uint256) {
+  function newAccessGroup(RootCallWrapper memory self, EntityId owner) internal returns (uint256 __auxRet0) {
     bytes memory systemCall = abi.encodeCall(_newAccessGroup_EntityId.newAccessGroup, (owner));
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
-    return abi.decode(result, (uint256));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (uint256));
+    }
   }
 
   function getAccessGroupId(RootCallWrapper memory self, EntityId entity)
@@ -336,7 +345,10 @@ library DefaultProgramSystemLib {
     bytes memory systemCall = abi.encodeCall(_getAccessGroupId_EntityId.getAccessGroupId, (entity));
 
     bytes memory result = SystemCall.staticcallOrRevert(self.from, self.systemId, systemCall);
-    return abi.decode(result, (uint256, bool));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (uint256, bool));
+    }
   }
 
   function setAccessGroup(RootCallWrapper memory self, EntityId caller, address groupOwner) internal {

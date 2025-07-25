@@ -39,7 +39,7 @@ struct RootCallWrapper {
 library TerrainSystemLib {
   error TerrainSystemLib_CallingFromRootSystem();
 
-  function getObjectTypeAt(TerrainSystemType self, Vec3 coord) internal view returns (ObjectType) {
+  function getObjectTypeAt(TerrainSystemType self, Vec3 coord) internal view returns (ObjectType __auxRet0) {
     return CallWrapper(self.toResourceId(), address(0)).getObjectTypeAt(coord);
   }
 
@@ -61,7 +61,7 @@ library TerrainSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).exploreRegionEnergy(regionCoord, vegetationCount, merkleProof);
   }
 
-  function getObjectTypeAt(CallWrapper memory self, Vec3 coord) internal view returns (ObjectType) {
+  function getObjectTypeAt(CallWrapper memory self, Vec3 coord) internal view returns (ObjectType __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert TerrainSystemLib_CallingFromRootSystem();
 
@@ -73,7 +73,10 @@ library TerrainSystemLib {
     if (!success) revertWithBytes(returnData);
 
     bytes memory result = abi.decode(returnData, (bytes));
-    return abi.decode(result, (ObjectType));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (ObjectType));
+    }
   }
 
   function exploreChunk(

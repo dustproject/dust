@@ -1,4 +1,4 @@
-import { garnet, pyrope, redstone, rhodolite } from "@latticexyz/common/chains";
+import { garnet, pyrope, redstone } from "@latticexyz/common/chains";
 import { createWagmiConfig } from "@latticexyz/entrykit/internal";
 import { http, type Transport, webSocket } from "viem";
 import { anvil } from "viem/chains";
@@ -9,7 +9,6 @@ export const transports = {
   [anvil.id]: webSocket(),
   [garnet.id]: http(),
   [pyrope.id]: http(),
-  [rhodolite.id]: http(),
   [redstone.id]: http(),
 } as const satisfies {
   readonly [k in keyof chains & number as chains[k]["id"]]: Transport;
@@ -25,7 +24,6 @@ export const wagmiConfig = createWagmiConfig({
     [anvil.id]: 2000,
     [garnet.id]: 2000,
     [pyrope.id]: 2000,
-    [rhodolite.id]: 2000,
     [redstone.id]: 2000,
   },
 });

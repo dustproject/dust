@@ -1405,6 +1405,14 @@ export const objectsByName = objects.reduce(
   {} as Record<ObjectName, ObjectDefinition>,
 );
 
+export const objectsById = objects.reduce(
+  (acc, obj) => {
+    acc[obj.id] = obj;
+    return acc;
+  },
+  {} as Record<number, ObjectDefinition>,
+);
+
 export const categories = {
   NonSolid: { objects: ["Air", "Water"] },
   Any: {

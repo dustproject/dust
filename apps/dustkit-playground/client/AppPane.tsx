@@ -9,7 +9,7 @@ import { isHex } from "viem";
 import { sendUserOperation } from "viem/account-abstraction";
 import { waitForTransactionReceipt, writeContract } from "viem/actions";
 import { getAction } from "viem/utils";
-import { getWorldAddress } from "./common";
+import { chainId, getWorldAddress } from "./common";
 import { waitForUserOperation } from "./waitForUserOperation";
 import { worldCallAbi } from "./worldCallAbi";
 
@@ -24,6 +24,8 @@ export function AppPane() {
     if (!sessionClient) return;
     if (!appWindow) return;
 
+    console.info("connecting Dust app");
+
     return connectDustApp({
       target: appWindow,
       appContext: {
@@ -32,6 +34,8 @@ export function AppPane() {
           name: "Playground",
           startUrl: "/",
         },
+        chainId,
+        worldAddress,
         userAddress: sessionClient.userAddress,
       },
       handlers: {

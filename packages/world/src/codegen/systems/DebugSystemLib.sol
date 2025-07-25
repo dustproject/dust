@@ -53,7 +53,7 @@ library DebugSystemLib {
     DebugSystemType self,
     EntityId owner,
     ObjectType toolObjectType
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     return CallWrapper(self.toResourceId(), address(0)).debugAddToolToInventory(owner, toolObjectType);
   }
 
@@ -96,7 +96,7 @@ library DebugSystemLib {
     CallWrapper memory self,
     EntityId owner,
     ObjectType toolObjectType
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert DebugSystemLib_CallingFromRootSystem();
 
@@ -108,7 +108,10 @@ library DebugSystemLib {
     bytes memory result = self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function debugRemoveFromInventory(
@@ -172,14 +175,17 @@ library DebugSystemLib {
     RootCallWrapper memory self,
     EntityId owner,
     ObjectType toolObjectType
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     bytes memory systemCall = abi.encodeCall(
       _debugAddToolToInventory_EntityId_ObjectType.debugAddToolToInventory,
       (owner, toolObjectType)
     );
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function debugRemoveFromInventory(
