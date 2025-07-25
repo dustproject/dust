@@ -2,6 +2,7 @@
 pragma solidity >=0.8.24;
 
 import { DefaultProgram, IBaseWorld } from "../src/programs/DefaultProgram.sol";
+import { HookContext } from "@dust/world/src/ProgramHooks.sol";
 
 import { Energy } from "@dust/world/src/codegen/tables/Energy.sol";
 import { EntityObjectType } from "@dust/world/src/codegen/tables/EntityObjectType.sol";
@@ -15,7 +16,6 @@ import { Vec3, vec3 } from "@dust/world/src/types/Vec3.sol";
 
 import { AccessGroupMember } from "../src/codegen/tables/AccessGroupMember.sol";
 import { EntityAccessGroup } from "../src/codegen/tables/EntityAccessGroup.sol";
-import { AttachProgramContext, DetachProgramContext } from "@dust/world/src/ProgramHooks.sol";
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { NamespaceOwner } from "@latticexyz/world/src/codegen/tables/NamespaceOwner.sol";
 import { ROOT_NAMESPACE_ID } from "@latticexyz/world/src/constants.sol";
@@ -89,7 +89,9 @@ contract DefaultProgramTest is MudTest {
     EntityId entityId = randomEntityId();
 
     vm.prank(worldAddress);
-    defaultProgram.onAttachProgram(AttachProgramContext({ caller: playerEntityId, target: entityId, extraData: "" }));
+    defaultProgram.onAttachProgram(
+      HookContext({ caller: playerEntityId, target: entityId, revertOnFailure: true, extraData: "" })
+    );
 
     assertEq(EntityAccessGroup.get(entityId), 0, "Entity should not have an access group");
   }
@@ -101,7 +103,9 @@ contract DefaultProgramTest is MudTest {
     EntityId forceField = mockForceField(coord);
 
     vm.prank(worldAddress);
-    defaultProgram.onAttachProgram(AttachProgramContext({ caller: playerEntityId, target: forceField, extraData: "" }));
+    defaultProgram.onAttachProgram(
+      HookContext({ caller: playerEntityId, target: forceField, revertOnFailure: true, extraData: "" })
+    );
 
     assertNotEq(EntityAccessGroup.get(forceField), 0, "ForceField should have an access group");
   }
@@ -115,7 +119,9 @@ contract DefaultProgramTest is MudTest {
 
     // First attach program to forcefield to create access group
     vm.prank(worldAddress);
-    defaultProgram.onAttachProgram(AttachProgramContext({ caller: alice, target: forceField, extraData: "" }));
+    defaultProgram.onAttachProgram(
+      HookContext({ caller: alice, target: forceField, revertOnFailure: true, extraData: "" })
+    );
 
     uint256 forceFieldGroupId = EntityAccessGroup.get(forceField);
     assertNotEq(forceFieldGroupId, 0, "ForceField should have an access group");
@@ -126,7 +132,9 @@ contract DefaultProgramTest is MudTest {
     // Now alice can attach program to entity within forcefield
     EntityId entityId = blockEntityId(coord + vec3(1, 0, 0));
     vm.prank(worldAddress);
-    defaultProgram.onAttachProgram(AttachProgramContext({ caller: alice, target: entityId, extraData: "" }));
+    defaultProgram.onAttachProgram(
+      HookContext({ caller: alice, target: entityId, revertOnFailure: true, extraData: "" })
+    );
 
     // Entity should NOT have its own access group (should be 0 to fallback to forcefield)
     uint256 entityGroupId = EntityAccessGroup.get(entityId);
@@ -135,7 +143,9 @@ contract DefaultProgramTest is MudTest {
     // Bob can also attach program to another entity (anyone can attach programs)
     EntityId entityId2 = blockEntityId(coord + vec3(0, 1, 0));
     vm.prank(worldAddress);
-    defaultProgram.onAttachProgram(AttachProgramContext({ caller: bob, target: entityId2, extraData: "" }));
+    defaultProgram.onAttachProgram(
+      HookContext({ caller: bob, target: entityId2, revertOnFailure: true, extraData: "" })
+    );
 
     // This entity should also not have its own access group
     uint256 entityGroupId2 = EntityAccessGroup.get(entityId2);
@@ -153,7 +163,9 @@ contract DefaultProgramTest is MudTest {
 
     // Should NOT create an access group for the entity (will be locked instead)
     vm.prank(worldAddress);
-    defaultProgram.onAttachProgram(AttachProgramContext({ caller: playerEntityId, target: entityId, extraData: "" }));
+    defaultProgram.onAttachProgram(
+      HookContext({ caller: playerEntityId, target: entityId, revertOnFailure: true, extraData: "" })
+    );
 
     // Verify entity has no access group
     uint256 entityGroupId = EntityAccessGroup.get(entityId);
@@ -167,13 +179,15 @@ contract DefaultProgramTest is MudTest {
     EntityId entityId = randomEntityId();
 
     vm.prank(worldAddress);
-    defaultProgram.onAttachProgram(AttachProgramContext({ caller: alice, target: entityId, extraData: "" }));
+    defaultProgram.onAttachProgram(
+      HookContext({ caller: alice, target: entityId, revertOnFailure: true, extraData: "" })
+    );
 
     assertEq(EntityAccessGroup.get(entityId), 0, "Entity should not have an access group");
 
     // This should not revert
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entityId, extraData: "" }));
+    defaultProgram.onDetachProgram(HookContext({ caller: bob, target: entityId, revertOnFailure: true, extraData: "" }));
   }
 
   function testDetachProgramWithAccessGroupByMember() public {
@@ -185,7 +199,9 @@ contract DefaultProgramTest is MudTest {
 
     // Setup forcefield with access group
     vm.prank(worldAddress);
-    defaultProgram.onAttachProgram(AttachProgramContext({ caller: alice, target: forceField, extraData: "" }));
+    defaultProgram.onAttachProgram(
+      HookContext({ caller: alice, target: forceField, revertOnFailure: true, extraData: "" })
+    );
     EntityAccessGroup.get(forceField);
 
     // Create entity with its own access group
@@ -195,7 +211,7 @@ contract DefaultProgramTest is MudTest {
 
     // Bob can detach (member of entity's access group)
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entityId, extraData: "" }));
+    defaultProgram.onDetachProgram(HookContext({ caller: bob, target: entityId, revertOnFailure: true, extraData: "" }));
 
     assertEq(EntityAccessGroup.get(entityId), 0, "Entity should not have an access group after detachment");
   }
@@ -209,7 +225,9 @@ contract DefaultProgramTest is MudTest {
 
     // Setup forcefield with access group
     vm.prank(worldAddress);
-    defaultProgram.onAttachProgram(AttachProgramContext({ caller: alice, target: forceField, extraData: "" }));
+    defaultProgram.onAttachProgram(
+      HookContext({ caller: alice, target: forceField, revertOnFailure: true, extraData: "" })
+    );
     uint256 forceFieldGroupId = EntityAccessGroup.get(forceField);
 
     // Add alice to forcefield group but not bob
@@ -223,7 +241,7 @@ contract DefaultProgramTest is MudTest {
     // Bob cannot detach (not member of entity's group)
     vm.expectRevert("Caller not authorized to detach this program");
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entityId, extraData: "" }));
+    defaultProgram.onDetachProgram(HookContext({ caller: bob, target: entityId, revertOnFailure: true, extraData: "" }));
   }
 
   // Test entity with its own group inside forcefield with group
@@ -237,7 +255,9 @@ contract DefaultProgramTest is MudTest {
 
     // Setup forcefield with access group
     vm.prank(worldAddress);
-    defaultProgram.onAttachProgram(AttachProgramContext({ caller: alice, target: forceField, extraData: "" }));
+    defaultProgram.onAttachProgram(
+      HookContext({ caller: alice, target: forceField, revertOnFailure: true, extraData: "" })
+    );
     uint256 forceFieldGroupId = EntityAccessGroup.get(forceField);
     AccessGroupMember.set(forceFieldGroupId, alice, true);
     AccessGroupMember.set(forceFieldGroupId, bob, true);
@@ -249,7 +269,9 @@ contract DefaultProgramTest is MudTest {
 
     // Charlie can detach (member of entity's group)
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: charlie, target: entity, extraData: "" }));
+    defaultProgram.onDetachProgram(
+      HookContext({ caller: charlie, target: entity, revertOnFailure: true, extraData: "" })
+    );
 
     // Reset entity group for next test
     EntityAccessGroup.set(entity, 2);
@@ -257,7 +279,7 @@ contract DefaultProgramTest is MudTest {
     // Alice cannot detach (member of forcefield but not entity)
     vm.expectRevert("Caller not authorized to detach this program");
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
+    defaultProgram.onDetachProgram(HookContext({ caller: alice, target: entity, revertOnFailure: true, extraData: "" }));
   }
 
   // Test entity without group falls back to forcefield's group
@@ -270,7 +292,9 @@ contract DefaultProgramTest is MudTest {
 
     // Setup forcefield with access group
     vm.prank(worldAddress);
-    defaultProgram.onAttachProgram(AttachProgramContext({ caller: alice, target: forceField, extraData: "" }));
+    defaultProgram.onAttachProgram(
+      HookContext({ caller: alice, target: forceField, revertOnFailure: true, extraData: "" })
+    );
     uint256 forceFieldGroupId = EntityAccessGroup.get(forceField);
     AccessGroupMember.set(forceFieldGroupId, alice, true);
 
@@ -279,12 +303,12 @@ contract DefaultProgramTest is MudTest {
 
     // Alice can detach (member of forcefield's group)
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
+    defaultProgram.onDetachProgram(HookContext({ caller: alice, target: entity, revertOnFailure: true, extraData: "" }));
 
     // Bob cannot detach (not member of forcefield's group)
     vm.expectRevert("Caller not authorized to detach this program");
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
+    defaultProgram.onDetachProgram(HookContext({ caller: bob, target: entity, revertOnFailure: true, extraData: "" }));
   }
 
   // Test entity outside forcefield is open to everyone
@@ -296,7 +320,7 @@ contract DefaultProgramTest is MudTest {
 
     // Anyone can detach (testing with alice)
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
+    defaultProgram.onDetachProgram(HookContext({ caller: alice, target: entity, revertOnFailure: true, extraData: "" }));
   }
 
   // Test forcefield energy depletion changes access
@@ -309,7 +333,9 @@ contract DefaultProgramTest is MudTest {
 
     // Setup forcefield with access group
     vm.prank(worldAddress);
-    defaultProgram.onAttachProgram(AttachProgramContext({ caller: alice, target: forceField, extraData: "" }));
+    defaultProgram.onAttachProgram(
+      HookContext({ caller: alice, target: forceField, revertOnFailure: true, extraData: "" })
+    );
     uint256 forceFieldGroupId = EntityAccessGroup.get(forceField);
     AccessGroupMember.set(forceFieldGroupId, alice, true);
 
@@ -318,14 +344,14 @@ contract DefaultProgramTest is MudTest {
     // Bob cannot access while forcefield is active (not a member)
     vm.expectRevert("Caller not authorized to detach this program");
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
+    defaultProgram.onDetachProgram(HookContext({ caller: bob, target: entity, revertOnFailure: true, extraData: "" }));
 
     // Deplete forcefield energy
     Energy.setEnergy(forceField, 0);
 
     // Now bob can access (entity is no longer protected)
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
+    defaultProgram.onDetachProgram(HookContext({ caller: bob, target: entity, revertOnFailure: true, extraData: "" }));
   }
 
   // Test forcefield without energy from the start
@@ -341,7 +367,9 @@ contract DefaultProgramTest is MudTest {
 
     // Setup forcefield with access group (even though it has no energy)
     vm.prank(worldAddress);
-    defaultProgram.onAttachProgram(AttachProgramContext({ caller: alice, target: forceField, extraData: "" }));
+    defaultProgram.onAttachProgram(
+      HookContext({ caller: alice, target: forceField, revertOnFailure: true, extraData: "" })
+    );
     uint256 forceFieldGroupId = EntityAccessGroup.get(forceField);
     AccessGroupMember.set(forceFieldGroupId, alice, true);
 
@@ -353,7 +381,7 @@ contract DefaultProgramTest is MudTest {
     // Bob can access because forcefield has no energy (not protected)
     // Even though entity has an access group, it's ignored when not in active forcefield
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: bob, target: entity, extraData: "" }));
+    defaultProgram.onDetachProgram(HookContext({ caller: bob, target: entity, revertOnFailure: true, extraData: "" }));
   }
 
   // Test forcefield without energy and without access group
@@ -371,7 +399,7 @@ contract DefaultProgramTest is MudTest {
 
     // Anyone can access because forcefield has no energy
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: alice, target: entity, extraData: "" }));
+    defaultProgram.onDetachProgram(HookContext({ caller: alice, target: entity, revertOnFailure: true, extraData: "" }));
   }
 
   // Test entity with program and access group inside forcefield without energy
@@ -385,14 +413,16 @@ contract DefaultProgramTest is MudTest {
 
     // Setup forcefield with access group
     vm.prank(worldAddress);
-    defaultProgram.onAttachProgram(AttachProgramContext({ caller: alice, target: forceField, extraData: "" }));
+    defaultProgram.onAttachProgram(
+      HookContext({ caller: alice, target: forceField, revertOnFailure: true, extraData: "" })
+    );
     uint256 forceFieldGroupId = EntityAccessGroup.get(forceField);
     AccessGroupMember.set(forceFieldGroupId, alice, true);
 
     // Create entity with program and its own access group
     EntityId entity = blockEntityId(coord + vec3(1, 0, 0));
     vm.prank(worldAddress);
-    defaultProgram.onAttachProgram(AttachProgramContext({ caller: alice, target: entity, extraData: "" }));
+    defaultProgram.onAttachProgram(HookContext({ caller: alice, target: entity, revertOnFailure: true, extraData: "" }));
     EntityAccessGroup.set(entity, 2);
     AccessGroupMember.set(2, bob, true); // Only bob is member of entity's group
 
@@ -400,7 +430,9 @@ contract DefaultProgramTest is MudTest {
     // Charlie cannot access (not in entity's group)
     vm.expectRevert("Caller not authorized to detach this program");
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: charlie, target: entity, extraData: "" }));
+    defaultProgram.onDetachProgram(
+      HookContext({ caller: charlie, target: entity, revertOnFailure: true, extraData: "" })
+    );
 
     // Deplete forcefield energy
     Energy.setEnergy(forceField, 0);
@@ -408,6 +440,8 @@ contract DefaultProgramTest is MudTest {
     // Now the entity is unprotected - anyone can access
     // Even though entity has its own access group, it's ignored because it's not in an active forcefield
     vm.prank(worldAddress);
-    defaultProgram.onDetachProgram(DetachProgramContext({ caller: charlie, target: entity, extraData: "" }));
+    defaultProgram.onDetachProgram(
+      HookContext({ caller: charlie, target: entity, revertOnFailure: true, extraData: "" })
+    );
   }
 }

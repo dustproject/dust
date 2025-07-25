@@ -39,6 +39,16 @@ struct RootCallWrapper {
 library MachineSystemLib {
   error MachineSystemLib_CallingFromRootSystem();
 
+  function energizeMachine(
+    MachineSystemType self,
+    EntityId caller,
+    EntityId machine,
+    SlotAmount[] memory slots,
+    bytes memory extraData
+  ) internal {
+    return CallWrapper(self.toResourceId(), address(0)).energizeMachine(caller, machine, slots, extraData);
+  }
+
   function fuelMachine(
     MachineSystemType self,
     EntityId caller,
@@ -47,6 +57,25 @@ library MachineSystemLib {
     bytes memory extraData
   ) internal {
     return CallWrapper(self.toResourceId(), address(0)).fuelMachine(caller, machine, slots, extraData);
+  }
+
+  function energizeMachine(
+    CallWrapper memory self,
+    EntityId caller,
+    EntityId machine,
+    SlotAmount[] memory slots,
+    bytes memory extraData
+  ) internal {
+    // if the contract calling this function is a root system, it should use `callAsRoot`
+    if (address(_world()) == address(this)) revert MachineSystemLib_CallingFromRootSystem();
+
+    bytes memory systemCall = abi.encodeCall(
+      _energizeMachine_EntityId_EntityId_SlotAmountArray_bytes.energizeMachine,
+      (caller, machine, slots, extraData)
+    );
+    self.from == address(0)
+      ? _world().call(self.systemId, systemCall)
+      : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
   function fuelMachine(
@@ -66,6 +95,20 @@ library MachineSystemLib {
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
+  }
+
+  function energizeMachine(
+    RootCallWrapper memory self,
+    EntityId caller,
+    EntityId machine,
+    SlotAmount[] memory slots,
+    bytes memory extraData
+  ) internal {
+    bytes memory systemCall = abi.encodeCall(
+      _energizeMachine_EntityId_EntityId_SlotAmountArray_bytes.energizeMachine,
+      (caller, machine, slots, extraData)
+    );
+    SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
   function fuelMachine(
@@ -119,6 +162,15 @@ library MachineSystemLib {
  *
  * Each interface is uniquely named based on the function name and parameters to prevent collisions.
  */
+
+interface _energizeMachine_EntityId_EntityId_SlotAmountArray_bytes {
+  function energizeMachine(
+    EntityId caller,
+    EntityId machine,
+    SlotAmount[] memory slots,
+    bytes memory extraData
+  ) external;
+}
 
 interface _fuelMachine_EntityId_EntityId_SlotAmountArray_bytes {
   function fuelMachine(EntityId caller, EntityId machine, SlotAmount[] memory slots, bytes memory extraData) external;

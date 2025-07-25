@@ -11,13 +11,11 @@ import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { AttachProgramNotification, DetachProgramNotification, notify } from "../utils/NotifUtils.sol";
 
-import { SAFE_PROGRAM_GAS } from "../Constants.sol";
 import { EntityId, EntityTypeLib } from "../types/EntityId.sol";
 import { ObjectType } from "../types/ObjectType.sol";
 
 import { ObjectTypes } from "../types/ObjectType.sol";
 
-import "../ProgramHooks.sol" as Hooks;
 import { ProgramId } from "../types/ProgramId.sol";
 import { Vec3 } from "../types/Vec3.sol";
 
@@ -81,30 +79,13 @@ contract ProgramSystem is System {
 
     (EntityId validator, ProgramId validatorProgram) = _getValidatorProgram(validatorCoord);
 
-    bytes memory validateProgram = abi.encodeCall(
-      Hooks.IProgramValidator.validateProgram,
-      (
-        Hooks.ValidateProgramContext({
-          caller: caller,
-          target: validator,
-          programmed: target,
-          program: program,
-          extraData: extraData
-        })
-      )
-    );
-
     // The validateProgram view function should revert if the program is not allowed
-    validatorProgram.staticcallOrRevert(validateProgram);
+    validatorProgram.hook({ caller: caller, target: validator, revertOnFailure: true, extraData: extraData })
+      .validateProgram({ programmed: target, program: program });
 
     EntityProgram._set(target, program);
 
-    program.callOrRevert(
-      abi.encodeCall(
-        Hooks.IAttachProgram.onAttachProgram,
-        (Hooks.AttachProgramContext({ caller: caller, target: target, extraData: extraData }))
-      )
-    );
+    program.hook({ caller: caller, target: target, revertOnFailure: true, extraData: extraData }).onAttachProgram();
 
     notify(caller, AttachProgramNotification({ attachedTo: target, programSystemId: program.toResourceId() }));
   }
@@ -117,19 +98,12 @@ contract ProgramSystem is System {
     ProgramId program = target._getProgram();
     require(program.exists(), "No program attached");
 
-    bytes memory onDetachProgram = abi.encodeCall(
-      Hooks.IDetachProgram.onDetachProgram,
-      (Hooks.DetachProgramContext({ caller: caller, target: target, extraData: extraData }))
-    );
-
     (EntityId forceField,) = ForceFieldUtils.getForceField(forceFieldCoord);
     // If forcefield doesn't have energy, allow detachment
     EnergyData memory machineData = updateMachineEnergy(forceField);
-    if (machineData.energy > 0) {
-      program.callOrRevert(onDetachProgram);
-    } else {
-      program.call({ gas: SAFE_PROGRAM_GAS, hook: onDetachProgram });
-    }
+
+    program.hook({ caller: caller, target: target, revertOnFailure: machineData.energy > 0, extraData: extraData })
+      .onDetachProgram();
 
     EntityProgram._deleteRecord(target);
 

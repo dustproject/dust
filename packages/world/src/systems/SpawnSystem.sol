@@ -18,6 +18,7 @@ import {
   SPAWN_BLOCK_RANGE
 } from "../Constants.sol";
 import { ObjectType } from "../types/ObjectType.sol";
+import { ProgramId } from "../types/ProgramId.sol";
 
 import { ObjectTypes } from "../types/ObjectType.sol";
 import { checkWorldStatus } from "../utils/WorldUtils.sol";
@@ -31,7 +32,6 @@ import { SpawnNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { MoveLib } from "./libraries/MoveLib.sol";
 
-import "../ProgramHooks.sol" as Hooks;
 import { EntityId } from "../types/EntityId.sol";
 
 contract SpawnSystem is System {
@@ -144,6 +144,8 @@ contract SpawnSystem is System {
     Vec3 spawnTileCoord = spawnTile._getPosition();
     require(spawnTileCoord.inSurroundingCube(spawnCoord, MAX_RESPAWN_HALF_WIDTH), "Spawn tile is too far away");
 
+    ProgramId program = spawnTile._getProgram();
+
     (EntityId forceField,) = ForceFieldUtils.getForceField(spawnTileCoord);
     require(forceField._exists(), "Spawn tile is not inside a forcefield");
     EnergyData memory machineData = updateMachineEnergy(forceField);
@@ -152,11 +154,9 @@ contract SpawnSystem is System {
 
     EntityId player = _spawnPlayer(spawnCoord, spawnEnergy);
 
-    bytes memory onSpawn = abi.encodeCall(
-      Hooks.ISpawn.onSpawn,
-      (Hooks.SpawnContext({ caller: player, target: spawnTile, spawnEnergy: spawnEnergy, extraData: extraData }))
+    program.hook({ caller: player, target: spawnTile, revertOnFailure: true, extraData: extraData }).onSpawn(
+      spawnEnergy, spawnCoord
     );
-    spawnTile._getProgram().callOrRevert(onSpawn);
 
     return player;
   }

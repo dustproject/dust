@@ -13,6 +13,8 @@
     "no-console": "warn",
     "gas-increment-by-one": "off",
     "gas-strict-inequalities": "off",
-    "one-contract-per-file": "off"
+    "one-contract-per-file": "off",
+    "gas-small-strings": "off",
+    "function-max-lines": "off"
   }
 }
