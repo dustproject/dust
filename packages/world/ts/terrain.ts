@@ -3,6 +3,8 @@ import { CHUNK_SIZE, voxelToChunkPos } from "./chunk";
 import { getCreate3Address } from "./getCreate3Address";
 import { type ReadonlyVec3, type Vec3, packVec3 } from "./vec3";
 
+const bytecodeCache = new Map<string, string>();
+
 // Should match SSTORE2.sol
 const DATA_OFFSET = 1;
 
@@ -14,6 +16,10 @@ const SURFACE_PADDING = 1;
 
 function getChunkSalt(coord: ReadonlyVec3) {
   return pad(toBytes(packVec3(coord)), { size: 32 });
+}
+
+function getCacheKey(worldAddress: Hex, chunkCoord: ReadonlyVec3): string {
+  return `${worldAddress}:${chunkCoord[0]},${chunkCoord[1]},${chunkCoord[2]}`;
 }
 
 function mod(a: number, b: number): number {
@@ -75,12 +81,13 @@ export async function getTerrainBlockType(
   [x, y, z]: Vec3,
 ): Promise<number> {
   const chunkCoord = voxelToChunkPos([x, y, z]);
+  const cacheKey = getCacheKey(worldAddress, chunkCoord);
 
-  const bytecode = await getChunkBytecode(
-    publicClient,
-    worldAddress,
-    chunkCoord,
-  );
+  let bytecode = bytecodeCache.get(cacheKey);
+  if (!bytecode) {
+    bytecode = await getChunkBytecode(publicClient, worldAddress, chunkCoord);
+    bytecodeCache.set(cacheKey, bytecode);
+  }
 
   return readTerrainBlockType(bytecode, [x, y, z]);
 }
@@ -98,12 +105,13 @@ export async function getBiome(
   [x, y, z]: Vec3,
 ): Promise<number> {
   const chunkCoord = voxelToChunkPos([x, y, z]);
+  const cacheKey = getCacheKey(worldAddress, chunkCoord);
 
-  const bytecode = await getChunkBytecode(
-    publicClient,
-    worldAddress,
-    chunkCoord,
-  );
+  let bytecode = bytecodeCache.get(cacheKey);
+  if (!bytecode) {
+    bytecode = await getChunkBytecode(publicClient, worldAddress, chunkCoord);
+    bytecodeCache.set(cacheKey, bytecode);
+  }
 
   return readBiome(bytecode);
 }
