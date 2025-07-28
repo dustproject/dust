@@ -23,9 +23,3 @@ function getForceField(EntityId target) view returns (EntityId) {
 
   return isActive ? fragmentData.forceField : EntityId.wrap(0);
 }
-
-// Checks if a forcefield is protected (has energy)
-function isForceFieldProtected(EntityId forceField) view returns (bool) {
-  if (!forceField.exists()) return false;
-  return Energy.getEnergy(forceField) != 0;
-}

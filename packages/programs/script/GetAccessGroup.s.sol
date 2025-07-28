@@ -7,9 +7,11 @@ import { console } from "forge-std/console.sol";
 import { DustScript } from "@dust/world/script/DustScript.sol";
 import { EntityId } from "@dust/world/src/types/EntityId.sol";
 
-import { getForceField, isForceFieldProtected } from "../src/getForceField.sol";
-import { getAccessControl, getGroupId } from "../src/getGroupId.sol";
+import { getAccessControl } from "../src/getAccessControl.sol";
+import { getForceField } from "../src/getForceField.sol";
+import { getGroupId } from "../src/getGroupId.sol";
 import { hasAccess } from "../src/hasAccess.sol";
+import { isForceFieldActive } from "../src/isForceFieldActive.sol";
 
 contract GetAccessGroup is DustScript {
   function run(address worldAddress, EntityId target) public {
@@ -18,13 +20,13 @@ contract GetAccessGroup is DustScript {
     (uint256 groupId, bool locked) = getAccessControl(target);
 
     EntityId forceField = getForceField(target);
-    bool isProtected = isForceFieldProtected(forceField);
+    bool isActive = isForceFieldActive(forceField);
 
     console.log("Group ID:", groupId);
     console.log("Locked:", locked);
     console.log("Force Field:");
     console.logBytes32(forceField.unwrap());
-    console.log("Is Protected:", isProtected);
+    console.log("Is Active:", isActive);
 
     (uint256 ffGroupId, bool ffLocked) = getAccessControl(forceField);
     console.log("Force Field Group ID:", ffGroupId);

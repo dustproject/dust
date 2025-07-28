@@ -5,7 +5,7 @@ import { EntityId } from "@dust/world/src/types/EntityId.sol";
 
 import { AccessGroupMember } from "./codegen/tables/AccessGroupMember.sol";
 
-import { getAccessControl } from "./getGroupId.sol";
+import { getAccessControl } from "./getAccessControl.sol";
 
 // Checks if caller has access to target entity
 function hasAccess(EntityId caller, EntityId target) view returns (bool) {

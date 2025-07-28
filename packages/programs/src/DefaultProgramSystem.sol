@@ -12,7 +12,8 @@ import { EntityAccessGroup } from "./codegen/tables/EntityAccessGroup.sol";
 import { TextSignContent } from "./codegen/tables/TextSignContent.sol";
 
 import { createAccessGroup } from "./createAccessGroup.sol";
-import { getAccessControl, getGroupId } from "./getGroupId.sol";
+import { getAccessControl } from "./getAccessControl.sol";
+import { getGroupId } from "./getGroupId.sol";
 import { hasAccess } from "./hasAccess.sol";
 
 contract DefaultProgramSystem is System {
