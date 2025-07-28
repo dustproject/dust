@@ -7,9 +7,9 @@ import { console } from "forge-std/console.sol";
 import { DustScript } from "@dust/world/script/DustScript.sol";
 import { EntityId } from "@dust/world/src/types/EntityId.sol";
 
-import { AccessGroupMember } from "../src/codegen/tables/AccessGroupMember.sol";
 import { getForceField, isForceFieldProtected } from "../src/getForceField.sol";
 import { getAccessControl, getGroupId } from "../src/getGroupId.sol";
+import { hasAccess } from "../src/hasAccess.sol";
 
 contract GetAccessGroup is DustScript {
   function run(address worldAddress, EntityId target) public {
@@ -33,19 +33,6 @@ contract GetAccessGroup is DustScript {
 
   function run(address worldAddress, EntityId target, EntityId caller) external {
     run(worldAddress, target);
-
-    // Check if caller is allowed
-    (uint256 groupId, bool locked) = getAccessControl(target);
-    bool allowed = false;
-
-    if (!locked) {
-      if (groupId == 0) {
-        allowed = true;
-      } else {
-        allowed = AccessGroupMember.get(groupId, caller);
-      }
-    }
-
-    console.log("isAllowed:", allowed);
+    console.log("hasAccess:", hasAccess(caller, target));
   }
 }

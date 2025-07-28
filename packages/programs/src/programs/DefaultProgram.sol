@@ -10,10 +10,9 @@ import { HookContext, IAttachProgram, IDetachProgram } from "@dust/world/src/Pro
 import { AccessGroupOwner } from "../codegen/tables/AccessGroupOwner.sol";
 import { EntityAccessGroup } from "../codegen/tables/EntityAccessGroup.sol";
 
-import { AccessGroupMember } from "../codegen/tables/AccessGroupMember.sol";
 import { createAccessGroup } from "../createAccessGroup.sol";
 import { getForceField } from "../getForceField.sol";
-import { getAccessControl } from "../getGroupId.sol";
+import { hasAccess } from "../hasAccess.sol";
 
 abstract contract DefaultProgram is IAttachProgram, IDetachProgram, WorldConsumer {
   constructor(IBaseWorld _world) WorldConsumer(_world) { }
@@ -47,32 +46,7 @@ abstract contract DefaultProgram is IAttachProgram, IDetachProgram, WorldConsume
   }
 
   function _canDetach(EntityId caller, EntityId target) internal view virtual returns (bool) {
-    return _hasAccess(caller, target);
-  }
-
-  function _hasAccess(EntityId caller, EntityId target) internal view returns (bool) {
-    (uint256 groupId, bool locked) = getAccessControl(target);
-
-    // If locked, deny access
-    if (locked) {
-      return false;
-    }
-
-    // If no group, allow access
-    if (groupId == 0) {
-      return true;
-    }
-
-    // Check group membership
-    return AccessGroupMember.get(groupId, caller);
-  }
-
-  function _requireAccess(EntityId caller, EntityId target, string memory errorMessage) internal view {
-    require(_hasAccess(caller, target), errorMessage);
-  }
-
-  function _requireAccess(EntityId caller, EntityId target) internal view {
-    _requireAccess(caller, target, "Access denied");
+    return hasAccess(caller, target);
   }
 
   function _createAndSetAccessGroup(EntityId target, EntityId owner) internal {

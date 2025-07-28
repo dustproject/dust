@@ -18,6 +18,7 @@ import {
 import { AccessGroupOwner } from "../codegen/tables/AccessGroupOwner.sol";
 
 import { getGroupId } from "../getGroupId.sol";
+import { hasAccess } from "../hasAccess.sol";
 import { DefaultProgram } from "./DefaultProgram.sol";
 
 contract ForceFieldProgram is
@@ -40,19 +41,19 @@ contract ForceFieldProgram is
   }
 
   function onAddFragment(HookContext calldata ctx, AddFragmentData calldata) external view onlyWorld {
-    _requireAccess(ctx.caller, ctx.target, "Only approved callers can add fragments to the force field");
+    require(hasAccess(ctx.caller, ctx.target), "Only approved callers can add fragments to the force field");
   }
 
   function onRemoveFragment(HookContext calldata ctx, RemoveFragmentData calldata) external view onlyWorld {
-    _requireAccess(ctx.caller, ctx.target, "Only approved callers can remove fragments from the force field");
+    require(hasAccess(ctx.caller, ctx.target), "Only approved callers can remove fragments from the force field");
   }
 
   function onBuild(HookContext calldata ctx, BuildData calldata) external view onlyWorld {
-    _requireAccess(ctx.caller, ctx.target, "Only approved callers can build in the force field");
+    require(hasAccess(ctx.caller, ctx.target), "Only approved callers can build in the force field");
   }
 
   function onMine(HookContext calldata ctx, MineData calldata mine) external view onlyWorld {
-    _requireAccess(ctx.caller, mine.entity, "Only approved callers can mine in the force field");
+    require(hasAccess(ctx.caller, mine.entity), "Only approved callers can mine in the force field");
   }
 
   // Override the default program attachment logic to only allow the owner of the access group to detach forcefield programs
