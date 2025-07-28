@@ -12,10 +12,12 @@ contract BedProgram is ISleep, IWakeup, DefaultProgram {
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
 
   function onSleep(HookContext calldata ctx) external view onlyWorld {
-    require(isAllowed(ctx.target, ctx.caller), "Only approved callers can sleep in the bed");
+    require(isAllowed(ctx, ctx.target), "Only approved callers can sleep in the bed");
   }
 
-  function onWakeup(HookContext calldata) external view onlyWorld {
-    // Allow all sleeping players to wakeup
+  function onWakeup(HookContext calldata ctx) external view onlyWorld {
+    // onWakeup typically has revertOnFailure=false, so isAllowed will always return true
+    // But we still check it for consistency
+    require(isAllowed(ctx, ctx.target), "Only approved callers can wake up from the bed");
   }
 }

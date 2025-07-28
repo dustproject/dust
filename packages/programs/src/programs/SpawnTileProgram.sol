@@ -12,6 +12,6 @@ contract SpawnTileProgram is ISpawn, DefaultProgram {
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
 
   function onSpawn(HookContext calldata ctx, SpawnData calldata) external view onlyWorld {
-    require(isAllowed(ctx.target, ctx.caller), "Only approved callers can spawn through this tile");
+    require(isAllowed(ctx, ctx.target), "Only approved callers can spawn through this tile");
   }
 }

@@ -12,6 +12,6 @@ contract ChestProgram is ITransfer, DefaultProgram {
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
 
   function onTransfer(HookContext calldata ctx, TransferData calldata) external view onlyWorld {
-    require(isAllowed(ctx.target, ctx.caller), "Only approved callers can transfer to/from the chest");
+    require(isAllowed(ctx, ctx.target), "Only approved callers can transfer to/from the chest");
   }
 }
