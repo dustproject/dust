@@ -5,7 +5,6 @@ pragma solidity >=0.8.24;
 
 import { HitPlayerSystem } from "../../systems/HitPlayerSystem.sol";
 import { EntityId } from "../../types/EntityId.sol";
-import { Vec3 } from "../../types/Vec3.sol";
 import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 import { IWorldCall } from "@latticexyz/world/src/IWorldKernel.sol";
 import { SystemCall } from "@latticexyz/world/src/SystemCall.sol";
@@ -39,47 +38,65 @@ struct RootCallWrapper {
 library HitPlayerSystemLib {
   error HitPlayerSystemLib_CallingFromRootSystem();
 
-  function hitPlayer(HitPlayerSystemType self, EntityId caller, Vec3 targetCoord, uint16 toolSlot) internal {
-    return CallWrapper(self.toResourceId(), address(0)).hitPlayer(caller, targetCoord, toolSlot);
+  function hitPlayer(
+    HitPlayerSystemType self,
+    EntityId caller,
+    EntityId target,
+    uint16 toolSlot,
+    bytes memory extraData
+  ) internal {
+    return CallWrapper(self.toResourceId(), address(0)).hitPlayer(caller, target, toolSlot, extraData);
   }
 
-  function hitPlayer(HitPlayerSystemType self, EntityId caller, Vec3 targetCoord) internal {
-    return CallWrapper(self.toResourceId(), address(0)).hitPlayer(caller, targetCoord);
+  function hitPlayer(HitPlayerSystemType self, EntityId caller, EntityId target, bytes memory extraData) internal {
+    return CallWrapper(self.toResourceId(), address(0)).hitPlayer(caller, target, extraData);
   }
 
-  function hitPlayer(CallWrapper memory self, EntityId caller, Vec3 targetCoord, uint16 toolSlot) internal {
+  function hitPlayer(
+    CallWrapper memory self,
+    EntityId caller,
+    EntityId target,
+    uint16 toolSlot,
+    bytes memory extraData
+  ) internal {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert HitPlayerSystemLib_CallingFromRootSystem();
 
     bytes memory systemCall = abi.encodeCall(
-      _hitPlayer_EntityId_Vec3_uint16.hitPlayer,
-      (caller, targetCoord, toolSlot)
+      _hitPlayer_EntityId_EntityId_uint16_bytes.hitPlayer,
+      (caller, target, toolSlot, extraData)
     );
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
-  function hitPlayer(CallWrapper memory self, EntityId caller, Vec3 targetCoord) internal {
+  function hitPlayer(CallWrapper memory self, EntityId caller, EntityId target, bytes memory extraData) internal {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert HitPlayerSystemLib_CallingFromRootSystem();
 
-    bytes memory systemCall = abi.encodeCall(_hitPlayer_EntityId_Vec3.hitPlayer, (caller, targetCoord));
+    bytes memory systemCall = abi.encodeCall(_hitPlayer_EntityId_EntityId_bytes.hitPlayer, (caller, target, extraData));
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
-  function hitPlayer(RootCallWrapper memory self, EntityId caller, Vec3 targetCoord, uint16 toolSlot) internal {
+  function hitPlayer(
+    RootCallWrapper memory self,
+    EntityId caller,
+    EntityId target,
+    uint16 toolSlot,
+    bytes memory extraData
+  ) internal {
     bytes memory systemCall = abi.encodeCall(
-      _hitPlayer_EntityId_Vec3_uint16.hitPlayer,
-      (caller, targetCoord, toolSlot)
+      _hitPlayer_EntityId_EntityId_uint16_bytes.hitPlayer,
+      (caller, target, toolSlot, extraData)
     );
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
-  function hitPlayer(RootCallWrapper memory self, EntityId caller, Vec3 targetCoord) internal {
-    bytes memory systemCall = abi.encodeCall(_hitPlayer_EntityId_Vec3.hitPlayer, (caller, targetCoord));
+  function hitPlayer(RootCallWrapper memory self, EntityId caller, EntityId target, bytes memory extraData) internal {
+    bytes memory systemCall = abi.encodeCall(_hitPlayer_EntityId_EntityId_bytes.hitPlayer, (caller, target, extraData));
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
@@ -121,12 +138,12 @@ library HitPlayerSystemLib {
  * Each interface is uniquely named based on the function name and parameters to prevent collisions.
  */
 
-interface _hitPlayer_EntityId_Vec3_uint16 {
-  function hitPlayer(EntityId caller, Vec3 targetCoord, uint16 toolSlot) external;
+interface _hitPlayer_EntityId_EntityId_uint16_bytes {
+  function hitPlayer(EntityId caller, EntityId target, uint16 toolSlot, bytes memory extraData) external;
 }
 
-interface _hitPlayer_EntityId_Vec3 {
-  function hitPlayer(EntityId caller, Vec3 targetCoord) external;
+interface _hitPlayer_EntityId_EntityId_bytes {
+  function hitPlayer(EntityId caller, EntityId target, bytes memory extraData) external;
 }
 
 using HitPlayerSystemLib for HitPlayerSystemType global;

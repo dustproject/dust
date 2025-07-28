@@ -153,7 +153,7 @@ contract BuildSystem is System {
     for (uint256 i = 0; i < coords.length; i++) {
       Vec3 coord = coords[i];
 
-      (ProgramId program, EntityId target) = _getHookTarget(coord);
+      (ProgramId program, EntityId target) = ForceFieldUtils.getHookTarget(coord);
 
       if (ctx.buildType == ObjectTypes.ForceField) {
         require(!target._exists(), "Force field overlaps with another force field");
@@ -174,26 +174,6 @@ contract BuildSystem is System {
         orientation: ctx.orientation
       });
     }
-  }
-
-  function _getHookTarget(Vec3 coord) internal returns (ProgramId, EntityId) {
-    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
-    if (!forceField._exists()) {
-      return (ProgramId.wrap(0), forceField);
-    }
-
-    EnergyData memory machineData = updateMachineEnergy(forceField);
-    if (machineData.energy == 0) {
-      return (ProgramId.wrap(0), forceField);
-    }
-
-    // We know fragment is active because its forcefield exists, so we can use its program
-    ProgramId program = fragment._getProgram();
-    if (program.exists()) {
-      return (program, fragment);
-    }
-
-    return (forceField._getProgram(), forceField);
   }
 }
 

@@ -19,7 +19,6 @@ import { DEFAULT_HIT_ENERGY_COST, HIT_ACTION_MODIFIER, TOOL_HIT_ENERGY_COST } fr
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType } from "../types/ObjectType.sol";
 
-import { ProgramId } from "../types/ProgramId.sol";
 import { Vec3 } from "../types/Vec3.sol";
 
 contract HitMachineSystem is System {

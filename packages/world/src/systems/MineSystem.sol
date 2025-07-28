@@ -343,7 +343,7 @@ library MineLib {
   }
 
   function _requireMinesAllowed(MineContext calldata ctx) public {
-    (ProgramId program, EntityId target) = _getHookTarget(ctx.coord);
+    (ProgramId program, EntityId target) = ForceFieldUtils.getHookTarget(ctx.coord);
 
     if (!program.exists()) {
       return;
@@ -355,26 +355,6 @@ library MineLib {
       objectType: ctx.objectType,
       coord: ctx.coord
     });
-  }
-
-  function _getHookTarget(Vec3 coord) private returns (ProgramId, EntityId) {
-    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
-    if (!forceField._exists()) {
-      return (ProgramId.wrap(0), forceField);
-    }
-
-    EnergyData memory machineData = updateMachineEnergy(forceField);
-    if (machineData.energy == 0) {
-      return (ProgramId.wrap(0), forceField);
-    }
-
-    // We know fragment is active because its forcefield exists, so we can use its program
-    ProgramId program = fragment._getProgram();
-    if (program.exists()) {
-      return (program, fragment);
-    }
-
-    return (forceField._getProgram(), forceField);
   }
 }
 
