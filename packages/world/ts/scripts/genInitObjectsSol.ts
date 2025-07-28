@@ -35,18 +35,17 @@ function validateSeeds() {
         `Seed ${seed.name} grows into ${seed.crop} but object does not exist`,
       );
     }
-    const totalInputMassEnergy =
-      (growsInto.mass ?? 0n) + (growsInto.energy ?? 0n);
+
     if (seed.mass !== undefined) {
       throw new Error(`Seed ${seed.name} has mass`);
     }
-    if (seed.growableEnergy === undefined) {
-      throw new Error(`Seed ${seed.name} has no energy`);
-    }
-    const totalOutputMassEnergy = seed.growableEnergy;
-    if (totalInputMassEnergy !== totalOutputMassEnergy) {
+
+    const totalCropEnergy = (growsInto.mass ?? 0n) + (growsInto.energy ?? 0n);
+    const growableEnergy = seed.growableEnergy;
+
+    if (totalCropEnergy !== growableEnergy) {
       throw new Error(
-        `Seed ${seed.name} does not maintain mass+energy balance ${totalInputMassEnergy} != ${totalOutputMassEnergy}`,
+        `Seed ${seed.name} does not maintain mass+energy balance ${totalCropEnergy} != ${growableEnergy}`,
       );
     }
   }

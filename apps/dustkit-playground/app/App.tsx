@@ -1,4 +1,4 @@
-import defaultProgramAbi from "@dust/programs/out/DefaultProgram.sol/DefaultProgram.abi";
+import defaultProgramAbi from "@dust/programs/out/DefaultProgramSystem.sol/DefaultProgramSystem.abi";
 import { resourceToHex } from "@latticexyz/common";
 import { useQuery } from "@tanstack/react-query";
 import { connectDustClient } from "dustkit/internal";
@@ -18,7 +18,7 @@ export function App() {
           type="button"
           onClick={async () => {
             await dustClient.data?.provider.request({
-              method: "dustClient_setWaypoint",
+              method: "setWaypoint",
               params: {
                 entity: "0x",
                 label: "Somewhere",
@@ -32,7 +32,7 @@ export function App() {
           type="button"
           onClick={async () => {
             await dustClient.data?.provider.request({
-              method: "dustClient_systemCall",
+              method: "systemCall",
               params: [
                 {
                   systemId: resourceToHex({
@@ -41,9 +41,8 @@ export function App() {
                     name: "",
                   }),
                   abi: defaultProgramAbi,
-                  // TODO: figure out why this isn't narrowing with the provided ABI
-                  functionName: "setAllowed",
-                  args: [zeroHash, zeroHash, true],
+                  functionName: "setMembership",
+                  args: [zeroHash, zeroHash, zeroHash, true],
                 },
               ],
             });

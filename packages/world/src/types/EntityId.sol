@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
-
 import { WorldContextConsumerLib } from "@latticexyz/world/src/WorldContext.sol";
-import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
 
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
-import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+import { EnergyData } from "../codegen/tables/Energy.sol";
 
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
@@ -69,9 +66,14 @@ library EntityIdLib {
     validateCaller(self, WorldContextConsumerLib._msgSender());
   }
 
+  function _baseEntityId(EntityId self) internal view returns (EntityId) {
+    EntityId base = BaseEntity._get(self);
+    return base.unwrap() == 0 ? self : base;
+  }
+
   function baseEntityId(EntityId self) internal view returns (EntityId) {
-    EntityId _base = BaseEntity._get(self);
-    return EntityId.unwrap(_base) == 0 ? self : _base;
+    EntityId base = BaseEntity.get(self);
+    return base.unwrap() == 0 ? self : base;
   }
 
   function requireInRange(EntityId self, Vec3 otherCoord, uint256 range) internal view returns (Vec3, Vec3) {

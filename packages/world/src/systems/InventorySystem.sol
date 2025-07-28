@@ -3,17 +3,13 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
-import { Action } from "../codegen/common.sol";
-
 import { MAX_PICKUP_RADIUS } from "../Constants.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType } from "../types/ObjectType.sol";
-import { ObjectTypes } from "../types/ObjectType.sol";
 import { Vec3 } from "../types/Vec3.sol";
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils, SlotAmount, SlotTransfer } from "../utils/InventoryUtils.sol";
 import { DropNotification, PickupNotification, notify } from "../utils/NotifUtils.sol";
-import { TerrainLib } from "./libraries/TerrainLib.sol";
 
 contract InventorySystem is System {
   function drop(EntityId caller, SlotAmount[] memory slots, Vec3 coord) public {

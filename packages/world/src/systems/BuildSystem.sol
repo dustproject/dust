@@ -3,19 +3,15 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
-import { Action } from "../codegen/common.sol";
 import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
-import { EntityFluidLevel } from "../codegen/tables/EntityFluidLevel.sol";
 
 import { DisabledExtraDrops } from "../codegen/tables/DisabledExtraDrops.sol";
-import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+import { EnergyData } from "../codegen/tables/Energy.sol";
 
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
-import { Mass } from "../codegen/tables/Mass.sol";
 
 import { EntityOrientation } from "../codegen/tables/EntityOrientation.sol";
-import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
@@ -27,24 +23,22 @@ import { Math } from "../utils/Math.sol";
 import { BuildNotification, MoveNotification, notify } from "../utils/NotifUtils.sol";
 
 import { MoveLib } from "./libraries/MoveLib.sol";
-import { TerrainLib } from "./libraries/TerrainLib.sol";
 
-import { BUILD_ENERGY_COST, MAX_FLUID_LEVEL } from "../Constants.sol";
+import { BUILD_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 
-import "../ProgramHooks.sol" as Hooks;
 import { ProgramId } from "../types/ProgramId.sol";
 import { Orientation, Vec3, vec3 } from "../types/Vec3.sol";
 
 struct BuildContext {
   EntityId caller;
-  Vec3 coord;
-  uint16 slot;
-  Orientation orientation;
-  uint128 callerEnergy;
   ObjectType slotType;
   ObjectType buildType;
+  Vec3 coord;
+  uint128 callerEnergy;
+  uint16 slot;
+  Orientation orientation;
 }
 
 contract BuildSystem is System {
@@ -99,7 +93,7 @@ contract BuildSystem is System {
       return base;
     }
 
-    _handleSpecialBlockTypes(base, ctx.buildType, ctx.coord);
+    _handleSpecialBlockTypes(ctx, base);
 
     _requireBuildsAllowed(ctx, base, coords, extraData);
 
@@ -137,15 +131,15 @@ contract BuildSystem is System {
   /**
    * @dev Handles special initialization for specific block types (growables, extra drops)
    */
-  function _handleSpecialBlockTypes(EntityId base, ObjectType buildType, Vec3 coord) internal {
-    if (buildType.isGrowable()) {
-      ObjectType belowType = EntityUtils.getObjectTypeAt(coord - vec3(0, 1, 0));
-      require(buildType.isPlantableOn(belowType), "Cannot plant on this block");
+  function _handleSpecialBlockTypes(BuildContext memory ctx, EntityId base) internal {
+    if (ctx.buildType.isGrowable()) {
+      ObjectType belowType = EntityUtils.getObjectTypeAt(ctx.coord - vec3(0, 1, 0));
+      require(ctx.buildType.isPlantableOn(belowType), "Cannot plant on this block");
 
-      removeEnergyFromLocalPool(coord, buildType.getGrowableEnergy());
+      removeEnergyFromLocalPool(ctx.coord, ctx.buildType.getGrowableEnergy());
 
-      SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + buildType.getTimeToGrow());
-    } else if (buildType.hasExtraDrops()) {
+      SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + ctx.buildType.getTimeToGrow());
+    } else if (ctx.buildType.hasExtraDrops()) {
       DisabledExtraDrops._set(base, true);
     }
   }
@@ -158,42 +152,48 @@ contract BuildSystem is System {
   {
     for (uint256 i = 0; i < coords.length; i++) {
       Vec3 coord = coords[i];
-      (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
+
+      (ProgramId program, EntityId target) = _getHookTarget(coord);
 
       if (ctx.buildType == ObjectTypes.ForceField) {
-        require(!forceField._exists(), "Force field overlaps with another force field");
+        require(!target._exists(), "Force field overlaps with another force field");
         ForceFieldUtils.setupForceField(base, coord);
+        // Return early as it is not possible for a new forcefield to have a program
+        return;
       }
 
-      if (!forceField._exists()) {
-        continue;
-      }
-
-      EnergyData memory machineData = updateMachineEnergy(forceField);
-      if (machineData.energy == 0) {
-        continue;
-      }
-
-      ProgramId program = fragment._getProgram();
       if (!program.exists()) {
-        program = forceField._getProgram();
+        continue;
       }
 
-      program.callOrRevert(
-        abi.encodeCall(
-          Hooks.IBuild.onBuild,
-          (
-            Hooks.BuildContext({
-              caller: ctx.caller,
-              target: forceField,
-              objectType: ctx.buildType,
-              coord: coord,
-              extraData: extraData
-            })
-          )
-        )
-      );
+      program.hook({ caller: ctx.caller, target: target, revertOnFailure: true, extraData: extraData }).onBuild({
+        entity: base,
+        coord: coord,
+        slotType: ctx.slotType,
+        objectType: ctx.buildType,
+        orientation: ctx.orientation
+      });
     }
+  }
+
+  function _getHookTarget(Vec3 coord) internal returns (ProgramId, EntityId) {
+    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
+    if (!forceField._exists()) {
+      return (ProgramId.wrap(0), forceField);
+    }
+
+    EnergyData memory machineData = updateMachineEnergy(forceField);
+    if (machineData.energy == 0) {
+      return (ProgramId.wrap(0), forceField);
+    }
+
+    // We know fragment is active because its forcefield exists, so we can use its program
+    ProgramId program = fragment._getProgram();
+    if (program.exists()) {
+      return (program, fragment);
+    }
+
+    return (forceField._getProgram(), forceField);
   }
 }
 

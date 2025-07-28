@@ -3,35 +3,30 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
-import { Action } from "../codegen/common.sol";
-import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectType } from "../types/ObjectType.sol";
 import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
 import { InventoryUtils, SlotAmount } from "../utils/InventoryUtils.sol";
 import { FuelMachineNotification, notify } from "../utils/NotifUtils.sol";
-import { PlayerUtils } from "../utils/PlayerUtils.sol";
-
-import { MACHINE_ENERGY_DRAIN_RATE } from "../Constants.sol";
-import { EntityId } from "../types/EntityId.sol";
-import { ObjectType } from "../types/ObjectType.sol";
 
 import { ObjectTypes } from "../types/ObjectType.sol";
 
-import "../ProgramHooks.sol" as Hooks;
 import { ProgramId } from "../types/ProgramId.sol";
-import { Vec3 } from "../types/Vec3.sol";
 
 contract MachineSystem is System {
-  function fuelMachine(EntityId caller, EntityId machine, SlotAmount[] memory slots, bytes calldata extraData) external {
+  function energizeMachine(EntityId caller, EntityId machine, SlotAmount[] calldata slots, bytes calldata extraData)
+    public
+  {
     caller.activate();
     require(slots.length > 0, "Must provide at least one slot");
     caller.requireConnected(machine);
 
-    machine = machine.baseEntityId();
+    machine = machine._baseEntityId();
 
     ObjectType objectType = machine._getObjectType();
     require(objectType.isMachine(), "Can only fuel machines");
@@ -47,18 +42,23 @@ contract MachineSystem is System {
 
     EnergyData memory machineData = updateMachineEnergy(machine);
 
-    uint128 newEnergyLevel = machineData.energy + uint128(fuelAmount) * ObjectPhysics._getEnergy(ObjectTypes.Battery);
+    uint128 energyProvided = uint128(fuelAmount) * ObjectPhysics._getEnergy(ObjectTypes.Battery);
+    uint128 newEnergyLevel = machineData.energy + energyProvided;
 
     Energy._setEnergy(machine, newEnergyLevel);
 
     ProgramId program = machine._getProgram();
-    program.callOrRevert(
-      abi.encodeCall(
-        Hooks.IFuel.onFuel,
-        (Hooks.FuelContext({ caller: caller, target: machine, fuelAmount: fuelAmount, extraData: extraData }))
-      )
+    program.hook({ caller: caller, target: machine, revertOnFailure: true, extraData: extraData }).onEnergize(
+      energyProvided
     );
 
     notify(caller, FuelMachineNotification({ machine: machine, fuelAmount: fuelAmount }));
+  }
+
+  /// @notice deprecated
+  function fuelMachine(EntityId caller, EntityId machine, SlotAmount[] calldata slots, bytes calldata extraData)
+    external
+  {
+    energizeMachine(caller, machine, slots, extraData);
   }
 }

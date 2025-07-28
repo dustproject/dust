@@ -4,13 +4,11 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 
 import { Direction } from "../codegen/common.sol";
-import { EnergyData } from "../codegen/tables/Energy.sol";
 
 import { EntityId } from "../types/EntityId.sol";
 import { Vec3 } from "../types/Vec3.sol";
 
 import { MoveNotification, notify } from "../utils/NotifUtils.sol";
-import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { MoveLib } from "./libraries/MoveLib.sol";
 
 contract MoveSystem is System {

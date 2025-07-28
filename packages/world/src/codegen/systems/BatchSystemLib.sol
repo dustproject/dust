@@ -49,7 +49,7 @@ library BatchSystemLib {
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     return
       CallWrapper(self.toResourceId(), address(0)).buildAndAttachProgram(
         caller,
@@ -70,7 +70,7 @@ library BatchSystemLib {
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     return
       CallWrapper(self.toResourceId(), address(0)).buildAndAttachProgramWithOrientation(
         caller,
@@ -90,7 +90,7 @@ library BatchSystemLib {
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     return
       CallWrapper(self.toResourceId(), address(0)).jumpBuildAndAttachProgram(
         caller,
@@ -109,7 +109,7 @@ library BatchSystemLib {
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     return
       CallWrapper(self.toResourceId(), address(0)).jumpBuildWithOrientationAndAttachProgram(
         caller,
@@ -129,7 +129,7 @@ library BatchSystemLib {
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert BatchSystemLib_CallingFromRootSystem();
 
@@ -141,7 +141,10 @@ library BatchSystemLib {
     bytes memory result = self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function buildAndAttachProgramWithOrientation(
@@ -153,7 +156,7 @@ library BatchSystemLib {
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert BatchSystemLib_CallingFromRootSystem();
 
@@ -166,7 +169,10 @@ library BatchSystemLib {
     bytes memory result = self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function jumpBuildAndAttachProgram(
@@ -176,7 +182,7 @@ library BatchSystemLib {
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert BatchSystemLib_CallingFromRootSystem();
 
@@ -188,7 +194,10 @@ library BatchSystemLib {
     bytes memory result = self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function jumpBuildWithOrientationAndAttachProgram(
@@ -199,7 +208,7 @@ library BatchSystemLib {
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert BatchSystemLib_CallingFromRootSystem();
 
@@ -212,7 +221,10 @@ library BatchSystemLib {
     bytes memory result = self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function buildAndAttachProgram(
@@ -223,14 +235,17 @@ library BatchSystemLib {
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     bytes memory systemCall = abi.encodeCall(
       _buildAndAttachProgram_EntityId_Vec3_uint16_ProgramId_bytes_bytes.buildAndAttachProgram,
       (caller, coord, slot, program, buildExtraData, attachExtraData)
     );
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function buildAndAttachProgramWithOrientation(
@@ -242,7 +257,7 @@ library BatchSystemLib {
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     bytes memory systemCall = abi.encodeCall(
       _buildAndAttachProgramWithOrientation_EntityId_Vec3_uint16_Orientation_ProgramId_bytes_bytes
         .buildAndAttachProgramWithOrientation,
@@ -250,7 +265,10 @@ library BatchSystemLib {
     );
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function jumpBuildAndAttachProgram(
@@ -260,14 +278,17 @@ library BatchSystemLib {
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     bytes memory systemCall = abi.encodeCall(
       _jumpBuildAndAttachProgram_EntityId_uint16_ProgramId_bytes_bytes.jumpBuildAndAttachProgram,
       (caller, slot, program, buildExtraData, attachExtraData)
     );
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function jumpBuildWithOrientationAndAttachProgram(
@@ -278,7 +299,7 @@ library BatchSystemLib {
     ProgramId program,
     bytes memory buildExtraData,
     bytes memory attachExtraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     bytes memory systemCall = abi.encodeCall(
       _jumpBuildWithOrientationAndAttachProgram_EntityId_uint16_Orientation_ProgramId_bytes_bytes
         .jumpBuildWithOrientationAndAttachProgram,
@@ -286,7 +307,10 @@ library BatchSystemLib {
     );
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function callFrom(BatchSystemType self, address from) internal pure returns (CallWrapper memory) {

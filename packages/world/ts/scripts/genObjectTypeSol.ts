@@ -285,7 +285,8 @@ ${Object.entries(categories)
           `if (self == ObjectTypes.${obj.name}) return ${obj.timeToGrow};`,
       )
       .join("\n    ")}
-    return 0;
+
+    revert("Object is not growable");
   }
 
   function getGrowableEnergy(ObjectType self) public pure returns(uint128) {
@@ -296,7 +297,8 @@ ${Object.entries(categories)
           `if (self == ObjectTypes.${obj.name}) return ${obj.growableEnergy};`,
       )
       .join("\n    ")}
-    return 0;
+
+    revert("Object is not growable");
   }
 
   function isPlantableOn(ObjectType self, ObjectType on) internal pure returns (bool) {

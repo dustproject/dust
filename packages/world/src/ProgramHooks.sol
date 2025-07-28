@@ -1,8 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { WorldContextProviderLib } from "@latticexyz/world/src/WorldContext.sol";
+import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
+
+import { SAFE_PROGRAM_GAS } from "./Constants.sol";
 import { EntityId } from "./types/EntityId.sol";
-import { ObjectType } from "./types/ObjectType.sol";
+import { ObjectAmount, ObjectType } from "./types/ObjectType.sol";
+import { Orientation } from "./types/Orientation.sol";
 import { ProgramId } from "./types/ProgramId.sol";
 import { Vec3 } from "./types/Vec3.sol";
 import { SlotData } from "./utils/InventoryUtils.sol";
@@ -13,169 +18,270 @@ import { SlotData } from "./utils/InventoryUtils.sol";
  * - target is the entity for which the function is being called
  */
 
-// Context structs for each hook type
-
-struct ValidateProgramContext {
+// Base context struct for all hooks
+struct HookContext {
   EntityId caller;
   EntityId target;
-  EntityId programmed;
-  ProgramId program;
-  bytes extraData;
-}
-
-struct AttachProgramContext {
-  EntityId caller;
-  EntityId target;
-  bytes extraData;
-}
-
-struct DetachProgramContext {
-  EntityId caller;
-  EntityId target;
-  bytes extraData;
-}
-
-struct TransferContext {
-  EntityId caller;
-  EntityId target;
-  SlotData[] deposits;
-  SlotData[] withdrawals;
-  bytes extraData;
-}
-
-struct HitContext {
-  EntityId caller;
-  EntityId target;
-  uint128 damage;
-  bytes extraData;
-}
-
-struct FuelContext {
-  EntityId caller;
-  EntityId target;
-  uint16 fuelAmount;
-  bytes extraData;
-}
-
-struct AddFragmentContext {
-  EntityId caller;
-  EntityId target;
-  EntityId added;
-  bytes extraData;
-}
-
-struct RemoveFragmentContext {
-  EntityId caller;
-  EntityId target;
-  EntityId removed;
-  bytes extraData;
-}
-
-struct BuildContext {
-  EntityId caller;
-  EntityId target;
-  ObjectType objectType;
-  Vec3 coord;
-  bytes extraData;
-}
-
-struct MineContext {
-  EntityId caller;
-  EntityId target;
-  ObjectType objectType;
-  Vec3 coord;
-  bytes extraData;
-}
-
-struct SpawnContext {
-  EntityId caller;
-  EntityId target;
-  uint128 spawnEnergy;
-  bytes extraData;
-}
-
-struct SleepContext {
-  EntityId caller;
-  EntityId target;
-  bytes extraData;
-}
-
-struct WakeupContext {
-  EntityId caller;
-  EntityId target;
-  bytes extraData;
-}
-
-struct OpenContext {
-  EntityId caller;
-  EntityId target;
-  bytes extraData;
-}
-
-struct CloseContext {
-  EntityId caller;
-  EntityId target;
+  bool revertOnFailure;
   bytes extraData;
 }
 
 // Interfaces
 
 interface IProgramValidator {
-  function validateProgram(ValidateProgramContext calldata ctx) external view;
+  struct ProgramData {
+    EntityId programmed;
+    ProgramId program;
+  }
+
+  function validateProgram(HookContext calldata ctx, ProgramData calldata data) external view;
 }
 
 interface IAttachProgram {
-  function onAttachProgram(AttachProgramContext calldata ctx) external;
+  function onAttachProgram(HookContext calldata ctx) external;
 }
 
 interface IDetachProgram {
-  function onDetachProgram(DetachProgramContext calldata ctx) external;
+  function onDetachProgram(HookContext calldata ctx) external;
 }
 
 interface ITransfer {
-  function onTransfer(TransferContext calldata ctx) external;
+  struct TransferData {
+    SlotData[] deposits;
+    SlotData[] withdrawals;
+  }
+
+  function onTransfer(HookContext calldata ctx, TransferData calldata transfer) external;
 }
 
 interface IHit {
-  function onHit(HitContext calldata ctx) external;
+  struct HitData {
+    EntityId tool;
+    uint128 damage;
+  }
+
+  function onHit(HookContext calldata ctx, HitData calldata hit) external;
 }
 
-interface IFuel {
-  function onFuel(FuelContext calldata ctx) external;
+interface IEnergize {
+  struct EnergizeData {
+    uint128 amount;
+  }
+
+  function onEnergize(HookContext calldata ctx, EnergizeData calldata energize) external;
 }
 
 interface IAddFragment {
-  function onAddFragment(AddFragmentContext calldata ctx) external;
+  struct AddFragmentData {
+    EntityId added;
+  }
+
+  function onAddFragment(HookContext calldata ctx, AddFragmentData calldata fragment) external;
 }
 
 interface IRemoveFragment {
-  function onRemoveFragment(RemoveFragmentContext calldata ctx) external;
+  struct RemoveFragmentData {
+    EntityId removed;
+  }
+
+  function onRemoveFragment(HookContext calldata ctx, RemoveFragmentData calldata fragment) external;
 }
 
 interface IBuild {
-  function onBuild(BuildContext calldata ctx) external;
+  struct BuildData {
+    EntityId entity;
+    Vec3 coord;
+    ObjectType slotType;
+    ObjectType objectType;
+    Orientation orientation;
+  }
+
+  function onBuild(HookContext calldata ctx, BuildData calldata build) external;
 }
 
 interface IMine {
-  function onMine(MineContext calldata ctx) external;
+  struct MineData {
+    EntityId entity;
+    EntityId tool;
+    Vec3 coord;
+    ObjectType objectType;
+  }
+
+  function onMine(HookContext calldata ctx, MineData calldata mine) external;
 }
 
 interface ISpawn {
-  function onSpawn(SpawnContext calldata ctx) external;
+  struct SpawnData {
+    uint128 energy;
+    Vec3 coord;
+  }
+
+  function onSpawn(HookContext calldata ctx, SpawnData calldata spawn) external;
 }
 
 interface ISleep {
-  function onSleep(SleepContext calldata ctx) external;
+  function onSleep(HookContext calldata ctx) external;
 }
 
 interface IWakeup {
-  function onWakeup(WakeupContext calldata ctx) external;
+  function onWakeup(HookContext calldata ctx) external;
 }
 
 interface IOpen {
-  function onOpen(OpenContext calldata ctx) external;
+  function onOpen(HookContext calldata ctx) external;
 }
 
 interface IClose {
-  function onClose(CloseContext calldata ctx) external;
+  function onClose(HookContext calldata ctx) external;
 }
+
+struct Hook {
+  ProgramId program;
+  HookContext ctx;
+}
+
+library HooksLib {
+  function hook(ProgramId self, EntityId caller, EntityId target, bool revertOnFailure, bytes memory extraData)
+    internal
+    pure
+    returns (Hook memory)
+  {
+    return Hook(self, HookContext(caller, target, revertOnFailure, extraData));
+  }
+
+  function validateProgram(Hook memory self, EntityId programmed, ProgramId program) internal view {
+    IProgramValidator.ProgramData memory data =
+      IProgramValidator.ProgramData({ programmed: programmed, program: program });
+
+    _staticcall(self, abi.encodeCall(IProgramValidator.validateProgram, (self.ctx, data)));
+  }
+
+  function onAttachProgram(Hook memory self) internal {
+    _call(self, abi.encodeCall(IAttachProgram.onAttachProgram, (self.ctx)));
+  }
+
+  function onDetachProgram(Hook memory self) internal {
+    _call(self, abi.encodeCall(IDetachProgram.onDetachProgram, (self.ctx)));
+  }
+
+  function onTransfer(Hook memory self, SlotData[] memory deposits, SlotData[] memory withdrawals) internal {
+    ITransfer.TransferData memory transfer = ITransfer.TransferData({ deposits: deposits, withdrawals: withdrawals });
+
+    _call(self, abi.encodeCall(ITransfer.onTransfer, (self.ctx, transfer)));
+  }
+
+  function onHit(Hook memory self, EntityId tool, uint128 damage) internal {
+    IHit.HitData memory hit = IHit.HitData({ tool: tool, damage: damage });
+
+    _call(self, abi.encodeCall(IHit.onHit, (self.ctx, hit)));
+  }
+
+  function onEnergize(Hook memory self, uint128 amount) internal {
+    IEnergize.EnergizeData memory energize = IEnergize.EnergizeData({ amount: amount });
+
+    _call(self, abi.encodeCall(IEnergize.onEnergize, (self.ctx, energize)));
+  }
+
+  function onAddFragment(Hook memory self, EntityId added) internal {
+    IAddFragment.AddFragmentData memory fragment = IAddFragment.AddFragmentData({ added: added });
+
+    _call(self, abi.encodeCall(IAddFragment.onAddFragment, (self.ctx, fragment)));
+  }
+
+  function onRemoveFragment(Hook memory self, EntityId removed) internal {
+    IRemoveFragment.RemoveFragmentData memory fragment = IRemoveFragment.RemoveFragmentData({ removed: removed });
+
+    _call(self, abi.encodeCall(IRemoveFragment.onRemoveFragment, (self.ctx, fragment)));
+  }
+
+  function onMine(Hook memory self, EntityId entity, EntityId tool, ObjectType objectType, Vec3 coord) internal {
+    IMine.MineData memory mine = IMine.MineData({ entity: entity, tool: tool, objectType: objectType, coord: coord });
+
+    _call(self, abi.encodeCall(IMine.onMine, (self.ctx, mine)));
+  }
+
+  function onBuild(
+    Hook memory self,
+    EntityId entity,
+    Vec3 coord,
+    ObjectType slotType,
+    ObjectType objectType,
+    Orientation orientation
+  ) internal {
+    IBuild.BuildData memory build = IBuild.BuildData({
+      entity: entity,
+      coord: coord,
+      slotType: slotType,
+      objectType: objectType,
+      orientation: orientation
+    });
+
+    _call(self, abi.encodeCall(IBuild.onBuild, (self.ctx, build)));
+  }
+
+  function onSpawn(Hook memory self, uint128 energy, Vec3 coord) internal {
+    ISpawn.SpawnData memory spawn = ISpawn.SpawnData({ energy: energy, coord: coord });
+
+    _call(self, abi.encodeCall(ISpawn.onSpawn, (self.ctx, spawn)));
+  }
+
+  function onSleep(Hook memory self) internal {
+    _call(self, abi.encodeCall(ISleep.onSleep, (self.ctx)));
+  }
+
+  function onWakeup(Hook memory self) internal {
+    _call(self, abi.encodeCall(IWakeup.onWakeup, (self.ctx)));
+  }
+
+  function onOpen(Hook memory self) internal {
+    _call(self, abi.encodeCall(IOpen.onOpen, (self.ctx)));
+  }
+
+  function onClose(Hook memory self) internal {
+    _call(self, abi.encodeCall(IClose.onClose, (self.ctx)));
+  }
+
+  /**
+   * @dev Private helper that executes hooks with proper gas handling based on revertOnFailure
+   * @param self The Hook containing program and context
+   * @param hookData The calldata to use for the program call
+   */
+  function _call(Hook memory self, bytes memory hookData) private {
+    address programAddress = self.program.getAddress();
+    if (programAddress == address(0)) {
+      return;
+    }
+
+    bytes memory data = _hookWorldContext(hookData);
+    bool revertOnFailure = self.ctx.revertOnFailure;
+    uint256 gas = revertOnFailure ? gasleft() : SAFE_PROGRAM_GAS;
+    (bool success, bytes memory returnData) = programAddress.call{ gas: gas }(data);
+
+    if (revertOnFailure && !success) revertWithBytes(returnData);
+  }
+
+  /**
+   * @dev Private helper that executes view/pure hooks with proper gas handling based on revertOnFailure
+   * @param self The Hook containing program and context
+   * @param hookData The calldata to use for the program staticcall
+   */
+  function _staticcall(Hook memory self, bytes memory hookData) private view {
+    address programAddress = self.program.getAddress();
+    if (programAddress == address(0)) {
+      return;
+    }
+
+    bytes memory data = _hookWorldContext(hookData);
+    bool revertOnFailure = self.ctx.revertOnFailure;
+    uint256 gas = revertOnFailure ? gasleft() : SAFE_PROGRAM_GAS;
+    (bool success, bytes memory returnData) = programAddress.staticcall{ gas: gas }(data);
+
+    if (revertOnFailure && !success) revertWithBytes(returnData);
+  }
+
+  function _hookWorldContext(bytes memory hookData) private pure returns (bytes memory) {
+    return WorldContextProviderLib.appendContext({ callData: hookData, msgSender: address(0), msgValue: 0 });
+  }
+}
+
+using HooksLib for Hook global;

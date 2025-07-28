@@ -3,8 +3,6 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
-import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
-
 import { ObjectType } from "../types/ObjectType.sol";
 
 import { ObjectTypes } from "../types/ObjectType.sol";
@@ -19,15 +17,17 @@ contract ActivateSystem is System {
     checkWorldStatus();
 
     require(entityId._exists(), "Entity does not exist");
-    EntityId base = entityId.baseEntityId();
+    EntityId base = entityId._baseEntityId();
     ObjectType objectType = base._getObjectType();
     require(!objectType.isNull(), "Entity has no object type");
 
     if (objectType == ObjectTypes.Player) {
       updatePlayerEnergy(base);
-    } else {
+    } else if (objectType.isMachine()) {
       // if there's no program, it'll just do nothing
       updateMachineEnergy(base);
+    } else {
+      revert("Entity is not a player or machine");
     }
   }
 

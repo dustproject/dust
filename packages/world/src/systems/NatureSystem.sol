@@ -21,7 +21,7 @@ import { ObjectTypes } from "../types/ObjectType.sol";
 
 import { NatureLib } from "../utils/NatureLib.sol";
 
-import { Vec3, vec3 } from "../types/Vec3.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 contract NatureSystem is System {
   function chunkCommit(EntityId caller, Vec3 chunkCoord) public {

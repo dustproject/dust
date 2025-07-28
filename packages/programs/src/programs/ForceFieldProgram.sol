@@ -4,11 +4,16 @@ pragma solidity >=0.8.24;
 import { IBaseWorld } from "@latticexyz/world-consumer/src/experimental/WorldConsumer.sol";
 
 import { EntityId } from "@dust/world/src/types/EntityId.sol";
-import { ObjectAmount, ObjectType } from "@dust/world/src/types/ObjectType.sol";
-import { ProgramId } from "@dust/world/src/types/ProgramId.sol";
-import { Vec3 } from "@dust/world/src/types/Vec3.sol";
 
-import "@dust/world/src/ProgramHooks.sol" as Hooks;
+import {
+  HookContext,
+  IAddFragment,
+  IBuild,
+  IEnergize,
+  IMine,
+  IProgramValidator,
+  IRemoveFragment
+} from "@dust/world/src/ProgramHooks.sol";
 
 import { AccessGroupOwner } from "../codegen/tables/AccessGroupOwner.sol";
 
@@ -17,38 +22,37 @@ import { isAllowed } from "../isAllowed.sol";
 import { DefaultProgram } from "./DefaultProgram.sol";
 
 contract ForceFieldProgram is
-  Hooks.IProgramValidator,
-  Hooks.IAddFragment,
-  Hooks.IRemoveFragment,
-  Hooks.IFuel,
-  Hooks.IBuild,
-  Hooks.IMine,
+  IProgramValidator,
+  IAddFragment,
+  IRemoveFragment,
+  IEnergize,
+  IBuild,
+  IMine,
   DefaultProgram
 {
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
 
-  function validateProgram(Hooks.ValidateProgramContext calldata ctx) external view onlyWorld {
+  function validateProgram(HookContext calldata, ProgramData calldata) external view onlyWorld {
     // Allow all programs
-    // TODO: should we add a method to restrict programs?
   }
 
-  function onFuel(Hooks.FuelContext calldata ctx) external view onlyWorld {
+  function onEnergize(HookContext calldata, EnergizeData calldata) external view onlyWorld {
     // Allow anyone to fuel the force field
   }
 
-  function onAddFragment(Hooks.AddFragmentContext calldata ctx) external view onlyWorld {
+  function onAddFragment(HookContext calldata ctx, AddFragmentData calldata) external view onlyWorld {
     require(isAllowed(ctx.target, ctx.caller), "Only approved callers can add fragments to the force field");
   }
 
-  function onRemoveFragment(Hooks.RemoveFragmentContext calldata ctx) external view onlyWorld {
+  function onRemoveFragment(HookContext calldata ctx, RemoveFragmentData calldata) external view onlyWorld {
     require(isAllowed(ctx.target, ctx.caller), "Only approved callers can remove fragments from the force field");
   }
 
-  function onBuild(Hooks.BuildContext calldata ctx) external view onlyWorld {
+  function onBuild(HookContext calldata ctx, BuildData calldata) external view onlyWorld {
     require(isAllowed(ctx.target, ctx.caller), "Only approved callers can build in the force field");
   }
 
-  function onMine(Hooks.MineContext calldata ctx) external view onlyWorld {
+  function onMine(HookContext calldata ctx, MineData calldata) external view onlyWorld {
     require(isAllowed(ctx.target, ctx.caller), "Only approved callers can mine in the force field");
   }
 

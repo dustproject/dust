@@ -61,4 +61,66 @@ export type ClientRpcSchema = RpcSchema.From<
         z: number;
       };
     }
+  | {
+      Request: {
+        method: "setBlueprint";
+        params: {
+          blocks: {
+            objectTypeId: number;
+            x: number;
+            y: number;
+            z: number;
+            orientation: number;
+          }[];
+          options:
+            | {
+                showBlocksToMine: boolean;
+                showBlocksToBuild: boolean;
+              }
+            | undefined;
+        };
+      };
+      ReturnType: void;
+    }
+  | {
+      Request: {
+        method: "getSelectedObjectType";
+      };
+      ReturnType: number;
+    }
+  | {
+      Request: {
+        method: "getForceFieldAt";
+        params: {
+          x: number;
+          y: number;
+          z: number;
+        };
+      };
+      ReturnType:
+        | {
+            forceFieldId: Hex;
+            fragmentId: Hex;
+            fragmentPos: {
+              x: number;
+              y: number;
+              z: number;
+            };
+            forceFieldCreatedAt: bigint;
+            extraDrainRate: bigint;
+          }
+        | undefined;
+    }
+  | {
+      Request: {
+        method: "getCursorPosition";
+      };
+      ReturnType:
+        | {
+            x: number;
+            y: number;
+            z: number;
+          }
+        | undefined;
+    }
 >;

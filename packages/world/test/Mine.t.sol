@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { console } from "forge-std/console.sol";
-
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
@@ -13,23 +11,14 @@ import { SeedGrowth } from "../src/codegen/tables/SeedGrowth.sol";
 
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 
-import { Machine } from "../src/codegen/tables/Machine.sol";
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
-
-import { BurnedResourceCount } from "../src/codegen/tables/BurnedResourceCount.sol";
 
 import { Death } from "../src/codegen/tables/Death.sol";
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 import { DustTest } from "./DustTest.sol";
 
-import {
-  ChunkCommitment,
-  EntityPosition,
-  LocalEnergyPool,
-  ResourcePosition,
-  ReverseMovablePosition
-} from "../src/utils/Vec3Storage.sol";
+import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import {
   ACTION_MODIFIER_DENOMINATOR,
@@ -48,7 +37,7 @@ import {
 import { ObjectAmount, ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 
 import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
-import { EntityId, EntityTypeLib } from "../src/types/EntityId.sol";
+import { EntityId } from "../src/types/EntityId.sol";
 
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { Orientation } from "../src/types/Orientation.sol";
@@ -251,15 +240,14 @@ contract MineTest is DustTest {
     vm.prank(alice);
     world.mineUntilDestroyed(aliceEntityId, farmlandCoord + vec3(0, 1, 0), "");
 
-    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Wheat seeds were not removed from circulation");
+    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 2, "Wheat seeds were not removed from circulation");
 
     // Verify drops
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 2);
 
     // Verify crop no longer exists
     assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
-    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seed was removed from circulation");
 
     // Verify local energy pool has changed (from player's energy cost)
     assertEq(
@@ -304,15 +292,14 @@ contract MineTest is DustTest {
     vm.prank(alice);
     world.mineUntilDestroyed(aliceEntityId, farmlandCoord, "");
 
-    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seed drop was not removed from circulation");
+    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 2, "Seed drop was not removed from circulation");
 
     // Verify drops
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 2);
 
     // Verify crop no longer exists
     assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
-    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seed was removed from circulation");
   }
 
   function testMineResourceTypeIsFixedAfterPartialMine() public {

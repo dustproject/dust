@@ -1,11 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { console } from "forge-std/console.sol";
-
-import { IERC165 } from "@latticexyz/world/src/IERC165.sol";
 import { System } from "@latticexyz/world/src/System.sol";
-import { WorldContextConsumer } from "@latticexyz/world/src/WorldContext.sol";
 
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
@@ -13,37 +9,28 @@ import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
 import { EntityId } from "../src/types/EntityId.sol";
 
-import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { EnergyData } from "../src/codegen/tables/Energy.sol";
 
-import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
-
-import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
-import { ReverseMovablePosition } from "../src/codegen/tables/ReverseMovablePosition.sol";
-import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
-import { ITransferSystem } from "../src/codegen/world/ITransferSystem.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { DustTest } from "./DustTest.sol";
 
-import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_RADIUS } from "../src/Constants.sol";
+import { MAX_ENTITY_INFLUENCE_RADIUS } from "../src/Constants.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
 
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 
-import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { Orientation } from "../src/types/Orientation.sol";
 import { ProgramId } from "../src/types/ProgramId.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
-import "../src/ProgramHooks.sol" as Hooks;
+import { HookContext, ITransfer } from "../src/ProgramHooks.sol";
 import { SlotAmount, SlotData, SlotTransfer } from "../src/utils/InventoryUtils.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
-import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestInventoryUtils } from "./utils/TestUtils.sol";
 
-contract TestChestProgram is System {
+contract TestChestProgram is System, ITransfer {
   // Store the last inputs received by onTransfer
   EntityId public lastCaller;
   EntityId public lastTarget;
@@ -54,7 +41,7 @@ contract TestChestProgram is System {
   // Flag to control whether the hook should revert
   bool public shouldRevert;
 
-  function onTransfer(Hooks.TransferContext calldata ctx) external {
+  function onTransfer(HookContext calldata ctx, TransferData calldata transfer) external {
     require(!shouldRevert, "Transfer not allowed by chest");
 
     lastCaller = ctx.caller;
@@ -64,12 +51,12 @@ contract TestChestProgram is System {
     delete _lastDeposits;
     delete _lastWithdrawals;
 
-    for (uint256 i = 0; i < ctx.deposits.length; i++) {
-      _lastDeposits.push(ctx.deposits[i]);
+    for (uint256 i = 0; i < transfer.deposits.length; i++) {
+      _lastDeposits.push(transfer.deposits[i]);
     }
 
-    for (uint256 i = 0; i < ctx.withdrawals.length; i++) {
-      _lastWithdrawals.push(ctx.withdrawals[i]);
+    for (uint256 i = 0; i < transfer.withdrawals.length; i++) {
+      _lastWithdrawals.push(transfer.withdrawals[i]);
     }
   }
 
@@ -522,9 +509,9 @@ contract TransferTest is DustTest {
     SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: numToTransfer });
 
-    program.call(
-      world, abi.encodeCall(world.transfer, (chestEntityId, chestEntityId, otherChestEntityId, slotsToTransfer, ""))
-    );
+    // Use the program to transfer between chests
+    vm.prank(address(program));
+    world.transfer(chestEntityId, chestEntityId, otherChestEntityId, slotsToTransfer, "");
 
     assertInventoryHasObject(chestEntityId, transferObjectType, 0);
     assertInventoryHasObject(otherChestEntityId, transferObjectType, numToTransfer);
@@ -554,10 +541,10 @@ contract TransferTest is DustTest {
     SlotTransfer[] memory slotsToTransfer = new SlotTransfer[](1);
     slotsToTransfer[0] = SlotTransfer({ slotFrom: 0, slotTo: 0, amount: numToTransfer });
 
+    // Use the program to transfer between chests
+    vm.prank(address(program));
     vm.expectRevert("Entity is too far");
-    program.call(
-      world, abi.encodeCall(world.transfer, (chestEntityId, chestEntityId, otherChestEntityId, slotsToTransfer, ""))
-    );
+    world.transfer(chestEntityId, chestEntityId, otherChestEntityId, slotsToTransfer, "");
   }
 
   function testSwapPartiallyFilledSlots() public {

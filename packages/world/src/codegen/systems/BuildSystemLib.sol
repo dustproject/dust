@@ -45,7 +45,7 @@ library BuildSystemLib {
     Vec3 coord,
     uint16 slot,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     return CallWrapper(self.toResourceId(), address(0)).build(caller, coord, slot, extraData);
   }
 
@@ -56,7 +56,7 @@ library BuildSystemLib {
     uint16 slot,
     Orientation orientation,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     return
       CallWrapper(self.toResourceId(), address(0)).buildWithOrientation(caller, coord, slot, orientation, extraData);
   }
@@ -66,7 +66,7 @@ library BuildSystemLib {
     EntityId caller,
     uint16 slot,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     return CallWrapper(self.toResourceId(), address(0)).jumpBuild(caller, slot, extraData);
   }
 
@@ -76,7 +76,7 @@ library BuildSystemLib {
     uint16 slot,
     Orientation orientation,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     return CallWrapper(self.toResourceId(), address(0)).jumpBuildWithOrientation(caller, slot, orientation, extraData);
   }
 
@@ -86,7 +86,7 @@ library BuildSystemLib {
     Vec3 coord,
     uint16 slot,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert BuildSystemLib_CallingFromRootSystem();
 
@@ -95,7 +95,10 @@ library BuildSystemLib {
     bytes memory result = self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function buildWithOrientation(
@@ -105,7 +108,7 @@ library BuildSystemLib {
     uint16 slot,
     Orientation orientation,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert BuildSystemLib_CallingFromRootSystem();
 
@@ -117,7 +120,10 @@ library BuildSystemLib {
     bytes memory result = self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function jumpBuild(
@@ -125,7 +131,7 @@ library BuildSystemLib {
     EntityId caller,
     uint16 slot,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert BuildSystemLib_CallingFromRootSystem();
 
@@ -134,7 +140,10 @@ library BuildSystemLib {
     bytes memory result = self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function jumpBuildWithOrientation(
@@ -143,7 +152,7 @@ library BuildSystemLib {
     uint16 slot,
     Orientation orientation,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert BuildSystemLib_CallingFromRootSystem();
 
@@ -155,7 +164,10 @@ library BuildSystemLib {
     bytes memory result = self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function build(
@@ -164,11 +176,14 @@ library BuildSystemLib {
     Vec3 coord,
     uint16 slot,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     bytes memory systemCall = abi.encodeCall(_build_EntityId_Vec3_uint16_bytes.build, (caller, coord, slot, extraData));
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function buildWithOrientation(
@@ -178,14 +193,17 @@ library BuildSystemLib {
     uint16 slot,
     Orientation orientation,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     bytes memory systemCall = abi.encodeCall(
       _buildWithOrientation_EntityId_Vec3_uint16_Orientation_bytes.buildWithOrientation,
       (caller, coord, slot, orientation, extraData)
     );
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function jumpBuild(
@@ -193,11 +211,14 @@ library BuildSystemLib {
     EntityId caller,
     uint16 slot,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     bytes memory systemCall = abi.encodeCall(_jumpBuild_EntityId_uint16_bytes.jumpBuild, (caller, slot, extraData));
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function jumpBuildWithOrientation(
@@ -206,14 +227,17 @@ library BuildSystemLib {
     uint16 slot,
     Orientation orientation,
     bytes memory extraData
-  ) internal returns (EntityId) {
+  ) internal returns (EntityId __auxRet0) {
     bytes memory systemCall = abi.encodeCall(
       _jumpBuildWithOrientation_EntityId_uint16_Orientation_bytes.jumpBuildWithOrientation,
       (caller, slot, orientation, extraData)
     );
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
-    return abi.decode(result, (EntityId));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
   }
 
   function callFrom(BuildSystemType self, address from) internal pure returns (CallWrapper memory) {

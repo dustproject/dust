@@ -1,29 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { ERC165Checker } from "@latticexyz/world/src/ERC165Checker.sol";
-import { System } from "@latticexyz/world/src/System.sol";
-import { NamespaceOwner } from "@latticexyz/world/src/codegen/tables/NamespaceOwner.sol";
-import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
-
-import { Action } from "../codegen/common.sol";
-import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
 import { EnergyData } from "../codegen/tables/Energy.sol";
+import { System } from "@latticexyz/world/src/System.sol";
+import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
 
 import { EntityProgram } from "../codegen/tables/EntityProgram.sol";
 
 import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { AttachProgramNotification, DetachProgramNotification, notify } from "../utils/NotifUtils.sol";
-import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
-import { SAFE_PROGRAM_GAS } from "../Constants.sol";
-import { EntityId } from "../types/EntityId.sol";
+import { EntityId, EntityTypeLib } from "../types/EntityId.sol";
 import { ObjectType } from "../types/ObjectType.sol";
 
 import { ObjectTypes } from "../types/ObjectType.sol";
 
-import "../ProgramHooks.sol" as Hooks;
 import { ProgramId } from "../types/ProgramId.sol";
 import { Vec3 } from "../types/Vec3.sol";
 
@@ -31,49 +23,36 @@ contract ProgramSystem is System {
   function updateProgram(EntityId caller, EntityId target, ProgramId newProgram, bytes calldata extraData) public {
     caller.activate();
 
-    // Validate and prepare target
-    Vec3 validatorCoord = _getValidatorCoord(caller, target);
-    target = _validateTarget(target);
-
     // Detach existing program if any
-    ProgramId existingProgram = target._getProgram();
-    if (existingProgram.exists()) {
-      _detachProgram(caller, target, existingProgram, validatorCoord, extraData);
+    if (target._getProgram().exists()) {
+      _detachProgram(caller, target, extraData);
     }
 
     // Attach new program
-    _attachProgram(caller, target, newProgram, validatorCoord, extraData);
+    _attachProgram(caller, target, newProgram, extraData);
+  }
+
+  function updateProgram(EntityId target, ProgramId newProgram, bytes calldata extraData) public {
+    EntityId caller = EntityTypeLib.encodePlayer(_msgSender());
+    updateProgram(caller, target, newProgram, extraData);
   }
 
   function attachProgram(EntityId caller, EntityId target, ProgramId program, bytes calldata extraData) public {
     caller.activate();
 
-    // Validate and prepare target
-    Vec3 validatorCoord = _getValidatorCoord(caller, target);
-    target = _validateTarget(target);
-
-    require(!target._getProgram().exists(), "Existing program must be detached");
-
-    _attachProgram(caller, target, program, validatorCoord, extraData);
+    _attachProgram(caller, target, program, extraData);
   }
 
   function detachProgram(EntityId caller, EntityId target, bytes calldata extraData) public {
     caller.activate();
 
-    // Validate and prepare target
-    Vec3 validatorCoord = _getValidatorCoord(caller, target);
-    target = _validateTarget(target);
-
-    ProgramId program = target._getProgram();
-    require(program.exists(), "No program attached");
-
-    _detachProgram(caller, target, program, validatorCoord, extraData);
+    _detachProgram(caller, target, extraData);
   }
 
   function _validateTarget(EntityId target) internal view returns (EntityId) {
     ObjectType targetType = target._getObjectType();
     require(targetType.isSmartEntity(), "Target is not a smart entity");
-    return target.baseEntityId();
+    return target._baseEntityId();
   }
 
   function _getValidatorCoord(EntityId caller, EntityId target) internal view returns (Vec3) {
@@ -88,67 +67,43 @@ contract ProgramSystem is System {
     }
   }
 
-  function _attachProgram(
-    EntityId caller,
-    EntityId target,
-    ProgramId program,
-    Vec3 validatorCoord,
-    bytes calldata extraData
-  ) internal {
+  function _attachProgram(EntityId caller, EntityId target, ProgramId program, bytes calldata extraData) internal {
+    // Validate and prepare target
+    Vec3 validatorCoord = _getValidatorCoord(caller, target);
+    target = _validateTarget(target);
+
     (address programAddress, bool publicAccess) = Systems._get(program.toResourceId());
     require(programAddress != address(0), "Program does not exist");
     require(!publicAccess, "Program system must be private");
+    require(!target._getProgram().exists(), "Existing program must be detached");
 
     (EntityId validator, ProgramId validatorProgram) = _getValidatorProgram(validatorCoord);
 
-    bytes memory validateProgram = abi.encodeCall(
-      Hooks.IProgramValidator.validateProgram,
-      (
-        Hooks.ValidateProgramContext({
-          caller: caller,
-          target: validator,
-          programmed: target,
-          program: program,
-          extraData: extraData
-        })
-      )
-    );
-
     // The validateProgram view function should revert if the program is not allowed
-    validatorProgram.staticcallOrRevert(validateProgram);
+    validatorProgram.hook({ caller: caller, target: validator, revertOnFailure: true, extraData: extraData })
+      .validateProgram({ programmed: target, program: program });
 
     EntityProgram._set(target, program);
 
-    program.callOrRevert(
-      abi.encodeCall(
-        Hooks.IAttachProgram.onAttachProgram,
-        (Hooks.AttachProgramContext({ caller: caller, target: target, extraData: extraData }))
-      )
-    );
+    program.hook({ caller: caller, target: target, revertOnFailure: true, extraData: extraData }).onAttachProgram();
 
     notify(caller, AttachProgramNotification({ attachedTo: target, programSystemId: program.toResourceId() }));
   }
 
-  function _detachProgram(
-    EntityId caller,
-    EntityId target,
-    ProgramId program,
-    Vec3 forceFieldCoord,
-    bytes calldata extraData
-  ) internal {
-    bytes memory onDetachProgram = abi.encodeCall(
-      Hooks.IDetachProgram.onDetachProgram,
-      (Hooks.DetachProgramContext({ caller: caller, target: target, extraData: extraData }))
-    );
+  function _detachProgram(EntityId caller, EntityId target, bytes calldata extraData) internal {
+    // Validate and prepare target
+    Vec3 forceFieldCoord = _getValidatorCoord(caller, target);
+    target = _validateTarget(target);
+
+    ProgramId program = target._getProgram();
+    require(program.exists(), "No program attached");
 
     (EntityId forceField,) = ForceFieldUtils.getForceField(forceFieldCoord);
     // If forcefield doesn't have energy, allow detachment
     EnergyData memory machineData = updateMachineEnergy(forceField);
-    if (machineData.energy > 0) {
-      program.callOrRevert(onDetachProgram);
-    } else {
-      program.call({ gas: SAFE_PROGRAM_GAS, hook: onDetachProgram });
-    }
+
+    program.hook({ caller: caller, target: target, revertOnFailure: machineData.energy > 0, extraData: extraData })
+      .onDetachProgram();
 
     EntityProgram._deleteRecord(target);
 

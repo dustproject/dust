@@ -1,12 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { IERC165 } from "@latticexyz/world/src/IERC165.sol";
 import { System } from "@latticexyz/world/src/System.sol";
-
-import { WorldContextConsumer } from "@latticexyz/world/src/WorldContext.sol";
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
-import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
 import { TestEnergyUtils, TestEntityUtils, TestForceFieldUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
@@ -19,40 +15,39 @@ import { EntityProgram } from "../src/codegen/tables/EntityProgram.sol";
 import { Fragment } from "../src/codegen/tables/Fragment.sol";
 import { Machine } from "../src/codegen/tables/Machine.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
-import { DustTest, console } from "./DustTest.sol";
+import { DustTest } from "./DustTest.sol";
 
-import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
 import { FRAGMENT_SIZE, MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
 import { EntityId } from "../src/types/EntityId.sol";
 
-import "../src/ProgramHooks.sol" as Hooks;
+import { HookContext, IBuild, IMine, IProgramValidator, IRemoveFragment } from "../src/ProgramHooks.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 import { ProgramId } from "../src/types/ProgramId.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
-contract TestForceFieldProgram is System {
+contract TestForceFieldProgram is System, IProgramValidator, IBuild, IMine, IRemoveFragment {
   // Just for testing, real programs should use tables
-  bool revertOnValidateProgram;
-  bool revertOnBuild;
-  bool revertOnMine;
-  bool revertOnRemoveFragment;
+  bool public revertOnValidateProgram;
+  bool public revertOnBuild;
+  bool public revertOnMine;
+  bool public revertOnRemoveFragment;
 
-  function validateProgram(Hooks.ValidateProgramContext calldata) external view {
+  function validateProgram(HookContext calldata, ProgramData calldata) external view {
     require(!revertOnValidateProgram, "Not allowed by forcefield");
   }
 
-  function onBuild(Hooks.BuildContext calldata) external view {
+  function onBuild(HookContext calldata, BuildData calldata) external view {
     require(!revertOnBuild, "Not allowed by forcefield");
   }
 
-  function onMine(Hooks.MineContext calldata) external view {
+  function onMine(HookContext calldata, MineData calldata) external view {
     require(!revertOnMine, "Not allowed by forcefield");
   }
 
-  function onRemoveFragment(Hooks.RemoveFragmentContext calldata) external view {
+  function onRemoveFragment(HookContext calldata, RemoveFragmentData calldata) external view {
     require(!revertOnRemoveFragment, "Not allowed by forcefield");
   }
 
@@ -75,21 +70,21 @@ contract TestForceFieldProgram is System {
   fallback() external { }
 }
 
-contract TestFragmentProgram is System {
+contract TestFragmentProgram is System, IProgramValidator, IBuild, IMine {
   // Just for testing, real programs should use tables
-  bool revertOnValidateProgram;
-  bool revertOnBuild;
-  bool revertOnMine;
+  bool public revertOnValidateProgram;
+  bool public revertOnBuild;
+  bool public revertOnMine;
 
-  function validateProgram(Hooks.ValidateProgramContext calldata) external view {
+  function validateProgram(HookContext calldata, ProgramData calldata) external view {
     require(!revertOnValidateProgram, "Not allowed by forcefield fragment");
   }
 
-  function onBuild(Hooks.BuildContext calldata) external view {
+  function onBuild(HookContext calldata, BuildData calldata) external view {
     require(!revertOnBuild, "Not allowed by forcefield fragment");
   }
 
-  function onMine(Hooks.MineContext calldata) external view {
+  function onMine(HookContext calldata, MineData calldata) external view {
     require(!revertOnMine, "Not allowed by forcefield fragment");
   }
 
@@ -918,17 +913,12 @@ contract ForceFieldTest is DustTest {
     world.registerNamespace(namespaceId);
     world.registerSystem(programSystemId, chestProgram, false);
 
-    // Expect the forcefield program's onProgramAttached to be called with the correct parameters
+    // Expect the forcefield program's validateProgram to be called with the correct parameters
     bytes memory expectedCallData = abi.encodeCall(
       TestForceFieldProgram.validateProgram,
       (
-        Hooks.ValidateProgramContext({
-          caller: aliceEntityId,
-          target: forceFieldEntityId,
-          programmed: chestEntityId,
-          program: ProgramId.wrap(programSystemId.unwrap()),
-          extraData: bytes("")
-        })
+        HookContext({ caller: aliceEntityId, target: forceFieldEntityId, revertOnFailure: true, extraData: bytes("") }),
+        IProgramValidator.ProgramData({ programmed: chestEntityId, program: ProgramId.wrap(programSystemId.unwrap()) })
       )
     );
     vm.expectCall(address(forceFieldProgram), expectedCallData);

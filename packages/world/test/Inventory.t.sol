@@ -1,24 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
-import { Systems } from "@latticexyz/world/src/codegen/tables/Systems.sol";
-import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
-import { console } from "forge-std/console.sol";
-
 import { Direction } from "../src/codegen/common.sol";
-import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
-
-import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
-import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
-
-import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
-
-import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
 import { CHUNK_SIZE, MAX_ENTITY_INFLUENCE_RADIUS } from "../src/Constants.sol";
 import { EntityId } from "../src/types/EntityId.sol";

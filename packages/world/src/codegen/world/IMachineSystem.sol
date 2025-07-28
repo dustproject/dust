@@ -12,5 +12,17 @@ import { SlotAmount } from "../../utils/InventoryUtils.sol";
  * @dev This interface is automatically generated from the corresponding system contract. Do not edit manually.
  */
 interface IMachineSystem {
-  function fuelMachine(EntityId caller, EntityId machine, SlotAmount[] memory slots, bytes calldata extraData) external;
+  function energizeMachine(
+    EntityId caller,
+    EntityId machine,
+    SlotAmount[] calldata slots,
+    bytes calldata extraData
+  ) external;
+
+  function fuelMachine(
+    EntityId caller,
+    EntityId machine,
+    SlotAmount[] calldata slots,
+    bytes calldata extraData
+  ) external;
 }

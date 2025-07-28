@@ -1,22 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
-import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
-import { console } from "forge-std/console.sol";
-
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-import { Mass } from "../src/codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 import { SeedGrowth } from "../src/codegen/tables/SeedGrowth.sol";
 
 import { LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
-
-import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
 import {
   BUILD_ENERGY_COST,
@@ -30,7 +23,6 @@ import { ObjectType } from "../src/types/ObjectType.sol";
 
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 
-import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 import { DustTest } from "./DustTest.sol";
@@ -284,11 +276,11 @@ contract FarmingTest is DustTest {
     // Verify wheat and seeds were obtained
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
     // TODO: test randomness
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 2);
 
     // Verify crop no longer exists
     assertEq(EntityObjectType.get(cropEntityId), ObjectTypes.Air, "Crop wasn't removed after harvesting");
-    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seed was removed from circulation");
+    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 2, "Seed was not removed from circulation");
 
     // Verify local energy pool has changed (from the player's energy cost)
     assertEq(
@@ -431,7 +423,6 @@ contract FarmingTest is DustTest {
     (cropEntityId,) = TestEntityUtils.getBlockAt(cropCoord);
     fullyGrownAt = SeedGrowth.getFullyGrownAt(cropEntityId);
 
-    console.log(ResourceCount.get(ObjectTypes.WheatSeed));
     // Full growth - Warp past the full growth time
     vm.roll(vm.getBlockNumber() + CHUNK_COMMIT_EXPIRY_BLOCKS + 1);
     vm.warp(fullyGrownAt + 1);
@@ -447,11 +438,13 @@ contract FarmingTest is DustTest {
     vm.prank(alice);
     world.mineUntilDestroyed(aliceEntityId, cropCoord, "");
 
-    assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 1, "Seeds should be added to circulation if received as a drop");
+    assertEq(
+      ResourceCount.get(ObjectTypes.WheatSeed), 2, "Seeds should be removed from circulation if received as a drop"
+    );
 
     // Now we get wheat and seeds
     assertInventoryHasObject(aliceEntityId, ObjectTypes.Wheat, 1);
     // TODO: test randomness
-    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 1);
+    assertInventoryHasObject(aliceEntityId, ObjectTypes.WheatSeed, 2);
   }
 }

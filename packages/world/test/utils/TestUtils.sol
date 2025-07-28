@@ -3,16 +3,12 @@ pragma solidity >=0.8.24;
 
 import { WorldContextConsumerLib } from "@latticexyz/world/src/WorldContext.sol";
 import { Vm } from "forge-std/Vm.sol";
-import { console } from "forge-std/console.sol";
 
 import { EntityId } from "../../src/types/EntityId.sol";
 import { Vec3 } from "../../src/types/Vec3.sol";
 
 import { Energy, EnergyData } from "../../src/codegen/tables/Energy.sol";
 import { Machine } from "../../src/codegen/tables/Machine.sol";
-
-import { EntityObjectType } from "../../src/codegen/tables/EntityObjectType.sol";
-import { InventorySlot } from "../../src/codegen/tables/InventorySlot.sol";
 
 import { ObjectType } from "../../src/types/ObjectType.sol";
 

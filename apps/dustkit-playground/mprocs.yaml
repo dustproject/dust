@@ -6,9 +6,16 @@ procs:
       VITE_DUSTKIT_APP_URL: http://localhost:5501/
   app:
     shell: pnpm vite app --port 5501
-  anvil:
-    shell: anvil
   dustkit:
     shell: pnpm --filter dustkit run dev
   world:
-    shell: pnpm --filter world run dev
+    cwd: ../../packages/world
+    shell: pnpm run dev
+  default-programs:
+    cwd: ../../packages/programs
+    shell: wait-on -l ../world/deploys/31337/latest.json && pnpm mud deploy --worldAddress=$(cat ../world/worlds.json | jq -r ".[\"31337\"].address // empty") --alwaysRunPostDeploy=true --rpcBatch=true
+  explorer:
+    cwd: ../../packages/world
+    shell: pnpm explorer --indexer-port 3008
+  anvil:
+    shell: anvil --block-time 2 --base-fee 50 --gas-limit 100000000

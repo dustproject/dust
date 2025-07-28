@@ -5,7 +5,7 @@ import { System } from "@latticexyz/world/src/System.sol";
 
 import { BedPlayer } from "../codegen/tables/BedPlayer.sol";
 
-import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+import { EnergyData } from "../codegen/tables/Energy.sol";
 import { Machine } from "../codegen/tables/Machine.sol";
 
 import { PlayerBed } from "../codegen/tables/PlayerBed.sol";
@@ -15,10 +15,7 @@ import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 import { checkWorldStatus } from "../utils/WorldUtils.sol";
 
 import {
-  decreaseFragmentDrainRate,
-  increaseFragmentDrainRate,
-  updateMachineEnergy,
-  updateSleepingPlayerEnergy
+  decreaseFragmentDrainRate, increaseFragmentDrainRate, updateSleepingPlayerEnergy
 } from "../utils/EnergyUtils.sol";
 
 import { EntityUtils } from "../utils/EntityUtils.sol";
@@ -29,7 +26,6 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { MoveLib } from "./libraries/MoveLib.sol";
 
-import "../ProgramHooks.sol" as Hooks;
 import { EntityId } from "../types/EntityId.sol";
 import { Vec3 } from "../types/Vec3.sol";
 
@@ -41,7 +37,7 @@ contract BedSystem is System {
 
     require(bed._getObjectType() == ObjectTypes.Bed, "Not a bed");
 
-    bed = bed.baseEntityId();
+    bed = bed._baseEntityId();
 
     require(!BedPlayer._getPlayerEntityId(bed)._exists(), "Bed full");
 
@@ -51,9 +47,7 @@ contract BedSystem is System {
 
     PlayerUtils.removePlayerFromGrid(caller, callerCoord);
 
-    bytes memory onSleep =
-      abi.encodeCall(Hooks.ISleep.onSleep, (Hooks.SleepContext({ caller: caller, target: bed, extraData: extraData })));
-    bed._getProgram().callOrRevert(onSleep);
+    bed._getProgram().hook({ caller: caller, target: bed, revertOnFailure: true, extraData: extraData }).onSleep();
 
     notify(caller, SleepNotification({ bed: bed, bedCoord: bedCoord }));
   }
@@ -84,10 +78,7 @@ contract BedSystem is System {
 
     PlayerUtils.addPlayerToGrid(caller, spawnCoord);
 
-    bytes memory onWakeup = abi.encodeCall(
-      Hooks.IWakeup.onWakeup, (Hooks.WakeupContext({ caller: caller, target: bed, extraData: extraData }))
-    );
-    bed._getProgram().callOrRevert(onWakeup);
+    bed._getProgram().hook({ caller: caller, target: bed, revertOnFailure: true, extraData: extraData }).onWakeup();
 
     notify(caller, WakeupNotification({ bed: bed, bedCoord: bedCoord }));
   }

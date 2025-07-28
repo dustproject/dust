@@ -261,7 +261,7 @@ library MoveLib {
     Vec3 aboveCoord = playerCoord + vec3(0, 2, 0);
     EntityId above = EntityUtils.getMovableEntityAt(aboveCoord);
 
-    if (!above._exists() || above.baseEntityId() == player) {
+    if (!above._exists() || above._baseEntityId() == player) {
       return;
     }
 

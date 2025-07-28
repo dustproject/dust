@@ -22,25 +22,25 @@
     "fix": "pnpm run fix:format",
     "fix:format": "forge fmt",
     "fix:lint": "solhint --config ./.solhint.json '**/*.sol' --fix",
-    "getAccessGroup": "force script GetAccessGroup",
+    "getAccessGroup": "forge script GetAccessGroup --sig='run(address,bytes32)'",
     "test": "mud test"
   },
   "dependencies": {
     "@dust/world": "workspace:*",
-    "@latticexyz/config": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
-    "@latticexyz/schema-type": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
-    "@latticexyz/store": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
-    "@latticexyz/world": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
-    "@latticexyz/world-consumer": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
+    "@latticexyz/config": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
+    "@latticexyz/schema-type": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
+    "@latticexyz/store": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
+    "@latticexyz/world": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
+    "@latticexyz/world-consumer": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
     "@openzeppelin/contracts": "^4.9.6",
     "dustkit": "workspace:*",
     "solady": "^0.1.12"
   },
   "devDependencies": {
-    "@latticexyz/gas-report": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
+    "@latticexyz/gas-report": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
     "forge-std": "https://github.com/foundry-rs/forge-std.git#3b20d60d14b343ee4f908cb8079495c07f5e8981",
-    "solhint": "^3.4.1",
-    "solhint-config-mud": "2.2.22-168c20816258c0b5c387f354283873a7544294ca",
-    "solhint-plugin-mud": "2.2.22-168c20816258c0b5c387f354283873a7544294ca"
+    "solhint": "^6.0.0",
+    "solhint-config-mud": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a",
+    "solhint-plugin-mud": "2.2.23-94cac741be24bb5743f2f36235cc3bb40012417a"
   }
 }

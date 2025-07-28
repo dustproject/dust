@@ -3,26 +3,20 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
-import { Action } from "../codegen/common.sol";
-import { BaseEntity } from "../codegen/tables/BaseEntity.sol";
-import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
+import { EnergyData } from "../codegen/tables/Energy.sol";
 
 import { updateMachineEnergy } from "../utils/EnergyUtils.sol";
 
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { AddFragmentNotification, RemoveFragmentNotification, notify } from "../utils/NotifUtils.sol";
-import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
-import { SAFE_PROGRAM_GAS } from "../Constants.sol";
 import { EntityId } from "../types/EntityId.sol";
 
-import { ObjectType } from "../types/ObjectType.sol";
 import { ObjectTypes } from "../types/ObjectType.sol";
 
-import "../ProgramHooks.sol" as Hooks;
 import { ProgramId } from "../types/ProgramId.sol";
-import { Vec3, vec3 } from "../types/Vec3.sol";
+import { Vec3 } from "../types/Vec3.sol";
 
 contract ForceFieldSystem is System {
   /**
@@ -104,8 +98,7 @@ contract ForceFieldSystem is System {
     caller.activate();
     caller.requireAdjacentToFragment(fragmentCoord);
 
-    ObjectType objectType = forceField._getObjectType();
-    require(objectType == ObjectTypes.ForceField, "Invalid object type");
+    require(forceField._getObjectType() == ObjectTypes.ForceField, "Invalid object type");
 
     require(
       refFragmentCoord.inVonNeumannNeighborhood(fragmentCoord), "Reference fragment is not adjacent to new fragment"
@@ -117,12 +110,12 @@ contract ForceFieldSystem is System {
 
     ForceFieldUtils.addFragment(forceField, fragment);
 
-    bytes memory onAddFragment = abi.encodeCall(
-      Hooks.IAddFragment.onAddFragment,
-      (Hooks.AddFragmentContext({ caller: caller, target: forceField, added: fragment, extraData: extraData }))
-    );
-
-    _callForceFieldHook(forceField, onAddFragment);
+    ProgramId program = forceField._getProgram();
+    if (program.exists()) {
+      EnergyData memory machineData = updateMachineEnergy(forceField);
+      program.hook({ caller: caller, target: forceField, revertOnFailure: machineData.energy > 0, extraData: extraData })
+        .onAddFragment(fragment);
+    }
 
     notify(caller, AddFragmentNotification({ forceField: forceField }));
   }
@@ -144,11 +137,8 @@ contract ForceFieldSystem is System {
     caller.activate();
     caller.requireAdjacentToFragment(fragmentCoord);
 
-    ObjectType objectType = forceField._getObjectType();
-    require(objectType == ObjectTypes.ForceField, "Invalid object type");
-
-    Vec3 forceFieldFragmentCoord = forceField._getPosition().toFragmentCoord();
-    require(forceFieldFragmentCoord != fragmentCoord, "Can't remove forcefield's fragment");
+    require(forceField._getObjectType() == ObjectTypes.ForceField, "Invalid object type");
+    require(forceField._getPosition().toFragmentCoord() != fragmentCoord, "Can't remove forcefield's fragment");
 
     EntityId fragment = EntityUtils.getFragmentAt(fragmentCoord);
     require(ForceFieldUtils.isFragment(forceField, fragment), "Fragment is not part of forcefield");
@@ -165,27 +155,13 @@ contract ForceFieldSystem is System {
 
     ForceFieldUtils.removeFragment(forceField, fragment);
 
-    bytes memory onRemoveFragment = abi.encodeCall(
-      Hooks.IRemoveFragment.onRemoveFragment,
-      (Hooks.RemoveFragmentContext({ caller: caller, target: forceField, removed: fragment, extraData: extraData }))
-    );
-
-    _callForceFieldHook(forceField, onRemoveFragment);
+    ProgramId program = forceField._getProgram();
+    if (program.exists()) {
+      EnergyData memory machineData = updateMachineEnergy(forceField);
+      program.hook({ caller: caller, target: forceField, revertOnFailure: machineData.energy > 0, extraData: extraData })
+        .onRemoveFragment(fragment);
+    }
 
     notify(caller, RemoveFragmentNotification({ forceField: forceField }));
-  }
-
-  function _callForceFieldHook(EntityId forceField, bytes memory hook) private {
-    ProgramId program = forceField._getProgram();
-    if (!program.exists()) {
-      return;
-    }
-
-    EnergyData memory machineData = updateMachineEnergy(forceField);
-    if (machineData.energy > 0) {
-      program.callOrRevert(hook);
-    } else {
-      program.call({ gas: SAFE_PROGRAM_GAS, hook: hook });
-    }
   }
 }

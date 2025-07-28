@@ -1,12 +1,20 @@
 {
-  "extends": ["solhint:recommended", "mud"],
-  "plugins": ["mud"],
+  "extends": ["solhint:recommended"],
   "rules": {
     "compiler-version": ["error", ">=0.8.0"],
     "avoid-low-level-calls": "off",
     "no-inline-assembly": "off",
     "func-visibility": ["warn", { "ignoreConstructors": true }],
     "no-empty-blocks": "off",
-    "no-complex-fallback": "off"
+    "no-complex-fallback": "off",
+    "import-path-check": "off",
+    "use-natspec": "off",
+    "gas-custom-errors": "off",
+    "no-console": "warn",
+    "gas-increment-by-one": "off",
+    "gas-strict-inequalities": "off",
+    "one-contract-per-file": "off",
+    "gas-small-strings": "off",
+    "function-max-lines": "off"
   }
 }

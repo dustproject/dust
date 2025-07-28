@@ -3,8 +3,6 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
-import { EnergyData } from "../codegen/tables/Energy.sol";
-
 import { InventoryUtils, SlotAmount, SlotData, SlotTransfer } from "../utils/InventoryUtils.sol";
 import { TransferNotification, notify } from "../utils/NotifUtils.sol";
 
@@ -12,9 +10,6 @@ import { EntityId } from "../types/EntityId.sol";
 import { ObjectType } from "../types/ObjectType.sol";
 
 import { ObjectTypes } from "../types/ObjectType.sol";
-
-import "../ProgramHooks.sol" as Hooks;
-import { Vec3 } from "../types/Vec3.sol";
 
 contract TransferSystem is System {
   function transfer(
@@ -105,17 +100,8 @@ contract TransferSystem is System {
       require(targetType != ObjectTypes.Player, "Cannot access another player's inventory");
       require(!targetType.isPassThrough(), "Cannot transfer directly to pass-through object");
 
-      Hooks.TransferContext memory ctx = Hooks.TransferContext({
-        caller: caller,
-        target: target,
-        deposits: deposits,
-        withdrawals: withdrawals,
-        extraData: extraData
-      });
-
-      bytes memory onTransfer = abi.encodeCall(Hooks.ITransfer.onTransfer, (ctx));
-
-      target._getProgram().callOrRevert(onTransfer);
+      target._getProgram().hook({ caller: caller, target: target, revertOnFailure: true, extraData: extraData })
+        .onTransfer(deposits, withdrawals);
     }
 
     notify(caller, TransferNotification({ transferEntityId: target, deposits: deposits, withdrawals: withdrawals }));

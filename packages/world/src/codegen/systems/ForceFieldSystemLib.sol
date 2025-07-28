@@ -44,7 +44,7 @@ library ForceFieldSystemLib {
     Vec3[] memory boundary,
     uint8[] memory boundaryIdx,
     uint8[] memory parents
-  ) internal view returns (bool) {
+  ) internal view returns (bool __auxRet0) {
     return CallWrapper(self.toResourceId(), address(0)).validateSpanningTree(boundary, boundaryIdx, parents);
   }
 
@@ -52,7 +52,7 @@ library ForceFieldSystemLib {
     ForceFieldSystemType self,
     EntityId forceField,
     Vec3 fragmentCoord
-  ) internal view returns (Vec3[] memory) {
+  ) internal view returns (Vec3[] memory __auxRet0) {
     return CallWrapper(self.toResourceId(), address(0)).computeBoundaryFragments(forceField, fragmentCoord);
   }
 
@@ -99,7 +99,7 @@ library ForceFieldSystemLib {
     Vec3[] memory boundary,
     uint8[] memory boundaryIdx,
     uint8[] memory parents
-  ) internal view returns (bool) {
+  ) internal view returns (bool __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert ForceFieldSystemLib_CallingFromRootSystem();
 
@@ -114,14 +114,17 @@ library ForceFieldSystemLib {
     if (!success) revertWithBytes(returnData);
 
     bytes memory result = abi.decode(returnData, (bytes));
-    return abi.decode(result, (bool));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (bool));
+    }
   }
 
   function computeBoundaryFragments(
     CallWrapper memory self,
     EntityId forceField,
     Vec3 fragmentCoord
-  ) internal view returns (Vec3[] memory) {
+  ) internal view returns (Vec3[] memory __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert ForceFieldSystemLib_CallingFromRootSystem();
 
@@ -136,7 +139,10 @@ library ForceFieldSystemLib {
     if (!success) revertWithBytes(returnData);
 
     bytes memory result = abi.decode(returnData, (bytes));
-    return abi.decode(result, (Vec3[]));
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (Vec3[]));
+    }
   }
 
   function addFragment(

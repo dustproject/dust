@@ -5,7 +5,7 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { RESOURCE_SYSTEM } from "@latticexyz/world/src/worldResourceTypes.sol";
 
-import { DustTest, console } from "./DustTest.sol";
+import { DustTest } from "./DustTest.sol";
 
 contract MockSystem is System {
   function foo() external pure { }

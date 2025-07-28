@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+uint256 constant PRECISION_MULTIPLIER = 1e18;
+
 uint32 constant MAX_ENTITY_INFLUENCE_RADIUS = 10;
 uint32 constant MAX_PICKUP_RADIUS = 6;
 uint32 constant MAX_RESPAWN_HALF_WIDTH = 10;
@@ -72,6 +74,7 @@ uint128 constant HIT_ACTION_MODIFIER = ACTION_MODIFIER_DENOMINATOR / 100; // ~1/
 uint256 constant MAX_WHEAT_SEED = 29_659;
 uint256 constant MAX_MELON_SEED = 7_493;
 uint256 constant MAX_PUMPKIN_SEED = 1_410;
+// uint256 constant MAX_COTTON_SEED = 20_000;
 
 uint256 constant MAX_OAK_SAPLING = 44_745;
 uint256 constant MAX_BIRCH_SAPLING = 35_656;

@@ -1,4 +1,4 @@
-import { garnet, pyrope, redstone, rhodolite } from "@latticexyz/common/chains";
+import { garnet, pyrope, redstone } from "@latticexyz/common/chains";
 import type { Chain } from "viem";
 import { anvil } from "viem/chains";
 
@@ -6,7 +6,6 @@ export const chains = [
   redstone,
   garnet,
   pyrope,
-  rhodolite,
   {
     ...anvil,
     contracts: {

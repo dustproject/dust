@@ -3,10 +3,8 @@ pragma solidity >=0.8.24;
 
 import { console } from "forge-std/console.sol";
 
-import { Config, config } from "../../utils/config.sol";
-
 import { ObjectPhysics, ObjectPhysicsData } from "../../../src/codegen/tables/ObjectPhysics.sol";
-import { ObjectType, ObjectTypes } from "../../../src/types/ObjectType.sol";
+import { ObjectTypes } from "../../../src/types/ObjectType.sol";
 
 import { Migration } from "../Migration.sol";
 

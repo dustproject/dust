@@ -4,19 +4,11 @@ pragma solidity >=0.8.24;
 import { InventoryBitmap } from "../codegen/tables/InventoryBitmap.sol";
 import { InventorySlot, InventorySlotData } from "../codegen/tables/InventorySlot.sol";
 import { Mass } from "../codegen/tables/Mass.sol";
-import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { LibBit } from "solady/utils/LibBit.sol";
-
-import { burnToolEnergy } from "../utils/EnergyUtils.sol";
-import { Math } from "../utils/Math.sol";
 
 import { EntityId } from "../types/EntityId.sol";
 
-import { ACTION_MODIFIER_DENOMINATOR } from "../Constants.sol";
-import { ObjectAmount, ObjectType, ObjectTypes } from "../types/ObjectType.sol";
-
-import { Vec3 } from "../types/Vec3.sol";
-import { OreLib } from "../utils/OreLib.sol";
+import { ObjectType } from "../types/ObjectType.sol";
 
 struct SlotTransfer {
   uint16 slotFrom;
@@ -36,7 +28,7 @@ struct SlotData {
 }
 
 library InventoryUtils {
-  uint256 constant SLOTS_PER_WORD = 256;
+  uint256 internal constant SLOTS_PER_WORD = 256;
 
   /* Bitmap operations */
 
