@@ -16,7 +16,6 @@ contract BedProgram is ISleep, IWakeup, DefaultProgram {
   }
 
   function onWakeup(HookContext calldata ctx) external view onlyWorld {
-    // onWakeup typically has revertOnFailure=false, so we don't check access
-    // (cleanup operations should always be allowed)
+    // Allow anyone to wake up
   }
 }
