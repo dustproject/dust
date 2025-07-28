@@ -10,10 +10,10 @@ import { HookContext, IAttachProgram, IDetachProgram } from "@dust/world/src/Pro
 import { AccessGroupOwner } from "../codegen/tables/AccessGroupOwner.sol";
 import { EntityAccessGroup } from "../codegen/tables/EntityAccessGroup.sol";
 
+import { AccessGroupMember } from "../codegen/tables/AccessGroupMember.sol";
 import { createAccessGroup } from "../createAccessGroup.sol";
 import { getForceField } from "../getForceField.sol";
-
-import { isAllowed } from "../isAllowed.sol";
+import { getAccessControl } from "../getGroupId.sol";
 
 abstract contract DefaultProgram is IAttachProgram, IDetachProgram, WorldConsumer {
   constructor(IBaseWorld _world) WorldConsumer(_world) { }
@@ -37,7 +37,7 @@ abstract contract DefaultProgram is IAttachProgram, IDetachProgram, WorldConsume
   }
 
   function onDetachProgram(HookContext calldata ctx) external onlyWorld {
-    // Check if allowed to detach using revertOnFailure
+    // Check if allowed to detach
     if (ctx.revertOnFailure) {
       require(_canDetach(ctx.caller, ctx.target), "Caller not authorized to detach this program");
     }
@@ -47,14 +47,32 @@ abstract contract DefaultProgram is IAttachProgram, IDetachProgram, WorldConsume
   }
 
   function _canDetach(EntityId caller, EntityId target) internal view virtual returns (bool) {
-    // Get the entity's access group
-    uint256 groupId = EntityAccessGroup.get(target);
+    return _hasAccess(caller, target);
+  }
 
-    // If no group, anyone can detach
-    if (groupId == 0) return true;
+  function _hasAccess(EntityId caller, EntityId target) internal view returns (bool) {
+    (uint256 groupId, bool locked) = getAccessControl(target);
 
-    // Check if caller owns the group
-    return AccessGroupOwner.get(groupId) == caller;
+    // If locked, deny access
+    if (locked) {
+      return false;
+    }
+
+    // If no group, allow access
+    if (groupId == 0) {
+      return true;
+    }
+
+    // Check group membership
+    return AccessGroupMember.get(groupId, caller);
+  }
+
+  function _requireAccess(EntityId caller, EntityId target, string memory errorMessage) internal view {
+    require(_hasAccess(caller, target), errorMessage);
+  }
+
+  function _requireAccess(EntityId caller, EntityId target) internal view {
+    _requireAccess(caller, target, "Access denied");
   }
 
   function _createAndSetAccessGroup(EntityId target, EntityId owner) internal {

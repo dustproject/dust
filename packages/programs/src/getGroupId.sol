@@ -45,8 +45,3 @@ function getAccessControl(EntityId target) view returns (uint256 groupId, bool l
 
   return (groupId, false);
 }
-
-// Legacy function for backward compatibility (used by DefaultProgramSystem)
-function getAccessGroupId(EntityId target) view returns (uint256 groupId, bool defaultDeny) {
-  return getAccessControl(target);
-}

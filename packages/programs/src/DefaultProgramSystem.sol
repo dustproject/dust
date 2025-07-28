@@ -12,8 +12,7 @@ import { EntityAccessGroup } from "./codegen/tables/EntityAccessGroup.sol";
 import { TextSignContent } from "./codegen/tables/TextSignContent.sol";
 
 import { createAccessGroup } from "./createAccessGroup.sol";
-import { getAccessGroupId as getAccessGroupIdHelper, getGroupId } from "./getGroupId.sol";
-import { isAllowed } from "./isAllowed.sol";
+import { getAccessControl, getGroupId } from "./getGroupId.sol";
 
 contract DefaultProgramSystem is System {
   function newAccessGroup(EntityId owner) external returns (uint256) {
@@ -21,8 +20,8 @@ contract DefaultProgramSystem is System {
     return createAccessGroup(owner);
   }
 
-  function getAccessGroupId(EntityId entity) external view returns (uint256 groupId, bool defaultDeny) {
-    (groupId, defaultDeny) = getAccessGroupIdHelper(entity);
+  function getAccessGroupId(EntityId entity) external view returns (uint256 groupId, bool locked) {
+    return getAccessControl(entity);
   }
 
   /// @dev This function can be called by other entities to get a new access group assigned to themselves
@@ -108,7 +107,18 @@ contract DefaultProgramSystem is System {
   }
 
   function _requireMember(EntityId caller, EntityId target) private view {
-    require(isAllowed(target, caller), "Caller is not a member of the access group");
+    (uint256 groupId, bool locked) = getAccessControl(target);
+
+    // If locked, deny access
+    require(!locked, "Caller is not a member of the access group");
+
+    // If no group, allow access
+    if (groupId == 0) {
+      return;
+    }
+
+    // Check group membership
+    require(AccessGroupMember.get(groupId, caller), "Caller is not a member of the access group");
   }
 
   function _requireOwner(uint256 groupId, EntityId caller) private view {
