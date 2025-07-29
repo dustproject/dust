@@ -18,8 +18,8 @@ function getChunkSalt(coord: ReadonlyVec3) {
   return pad(toBytes(packVec3(coord)), { size: 32 });
 }
 
-function getCacheKey(worldAddress: Hex, chunkCoord: ReadonlyVec3): string {
-  return `${worldAddress}:${chunkCoord[0]},${chunkCoord[1]},${chunkCoord[2]}`;
+function getCacheKey(worldAddress: Hex, [x, y, z]: ReadonlyVec3): string {
+  return `${worldAddress}:${x},${y},${z}`;
 }
 
 function mod(a: number, b: number): number {
