@@ -345,6 +345,10 @@ library MineLib {
   function _requireMinesAllowed(MineContext calldata ctx) public {
     (ProgramId program, EntityId target, EnergyData memory energyData) = ForceFieldUtils.getHookTarget(ctx.coord);
 
+    if (!program.exists()) {
+      return;
+    }
+
     program.hook({ caller: ctx.caller, target: target, revertOnFailure: energyData.energy > 0, extraData: ctx.extraData })
       .onMine({ entity: ctx.mined, tool: ctx.toolData.tool, objectType: ctx.objectType, coord: ctx.coord });
   }

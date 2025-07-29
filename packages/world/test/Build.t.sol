@@ -639,4 +639,92 @@ contract BuildTest is DustTest {
     uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(playerCoord);
     assertEq(fluidLevel, MAX_FLUID_LEVEL, "Stone should have fluid level");
   }
+
+  function testBuildRateLimit() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Set high energy so rate limit is hit before energy depletion
+    Energy.setEnergy(aliceEntityId, MAX_PLAYER_ENERGY);
+
+    // Add many blocks to inventory
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Dirt, 30);
+
+    // Player can build up to 10 times per block (5 builds per second with 2 second blocks)
+    // Try to build 10 times, the 11th should revert
+    for (uint256 i = 0; i < 10; i++) {
+      Vec3 buildCoord = vec3(
+        playerCoord.x() + int32(int256(i % 5 + 1)), FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z() + int32(int256(i / 5))
+      );
+      setObjectAtCoord(buildCoord, ObjectTypes.Air);
+
+      uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.Dirt);
+
+      vm.prank(alice);
+      world.build(aliceEntityId, buildCoord, inventorySlot, "");
+    }
+
+    // 11th build should fail due to rate limit
+    Vec3 finalBuildCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z() + 3);
+    setObjectAtCoord(finalBuildCoord, ObjectTypes.Air);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.Dirt);
+
+    vm.prank(alice);
+    vm.expectRevert("Rate limit exceeded");
+    world.build(aliceEntityId, finalBuildCoord, inventorySlot, "");
+
+    // Move to next block and verify can build again
+    vm.roll(block.number + 1);
+
+    vm.prank(alice);
+    world.build(aliceEntityId, finalBuildCoord, inventorySlot, "");
+  }
+
+  function testJumpBuildRateLimit() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Set high energy so rate limit is hit before energy depletion
+    Energy.setEnergy(aliceEntityId, MAX_PLAYER_ENERGY);
+
+    // Add many blocks to inventory
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Stone, 20);
+
+    // JumpBuild should also count against build rate limit
+    for (uint256 i = 0; i < 10; i++) {
+      // Teleport player to different positions for each jump build
+      Vec3 newPos = vec3(
+        playerCoord.x() + int32(int256(i % 5 * 2)),
+        playerCoord.y() + int32(int256(i)),
+        playerCoord.z() + int32(int256(i / 5 * 2))
+      );
+      EntityPosition.set(aliceEntityId, newPos);
+
+      // Make sure terrain allows jump build
+      setObjectAtCoord(newPos + vec3(0, 1, 0), ObjectTypes.Air);
+      setObjectAtCoord(newPos + vec3(0, 2, 0), ObjectTypes.Air);
+
+      uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.Stone);
+
+      vm.prank(alice);
+      world.jumpBuild(aliceEntityId, inventorySlot, "");
+    }
+
+    // 11th jump build should fail due to rate limit
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.Stone);
+
+    vm.prank(alice);
+    vm.expectRevert("Rate limit exceeded");
+    world.jumpBuild(aliceEntityId, inventorySlot, "");
+
+    // Move to next block and verify can build again
+    vm.roll(block.number + 1);
+
+    // Reset position for final jump build
+    Vec3 finalPos = vec3(playerCoord.x() + 20, playerCoord.y() + 10, playerCoord.z() + 20);
+    EntityPosition.set(aliceEntityId, finalPos);
+    setObjectAtCoord(finalPos + vec3(0, 1, 0), ObjectTypes.Air);
+    setObjectAtCoord(finalPos + vec3(0, 2, 0), ObjectTypes.Air);
+
+    vm.prank(alice);
+    world.jumpBuild(aliceEntityId, inventorySlot, "");
+  }
 }

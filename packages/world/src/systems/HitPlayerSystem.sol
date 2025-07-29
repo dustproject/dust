@@ -32,14 +32,14 @@ contract HitPlayerSystem is System {
     // Update and check caller's energy
     uint128 callerEnergy = caller.activate().energy;
 
-    // Check rate limit for combat actions
-    RateLimitUtils.hit(caller);
-
     (Vec3 callerCoord, Vec3 targetCoord) = caller.requireConnected(target);
 
     require(target != caller, "Cannot hit yourself");
     require(target._exists(), "No entity at target location");
     require(target._getObjectType() == ObjectTypes.Player, "Target is not a player");
+
+    // Check rate limit for combat actions
+    RateLimitUtils.hit(caller);
 
     // Update target player's energy
     uint128 targetEnergyLeft = updatePlayerEnergy(target).energy;

@@ -1268,4 +1268,73 @@ contract MineTest is DustTest {
       TestEntityUtils.getObjectTypeAt(baseCoord), ObjectTypes.Air, "Block should be minable after adding air neighbor"
     );
   }
+
+  function testMineRateLimit() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Set high energy so rate limit is hit before energy depletion
+    Energy.setEnergy(aliceEntityId, MAX_PLAYER_ENERGY);
+
+    // Player can mine up to 20 times per block (10 mines per second with 2 second blocks)
+    // Try to mine 20 times, the 21st should revert
+    for (uint256 i = 0; i < 20; i++) {
+      Vec3 mineCoord =
+        vec3(playerCoord.x() + int32(int256(i % 5 + 1)), FLAT_CHUNK_GRASS_LEVEL, playerCoord.z() + int32(int256(i / 5)));
+      setObjectAtCoord(mineCoord, ObjectTypes.Dirt);
+      ObjectPhysics.setMass(ObjectTypes.Dirt, 1); // Minimal mass so it mines in one hit
+
+      vm.prank(alice);
+      world.mine(aliceEntityId, mineCoord, "");
+    }
+
+    // 21st mine should fail due to rate limit
+    Vec3 finalMineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z() + 5);
+    setObjectAtCoord(finalMineCoord, ObjectTypes.Dirt);
+
+    vm.prank(alice);
+    vm.expectRevert("Rate limit exceeded");
+    world.mine(aliceEntityId, finalMineCoord, "");
+
+    // Move to next block and verify can mine again
+    vm.roll(block.number + 1);
+
+    vm.prank(alice);
+    world.mine(aliceEntityId, finalMineCoord, "");
+  }
+
+  function testMineRateLimitWithTool() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Create and equip pick
+    EntityId pick = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenPick);
+    uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, pick);
+
+    // Set high energy so rate limit is hit before energy depletion
+    Energy.setEnergy(aliceEntityId, MAX_PLAYER_ENERGY);
+
+    // Same rate limit applies with tool
+    for (uint256 i = 0; i < 20; i++) {
+      Vec3 mineCoord =
+        vec3(playerCoord.x() + int32(int256(i % 5 + 1)), FLAT_CHUNK_GRASS_LEVEL, playerCoord.z() + int32(int256(i / 5)));
+      setObjectAtCoord(mineCoord, ObjectTypes.Stone);
+      ObjectPhysics.setMass(ObjectTypes.Stone, 1); // Minimal mass so it mines in one hit
+
+      vm.prank(alice);
+      world.mine(aliceEntityId, mineCoord, slot, "");
+    }
+
+    // 21st mine should fail due to rate limit
+    Vec3 finalMineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z() + 5);
+    setObjectAtCoord(finalMineCoord, ObjectTypes.Stone);
+
+    vm.prank(alice);
+    vm.expectRevert("Rate limit exceeded");
+    world.mine(aliceEntityId, finalMineCoord, slot, "");
+
+    // Move to next block and verify can mine again
+    vm.roll(block.number + 1);
+
+    vm.prank(alice);
+    world.mine(aliceEntityId, finalMineCoord, slot, "");
+  }
 }
