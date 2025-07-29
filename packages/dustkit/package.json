@@ -22,7 +22,7 @@
     "build:js": "tsc",
     "build:json-schema": "tsx scripts/generate-json-schemas.ts && biome check --write --config-path ../../biome.json json-schemas",
     "build:mud": "mud build && abi-ts --extension .ts",
-    "dev": "tsc --watch",
+    "dev": "pnpm run build && tsc --watch",
     "test": "tsc --noEmit"
   },
   "dependencies": {
