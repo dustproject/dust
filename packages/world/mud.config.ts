@@ -8,7 +8,7 @@ export default defineWorld({
     generateSystemLibraries: true,
   },
   enums: {
-    Action: [
+    NotificationType: [
       "None",
       "Build",
       "Mine",
@@ -30,6 +30,7 @@ export default defineWorld({
       "RemoveFragment",
       "Death",
     ],
+    RateLimitType: ["Movement", "Combat", "Work"],
     Direction: [
       // Cardinal directions (6)
       "PositiveX",
@@ -236,6 +237,15 @@ export default defineWorld({
       },
       key: ["entityId", "blockNumber"],
     },
+    RateLimitUnits: {
+      schema: {
+        entityId: "EntityId",
+        blockNumber: "uint256",
+        rateLimitType: "RateLimitType",
+        units: "uint128",
+      },
+      key: ["entityId", "blockNumber", "rateLimitType"],
+    },
     // ------------------------------------------------------------
     // Player
     // ------------------------------------------------------------
@@ -351,7 +361,7 @@ export default defineWorld({
       schema: {
         playerEntityId: "EntityId",
         timestamp: "uint128",
-        action: "Action",
+        action: "NotificationType",
         data: "bytes",
       },
       key: ["playerEntityId"],

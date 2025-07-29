@@ -12,10 +12,12 @@ import { HitPlayerNotification, notify } from "../utils/NotifUtils.sol";
 import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
 import { DEFAULT_HIT_ENERGY_COST, HIT_ACTION_MODIFIER, TOOL_HIT_ENERGY_COST } from "../Constants.sol";
+
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 import { ProgramId } from "../types/ProgramId.sol";
 import { Vec3 } from "../types/Vec3.sol";
+import { RateLimitUtils } from "../utils/RateLimitUtils.sol";
 
 contract HitPlayerSystem is System {
   function hitPlayer(EntityId caller, EntityId target, uint16 toolSlot, bytes calldata extraData) public {
@@ -29,6 +31,9 @@ contract HitPlayerSystem is System {
   function _hitPlayer(EntityId caller, EntityId target, uint16 toolSlot, bytes calldata extraData) internal {
     // Update and check caller's energy
     uint128 callerEnergy = caller.activate().energy;
+
+    // Check rate limit for combat actions
+    RateLimitUtils.hit(caller);
 
     (Vec3 callerCoord, Vec3 targetCoord) = caller.requireConnected(target);
 

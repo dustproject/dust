@@ -3,7 +3,7 @@ pragma solidity >=0.8.24;
 
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
-import { Action } from "../codegen/common.sol";
+import { NotificationType } from "../codegen/common.sol";
 import { Notification, NotificationData } from "../codegen/tables/Notification.sol";
 
 import { EntityId } from "../types/EntityId.sol";
@@ -117,28 +117,44 @@ struct DeathNotification {
 function notify(EntityId player, BuildNotification memory buildNotification) {
   Notification._set(
     player,
-    NotificationData({ timestamp: uint128(block.timestamp), action: Action.Build, data: abi.encode(buildNotification) })
+    NotificationData({
+      timestamp: uint128(block.timestamp),
+      action: NotificationType.Build,
+      data: abi.encode(buildNotification)
+    })
   );
 }
 
 function notify(EntityId player, MineNotification memory mineNotification) {
   Notification._set(
     player,
-    NotificationData({ timestamp: uint128(block.timestamp), action: Action.Mine, data: abi.encode(mineNotification) })
+    NotificationData({
+      timestamp: uint128(block.timestamp),
+      action: NotificationType.Mine,
+      data: abi.encode(mineNotification)
+    })
   );
 }
 
 function notify(EntityId player, MoveNotification memory moveNotification) {
   Notification._set(
     player,
-    NotificationData({ timestamp: uint128(block.timestamp), action: Action.Move, data: abi.encode(moveNotification) })
+    NotificationData({
+      timestamp: uint128(block.timestamp),
+      action: NotificationType.Move,
+      data: abi.encode(moveNotification)
+    })
   );
 }
 
 function notify(EntityId player, CraftNotification memory craftNotification) {
   Notification._set(
     player,
-    NotificationData({ timestamp: uint128(block.timestamp), action: Action.Craft, data: abi.encode(craftNotification) })
+    NotificationData({
+      timestamp: uint128(block.timestamp),
+      action: NotificationType.Craft,
+      data: abi.encode(craftNotification)
+    })
   );
 }
 
@@ -147,7 +163,7 @@ function notify(EntityId player, CraftFuelNotification memory craftFuelNotificat
     player,
     NotificationData({
       timestamp: uint128(block.timestamp),
-      action: Action.CraftFuel,
+      action: NotificationType.CraftFuel,
       data: abi.encode(craftFuelNotification)
     })
   );
@@ -156,14 +172,22 @@ function notify(EntityId player, CraftFuelNotification memory craftFuelNotificat
 function notify(EntityId player, DropNotification memory dropNotification) {
   Notification._set(
     player,
-    NotificationData({ timestamp: uint128(block.timestamp), action: Action.Drop, data: abi.encode(dropNotification) })
+    NotificationData({
+      timestamp: uint128(block.timestamp),
+      action: NotificationType.Drop,
+      data: abi.encode(dropNotification)
+    })
   );
 }
 
 function notify(EntityId player, PickupNotification memory pickupNotification) {
   Notification._set(
     player,
-    NotificationData({ timestamp: uint128(block.timestamp), action: Action.Pickup, data: abi.encode(pickupNotification) })
+    NotificationData({
+      timestamp: uint128(block.timestamp),
+      action: NotificationType.Pickup,
+      data: abi.encode(pickupNotification)
+    })
   );
 }
 
@@ -172,7 +196,7 @@ function notify(EntityId player, TransferNotification memory transferNotificatio
     player,
     NotificationData({
       timestamp: uint128(block.timestamp),
-      action: Action.Transfer,
+      action: NotificationType.Transfer,
       data: abi.encode(transferNotification)
     })
   );
@@ -181,7 +205,11 @@ function notify(EntityId player, TransferNotification memory transferNotificatio
 function notify(EntityId player, SpawnNotification memory spawnNotification) {
   Notification._set(
     player,
-    NotificationData({ timestamp: uint128(block.timestamp), action: Action.Spawn, data: abi.encode(spawnNotification) })
+    NotificationData({
+      timestamp: uint128(block.timestamp),
+      action: NotificationType.Spawn,
+      data: abi.encode(spawnNotification)
+    })
   );
 }
 
@@ -190,7 +218,7 @@ function notify(EntityId player, FuelMachineNotification memory powerMachineNoti
     player,
     NotificationData({
       timestamp: uint128(block.timestamp),
-      action: Action.FuelMachine,
+      action: NotificationType.FuelMachine,
       data: abi.encode(powerMachineNotification)
     })
   );
@@ -201,7 +229,7 @@ function notify(EntityId player, HitMachineNotification memory hitMachineNotific
     player,
     NotificationData({
       timestamp: uint128(block.timestamp),
-      action: Action.HitMachine,
+      action: NotificationType.HitMachine,
       data: abi.encode(hitMachineNotification)
     })
   );
@@ -212,7 +240,7 @@ function notify(EntityId player, HitPlayerNotification memory hitPlayerNotificat
     player,
     NotificationData({
       timestamp: uint128(block.timestamp),
-      action: Action.HitPlayer,
+      action: NotificationType.HitPlayer,
       data: abi.encode(hitPlayerNotification)
     })
   );
@@ -223,7 +251,7 @@ function notify(EntityId player, AttachProgramNotification memory attachProgramN
     player,
     NotificationData({
       timestamp: uint128(block.timestamp),
-      action: Action.AttachProgram,
+      action: NotificationType.AttachProgram,
       data: abi.encode(attachProgramNotification)
     })
   );
@@ -234,7 +262,7 @@ function notify(EntityId player, DetachProgramNotification memory detachProgramN
     player,
     NotificationData({
       timestamp: uint128(block.timestamp),
-      action: Action.DetachProgram,
+      action: NotificationType.DetachProgram,
       data: abi.encode(detachProgramNotification)
     })
   );
@@ -243,14 +271,22 @@ function notify(EntityId player, DetachProgramNotification memory detachProgramN
 function notify(EntityId player, SleepNotification memory sleepNotification) {
   Notification._set(
     player,
-    NotificationData({ timestamp: uint128(block.timestamp), action: Action.Sleep, data: abi.encode(sleepNotification) })
+    NotificationData({
+      timestamp: uint128(block.timestamp),
+      action: NotificationType.Sleep,
+      data: abi.encode(sleepNotification)
+    })
   );
 }
 
 function notify(EntityId player, WakeupNotification memory wakeupNotification) {
   Notification._set(
     player,
-    NotificationData({ timestamp: uint128(block.timestamp), action: Action.Wakeup, data: abi.encode(wakeupNotification) })
+    NotificationData({
+      timestamp: uint128(block.timestamp),
+      action: NotificationType.Wakeup,
+      data: abi.encode(wakeupNotification)
+    })
   );
 }
 
@@ -259,7 +295,7 @@ function notify(EntityId player, AddFragmentNotification memory addFragmentNotif
     player,
     NotificationData({
       timestamp: uint128(block.timestamp),
-      action: Action.AddFragment,
+      action: NotificationType.AddFragment,
       data: abi.encode(addFragmentNotification)
     })
   );
@@ -270,7 +306,7 @@ function notify(EntityId player, RemoveFragmentNotification memory removeFragmen
     player,
     NotificationData({
       timestamp: uint128(block.timestamp),
-      action: Action.RemoveFragment,
+      action: NotificationType.RemoveFragment,
       data: abi.encode(removeFragmentNotification)
     })
   );
@@ -279,6 +315,10 @@ function notify(EntityId player, RemoveFragmentNotification memory removeFragmen
 function notify(EntityId player, DeathNotification memory deathNotification) {
   Notification._set(
     player,
-    NotificationData({ timestamp: uint128(block.timestamp), action: Action.Death, data: abi.encode(deathNotification) })
+    NotificationData({
+      timestamp: uint128(block.timestamp),
+      action: NotificationType.Death,
+      data: abi.encode(deathNotification)
+    })
   );
 }

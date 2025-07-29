@@ -151,16 +151,15 @@ contract BuildSystem is System {
     internal
   {
     for (uint256 i = 0; i < coords.length; i++) {
-      Vec3 coord = coords[i];
-
-      (ProgramId program, EntityId target, EnergyData memory energyData) = ForceFieldUtils.getHookTarget(coord);
-
       if (ctx.buildType == ObjectTypes.ForceField) {
-        require(!target._exists(), "Force field overlaps with another force field");
-        ForceFieldUtils.setupForceField(base, coord);
+        (EntityId existing,) = ForceFieldUtils.getForceField(coords[i]);
+        require(!existing._exists(), "Force field overlaps with another force field");
+        ForceFieldUtils.setupForceField(base, coords[i]);
         // Return early as it is not possible for a new forcefield to have a program
         return;
       }
+
+      (ProgramId program, EntityId target, EnergyData memory energyData) = ForceFieldUtils.getHookTarget(coords[i]);
 
       if (!program.exists()) {
         continue;
@@ -169,7 +168,7 @@ contract BuildSystem is System {
       program.hook({ caller: ctx.caller, target: target, revertOnFailure: energyData.energy > 0, extraData: extraData })
         .onBuild({
         entity: base,
-        coord: coord,
+        coord: coords[i],
         slotType: ctx.slotType,
         objectType: ctx.buildType,
         orientation: ctx.orientation

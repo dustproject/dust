@@ -53,11 +53,6 @@ uint128 constant WATER_MOVE_ENERGY_COST = MAX_PLAYER_ENERGY / 4000; // 4000 move
 uint128 constant LAVA_MOVE_ENERGY_COST = MAX_PLAYER_ENERGY / 10; // 10 moves on lava to die
 uint128 constant PLAYER_FALL_ENERGY_COST = MAX_PLAYER_ENERGY / 25; // This makes it so, with full energy, you die from a 25 + 3 block fall
 
-uint128 constant MAX_MOVE_UNITS_PER_BLOCK = 1e18;
-uint128 constant MAX_MOVE_UNITS_PER_SECOND = MAX_MOVE_UNITS_PER_BLOCK / BLOCK_TIME; // 1e18 move units per second
-uint128 constant MOVING_UNIT_COST = MAX_MOVE_UNITS_PER_SECOND / 15; // 15 blocks per second
-uint128 constant SWIMMING_UNIT_COST = MAX_MOVE_UNITS_PER_SECOND * 10 / 135; // 13,5 blocks per second (90% of walking speed)
-
 // Base tool effectiveness (relative to bare hands)
 uint128 constant WOODEN_TOOL_BASE_MULTIPLIER = 10; // 10x base effectiveness
 uint128 constant ORE_TOOL_BASE_MULTIPLIER = 3; // 3x base effectiveness
@@ -94,3 +89,18 @@ uint256 constant MAX_NEPTUNIUM = 18_696;
 
 uint128 constant INITIAL_ENERGY_PER_VEGETATION = 10000000000000000;
 uint128 constant INITIAL_LOCAL_ENERGY_BUFFER = 131480700000000000000;
+
+// Rate limit constants
+uint128 constant MAX_RATE_LIMIT_UNITS_PER_BLOCK = 1e18;
+uint128 constant MAX_RATE_LIMIT_UNITS_PER_SECOND = MAX_RATE_LIMIT_UNITS_PER_BLOCK / BLOCK_TIME;
+
+// Movement rate limits
+uint128 constant MOVEMENT_WALK_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 15; // 15 blocks per second
+uint128 constant MOVEMENT_SWIM_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND * 10 / 135; // 13.5 blocks per second (90% of walking speed)
+
+// Combat rate limits
+uint128 constant COMBAT_HIT_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND * 2 / 5; // 2.5 hits per second (5 per block)
+
+// Work rate limits (for future use)
+uint128 constant WORK_MINE_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // 10 mines per second (20 per block)
+uint128 constant WORK_BUILD_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 5; // 5 builds per second (10 per block)
