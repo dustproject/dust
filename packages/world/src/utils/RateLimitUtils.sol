@@ -2,12 +2,12 @@
 pragma solidity >=0.8.24;
 
 import {
-  COMBAT_HIT_UNIT_COST,
+  BUILD_UNIT_COST,
+  HIT_UNIT_COST,
   MAX_RATE_LIMIT_UNITS_PER_BLOCK,
-  MOVEMENT_SWIM_UNIT_COST,
-  MOVEMENT_WALK_UNIT_COST,
-  WORK_BUILD_UNIT_COST,
-  WORK_MINE_UNIT_COST
+  MINE_UNIT_COST,
+  SWIM_UNIT_COST,
+  WALK_UNIT_COST
 } from "../Constants.sol";
 import { RateLimitType } from "../codegen/common.sol";
 import { RateLimitUnits } from "../codegen/tables/RateLimitUnits.sol";
@@ -16,23 +16,21 @@ import { EntityId } from "../types/EntityId.sol";
 library RateLimitUtils {
   // Movement actions - batch
   function move(EntityId entity, uint128 walkSteps, uint128 swimSteps) internal {
-    _updateRateLimit(
-      entity, RateLimitType.Movement, MOVEMENT_WALK_UNIT_COST * walkSteps + MOVEMENT_SWIM_UNIT_COST * swimSteps
-    );
+    _updateRateLimit(entity, RateLimitType.Movement, WALK_UNIT_COST * walkSteps + SWIM_UNIT_COST * swimSteps);
   }
 
   // Combat actions
   function hit(EntityId entity) internal {
-    _updateRateLimit(entity, RateLimitType.Combat, COMBAT_HIT_UNIT_COST);
+    _updateRateLimit(entity, RateLimitType.Combat, HIT_UNIT_COST);
   }
 
   // Work actions
   function mine(EntityId entity) internal {
-    _updateRateLimit(entity, RateLimitType.Work, WORK_MINE_UNIT_COST);
+    _updateRateLimit(entity, RateLimitType.Work, MINE_UNIT_COST);
   }
 
   function build(EntityId entity) internal {
-    _updateRateLimit(entity, RateLimitType.Work, WORK_BUILD_UNIT_COST);
+    _updateRateLimit(entity, RateLimitType.Work, BUILD_UNIT_COST);
   }
 
   // Internal helper

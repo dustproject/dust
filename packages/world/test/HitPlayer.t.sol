@@ -384,12 +384,10 @@ contract HitPlayerTest is DustTest {
     Energy.setEnergy(aliceEntityId, MAX_PLAYER_ENERGY);
     Energy.setEnergy(bobEntityId, MAX_PLAYER_ENERGY);
 
-    // Player can hit up to 5 times per block (2.5 hits per second with 2 second blocks)
-    // Try to hit 5 times, the 6th should revert
-    for (uint256 i = 0; i < 5; i++) {
-      vm.prank(alice);
-      world.hitPlayer(aliceEntityId, bobEntityId, bytes(""));
-    }
+    // Player can hit up to 1 time per block
+    // Hit once, next time should revert
+    vm.prank(alice);
+    world.hitPlayer(aliceEntityId, bobEntityId, bytes(""));
 
     // 6th hit should fail due to rate limit
     vm.prank(alice);
@@ -418,10 +416,8 @@ contract HitPlayerTest is DustTest {
     Energy.setEnergy(bobEntityId, MAX_PLAYER_ENERGY);
 
     // Same rate limit applies with tool
-    for (uint256 i = 0; i < 5; i++) {
-      vm.prank(alice);
-      world.hitPlayer(aliceEntityId, bobEntityId, slot, bytes(""));
-    }
+    vm.prank(alice);
+    world.hitPlayer(aliceEntityId, bobEntityId, slot, bytes(""));
 
     // 6th hit should fail due to rate limit
     vm.prank(alice);

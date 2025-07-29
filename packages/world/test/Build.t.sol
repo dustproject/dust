@@ -653,12 +653,12 @@ contract BuildTest is DustTest {
     Energy.setEnergy(aliceEntityId, MAX_PLAYER_ENERGY);
 
     // Add many blocks to inventory
-    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Dirt, 30);
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Dirt, 21);
     uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.Dirt);
 
-    // Player can build up to 10 times per block (5 builds per second with 2 second blocks)
-    // Try to build 10 times, the 11th should revert
-    for (uint256 i = 0; i < 10; i++) {
+    // Player can build up to 20 times per block (10 builds per second with 2 second blocks)
+    // Try to build 20 times, the 21st should revert
+    for (uint256 i = 0; i < 20; i++) {
       Vec3 buildCoord = vec3(
         playerCoord.x() + int32(int256(i % 5 + 1)), FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z() + int32(int256(i / 5))
       );
@@ -668,7 +668,7 @@ contract BuildTest is DustTest {
       world.build(aliceEntityId, buildCoord, inventorySlot, "");
     }
 
-    // 11th build should fail due to rate limit
+    // 21st build should fail due to rate limit
     Vec3 finalBuildCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z() + 3);
     setObjectAtCoord(finalBuildCoord, ObjectTypes.Air);
 
@@ -690,12 +690,12 @@ contract BuildTest is DustTest {
     Energy.setEnergy(aliceEntityId, MAX_PLAYER_ENERGY);
 
     // Add many blocks to inventory
-    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Stone, 20);
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Stone, 21);
 
     uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.Stone);
 
     // JumpBuild should also count against build rate limit
-    for (uint256 i = 0; i < 10; i++) {
+    for (uint256 i = 0; i < 20; i++) {
       Vec3 currentPos = EntityPosition.get(aliceEntityId);
 
       // Make sure terrain allows jump build

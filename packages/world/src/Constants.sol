@@ -96,12 +96,12 @@ uint128 constant MAX_RATE_LIMIT_UNITS_PER_BLOCK = 1e18;
 uint128 constant MAX_RATE_LIMIT_UNITS_PER_SECOND = MAX_RATE_LIMIT_UNITS_PER_BLOCK / BLOCK_TIME;
 
 // Movement rate limits
-uint128 constant MOVEMENT_WALK_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 15; // 15 blocks per second
-uint128 constant MOVEMENT_SWIM_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND * 10 / 135; // 13.5 blocks per second (90% of walking speed)
+uint128 constant WALK_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 15; // 15 blocks per second
+uint128 constant SWIM_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND * 10 / 135; // 13.5 blocks per second (90% of walking speed)
 
 // Combat rate limits
-uint128 constant COMBAT_HIT_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND * 2 / 5; // 2.5 hits per second (5 per block)
+uint128 constant HIT_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_BLOCK; // 1 hit per block
 
-// Work rate limits (for future use)
-uint128 constant WORK_MINE_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // 10 mines per second (20 per block)
-uint128 constant WORK_BUILD_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 5; // 5 builds per second (10 per block)
+// Work rate limits
+uint128 constant MINE_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // 10 mines per second (20 per block)
+uint128 constant BUILD_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // 10 builds per second (20 per block)
