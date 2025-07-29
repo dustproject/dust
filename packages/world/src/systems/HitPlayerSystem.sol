@@ -3,8 +3,9 @@ pragma solidity >=0.8.24;
 
 import { System } from "@latticexyz/world/src/System.sol";
 
-import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
+import { EnergyData } from "../codegen/tables/Energy.sol";
 
+import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { Math } from "../utils/Math.sol";
 import { HitPlayerNotification, notify } from "../utils/NotifUtils.sol";
@@ -13,7 +14,6 @@ import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 import { DEFAULT_HIT_ENERGY_COST, HIT_ACTION_MODIFIER, TOOL_HIT_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
-
 import { ProgramId } from "../types/ProgramId.sol";
 import { Vec3 } from "../types/Vec3.sol";
 
@@ -93,11 +93,13 @@ contract HitPlayerSystem is System {
     bytes calldata extraData
   ) internal {
     // Check if target is within a force field and call hooks
-    (ProgramId program, EntityId hookTarget) = ForceFieldUtils.getHookTarget(targetCoord);
+    (ProgramId program, EntityId hookTarget, EnergyData memory energyData) = ForceFieldUtils.getHookTarget(targetCoord);
 
-    // TODO: revertOnFailure should depend on if the forcefield has energy!
-    program.hook({ caller: caller, target: hookTarget, revertOnFailure: false, extraData: extraData }).onHit(
-      tool, totalDamage
-    );
+    if (!program.exists()) {
+      return;
+    }
+
+    program.hook({ caller: caller, target: hookTarget, revertOnFailure: energyData.energy > 0, extraData: extraData })
+      .onHit(tool, totalDamage);
   }
 }

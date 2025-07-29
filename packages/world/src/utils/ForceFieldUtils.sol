@@ -112,24 +112,20 @@ library ForceFieldUtils {
    * @return program The program ID to execute hooks on (if any)
    * @return target The target entity (fragment or forcefield) for the hook
    */
-  function getHookTarget(Vec3 coord) internal returns (ProgramId, EntityId) {
+  function getHookTarget(Vec3 coord) internal returns (ProgramId, EntityId, EnergyData memory energyData) {
     (EntityId forceField, EntityId fragment) = getForceField(coord);
     if (!forceField._exists()) {
-      return (ProgramId.wrap(0), forceField);
+      return (ProgramId.wrap(0), forceField, energyData);
     }
 
-    // TODO: instead we could check that lastUpdatedTime is block.now so we keep the function view
-    EnergyData memory machineData = updateMachineEnergy(forceField);
-    if (machineData.energy == 0) {
-      return (ProgramId.wrap(0), forceField);
-    }
+    energyData = updateMachineEnergy(forceField);
 
     // We know fragment is active because its forcefield exists, so we can use its program
     ProgramId program = fragment._getProgram();
     if (program.exists()) {
-      return (program, fragment);
+      return (program, fragment, energyData);
     }
 
-    return (forceField._getProgram(), forceField);
+    return (forceField._getProgram(), forceField, energyData);
   }
 }
