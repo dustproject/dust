@@ -39,6 +39,8 @@ import { InventoryUtils } from "../utils/InventoryUtils.sol";
 
 import { DeathNotification, MineNotification, WakeupNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
+
+import { RateLimitUtils } from "../utils/RateLimitUtils.sol";
 import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
 import {
@@ -108,8 +110,12 @@ contract MineSystem is System {
 
   function _mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) internal returns (EntityId) {
     uint128 callerEnergy = caller.activate().energy;
+
     caller.requireConnected(coord);
     MineLib._requireReachable(coord);
+
+    // Check rate limit for work actions
+    RateLimitUtils.mine(caller);
 
     MineContext memory ctx = _mineContext({
       caller: caller,
@@ -364,7 +370,7 @@ library MinePhysicsLib {
     uint128 energyReduction = _getCallerEnergyReduction(ctx.toolData.toolType, ctx.callerEnergy, massLeft);
 
     if (energyReduction > 0) {
-      (uint128 callerEnergy,) = transferEnergyToPool(ctx.caller, energyReduction);
+      uint128 callerEnergy = transferEnergyToPool(ctx.caller, energyReduction);
 
       // If player died, return early
       if (callerEnergy == 0) {

@@ -21,6 +21,7 @@ import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { Math } from "../utils/Math.sol";
 import { BuildNotification, MoveNotification, notify } from "../utils/NotifUtils.sol";
+import { RateLimitUtils } from "../utils/RateLimitUtils.sol";
 
 import { MoveLib } from "./libraries/MoveLib.sol";
 
@@ -54,6 +55,7 @@ contract BuildSystem is System {
     bytes calldata extraData
   ) public returns (EntityId) {
     uint128 callerEnergy = caller.activate().energy;
+
     caller.requireConnected(coord);
 
     BuildContext memory ctx = _buildContext(caller, coord, slot, orientation, callerEnergy);
@@ -70,6 +72,7 @@ contract BuildSystem is System {
     returns (EntityId)
   {
     uint128 callerEnergy = caller.activate().energy;
+
     Vec3 coord = caller._getPosition();
 
     BuildContext memory ctx = _buildContext(caller, coord, slot, orientation, callerEnergy);
@@ -87,6 +90,9 @@ contract BuildSystem is System {
   }
 
   function _build(BuildContext memory ctx, bytes calldata extraData) internal returns (EntityId) {
+    // Check rate limit for work actions
+    RateLimitUtils.build(ctx.caller);
+
     (EntityId base, Vec3[] memory coords) = BuildLib._executeBuild(ctx);
 
     if (coords.length == 0) {
@@ -179,8 +185,8 @@ contract BuildSystem is System {
 
 library BuildLib {
   function _executeBuild(BuildContext memory ctx) public returns (EntityId, Vec3[] memory) {
-    (ctx.callerEnergy,) = transferEnergyToPool(ctx.caller, Math.min(ctx.callerEnergy, BUILD_ENERGY_COST));
-    if (ctx.callerEnergy == 0) {
+    uint128 energyLeft = transferEnergyToPool(ctx.caller, Math.min(ctx.callerEnergy, BUILD_ENERGY_COST));
+    if (energyLeft == 0) {
       return (EntityId.wrap(0), new Vec3[](0));
     }
 

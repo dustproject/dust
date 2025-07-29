@@ -27,7 +27,7 @@ contract FarmingSystem is System {
     require(objectType.isTillable(), "Not tillable");
 
     // If player died, return early
-    (callerEnergy,) = transferEnergyToPool(caller, Math.min(callerEnergy, TILL_ENERGY_COST));
+    callerEnergy = transferEnergyToPool(caller, Math.min(callerEnergy, TILL_ENERGY_COST));
     if (callerEnergy == 0) {
       return;
     }

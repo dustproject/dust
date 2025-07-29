@@ -14,7 +14,13 @@ import { DustTest } from "./DustTest.sol";
 
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
-import { BUILD_ENERGY_COST, CHUNK_SIZE, MAX_ENTITY_INFLUENCE_RADIUS, MAX_FLUID_LEVEL } from "../src/Constants.sol";
+import {
+  BUILD_ENERGY_COST,
+  CHUNK_SIZE,
+  MAX_ENTITY_INFLUENCE_RADIUS,
+  MAX_FLUID_LEVEL,
+  MAX_PLAYER_ENERGY
+} from "../src/Constants.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
 
 import { NonPassableBlock } from "../src/systems/libraries/MoveLib.sol";
@@ -648,6 +654,7 @@ contract BuildTest is DustTest {
 
     // Add many blocks to inventory
     TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Dirt, 30);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.Dirt);
 
     // Player can build up to 10 times per block (5 builds per second with 2 second blocks)
     // Try to build 10 times, the 11th should revert
@@ -657,8 +664,6 @@ contract BuildTest is DustTest {
       );
       setObjectAtCoord(buildCoord, ObjectTypes.Air);
 
-      uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.Dirt);
-
       vm.prank(alice);
       world.build(aliceEntityId, buildCoord, inventorySlot, "");
     }
@@ -666,7 +671,6 @@ contract BuildTest is DustTest {
     // 11th build should fail due to rate limit
     Vec3 finalBuildCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z() + 3);
     setObjectAtCoord(finalBuildCoord, ObjectTypes.Air);
-    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.Dirt);
 
     vm.prank(alice);
     vm.expectRevert("Rate limit exceeded");
@@ -688,28 +692,19 @@ contract BuildTest is DustTest {
     // Add many blocks to inventory
     TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Stone, 20);
 
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.Stone);
+
     // JumpBuild should also count against build rate limit
     for (uint256 i = 0; i < 10; i++) {
-      // Teleport player to different positions for each jump build
-      Vec3 newPos = vec3(
-        playerCoord.x() + int32(int256(i % 5 * 2)),
-        playerCoord.y() + int32(int256(i)),
-        playerCoord.z() + int32(int256(i / 5 * 2))
-      );
-      EntityPosition.set(aliceEntityId, newPos);
+      Vec3 currentPos = EntityPosition.get(aliceEntityId);
 
       // Make sure terrain allows jump build
-      setObjectAtCoord(newPos + vec3(0, 1, 0), ObjectTypes.Air);
-      setObjectAtCoord(newPos + vec3(0, 2, 0), ObjectTypes.Air);
-
-      uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.Stone);
+      setObjectAtCoord(currentPos + vec3(0, 1, 0), ObjectTypes.Air);
+      setObjectAtCoord(currentPos + vec3(0, 2, 0), ObjectTypes.Air);
 
       vm.prank(alice);
       world.jumpBuild(aliceEntityId, inventorySlot, "");
     }
-
-    // 11th jump build should fail due to rate limit
-    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.Stone);
 
     vm.prank(alice);
     vm.expectRevert("Rate limit exceeded");
@@ -719,8 +714,7 @@ contract BuildTest is DustTest {
     vm.roll(block.number + 1);
 
     // Reset position for final jump build
-    Vec3 finalPos = vec3(playerCoord.x() + 20, playerCoord.y() + 10, playerCoord.z() + 20);
-    EntityPosition.set(aliceEntityId, finalPos);
+    Vec3 finalPos = EntityPosition.get(aliceEntityId);
     setObjectAtCoord(finalPos + vec3(0, 1, 0), ObjectTypes.Air);
     setObjectAtCoord(finalPos + vec3(0, 2, 0), ObjectTypes.Air);
 

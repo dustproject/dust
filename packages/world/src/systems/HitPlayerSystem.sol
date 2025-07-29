@@ -11,7 +11,7 @@ import { Math } from "../utils/Math.sol";
 import { HitPlayerNotification, notify } from "../utils/NotifUtils.sol";
 import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
-import { DEFAULT_HIT_ENERGY_COST, HIT_ACTION_MODIFIER, TOOL_HIT_ENERGY_COST } from "../Constants.sol";
+import { DEFAULT_HIT_ENERGY_COST, HIT_ACTION_MODIFIER, MAX_HIT_RADIUS, TOOL_HIT_ENERGY_COST } from "../Constants.sol";
 
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
@@ -32,7 +32,7 @@ contract HitPlayerSystem is System {
     // Update and check caller's energy
     uint128 callerEnergy = caller.activate().energy;
 
-    (Vec3 callerCoord, Vec3 targetCoord) = caller.requireConnected(target);
+    (Vec3 callerCoord, Vec3 targetCoord) = caller.requireInRange(target, MAX_HIT_RADIUS);
 
     require(target != caller, "Cannot hit yourself");
     require(target._exists(), "No entity at target location");
@@ -63,12 +63,14 @@ contract HitPlayerSystem is System {
     // Calculate damage based on tool
     targetEnergyLeft -= callerEnergyReduction;
 
+    // Apply damage to target player
     uint128 toolEnergyReduction = toolData.use(targetEnergyLeft, HIT_ACTION_MODIFIER, toolData.toolType.isWhacker());
     uint128 totalDamage = callerEnergyReduction + toolEnergyReduction;
-
-    // Apply damage to target player
     decreasePlayerEnergy(target, targetCoord, totalDamage);
-    // Add energy to local pool at target location
+
+    // Add caller's energy reduction to caller's local pool
+    addEnergyToLocalPool(callerCoord, callerEnergyReduction);
+    // Add target's total damage to target's local pool
     addEnergyToLocalPool(targetCoord, totalDamage);
 
     _requireHitsAllowed(caller, targetCoord, toolData.tool, totalDamage, extraData);
