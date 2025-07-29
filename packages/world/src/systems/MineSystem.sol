@@ -83,14 +83,20 @@ contract MineSystem is System {
   }
 
   function mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) external returns (EntityId) {
+    // Check rate limit for work actions
+    RateLimitUtils.mine(caller);
     return _mine(caller, coord, toolSlot, extraData);
   }
 
   function mine(EntityId caller, Vec3 coord, bytes calldata extraData) external returns (EntityId) {
+    // Check rate limit for work actions
+    RateLimitUtils.mine(caller);
     return _mine(caller, coord, type(uint16).max, extraData);
   }
 
   function mineUntilDestroyed(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) public {
+    // Check rate limit for work actions
+    RateLimitUtils.mine(caller);
     uint128 massLeft = 0;
     do {
       // TODO: factor out the mass reduction logic so it's cheaper to call
@@ -100,6 +106,8 @@ contract MineSystem is System {
   }
 
   function mineUntilDestroyed(EntityId caller, Vec3 coord, bytes calldata extraData) public {
+    // Check rate limit for work actions
+    RateLimitUtils.mine(caller);
     uint128 massLeft = 0;
     do {
       // TODO: factor out the mass reduction logic so it's cheaper to call
@@ -113,9 +121,6 @@ contract MineSystem is System {
 
     caller.requireConnected(coord);
     MineLib._requireReachable(coord);
-
-    // Check rate limit for work actions
-    RateLimitUtils.mine(caller);
 
     MineContext memory ctx = _mineContext({
       caller: caller,

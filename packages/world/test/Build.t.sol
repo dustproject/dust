@@ -684,7 +684,7 @@ contract BuildTest is DustTest {
   }
 
   function testJumpBuildRateLimit() public {
-    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+    (address alice, EntityId aliceEntityId,) = setupFlatChunkWithPlayer();
 
     // Set high energy so rate limit is hit before energy depletion
     Energy.setEnergy(aliceEntityId, MAX_PLAYER_ENERGY);
