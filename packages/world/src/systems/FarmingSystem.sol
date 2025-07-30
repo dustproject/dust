@@ -23,8 +23,8 @@ contract FarmingSystem is System {
 
     ToolData memory toolData = ToolUtils.getToolData(caller, toolSlot);
     require(toolData.toolType.isHoe(), "Must equip a hoe");
-    uint128 massReduction = toolData.use(type(uint128).max);
-    if (massReduction == 0) {
+
+    if (toolData.use(type(uint128).max) == 0) {
       return; // Player died
     }
 
