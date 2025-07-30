@@ -7,6 +7,7 @@ import { addEnergyToLocalPool, decreaseMachineEnergy, updateMachineEnergy } from
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 
 import { HitMachineNotification, notify } from "../utils/NotifUtils.sol";
+import { PlayerActivityUtils } from "../utils/PlayerActivityUtils.sol";
 
 import { RateLimitUtils } from "../utils/RateLimitUtils.sol";
 import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
@@ -54,6 +55,9 @@ contract HitMachineSystem is System {
 
     // Add total machine damage to force field's local pool
     addEnergyToLocalPool(forceFieldCoord, damage);
+
+    // Track damage dealt for player activity
+    PlayerActivityUtils.updateDealtDamageToMachine(caller, damage);
 
     // Don't revert so the program can't prevent hitting
     forceField._getProgram().hook({ caller: caller, target: forceField, revertOnFailure: false, extraData: "" }).onHit(

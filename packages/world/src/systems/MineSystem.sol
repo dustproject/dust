@@ -37,6 +37,8 @@ import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 
 import { DeathNotification, MineNotification, WakeupNotification, notify } from "../utils/NotifUtils.sol";
+
+import { PlayerActivityUtils } from "../utils/PlayerActivityUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { RateLimitUtils } from "../utils/RateLimitUtils.sol";
@@ -380,6 +382,9 @@ library MinePhysicsLib {
     }
 
     massLeft -= totalMassReduction;
+
+    // Track the mass reduction for player activity
+    PlayerActivityUtils.updateMinedMass(ctx.caller, totalMassReduction, ctx.toolData.toolType, ctx.objectType);
 
     return (massLeft, true);
   }

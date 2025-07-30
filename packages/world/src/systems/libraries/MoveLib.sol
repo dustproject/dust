@@ -14,6 +14,7 @@ import { ObjectTypes } from "../../types/ObjectType.sol";
 import { Vec3, vec3 } from "../../types/Vec3.sol";
 import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../../utils/EnergyUtils.sol";
 import { EntityUtils } from "../../utils/EntityUtils.sol";
+import { PlayerActivityUtils } from "../../utils/PlayerActivityUtils.sol";
 import { RateLimitUtils } from "../../utils/RateLimitUtils.sol";
 
 error NonPassableBlock(int32 x, int32 y, int32 z, ObjectType objectType);
@@ -42,6 +43,8 @@ library MoveLib {
     if (totalCost > 0) {
       decreasePlayerEnergy(player, above, totalCost);
       addEnergyToLocalPool(above, totalCost);
+      // Track movement energy for player activity (jump is considered walking)
+      PlayerActivityUtils.updateWalkEnergy(player, totalCost);
     }
   }
 
@@ -68,6 +71,27 @@ library MoveLib {
     if (totalCost > 0) {
       decreasePlayerEnergy(player, finalCoord, totalCost);
       addEnergyToLocalPool(finalCoord, totalCost);
+
+      // Track movement energy for player activity
+      // Split energy cost proportionally between walk and swim
+      if (walkSteps > 0 || swimSteps > 0) {
+        uint128 walkCost = walkSteps * Constants.MOVE_ENERGY_COST;
+        uint128 swimCost = swimSteps * Constants.WATER_MOVE_ENERGY_COST;
+        uint128 totalStepCost = walkCost + swimCost;
+
+        // If totalCost was capped by current energy, scale proportionally
+        if (totalCost < totalStepCost) {
+          walkCost = (totalCost * walkCost) / totalStepCost;
+          swimCost = totalCost - walkCost;
+        }
+
+        if (walkCost > 0) {
+          PlayerActivityUtils.updateWalkEnergy(player, walkCost);
+        }
+        if (swimCost > 0) {
+          PlayerActivityUtils.updateSwimEnergy(player, swimCost);
+        }
+      }
     }
 
     _handleAbove(player, playerCoord);
@@ -96,6 +120,8 @@ library MoveLib {
     if (totalCost > 0) {
       decreasePlayerEnergy(player, finalCoord, totalCost);
       addEnergyToLocalPool(finalCoord, totalCost);
+      // Track movement energy for player activity
+      PlayerActivityUtils.updateWalkEnergy(player, totalCost);
     }
 
     _handleAbove(player, playerCoord);

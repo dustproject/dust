@@ -10,6 +10,7 @@ import { EnergyData } from "../codegen/tables/Energy.sol";
 
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
+import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 
 import { EntityOrientation } from "../codegen/tables/EntityOrientation.sol";
 
@@ -21,6 +22,7 @@ import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { Math } from "../utils/Math.sol";
 import { BuildNotification, MoveNotification, notify } from "../utils/NotifUtils.sol";
+import { PlayerActivityUtils } from "../utils/PlayerActivityUtils.sol";
 import { RateLimitUtils } from "../utils/RateLimitUtils.sol";
 
 import { MoveLib } from "./libraries/MoveLib.sol";
@@ -185,14 +187,26 @@ contract BuildSystem is System {
 
 library BuildLib {
   function _executeBuild(BuildContext memory ctx) public returns (EntityId, Vec3[] memory) {
-    uint128 energyLeft = transferEnergyToPool(ctx.caller, Math.min(ctx.callerEnergy, BUILD_ENERGY_COST));
+    uint128 energyCost = Math.min(ctx.callerEnergy, BUILD_ENERGY_COST);
+    uint128 energyLeft = transferEnergyToPool(ctx.caller, energyCost);
     if (energyLeft == 0) {
       return (EntityId.wrap(0), new Vec3[](0));
     }
 
+    // Track build energy spent
+    PlayerActivityUtils.updateBuildEnergy(ctx.caller, energyCost);
+
     _updateInventory(ctx);
 
-    return _addBlocks(ctx);
+    (EntityId base, Vec3[] memory coords) = _addBlocks(ctx);
+
+    // Track build mass (only for base block, not relatives)
+    if (base._exists()) {
+      uint128 mass = ObjectPhysics._getMass(ctx.buildType);
+      PlayerActivityUtils.updateBuildMass(ctx.caller, mass, uint16(ctx.buildType));
+    }
+
+    return (base, coords);
   }
 
   /**

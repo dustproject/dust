@@ -241,6 +241,15 @@ export default defineWorld({
     // ------------------------------------------------------------
     // Player
     // ------------------------------------------------------------
+    PlayerActivity: {
+      schema: {
+        player: "EntityId",
+        deathCount: "uint256",
+        activityKey: "bytes32",
+        value: "uint256",
+      },
+      key: ["player", "deathCount", "activityKey"],
+    },
     Death: {
       schema: {
         player: "EntityId",
