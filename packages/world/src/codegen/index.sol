@@ -20,7 +20,6 @@ import { RegionMerkleRoot } from "./tables/RegionMerkleRoot.sol";
 import { InventorySlot, InventorySlotData } from "./tables/InventorySlot.sol";
 import { InventoryBitmap } from "./tables/InventoryBitmap.sol";
 import { ReverseMovablePosition } from "./tables/ReverseMovablePosition.sol";
-import { MoveUnits } from "./tables/MoveUnits.sol";
 import { RateLimitUnits } from "./tables/RateLimitUnits.sol";
 import { Death, DeathData } from "./tables/Death.sol";
 import { BedPlayer, BedPlayerData } from "./tables/BedPlayer.sol";
