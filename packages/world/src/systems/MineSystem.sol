@@ -28,7 +28,6 @@ import { ResourcePosition } from "../utils/Vec3Storage.sol";
 import {
   addEnergyToLocalPool,
   decreaseFragmentDrainRate,
-  transferEnergyToPool,
   updateMachineEnergy,
   updateSleepingPlayerEnergy
 } from "../utils/EnergyUtils.sol";
@@ -44,12 +43,10 @@ import { RateLimitUtils } from "../utils/RateLimitUtils.sol";
 import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
 import {
-  DEFAULT_MINE_ENERGY_COST,
   MACHINE_ENERGY_DRAIN_RATE,
   MINE_ACTION_MODIFIER,
   PLAYER_ENERGY_DRAIN_RATE,
-  PRECISION_MULTIPLIER,
-  TOOL_MINE_ENERGY_COST
+  PRECISION_MULTIPLIER
 } from "../Constants.sol";
 
 import { EntityId } from "../types/EntityId.sol";
@@ -372,37 +369,19 @@ library MinePhysicsLib {
       return (0, true);
     }
 
-    uint128 energyReduction = _getCallerEnergyReduction(ctx.toolData.toolType, ctx.callerEnergy, massLeft);
-
-    if (energyReduction > 0) {
-      uint128 callerEnergy = transferEnergyToPool(ctx.caller, energyReduction);
-
-      // If player died, return early
-      if (callerEnergy == 0) {
-        return (massLeft, false);
-      }
-
-      massLeft -= energyReduction;
-    }
-
     bool specialized = (ctx.toolData.toolType.isAxe() && ctx.objectType.hasAxeMultiplier())
       || (ctx.toolData.toolType.isPick() && ctx.objectType.hasPickMultiplier());
 
-    uint128 massReduction = ctx.toolData.use(massLeft, MINE_ACTION_MODIFIER, specialized);
+    uint128 totalMassReduction = ctx.toolData.use(massLeft, MINE_ACTION_MODIFIER, specialized);
 
-    massLeft -= massReduction;
+    // If caller died (totalMassReduction == 0), return early
+    if (totalMassReduction == 0) {
+      return (massLeft, false);
+    }
+
+    massLeft -= totalMassReduction;
 
     return (massLeft, true);
-  }
-
-  function _getCallerEnergyReduction(ObjectType toolType, uint128 currentEnergy, uint128 massLeft)
-    internal
-    pure
-    returns (uint128)
-  {
-    uint128 maxEnergyCost = toolType.isNull() ? DEFAULT_MINE_ENERGY_COST : TOOL_MINE_ENERGY_COST;
-    maxEnergyCost = Math.min(currentEnergy, maxEnergyCost);
-    return Math.min(massLeft, maxEnergyCost);
   }
 }
 

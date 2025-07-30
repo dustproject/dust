@@ -10,11 +10,11 @@ import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 import {
   CHUNK_COMMIT_EXPIRY_BLOCKS,
   CHUNK_SIZE,
-  DEFAULT_MINE_ENERGY_COST,
   MAX_FLUID_LEVEL,
   MAX_PLAYER_ENERGY,
   PLAYER_ENERGY_DRAIN_RATE,
-  REGION_SIZE
+  REGION_SIZE,
+  UNEQUIPPED_ACTION_ENERGY_COST
 } from "../src/Constants.sol";
 import { EntityId, EntityTypeLib } from "../src/types/EntityId.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
@@ -59,7 +59,7 @@ import { IWorld } from "../src/codegen/world/IWorld.sol";
 abstract contract DustTest is MudTest, GasReporter, DustAssertions {
   IWorld internal world;
   int32 constant FLAT_CHUNK_GRASS_LEVEL = 4;
-  uint128 playerHandMassReduction = DEFAULT_MINE_ENERGY_COST;
+  uint128 playerHandMassReduction = UNEQUIPPED_ACTION_ENERGY_COST;
 
   function setUp() public virtual override {
     super.setUp();

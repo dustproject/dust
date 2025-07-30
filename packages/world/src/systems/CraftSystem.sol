@@ -33,7 +33,7 @@ contract CraftSystem is System {
     }
 
     uint128 callerEnergy = transferEnergyToPool(caller, CRAFT_ENERGY_COST);
-    require(callerEnergy > 0, "Not enough energy");
+    require(callerEnergy > 0, "Not enough energy to craft");
 
     CraftLib._consumeRecipeInputs(caller, recipe, inputs);
     CraftLib._createRecipeOutputs(caller, recipe);

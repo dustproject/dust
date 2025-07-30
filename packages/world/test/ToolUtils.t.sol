@@ -4,6 +4,7 @@ pragma solidity >=0.8.24;
 import { DustTest } from "./DustTest.sol";
 
 import {
+  ACTION_ENERGY_COST,
   ACTION_MODIFIER_DENOMINATOR,
   ORE_TOOL_BASE_MULTIPLIER,
   SPECIALIZATION_MULTIPLIER,
@@ -40,10 +41,11 @@ contract ToolUtilsTest is DustTest {
 
     // Use the tool partially
     uint128 initialMass = Mass.getMass(toolId);
-    TestToolUtils.use(toolData, 100);
+    // Use the tool with a limit larger than energy cost so tool mass is reduced
+    TestToolUtils.use(toolData, ACTION_ENERGY_COST + 1);
 
     // Tool should still exist with reduced mass
-    assertTrue(Mass.getMass(toolId) < initialMass, "Tool mass should be reduced");
+    assertLt(Mass.getMass(toolId), initialMass, "Tool mass should be reduced");
     assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 1, "Tool should still be in inventory");
 
     _verifyInventoryBitmapIntegrity(alice);
@@ -94,8 +96,7 @@ contract ToolUtilsTest is DustTest {
     uint128 actionMassReduction = TestToolUtils.use(toolData, useMassMax, actionModifier, specialized);
 
     // Check tool state after use
-    bool toolStillInInventory = TestInventoryUtils.findEntity(alice, toolEntity) != type(uint16).max;
-    uint128 actualToolMassReduction = initialToolMass - (toolStillInInventory ? Mass.getMass(toolEntity) : 0);
+    uint128 actualToolMassReduction = initialToolMass - Mass.getMass(toolEntity);
 
     // Verify the invariant: tool mass reduction should never exceed max
     assertLe(
@@ -104,18 +105,26 @@ contract ToolUtilsTest is DustTest {
       "INVARIANT VIOLATED: actualToolMassReduction exceeds maxToolMassReduction"
     );
 
+    if (!TestInventoryUtils.hasEntity(alice, toolEntity)) {
+      // Tool was fully consumed
+      assertEq(actualToolMassReduction, initialToolMass, "All tool mass should be consumed");
+    }
     // Verify the relationship between actionMassReduction and toolMassReduction
-    if (actionMassReduction > 0) {
-      if (!toolStillInInventory) {
-        // Tool was fully consumed
-        assertEq(actualToolMassReduction, initialToolMass, "All tool mass should be consumed");
+    else if (actionMassReduction > 0) {
+      // Calculate energy cost that was deducted from useMassMax
+      uint128 energyCost = Math.min(_tempUseMassMax, ACTION_ENERGY_COST);
+      uint128 effectiveMassLeft = _tempUseMassMax > energyCost ? _tempUseMassMax - energyCost : 0;
+
+      // If no mass left after energy cost, tool shouldn't be used
+      if (effectiveMassLeft == 0) {
+        assertEq(actualToolMassReduction, 0, "Tool should not be used when mass is fully consumed by energy cost");
       } else {
         // Calculate max tool mass reduction
         uint128 maxToolMassReduction = Math.min(ObjectPhysics.getMass(toolType) / 10, initialToolMass);
 
         // Calculate expected values matching the contract's logic exactly
         uint256 maxReductionScaled = uint256(maxToolMassReduction) * _tempMultiplier;
-        uint256 massLeftScaled = uint256(_tempUseMassMax) * ACTION_MODIFIER_DENOMINATOR;
+        uint256 massLeftScaled = uint256(effectiveMassLeft) * ACTION_MODIFIER_DENOMINATOR;
 
         if (maxReductionScaled <= massLeftScaled) {
           // Tool capacity is limiting - expect exact max tool mass reduction
@@ -125,7 +134,7 @@ contract ToolUtilsTest is DustTest {
             "Tool mass reduction should be exact max when tool capacity limits"
           );
         } else {
-          // useMassMax is limiting - calculate expected with divUp
+          // effectiveMassLeft is limiting - calculate expected with divUp
           uint128 expectedToolMassReduction = uint128(Math.divUp(massLeftScaled, _tempMultiplier));
           assertEq(actualToolMassReduction, expectedToolMassReduction, "Tool mass reduction should match expected");
         }

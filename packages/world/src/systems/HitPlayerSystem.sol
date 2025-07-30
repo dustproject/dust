@@ -7,14 +7,13 @@ import { EnergyData } from "../codegen/tables/Energy.sol";
 
 import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
-import { Math } from "../utils/Math.sol";
 import { HitPlayerNotification, notify } from "../utils/NotifUtils.sol";
 import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
-import { DEFAULT_HIT_ENERGY_COST, HIT_ACTION_MODIFIER, MAX_HIT_RADIUS, TOOL_HIT_ENERGY_COST } from "../Constants.sol";
+import { HIT_ACTION_MODIFIER, MAX_HIT_RADIUS } from "../Constants.sol";
 
 import { EntityId } from "../types/EntityId.sol";
-import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
+import { ObjectTypes } from "../types/ObjectType.sol";
 import { ProgramId } from "../types/ProgramId.sol";
 import { Vec3 } from "../types/Vec3.sol";
 import { RateLimitUtils } from "../utils/RateLimitUtils.sol";
@@ -30,9 +29,9 @@ contract HitPlayerSystem is System {
 
   function _hitPlayer(EntityId caller, EntityId target, uint16 toolSlot, bytes calldata extraData) internal {
     // Update and check caller's energy
-    uint128 callerEnergy = caller.activate().energy;
+    caller.activate();
 
-    (Vec3 callerCoord, Vec3 targetCoord) = caller.requireInRange(target, MAX_HIT_RADIUS);
+    (, Vec3 targetCoord) = caller.requireInRange(target, MAX_HIT_RADIUS);
 
     require(target != caller, "Cannot hit yourself");
     require(target._exists(), "No entity at target location");
@@ -42,54 +41,37 @@ contract HitPlayerSystem is System {
     RateLimitUtils.hit(caller);
 
     // Update target player's energy
-    uint128 targetEnergyLeft = updatePlayerEnergy(target).energy;
+    uint128 targetEnergy = updatePlayerEnergy(target).energy;
 
     // If target is already dead, return early
-    if (targetEnergyLeft == 0) {
+    if (targetEnergy == 0) {
       return;
     }
 
     // Get tool data for damage calculation
     ToolData memory toolData = ToolUtils.getToolData(caller, toolSlot);
-    uint128 callerEnergyReduction = _getCallerEnergyReduction(toolData.toolType, callerEnergy, targetEnergyLeft);
 
-    // Reduce caller's energy first
-    if (callerEnergyReduction > 0 && decreasePlayerEnergy(caller, callerCoord, callerEnergyReduction) == 0) {
-      // Caller died from the energy cost
-      addEnergyToLocalPool(callerCoord, callerEnergyReduction);
+    // Use tool and get total damage (handles energy costs internally)
+    uint128 damage = toolData.use(targetEnergy, HIT_ACTION_MODIFIER, toolData.toolType.isWhacker());
+
+    // If caller died (damage == 0), return early
+    if (damage == 0) {
       return;
     }
 
-    // Calculate damage based on tool
-    targetEnergyLeft -= callerEnergyReduction;
-
     // Apply damage to target player
-    uint128 toolEnergyReduction = toolData.use(targetEnergyLeft, HIT_ACTION_MODIFIER, toolData.toolType.isWhacker());
-    uint128 totalDamage = callerEnergyReduction + toolEnergyReduction;
-    decreasePlayerEnergy(target, targetCoord, totalDamage);
+    decreasePlayerEnergy(target, targetCoord, damage);
 
-    // Add caller's energy reduction to caller's local pool
-    addEnergyToLocalPool(callerCoord, callerEnergyReduction);
     // Add target's total damage to target's local pool
-    addEnergyToLocalPool(targetCoord, totalDamage);
+    addEnergyToLocalPool(targetCoord, damage);
 
-    _requireHitsAllowed(caller, targetCoord, toolData.tool, totalDamage, extraData);
+    _requireHitsAllowed(caller, targetCoord, toolData.tool, damage, extraData);
 
     // Notify both players about the hit
-    notify(caller, HitPlayerNotification({ targetPlayer: target, targetCoord: targetCoord, damage: totalDamage }));
+    notify(caller, HitPlayerNotification({ targetPlayer: target, targetCoord: targetCoord, damage: damage }));
 
     // TODO: Notify target about being hit?
     // notify(target, HitPlayerNotification({ targetPlayer: caller, targetCoord: callerCoord, damage: totalDamage }));
-  }
-
-  function _getCallerEnergyReduction(ObjectType toolType, uint128 currentEnergy, uint128 targetEnergyLeft)
-    internal
-    pure
-    returns (uint128)
-  {
-    uint128 maxEnergyCost = toolType.isNull() ? DEFAULT_HIT_ENERGY_COST : TOOL_HIT_ENERGY_COST;
-    maxEnergyCost = Math.min(currentEnergy, maxEnergyCost);
-    return Math.min(targetEnergyLeft, maxEnergyCost);
   }
 
   function _requireHitsAllowed(
