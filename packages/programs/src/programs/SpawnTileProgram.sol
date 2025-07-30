@@ -5,13 +5,13 @@ import { IBaseWorld } from "@latticexyz/world-consumer/src/experimental/WorldCon
 
 import { HookContext, ISpawn } from "@dust/world/src/ProgramHooks.sol";
 
-import { isAllowed } from "../isAllowed.sol";
+import { hasAccess } from "../hasAccess.sol";
 import { DefaultProgram } from "./DefaultProgram.sol";
 
 contract SpawnTileProgram is ISpawn, DefaultProgram {
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
 
   function onSpawn(HookContext calldata ctx, SpawnData calldata) external view onlyWorld {
-    require(isAllowed(ctx.target, ctx.caller), "Only approved callers can spawn through this tile");
+    require(hasAccess(ctx.caller, ctx.target), "Only approved callers can spawn through this tile");
   }
 }

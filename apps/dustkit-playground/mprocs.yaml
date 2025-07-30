@@ -13,7 +13,7 @@ procs:
     shell: pnpm run dev
   default-programs:
     cwd: ../../packages/programs
-    shell: wait-on -l ../world/deploys/31337/latest.json && pnpm mud deploy --worldAddress=$(cat ../world/worlds.json | jq -r ".[\"31337\"].address // empty") --alwaysRunPostDeploy=true --rpcBatch=true
+    shell: wait-on -l ../world/deploys/31337/latest.json && pnpm run build && pnpm mud deploy --worldAddress=$(cat ../world/worlds.json | jq -r ".[\"31337\"].address // empty") --alwaysRunPostDeploy=true --rpcBatch=true
   explorer:
     cwd: ../../packages/world
     shell: pnpm explorer --indexer-port 3008

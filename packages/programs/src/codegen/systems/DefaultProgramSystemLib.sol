@@ -45,7 +45,7 @@ library DefaultProgramSystemLib {
   function getAccessGroupId(DefaultProgramSystemType self, EntityId entity)
     internal
     view
-    returns (uint256 groupId, bool defaultDeny)
+    returns (uint256 groupId, bool locked)
   {
     return CallWrapper(self.toResourceId(), address(0)).getAccessGroupId(entity);
   }
@@ -138,7 +138,7 @@ library DefaultProgramSystemLib {
   function getAccessGroupId(CallWrapper memory self, EntityId entity)
     internal
     view
-    returns (uint256 groupId, bool defaultDeny)
+    returns (uint256 groupId, bool locked)
   {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert DefaultProgramSystemLib_CallingFromRootSystem();
@@ -340,7 +340,7 @@ library DefaultProgramSystemLib {
   function getAccessGroupId(RootCallWrapper memory self, EntityId entity)
     internal
     view
-    returns (uint256 groupId, bool defaultDeny)
+    returns (uint256 groupId, bool locked)
   {
     bytes memory systemCall = abi.encodeCall(_getAccessGroupId_EntityId.getAccessGroupId, (entity));
 
