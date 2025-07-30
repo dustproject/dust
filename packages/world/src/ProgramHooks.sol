@@ -56,6 +56,7 @@ interface ITransfer {
 
 interface IHit {
   struct HitData {
+    EntityId target;
     EntityId tool;
     uint128 damage;
   }
@@ -170,8 +171,8 @@ library HooksLib {
     _call(self, abi.encodeCall(ITransfer.onTransfer, (self.ctx, transfer)));
   }
 
-  function onHit(Hook memory self, EntityId tool, uint128 damage) internal {
-    IHit.HitData memory hit = IHit.HitData({ tool: tool, damage: damage });
+  function onHit(Hook memory self, EntityId target, EntityId tool, uint128 damage) internal {
+    IHit.HitData memory hit = IHit.HitData({ target: target, tool: tool, damage: damage });
 
     _call(self, abi.encodeCall(IHit.onHit, (self.ctx, hit)));
   }

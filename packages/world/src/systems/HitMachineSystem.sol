@@ -57,7 +57,7 @@ contract HitMachineSystem is System {
 
     // Don't revert so the program can't prevent hitting
     forceField._getProgram().hook({ caller: caller, target: forceField, revertOnFailure: false, extraData: "" }).onHit(
-      toolData.tool, damage
+      forceField, toolData.tool, damage
     );
 
     notify(caller, HitMachineNotification({ machine: forceField, machineCoord: forceFieldCoord }));
