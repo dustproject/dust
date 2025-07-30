@@ -67,11 +67,7 @@ contract HitPlayerSystem is System {
 
     _requireHitsAllowed(caller, target, targetCoord, toolData.tool, damage, extraData);
 
-    // Notify both players about the hit
     notify(caller, HitPlayerNotification({ targetPlayer: target, targetCoord: targetCoord, damage: damage }));
-
-    // TODO: Notify target about being hit?
-    // notify(target, HitPlayerNotification({ targetPlayer: caller, targetCoord: callerCoord, damage: totalDamage }));
   }
 
   function _requireHitsAllowed(

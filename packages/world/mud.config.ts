@@ -353,7 +353,7 @@ export default defineWorld({
       schema: {
         playerEntityId: "EntityId",
         timestamp: "uint128",
-        action: "NotificationType",
+        notificationType: "NotificationType",
         data: "bytes",
       },
       key: ["playerEntityId"],
@@ -387,6 +387,17 @@ export default defineWorld({
         baseEntityId: "EntityId",
       },
       key: ["entityId"],
+    },
+
+    // DEPRECATED: replaced by RateLimitUnits
+    MoveUnits: {
+      schema: {
+        entityId: "EntityId",
+        blockNumber: "uint256",
+
+        units: "uint128",
+      },
+      key: ["entityId", "blockNumber"],
     },
   },
   systems: {
