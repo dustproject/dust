@@ -46,5 +46,5 @@ To understand the relationship between programs and apps, have a look at [PROGRA
 - [Discord](https://dustproject.org/discord)
 - [Landing page](https://dustproject.org)
 - [Learning resources](https://dustproject.org/what)
-- [Browser client](https://alpha.dustproject.org) ([join discord to get access](https://dustproject.org/access))
+- [Browser client](https://alpha.dustproject.org)
 - [Explorer](https://dustproject.org/explorer)

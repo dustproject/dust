@@ -22,7 +22,7 @@ import { NotificationType } from "../common.sol";
 
 struct NotificationData {
   uint128 timestamp;
-  NotificationType action;
+  NotificationType notificationType;
   bytes data;
 }
 
@@ -54,7 +54,7 @@ library Notification {
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
     fieldNames = new string[](3);
     fieldNames[0] = "timestamp";
-    fieldNames[1] = "action";
+    fieldNames[1] = "notificationType";
     fieldNames[2] = "data";
   }
 
@@ -93,30 +93,35 @@ library Notification {
   }
 
   /**
-   * @notice Set action.
+   * @notice Set notificationType.
    */
-  function setAction(EntityId playerEntityId, NotificationType action) internal {
+  function setNotificationType(EntityId playerEntityId, NotificationType notificationType) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(playerEntityId);
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked(uint8(action)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked(uint8(notificationType)), _fieldLayout);
   }
 
   /**
-   * @notice Set action.
+   * @notice Set notificationType.
    */
-  function _setAction(EntityId playerEntityId, NotificationType action) internal {
+  function _setNotificationType(EntityId playerEntityId, NotificationType notificationType) internal {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = EntityId.unwrap(playerEntityId);
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked(uint8(action)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked(uint8(notificationType)), _fieldLayout);
   }
 
   /**
    * @notice Set the full data using individual values.
    */
-  function set(EntityId playerEntityId, uint128 timestamp, NotificationType action, bytes memory data) internal {
-    bytes memory _staticData = encodeStatic(timestamp, action);
+  function set(
+    EntityId playerEntityId,
+    uint128 timestamp,
+    NotificationType notificationType,
+    bytes memory data
+  ) internal {
+    bytes memory _staticData = encodeStatic(timestamp, notificationType);
 
     EncodedLengths _encodedLengths = encodeLengths(data);
     bytes memory _dynamicData = encodeDynamic(data);
@@ -130,8 +135,13 @@ library Notification {
   /**
    * @notice Set the full data using individual values.
    */
-  function _set(EntityId playerEntityId, uint128 timestamp, NotificationType action, bytes memory data) internal {
-    bytes memory _staticData = encodeStatic(timestamp, action);
+  function _set(
+    EntityId playerEntityId,
+    uint128 timestamp,
+    NotificationType notificationType,
+    bytes memory data
+  ) internal {
+    bytes memory _staticData = encodeStatic(timestamp, notificationType);
 
     EncodedLengths _encodedLengths = encodeLengths(data);
     bytes memory _dynamicData = encodeDynamic(data);
@@ -146,7 +156,7 @@ library Notification {
    * @notice Set the full data using the data struct.
    */
   function set(EntityId playerEntityId, NotificationData memory _table) internal {
-    bytes memory _staticData = encodeStatic(_table.timestamp, _table.action);
+    bytes memory _staticData = encodeStatic(_table.timestamp, _table.notificationType);
 
     EncodedLengths _encodedLengths = encodeLengths(_table.data);
     bytes memory _dynamicData = encodeDynamic(_table.data);
@@ -161,7 +171,7 @@ library Notification {
    * @notice Set the full data using the data struct.
    */
   function _set(EntityId playerEntityId, NotificationData memory _table) internal {
-    bytes memory _staticData = encodeStatic(_table.timestamp, _table.action);
+    bytes memory _staticData = encodeStatic(_table.timestamp, _table.notificationType);
 
     EncodedLengths _encodedLengths = encodeLengths(_table.data);
     bytes memory _dynamicData = encodeDynamic(_table.data);
@@ -175,10 +185,12 @@ library Notification {
   /**
    * @notice Decode the tightly packed blob of static data using this table's field layout.
    */
-  function decodeStatic(bytes memory _blob) internal pure returns (uint128 timestamp, NotificationType action) {
+  function decodeStatic(
+    bytes memory _blob
+  ) internal pure returns (uint128 timestamp, NotificationType notificationType) {
     timestamp = (uint128(Bytes.getBytes16(_blob, 0)));
 
-    action = NotificationType(uint8(Bytes.getBytes1(_blob, 16)));
+    notificationType = NotificationType(uint8(Bytes.getBytes1(_blob, 16)));
   }
 
   /**
@@ -204,7 +216,7 @@ library Notification {
     EncodedLengths _encodedLengths,
     bytes memory _dynamicData
   ) internal pure returns (NotificationData memory _table) {
-    (_table.timestamp, _table.action) = decodeStatic(_staticData);
+    (_table.timestamp, _table.notificationType) = decodeStatic(_staticData);
 
     (_table.data) = decodeDynamic(_encodedLengths, _dynamicData);
   }
@@ -233,8 +245,8 @@ library Notification {
    * @notice Tightly pack static (fixed length) data using this table's schema.
    * @return The static data, encoded into a sequence of bytes.
    */
-  function encodeStatic(uint128 timestamp, NotificationType action) internal pure returns (bytes memory) {
-    return abi.encodePacked(timestamp, action);
+  function encodeStatic(uint128 timestamp, NotificationType notificationType) internal pure returns (bytes memory) {
+    return abi.encodePacked(timestamp, notificationType);
   }
 
   /**
@@ -264,10 +276,10 @@ library Notification {
    */
   function encode(
     uint128 timestamp,
-    NotificationType action,
+    NotificationType notificationType,
     bytes memory data
   ) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
-    bytes memory _staticData = encodeStatic(timestamp, action);
+    bytes memory _staticData = encodeStatic(timestamp, notificationType);
 
     EncodedLengths _encodedLengths = encodeLengths(data);
     bytes memory _dynamicData = encodeDynamic(data);

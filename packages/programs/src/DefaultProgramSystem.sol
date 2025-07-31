@@ -12,8 +12,9 @@ import { EntityAccessGroup } from "./codegen/tables/EntityAccessGroup.sol";
 import { TextSignContent } from "./codegen/tables/TextSignContent.sol";
 
 import { createAccessGroup } from "./createAccessGroup.sol";
+import { getAccessControl } from "./getAccessControl.sol";
 import { getGroupId } from "./getGroupId.sol";
-import { isAllowed } from "./isAllowed.sol";
+import { hasAccess } from "./hasAccess.sol";
 
 contract DefaultProgramSystem is System {
   function newAccessGroup(EntityId owner) external returns (uint256) {
@@ -21,16 +22,15 @@ contract DefaultProgramSystem is System {
     return createAccessGroup(owner);
   }
 
-  function getAccessGroupId(EntityId entity) external view returns (uint256 groupId, bool defaultDeny) {
-    (groupId, defaultDeny) = getGroupId(entity);
+  function getAccessGroupId(EntityId entity) external view returns (uint256 groupId, bool locked) {
+    return getAccessControl(entity);
   }
 
   /// @dev This function can be called by other entities to get a new access group assigned to themselves
   function setAccessGroup(EntityId caller, address groupOwner) external {
     caller.validateCaller();
     require(caller.getObjectType().isSmartEntity(), "Caller must be a smart entity");
-    (uint256 currentGroupId,) = getGroupId(caller);
-    require(currentGroupId == 0, "Caller entity already has an access group");
+    require(getGroupId(caller) == 0, "Caller entity already has an access group");
     uint256 groupId = createAccessGroup(EntityTypeLib.encodePlayer(groupOwner));
     EntityAccessGroup.set(caller, groupId);
   }
@@ -45,7 +45,7 @@ contract DefaultProgramSystem is System {
 
   function setAccessGroup(EntityId caller, EntityId target, uint256 groupId) public {
     caller.validateCaller();
-    (uint256 currentGroupId,) = getGroupId(target);
+    uint256 currentGroupId = getGroupId(target);
     _requireOwner(currentGroupId, caller);
     EntityAccessGroup.set(target, groupId);
   }
@@ -60,7 +60,7 @@ contract DefaultProgramSystem is System {
   }
 
   function setMembership(EntityId caller, EntityId target, EntityId member, bool allowed) public {
-    (uint256 groupId,) = getGroupId(target);
+    uint256 groupId = getGroupId(target);
     require(groupId != 0, "Target entity has no access group");
     setMembership(caller, groupId, member, allowed);
   }
@@ -94,7 +94,7 @@ contract DefaultProgramSystem is System {
   }
 
   function setMembership(EntityId target, EntityId member, bool allowed) public {
-    (uint256 groupId,) = getGroupId(target);
+    uint256 groupId = getGroupId(target);
     require(groupId != 0, "Target entity has no access group");
     setMembership(groupId, member, allowed);
   }
@@ -109,7 +109,7 @@ contract DefaultProgramSystem is System {
   }
 
   function _requireMember(EntityId caller, EntityId target) private view {
-    require(isAllowed(target, caller), "Caller is not a member of the access group");
+    require(hasAccess(caller, target), "Caller is not a member of the access group");
   }
 
   function _requireOwner(uint256 groupId, EntityId caller) private view {

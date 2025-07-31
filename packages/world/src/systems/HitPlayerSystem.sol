@@ -66,20 +66,17 @@ contract HitPlayerSystem is System {
     // Add target's total damage to target's local pool
     addEnergyToLocalPool(targetCoord, damage);
 
-    // Track damage dealt for player activity
+    // Track damage dealt
     PlayerActivityUtils.trackHitPlayer(caller, damage);
 
-    _requireHitsAllowed(caller, targetCoord, toolData.tool, damage, extraData);
+    _requireHitsAllowed(caller, target, targetCoord, toolData.tool, damage, extraData);
 
-    // Notify both players about the hit
     notify(caller, HitPlayerNotification({ targetPlayer: target, targetCoord: targetCoord, damage: damage }));
-
-    // TODO: Notify target about being hit?
-    // notify(target, HitPlayerNotification({ targetPlayer: caller, targetCoord: callerCoord, damage: totalDamage }));
   }
 
   function _requireHitsAllowed(
     EntityId caller,
+    EntityId target,
     Vec3 targetCoord,
     EntityId tool,
     uint128 totalDamage,
@@ -93,6 +90,6 @@ contract HitPlayerSystem is System {
     }
 
     program.hook({ caller: caller, target: hookTarget, revertOnFailure: energyData.energy > 0, extraData: extraData })
-      .onHit(tool, totalDamage);
+      .onHit(target, tool, totalDamage);
   }
 }

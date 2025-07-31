@@ -7,18 +7,18 @@ import { EntityId } from "@dust/world/src/types/EntityId.sol";
 
 import { HookContext, IAttachProgram, IDetachProgram } from "@dust/world/src/ProgramHooks.sol";
 
+import { AccessGroupOwner } from "../codegen/tables/AccessGroupOwner.sol";
 import { EntityAccessGroup } from "../codegen/tables/EntityAccessGroup.sol";
 
 import { createAccessGroup } from "../createAccessGroup.sol";
 import { getForceField } from "../getForceField.sol";
-
-import { isAllowed } from "../isAllowed.sol";
+import { hasAccess } from "../hasAccess.sol";
 
 abstract contract DefaultProgram is IAttachProgram, IDetachProgram, WorldConsumer {
   constructor(IBaseWorld _world) WorldConsumer(_world) { }
 
   function onAttachProgram(HookContext calldata ctx) external onlyWorld {
-    (EntityId forceField,) = getForceField(ctx.target);
+    EntityId forceField = getForceField(ctx.target);
 
     // Sanity check to ensure the target's access group is not already set
     if (EntityAccessGroup.get(ctx.target) != 0) {
@@ -36,14 +36,17 @@ abstract contract DefaultProgram is IAttachProgram, IDetachProgram, WorldConsume
   }
 
   function onDetachProgram(HookContext calldata ctx) external onlyWorld {
-    (, bool isProtected) = getForceField(ctx.target);
-    require(!isProtected || _canDetach(ctx.caller, ctx.target), "Caller not authorized to detach this program");
+    // Check if allowed to detach
+    if (ctx.revertOnFailure) {
+      require(_canDetach(ctx.caller, ctx.target), "Caller not authorized to detach this program");
+    }
 
+    // Always clean up access group
     EntityAccessGroup.deleteRecord(ctx.target);
   }
 
   function _canDetach(EntityId caller, EntityId target) internal view virtual returns (bool) {
-    return isAllowed(target, caller);
+    return hasAccess(caller, target);
   }
 
   function _createAndSetAccessGroup(EntityId target, EntityId owner) internal {

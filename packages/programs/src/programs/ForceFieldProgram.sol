@@ -10,6 +10,7 @@ import {
   IAddFragment,
   IBuild,
   IEnergize,
+  IHit,
   IMine,
   IProgramValidator,
   IRemoveFragment
@@ -18,7 +19,7 @@ import {
 import { AccessGroupOwner } from "../codegen/tables/AccessGroupOwner.sol";
 
 import { getGroupId } from "../getGroupId.sol";
-import { isAllowed } from "../isAllowed.sol";
+import { hasAccess } from "../hasAccess.sol";
 import { DefaultProgram } from "./DefaultProgram.sol";
 
 contract ForceFieldProgram is
@@ -28,6 +29,7 @@ contract ForceFieldProgram is
   IEnergize,
   IBuild,
   IMine,
+  IHit,
   DefaultProgram
 {
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
@@ -41,24 +43,33 @@ contract ForceFieldProgram is
   }
 
   function onAddFragment(HookContext calldata ctx, AddFragmentData calldata) external view onlyWorld {
-    require(isAllowed(ctx.target, ctx.caller), "Only approved callers can add fragments to the force field");
+    require(hasAccess(ctx.caller, ctx.target), "Only approved callers can add fragments to the force field");
   }
 
   function onRemoveFragment(HookContext calldata ctx, RemoveFragmentData calldata) external view onlyWorld {
-    require(isAllowed(ctx.target, ctx.caller), "Only approved callers can remove fragments from the force field");
+    require(hasAccess(ctx.caller, ctx.target), "Only approved callers can remove fragments from the force field");
   }
 
   function onBuild(HookContext calldata ctx, BuildData calldata) external view onlyWorld {
-    require(isAllowed(ctx.target, ctx.caller), "Only approved callers can build in the force field");
+    require(hasAccess(ctx.caller, ctx.target), "Only approved callers can build in the force field");
   }
 
-  function onMine(HookContext calldata ctx, MineData calldata) external view onlyWorld {
-    require(isAllowed(ctx.target, ctx.caller), "Only approved callers can mine in the force field");
+  function onMine(HookContext calldata ctx, MineData calldata mine) external view onlyWorld {
+    require(hasAccess(ctx.caller, mine.entity), "Only approved callers can mine in the force field");
+  }
+
+  function onHit(HookContext calldata ctx, HitData calldata hit) external view onlyWorld {
+    if (!ctx.revertOnFailure) {
+      return;
+    }
+    bool callerHasAccess = hasAccess(ctx.caller, ctx.target);
+    bool targetHasAccess = hasAccess(hit.target, ctx.target);
+    require(callerHasAccess && !targetHasAccess, "Only approved callers can hit other players");
   }
 
   // Override the default program attachment logic to only allow the owner of the access group to detach forcefield programs
   function _canDetach(EntityId caller, EntityId target) internal view override returns (bool) {
-    (uint256 groupId,) = getGroupId(target);
+    uint256 groupId = getGroupId(target);
 
     if (groupId == 0) {
       return true; // If no group, allow detachment
