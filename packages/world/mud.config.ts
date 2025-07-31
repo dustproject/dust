@@ -394,7 +394,6 @@ export default defineWorld({
       schema: {
         entityId: "EntityId",
         blockNumber: "uint256",
-
         units: "uint128",
       },
       key: ["entityId", "blockNumber"],

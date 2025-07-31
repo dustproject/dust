@@ -2,14 +2,14 @@
 pragma solidity >=0.8.24;
 
 import {
-  ACTION_ENERGY_COST,
   ACTION_MODIFIER_DENOMINATOR,
+  BARE_HANDS_ACTION_ENERGY_COST,
   HIT_ACTION_MODIFIER,
   MAX_HIT_RADIUS,
   MAX_PLAYER_ENERGY,
   ORE_TOOL_BASE_MULTIPLIER,
   SPECIALIZATION_MULTIPLIER,
-  UNEQUIPPED_ACTION_ENERGY_COST,
+  TOOL_ACTION_ENERGY_COST,
   WOODEN_TOOL_BASE_MULTIPLIER
 } from "../src/Constants.sol";
 import { Energy } from "../src/codegen/tables/Energy.sol";
@@ -30,8 +30,8 @@ contract HitPlayerTest is DustTest {
     (, EntityId bobEntityId) = createTestPlayer(bobCoord);
 
     // Set initial energy - both have plenty
-    uint128 aliceInitialEnergy = UNEQUIPPED_ACTION_ENERGY_COST * 10;
-    uint128 bobInitialEnergy = UNEQUIPPED_ACTION_ENERGY_COST * 10;
+    uint128 aliceInitialEnergy = BARE_HANDS_ACTION_ENERGY_COST * 10;
+    uint128 bobInitialEnergy = BARE_HANDS_ACTION_ENERGY_COST * 10;
     Energy.setEnergy(aliceEntityId, aliceInitialEnergy);
     Energy.setEnergy(bobEntityId, bobInitialEnergy);
 
@@ -45,8 +45,8 @@ contract HitPlayerTest is DustTest {
     endGasReport();
 
     // Calculate expected damage
-    // Without tool: damage to Bob equals Alice's energy reduction (up to UNEQUIPPED_ACTION_ENERGY_COST)
-    uint128 expectedAliceReduction = UNEQUIPPED_ACTION_ENERGY_COST;
+    // Without tool: damage to Bob equals Alice's energy reduction (up to BARE_HANDS_ACTION_ENERGY_COST)
+    uint128 expectedAliceReduction = BARE_HANDS_ACTION_ENERGY_COST;
     uint128 expectedTotalDamage = expectedAliceReduction; // No tool bonus
 
     // Verify energy changes
@@ -69,8 +69,8 @@ contract HitPlayerTest is DustTest {
     (address bob, EntityId bobEntityId) = createTestPlayer(bobCoord);
 
     // Set energy so Bob will die
-    uint128 aliceInitialEnergy = UNEQUIPPED_ACTION_ENERGY_COST * 2;
-    uint128 bobInitialEnergy = UNEQUIPPED_ACTION_ENERGY_COST / 2; // Less than damage
+    uint128 aliceInitialEnergy = BARE_HANDS_ACTION_ENERGY_COST * 2;
+    uint128 bobInitialEnergy = BARE_HANDS_ACTION_ENERGY_COST / 2; // Less than damage
     Energy.setEnergy(aliceEntityId, aliceInitialEnergy);
     Energy.setEnergy(bobEntityId, bobInitialEnergy);
 
@@ -124,7 +124,7 @@ contract HitPlayerTest is DustTest {
 
     // Set Bob's energy very high so tool capacity is limiting (similar to HitMachine tests)
     uint128 bobInitialEnergy = whackerMass * 1000;
-    uint128 aliceInitialEnergy = ACTION_ENERGY_COST + 1;
+    uint128 aliceInitialEnergy = TOOL_ACTION_ENERGY_COST + 1;
     Energy.setEnergy(aliceEntityId, aliceInitialEnergy);
     Energy.setEnergy(bobEntityId, bobInitialEnergy);
 
@@ -139,7 +139,7 @@ contract HitPlayerTest is DustTest {
 
     // Check energy reduction with whacker multiplier
     uint128 maxToolMassReduction = whackerMass / 10;
-    uint128 expectedAliceReduction = ACTION_ENERGY_COST;
+    uint128 expectedAliceReduction = TOOL_ACTION_ENERGY_COST;
     uint128 expectedTotalDamage;
     {
       uint128 expectedMultiplier = ORE_TOOL_BASE_MULTIPLIER * HIT_ACTION_MODIFIER * SPECIALIZATION_MULTIPLIER;
@@ -176,7 +176,7 @@ contract HitPlayerTest is DustTest {
     uint128 whackerMass = Mass.getMass(whacker);
 
     // Set Bob's energy so that remaining energy after player reduction is less than tool would normally do
-    // Bob energy = ACTION_ENERGY_COST + half of what tool would normally reduce
+    // Bob energy = TOOL_ACTION_ENERGY_COST + half of what tool would normally reduce
     uint256 multiplier = uint256(ORE_TOOL_BASE_MULTIPLIER) * HIT_ACTION_MODIFIER * SPECIALIZATION_MULTIPLIER;
 
     uint128 remainingEnergy;
@@ -187,8 +187,8 @@ contract HitPlayerTest is DustTest {
       remainingEnergy = maxActionMassReduction / 2;
     }
 
-    uint128 bobInitialEnergy = ACTION_ENERGY_COST + remainingEnergy;
-    Energy.setEnergy(aliceEntityId, ACTION_ENERGY_COST + 10);
+    uint128 bobInitialEnergy = TOOL_ACTION_ENERGY_COST + remainingEnergy;
+    Energy.setEnergy(aliceEntityId, TOOL_ACTION_ENERGY_COST + 10);
     Energy.setEnergy(bobEntityId, bobInitialEnergy);
 
     // Add items to Bob's inventory to test transfer
@@ -217,7 +217,7 @@ contract HitPlayerTest is DustTest {
 
     // Verify energy flowed to local pools
     uint128 aliceEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(aliceSnapshot);
-    assertEq(aliceEnergyLost, ACTION_ENERGY_COST, "Alice energy lost incorrect");
+    assertEq(aliceEnergyLost, TOOL_ACTION_ENERGY_COST, "Alice energy lost incorrect");
 
     uint128 bobEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(bobSnapshot);
     assertEq(bobEnergyLost, bobInitialEnergy, "Bob total damage incorrect");
@@ -241,8 +241,8 @@ contract HitPlayerTest is DustTest {
     (, EntityId bobEntityId) = createTestPlayer(bobCoord);
 
     // Set Alice energy to exactly the hit cost
-    uint128 aliceInitialEnergy = UNEQUIPPED_ACTION_ENERGY_COST;
-    uint128 bobInitialEnergy = UNEQUIPPED_ACTION_ENERGY_COST * 10;
+    uint128 aliceInitialEnergy = BARE_HANDS_ACTION_ENERGY_COST;
+    uint128 bobInitialEnergy = BARE_HANDS_ACTION_ENERGY_COST * 10;
     Energy.setEnergy(aliceEntityId, aliceInitialEnergy);
     Energy.setEnergy(bobEntityId, bobInitialEnergy);
 
@@ -276,8 +276,8 @@ contract HitPlayerTest is DustTest {
     uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, whacker);
 
     // Set Alice energy to exactly the tool hit cost
-    uint128 aliceInitialEnergy = ACTION_ENERGY_COST;
-    uint128 bobInitialEnergy = ACTION_ENERGY_COST * 10;
+    uint128 aliceInitialEnergy = TOOL_ACTION_ENERGY_COST;
+    uint128 bobInitialEnergy = TOOL_ACTION_ENERGY_COST * 10;
     Energy.setEnergy(aliceEntityId, aliceInitialEnergy);
     Energy.setEnergy(bobEntityId, bobInitialEnergy);
 
@@ -313,7 +313,7 @@ contract HitPlayerTest is DustTest {
 
     // Set Bob's energy very high so tool capacity is limiting
     uint128 bobInitialEnergy = pickMass * 1000;
-    uint128 aliceInitialEnergy = ACTION_ENERGY_COST + 1;
+    uint128 aliceInitialEnergy = TOOL_ACTION_ENERGY_COST + 1;
     Energy.setEnergy(aliceEntityId, aliceInitialEnergy);
     Energy.setEnergy(bobEntityId, bobInitialEnergy);
 
@@ -328,7 +328,7 @@ contract HitPlayerTest is DustTest {
 
     // Check energy reduction without specialization bonus
     uint128 maxToolMassReduction = pickMass / 10;
-    uint128 expectedAliceReduction = ACTION_ENERGY_COST;
+    uint128 expectedAliceReduction = TOOL_ACTION_ENERGY_COST;
     uint128 expectedTotalDamage;
     {
       uint128 expectedMultiplier = WOODEN_TOOL_BASE_MULTIPLIER * HIT_ACTION_MODIFIER; // No specialization
@@ -361,7 +361,7 @@ contract HitPlayerTest is DustTest {
 
     // Kill Bob by setting energy to 0
     Energy.setEnergy(bobEntityId, 0);
-    Energy.setEnergy(aliceEntityId, UNEQUIPPED_ACTION_ENERGY_COST + 1000);
+    Energy.setEnergy(aliceEntityId, BARE_HANDS_ACTION_ENERGY_COST + 1000);
 
     uint128 aliceInitialEnergy = Energy.getEnergy(aliceEntityId);
 

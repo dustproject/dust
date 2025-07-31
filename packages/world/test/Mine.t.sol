@@ -21,8 +21,8 @@ import { DustTest } from "./DustTest.sol";
 import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import {
-  ACTION_ENERGY_COST,
   ACTION_MODIFIER_DENOMINATOR,
+  BARE_HANDS_ACTION_ENERGY_COST,
   CHUNK_SIZE,
   MACHINE_ENERGY_DRAIN_RATE,
   MAX_ENTITY_INFLUENCE_RADIUS,
@@ -31,7 +31,7 @@ import {
   MINE_ACTION_MODIFIER,
   PLAYER_ENERGY_DRAIN_RATE,
   SPECIALIZATION_MULTIPLIER,
-  UNEQUIPPED_ACTION_ENERGY_COST,
+  TOOL_ACTION_ENERGY_COST,
   WOODEN_TOOL_BASE_MULTIPLIER
 } from "../src/Constants.sol";
 import { ObjectAmount, ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
@@ -328,7 +328,7 @@ contract MineTest is DustTest {
 
     // Verify mass has been set to the resource's
     uint128 mass = Mass.getMass(mineEntityId);
-    uint128 expectedMass = ObjectPhysics.getMass(resourceType) - UNEQUIPPED_ACTION_ENERGY_COST;
+    uint128 expectedMass = ObjectPhysics.getMass(resourceType) - BARE_HANDS_ACTION_ENERGY_COST;
     assertEq(mass, expectedMass, "Mass was not set correctly");
 
     // Roll forward many blocks to ensure the commitment expires
@@ -346,7 +346,7 @@ contract MineTest is DustTest {
 
     // Verify mass has been set to the resource's
     mass = Mass.getMass(mineEntityId);
-    expectedMass -= UNEQUIPPED_ACTION_ENERGY_COST;
+    expectedMass -= BARE_HANDS_ACTION_ENERGY_COST;
     assertEq(mass, expectedMass, "Mass should decrease after another mining attempt");
   }
 
@@ -714,7 +714,7 @@ contract MineTest is DustTest {
     setObjectAtCoord(mineCoord, mineObjectType);
 
     // Set player energy to exactly enough for one mine operation
-    uint128 exactEnergy = UNEQUIPPED_ACTION_ENERGY_COST;
+    uint128 exactEnergy = BARE_HANDS_ACTION_ENERGY_COST;
     Energy.set(
       aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: exactEnergy, drainRate: 0 })
     );
@@ -880,7 +880,7 @@ contract MineTest is DustTest {
       (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(stoneCoord);
       // Calculate expected multiplier: wooden base (3) * mine modifier (1) * specialization (3) = 9
       uint128 expectedMultiplier = WOODEN_TOOL_BASE_MULTIPLIER * MINE_ACTION_MODIFIER * SPECIALIZATION_MULTIPLIER;
-      uint128 massReduction = ACTION_ENERGY_COST + pickMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
+      uint128 massReduction = TOOL_ACTION_ENERGY_COST + pickMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
       uint128 expectedMass = stoneMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden pick on stone");
     }
@@ -904,7 +904,7 @@ contract MineTest is DustTest {
       (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(logCoord);
       // Calculate expected multiplier: wooden base (3) * mine modifier (1) * specialization (3) = 9
       uint128 expectedMultiplier = WOODEN_TOOL_BASE_MULTIPLIER * MINE_ACTION_MODIFIER * SPECIALIZATION_MULTIPLIER;
-      uint128 massReduction = ACTION_ENERGY_COST + axeMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
+      uint128 massReduction = TOOL_ACTION_ENERGY_COST + axeMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
       uint128 expectedMass = logMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden axe on log");
     }
@@ -925,7 +925,7 @@ contract MineTest is DustTest {
       (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(stoneCoord);
       // Calculate expected multiplier: wooden base (3) * mine modifier (1) * no specialization = 3
       uint128 expectedMultiplier = WOODEN_TOOL_BASE_MULTIPLIER * MINE_ACTION_MODIFIER;
-      uint128 massReduction = ACTION_ENERGY_COST + axeMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
+      uint128 massReduction = TOOL_ACTION_ENERGY_COST + axeMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
       uint128 expectedMass = stoneMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden axe on stone");
     }

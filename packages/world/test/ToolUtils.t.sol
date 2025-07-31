@@ -4,10 +4,10 @@ pragma solidity >=0.8.24;
 import { DustTest } from "./DustTest.sol";
 
 import {
-  ACTION_ENERGY_COST,
   ACTION_MODIFIER_DENOMINATOR,
   ORE_TOOL_BASE_MULTIPLIER,
   SPECIALIZATION_MULTIPLIER,
+  TOOL_ACTION_ENERGY_COST,
   WOODEN_TOOL_BASE_MULTIPLIER
 } from "../src/Constants.sol";
 import { EntityId } from "../src/types/EntityId.sol";
@@ -42,7 +42,7 @@ contract ToolUtilsTest is DustTest {
     // Use the tool partially
     uint128 initialMass = Mass.getMass(toolId);
     // Use the tool with a limit larger than energy cost so tool mass is reduced
-    TestToolUtils.use(toolData, ACTION_ENERGY_COST + 1);
+    TestToolUtils.use(toolData, TOOL_ACTION_ENERGY_COST + 1);
 
     // Tool should still exist with reduced mass
     assertLt(Mass.getMass(toolId), initialMass, "Tool mass should be reduced");
@@ -112,7 +112,7 @@ contract ToolUtilsTest is DustTest {
     // Verify the relationship between actionMassReduction and toolMassReduction
     else if (actionMassReduction > 0) {
       // Calculate energy cost that was deducted from useMassMax
-      uint128 energyCost = Math.min(_tempUseMassMax, ACTION_ENERGY_COST);
+      uint128 energyCost = Math.min(_tempUseMassMax, TOOL_ACTION_ENERGY_COST);
       uint128 effectiveMassLeft = _tempUseMassMax > energyCost ? _tempUseMassMax - energyCost : 0;
 
       // If no mass left after energy cost, tool shouldn't be used

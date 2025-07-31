@@ -128,7 +128,7 @@ library ToolUtils {
     returns (uint128)
   {
     uint128 energyCost =
-      toolData.toolType.isNull() ? Constants.UNEQUIPPED_ACTION_ENERGY_COST : Constants.ACTION_ENERGY_COST;
+      toolData.toolType.isNull() ? Constants.BARE_HANDS_ACTION_ENERGY_COST : Constants.TOOL_ACTION_ENERGY_COST;
     uint128 maxEnergyCost = Math.min(callerEnergy, energyCost);
     return Math.min(targetCapacity, maxEnergyCost);
   }
