@@ -57,7 +57,7 @@ contract HitMachineSystem is System {
     addEnergyToLocalPool(forceFieldCoord, damage);
 
     // Track damage dealt for player activity
-    PlayerActivityUtils.updateDealtDamageToMachine(caller, damage);
+    PlayerActivityUtils.trackHitMachine(caller, damage);
 
     // Don't revert so the program can't prevent hitting
     forceField._getProgram().hook({ caller: caller, target: forceField, revertOnFailure: false, extraData: "" }).onHit(

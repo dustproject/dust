@@ -13,9 +13,13 @@ import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 
+import { ActivityType } from "../src/codegen/common.sol";
 import { Death } from "../src/codegen/tables/Death.sol";
+import { PlayerActivity } from "../src/codegen/tables/PlayerActivity.sol";
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
+
+import { PlayerActivityUtils } from "../src/utils/PlayerActivityUtils.sol";
 import { DustTest } from "./DustTest.sol";
 
 import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
@@ -42,7 +46,7 @@ import { EntityId } from "../src/types/EntityId.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { Orientation } from "../src/types/Orientation.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
-import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestEntityUtils, TestInventoryUtils, TestPlayerActivityUtils } from "./utils/TestUtils.sol";
 
 contract MineTest is DustTest {
   function testMineTerrain() public {
@@ -883,6 +887,10 @@ contract MineTest is DustTest {
       uint128 massReduction = ACTION_ENERGY_COST + pickMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
       uint128 expectedMass = stoneMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden pick on stone");
+
+      // Check player activity tracking
+      uint256 pickActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MinePickMass);
+      assertEq(pickActivity, massReduction, "Pick mining activity not tracked correctly");
     }
 
     {
@@ -907,6 +915,10 @@ contract MineTest is DustTest {
       uint128 massReduction = ACTION_ENERGY_COST + axeMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
       uint128 expectedMass = logMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden axe on log");
+
+      // Check player activity tracking
+      uint256 axeActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MineAxeMass);
+      assertEq(axeActivity, massReduction, "Axe mining activity not tracked correctly");
     }
 
     {

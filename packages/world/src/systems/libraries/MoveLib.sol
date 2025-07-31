@@ -43,8 +43,6 @@ library MoveLib {
     if (totalCost > 0) {
       decreasePlayerEnergy(player, above, totalCost);
       addEnergyToLocalPool(above, totalCost);
-      // Track movement energy for player activity (jump is considered walking)
-      PlayerActivityUtils.updateWalkEnergy(player, totalCost);
     }
   }
 
@@ -59,6 +57,8 @@ library MoveLib {
 
     // Update rate limits based on movement counts
     RateLimitUtils.move(player, walkSteps, swimSteps);
+    // Track moves
+    PlayerActivityUtils.trackMoves(player, walkSteps, swimSteps);
 
     _setPlayerPosition(playerEntityIds, finalCoord);
 
@@ -71,27 +71,6 @@ library MoveLib {
     if (totalCost > 0) {
       decreasePlayerEnergy(player, finalCoord, totalCost);
       addEnergyToLocalPool(finalCoord, totalCost);
-
-      // Track movement energy for player activity
-      // Split energy cost proportionally between walk and swim
-      if (walkSteps > 0 || swimSteps > 0) {
-        uint128 walkCost = walkSteps * Constants.MOVE_ENERGY_COST;
-        uint128 swimCost = swimSteps * Constants.WATER_MOVE_ENERGY_COST;
-        uint128 totalStepCost = walkCost + swimCost;
-
-        // If totalCost was capped by current energy, scale proportionally
-        if (totalCost < totalStepCost) {
-          walkCost = (totalCost * walkCost) / totalStepCost;
-          swimCost = totalCost - walkCost;
-        }
-
-        if (walkCost > 0) {
-          PlayerActivityUtils.updateWalkEnergy(player, walkCost);
-        }
-        if (swimCost > 0) {
-          PlayerActivityUtils.updateSwimEnergy(player, swimCost);
-        }
-      }
     }
 
     _handleAbove(player, playerCoord);
@@ -120,8 +99,6 @@ library MoveLib {
     if (totalCost > 0) {
       decreasePlayerEnergy(player, finalCoord, totalCost);
       addEnergyToLocalPool(finalCoord, totalCost);
-      // Track movement energy for player activity
-      PlayerActivityUtils.updateWalkEnergy(player, totalCost);
     }
 
     _handleAbove(player, playerCoord);

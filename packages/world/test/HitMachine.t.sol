@@ -10,14 +10,17 @@ import {
   UNEQUIPPED_ACTION_ENERGY_COST
 } from "../src/Constants.sol";
 
+import { ActivityType } from "../src/codegen/common.sol";
 import { Energy } from "../src/codegen/tables/Energy.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
+import { PlayerActivity } from "../src/codegen/tables/PlayerActivity.sol";
+
 import { EntityId } from "../src/types/EntityId.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { DustTest } from "./DustTest.sol";
 
-import { TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestInventoryUtils, TestPlayerActivityUtils } from "./utils/TestUtils.sol";
 
 contract HitMachineTest is DustTest {
   function testHitForceFieldWithoutTool() public {
@@ -39,6 +42,10 @@ contract HitMachineTest is DustTest {
     // Check energy reduction
     assertEq(Energy.getEnergy(forceField), 0);
     assertEq(Energy.getEnergy(aliceEntityId), 1);
+
+    // Check player activity tracking
+    uint256 hitMachineActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.HitMachineDamage);
+    assertEq(hitMachineActivity, UNEQUIPPED_ACTION_ENERGY_COST, "Hit machine damage activity not tracked correctly");
   }
 
   function testHitForceFieldWithoutToolFatal() public {

@@ -18,6 +18,7 @@ import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
 // Import user types
 import { EntityId } from "../../types/EntityId.sol";
+import { ActivityType } from "../common.sol";
 
 library PlayerActivity {
   // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "PlayerActivity", typeId: RESOURCE_TABLE });`
@@ -26,8 +27,8 @@ library PlayerActivity {
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0020010020000000000000000000000000000000000000000000000000000000);
 
-  // Hex-encoded key schema of (bytes32, uint256, bytes32)
-  Schema constant _keySchema = Schema.wrap(0x006003005f1f5f00000000000000000000000000000000000000000000000000);
+  // Hex-encoded key schema of (bytes32, uint256, uint8)
+  Schema constant _keySchema = Schema.wrap(0x004103005f1f0000000000000000000000000000000000000000000000000000);
   // Hex-encoded value schema of (uint256)
   Schema constant _valueSchema = Schema.wrap(0x002001001f000000000000000000000000000000000000000000000000000000);
 
@@ -39,7 +40,7 @@ library PlayerActivity {
     keyNames = new string[](3);
     keyNames[0] = "player";
     keyNames[1] = "deathCount";
-    keyNames[2] = "activityKey";
+    keyNames[2] = "activityType";
   }
 
   /**
@@ -68,11 +69,15 @@ library PlayerActivity {
   /**
    * @notice Get value.
    */
-  function getValue(EntityId player, uint256 deathCount, bytes32 activityKey) internal view returns (uint256 value) {
+  function getValue(
+    EntityId player,
+    uint256 deathCount,
+    ActivityType activityType
+  ) internal view returns (uint256 value) {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = activityKey;
+    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (uint256(bytes32(_blob)));
@@ -81,11 +86,15 @@ library PlayerActivity {
   /**
    * @notice Get value.
    */
-  function _getValue(EntityId player, uint256 deathCount, bytes32 activityKey) internal view returns (uint256 value) {
+  function _getValue(
+    EntityId player,
+    uint256 deathCount,
+    ActivityType activityType
+  ) internal view returns (uint256 value) {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = activityKey;
+    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (uint256(bytes32(_blob)));
@@ -94,11 +103,11 @@ library PlayerActivity {
   /**
    * @notice Get value.
    */
-  function get(EntityId player, uint256 deathCount, bytes32 activityKey) internal view returns (uint256 value) {
+  function get(EntityId player, uint256 deathCount, ActivityType activityType) internal view returns (uint256 value) {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = activityKey;
+    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (uint256(bytes32(_blob)));
@@ -107,11 +116,11 @@ library PlayerActivity {
   /**
    * @notice Get value.
    */
-  function _get(EntityId player, uint256 deathCount, bytes32 activityKey) internal view returns (uint256 value) {
+  function _get(EntityId player, uint256 deathCount, ActivityType activityType) internal view returns (uint256 value) {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = activityKey;
+    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (uint256(bytes32(_blob)));
@@ -120,11 +129,11 @@ library PlayerActivity {
   /**
    * @notice Set value.
    */
-  function setValue(EntityId player, uint256 deathCount, bytes32 activityKey, uint256 value) internal {
+  function setValue(EntityId player, uint256 deathCount, ActivityType activityType, uint256 value) internal {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = activityKey;
+    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
 
     StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((value)), _fieldLayout);
   }
@@ -132,11 +141,11 @@ library PlayerActivity {
   /**
    * @notice Set value.
    */
-  function _setValue(EntityId player, uint256 deathCount, bytes32 activityKey, uint256 value) internal {
+  function _setValue(EntityId player, uint256 deathCount, ActivityType activityType, uint256 value) internal {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = activityKey;
+    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((value)), _fieldLayout);
   }
@@ -144,11 +153,11 @@ library PlayerActivity {
   /**
    * @notice Set value.
    */
-  function set(EntityId player, uint256 deathCount, bytes32 activityKey, uint256 value) internal {
+  function set(EntityId player, uint256 deathCount, ActivityType activityType, uint256 value) internal {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = activityKey;
+    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
 
     StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((value)), _fieldLayout);
   }
@@ -156,11 +165,11 @@ library PlayerActivity {
   /**
    * @notice Set value.
    */
-  function _set(EntityId player, uint256 deathCount, bytes32 activityKey, uint256 value) internal {
+  function _set(EntityId player, uint256 deathCount, ActivityType activityType, uint256 value) internal {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = activityKey;
+    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((value)), _fieldLayout);
   }
@@ -168,11 +177,11 @@ library PlayerActivity {
   /**
    * @notice Delete all data for given keys.
    */
-  function deleteRecord(EntityId player, uint256 deathCount, bytes32 activityKey) internal {
+  function deleteRecord(EntityId player, uint256 deathCount, ActivityType activityType) internal {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = activityKey;
+    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
 
     StoreSwitch.deleteRecord(_tableId, _keyTuple);
   }
@@ -180,11 +189,11 @@ library PlayerActivity {
   /**
    * @notice Delete all data for given keys.
    */
-  function _deleteRecord(EntityId player, uint256 deathCount, bytes32 activityKey) internal {
+  function _deleteRecord(EntityId player, uint256 deathCount, ActivityType activityType) internal {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = activityKey;
+    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
 
     StoreCore.deleteRecord(_tableId, _keyTuple, _fieldLayout);
   }
@@ -218,12 +227,12 @@ library PlayerActivity {
   function encodeKeyTuple(
     EntityId player,
     uint256 deathCount,
-    bytes32 activityKey
+    ActivityType activityType
   ) internal pure returns (bytes32[] memory) {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = activityKey;
+    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
 
     return _keyTuple;
   }

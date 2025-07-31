@@ -67,7 +67,7 @@ contract HitPlayerSystem is System {
     addEnergyToLocalPool(targetCoord, damage);
 
     // Track damage dealt for player activity
-    PlayerActivityUtils.updateDealtDamageToPlayer(caller, damage);
+    PlayerActivityUtils.trackHitPlayer(caller, damage);
 
     _requireHitsAllowed(caller, targetCoord, toolData.tool, damage, extraData);
 

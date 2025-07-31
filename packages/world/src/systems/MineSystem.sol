@@ -384,7 +384,7 @@ library MinePhysicsLib {
     massLeft -= totalMassReduction;
 
     // Track the mass reduction for player activity
-    PlayerActivityUtils.updateMinedMass(ctx.caller, totalMassReduction, ctx.toolData.toolType, ctx.objectType);
+    PlayerActivityUtils.trackMine(ctx.caller, totalMassReduction, ctx.toolData.toolType);
 
     return (massLeft, true);
   }

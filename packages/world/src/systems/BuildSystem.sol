@@ -194,7 +194,7 @@ library BuildLib {
     }
 
     // Track build energy spent
-    PlayerActivityUtils.updateBuildEnergy(ctx.caller, energyCost);
+    PlayerActivityUtils.trackBuildEnergy(ctx.caller, energyCost);
 
     _updateInventory(ctx);
 
@@ -203,7 +203,7 @@ library BuildLib {
     // Track build mass (only for base block, not relatives)
     if (base._exists()) {
       uint128 mass = ObjectPhysics._getMass(ctx.buildType);
-      PlayerActivityUtils.updateBuildMass(ctx.caller, mass, uint16(ctx.buildType));
+      PlayerActivityUtils.trackBuildMass(ctx.caller, mass);
     }
 
     return (base, coords);
