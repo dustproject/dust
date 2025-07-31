@@ -851,7 +851,7 @@ contract MoveTest is DustTest {
     setTerrainAtCoord(belowCoord, ObjectTypes.Grass);
 
     vm.prank(alice);
-    vm.expectRevert("Move limit exceeded");
+    vm.expectRevert("Rate limit exceeded");
     world.move(aliceEntityId, newCoords);
 
     Vec3 finalCoord = EntityPosition.get(aliceEntityId);
@@ -899,7 +899,7 @@ contract MoveTest is DustTest {
     setTerrainAtCoord(belowCoord, ObjectTypes.Water);
 
     vm.prank(alice);
-    vm.expectRevert("Move limit exceeded");
+    vm.expectRevert("Rate limit exceeded");
     world.move(aliceEntityId, newCoords);
 
     Vec3 finalCoord = EntityPosition.get(aliceEntityId);

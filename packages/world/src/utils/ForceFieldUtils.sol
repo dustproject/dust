@@ -15,6 +15,7 @@ import { EntityPosition } from "../utils/Vec3Storage.sol";
 import { MACHINE_ENERGY_DRAIN_RATE } from "../Constants.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectTypes } from "../types/ObjectType.sol";
+import { ProgramId } from "../types/ProgramId.sol";
 import { Vec3 } from "../types/Vec3.sol";
 
 library ForceFieldUtils {
@@ -103,5 +104,28 @@ library ForceFieldUtils {
   function _isFragmentActive(FragmentData memory fragmentData, EntityId forceField) private view returns (bool) {
     return forceField._exists() && fragmentData.forceField == forceField
       && fragmentData.forceFieldCreatedAt == Machine._getCreatedAt(forceField);
+  }
+
+  /**
+   * @dev Get the program and target entity for hook execution at a given coordinate
+   * @param coord The coordinate to check for force field and program
+   * @return program The program ID to execute hooks on (if any)
+   * @return target The target entity (fragment or forcefield) for the hook
+   */
+  function getHookTarget(Vec3 coord) internal returns (ProgramId, EntityId, EnergyData memory energyData) {
+    (EntityId forceField, EntityId fragment) = getForceField(coord);
+    if (!forceField._exists()) {
+      return (ProgramId.wrap(0), forceField, energyData);
+    }
+
+    energyData = updateMachineEnergy(forceField);
+
+    // We know fragment is active because its forcefield exists, so we can use its program
+    ProgramId program = fragment._getProgram();
+    if (program.exists()) {
+      return (program, fragment, energyData);
+    }
+
+    return (forceField._getProgram(), forceField, energyData);
   }
 }
