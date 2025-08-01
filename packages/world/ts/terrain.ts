@@ -114,9 +114,6 @@ export async function getTerrainBlockTypes(
     chunkGroups.get(chunkKey)!.push(coord);
   }
 
-  console.log(chunkGroups);
-  console.log(chunkGroups.keys());
-
   const chunkPromises = Array.from(chunkGroups.keys()).map(
     async (chunkCacheKey) => {
       const [worldAddress, chunkCoord] = deconstructCacheKey(chunkCacheKey);
