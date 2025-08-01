@@ -114,6 +114,9 @@ export async function getTerrainBlockTypes(
     chunkGroups.get(chunkKey)!.push(coord);
   }
 
+  console.log(chunkGroups);
+  console.log(chunkGroups.keys());
+
   const chunkPromises = Array.from(chunkGroups.keys()).map(
     async (chunkCacheKey) => {
       const [worldAddress, chunkCoord] = deconstructCacheKey(chunkCacheKey);
@@ -140,7 +143,9 @@ export async function getTerrainBlockTypes(
   return coords.map((coord) => {
     const chunkCoord = voxelToChunkPos(coord);
     const chunkCacheKey = getCacheKey(worldAddress, chunkCoord);
-    const bytecode = chunkBytecodes.get(chunkCacheKey)!;
+    const bytecode = chunkBytecodes.get(chunkCacheKey);
+    if (!bytecode) throw new Error("Chunk not explored");
+
     return readTerrainBlockType(bytecode, coord);
   });
 }
