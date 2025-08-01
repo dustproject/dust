@@ -14,6 +14,7 @@ import { ObjectTypes } from "../../types/ObjectType.sol";
 import { Vec3, vec3 } from "../../types/Vec3.sol";
 import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../../utils/EnergyUtils.sol";
 import { EntityUtils } from "../../utils/EntityUtils.sol";
+import { PlayerActivityUtils } from "../../utils/PlayerActivityUtils.sol";
 import { RateLimitUtils } from "../../utils/RateLimitUtils.sol";
 
 error NonPassableBlock(int32 x, int32 y, int32 z, ObjectType objectType);
@@ -56,6 +57,8 @@ library MoveLib {
 
     // Update rate limits based on movement counts
     RateLimitUtils.move(player, walkSteps, swimSteps);
+    // Track moves
+    PlayerActivityUtils.trackMoves(player, walkSteps, swimSteps);
 
     _setPlayerPosition(playerEntityIds, finalCoord);
 

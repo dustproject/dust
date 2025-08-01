@@ -32,6 +32,18 @@ enum RateLimitType {
   Work
 }
 
+enum ActivityType {
+  MinePickMass,
+  MineAxeMass,
+  HitPlayerDamage,
+  HitMachineDamage,
+  MoveWalkSteps,
+  MoveSwimSteps,
+  MoveFallEnergy,
+  BuildEnergy,
+  BuildMass
+}
+
 enum Direction {
   PositiveX,
   NegativeX,

@@ -1,0 +1,75 @@
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.8.24;
+
+import { ActivityType } from "../codegen/common.sol";
+import { Death } from "../codegen/tables/Death.sol";
+import { PlayerActivity } from "../codegen/tables/PlayerActivity.sol";
+import { EntityId } from "../types/EntityId.sol";
+import { ObjectType } from "../types/ObjectType.sol";
+
+library PlayerActivityUtils {
+  // Mining tracking - with tool specialization
+  function trackMine(EntityId player, uint128 massReduced, ObjectType toolType) internal {
+    ActivityType activityType;
+    if (toolType.isAxe()) {
+      activityType = ActivityType.MineAxeMass;
+    } else if (toolType.isPick()) {
+      activityType = ActivityType.MinePickMass;
+    } else {
+      // TODO: should we track bare hands mining?
+      return;
+    }
+    _updateActivity(player, activityType, uint256(massReduced));
+  }
+
+  // Combat tracking
+  function trackHitPlayer(EntityId player, uint128 damage) internal {
+    _updateActivity(player, ActivityType.HitPlayerDamage, uint256(damage));
+  }
+
+  function trackHitMachine(EntityId player, uint128 damage) internal {
+    _updateActivity(player, ActivityType.HitMachineDamage, uint256(damage));
+  }
+
+  // Movement tracking
+  function trackMoves(EntityId player, uint128 walkSteps, uint128 swimSteps) internal {
+    if (walkSteps > 0) {
+      _updateActivity(player, ActivityType.MoveWalkSteps, uint256(walkSteps));
+    }
+    if (swimSteps > 0) {
+      _updateActivity(player, ActivityType.MoveSwimSteps, uint256(swimSteps));
+    }
+  }
+
+  function trackFallEnergy(EntityId player, uint128 fallEnergy) internal {
+    _updateActivity(player, ActivityType.MoveFallEnergy, uint256(fallEnergy));
+  }
+
+  // Building tracking
+  function trackBuildEnergy(EntityId player, uint128 energySpent) internal {
+    _updateActivity(player, ActivityType.BuildEnergy, uint256(energySpent));
+  }
+
+  function trackBuildMass(EntityId player, uint128 massBuilt) internal {
+    _updateActivity(player, ActivityType.BuildMass, uint256(massBuilt));
+  }
+
+  // Internal helper
+  function _updateActivity(EntityId player, ActivityType activityType, uint256 additionalValue) private {
+    if (additionalValue == 0) {
+      return; // No update needed
+    }
+
+    uint256 deathCount = Death._getDeaths(player);
+    uint256 currentValue = PlayerActivity._getValue(player, deathCount, activityType);
+    uint256 newValue = currentValue + additionalValue;
+
+    PlayerActivity._setValue(player, deathCount, activityType, newValue);
+  }
+
+  // Utility function to get current activity value
+  function getActivityValue(EntityId player, ActivityType activityType) internal view returns (uint256) {
+    uint256 deathCount = Death._getDeaths(player);
+    return PlayerActivity._getValue(player, deathCount, activityType);
+  }
+}

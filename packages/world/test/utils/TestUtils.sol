@@ -17,9 +17,11 @@ import {
   updatePlayerEnergy as _updatePlayerEnergy
 } from "../../src/utils/EnergyUtils.sol";
 
+import { ActivityType } from "../../src/codegen/common.sol";
 import { EntityUtils } from "../../src/utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../../src/utils/ForceFieldUtils.sol";
 import { InventoryUtils, SlotAmount, SlotTransfer } from "../../src/utils/InventoryUtils.sol";
+import { PlayerActivityUtils } from "../../src/utils/PlayerActivityUtils.sol";
 import { PlayerUtils } from "../../src/utils/PlayerUtils.sol";
 import { ToolData, ToolUtils } from "../../src/utils/ToolUtils.sol";
 
@@ -298,5 +300,23 @@ library TestForceFieldUtils {
   function destroyForceField(EntityId forceField) public asWorld {
     Energy._deleteRecord(forceField);
     Machine._deleteRecord(forceField);
+  }
+}
+
+library TestPlayerActivityUtils {
+  bytes32 constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestPlayerActivityUtils");
+
+  modifier asWorld() {
+    TestUtils.asWorld(LIB_ADDRESS_SLOT);
+    _;
+  }
+
+  // Hack to be able to access the library address until we figure out why mud doesn't allow it
+  function init(address libAddress) public {
+    TestUtils.init(LIB_ADDRESS_SLOT, libAddress);
+  }
+
+  function getActivityValue(EntityId player, ActivityType activityType) public asWorld returns (uint256) {
+    return PlayerActivityUtils.getActivityValue(player, activityType);
   }
 }
