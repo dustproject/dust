@@ -3,6 +3,9 @@ import { defineConfig } from "vocs";
 export default defineConfig({
   title: "DUST",
   rootDir: "./",
+  iconUrl: "./dust.png",
+  logoUrl: "./dust.png",
+  ogImageUrl: "./dust.png",
   sidebar: [
     {
       text: "Programs (contracts)",
