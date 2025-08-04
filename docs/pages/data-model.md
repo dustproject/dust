@@ -28,6 +28,15 @@ EntityObjectType: {
   },
   key: ["entityId"],
 },
+EntityPosition: {
+  schema: {
+    entityId: "EntityId",
+    x: "int32",
+    y: "int32",
+    z: "int32",
+  },
+  key: ["entityId"],
+}
 ```
 
 To save on gas, this table is not prefilled with the entire map. Instead the intitial terrain is defined in the bytecode of a smart contract.
