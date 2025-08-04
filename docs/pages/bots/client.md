@@ -14,15 +14,21 @@ function fillBucket(EntityId caller, Vec3 waterCoord, uint16 bucketSlot) externa
 
 2. Call the tx
 
-- Many TXs will require the caller entity as the first argument. This is derived from the player's address. You can get this using `world.utils.encodePlayer(world.sessionClient.userAddress)`, in the browser console.
+- Many TXs will require the caller entity as the first argument. This is derived from the player's address. You can get this using `world.utils.encodePlayer(world.sessionClient.userAddress)`.
 
 ```typescript
 await world.write(
   "fillBucket",
   world.utils.encodePlayer(world.sessionClient.userAddress),
-  packVec3([597, 143, -1623]),
+  world.utils.packVec3([597, 143, -1623]),
   1
 );
 ```
 
-Right after this is called, the transaction details will be printed in the console along with if it was a success or not.
+Right after this is called, the transaction details will be printed in the console.
+
+![TX from console](/tx-from-console.png)
+
+You can expand on the object in the log to see more details, such as the transaction hash. eg fillBucket tx hash: [0xc3fe7fc926229b756afb2fd1cc7570c7babb4c37c28ddcc8617abed23bacc26e](https://explorer.redstone.xyz/tx/0xc3fe7fc926229b756afb2fd1cc7570c7babb4c37c28ddcc8617abed23bacc26e)
+
+![TX from console](/tx-from-console-expanded.png)
