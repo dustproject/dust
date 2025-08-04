@@ -15,7 +15,7 @@ import {
   BUILD_ENERGY_COST,
   CHUNK_COMMIT_EXPIRY_BLOCKS,
   MAX_ENTITY_INFLUENCE_RADIUS,
-  TILL_ENERGY_COST
+  TOOL_ACTION_ENERGY_COST
 } from "../src/Constants.sol";
 
 import { EntityId } from "../src/types/EntityId.sol";
@@ -154,7 +154,7 @@ contract FarmingTest is DustTest {
 
     // Set player energy to less than required
     uint128 toolMass = 0; // Assuming tool mass is 0 for simplicity
-    uint128 energyCost = TILL_ENERGY_COST + toolMass;
+    uint128 energyCost = TOOL_ACTION_ENERGY_COST + toolMass;
     Energy.set(
       aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: energyCost - 1, drainRate: 0 })
     );

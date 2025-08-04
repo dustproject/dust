@@ -12,7 +12,7 @@ import { DustTest } from "./DustTest.sol";
 
 import { EntityPosition, LocalEnergyPool, ReverseMovablePosition } from "../src/utils/Vec3Storage.sol";
 
-import { DEFAULT_MINE_ENERGY_COST, MOVE_ENERGY_COST, PLAYER_FALL_ENERGY_COST } from "../src/Constants.sol";
+import { BARE_HANDS_ACTION_ENERGY_COST, MOVE_ENERGY_COST, PLAYER_FALL_ENERGY_COST } from "../src/Constants.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
 
 import { ObjectTypes } from "../src/types/ObjectType.sol";
@@ -92,7 +92,7 @@ contract GravityTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
     // Set player energy to exactly enough for a mine, but not for a fall
-    uint128 exactEnergy = DEFAULT_MINE_ENERGY_COST + 1;
+    uint128 exactEnergy = BARE_HANDS_ACTION_ENERGY_COST + 1;
     Energy.set(
       aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: exactEnergy, drainRate: 0 })
     );
@@ -100,7 +100,7 @@ contract GravityTest is DustTest {
     // Create a scenario where after mining, player will fall and the fall energy cost will kill them
     Vec3 mineCoord = playerCoord - vec3(0, 1, 0);
     ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
-    ObjectPhysics.setMass(mineObjectType, DEFAULT_MINE_ENERGY_COST);
+    ObjectPhysics.setMass(mineObjectType, BARE_HANDS_ACTION_ENERGY_COST);
 
     // Set up a deep pit underneath
     setTerrainAtCoord(mineCoord - vec3(0, 1, 0), ObjectTypes.Air);
@@ -108,7 +108,7 @@ contract GravityTest is DustTest {
     setTerrainAtCoord(mineCoord - vec3(0, 3, 0), ObjectTypes.Air);
     setTerrainAtCoord(mineCoord - vec3(0, 4, 0), ObjectTypes.Dirt);
 
-    // Mining should use DEFAULT_MINE_ENERGY_COST, and falling should require PLAYER_FALL_ENERGY_COST,
+    // Mining should use BARE_HANDS_ACTION_ENERGY_COST, and falling should require PLAYER_FALL_ENERGY_COST,
     // which the player doesn't have enough for, resulting in death
     vm.prank(alice);
     world.mine(aliceEntityId, mineCoord, "");
@@ -121,14 +121,14 @@ contract GravityTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
     // Set player energy to exactly enough for a mine and landing on water, but not for a long fall
-    uint128 initialEnergy = DEFAULT_MINE_ENERGY_COST + MOVE_ENERGY_COST + 1;
+    uint128 initialEnergy = BARE_HANDS_ACTION_ENERGY_COST + MOVE_ENERGY_COST + 1;
     Energy.set(
       aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: initialEnergy, drainRate: 0 })
     );
 
     Vec3 mineCoord = playerCoord - vec3(0, 1, 0);
     ObjectType mineObjectType = TerrainLib.getBlockType(mineCoord);
-    ObjectPhysics.setMass(mineObjectType, DEFAULT_MINE_ENERGY_COST);
+    ObjectPhysics.setMass(mineObjectType, BARE_HANDS_ACTION_ENERGY_COST);
 
     // Set up a deep pit underneath
     setTerrainAtCoord(mineCoord - vec3(0, 1, 0), ObjectTypes.Air);
@@ -150,7 +150,7 @@ contract GravityTest is DustTest {
     assertGt(Energy.getEnergy(aliceEntityId), 0, "Player should not have died from fall on water");
     assertEq(
       Energy.getEnergy(aliceEntityId),
-      initialEnergy - DEFAULT_MINE_ENERGY_COST - MOVE_ENERGY_COST,
+      initialEnergy - BARE_HANDS_ACTION_ENERGY_COST - MOVE_ENERGY_COST,
       "Player shouldn't have died"
     );
   }
