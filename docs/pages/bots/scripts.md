@@ -4,9 +4,9 @@ Custom bot scripts can be written in various different ways.
 
 ## Example: Filling a bucket
 
-0. Install pre-reqs
+#### 0. Install pre-reqs
 
-```
+```bash
 pnpm install viem @latticexyz/common
 ```
 
@@ -14,7 +14,7 @@ The DUST world package is not available via NPM, and needs to be installed by ad
 
 `"@dust/world": "https://pkg.pr.new/dustproject/dust/@dust/world@3374e63"`
 
-1. Setup the wallet clients.
+#### 1. Setup the wallet clients.
 
 ```typescript
 import {
@@ -42,7 +42,7 @@ const walletClient = createWalletClient({
 }).extend(transactionQueue());
 ```
 
-2. Call the tx
+#### 2. Call the tx
 
 ```typescript
 import IWorldAbi from "@dust/world/out/IWorld.sol/IWorld.abi";
