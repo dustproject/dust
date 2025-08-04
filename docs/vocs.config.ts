@@ -41,4 +41,18 @@ export default defineConfig({
       ],
     },
   ],
+  socials: [
+    {
+      icon: "github",
+      link: "https://github.com/dustproject/dust",
+    },
+    {
+      icon: "discord",
+      link: "https://discord.gg/QFsFhehfhS",
+    },
+    {
+      icon: "x",
+      link: "https://x.com/Dust_Org",
+    },
+  ],
 });
