@@ -21,6 +21,14 @@ export default defineConfig({
       ],
     },
     {
+      text: "Bots",
+      items: [
+        { text: "Introduction", link: "/bots" },
+        { text: "Client", link: "/bots/client" },
+        { text: "Scripts", link: "/bots/scripts" },
+      ],
+    },
+    {
       text: "Examples",
       items: [
         { text: "Swap chest", link: "/examples/swap-chest" },
