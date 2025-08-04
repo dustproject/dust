@@ -95,7 +95,7 @@ SELECT "entityId", "x", "y", "z" FROM "EntityPosition" WHERE "entityId" = '0x01c
 
 This shows the player is at `[1380, 79, -2434]`.
 
-### Reading In Your Program
+### Reading In A Program
 
 ```solidity
 import { EntityId, EntityTypeLib } from "@dust/world/src/types/EntityId.sol";
@@ -111,7 +111,7 @@ function getObjectTypeAt(Vec3 coord) internal view returns (ObjectType) {
 }
 ```
 
-### Reading In Your App
+### Reading In An App
 
 ```typescript
 import { encodeBlock, getTerrainBlockType, Vec3 } from "@dust/world/internal";
@@ -133,3 +133,83 @@ function getObjectTypeAt(
 ```
 
 ## Inventory
+
+Players, chests, and all [pass through blocks](https://github.com/dustproject/dust/blob/main/packages/world/ts/objects.ts#L2033) (ie, air, water, flower, etc) can have an inventory.
+
+Players have 36 slots
+
+![player inventory labelled](player-inventory-labelled.png)
+
+Chests have 27 slots
+
+![chest inventory labelled](chest-inventory-labelled.png)
+
+### Tables
+
+```typescript
+InventorySlot: {
+  schema: {
+    owner: "EntityId",
+    slot: "uint16",
+    entityId: "EntityId",
+    objectType: "ObjectType",
+    amount: "uint16",
+  },
+  key: ["owner", "slot"],
+},
+InventoryBitmap: {
+  schema: {
+    owner: "EntityId",
+    bitmap: "uint256[]", // Each uint256 holds 256 slots
+  },
+  key: ["owner"],
+},
+```
+
+### Reading Via Explorer
+
+![player inventory](player-inventory.png)
+
+1. Get the player entity id using the `encodePlayer` util:
+
+```typescript
+world.utils.encodePlayer("0xcD0DD7a799b8281dddA11c5AA54FE8A2D05aAcF4");
+```
+
+This returns `0x01cd0dd7a799b8281ddda11c5aa54fe8a2d05aacf40000000000000000000000`
+
+2. Filter the `InventorySlot` table using this entity id and slot:
+
+```sql
+SELECT "entityId", "x", "y", "z" FROM "EntityPosition" WHERE "entityId" = '0x01cd0dd7a799b8281ddda11c5aa54fe8a2d05aacf40000000000000000000000';
+```
+
+![explorer entity position](explorer-entity-position.png)
+
+This shows the player is at `[1380, 79, -2434]`.
+
+### Reading In A Program
+
+```solidity
+import { InventorySlot, InventorySlotData } from "@dust/world/src/codegen/tables/InventorySlot.sol";
+
+InventorySlotData slotData = InventorySlot.get(EntityId.encodePlayer(0xcD0DD7a799b8281dddA11c5AA54FE8A2D05aAcF4), 1);
+
+```
+
+### Reading In An App
+
+```typescript
+import { getRecord } from "@latticexyz/store/internal";
+import { encodePlayer } from "@dust/world/internal";
+import mudConfig from "@dust/world/mud.config";
+
+const slotData = await getRecord(publicClient, {
+  address: worldAddress,
+  table: mudConfig.tables.InventorySlot,
+  key: {
+    owner: encodePlayer("0xcD0DD7a799b8281dddA11c5AA54FE8A2D05aAcF4"),
+    slot: 1,
+  },
+});
+```

@@ -26,7 +26,7 @@ contract GiveScript is Script {
 
     ensureDebugSystem(world);
 
-    EntityId playerEntityId = EntityTypeLib.encodePlayer(playerAddress);
+    EntityId playerEntityId = EntityTypeLib.encodePlayer(0xcD0DD7a799b8281dddA11c5AA54FE8A2D05aAcF4);
     world.debugAddToInventory(playerEntityId, ObjectTypes.OakLog, 99);
     world.debugAddToInventory(playerEntityId, ObjectTypes.Chest, 1);
     world.debugAddToInventory(playerEntityId, ObjectTypes.MelonSmoothie, 99);
