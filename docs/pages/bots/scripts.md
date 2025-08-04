@@ -10,7 +10,7 @@ Custom bot scripts can be written in various different ways.
 pnpm install viem @latticexyz/common
 ```
 
-The DUST world package is not available via NPM, and needs to be installed by adding the published github release to your `package.json`.
+The DUST world package is not available via NPM, and needs to be installed by adding the published github release to your `package.json`, then running `pnpm install`.
 
 `"@dust/world": "https://pkg.pr.new/dustproject/dust/@dust/world@3374e63"`
 
