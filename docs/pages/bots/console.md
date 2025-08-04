@@ -1,12 +1,12 @@
-# Client
+# Browser Console
 
-The DUST client exposes a bunch of utils under the `world` variable name. Transasctions can be called usnig the `world.write` util.
+The DUST client exposes a bunch of utils under the `world` variable name. Transactions can be called using the `world.write` util.
 
 ## Example: Filling a bucket
 
 1. Figure out the input parameters for the tx.
 
-- DUST is built on [MUD](https://mud.dev/) and so each function has its own system contract. You can see all the system interfaces [here](https://github.com/dustproject/dust/tree/main/packages/world/src/codegen/world). We can see the [BucketSystem interface](https://github.com/dustproject/dust/blob/main/packages/world/src/codegen/world/IBucketSystem.sol#L15), shows the interface for filling a bucket is:
+- DUST is built on [MUD](https://mud.dev/) and so each function has its own system contract. You can see all the system interfaces [here](https://github.com/dustproject/dust/tree/main/packages/world/src/codegen/world). We can see the [BucketSystem interface](https://github.com/dustproject/dust/blob/main/packages/world/src/codegen/world/IBucketSystem.sol#L15), shows the parameters for filling a bucket are:
 
 ```solidity
 function fillBucket(EntityId caller, Vec3 waterCoord, uint16 bucketSlot) external;
@@ -14,7 +14,9 @@ function fillBucket(EntityId caller, Vec3 waterCoord, uint16 bucketSlot) externa
 
 2. Call the tx
 
-- Many TXs will require the caller entity as the first argument. This is derived from the player's address. You can get this using `world.utils.encodePlayer(world.sessionClient.userAddress)`.
+:::tip
+Almost all TXs will require the caller entity as the first argument. This is derived from the player's address. You can get this using `world.utils.encodePlayer(world.sessionClient.userAddress)`.
+:::
 
 ```typescript
 await world.write(
