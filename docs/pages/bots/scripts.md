@@ -61,9 +61,11 @@ const txHash = await worldContract.write.fillBucket(
   packVec3([597, 143, -1623]),
   1
 );
+
 const txReceipt = await publicClient.waitForTransactionReceipt({
   hash: txHash,
 });
+
 if (txReceipt.status !== "success") {
   console.error(`Tx (${txHash}) failed`);
 } else {
