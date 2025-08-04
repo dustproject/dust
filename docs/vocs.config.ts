@@ -24,7 +24,6 @@ export default defineConfig({
       text: "Bots",
       items: [
         { text: "Introduction", link: "/bots" },
-        { text: "Reads", link: "/bots/reads" },
         { text: "Client", link: "/bots/client" },
         { text: "Scripts", link: "/bots/scripts" },
       ],
@@ -36,6 +35,10 @@ export default defineConfig({
         { text: "Blueprint", link: "/examples/blueprint" },
         { text: "Spawn tile", link: "/examples/spawn-tile" },
       ],
+    },
+    {
+      text: "FAQ",
+      items: [{ text: "Frequently Asked Questions", link: "/faq" }],
     },
   ],
 });
