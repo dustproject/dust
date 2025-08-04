@@ -24,6 +24,7 @@ export default defineConfig({
       text: "Bots",
       items: [
         { text: "Introduction", link: "/bots" },
+        { text: "Reads", link: "/bots/reads" },
         { text: "Client", link: "/bots/client" },
         { text: "Scripts", link: "/bots/scripts" },
       ],
