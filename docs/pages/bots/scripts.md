@@ -15,7 +15,7 @@ The DUST world package is not available via NPM, and needs to be installed by ad
 
 `"@dust/world": "https://pkg.pr.new/dustproject/dust/@dust/world@3374e63"`
 
-1. Setup the wallet clients
+1. Setup the wallet clients.
 
 ```typescript
 import {
@@ -25,8 +25,9 @@ import {
   http,
   webSocket,
 } from "viem";
-import { transactionQueue } from "@latticexyz/common/actions";
 import { createBurnerAccount } from "@latticexyz/common";
+import { transactionQueue } from "@latticexyz/common/actions";
+import { redstone } from "@latticexyz/common/chains";
 
 const clientOptions = {
   chain: redstone,
