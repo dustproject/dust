@@ -29,6 +29,7 @@ export default defineConfig({
         { text: "Introduction", link: "/bots" },
         { text: "Browser Console", link: "/bots/console" },
         { text: "Scripts", link: "/bots/scripts" },
+        { text: "FAQ", link: "/bots/faq" },
       ],
     },
     {
@@ -38,10 +39,6 @@ export default defineConfig({
         { text: "Blueprint", link: "/examples/blueprint" },
         { text: "Spawn tile", link: "/examples/spawn-tile" },
       ],
-    },
-    {
-      text: "FAQ",
-      items: [{ text: "Frequently Asked Questions", link: "/faq" }],
     },
   ],
 });

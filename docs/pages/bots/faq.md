@@ -1,4 +1,4 @@
-# FAQ
+# Frequently Asked Questions
 
 :::details[I moved via a bot, but its not updating in the client]
 
