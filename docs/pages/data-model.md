@@ -181,12 +181,12 @@ This returns `0x01cd0dd7a799b8281ddda11c5aa54fe8a2d05aacf40000000000000000000000
 2. Filter the `InventorySlot` table using this entity id and slot:
 
 ```sql
-SELECT "entityId", "x", "y", "z" FROM "EntityPosition" WHERE "entityId" = '0x01cd0dd7a799b8281ddda11c5aa54fe8a2d05aacf40000000000000000000000';
+SELECT "owner", "slot", "entityId", "objectType", "amount" FROM "InventorySlot" WHERE "owner" = '0x01cd0dd7a799b8281ddda11c5aa54fe8a2d05aacf40000000000000000000000';
 ```
 
-![explorer entity position](explorer-entity-position.png)
+![explorer entity inventory slot](explorer-entity-inventory-slot.png)
 
-This shows the player is at `[1380, 79, -2434]`.
+This shows all the items the player has. eg, the player has 4 WheatSeeds (id 134) in slot 2.
 
 ### Reading In A Program
 
