@@ -39,7 +39,7 @@ EntityPosition: {
 }
 ```
 
-To save on gas, this table is not prefilled with the entire map. Instead the intitial terrain is defined in the bytecode of a smart contract.
+To save on gas, this table is not prefilled with the entire map. Instead the intitial terrain is defined in the bytecode of a smart contract (each chunk has its own contract).
 
 ### Reading Via Explorer
 
