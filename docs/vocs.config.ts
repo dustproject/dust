@@ -8,6 +8,13 @@ export default defineConfig({
   ogImageUrl: "/dust.png",
   sidebar: [
     {
+      text: "Overview",
+      items: [
+        { text: "Introduction", link: "/" },
+        { text: "Data Model", link: "/data-model" },
+      ],
+    },
+    {
       text: "Programs (contracts)",
       items: [
         { text: "Introduction", link: "/programs" },
