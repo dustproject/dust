@@ -123,4 +123,41 @@ export type ClientRpcSchema = RpcSchema.From<
           }
         | undefined;
     }
+  | {
+      Request: {
+        method: "getMapTileMetadata";
+      };
+      ReturnType: {
+        id: string;
+        version: string;
+        fullImageURL: string;
+        fullImageWidth: number;
+        fullImageHeight: number;
+        fullTileImageURL: string;
+        boundsStart: [number, number];
+        boundsEnd: [number, number];
+        tileImageTemplateURL: string;
+        tileMaxZoomLevel: number;
+        tileMinZoomLevel: number;
+        tileSize: number;
+        versionIndex: {
+          [k: string]: number;
+        };
+      };
+    }
+  | {
+      Request: {
+        method: "getMapTileURL";
+        params: {
+          tileImageTemplateURL: string;
+          versionIndex: {
+            [k: string]: number;
+          };
+          kind: "surface" | "fog";
+          pos: [number, number];
+          zoom: number;
+        };
+      };
+      ReturnType: string;
+    }
 >;
