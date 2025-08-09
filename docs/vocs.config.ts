@@ -27,7 +27,7 @@ export default defineConfig({
       items: [
         { text: "Introduction", link: "/apps" },
         { text: "Registration", link: "/apps/registration" },
-        { text: "Dustkit", link: "/apps/dustkit" },
+        { text: "DustKit", link: "/apps/dustkit" },
       ],
     },
     {
