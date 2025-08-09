@@ -1,8 +1,8 @@
 # Introduction
 
-The Dust client supports embedded apps - web apps that integrate directly into the game client UI and interact with in-game objects and physics. Apps let developers build on top of the world and extend the game client with custom functionality like shops and marketplaces.
+The DUST client supports embedded apps - web apps that integrate directly into the game client UI and interact with in-game objects and physics. Apps let developers build on top of the world and extend the game client with custom functionality like shops and marketplaces.
 
-A Dust app is:
+A DUST app is:
 
 - A web app hosted at a URL
 - Described by a JSON manifest ([schema](https://raw.githubusercontent.com/dustproject/dust/refs/heads/main/packages/dustkit/json-schemas/app-config.json))
@@ -13,7 +13,7 @@ A Dust app is:
 
 ```
 User action (e.g. opens chest)
-└─> Dust client (detects program + associated app)
+└─> DUST client (detects program + associated app)
       └─> <iframe> (loads app.startUrl)
           └─> DustKit SDK (postMessage bridge)
               └─> App signals 'ready'
@@ -28,12 +28,12 @@ User action (e.g. opens chest)
 ### App lifecycle
 
 1. **[Registration](registration)**: Developer interacts with the App Registry to register the app's manifest URL.
-2. **Discovery**: The Dust client automatically detects app registrations.
+2. **Discovery**: The DUST client automatically detects app registrations.
 3. **Launch**:
    - Manual: User opens via their desktop
    - Contextual: Interacts with an in-game entity (e.g. chest)
 4. **Communication**:
    - App loads in iframe
-   - [Dustkit](dustkit) sets up postMessage channel
+   - [DustKit](dustkit) sets up postMessage channel
    - App sends `ready` message
    - Client sends contextual info (e.g. `entityId` of chest that opened the app)
