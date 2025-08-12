@@ -116,10 +116,7 @@ function getObjectTypeAt(Vec3 coord) internal view returns (ObjectType) {
 ```typescript
 import { encodeBlock, getTerrainBlockType, Vec3 } from "@dust/world/internal";
 
-function getObjectTypeAt(
-  publicClient: PublicClient,
-  pos: Vec3
-): Promise<number> {
+async function getObjectTypeAt(pos: Vec3): Promise<number> {
   const objectTypeRecord = stash.getRecord({
     table: tables.EntityObjectType,
     key: { entityId: encodeBlock(pos) },
