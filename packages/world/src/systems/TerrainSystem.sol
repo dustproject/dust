@@ -52,9 +52,11 @@ contract TerrainSystem is System {
     bytes32 leaf = TerrainLib._getVegetationLeafHash(vegetationCount);
     require(MerkleProof.verify(merkleProof, regionRoot, leaf), "Invalid merkle proof");
 
-    // Add +1 to be able to distinguish between unexplored and empty region
-    InitialEnergyPool._set(regionCoord, vegetationCount * INITIAL_ENERGY_PER_VEGETATION + 1);
+    uint128 initialEnergy = vegetationCount * INITIAL_ENERGY_PER_VEGETATION + 1;
 
-    LocalEnergyPool._set(regionCoord, INITIAL_LOCAL_ENERGY_BUFFER);
+    // Add +1 to be able to distinguish between unexplored and empty region
+    InitialEnergyPool._set(regionCoord, initialEnergy);
+
+    LocalEnergyPool._set(regionCoord, initialEnergy + INITIAL_LOCAL_ENERGY_BUFFER);
   }
 }
