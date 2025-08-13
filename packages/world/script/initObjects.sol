@@ -225,7 +225,7 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.Paper, ObjectPhysicsData({ mass: 200000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Stick, ObjectPhysicsData({ mass: 2250000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.Lodestone, ObjectPhysicsData({ mass: 771000000000000000, energy: 0 }));
-  ObjectPhysics.set(ObjectTypes.Anvil, ObjectPhysicsData({ mass: 711000000000000000, energy: 0 }));
+  ObjectPhysics.set(ObjectTypes.Anvil, ObjectPhysicsData({ mass: 2037000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.WoodenPick, ObjectPhysicsData({ mass: 22500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.CopperPick, ObjectPhysicsData({ mass: 534000000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.IronPick, ObjectPhysicsData({ mass: 2034000000000000000, energy: 0 }));

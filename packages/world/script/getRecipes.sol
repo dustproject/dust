@@ -5,7 +5,7 @@ import { RecipesData } from "../src/codegen/tables/Recipes.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 
 function getRecipes() pure returns (RecipesData[] memory) {
-  RecipesData[] memory recipes = new RecipesData[](160);
+  RecipesData[] memory recipes = new RecipesData[](161);
 
   // Recipe 0
   {
@@ -505,18 +505,18 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.Stone.unwrap();
-    inputAmounts[0] = 30;
-    inputTypes[1] = ObjectTypes.IronBar.unwrap();
+    inputTypes[0] = ObjectTypes.IronBar.unwrap();
+    inputAmounts[0] = 3;
+    inputTypes[1] = ObjectTypes.Stone.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.ForceField.unwrap();
+    outputTypes[0] = ObjectTypes.Anvil.unwrap();
     outputAmounts[0] = 1;
 
     recipes[22] = RecipesData({
-      stationTypeId: ObjectTypes.Workbench,
+      stationTypeId: ObjectTypes.Null,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -527,14 +527,16 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
   // Recipe 23
   {
-    uint16[] memory inputTypes = new uint16[](1);
-    uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
-    inputAmounts[0] = 8;
+    uint16[] memory inputTypes = new uint16[](2);
+    uint16[] memory inputAmounts = new uint16[](2);
+    inputTypes[0] = ObjectTypes.Stone.unwrap();
+    inputAmounts[0] = 30;
+    inputTypes[1] = ObjectTypes.IronBar.unwrap();
+    inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.Chest.unwrap();
+    outputTypes[0] = ObjectTypes.ForceField.unwrap();
     outputAmounts[0] = 1;
 
     recipes[23] = RecipesData({
@@ -552,11 +554,11 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
     inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
-    inputAmounts[0] = 4;
+    inputAmounts[0] = 8;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.TextSign.unwrap();
+    outputTypes[0] = ObjectTypes.Chest.unwrap();
     outputAmounts[0] = 1;
 
     recipes[24] = RecipesData({
@@ -571,16 +573,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
   // Recipe 25
   {
-    uint16[] memory inputTypes = new uint16[](2);
-    uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.ForceField.unwrap();
-    inputAmounts[0] = 1;
-    inputTypes[1] = ObjectTypes.IronBar.unwrap();
-    inputAmounts[1] = 8;
+    uint16[] memory inputTypes = new uint16[](1);
+    uint16[] memory inputAmounts = new uint16[](1);
+    inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
+    inputAmounts[0] = 4;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.SpawnTile.unwrap();
+    outputTypes[0] = ObjectTypes.TextSign.unwrap();
     outputAmounts[0] = 1;
 
     recipes[25] = RecipesData({
@@ -595,14 +595,16 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
   // Recipe 26
   {
-    uint16[] memory inputTypes = new uint16[](1);
-    uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
-    inputAmounts[0] = 3;
+    uint16[] memory inputTypes = new uint16[](2);
+    uint16[] memory inputAmounts = new uint16[](2);
+    inputTypes[0] = ObjectTypes.ForceField.unwrap();
+    inputAmounts[0] = 1;
+    inputTypes[1] = ObjectTypes.IronBar.unwrap();
+    inputAmounts[1] = 8;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.Bed.unwrap();
+    outputTypes[0] = ObjectTypes.SpawnTile.unwrap();
     outputAmounts[0] = 1;
 
     recipes[26] = RecipesData({
@@ -620,15 +622,15 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
     inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
-    inputAmounts[0] = 5;
+    inputAmounts[0] = 3;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.WoodenPick.unwrap();
+    outputTypes[0] = ObjectTypes.Bed.unwrap();
     outputAmounts[0] = 1;
 
     recipes[27] = RecipesData({
-      stationTypeId: ObjectTypes.Null,
+      stationTypeId: ObjectTypes.Workbench,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -646,11 +648,11 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.WoodenAxe.unwrap();
+    outputTypes[0] = ObjectTypes.WoodenPick.unwrap();
     outputAmounts[0] = 1;
 
     recipes[28] = RecipesData({
-      stationTypeId: ObjectTypes.Null,
+      stationTypeId: ObjectTypes.Workbench,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -664,15 +666,15 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
     inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
-    inputAmounts[0] = 8;
+    inputAmounts[0] = 5;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.WoodenWhacker.unwrap();
+    outputTypes[0] = ObjectTypes.WoodenAxe.unwrap();
     outputAmounts[0] = 1;
 
     recipes[29] = RecipesData({
-      stationTypeId: ObjectTypes.Null,
+      stationTypeId: ObjectTypes.Workbench,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -686,15 +688,15 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
     inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
-    inputAmounts[0] = 4;
+    inputAmounts[0] = 8;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.WoodenHoe.unwrap();
+    outputTypes[0] = ObjectTypes.WoodenWhacker.unwrap();
     outputAmounts[0] = 1;
 
     recipes[30] = RecipesData({
-      stationTypeId: ObjectTypes.Null,
+      stationTypeId: ObjectTypes.Workbench,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -705,16 +707,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
   // Recipe 31
   {
-    uint16[] memory inputTypes = new uint16[](2);
-    uint16[] memory inputAmounts = new uint16[](2);
+    uint16[] memory inputTypes = new uint16[](1);
+    uint16[] memory inputAmounts = new uint16[](1);
     inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
-    inputAmounts[0] = 2;
-    inputTypes[1] = ObjectTypes.CopperOre.unwrap();
-    inputAmounts[1] = 3;
+    inputAmounts[0] = 4;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.CopperPick.unwrap();
+    outputTypes[0] = ObjectTypes.WoodenHoe.unwrap();
     outputAmounts[0] = 1;
 
     recipes[31] = RecipesData({
@@ -738,11 +738,11 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.CopperAxe.unwrap();
+    outputTypes[0] = ObjectTypes.CopperPick.unwrap();
     outputAmounts[0] = 1;
 
     recipes[32] = RecipesData({
-      stationTypeId: ObjectTypes.Workbench,
+      stationTypeId: ObjectTypes.Anvil,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -758,15 +758,15 @@ function getRecipes() pure returns (RecipesData[] memory) {
     inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
     inputAmounts[0] = 2;
     inputTypes[1] = ObjectTypes.CopperOre.unwrap();
-    inputAmounts[1] = 6;
+    inputAmounts[1] = 3;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.CopperWhacker.unwrap();
+    outputTypes[0] = ObjectTypes.CopperAxe.unwrap();
     outputAmounts[0] = 1;
 
     recipes[33] = RecipesData({
-      stationTypeId: ObjectTypes.Workbench,
+      stationTypeId: ObjectTypes.Anvil,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -781,16 +781,16 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
     inputAmounts[0] = 2;
-    inputTypes[1] = ObjectTypes.IronBar.unwrap();
-    inputAmounts[1] = 3;
+    inputTypes[1] = ObjectTypes.CopperOre.unwrap();
+    inputAmounts[1] = 6;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.IronPick.unwrap();
+    outputTypes[0] = ObjectTypes.CopperWhacker.unwrap();
     outputAmounts[0] = 1;
 
     recipes[34] = RecipesData({
-      stationTypeId: ObjectTypes.Workbench,
+      stationTypeId: ObjectTypes.Anvil,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -810,11 +810,11 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.IronAxe.unwrap();
+    outputTypes[0] = ObjectTypes.IronPick.unwrap();
     outputAmounts[0] = 1;
 
     recipes[35] = RecipesData({
-      stationTypeId: ObjectTypes.Workbench,
+      stationTypeId: ObjectTypes.Anvil,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -830,15 +830,15 @@ function getRecipes() pure returns (RecipesData[] memory) {
     inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
     inputAmounts[0] = 2;
     inputTypes[1] = ObjectTypes.IronBar.unwrap();
-    inputAmounts[1] = 6;
+    inputAmounts[1] = 3;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.IronWhacker.unwrap();
+    outputTypes[0] = ObjectTypes.IronAxe.unwrap();
     outputAmounts[0] = 1;
 
     recipes[36] = RecipesData({
-      stationTypeId: ObjectTypes.Workbench,
+      stationTypeId: ObjectTypes.Anvil,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -853,16 +853,16 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
     inputAmounts[0] = 2;
-    inputTypes[1] = ObjectTypes.GoldBar.unwrap();
-    inputAmounts[1] = 3;
+    inputTypes[1] = ObjectTypes.IronBar.unwrap();
+    inputAmounts[1] = 6;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.GoldPick.unwrap();
+    outputTypes[0] = ObjectTypes.IronWhacker.unwrap();
     outputAmounts[0] = 1;
 
     recipes[37] = RecipesData({
-      stationTypeId: ObjectTypes.Workbench,
+      stationTypeId: ObjectTypes.Anvil,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -882,11 +882,11 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.GoldAxe.unwrap();
+    outputTypes[0] = ObjectTypes.GoldPick.unwrap();
     outputAmounts[0] = 1;
 
     recipes[38] = RecipesData({
-      stationTypeId: ObjectTypes.Workbench,
+      stationTypeId: ObjectTypes.Anvil,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -901,16 +901,16 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
     inputAmounts[0] = 2;
-    inputTypes[1] = ObjectTypes.Diamond.unwrap();
+    inputTypes[1] = ObjectTypes.GoldBar.unwrap();
     inputAmounts[1] = 3;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.DiamondPick.unwrap();
+    outputTypes[0] = ObjectTypes.GoldAxe.unwrap();
     outputAmounts[0] = 1;
 
     recipes[39] = RecipesData({
-      stationTypeId: ObjectTypes.Workbench,
+      stationTypeId: ObjectTypes.Anvil,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -930,11 +930,11 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.DiamondAxe.unwrap();
+    outputTypes[0] = ObjectTypes.DiamondPick.unwrap();
     outputAmounts[0] = 1;
 
     recipes[40] = RecipesData({
-      stationTypeId: ObjectTypes.Workbench,
+      stationTypeId: ObjectTypes.Anvil,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -949,16 +949,16 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
     inputAmounts[0] = 2;
-    inputTypes[1] = ObjectTypes.NeptuniumBar.unwrap();
+    inputTypes[1] = ObjectTypes.Diamond.unwrap();
     inputAmounts[1] = 3;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.NeptuniumPick.unwrap();
+    outputTypes[0] = ObjectTypes.DiamondAxe.unwrap();
     outputAmounts[0] = 1;
 
     recipes[41] = RecipesData({
-      stationTypeId: ObjectTypes.Workbench,
+      stationTypeId: ObjectTypes.Anvil,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -978,11 +978,11 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.NeptuniumAxe.unwrap();
+    outputTypes[0] = ObjectTypes.NeptuniumPick.unwrap();
     outputAmounts[0] = 1;
 
     recipes[42] = RecipesData({
-      stationTypeId: ObjectTypes.Workbench,
+      stationTypeId: ObjectTypes.Anvil,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -993,18 +993,20 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
   // Recipe 43
   {
-    uint16[] memory inputTypes = new uint16[](1);
-    uint16[] memory inputAmounts = new uint16[](1);
+    uint16[] memory inputTypes = new uint16[](2);
+    uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
-    inputAmounts[0] = 3;
+    inputAmounts[0] = 2;
+    inputTypes[1] = ObjectTypes.NeptuniumBar.unwrap();
+    inputAmounts[1] = 3;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.Bucket.unwrap();
+    outputTypes[0] = ObjectTypes.NeptuniumAxe.unwrap();
     outputAmounts[0] = 1;
 
     recipes[43] = RecipesData({
-      stationTypeId: ObjectTypes.Null,
+      stationTypeId: ObjectTypes.Anvil,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -1017,12 +1019,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.Wheat.unwrap();
-    inputAmounts[0] = 16;
+    inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
+    inputAmounts[0] = 3;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.WheatSlop.unwrap();
+    outputTypes[0] = ObjectTypes.Bucket.unwrap();
     outputAmounts[0] = 1;
 
     recipes[44] = RecipesData({
@@ -1039,12 +1041,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.Pumpkin.unwrap();
-    inputAmounts[0] = 1;
+    inputTypes[0] = ObjectTypes.Wheat.unwrap();
+    inputAmounts[0] = 16;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.PumpkinSoup.unwrap();
+    outputTypes[0] = ObjectTypes.WheatSlop.unwrap();
     outputAmounts[0] = 1;
 
     recipes[45] = RecipesData({
@@ -1061,12 +1063,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.Melon.unwrap();
+    inputTypes[0] = ObjectTypes.Pumpkin.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.MelonSmoothie.unwrap();
+    outputTypes[0] = ObjectTypes.PumpkinSoup.unwrap();
     outputAmounts[0] = 1;
 
     recipes[46] = RecipesData({
@@ -1083,13 +1085,13 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
+    inputTypes[0] = ObjectTypes.Melon.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.Torch.unwrap();
-    outputAmounts[0] = 4;
+    outputTypes[0] = ObjectTypes.MelonSmoothie.unwrap();
+    outputAmounts[0] = 1;
 
     recipes[47] = RecipesData({
       stationTypeId: ObjectTypes.Null,
@@ -1103,17 +1105,15 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
   // Recipe 48
   {
-    uint16[] memory inputTypes = new uint16[](2);
-    uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.Mud.unwrap();
+    uint16[] memory inputTypes = new uint16[](1);
+    uint16[] memory inputAmounts = new uint16[](1);
+    inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
     inputAmounts[0] = 1;
-    inputTypes[1] = ObjectTypes.FescueGrass.unwrap();
-    inputAmounts[1] = 5;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.PackedMud.unwrap();
-    outputAmounts[0] = 1;
+    outputTypes[0] = ObjectTypes.Torch.unwrap();
+    outputAmounts[0] = 4;
 
     recipes[48] = RecipesData({
       stationTypeId: ObjectTypes.Null,
@@ -1129,18 +1129,18 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.PackedMud.unwrap();
+    inputTypes[0] = ObjectTypes.Mud.unwrap();
     inputAmounts[0] = 1;
-    inputTypes[1] = ObjectTypes.CoalOre.unwrap();
-    inputAmounts[1] = 1;
+    inputTypes[1] = ObjectTypes.FescueGrass.unwrap();
+    inputAmounts[1] = 5;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.MudBricks.unwrap();
+    outputTypes[0] = ObjectTypes.PackedMud.unwrap();
     outputAmounts[0] = 1;
 
     recipes[49] = RecipesData({
-      stationTypeId: ObjectTypes.Furnace,
+      stationTypeId: ObjectTypes.Null,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -1153,18 +1153,18 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.IronBar.unwrap();
+    inputTypes[0] = ObjectTypes.PackedMud.unwrap();
     inputAmounts[0] = 1;
-    inputTypes[1] = ObjectTypes.Stone.unwrap();
-    inputAmounts[1] = 3;
+    inputTypes[1] = ObjectTypes.CoalOre.unwrap();
+    inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.Stonecutter.unwrap();
+    outputTypes[0] = ObjectTypes.MudBricks.unwrap();
     outputAmounts[0] = 1;
 
     recipes[50] = RecipesData({
-      stationTypeId: ObjectTypes.Workbench,
+      stationTypeId: ObjectTypes.Furnace,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -1175,14 +1175,16 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
   // Recipe 51
   {
-    uint16[] memory inputTypes = new uint16[](1);
-    uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.BambooBush.unwrap();
+    uint16[] memory inputTypes = new uint16[](2);
+    uint16[] memory inputAmounts = new uint16[](2);
+    inputTypes[0] = ObjectTypes.IronBar.unwrap();
     inputAmounts[0] = 1;
+    inputTypes[1] = ObjectTypes.Stone.unwrap();
+    inputAmounts[1] = 3;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.Paper.unwrap();
+    outputTypes[0] = ObjectTypes.Stonecutter.unwrap();
     outputAmounts[0] = 1;
 
     recipes[51] = RecipesData({
@@ -1197,20 +1199,18 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
   // Recipe 52
   {
-    uint16[] memory inputTypes = new uint16[](2);
-    uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.Sand.unwrap();
+    uint16[] memory inputTypes = new uint16[](1);
+    uint16[] memory inputAmounts = new uint16[](1);
+    inputTypes[0] = ObjectTypes.BambooBush.unwrap();
     inputAmounts[0] = 1;
-    inputTypes[1] = ObjectTypes.CoalOre.unwrap();
-    inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.Glass.unwrap();
+    outputTypes[0] = ObjectTypes.Paper.unwrap();
     outputAmounts[0] = 1;
 
     recipes[52] = RecipesData({
-      stationTypeId: ObjectTypes.Furnace,
+      stationTypeId: ObjectTypes.Workbench,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -1223,14 +1223,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.Clay.unwrap();
+    inputTypes[0] = ObjectTypes.Sand.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.CoalOre.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.Brick.unwrap();
+    outputTypes[0] = ObjectTypes.Glass.unwrap();
     outputAmounts[0] = 1;
 
     recipes[53] = RecipesData({
@@ -1247,14 +1247,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.Basalt.unwrap();
+    inputTypes[0] = ObjectTypes.Clay.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.CoalOre.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.SmoothBasalt.unwrap();
+    outputTypes[0] = ObjectTypes.Brick.unwrap();
     outputAmounts[0] = 1;
 
     recipes[54] = RecipesData({
@@ -1269,18 +1269,20 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
   // Recipe 55
   {
-    uint16[] memory inputTypes = new uint16[](1);
-    uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.Brick.unwrap();
-    inputAmounts[0] = 4;
+    uint16[] memory inputTypes = new uint16[](2);
+    uint16[] memory inputAmounts = new uint16[](2);
+    inputTypes[0] = ObjectTypes.Basalt.unwrap();
+    inputAmounts[0] = 1;
+    inputTypes[1] = ObjectTypes.CoalOre.unwrap();
+    inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.BrickBlock.unwrap();
+    outputTypes[0] = ObjectTypes.SmoothBasalt.unwrap();
     outputAmounts[0] = 1;
 
     recipes[55] = RecipesData({
-      stationTypeId: ObjectTypes.Null,
+      stationTypeId: ObjectTypes.Furnace,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -1293,13 +1295,13 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
-    inputAmounts[0] = 1;
+    inputTypes[0] = ObjectTypes.Brick.unwrap();
+    inputAmounts[0] = 4;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.Stick.unwrap();
-    outputAmounts[0] = 2;
+    outputTypes[0] = ObjectTypes.BrickBlock.unwrap();
+    outputAmounts[0] = 1;
 
     recipes[56] = RecipesData({
       stationTypeId: ObjectTypes.Null,
@@ -1315,12 +1317,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.RoseFlower.unwrap();
+    inputTypes[0] = ObjectTypes.AnyPlank.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.RedDye.unwrap();
+    outputTypes[0] = ObjectTypes.Stick.unwrap();
     outputAmounts[0] = 2;
 
     recipes[57] = RecipesData({
@@ -1337,7 +1339,7 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.RedMushroom.unwrap();
+    inputTypes[0] = ObjectTypes.RoseFlower.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
@@ -1359,12 +1361,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.SunFlower.unwrap();
+    inputTypes[0] = ObjectTypes.RedMushroom.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.YellowDye.unwrap();
+    outputTypes[0] = ObjectTypes.RedDye.unwrap();
     outputAmounts[0] = 2;
 
     recipes[59] = RecipesData({
@@ -1381,7 +1383,7 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.DandelionFlower.unwrap();
+    inputTypes[0] = ObjectTypes.SunFlower.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
@@ -1403,12 +1405,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.Ultraviolet.unwrap();
+    inputTypes[0] = ObjectTypes.DandelionFlower.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.BlueDye.unwrap();
+    outputTypes[0] = ObjectTypes.YellowDye.unwrap();
     outputAmounts[0] = 2;
 
     recipes[61] = RecipesData({
@@ -1425,13 +1427,13 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.SwitchGrass.unwrap();
+    inputTypes[0] = ObjectTypes.Ultraviolet.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.GreenDye.unwrap();
-    outputAmounts[0] = 1;
+    outputTypes[0] = ObjectTypes.BlueDye.unwrap();
+    outputAmounts[0] = 2;
 
     recipes[62] = RecipesData({
       stationTypeId: ObjectTypes.Null,
@@ -1447,7 +1449,7 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.FescueGrass.unwrap();
+    inputTypes[0] = ObjectTypes.SwitchGrass.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
@@ -1469,13 +1471,13 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.Bone.unwrap();
+    inputTypes[0] = ObjectTypes.FescueGrass.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.WhiteDye.unwrap();
-    outputAmounts[0] = 3;
+    outputTypes[0] = ObjectTypes.GreenDye.unwrap();
+    outputAmounts[0] = 1;
 
     recipes[64] = RecipesData({
       stationTypeId: ObjectTypes.Null,
@@ -1491,13 +1493,13 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.CoalOre.unwrap();
+    inputTypes[0] = ObjectTypes.Bone.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.BlackDye.unwrap();
-    outputAmounts[0] = 2;
+    outputTypes[0] = ObjectTypes.WhiteDye.unwrap();
+    outputAmounts[0] = 3;
 
     recipes[65] = RecipesData({
       stationTypeId: ObjectTypes.Null,
@@ -1511,16 +1513,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
   // Recipe 66
   {
-    uint16[] memory inputTypes = new uint16[](2);
-    uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.GreenDye.unwrap();
+    uint16[] memory inputTypes = new uint16[](1);
+    uint16[] memory inputAmounts = new uint16[](1);
+    inputTypes[0] = ObjectTypes.CoalOre.unwrap();
     inputAmounts[0] = 1;
-    inputTypes[1] = ObjectTypes.RedDye.unwrap();
-    inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.BrownDye.unwrap();
+    outputTypes[0] = ObjectTypes.BlackDye.unwrap();
     outputAmounts[0] = 2;
 
     recipes[66] = RecipesData({
@@ -1537,14 +1537,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.RedDye.unwrap();
+    inputTypes[0] = ObjectTypes.GreenDye.unwrap();
     inputAmounts[0] = 1;
-    inputTypes[1] = ObjectTypes.YellowDye.unwrap();
+    inputTypes[1] = ObjectTypes.RedDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.OrangeDye.unwrap();
+    outputTypes[0] = ObjectTypes.BrownDye.unwrap();
     outputAmounts[0] = 2;
 
     recipes[67] = RecipesData({
@@ -1563,12 +1563,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.RedDye.unwrap();
     inputAmounts[0] = 1;
-    inputTypes[1] = ObjectTypes.WhiteDye.unwrap();
+    inputTypes[1] = ObjectTypes.YellowDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.PinkDye.unwrap();
+    outputTypes[0] = ObjectTypes.OrangeDye.unwrap();
     outputAmounts[0] = 2;
 
     recipes[68] = RecipesData({
@@ -1585,14 +1585,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.GreenDye.unwrap();
+    inputTypes[0] = ObjectTypes.RedDye.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.WhiteDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.LimeDye.unwrap();
+    outputTypes[0] = ObjectTypes.PinkDye.unwrap();
     outputAmounts[0] = 2;
 
     recipes[69] = RecipesData({
@@ -1609,14 +1609,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.BlueDye.unwrap();
+    inputTypes[0] = ObjectTypes.GreenDye.unwrap();
     inputAmounts[0] = 1;
-    inputTypes[1] = ObjectTypes.GreenDye.unwrap();
+    inputTypes[1] = ObjectTypes.WhiteDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.CyanDye.unwrap();
+    outputTypes[0] = ObjectTypes.LimeDye.unwrap();
     outputAmounts[0] = 2;
 
     recipes[70] = RecipesData({
@@ -1633,14 +1633,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.BlackDye.unwrap();
+    inputTypes[0] = ObjectTypes.BlueDye.unwrap();
     inputAmounts[0] = 1;
-    inputTypes[1] = ObjectTypes.WhiteDye.unwrap();
+    inputTypes[1] = ObjectTypes.GreenDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.GrayDye.unwrap();
+    outputTypes[0] = ObjectTypes.CyanDye.unwrap();
     outputAmounts[0] = 2;
 
     recipes[71] = RecipesData({
@@ -1657,14 +1657,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.RedDye.unwrap();
+    inputTypes[0] = ObjectTypes.BlackDye.unwrap();
     inputAmounts[0] = 1;
-    inputTypes[1] = ObjectTypes.BlueDye.unwrap();
+    inputTypes[1] = ObjectTypes.WhiteDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.PurpleDye.unwrap();
+    outputTypes[0] = ObjectTypes.GrayDye.unwrap();
     outputAmounts[0] = 2;
 
     recipes[72] = RecipesData({
@@ -1681,14 +1681,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.PurpleDye.unwrap();
+    inputTypes[0] = ObjectTypes.RedDye.unwrap();
     inputAmounts[0] = 1;
-    inputTypes[1] = ObjectTypes.PinkDye.unwrap();
+    inputTypes[1] = ObjectTypes.BlueDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.MagentaDye.unwrap();
+    outputTypes[0] = ObjectTypes.PurpleDye.unwrap();
     outputAmounts[0] = 2;
 
     recipes[73] = RecipesData({
@@ -1705,14 +1705,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.BlueDye.unwrap();
+    inputTypes[0] = ObjectTypes.PurpleDye.unwrap();
     inputAmounts[0] = 1;
-    inputTypes[1] = ObjectTypes.WhiteDye.unwrap();
+    inputTypes[1] = ObjectTypes.PinkDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.LightBlueDye.unwrap();
+    outputTypes[0] = ObjectTypes.MagentaDye.unwrap();
     outputAmounts[0] = 2;
 
     recipes[74] = RecipesData({
@@ -1729,14 +1729,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.GrayDye.unwrap();
+    inputTypes[0] = ObjectTypes.BlueDye.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.WhiteDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.LightGrayDye.unwrap();
+    outputTypes[0] = ObjectTypes.LightBlueDye.unwrap();
     outputAmounts[0] = 2;
 
     recipes[75] = RecipesData({
@@ -1751,22 +1751,20 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
   // Recipe 76
   {
-    uint16[] memory inputTypes = new uint16[](3);
-    uint16[] memory inputAmounts = new uint16[](3);
-    inputTypes[0] = ObjectTypes.Sand.unwrap();
-    inputAmounts[0] = 4;
-    inputTypes[1] = ObjectTypes.Gravel.unwrap();
-    inputAmounts[1] = 4;
-    inputTypes[2] = ObjectTypes.WhiteDye.unwrap();
-    inputAmounts[2] = 1;
+    uint16[] memory inputTypes = new uint16[](2);
+    uint16[] memory inputAmounts = new uint16[](2);
+    inputTypes[0] = ObjectTypes.GrayDye.unwrap();
+    inputAmounts[0] = 1;
+    inputTypes[1] = ObjectTypes.WhiteDye.unwrap();
+    inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.WhiteConcretePowder.unwrap();
-    outputAmounts[0] = 8;
+    outputTypes[0] = ObjectTypes.LightGrayDye.unwrap();
+    outputAmounts[0] = 2;
 
     recipes[76] = RecipesData({
-      stationTypeId: ObjectTypes.Workbench,
+      stationTypeId: ObjectTypes.Null,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -1783,12 +1781,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     inputAmounts[0] = 4;
     inputTypes[1] = ObjectTypes.Gravel.unwrap();
     inputAmounts[1] = 4;
-    inputTypes[2] = ObjectTypes.OrangeDye.unwrap();
+    inputTypes[2] = ObjectTypes.WhiteDye.unwrap();
     inputAmounts[2] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.OrangeConcretePowder.unwrap();
+    outputTypes[0] = ObjectTypes.WhiteConcretePowder.unwrap();
     outputAmounts[0] = 8;
 
     recipes[77] = RecipesData({
@@ -1809,12 +1807,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     inputAmounts[0] = 4;
     inputTypes[1] = ObjectTypes.Gravel.unwrap();
     inputAmounts[1] = 4;
-    inputTypes[2] = ObjectTypes.MagentaDye.unwrap();
+    inputTypes[2] = ObjectTypes.OrangeDye.unwrap();
     inputAmounts[2] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.MagentaConcretePowder.unwrap();
+    outputTypes[0] = ObjectTypes.OrangeConcretePowder.unwrap();
     outputAmounts[0] = 8;
 
     recipes[78] = RecipesData({
@@ -1835,12 +1833,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     inputAmounts[0] = 4;
     inputTypes[1] = ObjectTypes.Gravel.unwrap();
     inputAmounts[1] = 4;
-    inputTypes[2] = ObjectTypes.YellowDye.unwrap();
+    inputTypes[2] = ObjectTypes.MagentaDye.unwrap();
     inputAmounts[2] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.YellowConcretePowder.unwrap();
+    outputTypes[0] = ObjectTypes.MagentaConcretePowder.unwrap();
     outputAmounts[0] = 8;
 
     recipes[79] = RecipesData({
@@ -1861,12 +1859,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     inputAmounts[0] = 4;
     inputTypes[1] = ObjectTypes.Gravel.unwrap();
     inputAmounts[1] = 4;
-    inputTypes[2] = ObjectTypes.LightBlueDye.unwrap();
+    inputTypes[2] = ObjectTypes.YellowDye.unwrap();
     inputAmounts[2] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.LightBlueConcretePowder.unwrap();
+    outputTypes[0] = ObjectTypes.YellowConcretePowder.unwrap();
     outputAmounts[0] = 8;
 
     recipes[80] = RecipesData({
@@ -1887,12 +1885,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     inputAmounts[0] = 4;
     inputTypes[1] = ObjectTypes.Gravel.unwrap();
     inputAmounts[1] = 4;
-    inputTypes[2] = ObjectTypes.LimeDye.unwrap();
+    inputTypes[2] = ObjectTypes.LightBlueDye.unwrap();
     inputAmounts[2] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.LimeConcretePowder.unwrap();
+    outputTypes[0] = ObjectTypes.LightBlueConcretePowder.unwrap();
     outputAmounts[0] = 8;
 
     recipes[81] = RecipesData({
@@ -1913,12 +1911,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     inputAmounts[0] = 4;
     inputTypes[1] = ObjectTypes.Gravel.unwrap();
     inputAmounts[1] = 4;
-    inputTypes[2] = ObjectTypes.PinkDye.unwrap();
+    inputTypes[2] = ObjectTypes.LimeDye.unwrap();
     inputAmounts[2] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.PinkConcretePowder.unwrap();
+    outputTypes[0] = ObjectTypes.LimeConcretePowder.unwrap();
     outputAmounts[0] = 8;
 
     recipes[82] = RecipesData({
@@ -1939,12 +1937,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     inputAmounts[0] = 4;
     inputTypes[1] = ObjectTypes.Gravel.unwrap();
     inputAmounts[1] = 4;
-    inputTypes[2] = ObjectTypes.GrayDye.unwrap();
+    inputTypes[2] = ObjectTypes.PinkDye.unwrap();
     inputAmounts[2] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.GrayConcretePowder.unwrap();
+    outputTypes[0] = ObjectTypes.PinkConcretePowder.unwrap();
     outputAmounts[0] = 8;
 
     recipes[83] = RecipesData({
@@ -1965,12 +1963,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     inputAmounts[0] = 4;
     inputTypes[1] = ObjectTypes.Gravel.unwrap();
     inputAmounts[1] = 4;
-    inputTypes[2] = ObjectTypes.LightGrayDye.unwrap();
+    inputTypes[2] = ObjectTypes.GrayDye.unwrap();
     inputAmounts[2] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.LightGrayConcretePowder.unwrap();
+    outputTypes[0] = ObjectTypes.GrayConcretePowder.unwrap();
     outputAmounts[0] = 8;
 
     recipes[84] = RecipesData({
@@ -1991,12 +1989,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     inputAmounts[0] = 4;
     inputTypes[1] = ObjectTypes.Gravel.unwrap();
     inputAmounts[1] = 4;
-    inputTypes[2] = ObjectTypes.CyanDye.unwrap();
+    inputTypes[2] = ObjectTypes.LightGrayDye.unwrap();
     inputAmounts[2] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.CyanConcretePowder.unwrap();
+    outputTypes[0] = ObjectTypes.LightGrayConcretePowder.unwrap();
     outputAmounts[0] = 8;
 
     recipes[85] = RecipesData({
@@ -2017,12 +2015,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     inputAmounts[0] = 4;
     inputTypes[1] = ObjectTypes.Gravel.unwrap();
     inputAmounts[1] = 4;
-    inputTypes[2] = ObjectTypes.PurpleDye.unwrap();
+    inputTypes[2] = ObjectTypes.CyanDye.unwrap();
     inputAmounts[2] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.PurpleConcretePowder.unwrap();
+    outputTypes[0] = ObjectTypes.CyanConcretePowder.unwrap();
     outputAmounts[0] = 8;
 
     recipes[86] = RecipesData({
@@ -2043,12 +2041,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     inputAmounts[0] = 4;
     inputTypes[1] = ObjectTypes.Gravel.unwrap();
     inputAmounts[1] = 4;
-    inputTypes[2] = ObjectTypes.BlueDye.unwrap();
+    inputTypes[2] = ObjectTypes.PurpleDye.unwrap();
     inputAmounts[2] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.BlueConcretePowder.unwrap();
+    outputTypes[0] = ObjectTypes.PurpleConcretePowder.unwrap();
     outputAmounts[0] = 8;
 
     recipes[87] = RecipesData({
@@ -2069,12 +2067,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     inputAmounts[0] = 4;
     inputTypes[1] = ObjectTypes.Gravel.unwrap();
     inputAmounts[1] = 4;
-    inputTypes[2] = ObjectTypes.BrownDye.unwrap();
+    inputTypes[2] = ObjectTypes.BlueDye.unwrap();
     inputAmounts[2] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.BrownConcretePowder.unwrap();
+    outputTypes[0] = ObjectTypes.BlueConcretePowder.unwrap();
     outputAmounts[0] = 8;
 
     recipes[88] = RecipesData({
@@ -2095,12 +2093,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     inputAmounts[0] = 4;
     inputTypes[1] = ObjectTypes.Gravel.unwrap();
     inputAmounts[1] = 4;
-    inputTypes[2] = ObjectTypes.GreenDye.unwrap();
+    inputTypes[2] = ObjectTypes.BrownDye.unwrap();
     inputAmounts[2] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.GreenConcretePowder.unwrap();
+    outputTypes[0] = ObjectTypes.BrownConcretePowder.unwrap();
     outputAmounts[0] = 8;
 
     recipes[89] = RecipesData({
@@ -2121,12 +2119,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     inputAmounts[0] = 4;
     inputTypes[1] = ObjectTypes.Gravel.unwrap();
     inputAmounts[1] = 4;
-    inputTypes[2] = ObjectTypes.RedDye.unwrap();
+    inputTypes[2] = ObjectTypes.GreenDye.unwrap();
     inputAmounts[2] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.RedConcretePowder.unwrap();
+    outputTypes[0] = ObjectTypes.GreenConcretePowder.unwrap();
     outputAmounts[0] = 8;
 
     recipes[90] = RecipesData({
@@ -2147,12 +2145,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     inputAmounts[0] = 4;
     inputTypes[1] = ObjectTypes.Gravel.unwrap();
     inputAmounts[1] = 4;
-    inputTypes[2] = ObjectTypes.BlackDye.unwrap();
+    inputTypes[2] = ObjectTypes.RedDye.unwrap();
     inputAmounts[2] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.BlackConcretePowder.unwrap();
+    outputTypes[0] = ObjectTypes.RedConcretePowder.unwrap();
     outputAmounts[0] = 8;
 
     recipes[91] = RecipesData({
@@ -2167,22 +2165,22 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
   // Recipe 92
   {
-    uint16[] memory inputTypes = new uint16[](2);
-    uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.WhiteConcretePowder.unwrap();
-    inputAmounts[0] = 1;
-    inputTypes[1] = ObjectTypes.WaterBucket.unwrap();
-    inputAmounts[1] = 1;
+    uint16[] memory inputTypes = new uint16[](3);
+    uint16[] memory inputAmounts = new uint16[](3);
+    inputTypes[0] = ObjectTypes.Sand.unwrap();
+    inputAmounts[0] = 4;
+    inputTypes[1] = ObjectTypes.Gravel.unwrap();
+    inputAmounts[1] = 4;
+    inputTypes[2] = ObjectTypes.BlackDye.unwrap();
+    inputAmounts[2] = 1;
 
-    uint16[] memory outputTypes = new uint16[](2);
-    uint16[] memory outputAmounts = new uint16[](2);
-    outputTypes[0] = ObjectTypes.WhiteConcrete.unwrap();
-    outputAmounts[0] = 1;
-    outputTypes[1] = ObjectTypes.Bucket.unwrap();
-    outputAmounts[1] = 1;
+    uint16[] memory outputTypes = new uint16[](1);
+    uint16[] memory outputAmounts = new uint16[](1);
+    outputTypes[0] = ObjectTypes.BlackConcretePowder.unwrap();
+    outputAmounts[0] = 8;
 
     recipes[92] = RecipesData({
-      stationTypeId: ObjectTypes.Null,
+      stationTypeId: ObjectTypes.Workbench,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -2195,14 +2193,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.OrangeConcretePowder.unwrap();
+    inputTypes[0] = ObjectTypes.WhiteConcretePowder.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.WaterBucket.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](2);
     uint16[] memory outputAmounts = new uint16[](2);
-    outputTypes[0] = ObjectTypes.OrangeConcrete.unwrap();
+    outputTypes[0] = ObjectTypes.WhiteConcrete.unwrap();
     outputAmounts[0] = 1;
     outputTypes[1] = ObjectTypes.Bucket.unwrap();
     outputAmounts[1] = 1;
@@ -2221,14 +2219,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.MagentaConcretePowder.unwrap();
+    inputTypes[0] = ObjectTypes.OrangeConcretePowder.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.WaterBucket.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](2);
     uint16[] memory outputAmounts = new uint16[](2);
-    outputTypes[0] = ObjectTypes.MagentaConcrete.unwrap();
+    outputTypes[0] = ObjectTypes.OrangeConcrete.unwrap();
     outputAmounts[0] = 1;
     outputTypes[1] = ObjectTypes.Bucket.unwrap();
     outputAmounts[1] = 1;
@@ -2247,14 +2245,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.LightBlueConcretePowder.unwrap();
+    inputTypes[0] = ObjectTypes.MagentaConcretePowder.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.WaterBucket.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](2);
     uint16[] memory outputAmounts = new uint16[](2);
-    outputTypes[0] = ObjectTypes.LightBlueConcrete.unwrap();
+    outputTypes[0] = ObjectTypes.MagentaConcrete.unwrap();
     outputAmounts[0] = 1;
     outputTypes[1] = ObjectTypes.Bucket.unwrap();
     outputAmounts[1] = 1;
@@ -2273,14 +2271,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.YellowConcretePowder.unwrap();
+    inputTypes[0] = ObjectTypes.LightBlueConcretePowder.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.WaterBucket.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](2);
     uint16[] memory outputAmounts = new uint16[](2);
-    outputTypes[0] = ObjectTypes.YellowConcrete.unwrap();
+    outputTypes[0] = ObjectTypes.LightBlueConcrete.unwrap();
     outputAmounts[0] = 1;
     outputTypes[1] = ObjectTypes.Bucket.unwrap();
     outputAmounts[1] = 1;
@@ -2299,14 +2297,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.LimeConcretePowder.unwrap();
+    inputTypes[0] = ObjectTypes.YellowConcretePowder.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.WaterBucket.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](2);
     uint16[] memory outputAmounts = new uint16[](2);
-    outputTypes[0] = ObjectTypes.LimeConcrete.unwrap();
+    outputTypes[0] = ObjectTypes.YellowConcrete.unwrap();
     outputAmounts[0] = 1;
     outputTypes[1] = ObjectTypes.Bucket.unwrap();
     outputAmounts[1] = 1;
@@ -2325,14 +2323,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.PinkConcretePowder.unwrap();
+    inputTypes[0] = ObjectTypes.LimeConcretePowder.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.WaterBucket.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](2);
     uint16[] memory outputAmounts = new uint16[](2);
-    outputTypes[0] = ObjectTypes.PinkConcrete.unwrap();
+    outputTypes[0] = ObjectTypes.LimeConcrete.unwrap();
     outputAmounts[0] = 1;
     outputTypes[1] = ObjectTypes.Bucket.unwrap();
     outputAmounts[1] = 1;
@@ -2351,14 +2349,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.GrayConcretePowder.unwrap();
+    inputTypes[0] = ObjectTypes.PinkConcretePowder.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.WaterBucket.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](2);
     uint16[] memory outputAmounts = new uint16[](2);
-    outputTypes[0] = ObjectTypes.GrayConcrete.unwrap();
+    outputTypes[0] = ObjectTypes.PinkConcrete.unwrap();
     outputAmounts[0] = 1;
     outputTypes[1] = ObjectTypes.Bucket.unwrap();
     outputAmounts[1] = 1;
@@ -2377,14 +2375,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.LightGrayConcretePowder.unwrap();
+    inputTypes[0] = ObjectTypes.GrayConcretePowder.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.WaterBucket.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](2);
     uint16[] memory outputAmounts = new uint16[](2);
-    outputTypes[0] = ObjectTypes.LightGrayConcrete.unwrap();
+    outputTypes[0] = ObjectTypes.GrayConcrete.unwrap();
     outputAmounts[0] = 1;
     outputTypes[1] = ObjectTypes.Bucket.unwrap();
     outputAmounts[1] = 1;
@@ -2403,14 +2401,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.CyanConcretePowder.unwrap();
+    inputTypes[0] = ObjectTypes.LightGrayConcretePowder.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.WaterBucket.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](2);
     uint16[] memory outputAmounts = new uint16[](2);
-    outputTypes[0] = ObjectTypes.CyanConcrete.unwrap();
+    outputTypes[0] = ObjectTypes.LightGrayConcrete.unwrap();
     outputAmounts[0] = 1;
     outputTypes[1] = ObjectTypes.Bucket.unwrap();
     outputAmounts[1] = 1;
@@ -2429,14 +2427,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.PurpleConcretePowder.unwrap();
+    inputTypes[0] = ObjectTypes.CyanConcretePowder.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.WaterBucket.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](2);
     uint16[] memory outputAmounts = new uint16[](2);
-    outputTypes[0] = ObjectTypes.PurpleConcrete.unwrap();
+    outputTypes[0] = ObjectTypes.CyanConcrete.unwrap();
     outputAmounts[0] = 1;
     outputTypes[1] = ObjectTypes.Bucket.unwrap();
     outputAmounts[1] = 1;
@@ -2455,14 +2453,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.BlueConcretePowder.unwrap();
+    inputTypes[0] = ObjectTypes.PurpleConcretePowder.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.WaterBucket.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](2);
     uint16[] memory outputAmounts = new uint16[](2);
-    outputTypes[0] = ObjectTypes.BlueConcrete.unwrap();
+    outputTypes[0] = ObjectTypes.PurpleConcrete.unwrap();
     outputAmounts[0] = 1;
     outputTypes[1] = ObjectTypes.Bucket.unwrap();
     outputAmounts[1] = 1;
@@ -2481,14 +2479,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.BrownConcretePowder.unwrap();
+    inputTypes[0] = ObjectTypes.BlueConcretePowder.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.WaterBucket.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](2);
     uint16[] memory outputAmounts = new uint16[](2);
-    outputTypes[0] = ObjectTypes.BrownConcrete.unwrap();
+    outputTypes[0] = ObjectTypes.BlueConcrete.unwrap();
     outputAmounts[0] = 1;
     outputTypes[1] = ObjectTypes.Bucket.unwrap();
     outputAmounts[1] = 1;
@@ -2507,14 +2505,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.GreenConcretePowder.unwrap();
+    inputTypes[0] = ObjectTypes.BrownConcretePowder.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.WaterBucket.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](2);
     uint16[] memory outputAmounts = new uint16[](2);
-    outputTypes[0] = ObjectTypes.GreenConcrete.unwrap();
+    outputTypes[0] = ObjectTypes.BrownConcrete.unwrap();
     outputAmounts[0] = 1;
     outputTypes[1] = ObjectTypes.Bucket.unwrap();
     outputAmounts[1] = 1;
@@ -2533,14 +2531,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.RedConcretePowder.unwrap();
+    inputTypes[0] = ObjectTypes.GreenConcretePowder.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.WaterBucket.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](2);
     uint16[] memory outputAmounts = new uint16[](2);
-    outputTypes[0] = ObjectTypes.RedConcrete.unwrap();
+    outputTypes[0] = ObjectTypes.GreenConcrete.unwrap();
     outputAmounts[0] = 1;
     outputTypes[1] = ObjectTypes.Bucket.unwrap();
     outputAmounts[1] = 1;
@@ -2559,14 +2557,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.BlackConcretePowder.unwrap();
+    inputTypes[0] = ObjectTypes.RedConcretePowder.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.WaterBucket.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](2);
     uint16[] memory outputAmounts = new uint16[](2);
-    outputTypes[0] = ObjectTypes.BlackConcrete.unwrap();
+    outputTypes[0] = ObjectTypes.RedConcrete.unwrap();
     outputAmounts[0] = 1;
     outputTypes[1] = ObjectTypes.Bucket.unwrap();
     outputAmounts[1] = 1;
@@ -2583,18 +2581,22 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
   // Recipe 108
   {
-    uint16[] memory inputTypes = new uint16[](1);
-    uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.Stone.unwrap();
+    uint16[] memory inputTypes = new uint16[](2);
+    uint16[] memory inputAmounts = new uint16[](2);
+    inputTypes[0] = ObjectTypes.BlackConcretePowder.unwrap();
     inputAmounts[0] = 1;
+    inputTypes[1] = ObjectTypes.WaterBucket.unwrap();
+    inputAmounts[1] = 1;
 
-    uint16[] memory outputTypes = new uint16[](1);
-    uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.StoneBricks.unwrap();
+    uint16[] memory outputTypes = new uint16[](2);
+    uint16[] memory outputAmounts = new uint16[](2);
+    outputTypes[0] = ObjectTypes.BlackConcrete.unwrap();
     outputAmounts[0] = 1;
+    outputTypes[1] = ObjectTypes.Bucket.unwrap();
+    outputAmounts[1] = 1;
 
     recipes[108] = RecipesData({
-      stationTypeId: ObjectTypes.Stonecutter,
+      stationTypeId: ObjectTypes.Null,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -2607,12 +2609,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.Tuff.unwrap();
+    inputTypes[0] = ObjectTypes.Stone.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.TuffBricks.unwrap();
+    outputTypes[0] = ObjectTypes.StoneBricks.unwrap();
     outputAmounts[0] = 1;
 
     recipes[109] = RecipesData({
@@ -2629,12 +2631,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.CobbledDeepslate.unwrap();
+    inputTypes[0] = ObjectTypes.Tuff.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.DeepslateBricks.unwrap();
+    outputTypes[0] = ObjectTypes.TuffBricks.unwrap();
     outputAmounts[0] = 1;
 
     recipes[110] = RecipesData({
@@ -2651,12 +2653,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.Andesite.unwrap();
+    inputTypes[0] = ObjectTypes.CobbledDeepslate.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.PolishedAndesite.unwrap();
+    outputTypes[0] = ObjectTypes.DeepslateBricks.unwrap();
     outputAmounts[0] = 1;
 
     recipes[111] = RecipesData({
@@ -2673,12 +2675,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.Granite.unwrap();
+    inputTypes[0] = ObjectTypes.Andesite.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.PolishedGranite.unwrap();
+    outputTypes[0] = ObjectTypes.PolishedAndesite.unwrap();
     outputAmounts[0] = 1;
 
     recipes[112] = RecipesData({
@@ -2695,12 +2697,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.Diorite.unwrap();
+    inputTypes[0] = ObjectTypes.Granite.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.PolishedDiorite.unwrap();
+    outputTypes[0] = ObjectTypes.PolishedGranite.unwrap();
     outputAmounts[0] = 1;
 
     recipes[113] = RecipesData({
@@ -2717,12 +2719,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.Tuff.unwrap();
+    inputTypes[0] = ObjectTypes.Diorite.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.PolishedTuff.unwrap();
+    outputTypes[0] = ObjectTypes.PolishedDiorite.unwrap();
     outputAmounts[0] = 1;
 
     recipes[114] = RecipesData({
@@ -2739,12 +2741,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.Basalt.unwrap();
+    inputTypes[0] = ObjectTypes.Tuff.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.PolishedBasalt.unwrap();
+    outputTypes[0] = ObjectTypes.PolishedTuff.unwrap();
     outputAmounts[0] = 1;
 
     recipes[115] = RecipesData({
@@ -2761,12 +2763,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.Blackstone.unwrap();
+    inputTypes[0] = ObjectTypes.Basalt.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.PolishedBlackstone.unwrap();
+    outputTypes[0] = ObjectTypes.PolishedBasalt.unwrap();
     outputAmounts[0] = 1;
 
     recipes[116] = RecipesData({
@@ -2783,12 +2785,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.StoneBricks.unwrap();
+    inputTypes[0] = ObjectTypes.Blackstone.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.ChiseledStoneBricks.unwrap();
+    outputTypes[0] = ObjectTypes.PolishedBlackstone.unwrap();
     outputAmounts[0] = 1;
 
     recipes[117] = RecipesData({
@@ -2805,12 +2807,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.TuffBricks.unwrap();
+    inputTypes[0] = ObjectTypes.StoneBricks.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.ChiseledTuffBricks.unwrap();
+    outputTypes[0] = ObjectTypes.ChiseledStoneBricks.unwrap();
     outputAmounts[0] = 1;
 
     recipes[118] = RecipesData({
@@ -2827,12 +2829,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.DeepslateBricks.unwrap();
+    inputTypes[0] = ObjectTypes.TuffBricks.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.ChiseledDeepslate.unwrap();
+    outputTypes[0] = ObjectTypes.ChiseledTuffBricks.unwrap();
     outputAmounts[0] = 1;
 
     recipes[119] = RecipesData({
@@ -2849,12 +2851,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.PolishedBlackstone.unwrap();
+    inputTypes[0] = ObjectTypes.DeepslateBricks.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.ChiseledPolishedBlackstone.unwrap();
+    outputTypes[0] = ObjectTypes.ChiseledDeepslate.unwrap();
     outputAmounts[0] = 1;
 
     recipes[120] = RecipesData({
@@ -2871,12 +2873,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.Sandstone.unwrap();
+    inputTypes[0] = ObjectTypes.PolishedBlackstone.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.ChiseledSandstone.unwrap();
+    outputTypes[0] = ObjectTypes.ChiseledPolishedBlackstone.unwrap();
     outputAmounts[0] = 1;
 
     recipes[121] = RecipesData({
@@ -2893,12 +2895,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.RedSandstone.unwrap();
+    inputTypes[0] = ObjectTypes.Sandstone.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.ChiseledRedSandstone.unwrap();
+    outputTypes[0] = ObjectTypes.ChiseledSandstone.unwrap();
     outputAmounts[0] = 1;
 
     recipes[122] = RecipesData({
@@ -2915,12 +2917,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.Deepslate.unwrap();
+    inputTypes[0] = ObjectTypes.RedSandstone.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.PolishedDeepslate.unwrap();
+    outputTypes[0] = ObjectTypes.ChiseledRedSandstone.unwrap();
     outputAmounts[0] = 1;
 
     recipes[123] = RecipesData({
@@ -2937,12 +2939,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.PolishedBlackstone.unwrap();
+    inputTypes[0] = ObjectTypes.Deepslate.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.PolishedBlackstoneBricks.unwrap();
+    outputTypes[0] = ObjectTypes.PolishedDeepslate.unwrap();
     outputAmounts[0] = 1;
 
     recipes[124] = RecipesData({
@@ -2959,12 +2961,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.Sandstone.unwrap();
+    inputTypes[0] = ObjectTypes.PolishedBlackstone.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.CutSandstone.unwrap();
+    outputTypes[0] = ObjectTypes.PolishedBlackstoneBricks.unwrap();
     outputAmounts[0] = 1;
 
     recipes[125] = RecipesData({
@@ -2981,12 +2983,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](1);
     uint16[] memory inputAmounts = new uint16[](1);
-    inputTypes[0] = ObjectTypes.RedSandstone.unwrap();
+    inputTypes[0] = ObjectTypes.Sandstone.unwrap();
     inputAmounts[0] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.CutRedSandstone.unwrap();
+    outputTypes[0] = ObjectTypes.CutSandstone.unwrap();
     outputAmounts[0] = 1;
 
     recipes[126] = RecipesData({
@@ -3001,20 +3003,18 @@ function getRecipes() pure returns (RecipesData[] memory) {
 
   // Recipe 127
   {
-    uint16[] memory inputTypes = new uint16[](2);
-    uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.StoneBricks.unwrap();
+    uint16[] memory inputTypes = new uint16[](1);
+    uint16[] memory inputAmounts = new uint16[](1);
+    inputTypes[0] = ObjectTypes.RedSandstone.unwrap();
     inputAmounts[0] = 1;
-    inputTypes[1] = ObjectTypes.CoalOre.unwrap();
-    inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.CrackedStoneBricks.unwrap();
+    outputTypes[0] = ObjectTypes.CutRedSandstone.unwrap();
     outputAmounts[0] = 1;
 
     recipes[127] = RecipesData({
-      stationTypeId: ObjectTypes.Furnace,
+      stationTypeId: ObjectTypes.Stonecutter,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -3027,14 +3027,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.DeepslateBricks.unwrap();
+    inputTypes[0] = ObjectTypes.StoneBricks.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.CoalOre.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.CrackedDeepslateBricks.unwrap();
+    outputTypes[0] = ObjectTypes.CrackedStoneBricks.unwrap();
     outputAmounts[0] = 1;
 
     recipes[128] = RecipesData({
@@ -3051,14 +3051,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.PolishedBlackstoneBricks.unwrap();
+    inputTypes[0] = ObjectTypes.DeepslateBricks.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.CoalOre.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.CrackedPolishedBlackstoneBricks.unwrap();
+    outputTypes[0] = ObjectTypes.CrackedDeepslateBricks.unwrap();
     outputAmounts[0] = 1;
 
     recipes[129] = RecipesData({
@@ -3075,14 +3075,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.Sandstone.unwrap();
+    inputTypes[0] = ObjectTypes.PolishedBlackstoneBricks.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.CoalOre.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.SmoothSandstone.unwrap();
+    outputTypes[0] = ObjectTypes.CrackedPolishedBlackstoneBricks.unwrap();
     outputAmounts[0] = 1;
 
     recipes[130] = RecipesData({
@@ -3099,14 +3099,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.RedSandstone.unwrap();
+    inputTypes[0] = ObjectTypes.Sandstone.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.CoalOre.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.SmoothRedSandstone.unwrap();
+    outputTypes[0] = ObjectTypes.SmoothSandstone.unwrap();
     outputAmounts[0] = 1;
 
     recipes[131] = RecipesData({
@@ -3123,14 +3123,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.Stone.unwrap();
+    inputTypes[0] = ObjectTypes.RedSandstone.unwrap();
     inputAmounts[0] = 1;
     inputTypes[1] = ObjectTypes.CoalOre.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.SmoothStone.unwrap();
+    outputTypes[0] = ObjectTypes.SmoothRedSandstone.unwrap();
     outputAmounts[0] = 1;
 
     recipes[132] = RecipesData({
@@ -3147,18 +3147,18 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.StoneBricks.unwrap();
+    inputTypes[0] = ObjectTypes.Stone.unwrap();
     inputAmounts[0] = 1;
-    inputTypes[1] = ObjectTypes.Moss.unwrap();
+    inputTypes[1] = ObjectTypes.CoalOre.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.MossyStoneBricks.unwrap();
+    outputTypes[0] = ObjectTypes.SmoothStone.unwrap();
     outputAmounts[0] = 1;
 
     recipes[133] = RecipesData({
-      stationTypeId: ObjectTypes.Null,
+      stationTypeId: ObjectTypes.Furnace,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -3171,18 +3171,18 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.Terracotta.unwrap();
-    inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.BrownDye.unwrap();
+    inputTypes[0] = ObjectTypes.StoneBricks.unwrap();
+    inputAmounts[0] = 1;
+    inputTypes[1] = ObjectTypes.Moss.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.BrownTerracotta.unwrap();
-    outputAmounts[0] = 8;
+    outputTypes[0] = ObjectTypes.MossyStoneBricks.unwrap();
+    outputAmounts[0] = 1;
 
     recipes[134] = RecipesData({
-      stationTypeId: ObjectTypes.Workbench,
+      stationTypeId: ObjectTypes.Null,
       craftingTime: 0,
       inputTypes: inputTypes,
       inputAmounts: inputAmounts,
@@ -3197,12 +3197,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Terracotta.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.OrangeDye.unwrap();
+    inputTypes[1] = ObjectTypes.BrownDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.OrangeTerracotta.unwrap();
+    outputTypes[0] = ObjectTypes.BrownTerracotta.unwrap();
     outputAmounts[0] = 8;
 
     recipes[135] = RecipesData({
@@ -3221,12 +3221,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Terracotta.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.WhiteDye.unwrap();
+    inputTypes[1] = ObjectTypes.OrangeDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.WhiteTerracotta.unwrap();
+    outputTypes[0] = ObjectTypes.OrangeTerracotta.unwrap();
     outputAmounts[0] = 8;
 
     recipes[136] = RecipesData({
@@ -3245,12 +3245,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Terracotta.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.YellowDye.unwrap();
+    inputTypes[1] = ObjectTypes.WhiteDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.YellowTerracotta.unwrap();
+    outputTypes[0] = ObjectTypes.WhiteTerracotta.unwrap();
     outputAmounts[0] = 8;
 
     recipes[137] = RecipesData({
@@ -3269,12 +3269,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Terracotta.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.RedDye.unwrap();
+    inputTypes[1] = ObjectTypes.YellowDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.RedTerracotta.unwrap();
+    outputTypes[0] = ObjectTypes.YellowTerracotta.unwrap();
     outputAmounts[0] = 8;
 
     recipes[138] = RecipesData({
@@ -3293,12 +3293,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Terracotta.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.CyanDye.unwrap();
+    inputTypes[1] = ObjectTypes.RedDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.CyanTerracotta.unwrap();
+    outputTypes[0] = ObjectTypes.RedTerracotta.unwrap();
     outputAmounts[0] = 8;
 
     recipes[139] = RecipesData({
@@ -3317,12 +3317,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Terracotta.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.BlackDye.unwrap();
+    inputTypes[1] = ObjectTypes.CyanDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.BlackTerracotta.unwrap();
+    outputTypes[0] = ObjectTypes.CyanTerracotta.unwrap();
     outputAmounts[0] = 8;
 
     recipes[140] = RecipesData({
@@ -3341,12 +3341,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Terracotta.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.PurpleDye.unwrap();
+    inputTypes[1] = ObjectTypes.BlackDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.PurpleTerracotta.unwrap();
+    outputTypes[0] = ObjectTypes.BlackTerracotta.unwrap();
     outputAmounts[0] = 8;
 
     recipes[141] = RecipesData({
@@ -3365,12 +3365,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Terracotta.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.BlueDye.unwrap();
+    inputTypes[1] = ObjectTypes.PurpleDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.BlueTerracotta.unwrap();
+    outputTypes[0] = ObjectTypes.PurpleTerracotta.unwrap();
     outputAmounts[0] = 8;
 
     recipes[142] = RecipesData({
@@ -3389,12 +3389,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Terracotta.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.MagentaDye.unwrap();
+    inputTypes[1] = ObjectTypes.BlueDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.MagentaTerracotta.unwrap();
+    outputTypes[0] = ObjectTypes.BlueTerracotta.unwrap();
     outputAmounts[0] = 8;
 
     recipes[143] = RecipesData({
@@ -3413,12 +3413,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Terracotta.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.LightGrayDye.unwrap();
+    inputTypes[1] = ObjectTypes.MagentaDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.LightGrayTerracotta.unwrap();
+    outputTypes[0] = ObjectTypes.MagentaTerracotta.unwrap();
     outputAmounts[0] = 8;
 
     recipes[144] = RecipesData({
@@ -3437,12 +3437,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Terracotta.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.LightBlueDye.unwrap();
+    inputTypes[1] = ObjectTypes.LightGrayDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.LightBlueTerracotta.unwrap();
+    outputTypes[0] = ObjectTypes.LightGrayTerracotta.unwrap();
     outputAmounts[0] = 8;
 
     recipes[145] = RecipesData({
@@ -3461,12 +3461,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Terracotta.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.GreenDye.unwrap();
+    inputTypes[1] = ObjectTypes.LightBlueDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.GreenTerracotta.unwrap();
+    outputTypes[0] = ObjectTypes.LightBlueTerracotta.unwrap();
     outputAmounts[0] = 8;
 
     recipes[146] = RecipesData({
@@ -3485,12 +3485,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Terracotta.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.PinkDye.unwrap();
+    inputTypes[1] = ObjectTypes.GreenDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.PinkTerracotta.unwrap();
+    outputTypes[0] = ObjectTypes.GreenTerracotta.unwrap();
     outputAmounts[0] = 8;
 
     recipes[147] = RecipesData({
@@ -3509,12 +3509,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Terracotta.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.LimeDye.unwrap();
+    inputTypes[1] = ObjectTypes.PinkDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.LimeTerracotta.unwrap();
+    outputTypes[0] = ObjectTypes.PinkTerracotta.unwrap();
     outputAmounts[0] = 8;
 
     recipes[148] = RecipesData({
@@ -3533,12 +3533,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Terracotta.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.GrayDye.unwrap();
+    inputTypes[1] = ObjectTypes.LimeDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.GrayTerracotta.unwrap();
+    outputTypes[0] = ObjectTypes.LimeTerracotta.unwrap();
     outputAmounts[0] = 8;
 
     recipes[149] = RecipesData({
@@ -3555,14 +3555,14 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
-    inputTypes[0] = ObjectTypes.Glass.unwrap();
+    inputTypes[0] = ObjectTypes.Terracotta.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.WhiteDye.unwrap();
+    inputTypes[1] = ObjectTypes.GrayDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.WhiteGlass.unwrap();
+    outputTypes[0] = ObjectTypes.GrayTerracotta.unwrap();
     outputAmounts[0] = 8;
 
     recipes[150] = RecipesData({
@@ -3581,12 +3581,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Glass.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.OrangeDye.unwrap();
+    inputTypes[1] = ObjectTypes.WhiteDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.OrangeGlass.unwrap();
+    outputTypes[0] = ObjectTypes.WhiteGlass.unwrap();
     outputAmounts[0] = 8;
 
     recipes[151] = RecipesData({
@@ -3605,12 +3605,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Glass.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.YellowDye.unwrap();
+    inputTypes[1] = ObjectTypes.OrangeDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.YellowGlass.unwrap();
+    outputTypes[0] = ObjectTypes.OrangeGlass.unwrap();
     outputAmounts[0] = 8;
 
     recipes[152] = RecipesData({
@@ -3629,12 +3629,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Glass.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.PinkDye.unwrap();
+    inputTypes[1] = ObjectTypes.YellowDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.PinkGlass.unwrap();
+    outputTypes[0] = ObjectTypes.YellowGlass.unwrap();
     outputAmounts[0] = 8;
 
     recipes[153] = RecipesData({
@@ -3653,12 +3653,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Glass.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.PurpleDye.unwrap();
+    inputTypes[1] = ObjectTypes.PinkDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.PurpleGlass.unwrap();
+    outputTypes[0] = ObjectTypes.PinkGlass.unwrap();
     outputAmounts[0] = 8;
 
     recipes[154] = RecipesData({
@@ -3677,12 +3677,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Glass.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.BlueDye.unwrap();
+    inputTypes[1] = ObjectTypes.PurpleDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.BlueGlass.unwrap();
+    outputTypes[0] = ObjectTypes.PurpleGlass.unwrap();
     outputAmounts[0] = 8;
 
     recipes[155] = RecipesData({
@@ -3701,12 +3701,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Glass.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.GreenDye.unwrap();
+    inputTypes[1] = ObjectTypes.BlueDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.GreenGlass.unwrap();
+    outputTypes[0] = ObjectTypes.BlueGlass.unwrap();
     outputAmounts[0] = 8;
 
     recipes[156] = RecipesData({
@@ -3725,12 +3725,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Glass.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.RedDye.unwrap();
+    inputTypes[1] = ObjectTypes.GreenDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.RedGlass.unwrap();
+    outputTypes[0] = ObjectTypes.GreenGlass.unwrap();
     outputAmounts[0] = 8;
 
     recipes[157] = RecipesData({
@@ -3749,12 +3749,12 @@ function getRecipes() pure returns (RecipesData[] memory) {
     uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Glass.unwrap();
     inputAmounts[0] = 8;
-    inputTypes[1] = ObjectTypes.BlackDye.unwrap();
+    inputTypes[1] = ObjectTypes.RedDye.unwrap();
     inputAmounts[1] = 1;
 
     uint16[] memory outputTypes = new uint16[](1);
     uint16[] memory outputAmounts = new uint16[](1);
-    outputTypes[0] = ObjectTypes.BlackGlass.unwrap();
+    outputTypes[0] = ObjectTypes.RedGlass.unwrap();
     outputAmounts[0] = 8;
 
     recipes[158] = RecipesData({
@@ -3771,6 +3771,30 @@ function getRecipes() pure returns (RecipesData[] memory) {
   {
     uint16[] memory inputTypes = new uint16[](2);
     uint16[] memory inputAmounts = new uint16[](2);
+    inputTypes[0] = ObjectTypes.Glass.unwrap();
+    inputAmounts[0] = 8;
+    inputTypes[1] = ObjectTypes.BlackDye.unwrap();
+    inputAmounts[1] = 1;
+
+    uint16[] memory outputTypes = new uint16[](1);
+    uint16[] memory outputAmounts = new uint16[](1);
+    outputTypes[0] = ObjectTypes.BlackGlass.unwrap();
+    outputAmounts[0] = 8;
+
+    recipes[159] = RecipesData({
+      stationTypeId: ObjectTypes.Workbench,
+      craftingTime: 0,
+      inputTypes: inputTypes,
+      inputAmounts: inputAmounts,
+      outputTypes: outputTypes,
+      outputAmounts: outputAmounts
+    });
+  }
+
+  // Recipe 160
+  {
+    uint16[] memory inputTypes = new uint16[](2);
+    uint16[] memory inputAmounts = new uint16[](2);
     inputTypes[0] = ObjectTypes.Stone.unwrap();
     inputAmounts[0] = 8;
     inputTypes[1] = ObjectTypes.IronBar.unwrap();
@@ -3781,7 +3805,7 @@ function getRecipes() pure returns (RecipesData[] memory) {
     outputTypes[0] = ObjectTypes.Lodestone.unwrap();
     outputAmounts[0] = 1;
 
-    recipes[159] = RecipesData({
+    recipes[160] = RecipesData({
       stationTypeId: ObjectTypes.Workbench,
       craftingTime: 0,
       inputTypes: inputTypes,

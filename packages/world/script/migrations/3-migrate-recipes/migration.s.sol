@@ -41,7 +41,6 @@ contract MigrateRecipes is Migration {
     console.log("\nQuerying recipes to delete...");
     string memory deleteQuery =
       string.concat("SELECT recipeId FROM Recipes WHERE recipeId NOT IN (", newRecipeIdsStr, ") ORDER BY recipeId;");
-    console.log(deleteQuery);
 
     IndexerResult memory recipesToDeleteResult = recordingQueryNoResults(deleteQuery, "(bytes32)");
     console.log("Recipes to delete:", recipesToDeleteResult.rows.length);

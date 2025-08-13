@@ -1280,7 +1280,7 @@ export const objects: readonly ObjectDefinition[] = validateUniqueIds([
   {
     name: "Anvil",
     id: 510,
-    mass: 711000000000000000n,
+    mass: 2037000000000000000n,
     supportedOrientations: [
       getOrientation("PositiveX"),
       getOrientation("NegativeX"),
