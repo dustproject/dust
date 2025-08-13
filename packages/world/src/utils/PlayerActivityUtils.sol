@@ -71,6 +71,8 @@ library PlayerActivityUtils {
       activityType = ActivityType.CraftFurnaceMass;
     } else if (stationType == ObjectTypes.Stonecutter) {
       activityType = ActivityType.CraftStonecutterMass;
+    } else if (stationType == ObjectTypes.Anvil) {
+      activityType = ActivityType.CraftAnvilMass;
     } else {
       // Hand crafting (no station required)
       activityType = ActivityType.CraftHandMass;
