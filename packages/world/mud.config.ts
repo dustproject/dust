@@ -42,6 +42,11 @@ export default defineWorld({
       "MoveFallEnergy",
       "BuildEnergy",
       "BuildMass",
+      "CraftHandMass",
+      "CraftWorkbenchMass",
+      "CraftPowerstoneMass",
+      "CraftFurnaceMass",
+      "CraftStonecutterMass",
     ],
     Direction: [
       // Cardinal directions (6)

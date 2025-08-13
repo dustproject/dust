@@ -483,6 +483,9 @@ export const objectNames = [
   "DarkOakFenceGate",
   "MangroveFenceGate",
 
+  // Anvil station
+  "Anvil",
+
   // Non-blocks
   "WoodenPick",
   "CopperPick",
@@ -1273,6 +1276,19 @@ export const objects: readonly ObjectDefinition[] = validateUniqueIds([
   // { name: "DarkOakFenceGate", id: 508, mass: 18000000000000000n },
   // { name: "MangroveFenceGate", id: 509, mass: 18000000000000000n },
 
+  // Anvil crafting station
+  {
+    name: "Anvil",
+    id: 510,
+    mass: 711000000000000000n,
+    supportedOrientations: [
+      getOrientation("PositiveX"),
+      getOrientation("NegativeX"),
+      getOrientation("PositiveZ"),
+      getOrientation("NegativeZ"),
+    ],
+  },
+
   // Non blocks
   { name: "WoodenPick", id: 32768, mass: 22500000000000000n, plankAmount: 5 },
   {
@@ -1415,9 +1431,11 @@ export const objectsById = objects.reduce(
 
 export const categories = {
   NonSolid: { objects: ["Air", "Water"] },
+
   Any: {
     objects: ["AnyPlank", "AnyLog", "AnyLeaf", "AnyTerracotta"],
   },
+
   Block: {
     objects: [
       "Stone",
@@ -1672,8 +1690,11 @@ export const categories = {
       "GreenConcrete",
       "RedConcrete",
       "BlackConcrete",
+
+      "Anvil",
     ],
   },
+
   Terracotta: {
     objects: [
       "Terracotta",
@@ -1695,6 +1716,7 @@ export const categories = {
       "GrayTerracotta",
     ],
   },
+
   Ore: {
     objects: [
       "CoalOre",
@@ -1705,6 +1727,7 @@ export const categories = {
       "NeptuniumOre",
     ],
   },
+
   Log: {
     objects: [
       "OakLog",
@@ -1717,6 +1740,7 @@ export const categories = {
       "MangroveLog",
     ],
   },
+
   Leaf: {
     objects: [
       "OakLeaf",
@@ -1731,6 +1755,7 @@ export const categories = {
       "FloweringAzaleaLeaf",
     ],
   },
+
   Plank: {
     objects: [
       "OakPlanks",
@@ -1743,9 +1768,11 @@ export const categories = {
       "MangrovePlanks",
     ],
   },
+
   Seed: {
     objects: ["WheatSeed", "PumpkinSeed", "MelonSeed"],
   },
+
   Sapling: {
     objects: [
       "OakSapling",
@@ -1758,6 +1785,7 @@ export const categories = {
       "MangroveSapling",
     ],
   },
+
   SmartEntity: {
     objects: [
       "ForceField",
@@ -1786,9 +1814,11 @@ export const categories = {
       // "IronTrapdoor",
     ],
   },
+
   Station: {
-    objects: ["Workbench", "Powerstone", "Furnace", "Stonecutter"],
+    objects: ["Workbench", "Powerstone", "Furnace", "Stonecutter", "Anvil"],
   },
+
   Pick: {
     objects: [
       "WoodenPick",
@@ -1799,6 +1829,7 @@ export const categories = {
       "NeptuniumPick",
     ],
   },
+
   Axe: {
     objects: [
       "WoodenAxe",
@@ -1809,24 +1840,31 @@ export const categories = {
       "NeptuniumAxe",
     ],
   },
+
   Hoe: {
     objects: ["WoodenHoe"],
   },
+
   Whacker: {
     objects: ["WoodenWhacker", "CopperWhacker", "IronWhacker"],
   },
+
   OreBar: {
     objects: ["GoldBar", "IronBar", "Diamond", "NeptuniumBar"],
   },
+
   Food: {
     objects: ["WheatSlop", "PumpkinSoup", "MelonSmoothie"],
   },
+
   Fuel: {
     objects: ["Battery"],
   },
+
   Player: {
     objects: ["Player"],
   },
+
   ExtraDrops: {
     checkName: "hasExtraDrops",
     objects: [
@@ -1846,6 +1884,7 @@ export const categories = {
       // "CottonBush",
     ],
   },
+
   AxeMultiplier: {
     checkName: "hasAxeMultiplier",
     objects: [
@@ -1892,6 +1931,7 @@ export const categories = {
       "Torch",
     ],
   },
+
   PickMultiplier: {
     checkName: "hasPickMultiplier",
     objects: [
@@ -2027,9 +2067,11 @@ export const categories = {
       "BlackConcretePowder",
     ],
   },
+
   WoodenTool: {
     objects: ["WoodenPick", "WoodenAxe", "WoodenWhacker", "WoodenHoe"],
   },
+
   PassThrough: {
     objects: [
       "Air",
@@ -2076,6 +2118,7 @@ export const categories = {
       "BambooBush",
     ],
   },
+
   Growable: {
     objects: [
       "WheatSeed",

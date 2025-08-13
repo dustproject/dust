@@ -5,7 +5,7 @@ import { ActivityType } from "../codegen/common.sol";
 import { Death } from "../codegen/tables/Death.sol";
 import { PlayerActivity } from "../codegen/tables/PlayerActivity.sol";
 import { EntityId } from "../types/EntityId.sol";
-import { ObjectType } from "../types/ObjectType.sol";
+import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 
 library PlayerActivityUtils {
   // Mining tracking - with tool specialization and crop detection
@@ -57,6 +57,26 @@ library PlayerActivityUtils {
 
   function trackBuildMass(EntityId player, uint128 massBuilt) internal {
     _updateActivity(player, ActivityType.BuildMass, uint256(massBuilt));
+  }
+
+  // Crafting tracking - per station type
+  function trackCraft(EntityId player, ObjectType stationType, uint128 massEnergy) internal {
+    ActivityType activityType;
+
+    if (stationType == ObjectTypes.Workbench) {
+      activityType = ActivityType.CraftWorkbenchMass;
+    } else if (stationType == ObjectTypes.Powerstone) {
+      activityType = ActivityType.CraftPowerstoneMass;
+    } else if (stationType == ObjectTypes.Furnace) {
+      activityType = ActivityType.CraftFurnaceMass;
+    } else if (stationType == ObjectTypes.Stonecutter) {
+      activityType = ActivityType.CraftStonecutterMass;
+    } else {
+      // Hand crafting (no station required)
+      activityType = ActivityType.CraftHandMass;
+    }
+
+    _updateActivity(player, activityType, uint256(massEnergy));
   }
 
   // Internal helper

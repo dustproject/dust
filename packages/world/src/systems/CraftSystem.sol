@@ -12,6 +12,7 @@ import { addEnergyToLocalPool, transferEnergyToPool } from "../utils/EnergyUtils
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils, SlotAmount, SlotData } from "../utils/InventoryUtils.sol";
 import { CraftNotification, notify } from "../utils/NotifUtils.sol";
+import { PlayerActivityUtils } from "../utils/PlayerActivityUtils.sol";
 
 import { CRAFT_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../types/EntityId.sol";
@@ -37,7 +38,11 @@ contract CraftSystem is System {
 
     CraftLib._consumeRecipeInputs(caller, recipe, inputs);
     CraftLib._createRecipeOutputs(caller, recipe);
-    CraftLib._handleEnergyConservation(caller, recipe);
+    uint128 massEnergy = CraftLib._handleEnergyConservation(caller, recipe);
+
+    // Track crafting activity
+    // TODO: this is the output's mass+energy, should we track input instead?
+    PlayerActivityUtils.trackCraft(caller, recipe.stationTypeId, massEnergy);
 
     notify(caller, CraftNotification({ recipeId: recipeId, station: station }));
   }
@@ -111,7 +116,7 @@ library CraftLib {
     return withdrawals;
   }
 
-  function _handleEnergyConservation(EntityId caller, RecipesData memory recipe) public {
+  function _handleEnergyConservation(EntityId caller, RecipesData memory recipe) public returns (uint128 massEnergy) {
     // Calculate total input mass+energy (excluding coal recipes)
     uint128 totalInputMassEnergy = 0;
     for (uint256 i = 0; i < recipe.inputTypes.length; i++) {
@@ -145,5 +150,7 @@ library CraftLib {
       uint128 excessEnergy = totalInputMassEnergy - totalOutputMassEnergy;
       addEnergyToLocalPool(caller._getPosition(), excessEnergy);
     }
+
+    return totalOutputMassEnergy;
   }
 }

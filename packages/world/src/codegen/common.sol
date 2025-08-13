@@ -42,7 +42,12 @@ enum ActivityType {
   MoveSwimSteps,
   MoveFallEnergy,
   BuildEnergy,
-  BuildMass
+  BuildMass,
+  CraftHandMass,
+  CraftWorkbenchMass,
+  CraftPowerstoneMass,
+  CraftFurnaceMass,
+  CraftStonecutterMass
 }
 
 enum Direction {
