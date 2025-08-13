@@ -8,15 +8,20 @@ import { EntityId } from "../types/EntityId.sol";
 import { ObjectType } from "../types/ObjectType.sol";
 
 library PlayerActivityUtils {
-  // Mining tracking - with tool specialization
-  function trackMine(EntityId player, uint128 massReduced, ObjectType toolType) internal {
+  // Mining tracking - with tool specialization and crop detection
+  function trackMine(EntityId player, uint128 massReduced, ObjectType toolType, ObjectType minedType) internal {
     ActivityType activityType;
-    if (toolType.isAxe()) {
+
+    // Check if we're mining a crop
+    if (minedType.isCrop()) {
+      // TODO: should we still track axe/pick mining independently?
+      activityType = ActivityType.MineCropMass;
+    } else if (toolType.isAxe()) {
       activityType = ActivityType.MineAxeMass;
     } else if (toolType.isPick()) {
       activityType = ActivityType.MinePickMass;
     } else {
-      // TODO: should we track bare hands mining?
+      // Bare hands / whacker mining of non-crops - not tracked for now
       return;
     }
     _updateActivity(player, activityType, uint256(massReduced));

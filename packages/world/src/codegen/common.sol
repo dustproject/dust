@@ -35,6 +35,7 @@ enum RateLimitType {
 enum ActivityType {
   MinePickMass,
   MineAxeMass,
+  MineCropMass,
   HitPlayerDamage,
   HitMachineDamage,
   MoveWalkSteps,

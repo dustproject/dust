@@ -15,17 +15,16 @@ import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 
 import { ActivityType } from "../src/codegen/common.sol";
 import { Death } from "../src/codegen/tables/Death.sol";
-import { PlayerActivity } from "../src/codegen/tables/PlayerActivity.sol";
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
 
-import { PlayerActivityUtils } from "../src/utils/PlayerActivityUtils.sol";
 import { DustTest } from "./DustTest.sol";
 
 import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import {
   ACTION_MODIFIER_DENOMINATOR,
+  BARE_HANDS_ACTION_ENERGY_COST,
   BARE_HANDS_ACTION_ENERGY_COST,
   CHUNK_SIZE,
   MACHINE_ENERGY_DRAIN_RATE,
@@ -1348,5 +1347,81 @@ contract MineTest is DustTest {
 
     vm.prank(alice);
     world.mine(aliceEntityId, finalMineCoord, slot, "");
+  }
+
+  // Crop mining activity tracking tests
+
+  function testMineCropTracksActivity() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Test mining wheat
+    Vec3 wheatCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
+    ObjectType wheatType = ObjectTypes.Wheat;
+    setObjectAtCoord(wheatCoord, wheatType);
+
+    ObjectPhysics.getMass(wheatType);
+
+    // Mine wheat without tool (bare hands)
+    vm.prank(alice);
+    world.mine(aliceEntityId, wheatCoord, "");
+
+    // Check that crop mining was tracked
+    uint256 cropActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MineCropMass);
+
+    // When mining without tool, mass reduction should be BARE_HANDS_ACTION_ENERGY_COST
+    assertEq(cropActivity, BARE_HANDS_ACTION_ENERGY_COST, "Crop mining activity not tracked correctly");
+
+    // Should have no tool-based mining activity
+    uint256 pickActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MinePickMass);
+    assertEq(pickActivity, 0, "Pick mining should be zero for crops");
+
+    uint256 axeActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MineAxeMass);
+    assertEq(axeActivity, 0, "Axe mining should be zero for crops");
+  }
+
+  function testMultipleCropsTracked() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Mine multiple crop types
+    ObjectType[4] memory cropTypes = [ObjectTypes.Wheat, ObjectTypes.Melon, ObjectTypes.Pumpkin, ObjectTypes.CottonBush];
+
+    uint256 totalCropMass = 0;
+
+    for (uint256 i = 0; i < cropTypes.length; i++) {
+      Vec3 cropCoord = vec3(playerCoord.x() + int32(int256(i)) + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
+      setObjectAtCoord(cropCoord, cropTypes[i]);
+
+      vm.prank(alice);
+      world.mine(aliceEntityId, cropCoord, "");
+
+      totalCropMass += BARE_HANDS_ACTION_ENERGY_COST;
+    }
+
+    // Check total crop mining activity
+    uint256 cropActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MineCropMass);
+    assertEq(cropActivity, totalCropMass, "Total crop mining activity not tracked correctly");
+  }
+
+  function testCropMiningWithTool() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Add a tool to inventory
+    EntityId tool = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenAxe);
+    uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, tool);
+
+    // Mine wheat with tool
+    Vec3 wheatCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
+    setObjectAtCoord(wheatCoord, ObjectTypes.Wheat);
+
+    vm.prank(alice);
+    world.mine(aliceEntityId, wheatCoord, slot, "");
+
+    // Even with a tool, crop mining should be tracked as MineCropMass
+    uint256 cropActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MineCropMass);
+    assertTrue(cropActivity > 0, "Crop mining activity should be tracked even with tool");
+
+    // Should not have axe mining activity for crops
+    uint256 axeActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MineAxeMass);
+    assertEq(axeActivity, 0, "Axe mining should be zero for crops");
   }
 }

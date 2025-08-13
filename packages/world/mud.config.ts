@@ -34,6 +34,7 @@ export default defineWorld({
     ActivityType: [
       "MinePickMass",
       "MineAxeMass",
+      "MineCropMass",
       "HitPlayerDamage",
       "HitMachineDamage",
       "MoveWalkSteps",

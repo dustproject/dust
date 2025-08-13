@@ -2453,4 +2453,8 @@ export const categories = {
       "BambooBush",
     ],
   },
+
+  Crop: {
+    objects: ["Wheat", "Melon", "Pumpkin"],
+  },
 } as const satisfies Record<string, Category>;
