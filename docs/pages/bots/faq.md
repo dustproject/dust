@@ -1,0 +1,9 @@
+# Frequently Asked Questions
+
+:::details[I moved via a bot, but its not updating in the client]
+
+The client uses the position in the client as the source of truth. However, after
+30 seconds of inactivity, it will start using the position onchain and on new updates,
+teleport the player in the client there. If you've recently moved in the client,
+you'll need to wait 30 seconds before trying.
+:::

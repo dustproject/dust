@@ -22,6 +22,11 @@ function getCacheKey(worldAddress: Hex, [x, y, z]: ReadonlyVec3): string {
   return `${worldAddress}:${x},${y},${z}`;
 }
 
+function deconstructCacheKey(key: string): [Hex, Vec3] {
+  const [worldAddress, x, y, z] = key.split(":");
+  return [worldAddress as Hex, [Number(x), Number(y), Number(z)]];
+}
+
 function mod(a: number, b: number): number {
   return ((a % b) + b) % b;
 }
@@ -90,6 +95,56 @@ export async function getTerrainBlockType(
   }
 
   return readTerrainBlockType(bytecode, [x, y, z]);
+}
+
+export async function getTerrainBlockTypes(
+  publicClient: PublicClient,
+  worldAddress: Hex,
+  coords: Vec3[],
+): Promise<number[]> {
+  const chunkGroups = new Map<string, Vec3[]>();
+
+  for (const coord of coords) {
+    const chunkCoord = voxelToChunkPos(coord);
+    const chunkKey = getCacheKey(worldAddress, chunkCoord);
+
+    if (!chunkGroups.has(chunkKey)) {
+      chunkGroups.set(chunkKey, []);
+    }
+    chunkGroups.get(chunkKey)!.push(coord);
+  }
+
+  const chunkPromises = Array.from(chunkGroups.keys()).map(
+    async (chunkCacheKey) => {
+      const [worldAddress, chunkCoord] = deconstructCacheKey(chunkCacheKey);
+
+      let bytecode = bytecodeCache.get(chunkCacheKey);
+      if (!bytecode) {
+        bytecode = await getChunkBytecode(
+          publicClient,
+          worldAddress,
+          chunkCoord,
+        );
+        bytecodeCache.set(chunkCacheKey, bytecode);
+      }
+
+      return { chunkCacheKey, bytecode };
+    },
+  );
+
+  const chunkResults = await Promise.all(chunkPromises);
+  const chunkBytecodes = new Map(
+    chunkResults.map((r) => [r.chunkCacheKey, r.bytecode]),
+  );
+
+  return coords.map((coord) => {
+    const chunkCoord = voxelToChunkPos(coord);
+    const chunkCacheKey = getCacheKey(worldAddress, chunkCoord);
+    const bytecode = chunkBytecodes.get(chunkCacheKey);
+    if (!bytecode) throw new Error("Chunk not explored");
+
+    return readTerrainBlockType(bytecode, coord);
+  });
 }
 
 export function readTerrainBlockType(
