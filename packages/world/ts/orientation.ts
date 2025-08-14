@@ -4,20 +4,63 @@ import type { Vec3 } from "./vec3";
 // Direction is an array of strings
 config.enums.Direction;
 
-type Direction = (typeof config.enums.Direction)[number];
+export type Direction = (typeof config.enums.Direction)[number];
 
-const SUPPORTED_DIRECTION_VECTORS: {
-  [key in Direction]?: [number, number, number];
-} = {
+export const CANONICAL_VECTORS = {
   PositiveX: [1, 0, 0],
   NegativeX: [-1, 0, 0],
   PositiveY: [0, 1, 0],
   NegativeY: [0, -1, 0],
   PositiveZ: [0, 0, 1],
   NegativeZ: [0, 0, -1],
-};
+  PositiveXPositiveY: [1, 1, 0],
+  PositiveXNegativeY: [1, -1, 0],
+  NegativeXPositiveY: [-1, 1, 0],
+  NegativeXNegativeY: [-1, -1, 0],
+  PositiveXPositiveZ: [1, 0, 1],
+  PositiveXNegativeZ: [1, 0, -1],
+  NegativeXPositiveZ: [-1, 0, 1],
+  NegativeXNegativeZ: [-1, 0, -1],
+  PositiveYPositiveZ: [0, 1, 1],
+  PositiveYNegativeZ: [0, 1, -1],
+  NegativeYPositiveZ: [0, -1, 1],
+  NegativeYNegativeZ: [0, -1, -1],
+  PositiveXPositiveYPositiveZ: [1, 1, 1],
+  PositiveXPositiveYNegativeZ: [1, 1, -1],
+  PositiveXNegativeYPositiveZ: [1, -1, 1],
+  PositiveXNegativeYNegativeZ: [1, -1, -1],
+  NegativeXPositiveYPositiveZ: [-1, 1, 1],
+  NegativeXPositiveYNegativeZ: [-1, 1, -1],
+  NegativeXNegativeYPositiveZ: [-1, -1, 1],
+  NegativeXNegativeYNegativeZ: [-1, -1, -1],
+} as const satisfies { [key in Direction]: Vec3 };
 
-type SupportedDirection = keyof typeof SUPPORTED_DIRECTION_VECTORS;
+export const CANONICAL_UP: Vec3 = CANONICAL_VECTORS.PositiveY;
+export const CANONICAL_FORWARD: Vec3 = CANONICAL_VECTORS.PositiveX;
+
+// Full six axis directions (for general use, e.g., forward or up in orientations)
+export type AxisDirection =
+  | "PositiveX"
+  | "NegativeX"
+  | "PositiveY"
+  | "NegativeY"
+  | "PositiveZ"
+  | "NegativeZ";
+
+// Narrowed to four horizontal cardinals (for facing/forward in placement)
+export type CardinalDirection =
+  | "PositiveX"
+  | "NegativeX"
+  | "PositiveZ"
+  | "NegativeZ";
+
+export type SupportedDirection =
+  | "PositiveX"
+  | "NegativeX"
+  | "PositiveY"
+  | "NegativeY"
+  | "PositiveZ"
+  | "NegativeZ";
 
 export type Orientation = number; // uint8 in Solidity
 
@@ -63,9 +106,6 @@ export const REFLECTIONS: readonly [
   [1, 1, 1], // Reflect all axes
 ] as const;
 
-const CANONICAL_UP: Vec3 = [0, 1, 0];
-const CANONICAL_FORWARD: Vec3 = [1, 0, 0];
-
 export function applyOrientation(v: Vec3, perm: Permute, refl: Reflect): Vec3 {
   const out: Vec3 = [v[perm[0]]!, v[perm[1]]!, v[perm[2]]!];
   if (refl[0]) out[0] = -out[0];
@@ -74,18 +114,16 @@ export function applyOrientation(v: Vec3, perm: Permute, refl: Reflect): Vec3 {
   return out;
 }
 
-export function getOrientation(
-  forwardDirection: SupportedDirection,
-): Orientation {
+export function getOrientation(forwardDirection: AxisDirection): Orientation {
   return getOrientationGeneric(forwardDirection, "PositiveY");
 }
 
 export function getOrientationGeneric(
-  forwardDirection: SupportedDirection,
-  upDirection: SupportedDirection,
+  forwardDirection: AxisDirection,
+  upDirection: AxisDirection,
 ): Orientation {
-  const targetForward = SUPPORTED_DIRECTION_VECTORS[forwardDirection]!;
-  const targetUp = SUPPORTED_DIRECTION_VECTORS[upDirection]!;
+  const targetForward = CANONICAL_VECTORS[forwardDirection]!;
+  const targetUp = CANONICAL_VECTORS[upDirection]!;
 
   for (let permIdx = 0; permIdx < PERMUTATIONS.length; ++permIdx) {
     for (let reflIdx = 0; reflIdx < REFLECTIONS.length; ++reflIdx) {
@@ -116,28 +154,25 @@ export function getDirection(orientation: Orientation): SupportedDirection {
 
 export function getDirectionGeneric(
   orientation: Orientation,
-  upDirection: SupportedDirection,
-): SupportedDirection {
+  upDirection: AxisDirection,
+): AxisDirection {
   const [perm, refl] = decodeOrientation(orientation);
   const up = applyOrientation(CANONICAL_UP, perm, refl);
-  const targetUp = SUPPORTED_DIRECTION_VECTORS[upDirection]!;
+  const targetUp = CANONICAL_VECTORS[upDirection]!;
 
   const forward = applyOrientation(CANONICAL_FORWARD, perm, refl);
 
-  const forwardDirection = Object.keys(SUPPORTED_DIRECTION_VECTORS).find(
-    (dir) => {
-      const targetForward =
-        SUPPORTED_DIRECTION_VECTORS[dir as SupportedDirection]!;
-      return (
-        up[0] === targetUp[0] &&
-        up[1] === targetUp[1] &&
-        up[2] === targetUp[2] &&
-        forward[0] === targetForward[0] &&
-        forward[1] === targetForward[1] &&
-        forward[2] === targetForward[2]
-      );
-    },
-  );
+  const forwardDirection = Object.keys(CANONICAL_VECTORS).find((dir) => {
+    const targetForward = CANONICAL_VECTORS[dir as SupportedDirection]!;
+    return (
+      up[0] === targetUp[0] &&
+      up[1] === targetUp[1] &&
+      up[2] === targetUp[2] &&
+      forward[0] === targetForward[0] &&
+      forward[1] === targetForward[1] &&
+      forward[2] === targetForward[2]
+    );
+  });
   if (!forwardDirection) throw new Error("Unable to find direction");
   return forwardDirection as SupportedDirection;
 }
@@ -166,3 +201,29 @@ export function decodeOrientation(
   const reflIdx = orientation & 7;
   return [PERMUTATIONS[permIdx]!, REFLECTIONS[reflIdx]!];
 }
+
+export function isUpsideDown(orientation: Orientation): boolean {
+  const [perm, refl] = decodeOrientation(orientation);
+  const up = applyOrientation(CANONICAL_UP, perm, refl);
+  return up[0] === 0 && up[1] === -1 && up[2] === 0;
+}
+
+// All possible orientations (0-47)
+export const ALL_ORIENTATIONS: readonly Orientation[] = Array.from(
+  { length: 48 },
+  (_, i) => i,
+);
+
+// Common orientation sets for different object types
+export const CARDINAL_ORIENTATIONS: readonly Orientation[] = [0, 1, 40, 44];
+export const STAIR_ORIENTATIONS: readonly Orientation[] = [
+  0,
+  1,
+  40,
+  44,
+  2,
+  3,
+  42,
+  46, // 8 orientations for stairs (4 directions × 2 for upside-down)
+];
+export const SLAB_ORIENTATIONS: readonly Orientation[] = [0, 2]; // Bottom and top slabs
