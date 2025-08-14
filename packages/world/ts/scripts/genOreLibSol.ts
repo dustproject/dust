@@ -12,7 +12,11 @@ function generateOreLibSol(): string {
     )
     .map((biome) => {
       const multipliers = biome.oreMultipliers
-        .map(([, multiplier]) => `uint256(${multiplier.toString()})`)
+        .map(([oreType, multiplier]) =>
+          oreType === "CoalOre"
+            ? `uint256(${multiplier.toString()})`
+            : multiplier.toString(),
+        )
         .join(", ");
       return `    // biomeIndex == ${biome.id}: ${biome.name}
     ${biome.id === 0 ? "if" : "else if"} (biomeIndex == ${biome.id}) return [${multipliers}];`;
