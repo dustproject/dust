@@ -8,3 +8,4 @@ export * from "../moveUtils";
 export * from "../getCreate3Address";
 export * from "../terrain";
 export * from "../chunk";
+export * from "../biomes";

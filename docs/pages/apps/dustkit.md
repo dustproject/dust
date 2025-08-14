@@ -1,6 +1,6 @@
-# Dustkit
+# DustKit
 
-Dustkit is the bridge between apps and the native Dust browser client.
+DustKit is the bridge between apps and the native DUST browser client.
 
 ## Getting started
 
