@@ -184,7 +184,7 @@ export async function getBiomeName(
   [x, y, z]: Vec3,
 ): Promise<string> {
   const biome = await getBiome(worldAddress, publicClient, [x, y, z]);
-  return biomesById[biome]!;
+  return biomesById[biome.toString()]!;
 }
 
 export async function getBiome(
