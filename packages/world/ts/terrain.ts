@@ -3,7 +3,7 @@ import { CHUNK_SIZE, voxelToChunkPos } from "./chunk";
 import { getCreate3Address } from "./getCreate3Address";
 import { type ReadonlyVec3, type Vec3, packVec3 } from "./vec3";
 
-export const bytecodeCache = new Map<string, string>();
+const bytecodeCache = new Map<string, string>();
 
 // Should match SSTORE2.sol
 const DATA_OFFSET = 1;
@@ -18,10 +18,7 @@ function getChunkSalt(coord: ReadonlyVec3) {
   return pad(toBytes(packVec3(coord)), { size: 32 });
 }
 
-export function getCacheKey(
-  worldAddress: Hex,
-  [x, y, z]: ReadonlyVec3,
-): string {
+function getCacheKey(worldAddress: Hex, [x, y, z]: ReadonlyVec3): string {
   return `${worldAddress}:${x},${y},${z}`;
 }
 
@@ -50,7 +47,7 @@ function getBlockIndex([x, y, z]: ReadonlyVec3): number {
   return index;
 }
 
-export function readBytes1(bytecode: string, offset: number): number {
+function readBytes1(bytecode: string, offset: number): number {
   if (!bytecode || bytecode === "0x")
     throw new Error("InvalidPointer: no bytecode found");
 
@@ -155,4 +152,25 @@ export function readTerrainBlockType(
   [x, y, z]: Vec3,
 ): number {
   return readBytes1(chunkBytecode, getBlockIndex([x, y, z]));
+}
+
+export async function getBiome(
+  worldAddress: Hex,
+  publicClient: PublicClient,
+  [x, y, z]: Vec3,
+): Promise<number> {
+  const chunkCoord = voxelToChunkPos([x, y, z]);
+  const cacheKey = getCacheKey(worldAddress, chunkCoord);
+
+  let bytecode = bytecodeCache.get(cacheKey);
+  if (!bytecode) {
+    bytecode = await getChunkBytecode(publicClient, worldAddress, chunkCoord);
+    bytecodeCache.set(cacheKey, bytecode);
+  }
+
+  return readBiome(bytecode);
+}
+
+export function readBiome(chunkBytecode: string): number {
+  return readBytes1(chunkBytecode, 1);
 }
