@@ -47,7 +47,8 @@ enum ActivityType {
   CraftWorkbenchMass,
   CraftPowerstoneMass,
   CraftFurnaceMass,
-  CraftStonecutterMass
+  CraftStonecutterMass,
+  CraftAnvilMass
 }
 
 enum Direction {

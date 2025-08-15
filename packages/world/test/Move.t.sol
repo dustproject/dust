@@ -7,10 +7,11 @@ import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
 import { ActivityType } from "../src/codegen/common.sol";
-import { PlayerActivity } from "../src/codegen/tables/PlayerActivity.sol";
-import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 
-import { PlayerActivityUtils } from "../src/utils/PlayerActivityUtils.sol";
+import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
+import { PlayerProgress } from "../src/codegen/tables/PlayerProgress.sol";
+
+import { PlayerProgressUtils } from "../src/utils/PlayerProgressUtils.sol";
 
 import { DustTest } from "./DustTest.sol";
 
@@ -37,7 +38,7 @@ import { Orientation } from "../src/types/Orientation.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 import { NonPassableBlock } from "../src/systems/libraries/MoveLib.sol";
-import { TestEntityUtils, TestInventoryUtils, TestPlayerActivityUtils } from "./utils/TestUtils.sol";
+import { TestEntityUtils, TestInventoryUtils, TestPlayerProgressUtils } from "./utils/TestUtils.sol";
 
 import { Direction } from "../src/codegen/common.sol";
 
@@ -85,11 +86,11 @@ contract MoveTest is DustTest {
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
 
     // Check player activity tracking - all moves should be walk steps
-    uint256 walkSteps = TestPlayerActivityUtils.getActivityValue(playerEntityId, ActivityType.MoveWalkSteps);
+    uint256 walkSteps = TestPlayerProgressUtils.getProgress(playerEntityId, ActivityType.MoveWalkSteps);
     assertEq(walkSteps, numBlocksToMove, "Walk steps activity not tracked correctly");
 
     // Should have no swim steps
-    uint256 swimSteps = TestPlayerActivityUtils.getActivityValue(playerEntityId, ActivityType.MoveSwimSteps);
+    uint256 swimSteps = TestPlayerProgressUtils.getProgress(playerEntityId, ActivityType.MoveSwimSteps);
     assertEq(swimSteps, 0, "Swim steps should be zero");
   }
 

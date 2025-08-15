@@ -25,7 +25,7 @@ import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { SlotAmount } from "../src/utils/InventoryUtils.sol";
 
 import { ActivityType } from "../src/codegen/common.sol";
-import { TestInventoryUtils, TestPlayerActivityUtils } from "./utils/TestUtils.sol";
+import { TestInventoryUtils, TestPlayerProgressUtils } from "./utils/TestUtils.sol";
 
 contract CraftTest is DustTest {
   function hashRecipe(
@@ -774,14 +774,14 @@ contract CraftTest is DustTest {
     world.craft(aliceEntityId, recipeId, inputs);
 
     // Check that hand crafting was tracked
-    uint256 handActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.CraftHandMass);
+    uint256 handActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftHandMass);
 
     // Calculate expected mass (4 oak planks)
     uint128 expectedMass = ObjectPhysics.getMass(ObjectTypes.OakPlanks) * 4;
     assertEq(handActivity, expectedMass, "Hand crafting activity not tracked correctly");
 
     // Should have no station-based crafting activity
-    uint256 workbenchActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.CraftWorkbenchMass);
+    uint256 workbenchActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftWorkbenchMass);
     assertEq(workbenchActivity, 0, "Workbench activity should be zero for hand crafting");
   }
 
@@ -816,14 +816,14 @@ contract CraftTest is DustTest {
     world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
 
     // Check that workbench crafting was tracked
-    uint256 workbenchActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.CraftWorkbenchMass);
+    uint256 workbenchActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftWorkbenchMass);
 
     // Calculate expected mass (1 forcefield)
     uint128 expectedMass = ObjectPhysics.getMass(ObjectTypes.ForceField) * 1;
     assertEq(workbenchActivity, expectedMass, "Workbench crafting activity not tracked correctly");
 
     // Should have no hand crafting activity
-    uint256 handActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.CraftHandMass);
+    uint256 handActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftHandMass);
     assertEq(handActivity, 0, "Hand activity should be zero for workbench crafting");
   }
 
@@ -857,7 +857,7 @@ contract CraftTest is DustTest {
     }
 
     // Check that all crafts were accumulated
-    uint256 handActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.CraftHandMass);
+    uint256 handActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftHandMass);
     assertEq(handActivity, totalExpectedMass, "Multiple crafts should accumulate");
   }
 
@@ -919,9 +919,8 @@ contract CraftTest is DustTest {
     }
 
     // Check that each station was tracked separately
-    uint256 powerstoneActivity =
-      TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.CraftPowerstoneMass);
-    uint256 furnaceActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.CraftFurnaceMass);
+    uint256 powerstoneActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftPowerstoneMass);
+    uint256 furnaceActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftFurnaceMass);
 
     uint128 neptuniumPickMass = ObjectPhysics.getMass(ObjectTypes.NeptuniumPick);
     uint128 ironBarMass = ObjectPhysics.getMass(ObjectTypes.IronBar) * 3;
@@ -930,9 +929,8 @@ contract CraftTest is DustTest {
     assertEq(furnaceActivity, ironBarMass, "Furnace crafting activity not tracked correctly");
 
     // Other stations should be zero
-    uint256 workbenchActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.CraftWorkbenchMass);
-    uint256 stonecutterActivity =
-      TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.CraftStonecutterMass);
+    uint256 workbenchActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftWorkbenchMass);
+    uint256 stonecutterActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftStonecutterMass);
     assertEq(workbenchActivity, 0, "Workbench activity should be zero");
     assertEq(stonecutterActivity, 0, "Stonecutter activity should be zero");
   }

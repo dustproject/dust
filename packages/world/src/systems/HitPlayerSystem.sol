@@ -8,7 +8,7 @@ import { EnergyData } from "../codegen/tables/Energy.sol";
 import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { HitPlayerNotification, notify } from "../utils/NotifUtils.sol";
-import { PlayerActivityUtils } from "../utils/PlayerActivityUtils.sol";
+import { PlayerProgressUtils } from "../utils/PlayerProgressUtils.sol";
 import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
 import { HIT_ACTION_MODIFIER, MAX_HIT_RADIUS } from "../Constants.sol";
@@ -67,7 +67,7 @@ contract HitPlayerSystem is System {
     addEnergyToLocalPool(targetCoord, damage);
 
     // Track damage dealt
-    PlayerActivityUtils.trackHitPlayer(caller, damage);
+    PlayerProgressUtils.trackHitPlayer(caller, damage);
 
     _requireHitsAllowed(caller, target, targetCoord, toolData.tool, damage, extraData);
 

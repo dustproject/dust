@@ -16,14 +16,14 @@ import {
 import { ActivityType } from "../src/codegen/common.sol";
 import { Energy } from "../src/codegen/tables/Energy.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
-import { PlayerActivity } from "../src/codegen/tables/PlayerActivity.sol";
+import { PlayerProgress } from "../src/codegen/tables/PlayerProgress.sol";
 
 import { EntityId, EntityTypeLib } from "../src/types/EntityId.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 import { DustTest } from "./DustTest.sol";
-import { TestInventoryUtils, TestPlayerActivityUtils } from "./utils/TestUtils.sol";
+import { TestInventoryUtils, TestPlayerProgressUtils } from "./utils/TestUtils.sol";
 
 contract HitPlayerTest is DustTest {
   // Test hitting without tool - partial damage
@@ -65,8 +65,8 @@ contract HitPlayerTest is DustTest {
     assertEq(bobEnergyLost, expectedTotalDamage, "Bob total damage incorrect");
 
     // Check player activity tracking
-    uint256 hitPlayerActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.HitPlayerDamage);
-    assertEq(hitPlayerActivity, expectedTotalDamage, "Hit player damage activity not tracked correctly");
+    uint256 hitPlayerProgress = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.HitPlayerDamage);
+    assertEq(hitPlayerProgress, expectedTotalDamage, "Hit player damage activity not tracked correctly");
   }
 
   // Test hitting without tool - kill target

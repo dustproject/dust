@@ -3,15 +3,15 @@ pragma solidity >=0.8.24;
 
 import { ActivityType } from "../src/codegen/common.sol";
 import { Death } from "../src/codegen/tables/Death.sol";
-import { PlayerActivity } from "../src/codegen/tables/PlayerActivity.sol";
+import { PlayerProgress } from "../src/codegen/tables/PlayerProgress.sol";
 import { EntityId } from "../src/types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { DustTest } from "./DustTest.sol";
 
-import { TestInventoryUtils, TestPlayerActivityUtils } from "./utils/TestUtils.sol";
+import { TestInventoryUtils, TestPlayerProgressUtils } from "./utils/TestUtils.sol";
 
-contract PlayerActivityTest is DustTest {
+contract PlayerProgressTest is DustTest {
   function testActivityResetsOnDeath() public {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
@@ -25,7 +25,7 @@ contract PlayerActivityTest is DustTest {
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
     // Verify activity was tracked
-    uint256 buildMass = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.BuildMass);
+    uint256 buildMass = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMass);
     assertTrue(buildMass > 0, "Build mass should be tracked");
 
     // Simulate death by incrementing death count
@@ -33,7 +33,7 @@ contract PlayerActivityTest is DustTest {
     Death.setDeaths(aliceEntityId, deathsBefore + 1);
 
     // Check that activity is now zero for the new life
-    uint256 buildMassAfterDeath = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.BuildMass);
+    uint256 buildMassAfterDeath = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMass);
     assertEq(buildMassAfterDeath, 0, "Build mass should be reset after death");
 
     // Build again and verify it tracks for the new life
@@ -43,7 +43,7 @@ contract PlayerActivityTest is DustTest {
     vm.prank(alice);
     world.build(aliceEntityId, buildCoord + vec3(1, 0, 0), inventorySlot, "");
 
-    uint256 newBuildMass = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.BuildMass);
+    uint256 newBuildMass = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMass);
     assertTrue(newBuildMass > 0, "Build mass should be tracked for new life");
     assertEq(newBuildMass, buildMass, "Build mass should be the same as first life");
   }
@@ -72,13 +72,13 @@ contract PlayerActivityTest is DustTest {
     world.mine(aliceEntityId, stoneCoord, pickSlot, "");
 
     // Verify multiple activities are tracked
-    uint256 walkSteps = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MoveWalkSteps);
+    uint256 walkSteps = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MoveWalkSteps);
     assertEq(walkSteps, 3, "Walk steps should be tracked");
 
-    uint256 pickMass = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MinePickMass);
+    uint256 pickMass = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MinePickMass);
     assertTrue(pickMass > 0, "Pick mining should be tracked");
 
-    uint256 axeMass = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MineAxeMass);
+    uint256 axeMass = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MineAxeMass);
     assertEq(axeMass, 0, "Axe mining should be zero");
   }
 }

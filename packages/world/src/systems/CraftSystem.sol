@@ -12,7 +12,7 @@ import { addEnergyToLocalPool, transferEnergyToPool } from "../utils/EnergyUtils
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils, SlotAmount, SlotData } from "../utils/InventoryUtils.sol";
 import { CraftNotification, notify } from "../utils/NotifUtils.sol";
-import { PlayerActivityUtils } from "../utils/PlayerActivityUtils.sol";
+import { PlayerProgressUtils } from "../utils/PlayerProgressUtils.sol";
 
 import { CRAFT_ENERGY_COST } from "../Constants.sol";
 import { EntityId } from "../types/EntityId.sol";
@@ -42,7 +42,7 @@ contract CraftSystem is System {
 
     // Track crafting activity
     // TODO: this is the output's mass+energy, should we track input instead?
-    PlayerActivityUtils.trackCraft(caller, recipe.stationTypeId, massEnergy);
+    PlayerProgressUtils.trackCraft(caller, recipe.stationTypeId, massEnergy);
 
     notify(caller, CraftNotification({ recipeId: recipeId, station: station }));
   }

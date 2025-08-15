@@ -7,8 +7,10 @@ import { Vm } from "forge-std/Vm.sol";
 import { EntityId } from "../../src/types/EntityId.sol";
 import { Vec3 } from "../../src/types/Vec3.sol";
 
+import { Death } from "../../src/codegen/tables/Death.sol";
 import { Energy, EnergyData } from "../../src/codegen/tables/Energy.sol";
 import { Machine } from "../../src/codegen/tables/Machine.sol";
+import { PlayerProgress } from "../../src/codegen/tables/PlayerProgress.sol";
 
 import { ObjectType } from "../../src/types/ObjectType.sol";
 
@@ -21,7 +23,6 @@ import { ActivityType } from "../../src/codegen/common.sol";
 import { EntityUtils } from "../../src/utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../../src/utils/ForceFieldUtils.sol";
 import { InventoryUtils, SlotAmount, SlotTransfer } from "../../src/utils/InventoryUtils.sol";
-import { PlayerActivityUtils } from "../../src/utils/PlayerActivityUtils.sol";
 import { PlayerUtils } from "../../src/utils/PlayerUtils.sol";
 import { ToolData, ToolUtils } from "../../src/utils/ToolUtils.sol";
 
@@ -56,7 +57,7 @@ library TestUtils {
 }
 
 library TestEntityUtils {
-  bytes32 constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestEntityUtils");
+  bytes32 private constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestEntityUtils");
 
   modifier asWorld() {
     TestUtils.asWorld(LIB_ADDRESS_SLOT);
@@ -98,7 +99,7 @@ library TestEntityUtils {
 }
 
 library TestPlayerUtils {
-  bytes32 constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestPlayerUtils");
+  bytes32 private constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestPlayerUtils");
 
   modifier asWorld() {
     TestUtils.asWorld(LIB_ADDRESS_SLOT);
@@ -116,7 +117,7 @@ library TestPlayerUtils {
 }
 
 library TestInventoryUtils {
-  bytes32 constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestInventoryUtils");
+  bytes32 private constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestInventoryUtils");
 
   modifier asWorld() {
     TestUtils.asWorld(LIB_ADDRESS_SLOT);
@@ -217,7 +218,7 @@ library TestInventoryUtils {
 }
 
 library TestToolUtils {
-  bytes32 constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestToolUtils");
+  bytes32 private constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestToolUtils");
 
   modifier asWorld() {
     TestUtils.asWorld(LIB_ADDRESS_SLOT);
@@ -247,7 +248,7 @@ library TestToolUtils {
 }
 
 library TestEnergyUtils {
-  bytes32 constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestEnergyUtils");
+  bytes32 private constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestEnergyUtils");
 
   modifier asWorld() {
     TestUtils.asWorld(LIB_ADDRESS_SLOT);
@@ -269,7 +270,7 @@ library TestEnergyUtils {
 }
 
 library TestForceFieldUtils {
-  bytes32 constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestForceFieldUtils");
+  bytes32 private constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestForceFieldUtils");
 
   modifier asWorld() {
     TestUtils.asWorld(LIB_ADDRESS_SLOT);
@@ -303,8 +304,8 @@ library TestForceFieldUtils {
   }
 }
 
-library TestPlayerActivityUtils {
-  bytes32 constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestPlayerActivityUtils");
+library TestPlayerProgressUtils {
+  bytes32 private constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestPlayerProgressUtils");
 
   modifier asWorld() {
     TestUtils.asWorld(LIB_ADDRESS_SLOT);
@@ -316,7 +317,7 @@ library TestPlayerActivityUtils {
     TestUtils.init(LIB_ADDRESS_SLOT, libAddress);
   }
 
-  function getActivityValue(EntityId player, ActivityType activityType) public asWorld returns (uint256) {
-    return PlayerActivityUtils.getActivityValue(player, activityType);
+  function getProgress(EntityId player, ActivityType activityType) internal view returns (uint256) {
+    return PlayerProgress.getCurrent(player, Death.getDeaths(player), activityType);
   }
 }

@@ -22,7 +22,7 @@ import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { Math } from "../utils/Math.sol";
 import { BuildNotification, MoveNotification, notify } from "../utils/NotifUtils.sol";
-import { PlayerActivityUtils } from "../utils/PlayerActivityUtils.sol";
+import { PlayerProgressUtils } from "../utils/PlayerProgressUtils.sol";
 import { RateLimitUtils } from "../utils/RateLimitUtils.sol";
 
 import { MoveLib } from "./libraries/MoveLib.sol";
@@ -197,9 +197,9 @@ library BuildLib {
     (EntityId base, Vec3[] memory coords) = _addBlocks(ctx);
 
     // Track build energy spent
-    PlayerActivityUtils.trackBuildEnergy(ctx.caller, energyCost);
+    PlayerProgressUtils.trackBuildEnergy(ctx.caller, energyCost);
     // Track build mass
-    PlayerActivityUtils.trackBuildMass(ctx.caller, ObjectPhysics._getMass(ctx.buildType));
+    PlayerProgressUtils.trackBuildMass(ctx.caller, ObjectPhysics._getMass(ctx.buildType));
 
     return (base, coords);
   }

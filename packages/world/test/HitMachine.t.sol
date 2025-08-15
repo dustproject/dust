@@ -13,14 +13,14 @@ import {
 import { ActivityType } from "../src/codegen/common.sol";
 import { Energy } from "../src/codegen/tables/Energy.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
-import { PlayerActivity } from "../src/codegen/tables/PlayerActivity.sol";
+import { PlayerProgress } from "../src/codegen/tables/PlayerProgress.sol";
 
 import { EntityId } from "../src/types/EntityId.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { DustTest } from "./DustTest.sol";
 
-import { TestInventoryUtils, TestPlayerActivityUtils } from "./utils/TestUtils.sol";
+import { TestInventoryUtils, TestPlayerProgressUtils } from "./utils/TestUtils.sol";
 
 contract HitMachineTest is DustTest {
   function testHitForceFieldWithoutTool() public {
@@ -44,7 +44,7 @@ contract HitMachineTest is DustTest {
     assertEq(Energy.getEnergy(aliceEntityId), 1);
 
     // Check player activity tracking
-    uint256 hitMachineActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.HitMachineDamage);
+    uint256 hitMachineActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.HitMachineDamage);
     assertEq(hitMachineActivity, BARE_HANDS_ACTION_ENERGY_COST, "Hit machine damage activity not tracked correctly");
   }
 

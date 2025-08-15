@@ -45,7 +45,7 @@ import { EntityId } from "../src/types/EntityId.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { Orientation } from "../src/types/Orientation.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
-import { TestEntityUtils, TestInventoryUtils, TestPlayerActivityUtils } from "./utils/TestUtils.sol";
+import { TestEntityUtils, TestInventoryUtils, TestPlayerProgressUtils } from "./utils/TestUtils.sol";
 
 contract MineTest is DustTest {
   function testMineTerrain() public {
@@ -888,7 +888,7 @@ contract MineTest is DustTest {
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden pick on stone");
 
       // Check player activity tracking
-      uint256 pickActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MinePickMass);
+      uint256 pickActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MinePickMass);
       assertEq(pickActivity, massReduction, "Pick mining activity not tracked correctly");
     }
 
@@ -916,7 +916,7 @@ contract MineTest is DustTest {
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden axe on log");
 
       // Check player activity tracking
-      uint256 axeActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MineAxeMass);
+      uint256 axeActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MineAxeMass);
       assertEq(axeActivity, massReduction, "Axe mining activity not tracked correctly");
     }
 
@@ -1366,16 +1366,16 @@ contract MineTest is DustTest {
     world.mine(aliceEntityId, wheatCoord, "");
 
     // Check that crop mining was tracked
-    uint256 cropActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MineCropMass);
+    uint256 cropActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MineCropMass);
 
     // When mining without tool, mass reduction should be BARE_HANDS_ACTION_ENERGY_COST
     assertEq(cropActivity, BARE_HANDS_ACTION_ENERGY_COST, "Crop mining activity not tracked correctly");
 
     // Should have no tool-based mining activity
-    uint256 pickActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MinePickMass);
+    uint256 pickActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MinePickMass);
     assertEq(pickActivity, 0, "Pick mining should be zero for crops");
 
-    uint256 axeActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MineAxeMass);
+    uint256 axeActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MineAxeMass);
     assertEq(axeActivity, 0, "Axe mining should be zero for crops");
   }
 
@@ -1398,7 +1398,7 @@ contract MineTest is DustTest {
     }
 
     // Check total crop mining activity
-    uint256 cropActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MineCropMass);
+    uint256 cropActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MineCropMass);
     assertEq(cropActivity, totalCropMass, "Total crop mining activity not tracked correctly");
   }
 
@@ -1417,11 +1417,11 @@ contract MineTest is DustTest {
     world.mine(aliceEntityId, wheatCoord, slot, "");
 
     // Even with a tool, crop mining should be tracked as MineCropMass
-    uint256 cropActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MineCropMass);
+    uint256 cropActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MineCropMass);
     assertTrue(cropActivity > 0, "Crop mining activity should be tracked even with tool");
 
     // Should not have axe mining activity for crops
-    uint256 axeActivity = TestPlayerActivityUtils.getActivityValue(aliceEntityId, ActivityType.MineAxeMass);
+    uint256 axeActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MineAxeMass);
     assertEq(axeActivity, 0, "Axe mining should be zero for crops");
   }
 }

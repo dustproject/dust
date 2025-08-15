@@ -38,7 +38,7 @@ import { InventoryUtils } from "../utils/InventoryUtils.sol";
 
 import { DeathNotification, MineNotification, WakeupNotification, notify } from "../utils/NotifUtils.sol";
 
-import { PlayerActivityUtils } from "../utils/PlayerActivityUtils.sol";
+import { PlayerProgressUtils } from "../utils/PlayerProgressUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { RateLimitUtils } from "../utils/RateLimitUtils.sol";
@@ -384,7 +384,7 @@ library MinePhysicsLib {
     massLeft -= totalMassReduction;
 
     // Track the mass reduction for player activity
-    PlayerActivityUtils.trackMine(ctx.caller, totalMassReduction, ctx.toolData.toolType, ctx.objectType);
+    PlayerProgressUtils.trackMine(ctx.caller, totalMassReduction, ctx.toolData.toolType, ctx.objectType);
 
     return (massLeft, true);
   }

@@ -21,7 +21,7 @@
     "build:js": "tsc",
     "build:mud": "mud build && abi-ts --extension .ts",
     "clean": "forge clean && shx rm -rf src/**/codegen",
-    "codegen": "pnpm run codegen:object-type && pnpm run codegen:object-type-test && pnpm run codegen:init-objects && pnpm run codegen:init-recipes && pnpm run codegen:tree-lib && pnpm run codegen:biomes-lib && pnpm run codegen:get-recipes && forge fmt",
+    "codegen": "pnpm run codegen:object-type && pnpm run codegen:object-type-test && pnpm run codegen:init-objects && pnpm run codegen:tree-lib && pnpm run codegen:biomes-lib && pnpm run codegen:get-recipes && forge fmt",
     "codegen:biomes-lib": "tsx ./ts/scripts/genBiomesLibSol.ts > ./src/utils/BiomesLib.sol",
     "codegen:get-recipes": "tsx ./ts/scripts/genGetRecipesSol.ts > ./script/getRecipes.sol",
     "codegen:init-objects": "tsx ./ts/scripts/genInitObjectsSol.ts > ./script/initObjects.sol",

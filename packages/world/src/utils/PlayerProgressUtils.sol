@@ -1,13 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
+
 import { ActivityType } from "../codegen/common.sol";
+
 import { Death } from "../codegen/tables/Death.sol";
-import { PlayerActivity } from "../codegen/tables/PlayerActivity.sol";
+import { PlayerProgress, PlayerProgressData } from "../codegen/tables/PlayerProgress.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
+import { Math } from "../utils/Math.sol";
 
-library PlayerActivityUtils {
+// TODO: move to constants
+int128 constant LN2_WAD = 693147180559945309; // ln(2) in 1e18
+uint256 constant HALF_LIFE = 7 days; // every 7 days progress decays by half
+int128 constant LAMBDA_WAD = int128(int256(LN2_WAD) / int256(HALF_LIFE));
+
+library PlayerProgressUtils {
   // Mining tracking - with tool specialization and crop detection
   function trackMine(EntityId player, uint128 massReduced, ObjectType toolType, ObjectType minedType) internal {
     ActivityType activityType;
@@ -24,39 +33,39 @@ library PlayerActivityUtils {
       // Bare hands / whacker mining of non-crops - not tracked for now
       return;
     }
-    _updateActivity(player, activityType, uint256(massReduced));
+    _trackProgress(player, activityType, uint256(massReduced));
   }
 
   // Combat tracking
   function trackHitPlayer(EntityId player, uint128 damage) internal {
-    _updateActivity(player, ActivityType.HitPlayerDamage, uint256(damage));
+    _trackProgress(player, ActivityType.HitPlayerDamage, uint256(damage));
   }
 
   function trackHitMachine(EntityId player, uint128 damage) internal {
-    _updateActivity(player, ActivityType.HitMachineDamage, uint256(damage));
+    _trackProgress(player, ActivityType.HitMachineDamage, uint256(damage));
   }
 
   // Movement tracking
   function trackMoves(EntityId player, uint128 walkSteps, uint128 swimSteps) internal {
     if (walkSteps > 0) {
-      _updateActivity(player, ActivityType.MoveWalkSteps, uint256(walkSteps));
+      _trackProgress(player, ActivityType.MoveWalkSteps, uint256(walkSteps));
     }
     if (swimSteps > 0) {
-      _updateActivity(player, ActivityType.MoveSwimSteps, uint256(swimSteps));
+      _trackProgress(player, ActivityType.MoveSwimSteps, uint256(swimSteps));
     }
   }
 
   function trackFallEnergy(EntityId player, uint128 fallEnergy) internal {
-    _updateActivity(player, ActivityType.MoveFallEnergy, uint256(fallEnergy));
+    _trackProgress(player, ActivityType.MoveFallEnergy, uint256(fallEnergy));
   }
 
   // Building tracking
   function trackBuildEnergy(EntityId player, uint128 energySpent) internal {
-    _updateActivity(player, ActivityType.BuildEnergy, uint256(energySpent));
+    _trackProgress(player, ActivityType.BuildEnergy, uint256(energySpent));
   }
 
   function trackBuildMass(EntityId player, uint128 massBuilt) internal {
-    _updateActivity(player, ActivityType.BuildMass, uint256(massBuilt));
+    _trackProgress(player, ActivityType.BuildMass, uint256(massBuilt));
   }
 
   // Crafting tracking - per station type
@@ -78,25 +87,39 @@ library PlayerActivityUtils {
       activityType = ActivityType.CraftHandMass;
     }
 
-    _updateActivity(player, activityType, uint256(massEnergy));
+    _trackProgress(player, activityType, uint256(massEnergy));
   }
 
   // Internal helper
-  function _updateActivity(EntityId player, ActivityType activityType, uint256 additionalValue) private {
-    if (additionalValue == 0) {
-      return; // No update needed
-    }
+  function _trackProgress(EntityId player, ActivityType activityType, uint256 value) private {
+    uint256 deaths = Death._getDeaths(player);
+    PlayerProgressData memory previous = PlayerProgress._get(player, deaths, activityType);
 
-    uint256 deathCount = Death._getDeaths(player);
-    uint256 currentValue = PlayerActivity._getValue(player, deathCount, activityType);
-    uint256 newValue = currentValue + additionalValue;
+    // decay current value to now
+    uint256 currentValue = _decay(previous);
 
-    PlayerActivity._setValue(player, deathCount, activityType, newValue);
+    uint256 floor = previous.accumulated / 3;
+
+    PlayerProgress._set(
+      player,
+      deaths,
+      activityType,
+      PlayerProgressData({
+        accumulated: previous.accumulated + value,
+        current: Math.max(currentValue, floor) + value,
+        lastUpdatedAt: uint128(block.timestamp)
+      })
+    );
   }
 
-  // Utility function to get current activity value
-  function getActivityValue(EntityId player, ActivityType activityType) internal view returns (uint256) {
-    uint256 deathCount = Death._getDeaths(player);
-    return PlayerActivity._getValue(player, deathCount, activityType);
+  /// @dev Exponential decay toward zero using half-life
+  function _decay(PlayerProgressData memory progress) private view returns (uint256) {
+    if (progress.current == 0 || block.timestamp <= progress.lastUpdatedAt) return progress.current;
+
+    unchecked {
+      int256 x = -int256(LAMBDA_WAD) * int256(uint256(block.timestamp - progress.lastUpdatedAt)); // wad * seconds
+      uint256 factorWad = uint256(FixedPointMathLib.expWad(x)); // in [0..1e18]
+      return FixedPointMathLib.mulWad(progress.current, factorWad);
+    }
   }
 }
