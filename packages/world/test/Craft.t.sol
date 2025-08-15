@@ -7,6 +7,7 @@ import { Energy } from "../src/codegen/tables/Energy.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 
 import { BurnedResourceCount } from "../src/codegen/tables/BurnedResourceCount.sol";
+import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
@@ -936,6 +937,9 @@ contract CraftTest is DustTest {
       inputs[0] = SlotAmount({ slot: 1, amount: inputAmounts[0] });
       inputs[1] = SlotAmount({ slot: 2, amount: inputAmounts[1] });
 
+      // Set resource count so coal can be burned
+      ResourceCount.set(ObjectTypes.CoalOre, 1);
+
       vm.prank(alice);
       world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
     }
@@ -945,7 +949,7 @@ contract CraftTest is DustTest {
     uint256 furnaceActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftFurnaceMass);
 
     uint128 neptuniumPickMass = ObjectPhysics.getMass(ObjectTypes.NeptuniumPick);
-    uint128 ironBarMass = ObjectPhysics.getMass(ObjectTypes.IronBar) * 3;
+    uint128 ironBarMass = ObjectPhysics.getMass(ObjectTypes.IronBar) * 1; // Recipe outputs 1 IronBar
 
     assertEq(anvilActivity, neptuniumPickMass, "Anvil crafting activity not tracked correctly");
     assertEq(furnaceActivity, ironBarMass, "Furnace crafting activity not tracked correctly");
