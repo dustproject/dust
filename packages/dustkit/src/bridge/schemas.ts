@@ -51,14 +51,20 @@ export type ClientRpcSchema = RpcSchema.From<
   | {
       Request: {
         method: "getPlayerPosition";
-        params: {
-          entity: EntityId;
-        };
       };
       ReturnType: {
         x: number;
         y: number;
         z: number;
+      };
+    }
+  | {
+      Request: {
+        method: "getPlayerOrientation";
+      };
+      ReturnType: {
+        pitch: number;
+        yaw: number;
       };
     }
   | {
