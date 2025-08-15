@@ -90,9 +90,7 @@ Executes a system call in the world
 
 Gets the 3D position of a player entity.
 
-**Parameters:**
-
-- `entity` (EntityId): The player entity
+**Parameters:** None
 
 **Returns:**
 
@@ -101,6 +99,21 @@ Gets the 3D position of a player entity.
   x: number;
   y: number;
   z: number;
+}
+```
+
+### `getPlayerOrientation`
+
+Gets the 3D orientation of a player entity.
+
+**Parameters:** None
+
+**Returns:**
+
+```typescript
+{
+  pitch: number;
+  yaw: number;
 }
 ```
 
