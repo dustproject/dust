@@ -94,6 +94,17 @@ function updatePlayerEnergy(EntityId player) returns (EnergyData memory) {
   return energyData;
 }
 
+function updateEnergy(EntityId entity) returns (EnergyData memory) {
+  ObjectType objectType = entity._getObjectType();
+  if (objectType == ObjectTypes.Player) {
+    return updatePlayerEnergy(entity);
+  } else if (objectType.isMachine()) {
+    return updateMachineEnergy(entity);
+  }
+
+  revert("Can only update energy for players or machines");
+}
+
 function decreaseMachineEnergy(EntityId machine, uint128 amount) returns (uint128) {
   require(amount > 0, "Cannot decrease 0 energy");
   uint128 current = Energy._getEnergy(machine);

@@ -95,7 +95,7 @@ contract BuildSystem is System {
     // Check rate limit for work actions
     RateLimitUtils.build(ctx.caller);
 
-    (EntityId base, Vec3[] memory coords) = BuildLib._executeBuild(ctx);
+    (EntityId base, Vec3[] memory coords, uint128 energyCost) = BuildLib._executeBuild(ctx);
 
     if (coords.length == 0) {
       return base;
@@ -104,6 +104,11 @@ contract BuildSystem is System {
     _handleSpecialBlockTypes(ctx, base);
 
     _requireBuildsAllowed(ctx, base, coords, extraData);
+
+    // Track build energy spent
+    PlayerProgressUtils.trackBuildEnergy(ctx.caller, energyCost);
+    // Track build mass
+    PlayerProgressUtils.trackBuildMass(ctx.caller, ObjectPhysics._getMass(ctx.buildType));
 
     notify(
       ctx.caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectType: ctx.buildType })
@@ -186,22 +191,17 @@ contract BuildSystem is System {
 }
 
 library BuildLib {
-  function _executeBuild(BuildContext memory ctx) public returns (EntityId, Vec3[] memory) {
+  function _executeBuild(BuildContext memory ctx) public returns (EntityId, Vec3[] memory, uint128) {
     uint128 energyCost = Math.min(ctx.callerEnergy, BUILD_ENERGY_COST);
     if (transferEnergyToPool(ctx.caller, energyCost) == 0) {
-      return (EntityId.wrap(0), new Vec3[](0));
+      return (EntityId.wrap(0), new Vec3[](0), energyCost);
     }
 
     _updateInventory(ctx);
 
     (EntityId base, Vec3[] memory coords) = _addBlocks(ctx);
 
-    // Track build energy spent
-    PlayerProgressUtils.trackBuildEnergy(ctx.caller, energyCost);
-    // Track build mass
-    PlayerProgressUtils.trackBuildMass(ctx.caller, ObjectPhysics._getMass(ctx.buildType));
-
-    return (base, coords);
+    return (base, coords, energyCost);
   }
 
   /**

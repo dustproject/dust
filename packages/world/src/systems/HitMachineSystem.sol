@@ -30,10 +30,10 @@ contract HitMachineSystem is System {
     caller.activate();
     caller.requireInRange(coord, MAX_HIT_RADIUS);
 
-    (EntityId forceField,) = ForceFieldUtils.getForceField(coord);
-    require(forceField._exists(), "No force field at this location");
+    (EntityId target,) = ForceFieldUtils.getForceField(coord);
+    require(target._exists(), "No force field at this location");
 
-    uint128 energyLeft = updateMachineEnergy(forceField).energy;
+    uint128 energyLeft = updateMachineEnergy(target).energy;
     require(energyLeft > 0, "Cannot hit depleted forcefield");
 
     // Check rate limit for hit
@@ -49,9 +49,9 @@ contract HitMachineSystem is System {
       return;
     }
 
-    decreaseMachineEnergy(forceField, damage);
+    decreaseMachineEnergy(target, damage);
 
-    Vec3 forceFieldCoord = forceField._getPosition();
+    Vec3 forceFieldCoord = target._getPosition();
 
     // Add total machine damage to force field's local pool
     addEnergyToLocalPool(forceFieldCoord, damage);
@@ -60,10 +60,10 @@ contract HitMachineSystem is System {
     PlayerProgressUtils.trackHitMachine(caller, damage);
 
     // Don't revert so the program can't prevent hitting
-    forceField._getProgram().hook({ caller: caller, target: forceField, revertOnFailure: false, extraData: "" }).onHit(
-      forceField, toolData.tool, damage
+    target._getProgram().hook({ caller: caller, target: target, revertOnFailure: false, extraData: "" }).onHit(
+      target, toolData.tool, damage
     );
 
-    notify(caller, HitMachineNotification({ machine: forceField, machineCoord: forceFieldCoord }));
+    notify(caller, HitMachineNotification({ machine: target, machineCoord: forceFieldCoord }));
   }
 }

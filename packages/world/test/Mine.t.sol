@@ -1359,7 +1359,10 @@ contract MineTest is DustTest {
     ObjectType wheatType = ObjectTypes.Wheat;
     setObjectAtCoord(wheatCoord, wheatType);
 
-    ObjectPhysics.getMass(wheatType);
+    uint128 wheatMass = ObjectPhysics.getMass(wheatType);
+
+    // Set up chunk commitment for randomness when mining
+    newCommit(alice, aliceEntityId, wheatCoord, bytes32(0));
 
     // Mine wheat without tool (bare hands)
     vm.prank(alice);
@@ -1368,8 +1371,8 @@ contract MineTest is DustTest {
     // Check that crop mining was tracked
     uint256 cropActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MineCropMass);
 
-    // When mining without tool, mass reduction should be BARE_HANDS_ACTION_ENERGY_COST
-    assertEq(cropActivity, BARE_HANDS_ACTION_ENERGY_COST, "Crop mining activity not tracked correctly");
+    // Activity should track the actual mass of the wheat mined
+    assertEq(cropActivity, wheatMass, "Crop mining activity not tracked correctly");
 
     // Should have no tool-based mining activity
     uint256 pickActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MinePickMass);
@@ -1391,10 +1394,13 @@ contract MineTest is DustTest {
       Vec3 cropCoord = vec3(playerCoord.x() + int32(int256(i)) + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
       setObjectAtCoord(cropCoord, cropTypes[i]);
 
-      vm.prank(alice);
-      world.mine(aliceEntityId, cropCoord, "");
+      // Set up chunk commitment for randomness when mining
+      newCommit(alice, aliceEntityId, cropCoord, bytes32(uint256(i)));
 
-      totalCropMass += BARE_HANDS_ACTION_ENERGY_COST;
+      vm.prank(alice);
+      world.mineUntilDestroyed(aliceEntityId, cropCoord, "");
+
+      totalCropMass += ObjectPhysics.getMass(cropTypes[i]);
     }
 
     // Check total crop mining activity
@@ -1412,6 +1418,9 @@ contract MineTest is DustTest {
     // Mine wheat with tool
     Vec3 wheatCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
     setObjectAtCoord(wheatCoord, ObjectTypes.Wheat);
+
+    // Set up chunk commitment for randomness when mining
+    newCommit(alice, aliceEntityId, wheatCoord, bytes32(0));
 
     vm.prank(alice);
     world.mine(aliceEntityId, wheatCoord, slot, "");

@@ -5,16 +5,12 @@ import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
 import { ActivityType } from "../codegen/common.sol";
 
+import { PROGRESS_DECAY_LAMBDA_WAD } from "../Constants.sol";
 import { Death } from "../codegen/tables/Death.sol";
 import { PlayerProgress, PlayerProgressData } from "../codegen/tables/PlayerProgress.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 import { Math } from "../utils/Math.sol";
-
-// TODO: move to constants
-int128 constant LN2_WAD = 693147180559945309; // ln(2) in 1e18
-uint256 constant HALF_LIFE = 7 days; // every 7 days progress decays by half
-int128 constant LAMBDA_WAD = int128(int256(LN2_WAD) / int256(HALF_LIFE));
 
 library PlayerProgressUtils {
   // Mining tracking - with tool specialization and crop detection
@@ -98,7 +94,7 @@ library PlayerProgressUtils {
     // decay current value to now
     uint256 currentValue = _decay(previous);
 
-    uint256 floor = previous.accumulated / 3;
+    uint256 floor = _floor(previous);
 
     PlayerProgress._set(
       player,
@@ -117,9 +113,13 @@ library PlayerProgressUtils {
     if (progress.current == 0 || block.timestamp <= progress.lastUpdatedAt) return progress.current;
 
     unchecked {
-      int256 x = -int256(LAMBDA_WAD) * int256(uint256(block.timestamp - progress.lastUpdatedAt)); // wad * seconds
+      int256 x = -int256(PROGRESS_DECAY_LAMBDA_WAD) * int256(uint256(block.timestamp - progress.lastUpdatedAt)); // wad * seconds
       uint256 factorWad = uint256(FixedPointMathLib.expWad(x)); // in [0..1e18]
       return FixedPointMathLib.mulWad(progress.current, factorWad);
     }
+  }
+
+  function _floor(PlayerProgressData memory progress) private pure returns (uint256) {
+    return progress.accumulated / 3;
   }
 }

@@ -226,7 +226,7 @@ contract CraftTest is DustTest {
   }
 
   function testCraftTool() public {
-    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     ObjectType[] memory inputTypes = new ObjectType[](1);
     inputTypes[0] = ObjectTypes.AnyPlank;
@@ -236,11 +236,14 @@ contract CraftTest is DustTest {
     outputTypes[0] = ObjectTypes.WoodenPick;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
-    bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
+    bytes32 recipeId = hashRecipe(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
     ObjectType inputObjectType = ObjectTypes.OakPlanks;
     TestInventoryUtils.addObject(aliceEntityId, inputObjectType, 5);
     assertInventoryHasObject(aliceEntityId, inputObjectType, 5);
+
+    Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
+    EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
@@ -249,7 +252,7 @@ contract CraftTest is DustTest {
 
     vm.prank(alice);
     startGasReport("craft tool");
-    world.craft(aliceEntityId, recipeId, inputs);
+    world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
     endGasReport();
 
     assertInventoryHasObject(aliceEntityId, inputObjectType, 0);
@@ -276,9 +279,9 @@ contract CraftTest is DustTest {
     outputTypes[0] = ObjectTypes.WoodenPick;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
-    bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
+    bytes32 recipeId = hashRecipe(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
-    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     ObjectType inputObjectType = ObjectTypes.OakPlanks;
     TestInventoryUtils.addObject(aliceEntityId, inputObjectType, 10);
@@ -286,11 +289,15 @@ contract CraftTest is DustTest {
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
-    SlotAmount[] memory inputs = new SlotAmount[](1);
-    inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
+    {
+      Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
+      EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
+      SlotAmount[] memory inputs = new SlotAmount[](1);
+      inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
 
-    vm.prank(alice);
-    world.craft(aliceEntityId, recipeId, inputs);
+      vm.prank(alice);
+      world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
+    }
 
     assertInventoryHasObject(aliceEntityId, inputObjectType, 5);
     uint16[] memory toolSlots = TestInventoryUtils.getSlotsWithType(aliceEntityId, outputTypes[0]);
@@ -314,9 +321,9 @@ contract CraftTest is DustTest {
     outputTypes[0] = ObjectTypes.WoodenAxe;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
-    bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
+    bytes32 recipeId = hashRecipe(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
-    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     ObjectType inputObjectType = ObjectTypes.OakPlanks;
     TestInventoryUtils.addObject(aliceEntityId, inputObjectType, 10);
@@ -324,11 +331,15 @@ contract CraftTest is DustTest {
 
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
-    SlotAmount[] memory inputs = new SlotAmount[](1);
-    inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
+    {
+      Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
+      EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
+      SlotAmount[] memory inputs = new SlotAmount[](1);
+      inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
 
-    vm.prank(alice);
-    world.craft(aliceEntityId, recipeId, inputs);
+      vm.prank(alice);
+      world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
+    }
 
     assertInventoryHasObject(aliceEntityId, inputObjectType, 5);
     uint16[] memory toolSlots = TestInventoryUtils.getSlotsWithType(aliceEntityId, outputTypes[0]);
@@ -635,7 +646,7 @@ contract CraftTest is DustTest {
   }
 
   function testCraftInputTypeMatching() public {
-    (address alice, EntityId aliceEntityId,) = setupAirChunkWithPlayer();
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     ObjectType[] memory inputTypes = new ObjectType[](1);
     inputTypes[0] = ObjectTypes.AnyPlank;
@@ -645,7 +656,10 @@ contract CraftTest is DustTest {
     outputTypes[0] = ObjectTypes.WoodenAxe;
     uint16[] memory outputAmounts = new uint16[](1);
     outputAmounts[0] = 1;
-    bytes32 recipeId = hashRecipe(ObjectTypes.Null, inputTypes, inputAmounts, outputTypes, outputAmounts);
+    bytes32 recipeId = hashRecipe(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts);
+
+    Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
+    EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
 
     // Add different log types
     TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.OakPlanks, 5);
@@ -656,7 +670,7 @@ contract CraftTest is DustTest {
     inputs[0] = SlotAmount({ slot: 0, amount: 5 });
 
     vm.prank(alice);
-    world.craft(aliceEntityId, recipeId, inputs);
+    world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
 
     // Verify oak log was consumed
     assertInventoryHasObject(aliceEntityId, ObjectTypes.OakPlanks, 0);
@@ -670,7 +684,7 @@ contract CraftTest is DustTest {
     inputs[0] = SlotAmount({ slot: 1, amount: 5 });
 
     vm.prank(alice);
-    world.craft(aliceEntityId, recipeId, inputs);
+    world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
 
     // Verify birch log was consumed
     assertInventoryHasObject(aliceEntityId, ObjectTypes.OakPlanks, 5);
@@ -847,8 +861,12 @@ contract CraftTest is DustTest {
     for (uint256 i = 0; i < 3; i++) {
       TestInventoryUtils.addObject(aliceEntityId, inputTypes[0], inputAmounts[0]);
 
+      // Find the slot where the OakLog was added
+      uint16[] memory oakLogSlots = TestInventoryUtils.getSlotsWithType(aliceEntityId, ObjectTypes.OakLog);
+      require(oakLogSlots.length > 0, "No OakLog found in inventory");
+
       SlotAmount[] memory inputs = new SlotAmount[](1);
-      inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
+      inputs[0] = SlotAmount({ slot: oakLogSlots[0], amount: inputAmounts[0] });
 
       vm.prank(alice);
       world.craft(aliceEntityId, recipeId, inputs);
@@ -865,25 +883,29 @@ contract CraftTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     // Test that different stations are tracked separately
-    // First craft with Powerstone
+    // First craft with Anvil
     {
-      ObjectType[] memory inputTypes = new ObjectType[](1);
-      inputTypes[0] = ObjectTypes.NeptuniumBar;
-      uint16[] memory inputAmounts = new uint16[](1);
+      ObjectType[] memory inputTypes = new ObjectType[](2);
+      inputTypes[0] = ObjectTypes.AnyPlank; // Use OakPlanks
+      inputTypes[1] = ObjectTypes.NeptuniumBar;
+      uint16[] memory inputAmounts = new uint16[](2);
       inputAmounts[0] = 2;
+      inputAmounts[1] = 3;
       ObjectType[] memory outputTypes = new ObjectType[](1);
       outputTypes[0] = ObjectTypes.NeptuniumPick;
       uint16[] memory outputAmounts = new uint16[](1);
       outputAmounts[0] = 1;
-      bytes32 recipeId = hashRecipe(ObjectTypes.Powerstone, inputTypes, inputAmounts, outputTypes, outputAmounts);
+      bytes32 recipeId = hashRecipe(ObjectTypes.Anvil, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
-      TestInventoryUtils.addObject(aliceEntityId, inputTypes[0], inputAmounts[0]);
+      TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.OakPlanks, inputAmounts[0]);
+      TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.NeptuniumBar, inputAmounts[1]);
 
       Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
-      EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Powerstone);
+      EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Anvil);
 
-      SlotAmount[] memory inputs = new SlotAmount[](1);
+      SlotAmount[] memory inputs = new SlotAmount[](2);
       inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
+      inputs[1] = SlotAmount({ slot: 1, amount: inputAmounts[1] });
 
       vm.prank(alice);
       world.craftWithStation(aliceEntityId, stationEntityId, recipeId, inputs);
@@ -892,15 +914,15 @@ contract CraftTest is DustTest {
     // Then craft with Furnace
     {
       ObjectType[] memory inputTypes = new ObjectType[](2);
-      inputTypes[0] = ObjectTypes.CoalOre;
-      inputTypes[1] = ObjectTypes.IronOre;
+      inputTypes[0] = ObjectTypes.IronOre;
+      inputTypes[1] = ObjectTypes.CoalOre;
       uint16[] memory inputAmounts = new uint16[](2);
       inputAmounts[0] = 1;
-      inputAmounts[1] = 3;
+      inputAmounts[1] = 1;
       ObjectType[] memory outputTypes = new ObjectType[](1);
       outputTypes[0] = ObjectTypes.IronBar;
       uint16[] memory outputAmounts = new uint16[](1);
-      outputAmounts[0] = 3;
+      outputAmounts[0] = 1;
       bytes32 recipeId = hashRecipe(ObjectTypes.Furnace, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
       for (uint256 i = 0; i < inputTypes.length; i++) {
@@ -919,13 +941,13 @@ contract CraftTest is DustTest {
     }
 
     // Check that each station was tracked separately
-    uint256 powerstoneActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftPowerstoneMass);
+    uint256 anvilActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftAnvilMass);
     uint256 furnaceActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftFurnaceMass);
 
     uint128 neptuniumPickMass = ObjectPhysics.getMass(ObjectTypes.NeptuniumPick);
     uint128 ironBarMass = ObjectPhysics.getMass(ObjectTypes.IronBar) * 3;
 
-    assertEq(powerstoneActivity, neptuniumPickMass, "Powerstone crafting activity not tracked correctly");
+    assertEq(anvilActivity, neptuniumPickMass, "Anvil crafting activity not tracked correctly");
     assertEq(furnaceActivity, ironBarMass, "Furnace crafting activity not tracked correctly");
 
     // Other stations should be zero

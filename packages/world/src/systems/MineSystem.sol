@@ -328,7 +328,7 @@ contract MineSystem is System {
     * Since 90,123,456,800 and 632,546,929 are coprime (GCD = 1),
     * N must be a multiple of 632,546,929 for the equation to hold.
     * This means at least 632,546,929 players must be sleeping in the same forcefield!
-    */
+        */
 
     // TODO: This modulo check is a hack but not ideal long-term. We should consider:
     // - Storing fragment count for the forcefield entity
