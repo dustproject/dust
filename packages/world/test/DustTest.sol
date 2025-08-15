@@ -50,6 +50,7 @@ import {
   TestEntityUtils,
   TestForceFieldUtils,
   TestInventoryUtils,
+  TestPlayerProgressUtils,
   TestPlayerUtils,
   TestToolUtils
 } from "./utils/TestUtils.sol";
@@ -77,6 +78,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     TestToolUtils.init(address(TestToolUtils));
     TestForceFieldUtils.init(address(TestForceFieldUtils));
     TestEnergyUtils.init(address(TestEnergyUtils));
+    TestPlayerProgressUtils.init(address(TestPlayerProgressUtils));
   }
 
   function randomEntityId() internal returns (EntityId) {

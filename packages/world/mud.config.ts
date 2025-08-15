@@ -31,6 +31,24 @@ export default defineWorld({
       "Death",
     ],
     RateLimitType: ["Movement", "Combat", "Work"],
+    ActivityType: [
+      "MinePickMass",
+      "MineAxeMass",
+      "MineCropMass",
+      "HitPlayerDamage",
+      "HitMachineDamage",
+      "MoveWalkSteps",
+      "MoveSwimSteps",
+      "MoveFallEnergy",
+      "BuildEnergy",
+      "BuildMass",
+      "CraftHandMass",
+      "CraftWorkbenchMass",
+      "CraftPowerstoneMass",
+      "CraftFurnaceMass",
+      "CraftStonecutterMass",
+      "CraftAnvilMass",
+    ],
     Direction: [
       // Cardinal directions (6)
       "PositiveX",
@@ -241,6 +259,17 @@ export default defineWorld({
     // ------------------------------------------------------------
     // Player
     // ------------------------------------------------------------
+    PlayerProgress: {
+      schema: {
+        player: "EntityId",
+        deathCount: "uint256",
+        activityType: "ActivityType",
+        accumulated: "uint256",
+        current: "uint256",
+        lastUpdatedAt: "uint128",
+      },
+      key: ["player", "deathCount", "activityType"],
+    },
     Death: {
       schema: {
         player: "EntityId",

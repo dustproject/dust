@@ -37,6 +37,8 @@ import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 
 import { DeathNotification, MineNotification, WakeupNotification, notify } from "../utils/NotifUtils.sol";
+
+import { PlayerProgressUtils } from "../utils/PlayerProgressUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 
 import { RateLimitUtils } from "../utils/RateLimitUtils.sol";
@@ -326,7 +328,7 @@ contract MineSystem is System {
     * Since 90,123,456,800 and 632,546,929 are coprime (GCD = 1),
     * N must be a multiple of 632,546,929 for the equation to hold.
     * This means at least 632,546,929 players must be sleeping in the same forcefield!
-    */
+        */
 
     // TODO: This modulo check is a hack but not ideal long-term. We should consider:
     // - Storing fragment count for the forcefield entity
@@ -380,6 +382,9 @@ library MinePhysicsLib {
     }
 
     massLeft -= totalMassReduction;
+
+    // Track the mass reduction for player activity
+    PlayerProgressUtils.trackMine(ctx.caller, totalMassReduction, ctx.toolData.toolType, ctx.objectType);
 
     return (massLeft, true);
   }

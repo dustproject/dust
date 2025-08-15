@@ -12,14 +12,18 @@ import {
   TOOL_ACTION_ENERGY_COST,
   WOODEN_TOOL_BASE_MULTIPLIER
 } from "../src/Constants.sol";
+
+import { ActivityType } from "../src/codegen/common.sol";
 import { Energy } from "../src/codegen/tables/Energy.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
+import { PlayerProgress } from "../src/codegen/tables/PlayerProgress.sol";
+
 import { EntityId, EntityTypeLib } from "../src/types/EntityId.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 import { DustTest } from "./DustTest.sol";
-import { TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestInventoryUtils, TestPlayerProgressUtils } from "./utils/TestUtils.sol";
 
 contract HitPlayerTest is DustTest {
   // Test hitting without tool - partial damage
@@ -59,6 +63,10 @@ contract HitPlayerTest is DustTest {
 
     uint128 bobEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(bobSnapshot);
     assertEq(bobEnergyLost, expectedTotalDamage, "Bob total damage incorrect");
+
+    // Check player activity tracking
+    uint256 hitPlayerProgress = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.HitPlayerDamage);
+    assertEq(hitPlayerProgress, expectedTotalDamage, "Hit player damage activity not tracked correctly");
   }
 
   // Test hitting without tool - kill target
@@ -365,12 +373,10 @@ contract HitPlayerTest is DustTest {
 
     uint128 aliceInitialEnergy = Energy.getEnergy(aliceEntityId);
 
-    // Hit dead player should do nothing
+    // Hitting a dead player should revert
     vm.prank(alice);
+    vm.expectRevert("Target has no energy");
     world.hitPlayer(aliceEntityId, bobEntityId, bytes(""));
-
-    // Alice should still have all her energy
-    assertEq(Energy.getEnergy(aliceEntityId), aliceInitialEnergy, "Alice energy should not change");
   }
 
   // Test rate limiting

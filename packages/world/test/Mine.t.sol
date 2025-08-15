@@ -13,15 +13,18 @@ import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 
+import { ActivityType } from "../src/codegen/common.sol";
 import { Death } from "../src/codegen/tables/Death.sol";
 import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 import { WorldStatus } from "../src/codegen/tables/WorldStatus.sol";
+
 import { DustTest } from "./DustTest.sol";
 
 import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import {
   ACTION_MODIFIER_DENOMINATOR,
+  BARE_HANDS_ACTION_ENERGY_COST,
   BARE_HANDS_ACTION_ENERGY_COST,
   CHUNK_SIZE,
   MACHINE_ENERGY_DRAIN_RATE,
@@ -42,7 +45,7 @@ import { EntityId } from "../src/types/EntityId.sol";
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { Orientation } from "../src/types/Orientation.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
-import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestEntityUtils, TestInventoryUtils, TestPlayerProgressUtils } from "./utils/TestUtils.sol";
 
 contract MineTest is DustTest {
   function testMineTerrain() public {
@@ -883,6 +886,10 @@ contract MineTest is DustTest {
       uint128 massReduction = TOOL_ACTION_ENERGY_COST + pickMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
       uint128 expectedMass = stoneMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden pick on stone");
+
+      // Check player activity tracking
+      uint256 pickActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MinePickMass);
+      assertEq(pickActivity, massReduction, "Pick mining activity not tracked correctly");
     }
 
     {
@@ -907,6 +914,10 @@ contract MineTest is DustTest {
       uint128 massReduction = TOOL_ACTION_ENERGY_COST + axeMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
       uint128 expectedMass = logMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden axe on log");
+
+      // Check player activity tracking
+      uint256 axeActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MineAxeMass);
+      assertEq(axeActivity, massReduction, "Axe mining activity not tracked correctly");
     }
 
     {
@@ -1336,5 +1347,90 @@ contract MineTest is DustTest {
 
     vm.prank(alice);
     world.mine(aliceEntityId, finalMineCoord, slot, "");
+  }
+
+  // Crop mining activity tracking tests
+
+  function testMineCropTracksActivity() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Test mining wheat
+    Vec3 wheatCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
+    ObjectType wheatType = ObjectTypes.Wheat;
+    setObjectAtCoord(wheatCoord, wheatType);
+
+    uint128 wheatMass = ObjectPhysics.getMass(wheatType);
+
+    // Set up chunk commitment for randomness when mining
+    newCommit(alice, aliceEntityId, wheatCoord, bytes32(0));
+
+    // Mine wheat without tool (bare hands)
+    vm.prank(alice);
+    world.mine(aliceEntityId, wheatCoord, "");
+
+    // Check that crop mining was tracked
+    uint256 cropActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MineCropMass);
+
+    // Activity should track the actual mass of the wheat mined
+    assertEq(cropActivity, wheatMass, "Crop mining activity not tracked correctly");
+
+    // Should have no tool-based mining activity
+    uint256 pickActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MinePickMass);
+    assertEq(pickActivity, 0, "Pick mining should be zero for crops");
+
+    uint256 axeActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MineAxeMass);
+    assertEq(axeActivity, 0, "Axe mining should be zero for crops");
+  }
+
+  function testMultipleCropsTracked() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Mine multiple crop types
+    ObjectType[4] memory cropTypes = [ObjectTypes.Wheat, ObjectTypes.Melon, ObjectTypes.Pumpkin, ObjectTypes.CottonBush];
+
+    uint256 totalCropMass = 0;
+
+    for (uint256 i = 0; i < cropTypes.length; i++) {
+      Vec3 cropCoord = vec3(playerCoord.x() + int32(int256(i)) + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
+      setObjectAtCoord(cropCoord, cropTypes[i]);
+
+      // Set up chunk commitment for randomness when mining
+      newCommit(alice, aliceEntityId, cropCoord, bytes32(uint256(i)));
+
+      vm.prank(alice);
+      world.mineUntilDestroyed(aliceEntityId, cropCoord, "");
+
+      totalCropMass += ObjectPhysics.getMass(cropTypes[i]);
+    }
+
+    // Check total crop mining activity
+    uint256 cropActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MineCropMass);
+    assertEq(cropActivity, totalCropMass, "Total crop mining activity not tracked correctly");
+  }
+
+  function testCropMiningWithTool() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Add a tool to inventory
+    EntityId tool = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenAxe);
+    uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, tool);
+
+    // Mine wheat with tool
+    Vec3 wheatCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
+    setObjectAtCoord(wheatCoord, ObjectTypes.Wheat);
+
+    // Set up chunk commitment for randomness when mining
+    newCommit(alice, aliceEntityId, wheatCoord, bytes32(0));
+
+    vm.prank(alice);
+    world.mine(aliceEntityId, wheatCoord, slot, "");
+
+    // Even with a tool, crop mining should be tracked as MineCropMass
+    uint256 cropActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MineCropMass);
+    assertTrue(cropActivity > 0, "Crop mining activity should be tracked even with tool");
+
+    // Should not have axe mining activity for crops
+    uint256 axeActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MineAxeMass);
+    assertEq(axeActivity, 0, "Axe mining should be zero for crops");
   }
 }
