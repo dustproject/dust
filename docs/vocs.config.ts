@@ -9,25 +9,15 @@ export default defineConfig({
   sidebar: [
     {
       text: "Overview",
-      items: [
-        { text: "Introduction", link: "/" },
-        { text: "Data Model", link: "/data-model" },
-      ],
+      items: [{ text: "Introduction", link: "/" }],
     },
     {
-      text: "Programs (contracts)",
+      text: "Programs",
       items: [
         { text: "Introduction", link: "/programs" },
-        { text: "Registration", link: "/programs/registration" },
-        { text: "Reference", link: "/programs/reference" },
-      ],
-    },
-    {
-      text: "Apps (client)",
-      items: [
-        { text: "Introduction", link: "/apps" },
-        { text: "Registration", link: "/apps/registration" },
-        { text: "DustKit", link: "/apps/dustkit" },
+        { text: "Reading The World", link: "/programs/reading-the-world" },
+        { text: "Smart Objects", link: "/programs/smart-objects" },
+        { text: "Custom UIs", link: "/programs/custom-uis" },
       ],
     },
     {

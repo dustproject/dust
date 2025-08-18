@@ -1,17 +1,75 @@
-## Attaching Programs to Entities
+# Registration
 
-To attach a program to an entity:
+## Preview an app in the client
 
-1. **Find Program ID**: Get the resource ID of the registered system. The easiest way to find it is to look in the MUD codegenerated system library. For example, [this is where you would find the resource ID of the default program](https://github.com/dustproject/dust/blob/6ad697a45c99ee3418196968b01cc38c73626aec/packages/programs/src/codegen/systems/DefaultProgramSystemLib.sol#L21).
-2. **Be in proximity**: Move close to the smart entity with a player that has access to upgrade the smart entity's program. By default the player who placed the smart entity has access to update its program.
-3. **Find the smart entity's ID**: The easiest way to find it is to right click the smart entity in the client to open its UI, then click on the small square next to the window title. From there you can select the truncated hex after "Entity" (i.e. `Entity: 0x0300...0000`) and press CTRL+C to copy it. Despite the truncation, it will copy the entire ID.
-   ![EntityId](/smart-entity-id.png)
-4. **Call the `world.updateProgram` function**: You need to call it from the account of the player standing close to the smart entity. The easiest way to do this is to connect the player's account to the [MUD World Explorer and call the function from there](https://explorer.mud.dev/redstone/worlds/0x253eb85B3C953bFE3827CC14a151262482E7189C/interact?expanded=root%2C0x7379000000000000000000000000000050726f6772616d53797374656d000000&filter=updatePro#0x7379000000000000000000000000000050726f6772616d53797374656d000000-0x843bb3c7cebac75f0b0ba241960c28d7148f695cb075442ee297284be1b22360).
+Before registering an app to make it available to everyone, you can preview your app in the production client by using the `debug-app` URL parameter.
+
+Example: `https://alpha.dustproject.org/?debug-app=https://your-dust-app.com/dust-app.json`
+
+## Register a global app
+
+To make an app available in everyone's client, you have to register it in the global app registry.
+
+1. Register a new MUD namespace.
+
+   ```solidity
+    import { ResourceId, WorldResourceIdInstance, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
+    import { ResourceIds } from "@latticexyz/store/src/codegen/tables/ResourceIds.sol";
+
+    IWorld world = IWorld(0x253eb85B3C953bFE3827CC14a151262482E7189C);
+    ResourceId appNamespaceId = WorldResourceIdLib.encodeNamespace(bytes14(bytes("your-dust-app")));
+    if (!ResourceIds.getExists(appNamespaceId)) {
+      world.registerNamespace(appNamespaceId);
+    }
+   ```
+
+2. Register by setting a resource tag that points to your ([app's manifest](https://esm.sh/pr/dustproject/dust/dustkit@d9cb17b/json-schemas/app-config.json))
+
+   ```solidity
+   import { metadataSystem } from
+   "@latticexyz/world-module-metadata/src/codegen/experimental/systems/MetadataSystemLib.sol";
+
+   metadataSystem.setResourceTag(appNamespaceId, "dust.appConfigUrl", bytes("https://your-dust-app.com/dust-app.json"));
+   ```
+
+## Register a contextual app
+
+To show a contextual app when interacting with an entity that has [your program installed](../programs/registration.md), your program needs to implement the [`appConfigURI` function](https://github.com/dustproject/dust/blob/main/packages/dustkit/contracts/IAppConfigURI.sol).
 
 ```solidity
-world.updateProgram(
-  entityId,    // ID of the smart entity, i.e. chest
-  programId,   // MUD system ID of the program
-  ""           // optional extra data
-);
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.8.24;
+
+contract CustomProgram {
+  function appConfigURI(EntityId viaEntity) external returns (string memory uri) {
+    return "https://your-dust-app.com/dust-app.json";
+  }
+}
 ```
+
+## Register a spawn app
+
+Spawn apps are displayed on the spawn screen and should implement spawning functionality for custom spawn tiles.
+Registering them is very similar to registering global apps, just using the `dust.spawnAppConfigUrl` resource tag instead.
+
+1. Register a new MUD namespace.
+
+   ```solidity
+    import { ResourceId, WorldResourceIdInstance, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
+    import { ResourceIds } from "@latticexyz/store/src/codegen/tables/ResourceIds.sol";
+
+    IWorld world = IWorld(0x253eb85B3C953bFE3827CC14a151262482E7189C);
+    ResourceId appNamespaceId = WorldResourceIdLib.encodeNamespace(bytes14(bytes("your-dust-app")));
+    if (!ResourceIds.getExists(appNamespaceId)) {
+      world.registerNamespace(appNamespaceId);
+    }
+   ```
+
+2. Register by setting a resource tag that points to your ([spawn app's manifest](https://esm.sh/pr/dustproject/dust/dustkit@d9cb17b/json-schemas/app-config.json))
+
+   ```solidity
+   import { metadataSystem } from
+   "@latticexyz/world-module-metadata/src/codegen/experimental/systems/MetadataSystemLib.sol";
+
+   metadataSystem.setResourceTag(appNamespaceId, "dust.spawnAppConfigUrl", bytes("https://your-dust-spawn-app.com/dust-app.json"));
+   ```
