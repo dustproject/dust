@@ -9,9 +9,13 @@ Instead of separate mods or servers, you deploy your code into the single shard 
 
 Command machines, turn chests into shops and doors into toll gates. Build currencies, reputation systens, governments and more.
 
-On the following pages you'll learn about:
+## Programs
 
-- [Programs](/programs): Smart contracts that define the rules of your onchain entities
-- [Apps](/apps): Custom user interfaces that integrate with the native client
-- [Bots](/bots): How to automate tasks in DUST
-- [Examples](/examples/swap-chest): Practical end-to-end use cases
+```
+flowchart TD
+W[W] -->|read T<br/>call S<br/>UI/explorer| Box
+Box[ ] --> O(O)
+
+    O -->|check hook<br/>UI/explorer| Step1
+    O -->|spawn the hook<br/>UI/explorer| Step2
+```
