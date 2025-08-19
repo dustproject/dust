@@ -22,6 +22,10 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: "Overview", link: "/programs/smart-objects" },
+            {
+              text: "Registration",
+              link: "/programs/smart-objects/registration",
+            },
             { text: "Reference", link: "/programs/smart-objects/reference" },
           ],
         },
