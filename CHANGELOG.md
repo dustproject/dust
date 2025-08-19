@@ -116,7 +116,7 @@
 
 - Fix access control for setting entity access group.
 - Support setting access group by smart entity programs.
-- Add overloaded functions to DefaultProgramSystem that don't recieve a caller.
+- Add overloaded functions to DefaultProgramSystem that don't receive a caller.
 
 ## 2025-07-07
 
