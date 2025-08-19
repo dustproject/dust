@@ -40,7 +40,7 @@ To make an app available in everyone's client, you have to register it in the gl
 
 ## Register a contextual app
 
-To show a contextual app when interacting with an entity that has [your program installed](../programs/registration.md), your program needs to implement the [`appConfigURI` function](https://github.com/dustproject/dust/blob/main/packages/dustkit/contracts/IAppConfigURI.sol).
+To show a contextual app when interacting with an entity that has your program installed, your program needs to implement the [`appConfigURI` function](https://github.com/dustproject/dust/blob/main/packages/dustkit/contracts/IAppConfigURI.sol).
 
 ```solidity
 // SPDX-License-Identifier: MIT

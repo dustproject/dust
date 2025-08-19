@@ -16,12 +16,21 @@ export default defineConfig({
       items: [
         { text: "Introduction", link: "/programs" },
         { text: "Reading The World", link: "/programs/reading-the-world" },
-        { text: "Smart Objects", link: "/programs/smart-objects" },
+        {
+          text: "Smart Objects",
+          link: "/programs/smart-objects",
+          collapsed: false,
+          items: [
+            { text: "Overview", link: "/programs/smart-objects" },
+            { text: "Reference", link: "/programs/smart-objects/reference" },
+          ],
+        },
         {
           text: "Custom UIs",
           link: "/programs/custom-uis",
           collapsed: false,
           items: [
+            { text: "Overview", link: "/programs/custom-uis" },
             { text: "Dustkit", link: "/programs/custom-uis/dustkit" },
             { text: "Registration", link: "/programs/custom-uis/registration" },
           ],
