@@ -1,4 +1,4 @@
-# Introduction
+# Custom UIs
 
 The DUST client supports embedded apps - web apps that integrate directly into the game client UI and interact with in-game objects and physics. Apps let developers build on top of the world and extend the game client with custom functionality like shops and marketplaces.
 

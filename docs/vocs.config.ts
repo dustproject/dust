@@ -17,7 +17,15 @@ export default defineConfig({
         { text: "Introduction", link: "/programs" },
         { text: "Reading The World", link: "/programs/reading-the-world" },
         { text: "Smart Objects", link: "/programs/smart-objects" },
-        { text: "Custom UIs", link: "/programs/custom-uis" },
+        {
+          text: "Custom UIs",
+          link: "/programs/custom-uis",
+          collapsed: false,
+          items: [
+            { text: "Dustkit", link: "/programs/custom-uis/dustkit" },
+            { text: "Registration", link: "/programs/custom-uis/registration" },
+          ],
+        },
       ],
     },
     {

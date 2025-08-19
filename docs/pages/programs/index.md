@@ -1,8 +1,6 @@
 ## Programs
 
-```
-insert diagram
-```
+![program diagram](/program-diagram.png)
 
 Programs can read from the world and influence it via smart objects.
 

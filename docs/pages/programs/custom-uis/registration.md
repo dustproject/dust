@@ -1,5 +1,11 @@
 # Registration
 
+Smart contract programs deployed to the DUST world will automatically show up in the explorer. You can also register a custom UI for your program in 3 different places:
+
+- sidebar: a list of global apps
+- spawn screen: a list of apps shown on the spawn screen
+- when interacting with smart items: shown when a user interacts with a smart object with your program attached
+
 ## Preview an app in the client
 
 Before registering an app to make it available to everyone, you can preview your app in the production client by using the `debug-app` URL parameter.
