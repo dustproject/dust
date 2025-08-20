@@ -38,22 +38,22 @@ struct RootCallWrapper {
 library NameSystemLib {
   error NameSystemLib_CallingFromRootSystem();
 
-  function setPlayerName(NameSystemType self, EntityId caller, bytes32 name) internal {
+  function setPlayerName(NameSystemType self, EntityId caller, string memory name) internal {
     return CallWrapper(self.toResourceId(), address(0)).setPlayerName(caller, name);
   }
 
-  function setPlayerName(CallWrapper memory self, EntityId caller, bytes32 name) internal {
+  function setPlayerName(CallWrapper memory self, EntityId caller, string memory name) internal {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert NameSystemLib_CallingFromRootSystem();
 
-    bytes memory systemCall = abi.encodeCall(_setPlayerName_EntityId_bytes32.setPlayerName, (caller, name));
+    bytes memory systemCall = abi.encodeCall(_setPlayerName_EntityId_string.setPlayerName, (caller, name));
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
-  function setPlayerName(RootCallWrapper memory self, EntityId caller, bytes32 name) internal {
-    bytes memory systemCall = abi.encodeCall(_setPlayerName_EntityId_bytes32.setPlayerName, (caller, name));
+  function setPlayerName(RootCallWrapper memory self, EntityId caller, string memory name) internal {
+    bytes memory systemCall = abi.encodeCall(_setPlayerName_EntityId_string.setPlayerName, (caller, name));
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
@@ -95,8 +95,8 @@ library NameSystemLib {
  * Each interface is uniquely named based on the function name and parameters to prevent collisions.
  */
 
-interface _setPlayerName_EntityId_bytes32 {
-  function setPlayerName(EntityId caller, bytes32 name) external;
+interface _setPlayerName_EntityId_string {
+  function setPlayerName(EntityId caller, string memory name) external;
 }
 
 using NameSystemLib for NameSystemType global;

@@ -11,5 +11,5 @@ import { EntityId } from "../../types/EntityId.sol";
  * @dev This interface is automatically generated from the corresponding system contract. Do not edit manually.
  */
 interface INameSystem {
-  function setPlayerName(EntityId caller, bytes32 name) external;
+  function setPlayerName(EntityId caller, string memory name) external;
 }
