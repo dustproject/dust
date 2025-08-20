@@ -12,7 +12,10 @@ import { LibString } from "solady/utils/LibString.sol";
 contract NameSystem is System {
   function setPlayerName(EntityId caller, string memory name) public {
     checkWorldStatus();
-    caller._validateCaller();
+    // We can't use `caller._validateCaller()` here because it expects the
+    // player to be spawned, but we don't need a spawned player here.
+    require(_msgSender() == caller.getPlayerAddress(), "Caller not allowed");
+
     _setPlayerName(caller.getPlayerAddress(), name);
   }
 }
