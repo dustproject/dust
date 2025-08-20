@@ -28,14 +28,14 @@ function _setPlayerName(address player, string memory name) {
   require(LibString.is7BitASCII(name, validCharacters), "Name has invalid characters.");
 
   bytes32 storedName = LibString.toSmallString(name);
-  require(ReversePlayerName._get(storedName) == address(0), "Name is already in use.");
+  require(ReversePlayerName.get(storedName) == address(0), "Name is already in use.");
 
   // free up previous name
-  bytes32 previousName = PlayerName._get(player);
+  bytes32 previousName = PlayerName.get(player);
   if (previousName != bytes32(0)) {
-    ReversePlayerName._deleteRecord(previousName);
+    ReversePlayerName.deleteRecord(previousName);
   }
 
-  ReversePlayerName._set({ player: player, name: storedName });
-  PlayerName._set({ player: player, name: storedName });
+  ReversePlayerName.set({ player: player, name: storedName });
+  PlayerName.set({ player: player, name: storedName });
 }
