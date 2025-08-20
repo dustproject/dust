@@ -9,25 +9,36 @@ export default defineConfig({
   sidebar: [
     {
       text: "Overview",
-      items: [
-        { text: "Introduction", link: "/" },
-        { text: "Data Model", link: "/data-model" },
-      ],
+      items: [{ text: "Introduction", link: "/" }],
     },
     {
-      text: "Programs (contracts)",
+      text: "Programs",
       items: [
         { text: "Introduction", link: "/programs" },
-        { text: "Registration", link: "/programs/registration" },
-        { text: "Reference", link: "/programs/reference" },
-      ],
-    },
-    {
-      text: "Apps (client)",
-      items: [
-        { text: "Introduction", link: "/apps" },
-        { text: "Registration", link: "/apps/registration" },
-        { text: "DustKit", link: "/apps/dustkit" },
+        { text: "Reading The World", link: "/programs/reading-the-world" },
+        {
+          text: "Smart Objects",
+          link: "/programs/smart-objects",
+          collapsed: false,
+          items: [
+            { text: "Overview", link: "/programs/smart-objects" },
+            {
+              text: "Registration",
+              link: "/programs/smart-objects/registration",
+            },
+            { text: "Reference", link: "/programs/smart-objects/reference" },
+          ],
+        },
+        {
+          text: "Custom UIs",
+          link: "/programs/custom-uis",
+          collapsed: false,
+          items: [
+            { text: "Overview", link: "/programs/custom-uis" },
+            { text: "Dustkit", link: "/programs/custom-uis/dustkit" },
+            { text: "Registration", link: "/programs/custom-uis/registration" },
+          ],
+        },
       ],
     },
     {

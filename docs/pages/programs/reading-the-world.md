@@ -1,4 +1,4 @@
-# Data Model
+# Reading The World
 
 DUST is built using [MUD](https://mud.dev/), and so the [mud.config.ts](https://github.com/dustproject/dust/blob/main/packages/world/mud.config.ts) defines all the different entities and components. Here we look at 2 specific kinds of data and how to read them.
 
@@ -95,7 +95,7 @@ SELECT "entityId", "x", "y", "z" FROM "EntityPosition" WHERE "entityId" = '0x01c
 
 This shows the player is at `[1380, 79, -2434]`.
 
-### Reading In A Program
+### Reading In A Smart Contract
 
 ```solidity
 import { EntityId, EntityTypeLib } from "@dust/world/src/types/EntityId.sol";
@@ -185,7 +185,7 @@ SELECT "owner", "slot", "entityId", "objectType", "amount" FROM "InventorySlot" 
 
 This shows all the items the player has. eg, the player has 4 WheatSeeds (id 134) in slot 2.
 
-### Reading In A Program
+### Reading In A Smart Contract
 
 ```solidity
 import { InventorySlot, InventorySlotData } from "@dust/world/src/codegen/tables/InventorySlot.sol";
