@@ -185,6 +185,10 @@ library TestInventoryUtils {
     return InventoryUtils.findEntity(owner, entityId);
   }
 
+  function hasEntity(EntityId owner, EntityId entityId) public asWorld returns (bool) {
+    return InventoryUtils.findEntity(owner, entityId) != type(uint16).max;
+  }
+
   function findObjectType(EntityId owner, ObjectType objectType) public asWorld returns (uint16) {
     return InventoryUtils.findObjectType(owner, objectType);
   }

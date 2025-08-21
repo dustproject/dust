@@ -142,7 +142,7 @@ function addEnergyToLocalPool(Vec3 coord, uint128 numToAdd) returns (uint128) {
   return newLocalEnergy;
 }
 
-function transferEnergyToPool(EntityId entityId, uint128 amount) returns (uint128, uint128) {
+function transferEnergyToPool(EntityId entityId, uint128 amount) returns (uint128) {
   Vec3 coord = entityId._getPosition();
   ObjectType objectType = entityId._getObjectType();
 
@@ -156,8 +156,9 @@ function transferEnergyToPool(EntityId entityId, uint128 amount) returns (uint12
     newEntityEnergy = decreaseMachineEnergy(entityId, amount);
   }
 
-  uint128 newLocalEnergy = addEnergyToLocalPool(coord, amount);
-  return (newEntityEnergy, newLocalEnergy);
+  addEnergyToLocalPool(coord, amount);
+
+  return newEntityEnergy;
 }
 
 function removeEnergyFromLocalPool(Vec3 coord, uint128 numToRemove) returns (uint128) {

@@ -83,6 +83,10 @@ library EntityIdLib {
     return (selfCoord, coord);
   }
 
+  function requireInRange(EntityId self, EntityId other, uint256 range) internal view returns (Vec3, Vec3) {
+    return requireInRange(self, other._getPosition(), range);
+  }
+
   // TODO: add pipe connections
   function requireConnected(EntityId self, EntityId other) internal view returns (Vec3, Vec3) {
     return requireConnected(self, other._getPosition());

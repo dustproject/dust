@@ -22,8 +22,8 @@ import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import {
   ACTION_MODIFIER_DENOMINATOR,
+  BARE_HANDS_ACTION_ENERGY_COST,
   CHUNK_SIZE,
-  DEFAULT_MINE_ENERGY_COST,
   MACHINE_ENERGY_DRAIN_RATE,
   MAX_ENTITY_INFLUENCE_RADIUS,
   MAX_FLUID_LEVEL,
@@ -31,7 +31,7 @@ import {
   MINE_ACTION_MODIFIER,
   PLAYER_ENERGY_DRAIN_RATE,
   SPECIALIZATION_MULTIPLIER,
-  TOOL_MINE_ENERGY_COST,
+  TOOL_ACTION_ENERGY_COST,
   WOODEN_TOOL_BASE_MULTIPLIER
 } from "../src/Constants.sol";
 import { ObjectAmount, ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
@@ -328,7 +328,7 @@ contract MineTest is DustTest {
 
     // Verify mass has been set to the resource's
     uint128 mass = Mass.getMass(mineEntityId);
-    uint128 expectedMass = ObjectPhysics.getMass(resourceType) - DEFAULT_MINE_ENERGY_COST;
+    uint128 expectedMass = ObjectPhysics.getMass(resourceType) - BARE_HANDS_ACTION_ENERGY_COST;
     assertEq(mass, expectedMass, "Mass was not set correctly");
 
     // Roll forward many blocks to ensure the commitment expires
@@ -346,7 +346,7 @@ contract MineTest is DustTest {
 
     // Verify mass has been set to the resource's
     mass = Mass.getMass(mineEntityId);
-    expectedMass -= DEFAULT_MINE_ENERGY_COST;
+    expectedMass -= BARE_HANDS_ACTION_ENERGY_COST;
     assertEq(mass, expectedMass, "Mass should decrease after another mining attempt");
   }
 
@@ -714,7 +714,7 @@ contract MineTest is DustTest {
     setObjectAtCoord(mineCoord, mineObjectType);
 
     // Set player energy to exactly enough for one mine operation
-    uint128 exactEnergy = DEFAULT_MINE_ENERGY_COST;
+    uint128 exactEnergy = BARE_HANDS_ACTION_ENERGY_COST;
     Energy.set(
       aliceEntityId, EnergyData({ lastUpdatedTime: uint128(block.timestamp), energy: exactEnergy, drainRate: 0 })
     );
@@ -880,7 +880,7 @@ contract MineTest is DustTest {
       (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(stoneCoord);
       // Calculate expected multiplier: wooden base (3) * mine modifier (1) * specialization (3) = 9
       uint128 expectedMultiplier = WOODEN_TOOL_BASE_MULTIPLIER * MINE_ACTION_MODIFIER * SPECIALIZATION_MULTIPLIER;
-      uint128 massReduction = TOOL_MINE_ENERGY_COST + pickMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
+      uint128 massReduction = TOOL_ACTION_ENERGY_COST + pickMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
       uint128 expectedMass = stoneMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden pick on stone");
     }
@@ -904,7 +904,7 @@ contract MineTest is DustTest {
       (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(logCoord);
       // Calculate expected multiplier: wooden base (3) * mine modifier (1) * specialization (3) = 9
       uint128 expectedMultiplier = WOODEN_TOOL_BASE_MULTIPLIER * MINE_ACTION_MODIFIER * SPECIALIZATION_MULTIPLIER;
-      uint128 massReduction = TOOL_MINE_ENERGY_COST + axeMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
+      uint128 massReduction = TOOL_ACTION_ENERGY_COST + axeMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
       uint128 expectedMass = logMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden axe on log");
     }
@@ -925,7 +925,7 @@ contract MineTest is DustTest {
       (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(stoneCoord);
       // Calculate expected multiplier: wooden base (3) * mine modifier (1) * no specialization = 3
       uint128 expectedMultiplier = WOODEN_TOOL_BASE_MULTIPLIER * MINE_ACTION_MODIFIER;
-      uint128 massReduction = TOOL_MINE_ENERGY_COST + axeMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
+      uint128 massReduction = TOOL_ACTION_ENERGY_COST + axeMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
       uint128 expectedMass = stoneMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden axe on stone");
     }
@@ -1267,5 +1267,74 @@ contract MineTest is DustTest {
     assertEq(
       TestEntityUtils.getObjectTypeAt(baseCoord), ObjectTypes.Air, "Block should be minable after adding air neighbor"
     );
+  }
+
+  function testMineRateLimit() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Set high energy so rate limit is hit before energy depletion
+    Energy.setEnergy(aliceEntityId, MAX_PLAYER_ENERGY);
+
+    // Player can mine up to 20 times per block (10 mines per second with 2 second blocks)
+    // Try to mine 20 times, the 21st should revert
+    for (uint256 i = 0; i < 20; i++) {
+      Vec3 mineCoord =
+        vec3(playerCoord.x() + int32(int256(i % 5 + 1)), FLAT_CHUNK_GRASS_LEVEL, playerCoord.z() + int32(int256(i / 5)));
+      setObjectAtCoord(mineCoord, ObjectTypes.Dirt);
+      ObjectPhysics.setMass(ObjectTypes.Dirt, 1); // Minimal mass so it mines in one hit
+
+      vm.prank(alice);
+      world.mine(aliceEntityId, mineCoord, "");
+    }
+
+    // 21st mine should fail due to rate limit
+    Vec3 finalMineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z() + 5);
+    setObjectAtCoord(finalMineCoord, ObjectTypes.Dirt);
+
+    vm.prank(alice);
+    vm.expectRevert("Rate limit exceeded");
+    world.mine(aliceEntityId, finalMineCoord, "");
+
+    // Move to next block and verify can mine again
+    vm.roll(block.number + 1);
+
+    vm.prank(alice);
+    world.mine(aliceEntityId, finalMineCoord, "");
+  }
+
+  function testMineRateLimitWithTool() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Create and equip pick
+    EntityId pick = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenPick);
+    uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, pick);
+
+    // Set high energy so rate limit is hit before energy depletion
+    Energy.setEnergy(aliceEntityId, MAX_PLAYER_ENERGY);
+
+    // Same rate limit applies with tool
+    for (uint256 i = 0; i < 20; i++) {
+      Vec3 mineCoord =
+        vec3(playerCoord.x() + int32(int256(i % 5 + 1)), FLAT_CHUNK_GRASS_LEVEL, playerCoord.z() + int32(int256(i / 5)));
+      setObjectAtCoord(mineCoord, ObjectTypes.Stone);
+      ObjectPhysics.setMass(ObjectTypes.Stone, 1); // Minimal mass so it mines in one hit
+
+      vm.prank(alice);
+      world.mine(aliceEntityId, mineCoord, slot, "");
+    }
+
+    // 21st mine should fail due to rate limit
+    Vec3 finalMineCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z() + 5);
+    setObjectAtCoord(finalMineCoord, ObjectTypes.Stone);
+
+    vm.prank(alice);
+    vm.expectRevert("Rate limit exceeded");
+    world.mine(aliceEntityId, finalMineCoord, slot, "");
+
+    // Move to next block and verify can mine again
+    vm.roll(block.number + 1);
+
+    vm.prank(alice);
+    world.mine(aliceEntityId, finalMineCoord, slot, "");
   }
 }

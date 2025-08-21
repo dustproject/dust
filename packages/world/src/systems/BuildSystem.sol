@@ -21,6 +21,7 @@ import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { Math } from "../utils/Math.sol";
 import { BuildNotification, MoveNotification, notify } from "../utils/NotifUtils.sol";
+import { RateLimitUtils } from "../utils/RateLimitUtils.sol";
 
 import { MoveLib } from "./libraries/MoveLib.sol";
 
@@ -54,6 +55,7 @@ contract BuildSystem is System {
     bytes calldata extraData
   ) public returns (EntityId) {
     uint128 callerEnergy = caller.activate().energy;
+
     caller.requireConnected(coord);
 
     BuildContext memory ctx = _buildContext(caller, coord, slot, orientation, callerEnergy);
@@ -70,6 +72,7 @@ contract BuildSystem is System {
     returns (EntityId)
   {
     uint128 callerEnergy = caller.activate().energy;
+
     Vec3 coord = caller._getPosition();
 
     BuildContext memory ctx = _buildContext(caller, coord, slot, orientation, callerEnergy);
@@ -87,6 +90,9 @@ contract BuildSystem is System {
   }
 
   function _build(BuildContext memory ctx, bytes calldata extraData) internal returns (EntityId) {
+    // Check rate limit for work actions
+    RateLimitUtils.build(ctx.caller);
+
     (EntityId base, Vec3[] memory coords) = BuildLib._executeBuild(ctx);
 
     if (coords.length == 0) {
@@ -151,56 +157,36 @@ contract BuildSystem is System {
     internal
   {
     for (uint256 i = 0; i < coords.length; i++) {
-      Vec3 coord = coords[i];
-
-      (ProgramId program, EntityId target) = _getHookTarget(coord);
-
       if (ctx.buildType == ObjectTypes.ForceField) {
-        require(!target._exists(), "Force field overlaps with another force field");
-        ForceFieldUtils.setupForceField(base, coord);
+        (EntityId existing,) = ForceFieldUtils.getForceField(coords[i]);
+        require(!existing._exists(), "Force field overlaps with another force field");
+        ForceFieldUtils.setupForceField(base, coords[i]);
         // Return early as it is not possible for a new forcefield to have a program
         return;
       }
+
+      (ProgramId program, EntityId target, EnergyData memory energyData) = ForceFieldUtils.getHookTarget(coords[i]);
 
       if (!program.exists()) {
         continue;
       }
 
-      program.hook({ caller: ctx.caller, target: target, revertOnFailure: true, extraData: extraData }).onBuild({
+      program.hook({ caller: ctx.caller, target: target, revertOnFailure: energyData.energy > 0, extraData: extraData })
+        .onBuild({
         entity: base,
-        coord: coord,
+        coord: coords[i],
         slotType: ctx.slotType,
         objectType: ctx.buildType,
         orientation: ctx.orientation
       });
     }
   }
-
-  function _getHookTarget(Vec3 coord) internal returns (ProgramId, EntityId) {
-    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
-    if (!forceField._exists()) {
-      return (ProgramId.wrap(0), forceField);
-    }
-
-    EnergyData memory machineData = updateMachineEnergy(forceField);
-    if (machineData.energy == 0) {
-      return (ProgramId.wrap(0), forceField);
-    }
-
-    // We know fragment is active because its forcefield exists, so we can use its program
-    ProgramId program = fragment._getProgram();
-    if (program.exists()) {
-      return (program, fragment);
-    }
-
-    return (forceField._getProgram(), forceField);
-  }
 }
 
 library BuildLib {
   function _executeBuild(BuildContext memory ctx) public returns (EntityId, Vec3[] memory) {
-    (ctx.callerEnergy,) = transferEnergyToPool(ctx.caller, Math.min(ctx.callerEnergy, BUILD_ENERGY_COST));
-    if (ctx.callerEnergy == 0) {
+    uint128 energyLeft = transferEnergyToPool(ctx.caller, Math.min(ctx.callerEnergy, BUILD_ENERGY_COST));
+    if (energyLeft == 0) {
       return (EntityId.wrap(0), new Vec3[](0));
     }
 
