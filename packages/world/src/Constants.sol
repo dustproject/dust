@@ -102,3 +102,8 @@ uint128 constant HIT_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_BLOCK; // 1 hit per bl
 // Work rate limits
 uint128 constant MINE_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // 10 mines per second (20 per block)
 uint128 constant BUILD_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // 10 builds per second (20 per block)
+
+// Progress decay constants
+int128 constant LN2_WAD = 693147180559945309; // ln(2) in 1e18
+uint256 constant PROGRESS_DECAY_HALF_LIFE = 7 days; // every 7 days progress decays by half
+int128 constant PROGRESS_DECAY_LAMBDA_WAD = int128(int256(LN2_WAD) / int256(PROGRESS_DECAY_HALF_LIFE));

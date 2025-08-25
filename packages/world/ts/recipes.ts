@@ -124,6 +124,13 @@ export const recipes: Recipe[] = [
     outputs: [["Powerstone", 1]],
   },
   {
+    inputs: [
+      ["IronBar", 3],
+      ["Stone", 1],
+    ],
+    outputs: [["Anvil", 1]],
+  },
+  {
     station: "Workbench",
     inputs: [
       ["Stone", 30],
@@ -155,23 +162,27 @@ export const recipes: Recipe[] = [
     outputs: [["Bed", 1]],
   },
   {
+    station: "Workbench",
     inputs: [["AnyPlank", 5]],
     outputs: [["WoodenPick", 1]],
   },
   {
+    station: "Workbench",
     inputs: [["AnyPlank", 5]],
     outputs: [["WoodenAxe", 1]],
   },
   {
+    station: "Workbench",
     inputs: [["AnyPlank", 8]],
     outputs: [["WoodenWhacker", 1]],
   },
   {
+    station: "Workbench",
     inputs: [["AnyPlank", 4]],
     outputs: [["WoodenHoe", 1]],
   },
   {
-    station: "Workbench",
+    station: "Anvil",
     inputs: [
       ["AnyPlank", 2],
       ["CopperOre", 3],
@@ -179,7 +190,7 @@ export const recipes: Recipe[] = [
     outputs: [["CopperPick", 1]],
   },
   {
-    station: "Workbench",
+    station: "Anvil",
     inputs: [
       ["AnyPlank", 2],
       ["CopperOre", 3],
@@ -187,7 +198,7 @@ export const recipes: Recipe[] = [
     outputs: [["CopperAxe", 1]],
   },
   {
-    station: "Workbench",
+    station: "Anvil",
     inputs: [
       ["AnyPlank", 2],
       ["CopperOre", 6],
@@ -195,7 +206,7 @@ export const recipes: Recipe[] = [
     outputs: [["CopperWhacker", 1]],
   },
   {
-    station: "Workbench",
+    station: "Anvil",
     inputs: [
       ["AnyPlank", 2],
       ["IronBar", 3],
@@ -203,7 +214,7 @@ export const recipes: Recipe[] = [
     outputs: [["IronPick", 1]],
   },
   {
-    station: "Workbench",
+    station: "Anvil",
     inputs: [
       ["AnyPlank", 2],
       ["IronBar", 3],
@@ -211,7 +222,7 @@ export const recipes: Recipe[] = [
     outputs: [["IronAxe", 1]],
   },
   {
-    station: "Workbench",
+    station: "Anvil",
     inputs: [
       ["AnyPlank", 2],
       ["IronBar", 6],
@@ -219,7 +230,7 @@ export const recipes: Recipe[] = [
     outputs: [["IronWhacker", 1]],
   },
   {
-    station: "Workbench",
+    station: "Anvil",
     inputs: [
       ["AnyPlank", 2],
       ["GoldBar", 3],
@@ -227,7 +238,7 @@ export const recipes: Recipe[] = [
     outputs: [["GoldPick", 1]],
   },
   {
-    station: "Workbench",
+    station: "Anvil",
     inputs: [
       ["AnyPlank", 2],
       ["GoldBar", 3],
@@ -235,7 +246,7 @@ export const recipes: Recipe[] = [
     outputs: [["GoldAxe", 1]],
   },
   {
-    station: "Workbench",
+    station: "Anvil",
     inputs: [
       ["AnyPlank", 2],
       ["Diamond", 3],
@@ -243,7 +254,7 @@ export const recipes: Recipe[] = [
     outputs: [["DiamondPick", 1]],
   },
   {
-    station: "Workbench",
+    station: "Anvil",
     inputs: [
       ["AnyPlank", 2],
       ["Diamond", 3],
@@ -251,7 +262,7 @@ export const recipes: Recipe[] = [
     outputs: [["DiamondAxe", 1]],
   },
   {
-    station: "Workbench",
+    station: "Anvil",
     inputs: [
       ["AnyPlank", 2],
       ["NeptuniumBar", 3],
@@ -259,7 +270,7 @@ export const recipes: Recipe[] = [
     outputs: [["NeptuniumPick", 1]],
   },
   {
-    station: "Workbench",
+    station: "Anvil",
     inputs: [
       ["AnyPlank", 2],
       ["NeptuniumBar", 3],

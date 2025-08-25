@@ -9,7 +9,12 @@ import { Mass } from "../src/codegen/tables/Mass.sol";
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
+import { ActivityType } from "../src/codegen/common.sol";
+
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
+import { PlayerProgress } from "../src/codegen/tables/PlayerProgress.sol";
+
+import { PlayerProgressUtils } from "../src/utils/PlayerProgressUtils.sol";
 import { DustTest } from "./DustTest.sol";
 
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
@@ -30,7 +35,7 @@ import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
 import { EntityId } from "../src/types/EntityId.sol";
 import { Orientation } from "../src/types/Orientation.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
-import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestEntityUtils, TestInventoryUtils, TestPlayerProgressUtils } from "./utils/TestUtils.sol";
 
 contract BuildTest is DustTest {
   function testBuildTerrain() public {
@@ -60,6 +65,13 @@ contract BuildTest is DustTest {
 
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
     assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
+
+    // Check player activity tracking
+    uint256 buildEnergy = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildEnergy);
+    assertEq(buildEnergy, BUILD_ENERGY_COST, "Build energy activity not tracked correctly");
+
+    uint256 buildMass = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMass);
+    assertEq(buildMass, ObjectPhysics.getMass(buildObjectType), "Build mass activity not tracked correctly");
   }
 
   function testBuildNonTerrain() public {
