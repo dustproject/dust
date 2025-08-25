@@ -16,7 +16,6 @@ import {
 import { ActivityType } from "../src/codegen/common.sol";
 import { Energy } from "../src/codegen/tables/Energy.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
-import { PlayerProgress } from "../src/codegen/tables/PlayerProgress.sol";
 
 import { EntityId, EntityTypeLib } from "../src/types/EntityId.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";
@@ -370,8 +369,6 @@ contract HitPlayerTest is DustTest {
     // Kill Bob by setting energy to 0
     Energy.setEnergy(bobEntityId, 0);
     Energy.setEnergy(aliceEntityId, BARE_HANDS_ACTION_ENERGY_COST + 1000);
-
-    uint128 aliceInitialEnergy = Energy.getEnergy(aliceEntityId);
 
     // Hitting a dead player should revert
     vm.prank(alice);

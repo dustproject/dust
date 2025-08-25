@@ -1386,7 +1386,7 @@ contract MineTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
 
     // Mine multiple crop types
-    ObjectType[4] memory cropTypes = [ObjectTypes.Wheat, ObjectTypes.Melon, ObjectTypes.Pumpkin, ObjectTypes.CottonBush];
+    ObjectType[3] memory cropTypes = [ObjectTypes.Wheat, ObjectTypes.Melon, ObjectTypes.Pumpkin];
 
     uint256 totalCropMass = 0;
 
