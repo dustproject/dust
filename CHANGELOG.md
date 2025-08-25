@@ -1,12 +1,19 @@
 # Changelog
 
+## 2025-08-20
+
+- Added ability to set player names (`PlayerName` and `ReversePlayerName` tables, `NameSystem` with `setPlayerName` function)
+- Initialized table with previously set offchain names
+
 ## 2025-07-25
+
 - Improved Program hooks:
   - All hooks now receive a `HookContext` struct with `caller`, `target`, `revertOnFailure` and `extraData`.
   - Some hooks receive an additional struct with metadata for that specific action (hit damage, tool used for mining, etc).
 - Updated default programs to use new hooks.
 
 ## 2025-07-17
+
 - Add view function for getting object type at coordinate
 
 ## 2025-07-16
@@ -116,7 +123,7 @@
 
 - Fix access control for setting entity access group.
 - Support setting access group by smart entity programs.
-- Add overloaded functions to DefaultProgramSystem that don't recieve a caller.
+- Add overloaded functions to DefaultProgramSystem that don't receive a caller.
 
 ## 2025-07-07
 
