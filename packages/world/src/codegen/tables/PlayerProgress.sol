@@ -23,6 +23,7 @@ import { ActivityType } from "../common.sol";
 struct PlayerProgressData {
   uint256 accumulated;
   uint256 current;
+  uint256 exponent;
   uint128 lastUpdatedAt;
 }
 
@@ -31,22 +32,21 @@ library PlayerProgress {
   ResourceId constant _tableId = ResourceId.wrap(0x74620000000000000000000000000000506c6179657250726f67726573730000);
 
   FieldLayout constant _fieldLayout =
-    FieldLayout.wrap(0x0050030020201000000000000000000000000000000000000000000000000000);
+    FieldLayout.wrap(0x0070040020202010000000000000000000000000000000000000000000000000);
 
-  // Hex-encoded key schema of (bytes32, uint256, uint8)
-  Schema constant _keySchema = Schema.wrap(0x004103005f1f0000000000000000000000000000000000000000000000000000);
-  // Hex-encoded value schema of (uint256, uint256, uint128)
-  Schema constant _valueSchema = Schema.wrap(0x005003001f1f0f00000000000000000000000000000000000000000000000000);
+  // Hex-encoded key schema of (bytes32, uint8)
+  Schema constant _keySchema = Schema.wrap(0x002102005f000000000000000000000000000000000000000000000000000000);
+  // Hex-encoded value schema of (uint256, uint256, uint256, uint128)
+  Schema constant _valueSchema = Schema.wrap(0x007004001f1f1f0f000000000000000000000000000000000000000000000000);
 
   /**
    * @notice Get the table's key field names.
    * @return keyNames An array of strings with the names of key fields.
    */
   function getKeyNames() internal pure returns (string[] memory keyNames) {
-    keyNames = new string[](3);
+    keyNames = new string[](2);
     keyNames[0] = "player";
-    keyNames[1] = "deathCount";
-    keyNames[2] = "activityType";
+    keyNames[1] = "activityType";
   }
 
   /**
@@ -54,10 +54,11 @@ library PlayerProgress {
    * @return fieldNames An array of strings with the names of value fields.
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
-    fieldNames = new string[](3);
+    fieldNames = new string[](4);
     fieldNames[0] = "accumulated";
     fieldNames[1] = "current";
-    fieldNames[2] = "lastUpdatedAt";
+    fieldNames[2] = "exponent";
+    fieldNames[3] = "lastUpdatedAt";
   }
 
   /**
@@ -77,15 +78,10 @@ library PlayerProgress {
   /**
    * @notice Get accumulated.
    */
-  function getAccumulated(
-    EntityId player,
-    uint256 deathCount,
-    ActivityType activityType
-  ) internal view returns (uint256 accumulated) {
-    bytes32[] memory _keyTuple = new bytes32[](3);
+  function getAccumulated(EntityId player, ActivityType activityType) internal view returns (uint256 accumulated) {
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (uint256(bytes32(_blob)));
@@ -94,15 +90,10 @@ library PlayerProgress {
   /**
    * @notice Get accumulated.
    */
-  function _getAccumulated(
-    EntityId player,
-    uint256 deathCount,
-    ActivityType activityType
-  ) internal view returns (uint256 accumulated) {
-    bytes32[] memory _keyTuple = new bytes32[](3);
+  function _getAccumulated(EntityId player, ActivityType activityType) internal view returns (uint256 accumulated) {
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
     return (uint256(bytes32(_blob)));
@@ -111,16 +102,10 @@ library PlayerProgress {
   /**
    * @notice Set accumulated.
    */
-  function setAccumulated(
-    EntityId player,
-    uint256 deathCount,
-    ActivityType activityType,
-    uint256 accumulated
-  ) internal {
-    bytes32[] memory _keyTuple = new bytes32[](3);
+  function setAccumulated(EntityId player, ActivityType activityType, uint256 accumulated) internal {
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((accumulated)), _fieldLayout);
   }
@@ -128,16 +113,10 @@ library PlayerProgress {
   /**
    * @notice Set accumulated.
    */
-  function _setAccumulated(
-    EntityId player,
-    uint256 deathCount,
-    ActivityType activityType,
-    uint256 accumulated
-  ) internal {
-    bytes32[] memory _keyTuple = new bytes32[](3);
+  function _setAccumulated(EntityId player, ActivityType activityType, uint256 accumulated) internal {
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((accumulated)), _fieldLayout);
   }
@@ -145,15 +124,10 @@ library PlayerProgress {
   /**
    * @notice Get current.
    */
-  function getCurrent(
-    EntityId player,
-    uint256 deathCount,
-    ActivityType activityType
-  ) internal view returns (uint256 current) {
-    bytes32[] memory _keyTuple = new bytes32[](3);
+  function getCurrent(EntityId player, ActivityType activityType) internal view returns (uint256 current) {
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 1, _fieldLayout);
     return (uint256(bytes32(_blob)));
@@ -162,15 +136,10 @@ library PlayerProgress {
   /**
    * @notice Get current.
    */
-  function _getCurrent(
-    EntityId player,
-    uint256 deathCount,
-    ActivityType activityType
-  ) internal view returns (uint256 current) {
-    bytes32[] memory _keyTuple = new bytes32[](3);
+  function _getCurrent(EntityId player, ActivityType activityType) internal view returns (uint256 current) {
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 1, _fieldLayout);
     return (uint256(bytes32(_blob)));
@@ -179,11 +148,10 @@ library PlayerProgress {
   /**
    * @notice Set current.
    */
-  function setCurrent(EntityId player, uint256 deathCount, ActivityType activityType, uint256 current) internal {
-    bytes32[] memory _keyTuple = new bytes32[](3);
+  function setCurrent(EntityId player, ActivityType activityType, uint256 current) internal {
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     StoreSwitch.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked((current)), _fieldLayout);
   }
@@ -191,95 +159,113 @@ library PlayerProgress {
   /**
    * @notice Set current.
    */
-  function _setCurrent(EntityId player, uint256 deathCount, ActivityType activityType, uint256 current) internal {
-    bytes32[] memory _keyTuple = new bytes32[](3);
+  function _setCurrent(EntityId player, ActivityType activityType, uint256 current) internal {
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked((current)), _fieldLayout);
   }
 
   /**
-   * @notice Get lastUpdatedAt.
+   * @notice Get exponent.
    */
-  function getLastUpdatedAt(
-    EntityId player,
-    uint256 deathCount,
-    ActivityType activityType
-  ) internal view returns (uint128 lastUpdatedAt) {
-    bytes32[] memory _keyTuple = new bytes32[](3);
+  function getExponent(EntityId player, ActivityType activityType) internal view returns (uint256 exponent) {
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 2, _fieldLayout);
+    return (uint256(bytes32(_blob)));
+  }
+
+  /**
+   * @notice Get exponent.
+   */
+  function _getExponent(EntityId player, ActivityType activityType) internal view returns (uint256 exponent) {
+    bytes32[] memory _keyTuple = new bytes32[](2);
+    _keyTuple[0] = EntityId.unwrap(player);
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
+
+    bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 2, _fieldLayout);
+    return (uint256(bytes32(_blob)));
+  }
+
+  /**
+   * @notice Set exponent.
+   */
+  function setExponent(EntityId player, ActivityType activityType, uint256 exponent) internal {
+    bytes32[] memory _keyTuple = new bytes32[](2);
+    _keyTuple[0] = EntityId.unwrap(player);
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
+
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 2, abi.encodePacked((exponent)), _fieldLayout);
+  }
+
+  /**
+   * @notice Set exponent.
+   */
+  function _setExponent(EntityId player, ActivityType activityType, uint256 exponent) internal {
+    bytes32[] memory _keyTuple = new bytes32[](2);
+    _keyTuple[0] = EntityId.unwrap(player);
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
+
+    StoreCore.setStaticField(_tableId, _keyTuple, 2, abi.encodePacked((exponent)), _fieldLayout);
+  }
+
+  /**
+   * @notice Get lastUpdatedAt.
+   */
+  function getLastUpdatedAt(EntityId player, ActivityType activityType) internal view returns (uint128 lastUpdatedAt) {
+    bytes32[] memory _keyTuple = new bytes32[](2);
+    _keyTuple[0] = EntityId.unwrap(player);
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
+
+    bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 3, _fieldLayout);
     return (uint128(bytes16(_blob)));
   }
 
   /**
    * @notice Get lastUpdatedAt.
    */
-  function _getLastUpdatedAt(
-    EntityId player,
-    uint256 deathCount,
-    ActivityType activityType
-  ) internal view returns (uint128 lastUpdatedAt) {
-    bytes32[] memory _keyTuple = new bytes32[](3);
+  function _getLastUpdatedAt(EntityId player, ActivityType activityType) internal view returns (uint128 lastUpdatedAt) {
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
-    bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 2, _fieldLayout);
+    bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 3, _fieldLayout);
     return (uint128(bytes16(_blob)));
   }
 
   /**
    * @notice Set lastUpdatedAt.
    */
-  function setLastUpdatedAt(
-    EntityId player,
-    uint256 deathCount,
-    ActivityType activityType,
-    uint128 lastUpdatedAt
-  ) internal {
-    bytes32[] memory _keyTuple = new bytes32[](3);
+  function setLastUpdatedAt(EntityId player, ActivityType activityType, uint128 lastUpdatedAt) internal {
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 2, abi.encodePacked((lastUpdatedAt)), _fieldLayout);
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 3, abi.encodePacked((lastUpdatedAt)), _fieldLayout);
   }
 
   /**
    * @notice Set lastUpdatedAt.
    */
-  function _setLastUpdatedAt(
-    EntityId player,
-    uint256 deathCount,
-    ActivityType activityType,
-    uint128 lastUpdatedAt
-  ) internal {
-    bytes32[] memory _keyTuple = new bytes32[](3);
+  function _setLastUpdatedAt(EntityId player, ActivityType activityType, uint128 lastUpdatedAt) internal {
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 2, abi.encodePacked((lastUpdatedAt)), _fieldLayout);
+    StoreCore.setStaticField(_tableId, _keyTuple, 3, abi.encodePacked((lastUpdatedAt)), _fieldLayout);
   }
 
   /**
    * @notice Get the full data.
    */
-  function get(
-    EntityId player,
-    uint256 deathCount,
-    ActivityType activityType
-  ) internal view returns (PlayerProgressData memory _table) {
-    bytes32[] memory _keyTuple = new bytes32[](3);
+  function get(EntityId player, ActivityType activityType) internal view returns (PlayerProgressData memory _table) {
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     (bytes memory _staticData, EncodedLengths _encodedLengths, bytes memory _dynamicData) = StoreSwitch.getRecord(
       _tableId,
@@ -292,15 +278,10 @@ library PlayerProgress {
   /**
    * @notice Get the full data.
    */
-  function _get(
-    EntityId player,
-    uint256 deathCount,
-    ActivityType activityType
-  ) internal view returns (PlayerProgressData memory _table) {
-    bytes32[] memory _keyTuple = new bytes32[](3);
+  function _get(EntityId player, ActivityType activityType) internal view returns (PlayerProgressData memory _table) {
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     (bytes memory _staticData, EncodedLengths _encodedLengths, bytes memory _dynamicData) = StoreCore.getRecord(
       _tableId,
@@ -315,21 +296,20 @@ library PlayerProgress {
    */
   function set(
     EntityId player,
-    uint256 deathCount,
     ActivityType activityType,
     uint256 accumulated,
     uint256 current,
+    uint256 exponent,
     uint128 lastUpdatedAt
   ) internal {
-    bytes memory _staticData = encodeStatic(accumulated, current, lastUpdatedAt);
+    bytes memory _staticData = encodeStatic(accumulated, current, exponent, lastUpdatedAt);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
 
-    bytes32[] memory _keyTuple = new bytes32[](3);
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     StoreSwitch.setRecord(_tableId, _keyTuple, _staticData, _encodedLengths, _dynamicData);
   }
@@ -339,21 +319,20 @@ library PlayerProgress {
    */
   function _set(
     EntityId player,
-    uint256 deathCount,
     ActivityType activityType,
     uint256 accumulated,
     uint256 current,
+    uint256 exponent,
     uint128 lastUpdatedAt
   ) internal {
-    bytes memory _staticData = encodeStatic(accumulated, current, lastUpdatedAt);
+    bytes memory _staticData = encodeStatic(accumulated, current, exponent, lastUpdatedAt);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
 
-    bytes32[] memory _keyTuple = new bytes32[](3);
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     StoreCore.setRecord(_tableId, _keyTuple, _staticData, _encodedLengths, _dynamicData, _fieldLayout);
   }
@@ -361,21 +340,15 @@ library PlayerProgress {
   /**
    * @notice Set the full data using the data struct.
    */
-  function set(
-    EntityId player,
-    uint256 deathCount,
-    ActivityType activityType,
-    PlayerProgressData memory _table
-  ) internal {
-    bytes memory _staticData = encodeStatic(_table.accumulated, _table.current, _table.lastUpdatedAt);
+  function set(EntityId player, ActivityType activityType, PlayerProgressData memory _table) internal {
+    bytes memory _staticData = encodeStatic(_table.accumulated, _table.current, _table.exponent, _table.lastUpdatedAt);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
 
-    bytes32[] memory _keyTuple = new bytes32[](3);
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     StoreSwitch.setRecord(_tableId, _keyTuple, _staticData, _encodedLengths, _dynamicData);
   }
@@ -383,21 +356,15 @@ library PlayerProgress {
   /**
    * @notice Set the full data using the data struct.
    */
-  function _set(
-    EntityId player,
-    uint256 deathCount,
-    ActivityType activityType,
-    PlayerProgressData memory _table
-  ) internal {
-    bytes memory _staticData = encodeStatic(_table.accumulated, _table.current, _table.lastUpdatedAt);
+  function _set(EntityId player, ActivityType activityType, PlayerProgressData memory _table) internal {
+    bytes memory _staticData = encodeStatic(_table.accumulated, _table.current, _table.exponent, _table.lastUpdatedAt);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
 
-    bytes32[] memory _keyTuple = new bytes32[](3);
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     StoreCore.setRecord(_tableId, _keyTuple, _staticData, _encodedLengths, _dynamicData, _fieldLayout);
   }
@@ -407,12 +374,14 @@ library PlayerProgress {
    */
   function decodeStatic(
     bytes memory _blob
-  ) internal pure returns (uint256 accumulated, uint256 current, uint128 lastUpdatedAt) {
+  ) internal pure returns (uint256 accumulated, uint256 current, uint256 exponent, uint128 lastUpdatedAt) {
     accumulated = (uint256(Bytes.getBytes32(_blob, 0)));
 
     current = (uint256(Bytes.getBytes32(_blob, 32)));
 
-    lastUpdatedAt = (uint128(Bytes.getBytes16(_blob, 64)));
+    exponent = (uint256(Bytes.getBytes32(_blob, 64)));
+
+    lastUpdatedAt = (uint128(Bytes.getBytes16(_blob, 96)));
   }
 
   /**
@@ -426,17 +395,16 @@ library PlayerProgress {
     EncodedLengths,
     bytes memory
   ) internal pure returns (PlayerProgressData memory _table) {
-    (_table.accumulated, _table.current, _table.lastUpdatedAt) = decodeStatic(_staticData);
+    (_table.accumulated, _table.current, _table.exponent, _table.lastUpdatedAt) = decodeStatic(_staticData);
   }
 
   /**
    * @notice Delete all data for given keys.
    */
-  function deleteRecord(EntityId player, uint256 deathCount, ActivityType activityType) internal {
-    bytes32[] memory _keyTuple = new bytes32[](3);
+  function deleteRecord(EntityId player, ActivityType activityType) internal {
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     StoreSwitch.deleteRecord(_tableId, _keyTuple);
   }
@@ -444,11 +412,10 @@ library PlayerProgress {
   /**
    * @notice Delete all data for given keys.
    */
-  function _deleteRecord(EntityId player, uint256 deathCount, ActivityType activityType) internal {
-    bytes32[] memory _keyTuple = new bytes32[](3);
+  function _deleteRecord(EntityId player, ActivityType activityType) internal {
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     StoreCore.deleteRecord(_tableId, _keyTuple, _fieldLayout);
   }
@@ -460,9 +427,10 @@ library PlayerProgress {
   function encodeStatic(
     uint256 accumulated,
     uint256 current,
+    uint256 exponent,
     uint128 lastUpdatedAt
   ) internal pure returns (bytes memory) {
-    return abi.encodePacked(accumulated, current, lastUpdatedAt);
+    return abi.encodePacked(accumulated, current, exponent, lastUpdatedAt);
   }
 
   /**
@@ -474,9 +442,10 @@ library PlayerProgress {
   function encode(
     uint256 accumulated,
     uint256 current,
+    uint256 exponent,
     uint128 lastUpdatedAt
   ) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
-    bytes memory _staticData = encodeStatic(accumulated, current, lastUpdatedAt);
+    bytes memory _staticData = encodeStatic(accumulated, current, exponent, lastUpdatedAt);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;
@@ -487,15 +456,10 @@ library PlayerProgress {
   /**
    * @notice Encode keys as a bytes32 array using this table's field layout.
    */
-  function encodeKeyTuple(
-    EntityId player,
-    uint256 deathCount,
-    ActivityType activityType
-  ) internal pure returns (bytes32[] memory) {
-    bytes32[] memory _keyTuple = new bytes32[](3);
+  function encodeKeyTuple(EntityId player, ActivityType activityType) internal pure returns (bytes32[] memory) {
+    bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
-    _keyTuple[1] = bytes32(uint256(deathCount));
-    _keyTuple[2] = bytes32(uint256(uint8(activityType)));
+    _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     return _keyTuple;
   }

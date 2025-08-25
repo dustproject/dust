@@ -11,6 +11,7 @@ import { Death } from "../../src/codegen/tables/Death.sol";
 import { Energy, EnergyData } from "../../src/codegen/tables/Energy.sol";
 import { Machine } from "../../src/codegen/tables/Machine.sol";
 import { PlayerProgress } from "../../src/codegen/tables/PlayerProgress.sol";
+import { PlayerProgressUtils } from "../../src/utils/PlayerProgressUtils.sol";
 
 import { ObjectType } from "../../src/types/ObjectType.sol";
 
@@ -317,7 +318,8 @@ library TestPlayerProgressUtils {
     TestUtils.init(LIB_ADDRESS_SLOT, libAddress);
   }
 
-  function getProgress(EntityId player, ActivityType activityType) internal view returns (uint256) {
-    return PlayerProgress.getCurrent(player, Death.getDeaths(player), activityType);
+  function getProgress(EntityId player, ActivityType activityType) public asWorld returns (uint256) {
+    // Use effective current which applies decay and halving by deaths
+    return PlayerProgressUtils.getProgress(player, activityType);
   }
 }

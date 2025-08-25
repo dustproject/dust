@@ -13,6 +13,36 @@ import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 import { Math } from "../utils/Math.sol";
 
 library PlayerProgressUtils {
+  // Reads -----------------------------------------------------------
+  function getAccumulated(EntityId player, ActivityType activityType) public view returns (uint256) {
+    PlayerProgressData memory data = PlayerProgress._get(player, activityType);
+    uint256 deaths = Death._getDeaths(player);
+    uint256 e = data.exponent;
+    uint256 diff = deaths > e ? (deaths - e) : 0;
+    return data.accumulated >> diff;
+  }
+
+  function getProgress(EntityId player, ActivityType activityType) public view returns (uint256) {
+    PlayerProgressData memory data = PlayerProgress._get(player, activityType);
+    uint256 deaths = Death._getDeaths(player);
+    uint256 e = data.exponent;
+    uint256 diff = deaths > e ? (deaths - e) : 0;
+    uint256 decayed = _decay(data.current, data.lastUpdatedAt);
+    uint256 decayedEffective = decayed >> diff;
+    uint256 alignedAccumulated = data.accumulated >> diff;
+    uint256 floorEffective = alignedAccumulated / 3;
+    return Math.max(decayedEffective, floorEffective);
+  }
+
+  function getFloor(EntityId player, ActivityType activityType) public view returns (uint256) {
+    PlayerProgressData memory data = PlayerProgress._get(player, activityType);
+    uint256 deaths = Death._getDeaths(player);
+    uint256 e = data.exponent;
+    uint256 diff = deaths > e ? (deaths - e) : 0;
+    uint256 alignedAccumulated = data.accumulated >> diff;
+    return alignedAccumulated / 3;
+  }
+
   // Mining tracking - with tool specialization and crop detection
   function trackMine(EntityId player, uint128 massReduced, ObjectType toolType, ObjectType minedType) internal {
     ActivityType activityType;
@@ -89,37 +119,48 @@ library PlayerProgressUtils {
   // Internal helper
   function _trackProgress(EntityId player, ActivityType activityType, uint256 value) private {
     uint256 deaths = Death._getDeaths(player);
-    PlayerProgressData memory previous = PlayerProgress._get(player, deaths, activityType);
+    PlayerProgressData memory previous = PlayerProgress._get(player, activityType);
 
-    // decay current value to now
-    uint256 currentValue = _decay(previous);
+    // Decay current mantissa to now in its stored scale
+    uint256 current = _decay(previous.current, previous.lastUpdatedAt);
+    uint256 accumulated = previous.accumulated;
 
-    uint256 floor = _floor(previous);
+    // Align stored mantissas to the current global exponent
+    uint256 e = previous.exponent;
+    if (deaths > e) {
+      uint256 diff = deaths - e;
+      // Right shift by diff == divide by 2^diff
+      current >>= diff;
+      accumulated >>= diff;
+    }
+
+    // Add new value and compute the new floor (minimal clamp semantics)
+    accumulated = accumulated + value;
+    uint256 floorNew = accumulated / 3;
+
+    // Minimal update: ensure current reflects the new floor but don't overshoot
+    current = Math.max(current + value, floorNew);
 
     PlayerProgress._set(
       player,
-      deaths,
       activityType,
       PlayerProgressData({
-        accumulated: previous.accumulated + value,
-        current: Math.max(currentValue, floor) + value,
-        lastUpdatedAt: uint128(block.timestamp)
+        accumulated: accumulated,
+        current: current,
+        lastUpdatedAt: uint128(block.timestamp),
+        exponent: deaths
       })
     );
   }
 
-  /// @dev Exponential decay toward zero using half-life
-  function _decay(PlayerProgressData memory progress) private view returns (uint256) {
-    if (progress.current == 0 || block.timestamp <= progress.lastUpdatedAt) return progress.current;
+  /// @dev Exponential decay toward zero using half-life, in mantissa units
+  function _decay(uint256 current, uint128 lastUpdatedAt) private view returns (uint256) {
+    if (current == 0 || block.timestamp <= lastUpdatedAt) return current;
 
     unchecked {
-      int256 x = -int256(PROGRESS_DECAY_LAMBDA_WAD) * int256(uint256(block.timestamp - progress.lastUpdatedAt)); // wad * seconds
+      int256 x = -int256(PROGRESS_DECAY_LAMBDA_WAD) * int256(uint256(block.timestamp - lastUpdatedAt)); // wad * seconds
       uint256 factorWad = uint256(FixedPointMathLib.expWad(x)); // in [0..1e18]
-      return FixedPointMathLib.mulWad(progress.current, factorWad);
+      return FixedPointMathLib.mulWad(current, factorWad);
     }
-  }
-
-  function _floor(PlayerProgressData memory progress) private pure returns (uint256) {
-    return progress.accumulated / 3;
   }
 }

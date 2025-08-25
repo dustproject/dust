@@ -32,9 +32,9 @@ contract PlayerProgressTest is DustTest {
     uint256 deathsBefore = Death.getDeaths(aliceEntityId);
     Death.setDeaths(aliceEntityId, deathsBefore + 1);
 
-    // Check that activity is now zero for the new life
+    // Check that activity is halved for the new life
     uint256 buildMassAfterDeath = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMass);
-    assertEq(buildMassAfterDeath, 0, "Build mass should be reset after death");
+    assertEq(buildMassAfterDeath, buildMass / 2, "Build mass should halve after death");
 
     // Build again and verify it tracks for the new life
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
@@ -45,7 +45,7 @@ contract PlayerProgressTest is DustTest {
 
     uint256 newBuildMass = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMass);
     assertTrue(newBuildMass > 0, "Build mass should be tracked for new life");
-    assertEq(newBuildMass, buildMass, "Build mass should be the same as first life");
+    assertEq(newBuildMass, buildMassAfterDeath + buildMass, "Build mass should add on top of halved value");
   }
 
   function testMultipleActivityTypesTracked() public {

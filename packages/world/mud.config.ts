@@ -262,13 +262,13 @@ export default defineWorld({
     PlayerProgress: {
       schema: {
         player: "EntityId",
-        deathCount: "uint256",
         activityType: "ActivityType",
         accumulated: "uint256",
         current: "uint256",
+        exponent: "uint256",
         lastUpdatedAt: "uint128",
       },
-      key: ["player", "deathCount", "activityType"],
+      key: ["player", "activityType"],
     },
     Death: {
       schema: {
