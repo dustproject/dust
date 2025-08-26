@@ -19,7 +19,36 @@ import { RateLimitUtils } from "../../utils/RateLimitUtils.sol";
 
 error NonPassableBlock(int32 x, int32 y, int32 z, ObjectType objectType);
 
+struct MoveCounts {
+  uint128 walkSteps;
+  uint128 swimSteps;
+  uint128 lavaSteps;
+  uint16 fallHeight;
+}
+
+struct MoveCosts {
+  uint128 walkCost;
+  uint128 swimCost;
+  uint128 lavaCost; // currently uses walk discount; separable later
+  uint128 fallPerBlockCost;
+}
+
 library MoveLib {
+  function _initMoveCosts(EntityId player) internal view returns (MoveCosts memory c) {
+    uint256 walkDiscount = PlayerProgressUtils.getMoveEnergyDiscountWad(player, false);
+    uint256 swimDiscount = PlayerProgressUtils.getMoveEnergyDiscountWad(player, true);
+    // reuse walk discount for lava for now (easy to split later)
+    uint256 lavaDiscount = walkDiscount;
+    uint256 fallDiscount = PlayerProgressUtils.getEnergyDiscountWad(player, ActivityType.MoveFallEnergy);
+    unchecked {
+      c.walkCost = uint128(Constants.MOVE_ENERGY_COST - (Constants.MOVE_ENERGY_COST * walkDiscount) / 1e18);
+      c.swimCost = uint128(Constants.WATER_MOVE_ENERGY_COST - (Constants.WATER_MOVE_ENERGY_COST * swimDiscount) / 1e18);
+      c.lavaCost = uint128(Constants.LAVA_MOVE_ENERGY_COST - (Constants.LAVA_MOVE_ENERGY_COST * lavaDiscount) / 1e18);
+      c.fallPerBlockCost =
+        uint128(Constants.PLAYER_FALL_ENERGY_COST - (Constants.PLAYER_FALL_ENERGY_COST * fallDiscount) / 1e18);
+    }
+  }
+
   function jump(Vec3 playerCoord) public {
     EntityId[] memory playerEntityIds = _removePlayerPosition(playerCoord);
     EntityId player = playerEntityIds[0];

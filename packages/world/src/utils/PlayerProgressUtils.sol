@@ -5,8 +5,21 @@ import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
 import { ActivityType } from "../codegen/common.sol";
 
-import { PROGRESS_DECAY_LAMBDA_WAD } from "../Constants.sol";
+import {
+  MAX_RATE_LIMIT_UNITS_PER_SECOND,
+  PLAYER_FALL_ENERGY_COST,
+  PROGRESS_DECAY_LAMBDA_WAD,
+  SKILL_FALL_BLOCKS_TO_MAX,
+  SKILL_MAX_ENERGY_DISCOUNT_WAD,
+  SKILL_MINING_BLOCKS_TO_MAX,
+  SKILL_SWIM_SECONDS_TO_MAX,
+  SKILL_WALK_SECONDS_TO_MAX,
+  SWIM_UNIT_COST,
+  WALK_UNIT_COST
+} from "../Constants.sol";
 import { Death } from "../codegen/tables/Death.sol";
+
+import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { PlayerProgress, PlayerProgressData } from "../codegen/tables/PlayerProgress.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
@@ -162,5 +175,89 @@ library PlayerProgressUtils {
       uint256 factorWad = uint256(FixedPointMathLib.expWad(x)); // in [0..1e18]
       return FixedPointMathLib.mulWad(current, factorWad);
     }
+  }
+
+  // ----------------------------------------------------------------
+  // Skill benefits (energy discounts)
+  // ----------------------------------------------------------------
+
+  // Smooth-then-cap discount using dynamic S and xCap anchors
+  function _normalizedSmooth(uint256 x, uint256 xCap) private pure returns (uint256) {
+    if (x == 0) return 0;
+    if (xCap == 0) return 1e18; // degenerate case, treat as max
+    // Use S = xCap
+    uint256 S = xCap;
+    // f(x) = x / (x + S)
+    uint256 fx = FixedPointMathLib.divWad(x, x + S);
+    uint256 fcap = FixedPointMathLib.divWad(xCap, xCap + S); // = 0.5 when S = xCap
+    // normalized = min(1, fx / fcap)
+    uint256 ratio = FixedPointMathLib.divWad(fx, fcap);
+    return ratio > 1e18 ? 1e18 : ratio;
+  }
+
+  function _stepsPerSecond(uint256 unitCost) private pure returns (uint256) {
+    // steps_per_second = MAX_RATE_LIMIT_UNITS_PER_SECOND / UNIT_COST
+    return MAX_RATE_LIMIT_UNITS_PER_SECOND / unitCost;
+  }
+
+  function _walkStepsToMax() private pure returns (uint256) {
+    return _stepsPerSecond(WALK_UNIT_COST) * SKILL_WALK_SECONDS_TO_MAX;
+  }
+
+  function _swimStepsToMax() private pure returns (uint256) {
+    return _stepsPerSecond(SWIM_UNIT_COST) * SKILL_SWIM_SECONDS_TO_MAX;
+  }
+
+  function _fallEnergyToMax() private pure returns (uint256) {
+    return uint256(PLAYER_FALL_ENERGY_COST) * SKILL_FALL_BLOCKS_TO_MAX;
+  }
+
+  function getEnergyDiscountWad(EntityId player, ActivityType activityType) internal view returns (uint256) {
+    uint256 progress = getFloor(player, activityType);
+
+    uint256 xCap;
+    if (activityType == ActivityType.MoveWalkSteps) {
+      xCap = _walkStepsToMax();
+    } else if (activityType == ActivityType.MoveSwimSteps) {
+      xCap = _swimStepsToMax();
+    } else if (activityType == ActivityType.MoveFallEnergy) {
+      xCap = _fallEnergyToMax();
+    } else if (
+      activityType == ActivityType.MinePickMass || activityType == ActivityType.MineAxeMass
+        || activityType == ActivityType.MineCropMass
+    ) {
+      // For mining families, caller should use getMiningEnergyDiscountWad as it needs minedType for scaling
+      revert("Use mining-specific discount");
+    } else {
+      // No discount for other activities (yet)
+      return 0;
+    }
+
+    uint256 normalized = _normalizedSmooth(progress, xCap);
+    return FixedPointMathLib.mulWad(SKILL_MAX_ENERGY_DISCOUNT_WAD, normalized);
+  }
+
+  function getMiningEnergyDiscountWad(EntityId player, ObjectType toolType, ObjectType minedType)
+    internal
+    view
+    returns (uint256 discountWad)
+  {
+    ActivityType activityType;
+    if (minedType.isCrop()) {
+      activityType = ActivityType.MineCropMass;
+    } else if (toolType.isAxe()) {
+      activityType = ActivityType.MineAxeMass;
+    } else if (toolType.isPick()) {
+      activityType = ActivityType.MinePickMass;
+    } else {
+      return 0;
+    }
+
+    uint256 progress = getFloor(player, activityType);
+    // xCap is derived from mass-per-block * blocks_to_max
+    uint256 blockMass = ObjectPhysics._getMass(minedType);
+    uint256 xCap = blockMass * SKILL_MINING_BLOCKS_TO_MAX;
+    uint256 normalized = _normalizedSmooth(progress, xCap);
+    return FixedPointMathLib.mulWad(SKILL_MAX_ENERGY_DISCOUNT_WAD, normalized);
   }
 }

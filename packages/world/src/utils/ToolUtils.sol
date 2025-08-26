@@ -14,6 +14,7 @@ import { addEnergyToLocalPool, burnToolEnergy, decreasePlayerEnergy, updatePlaye
 import { InventoryUtils } from "./InventoryUtils.sol";
 import { Math } from "./Math.sol";
 import { OreLib } from "./OreLib.sol";
+import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
 import "../Constants.sol" as Constants;
 
@@ -46,34 +47,48 @@ library ToolUtils {
     public
     returns (uint128)
   {
+    return use(toolData, useMassMax, actionModifier, specialized, 0);
+  }
+
+  function use(
+    ToolData memory toolData,
+    uint128 useMassMax,
+    uint128 actionModifier,
+    bool specialized,
+    uint256 energyDiscountWad
+  ) public returns (uint128) {
     require(useMassMax != 0, "Cannot perform action with zero mass limit");
 
     // Get caller's current energy and position
     uint128 callerEnergy = updatePlayerEnergy(toolData.owner).energy;
     Vec3 callerCoord = toolData.owner._getPosition();
 
-    // Calculate energy cost for this action
-    uint128 energyCost = getActionEnergyCost(toolData, callerEnergy, useMassMax);
+    // Base energy cost
+    uint128 baseEnergyCost = getActionEnergyCost(toolData, callerEnergy, useMassMax);
 
-    // If there's an energy cost, apply it
-    if (energyCost > 0) {
-      // Transfer the player's energy to the local pool
-      uint128 remainingEnergy = decreasePlayerEnergy(toolData.owner, callerCoord, energyCost);
-      addEnergyToLocalPool(callerCoord, energyCost);
+    // Apply discount (Option A semantics)
+    uint128 discountedEnergyCost = baseEnergyCost;
+    if (energyDiscountWad > 0 && baseEnergyCost > 0) {
+      uint256 reduction = FixedPointMathLib.mulWad(uint256(baseEnergyCost), energyDiscountWad);
+      if (reduction > baseEnergyCost) reduction = baseEnergyCost; // safety
+      discountedEnergyCost = uint128(uint256(baseEnergyCost) - reduction);
+    }
 
-      // If player died, return early
+    // Drain energy
+    if (discountedEnergyCost > 0) {
+      uint128 remainingEnergy = decreasePlayerEnergy(toolData.owner, callerCoord, discountedEnergyCost);
+      addEnergyToLocalPool(callerCoord, discountedEnergyCost);
       if (remainingEnergy == 0) {
         return 0;
       }
     }
 
-    // Player survived, calculate tool damage
+    // Player survived, calculate tool damage based on remaining budget
     (uint128 actionMassReduction, uint128 toolMassReduction) =
-      getMassReduction(toolData, useMassMax - energyCost, actionModifier, specialized);
+      getMassReduction(toolData, useMassMax - discountedEnergyCost, actionModifier, specialized);
     reduceMass(toolData, toolMassReduction);
 
-    // Return total damage (energy cost + tool damage)
-    return energyCost + actionMassReduction;
+    return discountedEnergyCost + actionMassReduction;
   }
 
   function getMassReduction(ToolData memory toolData, uint128 massLeft, uint128 actionModifier, bool specialized)

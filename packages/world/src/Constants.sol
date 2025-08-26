@@ -107,3 +107,23 @@ uint128 constant BUILD_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // 10 b
 int128 constant LN2_WAD = 693147180559945309; // ln(2) in 1e18
 uint256 constant PROGRESS_DECAY_HALF_LIFE = 7 days; // every 7 days progress decays by half
 int128 constant PROGRESS_DECAY_LAMBDA_WAD = int128(int256(LN2_WAD) / int256(PROGRESS_DECAY_HALF_LIFE));
+
+// ------------------------------------------------------------
+// Player skills (progress-based energy discounts)
+// ------------------------------------------------------------
+// Max discount applied to eligible energy costs (WAD scale)
+uint128 constant SKILL_MAX_ENERGY_DISCOUNT_WAD = 3e17; // 30%
+
+// Smooth-then-cap parameterization: choose an intuitive "effort to reach max" per activity family.
+// We compute a smooth curve f(x)=x/(x+S), then normalize by f(xCap) and cap at 1.
+// S is set equal to xCap for an intuitive shape; xCap is derived from the below anchors.
+
+// Mining: blocks to reach max (scaled by mined block mass)
+uint128 constant SKILL_MINING_BLOCKS_TO_MAX = 2000;
+
+// Movement: seconds of activity to reach max
+uint128 constant SKILL_WALK_SECONDS_TO_MAX = 360000; // 100 hours
+uint128 constant SKILL_SWIM_SECONDS_TO_MAX = 360000; // 100 hours
+
+// Falling: number of over-safe fall blocks to reach max
+uint128 constant SKILL_FALL_BLOCKS_TO_MAX = 1000;
