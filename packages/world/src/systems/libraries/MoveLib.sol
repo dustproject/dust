@@ -16,8 +16,6 @@ import { Vec3, vec3 } from "../../types/Vec3.sol";
 import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../../utils/EnergyUtils.sol";
 import { EntityUtils } from "../../utils/EntityUtils.sol";
 
-error NonPassableBlock(int32 x, int32 y, int32 z, ObjectType objectType);
-
 library MoveLib {
   function jump(Vec3 playerCoord) public {
     EntityId[] memory playerEntityIds = _removePlayerPosition(playerCoord);

@@ -17,7 +17,6 @@ import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 import { BUILD_ENERGY_COST, CHUNK_SIZE, MAX_ENTITY_INFLUENCE_RADIUS, MAX_FLUID_LEVEL } from "../src/Constants.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
 
-import { NonPassableBlock } from "../src/systems/libraries/MoveLib.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
@@ -247,7 +246,7 @@ contract BuildTest is DustTest {
     setObjectAtCoord(playerCoord + vec3(0, 2, 0), ObjectTypes.Grass);
 
     vm.prank(alice);
-    vm.expectPartialRevert(NonPassableBlock.selector);
+    vm.expectRevert("Cannot move through solid block");
     world.jumpBuild(aliceEntityId, inventorySlot, "");
   }
 
