@@ -1,0 +1,32 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+
+  "name": "realtime-position",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-08-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "vars": {
+    "REGION_HINT": "wnam",
+    "INGRESS_SHARDS": "8",
+    "TICK_HZ": "5",
+    "CHAIN_ID": "10",
+    "WORLD_ADDRESS": "0xYourWorld",
+    "RPC_HTTP_URL": "https://your-rpc.example"
+  },
+
+  "durable_objects": {
+    "bindings": [
+      { "name": "Authority", "class_name": "AuthorityActor" },
+      { "name": "Ingress", "class_name": "IngressActor" }
+    ]
+  },
+
+  // Initial migration is required on first deploy to create the DO classes
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["AuthorityActor", "IngressActor"]
+    }
+  ]
+}
