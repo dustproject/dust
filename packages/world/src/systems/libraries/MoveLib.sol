@@ -110,9 +110,7 @@ library MoveLib {
       Vec3 newCoord = newPlayerCoords[i];
 
       ObjectType newObjectType = EntityUtils.safeGetObjectTypeAt(newCoord);
-      if (!newObjectType.isPassThrough()) {
-        revert NonPassableBlock(newCoord.x(), newCoord.y(), newCoord.z(), newObjectType);
-      }
+      require(newObjectType.isPassThrough(), "Cannot move through solid block");
       require(!EntityUtils.getMovableEntityAt(newCoord)._exists(), "Cannot move through a player");
     }
   }
