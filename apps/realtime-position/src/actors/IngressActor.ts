@@ -1,13 +1,30 @@
 import { Actor, type ActorState, handler } from "@cloudflare/actors";
+import { scope, type } from "arktype";
 import type { Address, Hex } from "viem";
 import type { Env } from "../env";
+
+const $ = scope({
+  vec2: ["number", "number"],
+  vec3: ["number", "number", "number"],
+});
+
+const userDataSchema = $.type([
+  // position
+  "vec3",
+  // orientation
+  "vec2",
+  // velocity
+  "vec3",
+]);
+
+const parseUserData = type("string.json.parse").to(userDataSchema);
 
 export class IngressActor extends Actor<Env> {
   private uplink?: WebSocket;
   private clients = new Set<WebSocket>();
   private latest = new Map<
     Address,
-    { u: Address; x: number; y: number; z: number; ts: number }
+    { u: Address; t: number; d: typeof userDataSchema.infer }
   >();
 
   constructor(state: ActorState, env: Env) {
@@ -31,46 +48,15 @@ export class IngressActor extends Actor<Env> {
 
     const { 0: client, 1: server } = new WebSocketPair();
     server.serializeAttachment({ userAddress });
-    server.addEventListener("message", (event) => {
-      console.info("got message for user", userAddress, event);
-      const data =
-        typeof event.data === "string"
-          ? event.data
-          : new TextDecoder().decode(event.data as ArrayBuffer);
-      try {
-        const { x, y, z } = JSON.parse(data);
-        if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z)) {
-          this.latest.set(userAddress, {
-            u: userAddress,
-            x: Number(x),
-            y: Number(y),
-            z: Number(z),
-            ts: Date.now(),
-          });
-        }
-      } catch {}
-    });
-    server.addEventListener("close", () => {
-      console.info("client closed");
-      this.clients.delete(server);
-    });
-    server.addEventListener("error", (event) => {
-      console.info("client error", event);
-      this.clients.delete(server);
-    });
-
-    // We have to call `server.accept()` here rather than `this.ctx.acceptWebSocket(server)` because
-    // this is an outgoing websocket that can't be hibernated:
-    // https://developers.cloudflare.com/durable-objects/examples/websocket-hibernation-server/
-    // server.accept();
     this.ctx.acceptWebSocket(server);
     this.clients.add(server);
-    await this.ensureAuthority();
+
+    await this.ensureUplink();
 
     return new Response(null, { status: 101, webSocket: client });
   }
 
-  private async ensureAuthority(): Promise<void> {
+  private async ensureUplink(): Promise<void> {
     if (this.uplink && !this.clients.size) {
       console.info("no more clients, closing authority uplink for now");
       try {
@@ -93,12 +79,12 @@ export class IngressActor extends Actor<Env> {
       ws.addEventListener("message", (event) => {
         if (ws !== this.uplink) return;
 
-        const data =
+        const message =
           typeof event.data === "string"
             ? event.data
             : new TextDecoder().decode(event.data as ArrayBuffer);
 
-        if (data === "tick") {
+        if (message === "tick") {
           console.info("ingress got tick from authority");
           if (this.latest.size) {
             console.info(
@@ -113,8 +99,11 @@ export class IngressActor extends Actor<Env> {
 
         for (const client of this.clients) {
           try {
-            console.info("broadcasting data from authority to clients", data);
-            client.send(data);
+            console.info(
+              "broadcasting message from authority to clients",
+              message,
+            );
+            client.send(message);
           } catch {}
         }
       });
@@ -136,7 +125,12 @@ export class IngressActor extends Actor<Env> {
     }
   }
 
-  async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer) {
+  async webSocketMessage(ws: WebSocket, rawMessage: string | ArrayBuffer) {
+    const message =
+      typeof rawMessage === "string"
+        ? rawMessage
+        : new TextDecoder().decode(rawMessage);
+
     const attachment = ws.deserializeAttachment();
     if (!attachment?.userAddress) {
       console.warn("got ws message not from client", attachment, message);
@@ -144,34 +138,30 @@ export class IngressActor extends Actor<Env> {
     }
     const userAddress = attachment.userAddress as Hex;
 
-    const data =
-      typeof message === "string" ? message : new TextDecoder().decode(message);
-    try {
-      const { x, y, z } = JSON.parse(data);
-      if (Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z)) {
-        this.latest.set(userAddress, {
-          u: userAddress,
-          x: Number(x),
-          y: Number(y),
-          z: Number(z),
-          ts: Date.now(),
-        });
-      }
-    } catch {}
+    const userData = parseUserData(message);
+    if (userData instanceof type.errors) {
+      console.debug("ignoring invalid message", message);
+    } else {
+      this.latest.set(userAddress, {
+        u: userAddress,
+        t: Date.now(),
+        d: userData,
+      });
+    }
   }
 
   async webSocketClose(ws: WebSocket, code: number) {
     console.info("got ws close", ws.deserializeAttachment(), code);
     ws.close();
     this.clients.delete(ws);
-    await this.ensureAuthority();
+    await this.ensureUplink();
   }
 
   async webSocketError(ws: WebSocket, code: number) {
     console.info("got ws error", ws.deserializeAttachment(), code);
     ws.close();
     this.clients.delete(ws);
-    await this.ensureAuthority();
+    await this.ensureUplink();
   }
 }
 

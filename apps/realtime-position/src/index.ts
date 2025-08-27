@@ -1,4 +1,4 @@
-import { scope } from "arktype";
+import { scope, type } from "arktype";
 import { type Hex, isHex } from "viem";
 import type { Env } from "./env";
 
@@ -24,11 +24,9 @@ const sessionSchema = $.type({
   signedSessionData: "string.json",
 });
 
-const parseSignedSessionData = $.type([
-  "string.json.parse",
-  "|>",
+const parseSignedSessionData = type("string.json.parse").to(
   signedSessionDataSchema,
-]);
+);
 
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
@@ -50,8 +48,9 @@ export default {
         signedSessionData: url.searchParams.get("signedSessionData")!,
       });
 
-      const { userAddress, sessionAddress, signedAt } =
-        parseSignedSessionData.from(signedSessionData);
+      const parsed = parseSignedSessionData(signedSessionData);
+      if (parsed instanceof type.errors) return parsed.throw();
+      const { userAddress, sessionAddress, signedAt } = parsed;
 
       // TODO: validate signed session data
 
