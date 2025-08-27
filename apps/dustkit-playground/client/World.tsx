@@ -16,16 +16,32 @@ export function World() {
       if (!sessionClient) throw new Error("Not connected");
       return connectPositionSocket(sessionClient);
     },
+    staleTime: Number.POSITIVE_INFINITY,
   });
 
   useEffect(() => {
     if (!socket.data) return;
-    const timer = setInterval(() => {
-      console.debug("sending position");
-      socket.data.send(JSON.stringify({ x: 0, y: 0, z: 0 }));
-    }, 1000);
+
+    let mounted = true;
+    requestAnimationFrame(function onFrame() {
+      if (!mounted) return;
+      try {
+        socket.data.send(
+          JSON.stringify({
+            x: Math.random() * 1000,
+            y: Math.random() * 1000,
+            z: Math.random() * 64,
+          }),
+        );
+      } catch {}
+      requestAnimationFrame(onFrame);
+    });
+
     return () => {
-      clearInterval(timer);
+      mounted = false;
+      try {
+        socket.data.close();
+      } catch {}
     };
   }, [socket.data]);
 

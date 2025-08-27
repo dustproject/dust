@@ -32,11 +32,19 @@ const parseSignedSessionData = $.type([
 
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
+    if (req.headers.get("upgrade") !== "websocket") {
+      return new Response("Expected WebSocket", { status: 426 });
+    }
+
     const url = new URL(req.url);
 
     if (url.pathname === "/health") return new Response("ok");
 
-    if (url.pathname === "/ws" && req.headers.get("upgrade") === "websocket") {
+    if (url.pathname === "/ws") {
+      if (req.headers.get("upgrade") !== "websocket") {
+        return new Response("Expected WebSocket", { status: 426 });
+      }
+
       const { signature, signedSessionData } = sessionSchema.from({
         signature: url.searchParams.get("signature") as Hex,
         signedSessionData: url.searchParams.get("signedSessionData")!,
@@ -52,19 +60,19 @@ export default {
       const authority = env.Authority.get(env.Authority.idFromName("global"), {
         locationHint: env.REGION_HINT,
       });
-      await authority.ensureShard(shardName);
+      await authority.ensureIngress(shardName);
 
       // Forward original Upgrade to the shard's /ws
       const ingress = env.Ingress.get(env.Ingress.idFromName(shardName));
 
-      console.info(
-        "[entry] fwd → DO url=%s upgrade=%s",
-        new URL(req.url).toString(),
-        req.headers.get("upgrade"),
-      );
       // const target = new URL(req.url);
       // target.searchParams.set("userAddress", userAddress);
-      return ingress.fetch(req);
+      // return ingress.fetch(req);
+
+      return ingress.fetch(
+        `https://ingress/?${new URLSearchParams({ userAddress })}`,
+        { headers: { Upgrade: "websocket" } },
+      );
     }
 
     return new Response("not found", { status: 404 });

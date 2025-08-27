@@ -1,15 +1,19 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
 
-  "name": "realtime-position",
+  "name": "dust-realtime-position",
   "main": "src/index.ts",
   "compatibility_date": "2025-08-01",
   "compatibility_flags": ["nodejs_compat"],
 
+  "observability": {
+    "enabled": true
+  },
+
   "vars": {
     "REGION_HINT": "wnam",
     "INGRESS_SHARDS": "8",
-    "TICK_HZ": "5",
+    "TICK_HZ": "1",
     "CHAIN_ID": "10",
     "WORLD_ADDRESS": "0xYourWorld",
     "RPC_HTTP_URL": "https://your-rpc.example"
