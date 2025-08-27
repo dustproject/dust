@@ -87,7 +87,7 @@ function updatePlayerEnergy(EntityId player) returns (EnergyData memory) {
   }
 
   if (energyData.energy == 0) {
-    PlayerUtils.killPlayer(player, coord);
+    PlayerUtils.killPlayer(player);
   }
 
   Energy._set(player, energyData);
@@ -104,7 +104,7 @@ function decreaseMachineEnergy(EntityId machine, uint128 amount) returns (uint12
   return newEnergy;
 }
 
-function decreasePlayerEnergy(EntityId player, Vec3 playerCoord, uint128 amount) returns (uint128) {
+function decreasePlayerEnergy(EntityId player, uint128 amount) returns (uint128) {
   require(amount > 0, "Cannot decrease 0 energy");
   uint128 current = Energy._getEnergy(player);
   require(current >= amount, "Not enough energy");
@@ -113,7 +113,7 @@ function decreasePlayerEnergy(EntityId player, Vec3 playerCoord, uint128 amount)
   Energy._setEnergy(player, newEnergy);
 
   if (newEnergy == 0) {
-    PlayerUtils.killPlayer(player, playerCoord);
+    PlayerUtils.killPlayer(player);
   }
 
   return newEnergy;
@@ -148,7 +148,7 @@ function transferEnergyToPool(EntityId entityId, uint128 amount) returns (uint12
 
   uint128 newEntityEnergy;
   if (objectType == ObjectTypes.Player) {
-    newEntityEnergy = decreasePlayerEnergy(entityId, coord, amount);
+    newEntityEnergy = decreasePlayerEnergy(entityId, amount);
   } else {
     if (!objectType.isMachine()) {
       (entityId,) = ForceFieldUtils.getForceField(coord);

@@ -77,10 +77,8 @@ library PlayerUtils {
 
   /// @dev Kills the player, it assumes the player is not sleeping
   // If the player was already killed, it will return early
-  function killPlayer(EntityId player, Vec3 coord) internal {
-    if (ReverseMovablePosition._get(coord) != player) {
-      return;
-    }
+  function killPlayer(EntityId player) internal {
+    Vec3 coord = player._getPosition();
     // We use getOrCreateBlockAt because when moving the block entity might not be set
     (EntityId to,) = EntityUtils.getOrCreateBlockAt(coord);
     bool allTransferred = InventoryUtils.transferAll(player, to);

@@ -40,7 +40,7 @@ library MoveLib {
     _updatePlayerDrainRate(player, above);
 
     if (totalCost > 0) {
-      decreasePlayerEnergy(player, above, totalCost);
+      decreasePlayerEnergy(player, totalCost);
       addEnergyToLocalPool(above, totalCost);
     }
   }
@@ -66,7 +66,7 @@ library MoveLib {
     }
 
     if (totalCost > 0) {
-      decreasePlayerEnergy(player, finalCoord, totalCost);
+      decreasePlayerEnergy(player, totalCost);
       addEnergyToLocalPool(finalCoord, totalCost);
     }
 
@@ -94,7 +94,7 @@ library MoveLib {
     }
 
     if (totalCost > 0) {
-      decreasePlayerEnergy(player, finalCoord, totalCost);
+      decreasePlayerEnergy(player, totalCost);
       addEnergyToLocalPool(finalCoord, totalCost);
     }
 
