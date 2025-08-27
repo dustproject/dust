@@ -449,13 +449,13 @@ contract MoveTest is DustTest {
     setObjectAtCoord(newCoords[1], ObjectTypes.Dirt);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot jump build on a pass-through block");
+    vm.expectRevert("Cannot move through solid block");
     world.move(aliceEntityId, newCoords);
 
     setObjectAtCoord(newCoords[0] + vec3(0, 1, 0), ObjectTypes.Dirt);
 
     vm.prank(alice);
-    vm.expectRevert("Cannot jump build on a pass-through block");
+    vm.expectRevert("Cannot move through solid block");
     world.move(aliceEntityId, newCoords);
   }
 
