@@ -85,7 +85,6 @@ export class AuthorityActor extends Actor<Env> {
     }
 
     for (const uplink of this.uplinks) {
-      // if (uplink === ws) continue;
       try {
         uplink.send(message);
       } catch {}

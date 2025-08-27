@@ -54,6 +54,8 @@ export default {
 
       // TODO: validate signed session data
 
+      // TODO: factor in chain+world address into shard
+
       const shardName = `shard:${getShard(userAddress, Number.parseInt(env.INGRESS_SHARDS ?? "8"))}`;
 
       const authority = env.Authority.get(env.Authority.idFromName("global"), {

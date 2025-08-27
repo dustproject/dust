@@ -97,6 +97,7 @@ export class IngressActor extends Actor<Env> {
           return;
         }
 
+        // TODO: once we have a common schema for messages, filter out a user's own messages
         for (const client of this.clients) {
           try {
             console.info(
