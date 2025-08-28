@@ -13,9 +13,12 @@ import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils, SlotAmount, SlotData } from "../utils/InventoryUtils.sol";
 import { CraftNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerProgressUtils } from "../utils/PlayerProgressUtils.sol";
+import { PlayerSkillUtils } from "../utils/PlayerSkillUtils.sol";
 
 import { CRAFT_ENERGY_COST } from "../Constants.sol";
+
 import { EntityId } from "../types/EntityId.sol";
+import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 
@@ -33,7 +36,9 @@ contract CraftSystem is System {
       caller.requireConnected(station);
     }
 
-    uint128 callerEnergy = transferEnergyToPool(caller, CRAFT_ENERGY_COST);
+    uint256 craftMul = PlayerSkillUtils.getCraftEnergyMultiplierWad(caller, recipe.stationTypeId);
+    uint128 effectiveCost = uint128(FixedPointMathLib.mulWad(CRAFT_ENERGY_COST, craftMul));
+    uint128 callerEnergy = transferEnergyToPool(caller, effectiveCost);
     require(callerEnergy > 0, "Not enough energy to craft");
 
     CraftLib._consumeRecipeInputs(caller, recipe, inputs);

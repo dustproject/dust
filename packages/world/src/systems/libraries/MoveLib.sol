@@ -11,11 +11,11 @@ import { ObjectType } from "../../types/ObjectType.sol";
 
 import { ObjectTypes } from "../../types/ObjectType.sol";
 
-import { ActivityType } from "../../codegen/common.sol";
 import { Vec3, vec3 } from "../../types/Vec3.sol";
 import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../../utils/EnergyUtils.sol";
 import { EntityUtils } from "../../utils/EntityUtils.sol";
-import { PlayerProgressUtils } from "../../utils/PlayerProgressUtils.sol";
+import { PlayerProgressUtils as PlayerTrackingUtils } from "../../utils/PlayerProgressUtils.sol";
+import { MoveCosts, PlayerSkillUtils } from "../../utils/PlayerSkillUtils.sol";
 import { RateLimitUtils } from "../../utils/RateLimitUtils.sol";
 
 error NonPassableBlock(int32 x, int32 y, int32 z, ObjectType objectType);
@@ -26,13 +26,6 @@ struct MoveCounts {
   uint128 lavaSteps;
   uint128 fallEnergy;
   uint16 fallHeight;
-}
-
-struct MoveCosts {
-  uint128 walkCost;
-  uint128 swimCost;
-  uint128 lavaCost;
-  uint128 fallPerBlockCost;
 }
 
 library MoveLib {
@@ -48,20 +41,6 @@ library MoveLib {
     if (belowType == ObjectTypes.Lava) return MoveStepType.Lava;
     if (belowType.isPassThrough() && _isFluid(belowCoord)) return MoveStepType.Swim;
     return MoveStepType.Walk;
-  }
-
-  function _initMoveCosts(EntityId player) internal view returns (MoveCosts memory c) {
-    uint256 walkMul = PlayerProgressUtils.getMoveEnergyMultiplierWad(player, false);
-    uint256 swimMul = PlayerProgressUtils.getMoveEnergyMultiplierWad(player, true);
-    uint256 lavaMul = walkMul; // reuse walk for now
-    uint256 fallMul = PlayerProgressUtils.getEnergyMultiplierWad(player, ActivityType.MoveFallEnergy);
-
-    unchecked {
-      c.walkCost = uint128(uint256(Constants.MOVE_ENERGY_COST) * walkMul / 1e18);
-      c.swimCost = uint128(uint256(Constants.WATER_MOVE_ENERGY_COST) * swimMul / 1e18);
-      c.lavaCost = uint128(uint256(Constants.LAVA_MOVE_ENERGY_COST) * lavaMul / 1e18);
-      c.fallPerBlockCost = uint128(uint256(Constants.PLAYER_FALL_ENERGY_COST) * fallMul / 1e18);
-    }
   }
 
   function jump(Vec3 playerCoord) public {
@@ -105,9 +84,9 @@ library MoveLib {
     // Update rate limits based on movement counts
     RateLimitUtils.move(player, counts.walkSteps, counts.swimSteps);
     // Track moves
-    PlayerProgressUtils.trackMoves(player, counts.walkSteps, counts.swimSteps);
+    PlayerTrackingUtils.trackMoves(player, counts.walkSteps, counts.swimSteps);
     if (counts.fallEnergy > 0) {
-      PlayerProgressUtils.trackFallEnergy(player, counts.fallEnergy);
+      PlayerTrackingUtils.trackFallEnergy(player, counts.fallEnergy);
     }
 
     _setPlayerPosition(playerEntityIds, finalCoord);

@@ -60,6 +60,7 @@ uint128 constant SPECIALIZATION_MULTIPLIER = 3; // 3x bonus for using the right 
 
 // Action modifiers (fractional values use ACTION_MODIFIER_DENOMINATOR)
 uint128 constant ACTION_MODIFIER_DENOMINATOR = 1e18;
+uint128 constant TILL_ACTION_MODIFIER = ACTION_MODIFIER_DENOMINATOR; // 1x (no change for tilling)
 uint128 constant MINE_ACTION_MODIFIER = ACTION_MODIFIER_DENOMINATOR; // 1x (no change for mining)
 uint128 constant HIT_ACTION_MODIFIER = ACTION_MODIFIER_DENOMINATOR / 100; // ~1/100x
 
@@ -114,9 +115,9 @@ int128 constant PROGRESS_DECAY_LAMBDA_WAD = int128(int256(LN2_WAD) / int256(PROG
 // Minimum energy multiplier at max benefit (WAD scale). 0.70e18 = 30% discount
 uint128 constant SKILL_ENERGY_MIN_MULTIPLIER_WAD = 7e17; // 70%
 
-// Smooth-then-cap parameterization: choose an intuitive "effort to reach max" per activity family.
-// We compute a smooth curve f(x)=x/(x+S), then normalize by f(xCap) and cap at 1.
-// S is set equal to xCap for an intuitive shape; xCap is derived from the below anchors.
+// Smooth-then-cap parameterization: "effort to reach max" per activity family.
+// We compute a smooth curve f(x)=x/(x+s), then normalize by f(xCap) and cap at 1.
+// s is set equal to xCap for an intuitive shape; xCap is derived from the below anchors.
 
 // Mining: blocks to reach max (scaled by mined block mass)
 uint128 constant SKILL_MINING_BLOCKS_TO_MAX = 2000;
@@ -127,3 +128,9 @@ uint128 constant SKILL_SWIM_SECONDS_TO_MAX = 360000; // 100 hours
 
 // Falling: number of over-safe fall blocks to reach max
 uint128 constant SKILL_FALL_BLOCKS_TO_MAX = 1000;
+
+// Anchors (energy units) to reach max benefit
+uint128 constant SKILL_HIT_PLAYER_ENERGY_TO_MAX = MAX_PLAYER_ENERGY * 100;
+uint128 constant SKILL_HIT_MACHINE_ENERGY_TO_MAX = MAX_PLAYER_ENERGY * 100;
+uint128 constant SKILL_BUILD_ENERGY_TO_MAX = BUILD_ENERGY_COST * 1000;
+uint128 constant SKILL_CRAFT_MASS_ENERGY_TO_MAX = CRAFT_ENERGY_COST * 1500;

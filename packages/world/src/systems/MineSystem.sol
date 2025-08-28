@@ -44,12 +44,7 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { RateLimitUtils } from "../utils/RateLimitUtils.sol";
 import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
-import {
-  MACHINE_ENERGY_DRAIN_RATE,
-  MINE_ACTION_MODIFIER,
-  PLAYER_ENERGY_DRAIN_RATE,
-  PRECISION_MULTIPLIER
-} from "../Constants.sol";
+import { MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE, PRECISION_MULTIPLIER } from "../Constants.sol";
 
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectAmount, ObjectType } from "../types/ObjectType.sol";
@@ -371,13 +366,8 @@ library MinePhysicsLib {
       return (0, true);
     }
 
-    bool specialized = (ctx.toolData.toolType.isAxe() && ctx.objectType.hasAxeMultiplier())
-      || (ctx.toolData.toolType.isPick() && ctx.objectType.hasPickMultiplier());
-
-    // Compute progress-based energy multiplier and apply (Option A semantics)
-    uint256 energyMultiplierWad =
-      PlayerProgressUtils.getMiningEnergyMultiplierWad(ctx.caller, ctx.toolData.toolType, ctx.objectType);
-    uint128 totalMassReduction = ctx.toolData.use(massLeft, MINE_ACTION_MODIFIER, specialized, energyMultiplierWad);
+    // Use action-specific tool usage that consults PlayerSkillUtils for energy pricing
+    uint128 totalMassReduction = ctx.toolData.mine(ctx.objectType, massLeft);
 
     // If caller died (totalMassReduction == 0), return early
     if (totalMassReduction == 0) {
