@@ -43,35 +43,41 @@ export default {
         return new Response("Expected WebSocket", { status: 426 });
       }
 
-      const { signature, signedSessionData } = sessionSchema.from({
-        signature: url.searchParams.get("signature") as Hex,
-        signedSessionData: url.searchParams.get("signedSessionData")!,
-      });
+      // validate session and extract user address if provided
+      const userAddress =
+        url.searchParams.has("signature") &&
+        url.searchParams.has("signedSessionData")
+          ? await (async () => {
+              const { signature, signedSessionData } = sessionSchema.assert({
+                signature: url.searchParams.get("signature"),
+                signedSessionData: url.searchParams.get("signedSessionData"),
+              });
 
-      const parsed = parseSignedSessionData(signedSessionData);
-      if (parsed instanceof type.errors) return parsed.throw();
-      const { userAddress, sessionAddress, signedAt } = parsed;
+              const parsed = parseSignedSessionData(signedSessionData);
+              if (parsed instanceof type.errors) return parsed.throw();
+              const { userAddress, sessionAddress, signedAt } = parsed;
 
-      // TODO: validate signed session data
+              // TODO: validate signed session data
 
-      // TODO: factor in chain+world address into shard
+              return userAddress;
+            })()
+          : null;
 
-      const shardName = `shard:${getShard(userAddress, Number.parseInt(env.INGRESS_SHARDS ?? "8"))}`;
+      const shardName = [
+        "shard",
+        Math.floor(Math.random() * Number.parseInt(env.INGRESS_SHARDS ?? "8")),
+      ].join(":");
 
+      // create ingress via authority to bind it to a location relative to authority
+      // instead of relative to the client
       const authority = env.Authority.get(env.Authority.idFromName("global"), {
         locationHint: env.REGION_HINT,
       });
       await authority.ensureIngress(shardName);
 
-      // Forward original Upgrade to the shard's /ws
       const ingress = env.Ingress.get(env.Ingress.idFromName(shardName));
-
-      // const target = new URL(req.url);
-      // target.searchParams.set("userAddress", userAddress);
-      // return ingress.fetch(req);
-
       return ingress.fetch(
-        `https://ingress/?${new URLSearchParams({ userAddress })}`,
+        `https://ingress/?${new URLSearchParams({ userAddress: userAddress ?? "" })}`,
         { headers: { Upgrade: "websocket" } },
       );
     }
@@ -79,12 +85,3 @@ export default {
     return new Response("not found", { status: 404 });
   },
 };
-
-function getShard(key: string, shards: number): number {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < key.length; i++) {
-    h ^= key.charCodeAt(i);
-    h = Math.imul(h, 0x01000193);
-  }
-  return (h >>> 0) % shards;
-}

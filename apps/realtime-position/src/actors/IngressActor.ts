@@ -1,6 +1,6 @@
 import { Actor, type ActorState, handler } from "@cloudflare/actors";
 import { scope, type } from "arktype";
-import type { Address, Hex } from "viem";
+import { type Address, type Hex, isAddress } from "viem";
 import type { Env } from "../env";
 
 const $ = scope({
@@ -133,15 +133,16 @@ export class IngressActor extends Actor<Env> {
         : new TextDecoder().decode(rawMessage);
 
     const attachment = ws.deserializeAttachment();
-    if (!attachment?.userAddress) {
-      console.warn("got ws message not from client", attachment, message);
+    const userAddress = attachment?.userAddress;
+    if (!isAddress(userAddress)) {
+      // ignore messages from connections without a valid user address
+      // this might be from "observers" (read-only rather than read/write)
       return;
     }
-    const userAddress = attachment.userAddress as Hex;
 
     const userData = parseUserData(message);
     if (userData instanceof type.errors) {
-      console.debug("ignoring invalid message", message);
+      console.debug("ignoring invalid message from", userAddress, message);
     } else {
       this.latest.set(userAddress, {
         u: userAddress,
