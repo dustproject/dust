@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
+
 import { DustTest } from "./DustTest.sol";
 
 import {
@@ -42,7 +44,7 @@ contract ToolUtilsTest is DustTest {
     // Use the tool partially
     uint128 initialMass = Mass.getMass(toolId);
     // Use the tool with a limit larger than energy cost so tool mass is reduced
-    TestToolUtils.use(toolData, TOOL_ACTION_ENERGY_COST + 1);
+    TestToolUtils.use(toolData, TOOL_ACTION_ENERGY_COST + 1, ACTION_MODIFIER_DENOMINATOR, false, FixedPointMathLib.WAD);
 
     // Tool should still exist with reduced mass
     assertLt(Mass.getMass(toolId), initialMass, "Tool mass should be reduced");
@@ -93,7 +95,8 @@ contract ToolUtilsTest is DustTest {
     // Get tool data and use tool
     ToolData memory toolData = TestToolUtils.getToolData(alice, TestInventoryUtils.findEntity(alice, toolEntity));
     uint128 initialToolMass = toolData.massLeft;
-    uint128 actionMassReduction = TestToolUtils.use(toolData, useMassMax, actionModifier, specialized);
+    uint128 actionMassReduction =
+      TestToolUtils.use(toolData, useMassMax, actionModifier, specialized, FixedPointMathLib.WAD);
 
     // Check tool state after use
     uint128 actualToolMassReduction = initialToolMass - Mass.getMass(toolEntity);

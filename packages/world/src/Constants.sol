@@ -126,8 +126,13 @@ uint128 constant SKILL_MINING_BLOCKS_TO_MAX = 2000;
 uint128 constant SKILL_WALK_SECONDS_TO_MAX = 360000; // 100 hours
 uint128 constant SKILL_SWIM_SECONDS_TO_MAX = 360000; // 100 hours
 
+// Movement: steps to reach max (direct anchors for skills)
+uint128 constant SKILL_WALK_STEPS_TO_MAX = 5_400_000; // ~15 steps/s * 100h
+uint128 constant SKILL_SWIM_STEPS_TO_MAX = 4_860_000; // ~13.5 steps/s * 100h
+
 // Falling: number of over-safe fall blocks to reach max
 uint128 constant SKILL_FALL_BLOCKS_TO_MAX = 1000;
+uint128 constant SKILL_FALL_ENERGY_TO_MAX = PLAYER_FALL_ENERGY_COST * SKILL_FALL_BLOCKS_TO_MAX;
 
 // Anchors (energy units) to reach max benefit
 uint128 constant SKILL_HIT_PLAYER_ENERGY_TO_MAX = MAX_PLAYER_ENERGY * 100;

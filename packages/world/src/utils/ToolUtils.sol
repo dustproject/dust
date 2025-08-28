@@ -9,7 +9,6 @@ import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 
-import { ActivityType } from "../codegen/common.sol";
 import { burnToolEnergy, transferEnergyToPool, updatePlayerEnergy } from "./EnergyUtils.sol";
 import { InventoryUtils } from "./InventoryUtils.sol";
 import { Math } from "./Math.sol";

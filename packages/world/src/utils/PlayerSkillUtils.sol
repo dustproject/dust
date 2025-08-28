@@ -4,21 +4,14 @@ pragma solidity >=0.8.24;
 import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
 import {
-  LAVA_MOVE_ENERGY_COST,
-  MAX_RATE_LIMIT_UNITS_PER_SECOND,
-  MOVE_ENERGY_COST,
-  PLAYER_FALL_ENERGY_COST,
   SKILL_CRAFT_MASS_ENERGY_TO_MAX,
   SKILL_ENERGY_MIN_MULTIPLIER_WAD,
-  SKILL_FALL_BLOCKS_TO_MAX,
+  SKILL_FALL_ENERGY_TO_MAX,
   SKILL_HIT_MACHINE_ENERGY_TO_MAX,
   SKILL_HIT_PLAYER_ENERGY_TO_MAX,
   SKILL_MINING_BLOCKS_TO_MAX,
-  SKILL_SWIM_SECONDS_TO_MAX,
-  SKILL_WALK_SECONDS_TO_MAX,
-  SWIM_UNIT_COST,
-  WALK_UNIT_COST,
-  WATER_MOVE_ENERGY_COST
+  SKILL_SWIM_STEPS_TO_MAX,
+  SKILL_WALK_STEPS_TO_MAX
 } from "../Constants.sol";
 import { ActivityType } from "../codegen/common.sol";
 
@@ -26,13 +19,6 @@ import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 import { PlayerProgressUtils as Tracking } from "./PlayerProgressUtils.sol";
-
-struct MoveCosts {
-  uint128 walkCost;
-  uint128 swimCost;
-  uint128 lavaCost;
-  uint128 fallPerBlockCost;
-}
 
 library PlayerSkillUtils {
   function getMoveEnergyMultipliersWad(EntityId player)
@@ -42,30 +28,20 @@ library PlayerSkillUtils {
   {
     walkMul = getEnergyMultiplierWad({
       progress: Tracking.getProgress(player, ActivityType.MoveWalkSteps),
-      progressCap: _walkStepsToMax()
+      progressCap: SKILL_WALK_STEPS_TO_MAX
     });
 
     swimMul = getEnergyMultiplierWad({
       progress: Tracking.getProgress(player, ActivityType.MoveSwimSteps),
-      progressCap: _swimStepsToMax()
+      progressCap: SKILL_SWIM_STEPS_TO_MAX
     });
 
     lavaMul = walkMul; // reuse walk for now
 
     fallMul = getEnergyMultiplierWad({
       progress: Tracking.getProgress(player, ActivityType.MoveFallEnergy),
-      progressCap: _fallEnergyToMax()
+      progressCap: SKILL_FALL_ENERGY_TO_MAX
     });
-  }
-
-  function movementPricing(EntityId player) internal view returns (MoveCosts memory p) {
-    (uint256 walkMul, uint256 swimMul, uint256 lavaMul, uint256 fallMul) = getMoveEnergyMultipliersWad(player);
-    unchecked {
-      p.walkCost = uint128(FixedPointMathLib.mulWad(MOVE_ENERGY_COST, walkMul));
-      p.swimCost = uint128(FixedPointMathLib.mulWad(WATER_MOVE_ENERGY_COST, swimMul));
-      p.lavaCost = uint128(FixedPointMathLib.mulWad(LAVA_MOVE_ENERGY_COST, lavaMul));
-      p.fallPerBlockCost = uint128(FixedPointMathLib.mulWad(PLAYER_FALL_ENERGY_COST, fallMul));
-    }
   }
 
   function getMineEnergyMultiplierWad(EntityId player, ObjectType toolType, ObjectType minedType)
@@ -85,10 +61,13 @@ library PlayerSkillUtils {
     }
 
     uint256 blockMass = ObjectPhysics._getMass(minedType);
-    uint256 progressCap = blockMass * SKILL_MINING_BLOCKS_TO_MAX;
-    uint256 progress = Tracking.getProgress(player, activityType);
 
-    return getEnergyMultiplierWad(progress, progressCap);
+    return getEnergyMultiplierWad({
+      progress: Tracking.getProgress(player, activityType),
+      // TODO: this means that the larger the mined block's mass, the harder it is to obtain the full benefit
+      // should we just use absolute mass? eg. 2000 obsidian blocks
+      progressCap: blockMass * SKILL_MINING_BLOCKS_TO_MAX
+    });
   }
 
   function getHitPlayerEnergyMultiplierWad(EntityId player) internal view returns (uint256) {
@@ -126,8 +105,10 @@ library PlayerSkillUtils {
       activityType = ActivityType.CraftHandMass;
     }
 
-    uint256 progress = Tracking.getProgress(player, activityType);
-    return getEnergyMultiplierWad(progress, SKILL_CRAFT_MASS_ENERGY_TO_MAX);
+    return getEnergyMultiplierWad({
+      progress: Tracking.getProgress(player, activityType),
+      progressCap: SKILL_CRAFT_MASS_ENERGY_TO_MAX
+    });
   }
 
   function getEnergyMultiplierWad(uint256 progress, uint256 progressCap) internal pure returns (uint256) {
@@ -136,7 +117,7 @@ library PlayerSkillUtils {
     return 1e18 - FixedPointMathLib.mulWad(range, normalized);
   }
 
-  /// @dev Smooth-then-cap discount using dynamic s and xCap anchors
+  /// @dev Smooth-then-cap discount normalized by f(xCap)
   function _normalizedSmooth(uint256 x, uint256 xCap) private pure returns (uint256) {
     if (x == 0) return 0;
     if (xCap == 0) return 1e18; // degenerate case, treat as max
@@ -147,21 +128,5 @@ library PlayerSkillUtils {
     // normalized = min(1, fx / fcap)
     uint256 ratio = FixedPointMathLib.divWad(fx, fcap);
     return ratio > 1e18 ? 1e18 : ratio;
-  }
-
-  function _stepsPerSecond(uint256 unitCost) private pure returns (uint256) {
-    return MAX_RATE_LIMIT_UNITS_PER_SECOND / unitCost;
-  }
-
-  function _walkStepsToMax() private pure returns (uint256) {
-    return _stepsPerSecond(WALK_UNIT_COST) * SKILL_WALK_SECONDS_TO_MAX;
-  }
-
-  function _swimStepsToMax() private pure returns (uint256) {
-    return _stepsPerSecond(SWIM_UNIT_COST) * SKILL_SWIM_SECONDS_TO_MAX;
-  }
-
-  function _fallEnergyToMax() private pure returns (uint256) {
-    return uint256(PLAYER_FALL_ENERGY_COST) * SKILL_FALL_BLOCKS_TO_MAX;
   }
 }

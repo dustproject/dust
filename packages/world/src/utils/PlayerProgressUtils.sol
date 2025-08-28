@@ -14,14 +14,6 @@ import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 import { Math } from "../utils/Math.sol";
 
 library PlayerProgressUtils {
-  function getAccumulated(EntityId player, ActivityType activityType) internal view returns (uint256) {
-    PlayerProgressData memory data = PlayerProgress._get(player, activityType);
-    uint256 deaths = Death._getDeaths(player);
-    uint256 e = data.exponent;
-    uint256 diff = deaths > e ? (deaths - e) : 0;
-    return data.accumulated >> diff;
-  }
-
   function getProgress(EntityId player, ActivityType activityType) internal view returns (uint256) {
     PlayerProgressData memory data = PlayerProgress._get(player, activityType);
     uint256 deaths = Death._getDeaths(player);
@@ -30,17 +22,10 @@ library PlayerProgressUtils {
     uint256 decayed = _decay(data.current, data.lastUpdatedAt);
     uint256 decayedEffective = decayed >> diff;
     uint256 alignedAccumulated = data.accumulated >> diff;
+
+    // Floor is just accumulated / 3
     uint256 floorEffective = alignedAccumulated / 3;
     return Math.max(decayedEffective, floorEffective);
-  }
-
-  function getFloor(EntityId player, ActivityType activityType) internal view returns (uint256) {
-    PlayerProgressData memory data = PlayerProgress._get(player, activityType);
-    uint256 deaths = Death._getDeaths(player);
-    uint256 e = data.exponent;
-    uint256 diff = deaths > e ? (deaths - e) : 0;
-    uint256 alignedAccumulated = data.accumulated >> diff;
-    return alignedAccumulated / 3;
   }
 
   // Mining tracking - with tool specialization and crop detection
