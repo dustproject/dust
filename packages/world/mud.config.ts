@@ -376,6 +376,23 @@ export default defineWorld({
       key: ["entityId"],
     },
     // ------------------------------------------------------------
+    // Player names
+    // ------------------------------------------------------------
+    PlayerName: {
+      schema: {
+        player: "address",
+        name: "bytes32",
+      },
+      key: ["player"],
+    },
+    ReversePlayerName: {
+      schema: {
+        name: "bytes32",
+        player: "address",
+      },
+      key: ["name"],
+    },
+    // ------------------------------------------------------------
     // Offchain
     // ------------------------------------------------------------
     Notification: {

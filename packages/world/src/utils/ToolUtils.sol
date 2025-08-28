@@ -55,7 +55,7 @@ library ToolUtils {
     uint128 useMassMax,
     uint128 actionModifier,
     bool specialized,
-    uint256 energyDiscountWad
+    uint256 energyMultiplierWad
   ) public returns (uint128) {
     require(useMassMax != 0, "Cannot perform action with zero mass limit");
 
@@ -66,18 +66,16 @@ library ToolUtils {
     // Base energy cost
     uint128 baseEnergyCost = getActionEnergyCost(toolData, callerEnergy, useMassMax);
 
-    // Apply discount (Option A semantics)
-    uint128 discountedEnergyCost = baseEnergyCost;
-    if (energyDiscountWad > 0 && baseEnergyCost > 0) {
-      uint256 reduction = FixedPointMathLib.mulWad(uint256(baseEnergyCost), energyDiscountWad);
-      if (reduction > baseEnergyCost) reduction = baseEnergyCost; // safety
-      discountedEnergyCost = uint128(uint256(baseEnergyCost) - reduction);
+    // Apply discount
+    uint128 energyCost = baseEnergyCost;
+    if (energyMultiplierWad > 0 && baseEnergyCost > 0) {
+      energyCost = uint128(FixedPointMathLib.mulWad(baseEnergyCost, energyMultiplierWad));
     }
 
     // Drain energy
-    if (discountedEnergyCost > 0) {
-      uint128 remainingEnergy = decreasePlayerEnergy(toolData.owner, callerCoord, discountedEnergyCost);
-      addEnergyToLocalPool(callerCoord, discountedEnergyCost);
+    if (energyCost > 0) {
+      uint128 remainingEnergy = decreasePlayerEnergy(toolData.owner, energyCost);
+      addEnergyToLocalPool(callerCoord, energyCost);
       if (remainingEnergy == 0) {
         return 0;
       }
@@ -85,10 +83,10 @@ library ToolUtils {
 
     // Player survived, calculate tool damage based on remaining budget
     (uint128 actionMassReduction, uint128 toolMassReduction) =
-      getMassReduction(toolData, useMassMax - discountedEnergyCost, actionModifier, specialized);
+      getMassReduction(toolData, useMassMax - energyCost, actionModifier, specialized);
     reduceMass(toolData, toolMassReduction);
 
-    return discountedEnergyCost + actionMassReduction;
+    return energyCost + actionMassReduction;
   }
 
   function getMassReduction(ToolData memory toolData, uint128 massLeft, uint128 actionModifier, bool specialized)

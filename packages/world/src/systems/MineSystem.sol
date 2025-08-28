@@ -374,10 +374,10 @@ library MinePhysicsLib {
     bool specialized = (ctx.toolData.toolType.isAxe() && ctx.objectType.hasAxeMultiplier())
       || (ctx.toolData.toolType.isPick() && ctx.objectType.hasPickMultiplier());
 
-    // Compute progress-based energy discount and apply (Option A semantics)
-    uint256 discountWad =
-      PlayerProgressUtils.getMiningEnergyDiscountWad(ctx.caller, ctx.toolData.toolType, ctx.objectType);
-    uint128 totalMassReduction = ctx.toolData.use(massLeft, MINE_ACTION_MODIFIER, specialized, discountWad);
+    // Compute progress-based energy multiplier and apply (Option A semantics)
+    uint256 energyMultiplierWad =
+      PlayerProgressUtils.getMiningEnergyMultiplierWad(ctx.caller, ctx.toolData.toolType, ctx.objectType);
+    uint128 totalMassReduction = ctx.toolData.use(massLeft, MINE_ACTION_MODIFIER, specialized, energyMultiplierWad);
 
     // If caller died (totalMassReduction == 0), return early
     if (totalMassReduction == 0) {

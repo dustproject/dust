@@ -9,8 +9,8 @@ import {
   MAX_RATE_LIMIT_UNITS_PER_SECOND,
   PLAYER_FALL_ENERGY_COST,
   PROGRESS_DECAY_LAMBDA_WAD,
+  SKILL_ENERGY_MIN_MULTIPLIER_WAD,
   SKILL_FALL_BLOCKS_TO_MAX,
-  SKILL_MAX_ENERGY_DISCOUNT_WAD,
   SKILL_MINING_BLOCKS_TO_MAX,
   SKILL_SWIM_SECONDS_TO_MAX,
   SKILL_WALK_SECONDS_TO_MAX,
@@ -178,7 +178,7 @@ library PlayerProgressUtils {
   }
 
   // ----------------------------------------------------------------
-  // Skill benefits (energy discounts)
+  // Skill benefits (energy multipliers)
   // ----------------------------------------------------------------
 
   // Smooth-then-cap discount using dynamic S and xCap anchors
@@ -212,7 +212,8 @@ library PlayerProgressUtils {
     return uint256(PLAYER_FALL_ENERGY_COST) * SKILL_FALL_BLOCKS_TO_MAX;
   }
 
-  function getEnergyDiscountWad(EntityId player, ActivityType activityType) internal view returns (uint256) {
+  // Returns a discount-normalized progress in [0..1e18] for internal use
+  function _getNormalizedProgress(EntityId player, ActivityType activityType) private view returns (uint256) {
     uint256 progress = getFloor(player, activityType);
 
     uint256 xCap;
@@ -226,7 +227,7 @@ library PlayerProgressUtils {
       activityType == ActivityType.MinePickMass || activityType == ActivityType.MineAxeMass
         || activityType == ActivityType.MineCropMass
     ) {
-      // For mining families, caller should use getMiningEnergyDiscountWad as it needs minedType for scaling
+      // For mining families, caller should use mining-specific function as it needs minedType for scaling
       revert("Use mining-specific discount");
     } else {
       // No discount for other activities (yet)
@@ -234,13 +235,21 @@ library PlayerProgressUtils {
     }
 
     uint256 normalized = _normalizedSmooth(progress, xCap);
-    return FixedPointMathLib.mulWad(SKILL_MAX_ENERGY_DISCOUNT_WAD, normalized);
+    return normalized;
   }
 
-  function getMiningEnergyDiscountWad(EntityId player, ObjectType toolType, ObjectType minedType)
+  // Public helpers returning energy multipliers (WAD in [0..1e18], 1e18 = no change)
+  function getEnergyMultiplierWad(EntityId player, ActivityType activityType) internal view returns (uint256) {
+    uint256 n = _getNormalizedProgress(player, activityType);
+    // Lerp from 1e18 down to min multiplier by n
+    uint256 range = 1e18 - SKILL_ENERGY_MIN_MULTIPLIER_WAD;
+    return 1e18 - FixedPointMathLib.mulWad(range, n);
+  }
+
+  function getMiningEnergyMultiplierWad(EntityId player, ObjectType toolType, ObjectType minedType)
     internal
     view
-    returns (uint256 discountWad)
+    returns (uint256 energyMultiplierWad)
   {
     ActivityType activityType;
     if (minedType.isCrop()) {
@@ -250,7 +259,7 @@ library PlayerProgressUtils {
     } else if (toolType.isPick()) {
       activityType = ActivityType.MinePickMass;
     } else {
-      return 0;
+      return 1e18; // no applicable mining progress, no discount
     }
 
     uint256 progress = getFloor(player, activityType);
@@ -258,6 +267,11 @@ library PlayerProgressUtils {
     uint256 blockMass = ObjectPhysics._getMass(minedType);
     uint256 xCap = blockMass * SKILL_MINING_BLOCKS_TO_MAX;
     uint256 normalized = _normalizedSmooth(progress, xCap);
-    return FixedPointMathLib.mulWad(SKILL_MAX_ENERGY_DISCOUNT_WAD, normalized);
+    uint256 range = 1e18 - SKILL_ENERGY_MIN_MULTIPLIER_WAD;
+    return 1e18 - FixedPointMathLib.mulWad(range, normalized);
+  }
+
+  function getMoveEnergyMultiplierWad(EntityId player, bool isSwimming) internal view returns (uint256) {
+    return getEnergyMultiplierWad(player, isSwimming ? ActivityType.MoveSwimSteps : ActivityType.MoveWalkSteps);
   }
 }

@@ -80,7 +80,7 @@ library EntityIdLib {
     Vec3 selfCoord = self._getPosition();
     Vec3 coord = self._getObjectType() == ObjectTypes.Player ? selfCoord + vec3(0, 1, 0) : selfCoord;
     require(coord.inSphere(otherCoord, range), "Entity is too far");
-    return (selfCoord, coord);
+    return (selfCoord, otherCoord);
   }
 
   function requireInRange(EntityId self, EntityId other, uint256 range) internal view returns (Vec3, Vec3) {

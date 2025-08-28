@@ -34,6 +34,8 @@ contract HitPlayerSystem is System {
 
     (, Vec3 targetCoord) = caller.requireInRange(target, MAX_HIT_RADIUS);
 
+    target = target.baseEntityId();
+
     require(target != caller, "Cannot hit yourself");
     require(target._exists(), "No entity at target location");
     require(target._getObjectType() == ObjectTypes.Player, "Target is not a player");
@@ -57,7 +59,7 @@ contract HitPlayerSystem is System {
     }
 
     // Apply damage to target player
-    decreasePlayerEnergy(target, targetCoord, damage);
+    decreasePlayerEnergy(target, damage);
 
     // Add target's total damage to target's local pool
     addEnergyToLocalPool(targetCoord, damage);
