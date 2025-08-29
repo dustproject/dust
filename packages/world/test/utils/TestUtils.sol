@@ -241,7 +241,7 @@ library TestToolUtils {
     uint128 actionModifier,
     bool specialized,
     uint256 energyMultiplierWad
-  ) internal returns (uint128) {
+  ) public asWorld returns (uint128) {
     return toolData.use(useMassMax, actionModifier, specialized, energyMultiplierWad);
   }
 }

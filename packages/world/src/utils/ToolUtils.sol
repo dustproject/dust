@@ -82,6 +82,7 @@ library ToolUtils {
 
     // Drain energy
     if (energyCost > 0) {
+      // Use player specific util to decrease bytecode size
       decreasePlayerEnergy(toolData.owner, energyCost);
       addEnergyToLocalPool(toolData.owner._getPosition(), energyCost);
 

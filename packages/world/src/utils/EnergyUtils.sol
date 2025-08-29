@@ -125,7 +125,6 @@ function decreasePlayerEnergy(EntityId player, uint128 amount) returns (uint128)
   require(amount > 0, "Cannot decrease 0 energy");
   uint128 current = Energy._getEnergy(player);
   require(current >= amount, "Not enough energy");
-
   uint128 newEnergy = current - amount;
   Energy._setEnergy(player, newEnergy);
 
