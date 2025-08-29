@@ -129,4 +129,15 @@ export type ClientRpcSchema = RpcSchema.From<
           }
         | undefined;
     }
+  | {
+      Request: {
+        method: "getObjectTypeAt";
+        params: {
+          x: number;
+          y: number;
+          z: number;
+        };
+      };
+      ReturnType: number | undefined;
+    }
 >;
