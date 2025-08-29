@@ -34,7 +34,7 @@ contract HitPlayerSystem is System {
 
     (, Vec3 targetCoord) = caller.requireInRange(target, MAX_HIT_RADIUS);
 
-    target = target.baseEntityId();
+    target = target._baseEntityId();
 
     require(target != caller, "Cannot hit yourself");
     require(target._exists(), "No entity at target location");

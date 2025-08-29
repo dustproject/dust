@@ -9,13 +9,12 @@ import {
   SKILL_FALL_ENERGY_TO_MAX,
   SKILL_HIT_MACHINE_ENERGY_TO_MAX,
   SKILL_HIT_PLAYER_ENERGY_TO_MAX,
-  SKILL_MINING_BLOCKS_TO_MAX,
+  SKILL_MINING_MASS_TO_MAX,
   SKILL_SWIM_STEPS_TO_MAX,
   SKILL_WALK_STEPS_TO_MAX
 } from "../Constants.sol";
 import { ActivityType } from "../codegen/common.sol";
 
-import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 import { PlayerProgressUtils as Tracking } from "./PlayerProgressUtils.sol";
@@ -60,13 +59,9 @@ library PlayerSkillUtils {
       return 1e18; // no applicable mining progress
     }
 
-    uint256 blockMass = ObjectPhysics._getMass(minedType);
-
     return getEnergyMultiplierWad({
       progress: Tracking.getProgress(player, activityType),
-      // TODO: this means that the larger the mined block's mass, the harder it is to obtain the full benefit
-      // should we just use absolute mass? eg. 2000 obsidian blocks
-      progressCap: blockMass * SKILL_MINING_BLOCKS_TO_MAX
+      progressCap: SKILL_MINING_MASS_TO_MAX
     });
   }
 

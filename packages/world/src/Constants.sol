@@ -119,8 +119,8 @@ uint128 constant SKILL_ENERGY_MIN_MULTIPLIER_WAD = 7e17; // 70%
 // We compute a smooth curve f(x)=x/(x+s), then normalize by f(xCap) and cap at 1.
 // s is set equal to xCap for an intuitive shape; xCap is derived from the below anchors.
 
-// Mining: blocks to reach max (scaled by mined block mass)
-uint128 constant SKILL_MINING_BLOCKS_TO_MAX = 2000;
+// Mining: mined mass to reach max
+uint128 constant SKILL_MINING_MASS_TO_MAX = 9000000000000000000 * 2000; // 2000 obsidian blocks
 
 // Movement: seconds of activity to reach max
 uint128 constant SKILL_WALK_SECONDS_TO_MAX = 360000; // 100 hours
