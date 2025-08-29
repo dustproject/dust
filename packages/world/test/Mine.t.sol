@@ -2,16 +2,15 @@
 pragma solidity >=0.8.24;
 
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
-import { Mass } from "../src/codegen/tables/Mass.sol";
+import { console } from "forge-std/console.sol";
 
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
-
+import { Mass } from "../src/codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
-import { SeedGrowth } from "../src/codegen/tables/SeedGrowth.sol";
-
-import { ResourceCount } from "../src/codegen/tables/ResourceCount.sol";
 
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
+import { PlayerProgress } from "../src/codegen/tables/PlayerProgress.sol";
+import { SeedGrowth } from "../src/codegen/tables/SeedGrowth.sol";
 
 import { ActivityType } from "../src/codegen/common.sol";
 import { Death } from "../src/codegen/tables/Death.sol";
@@ -24,7 +23,6 @@ import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import {
   ACTION_MODIFIER_DENOMINATOR,
-  BARE_HANDS_ACTION_ENERGY_COST,
   BARE_HANDS_ACTION_ENERGY_COST,
   CHUNK_SIZE,
   MACHINE_ENERGY_DRAIN_RATE,
@@ -921,6 +919,10 @@ contract MineTest is DustTest {
     }
 
     {
+      // Reset axe progress so it doesn't affect the mass reduction calculation
+      PlayerProgress.setCurrent(aliceEntityId, ActivityType.MineAxeMass, 0);
+      PlayerProgress.setAccumulated(aliceEntityId, ActivityType.MineAxeMass, 0);
+
       Vec3 stoneCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL, playerCoord.z() + 2);
       ObjectType stoneType = ObjectTypes.Obsidian; // No multiplier
       setObjectAtCoord(stoneCoord, stoneType);
@@ -936,7 +938,11 @@ contract MineTest is DustTest {
       (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(stoneCoord);
       // Calculate expected multiplier: wooden base (3) * mine modifier (1) * no specialization = 3
       uint128 expectedMultiplier = WOODEN_TOOL_BASE_MULTIPLIER * MINE_ACTION_MODIFIER;
-      uint128 massReduction = TOOL_ACTION_ENERGY_COST + axeMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
+      uint128 maxToolMassReduction = axeMass / 10;
+      uint128 massReduction = uint128(
+        TOOL_ACTION_ENERGY_COST + uint256(maxToolMassReduction) * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR
+      );
+
       uint128 expectedMass = stoneMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden axe on stone");
     }
@@ -1397,6 +1403,7 @@ contract MineTest is DustTest {
       // Set up chunk commitment for randomness when mining
       newCommit(alice, aliceEntityId, cropCoord, bytes32(uint256(i)));
 
+      console.log("before");
       vm.prank(alice);
       world.mineUntilDestroyed(aliceEntityId, cropCoord, "");
 

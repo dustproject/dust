@@ -42,7 +42,10 @@ contract HitPlayerSystem is System {
 
     // Update target player's energy
     uint128 energyLeft = updatePlayerEnergy(target).energy;
-    require(energyLeft > 0, "Target has no energy");
+    if (energyLeft == 0) {
+      // Return early if target is already dead
+      return;
+    }
 
     // Check rate limit for combat actions
     RateLimitUtils.hit(caller);

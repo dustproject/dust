@@ -476,10 +476,14 @@ contract HitPlayerTest is DustTest {
     Energy.setEnergy(bobEntityId, 0);
     Energy.setEnergy(aliceEntityId, BARE_HANDS_ACTION_ENERGY_COST + 1000);
 
-    // Hitting a dead player should revert
+    uint128 aliceInitialEnergy = Energy.getEnergy(aliceEntityId);
+
+    // Hit dead player should do nothing
     vm.prank(alice);
-    vm.expectRevert("Target has no energy");
     world.hitPlayer(aliceEntityId, bobEntityId, bytes(""));
+
+    // Alice should still have all her energy
+    assertEq(Energy.getEnergy(aliceEntityId), aliceInitialEnergy, "Alice energy should not change");
   }
 
   // Test rate limiting
