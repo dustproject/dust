@@ -9,7 +9,7 @@ import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 
-import { burnToolEnergy, getEnergyData, transferEnergyToPool } from "./EnergyUtils.sol";
+import { addEnergyToLocalPool, burnToolEnergy, decreasePlayerEnergy, getEnergyData } from "./EnergyUtils.sol";
 import { InventoryUtils } from "./InventoryUtils.sol";
 import { Math } from "./Math.sol";
 import { OreLib } from "./OreLib.sol";
@@ -81,9 +81,14 @@ library ToolUtils {
     uint128 energyCost = uint128(FixedPointMathLib.mulWad(baseEnergyCost, energyMultiplierWad));
 
     // Drain energy
-    if (energyCost > 0 && transferEnergyToPool(toolData.owner, energyCost) == 0) {
-      // Return early if dead
-      return 0;
+    if (energyCost > 0) {
+      decreasePlayerEnergy(toolData.owner, energyCost);
+      addEnergyToLocalPool(toolData.owner._getPosition(), energyCost);
+
+      if (energyCost == callerEnergy) {
+        // Return early if dead
+        return 0;
+      }
     }
 
     // Player survived, calculate tool damage based on remaining budget
