@@ -32,7 +32,6 @@ import { ObjectTypes } from "../src/types/ObjectType.sol";
 import { Orientation } from "../src/types/Orientation.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
-import { NonPassableBlock } from "../src/systems/libraries/MoveLib.sol";
 import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
 
 import { Direction } from "../src/codegen/common.sol";
@@ -450,13 +449,13 @@ contract MoveTest is DustTest {
     setObjectAtCoord(newCoords[1], ObjectTypes.Dirt);
 
     vm.prank(alice);
-    vm.expectPartialRevert(NonPassableBlock.selector);
+    vm.expectRevert("Cannot move through solid block");
     world.move(aliceEntityId, newCoords);
 
     setObjectAtCoord(newCoords[0] + vec3(0, 1, 0), ObjectTypes.Dirt);
 
     vm.prank(alice);
-    vm.expectPartialRevert(NonPassableBlock.selector);
+    vm.expectRevert("Cannot move through solid block");
     world.move(aliceEntityId, newCoords);
   }
 
