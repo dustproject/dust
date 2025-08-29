@@ -39,8 +39,7 @@ contract HitPlayerSystem is System {
     require(target._exists(), "No entity at target location");
     require(target._getObjectType() == ObjectTypes.Player, "Target is not a player");
 
-    // Check rate limit for combat actions
-    RateLimitUtils.hit(caller);
+    RateLimitUtils.hitPlayer(caller);
 
     // Update target player's energy
     uint128 targetEnergy = updatePlayerEnergy(target).energy;

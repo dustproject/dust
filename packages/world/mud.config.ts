@@ -30,7 +30,7 @@ export default defineWorld({
       "RemoveFragment",
       "Death",
     ],
-    RateLimitType: ["Movement", "Combat", "Work"],
+    RateLimitType: ["Movement", "HitMachine", "HitPlayer", "Work"],
     Direction: [
       // Cardinal directions (6)
       "PositiveX",

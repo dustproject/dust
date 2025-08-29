@@ -28,7 +28,8 @@ enum NotificationType {
 
 enum RateLimitType {
   Movement,
-  Combat,
+  HitMachine,
+  HitPlayer,
   Work
 }
 
