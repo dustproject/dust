@@ -854,6 +854,7 @@ export const recipes: Recipe[] = [
     inputs: [["Blackstone", 1]],
     outputs: [["PolishedBlackstone", 1]],
   },
+
   // Chiseled blocks (Stonecutter)
   {
     station: "Stonecutter",
@@ -1440,62 +1441,66 @@ export const recipes: Recipe[] = [
   //   inputs: [["IronBar", 4]],
   //   outputs: [["IronTrapdoor", 1]],
   // },
-  // {
-  //   inputs: [
-  //     ["OakPlanks", 4],
-  //     ["Stick", 2],
-  //   ],
-  //   outputs: [["OakFence", 3]],
-  // },
-  // {
-  //   inputs: [
-  //     ["BirchPlanks", 4],
-  //     ["Stick", 2],
-  //   ],
-  //   outputs: [["BirchFence", 3]],
-  // },
-  // {
-  //   inputs: [
-  //     ["JunglePlanks", 4],
-  //     ["Stick", 2],
-  //   ],
-  //   outputs: [["JungleFence", 3]],
-  // },
-  // {
-  //   inputs: [
-  //     ["SakuraPlanks", 4],
-  //     ["Stick", 2],
-  //   ],
-  //   outputs: [["SakuraFence", 3]],
-  // },
-  // {
-  //   inputs: [
-  //     ["AcaciaPlanks", 4],
-  //     ["Stick", 2],
-  //   ],
-  //   outputs: [["AcaciaFence", 3]],
-  // },
-  // {
-  //   inputs: [
-  //     ["SprucePlanks", 4],
-  //     ["Stick", 2],
-  //   ],
-  //   outputs: [["SpruceFence", 3]],
-  // },
-  // {
-  //   inputs: [
-  //     ["DarkOakPlanks", 4],
-  //     ["Stick", 2],
-  //   ],
-  //   outputs: [["DarkOakFence", 3]],
-  // },
-  // {
-  //   inputs: [
-  //     ["MangrovePlanks", 4],
-  //     ["Stick", 2],
-  //   ],
-  //   outputs: [["MangroveFence", 3]],
-  // },
+
+  // Fences
+  {
+    inputs: [
+      ["OakPlanks", 4],
+      ["Stick", 2],
+    ],
+    outputs: [["OakFence", 3]],
+  },
+  {
+    inputs: [
+      ["BirchPlanks", 4],
+      ["Stick", 2],
+    ],
+    outputs: [["BirchFence", 3]],
+  },
+  {
+    inputs: [
+      ["JunglePlanks", 4],
+      ["Stick", 2],
+    ],
+    outputs: [["JungleFence", 3]],
+  },
+  {
+    inputs: [
+      ["SakuraPlanks", 4],
+      ["Stick", 2],
+    ],
+    outputs: [["SakuraFence", 3]],
+  },
+  {
+    inputs: [
+      ["AcaciaPlanks", 4],
+      ["Stick", 2],
+    ],
+    outputs: [["AcaciaFence", 3]],
+  },
+  {
+    inputs: [
+      ["SprucePlanks", 4],
+      ["Stick", 2],
+    ],
+    outputs: [["SpruceFence", 3]],
+  },
+  {
+    inputs: [
+      ["DarkOakPlanks", 4],
+      ["Stick", 2],
+    ],
+    outputs: [["DarkOakFence", 3]],
+  },
+  {
+    inputs: [
+      ["MangrovePlanks", 4],
+      ["Stick", 2],
+    ],
+    outputs: [["MangroveFence", 3]],
+  },
+
+  // Fence gates
   // {
   //   inputs: [
   //     ["Stick", 4],
@@ -1552,6 +1557,7 @@ export const recipes: Recipe[] = [
   //   ],
   //   outputs: [["MangroveFenceGate", 1]],
   // },
+
   // {
   //   inputs: [["IronBar", 3]],
   //   outputs: [["IronBars", 8]],
@@ -1598,464 +1604,464 @@ export const recipes: Recipe[] = [
     station: "Workbench",
   },
   // Stairs recipes
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Stone", 1]],
-  //   outputs: [["StoneStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Cobblestone", 1]],
-  //   outputs: [["CobblestoneStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["MossyCobblestone", 1]],
-  //   outputs: [["MossyCobblestoneStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["StoneBricks", 1]],
-  //   outputs: [["StoneBricksStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["SmoothStone", 1]],
-  //   outputs: [["SmoothStoneStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Andesite", 1]],
-  //   outputs: [["AndesiteStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Granite", 1]],
-  //   outputs: [["GraniteStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Diorite", 1]],
-  //   outputs: [["DioriteStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Tuff", 1]],
-  //   outputs: [["TuffStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Basalt", 1]],
-  //   outputs: [["BasaltStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Blackstone", 1]],
-  //   outputs: [["BlackstoneStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["PolishedAndesite", 1]],
-  //   outputs: [["PolishedAndesiteStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["PolishedGranite", 1]],
-  //   outputs: [["PolishedGraniteStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["PolishedDiorite", 1]],
-  //   outputs: [["PolishedDioriteStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["PolishedTuff", 1]],
-  //   outputs: [["PolishedTuffStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["PolishedBasalt", 1]],
-  //   outputs: [["PolishedBasaltStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["PolishedBlackstone", 1]],
-  //   outputs: [["PolishedBlackstoneStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Deepslate", 1]],
-  //   outputs: [["DeepslateStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["CobbledDeepslate", 1]],
-  //   outputs: [["CobbledDeepslateStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["DeepslateBricks", 1]],
-  //   outputs: [["DeepslateBricksStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Sandstone", 1]],
-  //   outputs: [["SandstoneStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["RedSandstone", 1]],
-  //   outputs: [["RedSandstoneStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["SmoothSandstone", 1]],
-  //   outputs: [["SmoothSandstoneStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["SmoothRedSandstone", 1]],
-  //   outputs: [["SmoothRedSandstoneStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["BrickBlock", 1]],
-  //   outputs: [["BrickBlockStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["MudBricks", 1]],
-  //   outputs: [["MudBricksStairs", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["TuffBricks", 1]],
-  //   outputs: [["TuffBricksStairs", 1]],
-  // },
+  {
+    station: "Stonecutter",
+    inputs: [["Stone", 1]],
+    outputs: [["StoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Cobblestone", 1]],
+    outputs: [["CobblestoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["MossyCobblestone", 1]],
+    outputs: [["MossyCobblestoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["StoneBricks", 1]],
+    outputs: [["StoneBricksStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["SmoothStone", 1]],
+    outputs: [["SmoothStoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Andesite", 1]],
+    outputs: [["AndesiteStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Granite", 1]],
+    outputs: [["GraniteStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Diorite", 1]],
+    outputs: [["DioriteStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Tuff", 1]],
+    outputs: [["TuffStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Basalt", 1]],
+    outputs: [["BasaltStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Blackstone", 1]],
+    outputs: [["BlackstoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedAndesite", 1]],
+    outputs: [["PolishedAndesiteStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedGranite", 1]],
+    outputs: [["PolishedGraniteStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedDiorite", 1]],
+    outputs: [["PolishedDioriteStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedTuff", 1]],
+    outputs: [["PolishedTuffStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedBasalt", 1]],
+    outputs: [["PolishedBasaltStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedBlackstone", 1]],
+    outputs: [["PolishedBlackstoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Deepslate", 1]],
+    outputs: [["DeepslateStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["CobbledDeepslate", 1]],
+    outputs: [["CobbledDeepslateStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["DeepslateBricks", 1]],
+    outputs: [["DeepslateBricksStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Sandstone", 1]],
+    outputs: [["SandstoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["RedSandstone", 1]],
+    outputs: [["RedSandstoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["SmoothSandstone", 1]],
+    outputs: [["SmoothSandstoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["SmoothRedSandstone", 1]],
+    outputs: [["SmoothRedSandstoneStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["BrickBlock", 1]],
+    outputs: [["BrickBlockStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["MudBricks", 1]],
+    outputs: [["MudBricksStairs", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["TuffBricks", 1]],
+    outputs: [["TuffBricksStairs", 1]],
+  },
   // Wooden stairs
-  // {
-  //   inputs: [["OakPlanks", 1]],
-  //   outputs: [["OakPlanksStairs", 1]],
-  // },
-  // {
-  //   inputs: [["BirchPlanks", 1]],
-  //   outputs: [["BirchPlanksStairs", 1]],
-  // },
-  // {
-  //   inputs: [["JunglePlanks", 1]],
-  //   outputs: [["JunglePlanksStairs", 1]],
-  // },
-  // {
-  //   inputs: [["SakuraPlanks", 1]],
-  //   outputs: [["SakuraPlanksStairs", 1]],
-  // },
-  // {
-  //   inputs: [["AcaciaPlanks", 1]],
-  //   outputs: [["AcaciaPlanksStairs", 1]],
-  // },
-  // {
-  //   inputs: [["SprucePlanks", 1]],
-  //   outputs: [["SprucePlanksStairs", 1]],
-  // },
-  // {
-  //   inputs: [["DarkOakPlanks", 1]],
-  //   outputs: [["DarkOakPlanksStairs", 1]],
-  // },
-  // {
-  //   inputs: [["MangrovePlanks", 1]],
-  //   outputs: [["MangrovePlanksStairs", 1]],
-  // },
+  {
+    inputs: [["OakPlanks", 1]],
+    outputs: [["OakPlanksStairs", 1]],
+  },
+  {
+    inputs: [["BirchPlanks", 1]],
+    outputs: [["BirchPlanksStairs", 1]],
+  },
+  {
+    inputs: [["JunglePlanks", 1]],
+    outputs: [["JunglePlanksStairs", 1]],
+  },
+  {
+    inputs: [["SakuraPlanks", 1]],
+    outputs: [["SakuraPlanksStairs", 1]],
+  },
+  {
+    inputs: [["AcaciaPlanks", 1]],
+    outputs: [["AcaciaPlanksStairs", 1]],
+  },
+  {
+    inputs: [["SprucePlanks", 1]],
+    outputs: [["SprucePlanksStairs", 1]],
+  },
+  {
+    inputs: [["DarkOakPlanks", 1]],
+    outputs: [["DarkOakPlanksStairs", 1]],
+  },
+  {
+    inputs: [["MangrovePlanks", 1]],
+    outputs: [["MangrovePlanksStairs", 1]],
+  },
   // Slab recipes
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Stone", 1]],
-  //   outputs: [["StoneSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Cobblestone", 1]],
-  //   outputs: [["CobblestoneSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["MossyCobblestone", 1]],
-  //   outputs: [["MossyCobblestoneSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["StoneBricks", 1]],
-  //   outputs: [["StoneBricksSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["SmoothStone", 1]],
-  //   outputs: [["SmoothStoneSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Andesite", 1]],
-  //   outputs: [["AndesiteSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Granite", 1]],
-  //   outputs: [["GraniteSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Diorite", 1]],
-  //   outputs: [["DioriteSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Tuff", 1]],
-  //   outputs: [["TuffSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Basalt", 1]],
-  //   outputs: [["BasaltSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Blackstone", 1]],
-  //   outputs: [["BlackstoneSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["PolishedAndesite", 1]],
-  //   outputs: [["PolishedAndesiteSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["PolishedGranite", 1]],
-  //   outputs: [["PolishedGraniteSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["PolishedDiorite", 1]],
-  //   outputs: [["PolishedDioriteSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["PolishedTuff", 1]],
-  //   outputs: [["PolishedTuffSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["PolishedBasalt", 1]],
-  //   outputs: [["PolishedBasaltSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["PolishedBlackstone", 1]],
-  //   outputs: [["PolishedBlackstoneSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Deepslate", 1]],
-  //   outputs: [["DeepslateSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["CobbledDeepslate", 1]],
-  //   outputs: [["CobbledDeepslateSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["DeepslateBricks", 1]],
-  //   outputs: [["DeepslateBricksSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Sandstone", 1]],
-  //   outputs: [["SandstoneSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["RedSandstone", 1]],
-  //   outputs: [["RedSandstoneSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["SmoothSandstone", 1]],
-  //   outputs: [["SmoothSandstoneSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["SmoothRedSandstone", 1]],
-  //   outputs: [["SmoothRedSandstoneSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["BrickBlock", 1]],
-  //   outputs: [["BrickBlockSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["MudBricks", 1]],
-  //   outputs: [["MudBricksSlab", 2]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["TuffBricks", 1]],
-  //   outputs: [["TuffBricksSlab", 2]],
-  // },
+  {
+    station: "Stonecutter",
+    inputs: [["Stone", 1]],
+    outputs: [["StoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Cobblestone", 1]],
+    outputs: [["CobblestoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["MossyCobblestone", 1]],
+    outputs: [["MossyCobblestoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["StoneBricks", 1]],
+    outputs: [["StoneBricksSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["SmoothStone", 1]],
+    outputs: [["SmoothStoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Andesite", 1]],
+    outputs: [["AndesiteSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Granite", 1]],
+    outputs: [["GraniteSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Diorite", 1]],
+    outputs: [["DioriteSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Tuff", 1]],
+    outputs: [["TuffSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Basalt", 1]],
+    outputs: [["BasaltSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Blackstone", 1]],
+    outputs: [["BlackstoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedAndesite", 1]],
+    outputs: [["PolishedAndesiteSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedGranite", 1]],
+    outputs: [["PolishedGraniteSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedDiorite", 1]],
+    outputs: [["PolishedDioriteSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedTuff", 1]],
+    outputs: [["PolishedTuffSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedBasalt", 1]],
+    outputs: [["PolishedBasaltSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedBlackstone", 1]],
+    outputs: [["PolishedBlackstoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Deepslate", 1]],
+    outputs: [["DeepslateSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["CobbledDeepslate", 1]],
+    outputs: [["CobbledDeepslateSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["DeepslateBricks", 1]],
+    outputs: [["DeepslateBricksSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Sandstone", 1]],
+    outputs: [["SandstoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["RedSandstone", 1]],
+    outputs: [["RedSandstoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["SmoothSandstone", 1]],
+    outputs: [["SmoothSandstoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["SmoothRedSandstone", 1]],
+    outputs: [["SmoothRedSandstoneSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["BrickBlock", 1]],
+    outputs: [["BrickBlockSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["MudBricks", 1]],
+    outputs: [["MudBricksSlab", 2]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["TuffBricks", 1]],
+    outputs: [["TuffBricksSlab", 2]],
+  },
   // Wooden slabs
-  // {
-  //   inputs: [["OakPlanks", 1]],
-  //   outputs: [["OakPlanksSlab", 2]],
-  // },
-  // {
-  //   inputs: [["BirchPlanks", 1]],
-  //   outputs: [["BirchPlanksSlab", 2]],
-  // },
-  // {
-  //   inputs: [["JunglePlanks", 1]],
-  //   outputs: [["JunglePlanksSlab", 2]],
-  // },
-  // {
-  //   inputs: [["SakuraPlanks", 1]],
-  //   outputs: [["SakuraPlanksSlab", 2]],
-  // },
-  // {
-  //   inputs: [["AcaciaPlanks", 1]],
-  //   outputs: [["AcaciaPlanksSlab", 2]],
-  // },
-  // {
-  //   inputs: [["SprucePlanks", 1]],
-  //   outputs: [["SprucePlanksSlab", 2]],
-  // },
-  // {
-  //   inputs: [["DarkOakPlanks", 1]],
-  //   outputs: [["DarkOakPlanksSlab", 2]],
-  // },
-  // {
-  //   inputs: [["MangrovePlanks", 1]],
-  //   outputs: [["MangrovePlanksSlab", 2]],
-  // },
+  {
+    inputs: [["OakPlanks", 1]],
+    outputs: [["OakPlanksSlab", 2]],
+  },
+  {
+    inputs: [["BirchPlanks", 1]],
+    outputs: [["BirchPlanksSlab", 2]],
+  },
+  {
+    inputs: [["JunglePlanks", 1]],
+    outputs: [["JunglePlanksSlab", 2]],
+  },
+  {
+    inputs: [["SakuraPlanks", 1]],
+    outputs: [["SakuraPlanksSlab", 2]],
+  },
+  {
+    inputs: [["AcaciaPlanks", 1]],
+    outputs: [["AcaciaPlanksSlab", 2]],
+  },
+  {
+    inputs: [["SprucePlanks", 1]],
+    outputs: [["SprucePlanksSlab", 2]],
+  },
+  {
+    inputs: [["DarkOakPlanks", 1]],
+    outputs: [["DarkOakPlanksSlab", 2]],
+  },
+  {
+    inputs: [["MangrovePlanks", 1]],
+    outputs: [["MangrovePlanksSlab", 2]],
+  },
   // Wall recipes
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Stone", 1]],
-  //   outputs: [["StoneWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Cobblestone", 1]],
-  //   outputs: [["CobblestoneWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["MossyCobblestone", 1]],
-  //   outputs: [["MossyCobblestoneWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["StoneBricks", 1]],
-  //   outputs: [["StoneBricksWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Andesite", 1]],
-  //   outputs: [["AndesiteWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Granite", 1]],
-  //   outputs: [["GraniteWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Diorite", 1]],
-  //   outputs: [["DioriteWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Tuff", 1]],
-  //   outputs: [["TuffWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Basalt", 1]],
-  //   outputs: [["BasaltWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Blackstone", 1]],
-  //   outputs: [["BlackstoneWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["PolishedAndesite", 1]],
-  //   outputs: [["PolishedAndesiteWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["PolishedGranite", 1]],
-  //   outputs: [["PolishedGraniteWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["PolishedDiorite", 1]],
-  //   outputs: [["PolishedDioriteWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["PolishedTuff", 1]],
-  //   outputs: [["PolishedTuffWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["PolishedBasalt", 1]],
-  //   outputs: [["PolishedBasaltWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["PolishedBlackstone", 1]],
-  //   outputs: [["PolishedBlackstoneWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Deepslate", 1]],
-  //   outputs: [["DeepslateWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["CobbledDeepslate", 1]],
-  //   outputs: [["CobbledDeepslateWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["DeepslateBricks", 1]],
-  //   outputs: [["DeepslateBricksWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["Sandstone", 1]],
-  //   outputs: [["SandstoneWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["RedSandstone", 1]],
-  //   outputs: [["RedSandstoneWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["BrickBlock", 1]],
-  //   outputs: [["BrickBlockWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["MudBricks", 1]],
-  //   outputs: [["MudBricksWall", 1]],
-  // },
-  // {
-  //   station: "Stonecutter",
-  //   inputs: [["TuffBricks", 1]],
-  //   outputs: [["TuffBricksWall", 1]],
-  // },
+  {
+    station: "Stonecutter",
+    inputs: [["Stone", 1]],
+    outputs: [["StoneWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Cobblestone", 1]],
+    outputs: [["CobblestoneWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["MossyCobblestone", 1]],
+    outputs: [["MossyCobblestoneWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["StoneBricks", 1]],
+    outputs: [["StoneBricksWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Andesite", 1]],
+    outputs: [["AndesiteWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Granite", 1]],
+    outputs: [["GraniteWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Diorite", 1]],
+    outputs: [["DioriteWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Tuff", 1]],
+    outputs: [["TuffWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Basalt", 1]],
+    outputs: [["BasaltWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Blackstone", 1]],
+    outputs: [["BlackstoneWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedAndesite", 1]],
+    outputs: [["PolishedAndesiteWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedGranite", 1]],
+    outputs: [["PolishedGraniteWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedDiorite", 1]],
+    outputs: [["PolishedDioriteWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedTuff", 1]],
+    outputs: [["PolishedTuffWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedBasalt", 1]],
+    outputs: [["PolishedBasaltWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["PolishedBlackstone", 1]],
+    outputs: [["PolishedBlackstoneWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Deepslate", 1]],
+    outputs: [["DeepslateWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["CobbledDeepslate", 1]],
+    outputs: [["CobbledDeepslateWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["DeepslateBricks", 1]],
+    outputs: [["DeepslateBricksWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["Sandstone", 1]],
+    outputs: [["SandstoneWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["RedSandstone", 1]],
+    outputs: [["RedSandstoneWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["BrickBlock", 1]],
+    outputs: [["BrickBlockWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["MudBricks", 1]],
+    outputs: [["MudBricksWall", 1]],
+  },
+  {
+    station: "Stonecutter",
+    inputs: [["TuffBricks", 1]],
+    outputs: [["TuffBricksWall", 1]],
+  },
 ];
 
 // Get recipes where an object is used as input

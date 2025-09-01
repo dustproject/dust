@@ -3,7 +3,6 @@ pragma solidity >=0.8.24;
 
 import { IMachineSystem } from "../codegen/world/IMachineSystem.sol";
 import { ITransferSystem } from "../codegen/world/ITransferSystem.sol";
-
 import { Orientation } from "./Orientation.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
 
@@ -267,6 +266,108 @@ library ObjectTypes {
   ObjectType constant Paper = ObjectType.wrap(387);
   ObjectType constant Stick = ObjectType.wrap(388);
   ObjectType constant Lodestone = ObjectType.wrap(389);
+  ObjectType constant StoneStairs = ObjectType.wrap(398);
+  ObjectType constant CobblestoneStairs = ObjectType.wrap(399);
+  ObjectType constant MossyCobblestoneStairs = ObjectType.wrap(400);
+  ObjectType constant StoneBricksStairs = ObjectType.wrap(401);
+  ObjectType constant SmoothStoneStairs = ObjectType.wrap(402);
+  ObjectType constant AndesiteStairs = ObjectType.wrap(403);
+  ObjectType constant GraniteStairs = ObjectType.wrap(404);
+  ObjectType constant DioriteStairs = ObjectType.wrap(405);
+  ObjectType constant TuffStairs = ObjectType.wrap(406);
+  ObjectType constant BasaltStairs = ObjectType.wrap(407);
+  ObjectType constant BlackstoneStairs = ObjectType.wrap(408);
+  ObjectType constant PolishedAndesiteStairs = ObjectType.wrap(409);
+  ObjectType constant PolishedGraniteStairs = ObjectType.wrap(410);
+  ObjectType constant PolishedDioriteStairs = ObjectType.wrap(411);
+  ObjectType constant PolishedTuffStairs = ObjectType.wrap(412);
+  ObjectType constant PolishedBasaltStairs = ObjectType.wrap(413);
+  ObjectType constant PolishedBlackstoneStairs = ObjectType.wrap(414);
+  ObjectType constant DeepslateStairs = ObjectType.wrap(415);
+  ObjectType constant CobbledDeepslateStairs = ObjectType.wrap(416);
+  ObjectType constant DeepslateBricksStairs = ObjectType.wrap(417);
+  ObjectType constant SandstoneStairs = ObjectType.wrap(418);
+  ObjectType constant RedSandstoneStairs = ObjectType.wrap(419);
+  ObjectType constant SmoothSandstoneStairs = ObjectType.wrap(420);
+  ObjectType constant SmoothRedSandstoneStairs = ObjectType.wrap(421);
+  ObjectType constant BrickBlockStairs = ObjectType.wrap(422);
+  ObjectType constant MudBricksStairs = ObjectType.wrap(423);
+  ObjectType constant TuffBricksStairs = ObjectType.wrap(424);
+  ObjectType constant OakPlanksStairs = ObjectType.wrap(425);
+  ObjectType constant BirchPlanksStairs = ObjectType.wrap(426);
+  ObjectType constant JunglePlanksStairs = ObjectType.wrap(427);
+  ObjectType constant SakuraPlanksStairs = ObjectType.wrap(428);
+  ObjectType constant AcaciaPlanksStairs = ObjectType.wrap(429);
+  ObjectType constant SprucePlanksStairs = ObjectType.wrap(430);
+  ObjectType constant DarkOakPlanksStairs = ObjectType.wrap(431);
+  ObjectType constant MangrovePlanksStairs = ObjectType.wrap(432);
+  ObjectType constant StoneSlab = ObjectType.wrap(433);
+  ObjectType constant CobblestoneSlab = ObjectType.wrap(434);
+  ObjectType constant MossyCobblestoneSlab = ObjectType.wrap(435);
+  ObjectType constant StoneBricksSlab = ObjectType.wrap(436);
+  ObjectType constant SmoothStoneSlab = ObjectType.wrap(437);
+  ObjectType constant AndesiteSlab = ObjectType.wrap(438);
+  ObjectType constant GraniteSlab = ObjectType.wrap(439);
+  ObjectType constant DioriteSlab = ObjectType.wrap(440);
+  ObjectType constant TuffSlab = ObjectType.wrap(441);
+  ObjectType constant BasaltSlab = ObjectType.wrap(442);
+  ObjectType constant BlackstoneSlab = ObjectType.wrap(443);
+  ObjectType constant PolishedAndesiteSlab = ObjectType.wrap(444);
+  ObjectType constant PolishedGraniteSlab = ObjectType.wrap(445);
+  ObjectType constant PolishedDioriteSlab = ObjectType.wrap(446);
+  ObjectType constant PolishedTuffSlab = ObjectType.wrap(447);
+  ObjectType constant PolishedBasaltSlab = ObjectType.wrap(448);
+  ObjectType constant PolishedBlackstoneSlab = ObjectType.wrap(449);
+  ObjectType constant DeepslateSlab = ObjectType.wrap(450);
+  ObjectType constant CobbledDeepslateSlab = ObjectType.wrap(451);
+  ObjectType constant DeepslateBricksSlab = ObjectType.wrap(452);
+  ObjectType constant SandstoneSlab = ObjectType.wrap(453);
+  ObjectType constant RedSandstoneSlab = ObjectType.wrap(454);
+  ObjectType constant SmoothSandstoneSlab = ObjectType.wrap(455);
+  ObjectType constant SmoothRedSandstoneSlab = ObjectType.wrap(456);
+  ObjectType constant BrickBlockSlab = ObjectType.wrap(457);
+  ObjectType constant MudBricksSlab = ObjectType.wrap(458);
+  ObjectType constant TuffBricksSlab = ObjectType.wrap(459);
+  ObjectType constant OakPlanksSlab = ObjectType.wrap(460);
+  ObjectType constant BirchPlanksSlab = ObjectType.wrap(461);
+  ObjectType constant JunglePlanksSlab = ObjectType.wrap(462);
+  ObjectType constant SakuraPlanksSlab = ObjectType.wrap(463);
+  ObjectType constant AcaciaPlanksSlab = ObjectType.wrap(464);
+  ObjectType constant SprucePlanksSlab = ObjectType.wrap(465);
+  ObjectType constant DarkOakPlanksSlab = ObjectType.wrap(466);
+  ObjectType constant MangrovePlanksSlab = ObjectType.wrap(467);
+  ObjectType constant StoneWall = ObjectType.wrap(468);
+  ObjectType constant CobblestoneWall = ObjectType.wrap(469);
+  ObjectType constant MossyCobblestoneWall = ObjectType.wrap(470);
+  ObjectType constant StoneBricksWall = ObjectType.wrap(471);
+  ObjectType constant AndesiteWall = ObjectType.wrap(472);
+  ObjectType constant GraniteWall = ObjectType.wrap(473);
+  ObjectType constant DioriteWall = ObjectType.wrap(474);
+  ObjectType constant TuffWall = ObjectType.wrap(475);
+  ObjectType constant BasaltWall = ObjectType.wrap(476);
+  ObjectType constant BlackstoneWall = ObjectType.wrap(477);
+  ObjectType constant PolishedAndesiteWall = ObjectType.wrap(478);
+  ObjectType constant PolishedGraniteWall = ObjectType.wrap(479);
+  ObjectType constant PolishedDioriteWall = ObjectType.wrap(480);
+  ObjectType constant PolishedTuffWall = ObjectType.wrap(481);
+  ObjectType constant PolishedBasaltWall = ObjectType.wrap(482);
+  ObjectType constant PolishedBlackstoneWall = ObjectType.wrap(483);
+  ObjectType constant DeepslateWall = ObjectType.wrap(484);
+  ObjectType constant CobbledDeepslateWall = ObjectType.wrap(485);
+  ObjectType constant DeepslateBricksWall = ObjectType.wrap(486);
+  ObjectType constant SandstoneWall = ObjectType.wrap(487);
+  ObjectType constant RedSandstoneWall = ObjectType.wrap(488);
+  ObjectType constant BrickBlockWall = ObjectType.wrap(489);
+  ObjectType constant MudBricksWall = ObjectType.wrap(490);
+  ObjectType constant TuffBricksWall = ObjectType.wrap(491);
+  ObjectType constant OakFence = ObjectType.wrap(510);
+  ObjectType constant BirchFence = ObjectType.wrap(511);
+  ObjectType constant JungleFence = ObjectType.wrap(512);
+  ObjectType constant SakuraFence = ObjectType.wrap(513);
+  ObjectType constant AcaciaFence = ObjectType.wrap(514);
+  ObjectType constant SpruceFence = ObjectType.wrap(515);
+  ObjectType constant DarkOakFence = ObjectType.wrap(516);
+  ObjectType constant MangroveFence = ObjectType.wrap(517);
   ObjectType constant WoodenPick = ObjectType.wrap(32768);
   ObjectType constant CopperPick = ObjectType.wrap(32769);
   ObjectType constant IronPick = ObjectType.wrap(32770);
@@ -349,7 +450,14 @@ library ObjectTypeLib {
       // IDs in [256..511]
       {
         let off := sub(self, 256)
-        let bit := and(shr(off, 0x26ffffffff00007629c00000000ffdffff), 1)
+        let bit := and(shr(off, 0xc0000fffffffffffffffffffffffc026ffffffff00007629c00000000ffdffff), 1)
+        ok := or(ok, bit)
+      }
+
+      // IDs in [512..767]
+      {
+        let off := sub(self, 512)
+        let bit := and(shr(off, 0x3f), 1)
         ok := or(ok, bit)
       }
     }
@@ -755,7 +863,7 @@ library ObjectTypeLib {
     return [ObjectTypes.AnyPlank, ObjectTypes.AnyLog, ObjectTypes.AnyLeaf, ObjectTypes.AnyTerracotta];
   }
 
-  function getBlockTypes() internal pure returns (ObjectType[224] memory) {
+  function getBlockTypes() internal pure returns (ObjectType[326] memory) {
     return [
       ObjectTypes.Stone,
       ObjectTypes.Deepslate,
@@ -980,7 +1088,109 @@ library ObjectTypeLib {
       ObjectTypes.BrownConcrete,
       ObjectTypes.GreenConcrete,
       ObjectTypes.RedConcrete,
-      ObjectTypes.BlackConcrete
+      ObjectTypes.BlackConcrete,
+      ObjectTypes.StoneStairs,
+      ObjectTypes.CobblestoneStairs,
+      ObjectTypes.MossyCobblestoneStairs,
+      ObjectTypes.StoneBricksStairs,
+      ObjectTypes.SmoothStoneStairs,
+      ObjectTypes.AndesiteStairs,
+      ObjectTypes.GraniteStairs,
+      ObjectTypes.DioriteStairs,
+      ObjectTypes.TuffStairs,
+      ObjectTypes.BasaltStairs,
+      ObjectTypes.BlackstoneStairs,
+      ObjectTypes.PolishedAndesiteStairs,
+      ObjectTypes.PolishedGraniteStairs,
+      ObjectTypes.PolishedDioriteStairs,
+      ObjectTypes.PolishedTuffStairs,
+      ObjectTypes.PolishedBasaltStairs,
+      ObjectTypes.PolishedBlackstoneStairs,
+      ObjectTypes.DeepslateStairs,
+      ObjectTypes.CobbledDeepslateStairs,
+      ObjectTypes.DeepslateBricksStairs,
+      ObjectTypes.SandstoneStairs,
+      ObjectTypes.RedSandstoneStairs,
+      ObjectTypes.SmoothSandstoneStairs,
+      ObjectTypes.SmoothRedSandstoneStairs,
+      ObjectTypes.BrickBlockStairs,
+      ObjectTypes.MudBricksStairs,
+      ObjectTypes.TuffBricksStairs,
+      ObjectTypes.OakPlanksStairs,
+      ObjectTypes.BirchPlanksStairs,
+      ObjectTypes.JunglePlanksStairs,
+      ObjectTypes.SakuraPlanksStairs,
+      ObjectTypes.AcaciaPlanksStairs,
+      ObjectTypes.SprucePlanksStairs,
+      ObjectTypes.DarkOakPlanksStairs,
+      ObjectTypes.MangrovePlanksStairs,
+      ObjectTypes.StoneSlab,
+      ObjectTypes.CobblestoneSlab,
+      ObjectTypes.MossyCobblestoneSlab,
+      ObjectTypes.StoneBricksSlab,
+      ObjectTypes.SmoothStoneSlab,
+      ObjectTypes.AndesiteSlab,
+      ObjectTypes.GraniteSlab,
+      ObjectTypes.DioriteSlab,
+      ObjectTypes.TuffSlab,
+      ObjectTypes.BasaltSlab,
+      ObjectTypes.BlackstoneSlab,
+      ObjectTypes.PolishedAndesiteSlab,
+      ObjectTypes.PolishedGraniteSlab,
+      ObjectTypes.PolishedDioriteSlab,
+      ObjectTypes.PolishedTuffSlab,
+      ObjectTypes.PolishedBasaltSlab,
+      ObjectTypes.PolishedBlackstoneSlab,
+      ObjectTypes.DeepslateSlab,
+      ObjectTypes.CobbledDeepslateSlab,
+      ObjectTypes.DeepslateBricksSlab,
+      ObjectTypes.SandstoneSlab,
+      ObjectTypes.RedSandstoneSlab,
+      ObjectTypes.SmoothSandstoneSlab,
+      ObjectTypes.SmoothRedSandstoneSlab,
+      ObjectTypes.BrickBlockSlab,
+      ObjectTypes.MudBricksSlab,
+      ObjectTypes.TuffBricksSlab,
+      ObjectTypes.OakPlanksSlab,
+      ObjectTypes.BirchPlanksSlab,
+      ObjectTypes.JunglePlanksSlab,
+      ObjectTypes.SakuraPlanksSlab,
+      ObjectTypes.AcaciaPlanksSlab,
+      ObjectTypes.SprucePlanksSlab,
+      ObjectTypes.DarkOakPlanksSlab,
+      ObjectTypes.MangrovePlanksSlab,
+      ObjectTypes.StoneWall,
+      ObjectTypes.CobblestoneWall,
+      ObjectTypes.MossyCobblestoneWall,
+      ObjectTypes.StoneBricksWall,
+      ObjectTypes.AndesiteWall,
+      ObjectTypes.GraniteWall,
+      ObjectTypes.DioriteWall,
+      ObjectTypes.TuffWall,
+      ObjectTypes.BasaltWall,
+      ObjectTypes.BlackstoneWall,
+      ObjectTypes.PolishedAndesiteWall,
+      ObjectTypes.PolishedGraniteWall,
+      ObjectTypes.PolishedDioriteWall,
+      ObjectTypes.PolishedTuffWall,
+      ObjectTypes.PolishedBasaltWall,
+      ObjectTypes.PolishedBlackstoneWall,
+      ObjectTypes.DeepslateWall,
+      ObjectTypes.CobbledDeepslateWall,
+      ObjectTypes.DeepslateBricksWall,
+      ObjectTypes.SandstoneWall,
+      ObjectTypes.RedSandstoneWall,
+      ObjectTypes.BrickBlockWall,
+      ObjectTypes.MudBricksWall,
+      ObjectTypes.TuffBricksWall,
+      ObjectTypes.OakFence,
+      ObjectTypes.BirchFence,
+      ObjectTypes.JungleFence,
+      ObjectTypes.SakuraFence,
+      ObjectTypes.AcaciaFence,
+      ObjectTypes.SpruceFence,
+      ObjectTypes.DarkOakFence,
+      ObjectTypes.MangroveFence
     ];
   }
 
@@ -1739,43 +1949,33 @@ library ObjectTypeLib {
   }
 
   function isOrientationSupported(ObjectType self, Orientation orientation) internal pure returns (bool) {
-    if (self == ObjectTypes.TextSign) {
-      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
-        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    uint8 orientationValue = Orientation.unwrap(orientation);
+
+    // Check if orientation is valid (0-47)
+    if (orientationValue >= 48) return false;
+
+    uint64 orientationBit = uint64(1) << orientationValue;
+    uint16 selfId = self.unwrap();
+
+    // Orientations [0, 1, 40, 44]: TextSign, ForceField, Chest...
+    if (selfId == 120 || (selfId >= 145 && selfId <= 147) || (selfId >= 149 && selfId <= 151) || selfId == 256) {
+      return (orientationBit & 0x110000000003) != 0;
     }
-    if (self == ObjectTypes.ForceField) {
-      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
-        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    // Orientations [1, 44]: Bed
+    if (selfId == 148) {
+      return (orientationBit & 0x100000000002) != 0;
     }
-    if (self == ObjectTypes.Chest) {
-      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
-        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    // Orientations [0, 1, 2, 3, 40, 41, 42, 43]: StoneStairs, CobblestoneStairs, MossyCobblestoneStairs...
+    if ((selfId >= 398 && selfId <= 432)) {
+      return (orientationBit & 0xf000000000f) != 0;
     }
-    if (self == ObjectTypes.SpawnTile) {
-      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
-        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
-    }
-    if (self == ObjectTypes.Bed) {
-      return orientation == Orientation.wrap(1) || orientation == Orientation.wrap(44);
-    }
-    if (self == ObjectTypes.Workbench) {
-      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
-        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
-    }
-    if (self == ObjectTypes.Powerstone) {
-      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
-        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
-    }
-    if (self == ObjectTypes.Furnace) {
-      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
-        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
-    }
-    if (self == ObjectTypes.Stonecutter) {
-      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
-        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
+    // Orientations [0, 2]: StoneSlab, CobblestoneSlab, MossyCobblestoneSlab...
+    if ((selfId >= 433 && selfId <= 467)) {
+      return (orientationBit & 0x5) != 0;
     }
 
-    return orientation == Orientation.wrap(0);
+    // Default: only orientation 0 is supported
+    return orientationValue == 0;
   }
 
   function getRelativeCoords(ObjectType self, Vec3 baseCoord) internal pure returns (Vec3[] memory) {
