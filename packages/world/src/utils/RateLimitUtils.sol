@@ -3,7 +3,8 @@ pragma solidity >=0.8.24;
 
 import {
   BUILD_UNIT_COST,
-  HIT_UNIT_COST,
+  HIT_MACHINE_UNIT_COST,
+  HIT_PLAYER_UNIT_COST,
   MAX_RATE_LIMIT_UNITS_PER_BLOCK,
   MINE_UNIT_COST,
   SWIM_UNIT_COST,
@@ -19,9 +20,12 @@ library RateLimitUtils {
     _updateRateLimit(entity, RateLimitType.Movement, WALK_UNIT_COST * walkSteps + SWIM_UNIT_COST * swimSteps);
   }
 
-  // Combat actions
-  function hit(EntityId entity) internal {
-    _updateRateLimit(entity, RateLimitType.Combat, HIT_UNIT_COST);
+  function hitPlayer(EntityId entity) internal {
+    _updateRateLimit(entity, RateLimitType.HitPlayer, HIT_PLAYER_UNIT_COST);
+  }
+
+  function hitMachine(EntityId entity) internal {
+    _updateRateLimit(entity, RateLimitType.HitMachine, HIT_MACHINE_UNIT_COST);
   }
 
   // Work actions

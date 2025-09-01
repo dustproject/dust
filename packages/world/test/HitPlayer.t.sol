@@ -68,6 +68,86 @@ contract HitPlayerTest is DustTest {
     assertEq(hitPlayerProgress, expectedTotalDamage, "Hit player damage activity not tracked correctly");
   }
 
+  // Target at exactly 1 energy: bare-hands hit kills and costs 1 energy
+  function testHitPlayerWithoutToolKillsTargetWithOneEnergy() public {
+    // Setup two players
+    (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupAirChunkWithPlayer();
+    Vec3 bobCoord = aliceCoord + vec3(1, 0, 0);
+    (address bob, EntityId bobEntityId) = createTestPlayer(bobCoord);
+
+    // Alice has plenty of energy; Bob has exactly 1
+    uint128 aliceInitialEnergy = BARE_HANDS_ACTION_ENERGY_COST * 2;
+    uint128 bobInitialEnergy = 1;
+    Energy.setEnergy(aliceEntityId, aliceInitialEnergy);
+    Energy.setEnergy(bobEntityId, bobInitialEnergy);
+
+    EnergyDataSnapshot memory aliceSnapshot = getEnergyDataSnapshot(aliceEntityId);
+    EnergyDataSnapshot memory bobSnapshot = getEnergyDataSnapshot(bobEntityId);
+
+    // Hit Bob without tool
+    vm.prank(alice);
+    world.hitPlayer(aliceEntityId, bobEntityId, bytes(""));
+
+    // Costs and damage should be capped by Bob's remaining energy (1)
+    uint128 expectedAliceReduction = 1;
+    uint128 expectedTotalDamage = 1;
+
+    // Verify energy changes
+    assertEq(Energy.getEnergy(aliceEntityId), aliceInitialEnergy - expectedAliceReduction, "Alice energy incorrect");
+    assertEq(Energy.getEnergy(bobEntityId), 0, "Bob should be dead");
+
+    // Verify energy flowed to local pools
+    uint128 aliceEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(aliceSnapshot);
+    assertEq(aliceEnergyLost, expectedAliceReduction, "Alice energy lost incorrect");
+
+    uint128 bobEnergyLost = assertEnergyFlowedFromPlayerToLocalPool(bobSnapshot);
+    assertEq(bobEnergyLost, expectedTotalDamage, "Bob total damage incorrect");
+
+    // Trigger player removal and verify grid cleared
+    vm.prank(bob);
+    world.activate(bobEntityId);
+    assertEq(EntityPosition.get(bobEntityId), vec3(0, 0, 0), "Bob position should be cleared");
+  }
+
+  // Test hitting dead player with a tool (no energy or tool mass change)
+  function testHitDeadPlayerWithTool() public {
+    // Setup two players
+    (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupAirChunkWithPlayer();
+    Vec3 bobCoord = aliceCoord + vec3(1, 0, 0);
+    (, EntityId bobEntityId) = createTestPlayer(bobCoord);
+
+    // Equip a whacker for Alice
+    EntityId whacker = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenWhacker);
+    uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, whacker);
+    uint128 whackerMass = Mass.getMass(whacker);
+
+    // Kill Bob by setting energy to 0
+    Energy.setEnergy(bobEntityId, 0);
+    Energy.setEnergy(aliceEntityId, TOOL_ACTION_ENERGY_COST + 1000);
+
+    uint128 aliceInitialEnergy = Energy.getEnergy(aliceEntityId);
+    uint128 bobInitialEnergy = Energy.getEnergy(bobEntityId);
+
+    // Snapshots for local pool verification
+    EnergyDataSnapshot memory aliceSnapshot = getEnergyDataSnapshot(aliceEntityId);
+    EnergyDataSnapshot memory bobSnapshot = getEnergyDataSnapshot(bobEntityId);
+
+    // Hit dead player should do nothing
+    vm.prank(alice);
+    world.hitPlayer(aliceEntityId, bobEntityId, slot, bytes(""));
+
+    // Alice energy should not change; tool mass should not change; Bob remains dead
+    assertEq(Energy.getEnergy(aliceEntityId), aliceInitialEnergy, "Alice energy should not change");
+    assertEq(Mass.getMass(whacker), whackerMass, "Tool mass should not change when target is dead");
+    assertEq(Energy.getEnergy(bobEntityId), bobInitialEnergy, "Bob energy should remain 0");
+
+    // Verify no energy flowed to local pools
+    EnergyDataSnapshot memory aliceAfter = getEnergyDataSnapshot(aliceEntityId);
+    EnergyDataSnapshot memory bobAfter = getEnergyDataSnapshot(bobEntityId);
+    assertEq(aliceAfter.localPoolEnergy, aliceSnapshot.localPoolEnergy, "Alice local pool should be unchanged");
+    assertEq(bobAfter.localPoolEnergy, bobSnapshot.localPoolEnergy, "Bob local pool should be unchanged");
+  }
+
   // Test hitting without tool - kill target
   function testHitPlayerWithoutToolKillsTarget() public {
     // Setup two players
@@ -306,6 +386,32 @@ contract HitPlayerTest is DustTest {
     assertEnergyFlowedFromPlayerToLocalPool(aliceSnapshot);
   }
 
+  // Ensure tool mass is not consumed if attacker dies from tool cost
+  function testHitPlayerWithToolAttackerDiesDoesNotConsumeTool() public {
+    // Setup two players
+    (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupAirChunkWithPlayer();
+    Vec3 bobCoord = aliceCoord + vec3(1, 0, 0);
+    (, EntityId bobEntityId) = createTestPlayer(bobCoord);
+
+    // Create and equip whacker for Alice
+    EntityId whacker = TestInventoryUtils.addEntity(aliceEntityId, ObjectTypes.WoodenWhacker);
+    uint16 slot = TestInventoryUtils.findEntity(aliceEntityId, whacker);
+    uint128 initialMass = Mass.getMass(whacker);
+
+    // Set Alice energy to exactly the tool hit cost so she dies on use
+    Energy.setEnergy(aliceEntityId, TOOL_ACTION_ENERGY_COST);
+    Energy.setEnergy(bobEntityId, MAX_PLAYER_ENERGY);
+
+    // Hit should cause Alice to die and not affect tool mass or Bob
+    vm.prank(alice);
+    world.hitPlayer(aliceEntityId, bobEntityId, slot, bytes(""));
+
+    // Alice should be dead; tool mass unchanged; Bob unchanged
+    assertPlayerIsDead(aliceEntityId, aliceCoord);
+    assertEq(Mass.getMass(whacker), initialMass, "Tool mass should not change when attacker dies");
+    assertEq(Energy.getEnergy(bobEntityId), MAX_PLAYER_ENERGY, "Bob should not take damage");
+  }
+
   // Test hitting with non-whacker tool
   function testHitPlayerWithNonWhackerTool() public {
     // Setup two players
@@ -434,7 +540,6 @@ contract HitPlayerTest is DustTest {
     world.hitPlayer(aliceEntityId, bobEntityId, slot, bytes(""));
   }
 
-  // Test edge cases
   function testHitPlayerFailsIfTooFar() public {
     // Setup two players far apart
     (address alice, EntityId aliceEntityId, Vec3 aliceCoord) = setupAirChunkWithPlayer();

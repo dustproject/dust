@@ -30,7 +30,7 @@ export default defineWorld({
       "RemoveFragment",
       "Death",
     ],
-    RateLimitType: ["Movement", "Combat", "Work"],
+    RateLimitType: ["Movement", "HitMachine", "HitPlayer", "Work"],
     ActivityType: [
       "MinePickMass",
       "MineAxeMass",
@@ -374,6 +374,23 @@ export default defineWorld({
         fullyGrownAt: "uint128",
       },
       key: ["entityId"],
+    },
+    // ------------------------------------------------------------
+    // Player names
+    // ------------------------------------------------------------
+    PlayerName: {
+      schema: {
+        player: "address",
+        name: "bytes32",
+      },
+      key: ["player"],
+    },
+    ReversePlayerName: {
+      schema: {
+        name: "bytes32",
+        player: "address",
+      },
+      key: ["name"],
     },
     // ------------------------------------------------------------
     // Offchain

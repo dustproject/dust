@@ -58,7 +58,7 @@ library ToolUtils {
     // If there's an energy cost, apply it
     if (energyCost > 0) {
       // Transfer the player's energy to the local pool
-      uint128 remainingEnergy = decreasePlayerEnergy(toolData.owner, callerCoord, energyCost);
+      uint128 remainingEnergy = decreasePlayerEnergy(toolData.owner, energyCost);
       addEnergyToLocalPool(callerCoord, energyCost);
 
       // If player died, return early
