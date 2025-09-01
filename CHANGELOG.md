@@ -5,6 +5,7 @@
 - Added ability to hit players
 - Updated onHit hook data to include an additional target entity (reused for both hitting force fields and players)
 - Updated default programs to make use of new onHit hook data
+- New rate limits for Mining (20 per block), Building (20 per block), Hitting Players (1 per block) and Hitting Force Fields (20 per block)
 
 ## 2025-08-20
 
