@@ -1,5 +1,11 @@
 # Changelog
 
+## 2025-09-01
+
+- Added ability to hit players
+- Updated onHit hook data to include an additional target entity (reused for both hitting force fields and players)
+- Updated default programs to make use of new onHit hook data
+
 ## 2025-08-20
 
 - Added ability to set player names (`PlayerName` and `ReversePlayerName` tables, `NameSystem` with `setPlayerName` function)
