@@ -10,7 +10,7 @@ import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 import { Vec3 } from "../types/Vec3.sol";
 
-import { burnToolEnergy } from "./EnergyUtils.sol";
+import { addEnergyToLocalPool, burnToolEnergy, decreasePlayerEnergy, updatePlayerEnergy } from "./EnergyUtils.sol";
 import { InventoryUtils } from "./InventoryUtils.sol";
 import { Math } from "./Math.sol";
 import { OreLib } from "./OreLib.sol";
@@ -46,10 +46,34 @@ library ToolUtils {
     public
     returns (uint128)
   {
+    require(useMassMax != 0, "Cannot perform action with zero mass limit");
+
+    // Get caller's current energy and position
+    uint128 callerEnergy = updatePlayerEnergy(toolData.owner).energy;
+    Vec3 callerCoord = toolData.owner._getPosition();
+
+    // Calculate energy cost for this action
+    uint128 energyCost = getActionEnergyCost(toolData, callerEnergy, useMassMax);
+
+    // If there's an energy cost, apply it
+    if (energyCost > 0) {
+      // Transfer the player's energy to the local pool
+      uint128 remainingEnergy = decreasePlayerEnergy(toolData.owner, energyCost);
+      addEnergyToLocalPool(callerCoord, energyCost);
+
+      // If player died, return early
+      if (remainingEnergy == 0) {
+        return 0;
+      }
+    }
+
+    // Player survived, calculate tool damage
     (uint128 actionMassReduction, uint128 toolMassReduction) =
-      getMassReduction(toolData, useMassMax, actionModifier, specialized);
+      getMassReduction(toolData, useMassMax - energyCost, actionModifier, specialized);
     reduceMass(toolData, toolMassReduction);
-    return actionMassReduction;
+
+    // Return total damage (energy cost + tool damage)
+    return energyCost + actionMassReduction;
   }
 
   function getMassReduction(ToolData memory toolData, uint128 massLeft, uint128 actionModifier, bool specialized)
@@ -57,7 +81,7 @@ library ToolUtils {
     view
     returns (uint128, uint128)
   {
-    if (toolData.toolType.isNull()) {
+    if (toolData.toolType.isNull() || massLeft == 0) {
       return (0, 0);
     }
 
@@ -96,6 +120,17 @@ library ToolUtils {
     } else {
       Mass._setMass(toolData.tool, toolData.massLeft - massReduction);
     }
+  }
+
+  function getActionEnergyCost(ToolData memory toolData, uint128 callerEnergy, uint128 targetCapacity)
+    internal
+    pure
+    returns (uint128)
+  {
+    uint128 energyCost =
+      toolData.toolType.isNull() ? Constants.BARE_HANDS_ACTION_ENERGY_COST : Constants.TOOL_ACTION_ENERGY_COST;
+    uint128 maxEnergyCost = Math.min(callerEnergy, energyCost);
+    return Math.min(targetCapacity, maxEnergyCost);
   }
 }
 

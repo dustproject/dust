@@ -15,6 +15,7 @@ import { IFoodSystem } from "./IFoodSystem.sol";
 import { IForceFieldSystem } from "./IForceFieldSystem.sol";
 import { IGuardianSystem } from "./IGuardianSystem.sol";
 import { IHitMachineSystem } from "./IHitMachineSystem.sol";
+import { IHitPlayerSystem } from "./IHitPlayerSystem.sol";
 import { IInventorySystem } from "./IInventorySystem.sol";
 import { IMachineSystem } from "./IMachineSystem.sol";
 import { IMineSystem } from "./IMineSystem.sol";
@@ -47,6 +48,7 @@ interface IWorld is
   IForceFieldSystem,
   IGuardianSystem,
   IHitMachineSystem,
+  IHitPlayerSystem,
   IInventorySystem,
   IMachineSystem,
   IMineSystem,

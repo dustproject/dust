@@ -116,7 +116,7 @@ abstract contract DustAssertions is MudTest, GasReporter {
     playerEnergyLost = previousSnapshot.playerEnergy - currentSnapshot.playerEnergy;
     assertGt(playerEnergyLost, 0, "Player energy did not decrease");
     uint128 localPoolEnergyGained = currentSnapshot.localPoolEnergy - previousSnapshot.localPoolEnergy;
-    assertEq(localPoolEnergyGained, playerEnergyLost, "Local pool energy did not gain all the player's energy");
+    assertGe(localPoolEnergyGained, playerEnergyLost, "Local pool energy did not gain all the player's energy");
   }
 
   function assertPlayerIsDead(EntityId player, Vec3 playerCoord) internal view {

@@ -28,7 +28,6 @@ import { ResourcePosition } from "../utils/Vec3Storage.sol";
 import {
   addEnergyToLocalPool,
   decreaseFragmentDrainRate,
-  transferEnergyToPool,
   updateMachineEnergy,
   updateSleepingPlayerEnergy
 } from "../utils/EnergyUtils.sol";
@@ -39,15 +38,15 @@ import { InventoryUtils } from "../utils/InventoryUtils.sol";
 
 import { DeathNotification, MineNotification, WakeupNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
+
+import { RateLimitUtils } from "../utils/RateLimitUtils.sol";
 import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
 import {
-  DEFAULT_MINE_ENERGY_COST,
   MACHINE_ENERGY_DRAIN_RATE,
   MINE_ACTION_MODIFIER,
   PLAYER_ENERGY_DRAIN_RATE,
-  PRECISION_MULTIPLIER,
-  TOOL_MINE_ENERGY_COST
+  PRECISION_MULTIPLIER
 } from "../Constants.sol";
 
 import { EntityId } from "../types/EntityId.sol";
@@ -81,14 +80,20 @@ contract MineSystem is System {
   }
 
   function mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) external returns (EntityId) {
+    // Check rate limit for work actions
+    RateLimitUtils.mine(caller);
     return _mine(caller, coord, toolSlot, extraData);
   }
 
   function mine(EntityId caller, Vec3 coord, bytes calldata extraData) external returns (EntityId) {
+    // Check rate limit for work actions
+    RateLimitUtils.mine(caller);
     return _mine(caller, coord, type(uint16).max, extraData);
   }
 
   function mineUntilDestroyed(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) public {
+    // Check rate limit for work actions
+    RateLimitUtils.mine(caller);
     uint128 massLeft = 0;
     do {
       // TODO: factor out the mass reduction logic so it's cheaper to call
@@ -98,6 +103,8 @@ contract MineSystem is System {
   }
 
   function mineUntilDestroyed(EntityId caller, Vec3 coord, bytes calldata extraData) public {
+    // Check rate limit for work actions
+    RateLimitUtils.mine(caller);
     uint128 massLeft = 0;
     do {
       // TODO: factor out the mass reduction logic so it's cheaper to call
@@ -108,6 +115,7 @@ contract MineSystem is System {
 
   function _mine(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) internal returns (EntityId) {
     uint128 callerEnergy = caller.activate().energy;
+
     caller.requireConnected(coord);
     MineLib._requireReachable(coord);
 
@@ -343,38 +351,14 @@ library MineLib {
   }
 
   function _requireMinesAllowed(MineContext calldata ctx) public {
-    (ProgramId program, EntityId target) = _getHookTarget(ctx.coord);
+    (ProgramId program, EntityId target, EnergyData memory energyData) = ForceFieldUtils.getHookTarget(ctx.coord);
 
     if (!program.exists()) {
       return;
     }
 
-    program.hook({ caller: ctx.caller, target: target, revertOnFailure: true, extraData: ctx.extraData }).onMine({
-      entity: ctx.mined,
-      tool: ctx.toolData.tool,
-      objectType: ctx.objectType,
-      coord: ctx.coord
-    });
-  }
-
-  function _getHookTarget(Vec3 coord) private returns (ProgramId, EntityId) {
-    (EntityId forceField, EntityId fragment) = ForceFieldUtils.getForceField(coord);
-    if (!forceField._exists()) {
-      return (ProgramId.wrap(0), forceField);
-    }
-
-    EnergyData memory machineData = updateMachineEnergy(forceField);
-    if (machineData.energy == 0) {
-      return (ProgramId.wrap(0), forceField);
-    }
-
-    // We know fragment is active because its forcefield exists, so we can use its program
-    ProgramId program = fragment._getProgram();
-    if (program.exists()) {
-      return (program, fragment);
-    }
-
-    return (forceField._getProgram(), forceField);
+    program.hook({ caller: ctx.caller, target: target, revertOnFailure: energyData.energy > 0, extraData: ctx.extraData })
+      .onMine({ entity: ctx.mined, tool: ctx.toolData.tool, objectType: ctx.objectType, coord: ctx.coord });
   }
 }
 
@@ -385,37 +369,19 @@ library MinePhysicsLib {
       return (0, true);
     }
 
-    uint128 energyReduction = _getCallerEnergyReduction(ctx.toolData.toolType, ctx.callerEnergy, massLeft);
-
-    if (energyReduction > 0) {
-      (uint128 callerEnergy,) = transferEnergyToPool(ctx.caller, energyReduction);
-
-      // If player died, return early
-      if (callerEnergy == 0) {
-        return (massLeft, false);
-      }
-
-      massLeft -= energyReduction;
-    }
-
     bool specialized = (ctx.toolData.toolType.isAxe() && ctx.objectType.hasAxeMultiplier())
       || (ctx.toolData.toolType.isPick() && ctx.objectType.hasPickMultiplier());
 
-    uint128 massReduction = ctx.toolData.use(massLeft, MINE_ACTION_MODIFIER, specialized);
+    uint128 totalMassReduction = ctx.toolData.use(massLeft, MINE_ACTION_MODIFIER, specialized);
 
-    massLeft -= massReduction;
+    // If caller died (totalMassReduction == 0), return early
+    if (totalMassReduction == 0) {
+      return (massLeft, false);
+    }
+
+    massLeft -= totalMassReduction;
 
     return (massLeft, true);
-  }
-
-  function _getCallerEnergyReduction(ObjectType toolType, uint128 currentEnergy, uint128 massLeft)
-    internal
-    pure
-    returns (uint128)
-  {
-    uint128 maxEnergyCost = toolType.isNull() ? DEFAULT_MINE_ENERGY_COST : TOOL_MINE_ENERGY_COST;
-    maxEnergyCost = Math.min(currentEnergy, maxEnergyCost);
-    return Math.min(massLeft, maxEnergyCost);
   }
 }
 
