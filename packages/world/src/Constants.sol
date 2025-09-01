@@ -96,9 +96,7 @@ uint128 constant MAX_RATE_LIMIT_UNITS_PER_SECOND = MAX_RATE_LIMIT_UNITS_PER_BLOC
 uint128 constant WALK_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 15; // 15 blocks per second
 uint128 constant SWIM_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND * 10 / 135; // 13.5 blocks per second (90% of walking speed)
 
-// Combat rate limits (separate buckets)
-// Keep legacy HIT_UNIT_COST for compatibility; prefer HIT_PLAYER_UNIT_COST and HIT_MACHINE_UNIT_COST
-uint128 constant HIT_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_BLOCK; // legacy: 1 hit per block
+// Combat rate limits
 uint128 constant HIT_PLAYER_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_BLOCK; // player vs player: 1 per block
 uint128 constant HIT_MACHINE_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // player vs machine: 20 per block
 
