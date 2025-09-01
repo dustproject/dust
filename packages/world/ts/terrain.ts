@@ -23,7 +23,18 @@ function getCacheKey(worldAddress: Hex, [x, y, z]: ReadonlyVec3): string {
 }
 
 function deconstructCacheKey(key: string): [Hex, Vec3] {
-  const [worldAddress, x, y, z] = key.split(":");
+  const [worldAddress, coords] = key.split(":");
+  if (!worldAddress || !coords) {
+    throw new Error("Invalid cache key");
+  }
+  const [x, y, z] = coords.split(",");
+  if (
+    Number.isNaN(Number(x)) ||
+    Number.isNaN(Number(y)) ||
+    Number.isNaN(Number(z))
+  ) {
+    throw new Error("Invalid cache key");
+  }
   return [worldAddress as Hex, [Number(x), Number(y), Number(z)]];
 }
 
@@ -125,7 +136,6 @@ export async function getTerrainBlockTypes(
           worldAddress,
           chunkCoord,
         );
-        bytecodeCache.set(chunkCacheKey, bytecode);
       }
 
       return { chunkCacheKey, bytecode };
@@ -133,6 +143,14 @@ export async function getTerrainBlockTypes(
   );
 
   const chunkResults = await Promise.all(chunkPromises);
+
+  // Update cache serially after all fetches complete
+  for (const { chunkCacheKey, bytecode } of chunkResults) {
+    if (!bytecodeCache.has(chunkCacheKey)) {
+      bytecodeCache.set(chunkCacheKey, bytecode);
+    }
+  }
+
   const chunkBytecodes = new Map(
     chunkResults.map((r) => [r.chunkCacheKey, r.bytecode]),
   );

@@ -30,7 +30,7 @@ export default defineWorld({
       "RemoveFragment",
       "Death",
     ],
-    RateLimitType: ["Movement", "Combat", "Work"],
+    RateLimitType: ["Movement", "HitMachine", "HitPlayer", "Work"],
     ActivityType: [
       "MinePickMass",
       "MineAxeMass",

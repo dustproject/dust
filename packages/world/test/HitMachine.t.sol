@@ -13,7 +13,6 @@ import {
 import { ActivityType } from "../src/codegen/common.sol";
 import { Energy } from "../src/codegen/tables/Energy.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
-import { PlayerProgress } from "../src/codegen/tables/PlayerProgress.sol";
 
 import { EntityId } from "../src/types/EntityId.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";
@@ -46,6 +45,32 @@ contract HitMachineTest is DustTest {
     // Check player activity tracking
     uint256 hitMachineActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.HitMachineDamage);
     assertEq(hitMachineActivity, BARE_HANDS_ACTION_ENERGY_COST, "Hit machine damage activity not tracked correctly");
+  }
+
+  function testRateLimitHitMachineDoesNotAffectHitPlayerSameBlock() public {
+    // Setup player, force field, and target player
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
+    Vec3 forceFieldCoord = playerCoord + vec3(1, 0, 0);
+    EntityId forceField = setupForceField(forceFieldCoord);
+    Vec3 bobCoord = playerCoord + vec3(0, 0, 1);
+    (, EntityId bobEntityId) = createTestPlayer(bobCoord);
+
+    // Give energies high enough for both actions
+    Energy.setEnergy(aliceEntityId, BARE_HANDS_ACTION_ENERGY_COST * 10);
+    Energy.setEnergy(forceField, BARE_HANDS_ACTION_ENERGY_COST * 2);
+    Energy.setEnergy(bobEntityId, BARE_HANDS_ACTION_ENERGY_COST * 2);
+
+    // Hit machine then player in the same block
+    vm.prank(alice);
+    world.hitForceField(aliceEntityId, forceFieldCoord);
+
+    uint128 bobEnergyBefore = Energy.getEnergy(bobEntityId);
+    vm.prank(alice);
+    world.hitPlayer(aliceEntityId, bobEntityId, bytes(""));
+
+    // Verify both actions succeeded independently (no combined rate limit)
+    assertLt(Energy.getEnergy(forceField), BARE_HANDS_ACTION_ENERGY_COST * 2, "Forcefield should be damaged");
+    assertLt(Energy.getEnergy(bobEntityId), bobEnergyBefore, "Bob should be damaged");
   }
 
   function testHitForceFieldWithoutToolFatal() public {

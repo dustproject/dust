@@ -20,8 +20,6 @@ import { PlayerProgressUtils as PlayerTrackingUtils } from "../../utils/PlayerPr
 import { PlayerSkillUtils } from "../../utils/PlayerSkillUtils.sol";
 import { RateLimitUtils } from "../../utils/RateLimitUtils.sol";
 
-error NonPassableBlock(int32 x, int32 y, int32 z, ObjectType objectType);
-
 struct MoveCounts {
   uint128 walkSteps;
   uint128 swimSteps;
@@ -141,9 +139,7 @@ library MoveLib {
       Vec3 newCoord = newPlayerCoords[i];
 
       ObjectType newObjectType = EntityUtils.safeGetObjectTypeAt(newCoord);
-      if (!newObjectType.isPassThrough()) {
-        revert NonPassableBlock(newCoord.x(), newCoord.y(), newCoord.z(), newObjectType);
-      }
+      require(newObjectType.isPassThrough(), "Cannot move through solid block");
       require(!EntityUtils.getMovableEntityAt(newCoord)._exists(), "Cannot move through a player");
     }
   }

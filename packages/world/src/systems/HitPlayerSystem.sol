@@ -11,7 +11,7 @@ import { HitPlayerNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerProgressUtils } from "../utils/PlayerProgressUtils.sol";
 import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
-import { HIT_ACTION_MODIFIER, MAX_HIT_RADIUS } from "../Constants.sol";
+import { MAX_HIT_RADIUS } from "../Constants.sol";
 
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectTypes } from "../types/ObjectType.sol";
@@ -40,21 +40,21 @@ contract HitPlayerSystem is System {
     require(target._exists(), "No entity at target location");
     require(target._getObjectType() == ObjectTypes.Player, "Target is not a player");
 
+    RateLimitUtils.hitPlayer(caller);
+
     // Update target player's energy
-    uint128 energyLeft = updatePlayerEnergy(target).energy;
-    if (energyLeft == 0) {
-      // Return early if target is already dead
+    uint128 targetEnergy = updatePlayerEnergy(target).energy;
+
+    // If target is already dead, return early
+    if (targetEnergy == 0) {
       return;
     }
-
-    // Check rate limit for combat actions
-    RateLimitUtils.hit(caller);
 
     // Get tool data for damage calculation
     ToolData memory toolData = ToolUtils.getToolData(caller, toolSlot);
 
     // Use tool and get total damage (skill-aware, action-specific)
-    uint128 damage = toolData.hitPlayer(energyLeft);
+    uint128 damage = toolData.hitPlayer(targetEnergy);
 
     // If caller died (damage == 0), return early
     if (damage == 0) {

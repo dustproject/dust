@@ -36,8 +36,7 @@ contract HitMachineSystem is System {
     uint128 energyLeft = updateMachineEnergy(target).energy;
     require(energyLeft > 0, "Cannot hit depleted forcefield");
 
-    // Check rate limit for hit
-    RateLimitUtils.hit(caller);
+    RateLimitUtils.hitMachine(caller);
 
     ToolData memory toolData = ToolUtils.getToolData(caller, toolSlot);
 
