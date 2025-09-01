@@ -1,32 +1,13 @@
-import { scope, type } from "arktype";
-import { type Hex, isHex } from "viem";
+import {
+  channelsSchema,
+  clientDataSchema,
+  parseSession,
+  parseSignedSessionData,
+} from "dustkit/realtime";
 import type { Env } from "./env";
 
 export { AuthorityActor } from "./actors/AuthorityActor";
 export { IngressActor } from "./actors/IngressActor";
-
-const $ = scope({
-  hex: [
-    "string",
-    ":",
-    (data, ctx): data is Hex => isHex(data) || ctx.mustBe("a hex string"),
-  ],
-});
-
-const signedSessionDataSchema = $.type({
-  userAddress: "hex",
-  sessionAddress: "hex",
-  signedAt: "number.epoch",
-});
-
-const sessionSchema = $.type({
-  signature: "hex",
-  signedSessionData: "string.json",
-});
-
-const parseSignedSessionData = type("string.json.parse").to(
-  signedSessionDataSchema,
-);
 
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
@@ -44,24 +25,23 @@ export default {
       }
 
       // validate session and extract user address if provided
-      const userAddress =
-        url.searchParams.has("signature") &&
-        url.searchParams.has("signedSessionData")
-          ? await (async () => {
-              const { signature, signedSessionData } = sessionSchema.assert({
-                signature: url.searchParams.get("signature"),
-                signedSessionData: url.searchParams.get("signedSessionData"),
-              });
+      const userAddress = url.searchParams.has("session")
+        ? await (async () => {
+            const { signature, signedSessionData } = parseSession.assert(
+              url.searchParams.get("session"),
+            );
+            const { userAddress, sessionAddress, signedAt } =
+              parseSignedSessionData.assert(signedSessionData);
 
-              const parsed = parseSignedSessionData(signedSessionData);
-              if (parsed instanceof type.errors) return parsed.throw();
-              const { userAddress, sessionAddress, signedAt } = parsed;
+            // TODO: validate signed session data
 
-              // TODO: validate signed session data
+            return userAddress;
+          })()
+        : undefined;
 
-              return userAddress;
-            })()
-          : null;
+      const channels = channelsSchema.assert(
+        url.searchParams.getAll("channels"),
+      );
 
       const shardName = [
         "shard",
@@ -76,8 +56,10 @@ export default {
       await authority.ensureIngress(shardName);
 
       const ingress = env.Ingress.get(env.Ingress.idFromName(shardName));
+      const clientData = clientDataSchema.from({ userAddress, channels });
+
       return ingress.fetch(
-        `https://ingress/?${new URLSearchParams({ userAddress: userAddress ?? "" })}`,
+        `https://ingress/?${new URLSearchParams({ client: JSON.stringify(clientData) })}`,
         { headers: { Upgrade: "websocket" } },
       );
     }

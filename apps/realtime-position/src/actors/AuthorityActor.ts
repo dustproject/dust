@@ -1,8 +1,6 @@
 import { Actor, type ActorState, handler } from "@cloudflare/actors";
 import type { Env } from "../env";
 
-// TODO: store latest state so we can broadcast to newly connected ingress
-
 export class AuthorityActor extends Actor<Env> {
   private uplinks = new Set<WebSocket>();
 
@@ -51,7 +49,7 @@ export class AuthorityActor extends Actor<Env> {
     return new Response(null, { status: 101, webSocket: client });
   }
 
-  private tick?: NodeJS.Timeout;
+  private tick?: number;
   private ensureTick(): void {
     if (!this.uplinks.size && this.tick) {
       clearInterval(this.tick);

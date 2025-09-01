@@ -1,0 +1,121 @@
+import type { SessionClient } from "@latticexyz/entrykit/internal";
+import { WebSocket } from "isows";
+import { type Address, getAddress } from "viem";
+import { getBlock } from "viem/actions";
+import { getAction } from "viem/utils";
+import { type channelsSchema, clientMessageSchema } from "./messages";
+import { toSearchParams } from "./toSearchParams";
+
+// TODO: abstract over WebSocket so we can auto reconnect like Viem's `getWebSocketRpcClient`
+export type RealtimeSocket = {
+  socket: WebSocket;
+  send: (data: typeof clientMessageSchema.infer) => void;
+};
+
+const sockets = new Map<string, Promise<RealtimeSocket>>();
+
+function getSocketKey(
+  config: {
+    sessionClient?: SessionClient | undefined;
+    channels?: typeof channelsSchema.infer;
+  } = {},
+): string {
+  const userName = config.sessionClient
+    ? getAddress(config.sessionClient.userAddress)
+    : "guest";
+  const channelNames = config.channels
+    ? Array.from(new Set(config.channels.slice().sort()))
+    : [];
+  return `${userName}:${channelNames.join(",")}`;
+}
+
+export function getSocket({
+  // TODO: fill this in with a real URL
+  url = "ws://localhost:8787/ws",
+  sessionClient,
+  onPositions,
+  onPresence,
+}: {
+  url?: string;
+  sessionClient?: SessionClient | undefined;
+  onPositions?: () => void;
+  onPresence?: () => void;
+} = {}) {
+  const channels: typeof channelsSchema.infer = [];
+  if (onPositions) channels.push("positions");
+  if (onPresence) channels.push("presence");
+
+  const socketKey = getSocketKey({ sessionClient, channels });
+  const socket = sockets.get(socketKey);
+  if (socket) return socket;
+
+  const socketPromise = (async () => {
+    const session = sessionClient
+      ? await (async () => {
+          console.debug("getting block");
+          const block = await getAction(
+            sessionClient,
+            getBlock,
+            "getBlock",
+          )({});
+          const signedSessionData = JSON.stringify({
+            userAddress: sessionClient.userAddress,
+            sessionAddress: sessionClient.account.address,
+            signedAt: Number(block.timestamp),
+          });
+          console.debug("signing session", signedSessionData);
+          const signature = await sessionClient.internal_signer.signMessage({
+            message: signedSessionData,
+          });
+          return JSON.stringify({ signedSessionData, signature });
+        })()
+      : null;
+
+    return new Promise<RealtimeSocket>((resolve, reject) => {
+      console.debug("opening realtime socket");
+      const socket = new WebSocket(
+        `${url}?${toSearchParams({ session, channels })}`,
+      );
+
+      function send(data: unknown) {
+        if (!sessionClient) {
+          throw new Error("Can't send without providing a sessionClient");
+        }
+        socket.send(JSON.stringify(clientMessageSchema.assert(data)));
+      }
+
+      socket.addEventListener(
+        "open",
+        (event) => {
+          console.debug("realtime socket open", event);
+          resolve({ socket, send });
+        },
+        { once: true },
+      );
+
+      socket.addEventListener(
+        "close",
+        (event) => {
+          console.debug("realtime socket close", event);
+          reject(new Error("Socket closed before it could be opened."));
+        },
+        { once: true },
+      );
+
+      socket.addEventListener(
+        "error",
+        (event) => {
+          console.error("realtime socket error", event);
+          reject(new Error("Socket errored before it could be opened."));
+          try {
+            socket?.close();
+          } catch {}
+        },
+        { once: true },
+      );
+    });
+  })();
+
+  sockets.set(socketKey, socketPromise);
+  return socketPromise;
+}
