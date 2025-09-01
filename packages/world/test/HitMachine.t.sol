@@ -13,7 +13,6 @@ import {
 import { ActivityType } from "../src/codegen/common.sol";
 import { Energy } from "../src/codegen/tables/Energy.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
-import { PlayerProgress } from "../src/codegen/tables/PlayerProgress.sol";
 
 import { EntityId } from "../src/types/EntityId.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";

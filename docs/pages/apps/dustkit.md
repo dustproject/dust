@@ -193,3 +193,15 @@ Gets the current cursor position in the world, if available.
   z: number;
 } | undefined
 ```
+
+### `getObjectTypeAt`
+
+Gets the current object type at the given position. If the client doesn't know it, returns undefined.
+
+**Parameters:**
+
+- `x` (number): X coordinate
+- `y` (number): Y coordinate
+- `z` (number): Z coordinate
+
+**Returns:** `number | undefined` - The object type ID at the position, or undefined if client hasn't loaded it
