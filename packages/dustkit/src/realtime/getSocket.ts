@@ -1,15 +1,40 @@
 import type { SessionClient } from "@latticexyz/entrykit/internal";
+import { type } from "arktype";
 import { WebSocket } from "isows";
 import { type Address, getAddress } from "viem";
 import { getBlock } from "viem/actions";
 import { getAction } from "viem/utils";
-import { type channelsSchema, clientMessageSchema } from "./messages";
+import {
+  type channelsSchema,
+  clientMessageSchema,
+  parseServerMessage,
+} from "./messages";
 import { toSearchParams } from "./toSearchParams";
 
 // TODO: abstract over WebSocket so we can auto reconnect like Viem's `getWebSocketRpcClient`
+
 export type RealtimeSocket = {
   socket: WebSocket;
+  // TODO: make data more user friendly rather than the raw protocol message
   send: (data: typeof clientMessageSchema.infer) => void;
+};
+
+export type GetSocketOptions = {
+  url?: string;
+  sessionClient?: SessionClient | undefined;
+  // TODO: consider making this `channels` arg and then using eventemitter so we can bind any number of listeners to each event type
+  onPositions?: (data: {
+    readonly positions: readonly {
+      readonly player: Address;
+      readonly timestamp: number;
+      readonly position: readonly [number, number, number];
+      readonly orientation: readonly [number, number];
+      readonly velocity: readonly [number, number];
+    }[];
+  }) => void;
+  onPresence?: (data: {
+    readonly players: readonly Address[];
+  }) => void;
 };
 
 const sockets = new Map<string, Promise<RealtimeSocket>>();
@@ -35,12 +60,7 @@ export function getSocket({
   sessionClient,
   onPositions,
   onPresence,
-}: {
-  url?: string;
-  sessionClient?: SessionClient | undefined;
-  onPositions?: () => void;
-  onPresence?: () => void;
-} = {}) {
+}: GetSocketOptions = {}) {
   const channels: typeof channelsSchema.infer = [];
   if (onPositions) channels.push("positions");
   if (onPresence) channels.push("presence");
@@ -113,6 +133,29 @@ export function getSocket({
         },
         { once: true },
       );
+
+      socket.addEventListener("message", (event) => {
+        const data = parseServerMessage(event.data);
+        if (data instanceof type.errors) return;
+
+        if (data.t === "positions" && onPositions) {
+          onPositions({
+            positions: data.d.map((pos) => ({
+              player: pos.u,
+              timestamp: pos.t,
+              position: pos.d[0],
+              orientation: pos.d[1],
+              velocity: pos.d[1],
+            })),
+          });
+        }
+
+        if (data.t === "presence" && onPresence) {
+          onPresence({
+            players: data.d,
+          });
+        }
+      });
     });
   })();
 
