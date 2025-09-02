@@ -254,7 +254,7 @@ contract MineTest is DustTest {
     assertEq(
       LocalEnergyPool.get(farmlandCoord.toLocalEnergyPoolShardCoord()),
       initialLocalEnergy + ObjectPhysics.getMass(ObjectTypes.Wheat),
-      "Local energy pool shouldn't change after harvesting mature crop"
+      "Local energy pool should include crop's mass"
     );
   }
 
