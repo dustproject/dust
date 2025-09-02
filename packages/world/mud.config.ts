@@ -263,9 +263,9 @@ export default defineWorld({
       schema: {
         player: "EntityId",
         activityType: "ActivityType",
-        accumulated: "uint256",
-        current: "uint256",
-        exponent: "uint256",
+        accumulated: "uint128",
+        current: "uint128",
+        exponent: "uint128",
         lastUpdatedAt: "uint128",
       },
       key: ["player", "activityType"],

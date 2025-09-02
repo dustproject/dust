@@ -11,21 +11,22 @@ import { Death } from "../codegen/tables/Death.sol";
 import { PlayerProgress, PlayerProgressData } from "../codegen/tables/PlayerProgress.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
-import { Math } from "../utils/Math.sol";
 
 library PlayerProgressUtils {
   function getProgress(EntityId player, ActivityType activityType) internal view returns (uint256) {
     PlayerProgressData memory data = PlayerProgress._get(player, activityType);
     uint256 deaths = Death._getDeaths(player);
-    uint256 e = data.exponent;
+    uint256 e = uint256(data.exponent);
     uint256 diff = deaths > e ? (deaths - e) : 0;
-    uint256 decayed = _decay(data.current, data.lastUpdatedAt);
-    uint256 decayedEffective = decayed >> diff;
-    uint256 alignedAccumulated = data.accumulated >> diff;
+
+    uint128 decayed = _decay(data.current, data.lastUpdatedAt);
+    uint128 decayedEffective = diff > 0 ? decayed >> diff : decayed;
+    uint128 alignedAccumulated = diff > 0 ? data.accumulated >> diff : data.accumulated;
 
     // Floor is just accumulated / 3
-    uint256 floorEffective = alignedAccumulated / 3;
-    return Math.max(decayedEffective, floorEffective);
+    uint128 floorEffective = alignedAccumulated / 3;
+    uint128 result = decayedEffective > floorEffective ? decayedEffective : floorEffective;
+    return uint256(result);
   }
 
   // Mining tracking - with tool specialization and crop detection
@@ -44,39 +45,39 @@ library PlayerProgressUtils {
       // Bare hands / whacker mining of non-crops - not tracked for now
       return;
     }
-    _trackProgress(player, activityType, uint256(massReduced));
+    _trackProgress(player, activityType, massReduced);
   }
 
   // Combat tracking
   function trackHitPlayer(EntityId player, uint128 damage) internal {
-    _trackProgress(player, ActivityType.HitPlayerDamage, uint256(damage));
+    _trackProgress(player, ActivityType.HitPlayerDamage, damage);
   }
 
   function trackHitMachine(EntityId player, uint128 damage) internal {
-    _trackProgress(player, ActivityType.HitMachineDamage, uint256(damage));
+    _trackProgress(player, ActivityType.HitMachineDamage, damage);
   }
 
   // Movement tracking
   function trackMoves(EntityId player, uint128 walkSteps, uint128 swimSteps) internal {
     if (walkSteps > 0) {
-      _trackProgress(player, ActivityType.MoveWalkSteps, uint256(walkSteps));
+      _trackProgress(player, ActivityType.MoveWalkSteps, walkSteps);
     }
     if (swimSteps > 0) {
-      _trackProgress(player, ActivityType.MoveSwimSteps, uint256(swimSteps));
+      _trackProgress(player, ActivityType.MoveSwimSteps, swimSteps);
     }
   }
 
   function trackFallEnergy(EntityId player, uint128 fallEnergy) internal {
-    _trackProgress(player, ActivityType.MoveFallEnergy, uint256(fallEnergy));
+    _trackProgress(player, ActivityType.MoveFallEnergy, fallEnergy);
   }
 
   // Building tracking
   function trackBuildEnergy(EntityId player, uint128 energySpent) internal {
-    _trackProgress(player, ActivityType.BuildEnergy, uint256(energySpent));
+    _trackProgress(player, ActivityType.BuildEnergy, energySpent);
   }
 
   function trackBuildMass(EntityId player, uint128 massBuilt) internal {
-    _trackProgress(player, ActivityType.BuildMass, uint256(massBuilt));
+    _trackProgress(player, ActivityType.BuildMass, massBuilt);
   }
 
   // Crafting tracking - per station type
@@ -98,54 +99,57 @@ library PlayerProgressUtils {
       activityType = ActivityType.CraftHandMass;
     }
 
-    _trackProgress(player, activityType, uint256(massEnergy));
+    _trackProgress(player, activityType, massEnergy);
   }
 
   // Internal helper
-  function _trackProgress(EntityId player, ActivityType activityType, uint256 value) private {
+  function _trackProgress(EntityId player, ActivityType activityType, uint128 value) private {
     uint256 deaths = Death._getDeaths(player);
     PlayerProgressData memory previous = PlayerProgress._get(player, activityType);
 
     // Decay current mantissa to now in its stored scale
-    uint256 current = _decay(previous.current, previous.lastUpdatedAt);
-    uint256 accumulated = previous.accumulated;
+    uint128 current = _decay(previous.current, previous.lastUpdatedAt);
+    uint128 accumulated = previous.accumulated;
 
     // Align stored mantissas to the current global exponent
-    uint256 e = previous.exponent;
+    uint256 e = uint256(previous.exponent);
     if (deaths > e) {
       uint256 diff = deaths - e;
       // Right shift by diff == divide by 2^diff
-      current >>= diff;
-      accumulated >>= diff;
+      current = current >> diff;
+      accumulated = accumulated >> diff;
     }
 
     // Add new value and compute the new floor (minimal clamp semantics)
     accumulated = accumulated + value;
-    uint256 floorNew = accumulated / 3;
+    uint128 floorNew = accumulated / 3;
 
     // Ensure current reflects the new floor
-    current = Math.max(current + value, floorNew);
+    uint128 nextCurrent = current + value;
+    if (nextCurrent < floorNew) {
+      nextCurrent = floorNew;
+    }
 
     PlayerProgress._set(
       player,
       activityType,
       PlayerProgressData({
         accumulated: accumulated,
-        current: current,
+        current: nextCurrent,
         lastUpdatedAt: uint128(block.timestamp),
-        exponent: deaths
+        exponent: uint128(deaths)
       })
     );
   }
 
   /// @dev Exponential decay toward zero using half-life, in mantissa units
-  function _decay(uint256 current, uint128 lastUpdatedAt) private view returns (uint256) {
+  function _decay(uint128 current, uint128 lastUpdatedAt) private view returns (uint128) {
     if (current == 0 || block.timestamp <= lastUpdatedAt) return current;
 
     unchecked {
       int256 x = -int256(PROGRESS_DECAY_LAMBDA_WAD) * int256(uint256(block.timestamp - lastUpdatedAt)); // wad * seconds
       uint256 factorWad = uint256(FixedPointMathLib.expWad(x)); // in [0..1e18]
-      return FixedPointMathLib.mulWad(current, factorWad);
+      return uint128(FixedPointMathLib.mulWad(current, factorWad));
     }
   }
 }

@@ -21,9 +21,9 @@ import { EntityId } from "../../types/EntityId.sol";
 import { ActivityType } from "../common.sol";
 
 struct PlayerProgressData {
-  uint256 accumulated;
-  uint256 current;
-  uint256 exponent;
+  uint128 accumulated;
+  uint128 current;
+  uint128 exponent;
   uint128 lastUpdatedAt;
 }
 
@@ -32,12 +32,12 @@ library PlayerProgress {
   ResourceId constant _tableId = ResourceId.wrap(0x74620000000000000000000000000000506c6179657250726f67726573730000);
 
   FieldLayout constant _fieldLayout =
-    FieldLayout.wrap(0x0070040020202010000000000000000000000000000000000000000000000000);
+    FieldLayout.wrap(0x0040040010101010000000000000000000000000000000000000000000000000);
 
   // Hex-encoded key schema of (bytes32, uint8)
   Schema constant _keySchema = Schema.wrap(0x002102005f000000000000000000000000000000000000000000000000000000);
-  // Hex-encoded value schema of (uint256, uint256, uint256, uint128)
-  Schema constant _valueSchema = Schema.wrap(0x007004001f1f1f0f000000000000000000000000000000000000000000000000);
+  // Hex-encoded value schema of (uint128, uint128, uint128, uint128)
+  Schema constant _valueSchema = Schema.wrap(0x004004000f0f0f0f000000000000000000000000000000000000000000000000);
 
   /**
    * @notice Get the table's key field names.
@@ -78,31 +78,31 @@ library PlayerProgress {
   /**
    * @notice Get accumulated.
    */
-  function getAccumulated(EntityId player, ActivityType activityType) internal view returns (uint256 accumulated) {
+  function getAccumulated(EntityId player, ActivityType activityType) internal view returns (uint128 accumulated) {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return (uint256(bytes32(_blob)));
+    return (uint128(bytes16(_blob)));
   }
 
   /**
    * @notice Get accumulated.
    */
-  function _getAccumulated(EntityId player, ActivityType activityType) internal view returns (uint256 accumulated) {
+  function _getAccumulated(EntityId player, ActivityType activityType) internal view returns (uint128 accumulated) {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return (uint256(bytes32(_blob)));
+    return (uint128(bytes16(_blob)));
   }
 
   /**
    * @notice Set accumulated.
    */
-  function setAccumulated(EntityId player, ActivityType activityType, uint256 accumulated) internal {
+  function setAccumulated(EntityId player, ActivityType activityType, uint128 accumulated) internal {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(uint8(activityType)));
@@ -113,7 +113,7 @@ library PlayerProgress {
   /**
    * @notice Set accumulated.
    */
-  function _setAccumulated(EntityId player, ActivityType activityType, uint256 accumulated) internal {
+  function _setAccumulated(EntityId player, ActivityType activityType, uint128 accumulated) internal {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(uint8(activityType)));
@@ -124,31 +124,31 @@ library PlayerProgress {
   /**
    * @notice Get current.
    */
-  function getCurrent(EntityId player, ActivityType activityType) internal view returns (uint256 current) {
+  function getCurrent(EntityId player, ActivityType activityType) internal view returns (uint128 current) {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 1, _fieldLayout);
-    return (uint256(bytes32(_blob)));
+    return (uint128(bytes16(_blob)));
   }
 
   /**
    * @notice Get current.
    */
-  function _getCurrent(EntityId player, ActivityType activityType) internal view returns (uint256 current) {
+  function _getCurrent(EntityId player, ActivityType activityType) internal view returns (uint128 current) {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 1, _fieldLayout);
-    return (uint256(bytes32(_blob)));
+    return (uint128(bytes16(_blob)));
   }
 
   /**
    * @notice Set current.
    */
-  function setCurrent(EntityId player, ActivityType activityType, uint256 current) internal {
+  function setCurrent(EntityId player, ActivityType activityType, uint128 current) internal {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(uint8(activityType)));
@@ -159,7 +159,7 @@ library PlayerProgress {
   /**
    * @notice Set current.
    */
-  function _setCurrent(EntityId player, ActivityType activityType, uint256 current) internal {
+  function _setCurrent(EntityId player, ActivityType activityType, uint128 current) internal {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(uint8(activityType)));
@@ -170,31 +170,31 @@ library PlayerProgress {
   /**
    * @notice Get exponent.
    */
-  function getExponent(EntityId player, ActivityType activityType) internal view returns (uint256 exponent) {
+  function getExponent(EntityId player, ActivityType activityType) internal view returns (uint128 exponent) {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 2, _fieldLayout);
-    return (uint256(bytes32(_blob)));
+    return (uint128(bytes16(_blob)));
   }
 
   /**
    * @notice Get exponent.
    */
-  function _getExponent(EntityId player, ActivityType activityType) internal view returns (uint256 exponent) {
+  function _getExponent(EntityId player, ActivityType activityType) internal view returns (uint128 exponent) {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(uint8(activityType)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 2, _fieldLayout);
-    return (uint256(bytes32(_blob)));
+    return (uint128(bytes16(_blob)));
   }
 
   /**
    * @notice Set exponent.
    */
-  function setExponent(EntityId player, ActivityType activityType, uint256 exponent) internal {
+  function setExponent(EntityId player, ActivityType activityType, uint128 exponent) internal {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(uint8(activityType)));
@@ -205,7 +205,7 @@ library PlayerProgress {
   /**
    * @notice Set exponent.
    */
-  function _setExponent(EntityId player, ActivityType activityType, uint256 exponent) internal {
+  function _setExponent(EntityId player, ActivityType activityType, uint128 exponent) internal {
     bytes32[] memory _keyTuple = new bytes32[](2);
     _keyTuple[0] = EntityId.unwrap(player);
     _keyTuple[1] = bytes32(uint256(uint8(activityType)));
@@ -297,9 +297,9 @@ library PlayerProgress {
   function set(
     EntityId player,
     ActivityType activityType,
-    uint256 accumulated,
-    uint256 current,
-    uint256 exponent,
+    uint128 accumulated,
+    uint128 current,
+    uint128 exponent,
     uint128 lastUpdatedAt
   ) internal {
     bytes memory _staticData = encodeStatic(accumulated, current, exponent, lastUpdatedAt);
@@ -320,9 +320,9 @@ library PlayerProgress {
   function _set(
     EntityId player,
     ActivityType activityType,
-    uint256 accumulated,
-    uint256 current,
-    uint256 exponent,
+    uint128 accumulated,
+    uint128 current,
+    uint128 exponent,
     uint128 lastUpdatedAt
   ) internal {
     bytes memory _staticData = encodeStatic(accumulated, current, exponent, lastUpdatedAt);
@@ -374,14 +374,14 @@ library PlayerProgress {
    */
   function decodeStatic(
     bytes memory _blob
-  ) internal pure returns (uint256 accumulated, uint256 current, uint256 exponent, uint128 lastUpdatedAt) {
-    accumulated = (uint256(Bytes.getBytes32(_blob, 0)));
+  ) internal pure returns (uint128 accumulated, uint128 current, uint128 exponent, uint128 lastUpdatedAt) {
+    accumulated = (uint128(Bytes.getBytes16(_blob, 0)));
 
-    current = (uint256(Bytes.getBytes32(_blob, 32)));
+    current = (uint128(Bytes.getBytes16(_blob, 16)));
 
-    exponent = (uint256(Bytes.getBytes32(_blob, 64)));
+    exponent = (uint128(Bytes.getBytes16(_blob, 32)));
 
-    lastUpdatedAt = (uint128(Bytes.getBytes16(_blob, 96)));
+    lastUpdatedAt = (uint128(Bytes.getBytes16(_blob, 48)));
   }
 
   /**
@@ -425,9 +425,9 @@ library PlayerProgress {
    * @return The static data, encoded into a sequence of bytes.
    */
   function encodeStatic(
-    uint256 accumulated,
-    uint256 current,
-    uint256 exponent,
+    uint128 accumulated,
+    uint128 current,
+    uint128 exponent,
     uint128 lastUpdatedAt
   ) internal pure returns (bytes memory) {
     return abi.encodePacked(accumulated, current, exponent, lastUpdatedAt);
@@ -440,9 +440,9 @@ library PlayerProgress {
    * @return The dynamic (variable length) data, encoded into a sequence of bytes.
    */
   function encode(
-    uint256 accumulated,
-    uint256 current,
-    uint256 exponent,
+    uint128 accumulated,
+    uint128 current,
+    uint128 exponent,
     uint128 lastUpdatedAt
   ) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
     bytes memory _staticData = encodeStatic(accumulated, current, exponent, lastUpdatedAt);

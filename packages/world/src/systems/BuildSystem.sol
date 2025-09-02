@@ -16,7 +16,7 @@ import { EntityOrientation } from "../codegen/tables/EntityOrientation.sol";
 
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
-import { removeEnergyFromLocalPool, transferEnergyToPool, updateMachineEnergy } from "../utils/EnergyUtils.sol";
+import { removeEnergyFromLocalPool, transferEnergyToPool } from "../utils/EnergyUtils.sol";
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
@@ -105,9 +105,9 @@ contract BuildSystem is System {
 
     _requireBuildsAllowed(ctx, base, coords, extraData);
 
-    // Track build energy spent
+    // // Track build energy spent
     PlayerProgressUtils.trackBuildEnergy(ctx.caller, energyCost);
-    // Track build mass
+    // // Track build mass
     PlayerProgressUtils.trackBuildMass(ctx.caller, ObjectPhysics._getMass(ctx.buildType));
 
     notify(
@@ -173,10 +173,6 @@ contract BuildSystem is System {
       }
 
       (ProgramId program, EntityId target, EnergyData memory energyData) = ForceFieldUtils.getHookTarget(coords[i]);
-
-      if (!program.exists()) {
-        continue;
-      }
 
       program.hook({ caller: ctx.caller, target: target, revertOnFailure: energyData.energy > 0, extraData: extraData })
         .onBuild({
