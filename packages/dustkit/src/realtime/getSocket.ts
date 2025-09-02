@@ -29,7 +29,7 @@ export type GetSocketOptions = {
       readonly timestamp: number;
       readonly position: readonly [number, number, number];
       readonly orientation: readonly [number, number];
-      readonly velocity: readonly [number, number];
+      readonly velocity: readonly [number, number, number];
     }[];
   }) => void;
   onPresence?: (data: {
@@ -145,7 +145,7 @@ export function getSocket({
               timestamp: pos.t,
               position: pos.d[0],
               orientation: pos.d[1],
-              velocity: pos.d[1],
+              velocity: pos.d[2],
             })),
           });
         }
