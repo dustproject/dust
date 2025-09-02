@@ -12,7 +12,7 @@ import type { Address } from "viem";
 import type { Env } from "../env";
 
 export class ShardActor extends Actor<Env> {
-  private uplink?: WebSocket;
+  private hub?: WebSocket;
   private clients = new Map<WebSocket, typeof clientDataSchema.infer>();
   private positionChanges = new Map<Address, typeof positionChange.infer>();
 
@@ -31,6 +31,7 @@ export class ShardActor extends Actor<Env> {
   }
 
   async fetch(req: Request): Promise<Response> {
+    console.info("got shard request", req.url);
     if (req.headers.get("upgrade") !== "websocket") {
       return new Response("Expected WebSocket", { status: 426 });
     }
@@ -52,16 +53,16 @@ export class ShardActor extends Actor<Env> {
   }
 
   private async ensureUplink(): Promise<void> {
-    if (this.uplink && !this.clients.size) {
-      console.info("no more clients, closing hub uplink for now");
+    if (this.hub && !this.clients.size) {
+      console.info("no more clients, closing hub socket for now");
       try {
-        this.uplink.close();
+        this.hub.close();
       } catch {}
-      this.uplink = undefined;
+      this.hub = undefined;
       return;
     }
 
-    if (!this.uplink && this.clients.size) {
+    if (!this.hub && this.clients.size) {
       const hub = this.env.Hub.get(this.env.Hub.idFromName("global"));
       const res = await hub.fetch(
         `https://hub/?${new URLSearchParams({ shard: this.ctx.id.toString() })}`,
@@ -70,7 +71,7 @@ export class ShardActor extends Actor<Env> {
       const ws = res.webSocket!;
 
       ws.addEventListener("message", (event) => {
-        if (ws !== this.uplink) return;
+        if (ws !== this.hub) return;
 
         const data =
           typeof event.data === "string"
@@ -78,49 +79,63 @@ export class ShardActor extends Actor<Env> {
             : new TextDecoder().decode(event.data as ArrayBuffer);
 
         if (data === "tick") {
-          console.info("shard got tick from hub");
           if (this.positionChanges.size) {
             console.info(
-              "sending",
+              "got tick, sending",
               this.positionChanges.size,
               "position changes to hub",
             );
-            ws.send(JSON.stringify([...this.positionChanges.values()]));
+            ws.send(
+              JSON.stringify(
+                serverMessageSchema.from({
+                  t: "positions",
+                  d: [...this.positionChanges.values()],
+                }),
+              ),
+            );
             this.positionChanges.clear();
           }
           return;
         }
 
         const message = parseServerMessage(data);
-        if (message instanceof type.errors) return;
-        if (message.t === "pong") return;
+        if (message instanceof type.errors) {
+          console.info("ignoring invalid message", message.toString(), data);
+          return;
+        }
+        if (message.t === "pong") {
+          console.info("igoring message", message);
+          return;
+        }
 
-        for (const [client, clientData] of this.clients) {
-          if (clientData.channels.includes(message.t)) {
-            try {
-              client.send(data);
-            } catch {}
-          }
+        const clients = Array.from(this.clients.entries()).filter(
+          ([client, clientData]) => clientData.channels.includes(message.t),
+        );
+        console.info("fanning out", message.t, "to", clients.length, "clients");
+        for (const [client, clientData] of clients) {
+          try {
+            client.send(data);
+          } catch {}
         }
       });
 
       ws.addEventListener("close", () => {
-        if (ws !== this.uplink) return;
+        if (ws !== this.hub) return;
 
-        this.uplink = undefined;
+        this.hub = undefined;
       });
 
       ws.addEventListener("error", () => {
-        if (ws !== this.uplink) return;
+        if (ws !== this.hub) return;
 
         try {
           ws.close();
         } catch {}
-        this.uplink = undefined;
+        this.hub = undefined;
       });
 
       ws.accept();
-      this.uplink = ws;
+      this.hub = ws;
     }
   }
 

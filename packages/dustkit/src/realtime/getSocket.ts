@@ -107,7 +107,7 @@ export function getSocket({
       socket.addEventListener(
         "open",
         (event) => {
-          console.debug("realtime socket open", event);
+          console.debug("realtime socket open");
           resolve({ socket, send });
         },
         { once: true },
@@ -116,7 +116,7 @@ export function getSocket({
       socket.addEventListener(
         "close",
         (event) => {
-          console.debug("realtime socket close", event);
+          console.debug("realtime socket close", event.code, event.reason);
           reject(new Error("Socket closed before it could be opened."));
         },
         { once: true },
@@ -125,7 +125,7 @@ export function getSocket({
       socket.addEventListener(
         "error",
         (event) => {
-          console.error("realtime socket error", event);
+          console.error("realtime socket error");
           reject(new Error("Socket errored before it could be opened."));
           try {
             socket?.close();

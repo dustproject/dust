@@ -11,10 +11,7 @@ export { ShardActor } from "./actors/ShardActor";
 
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
-    if (req.headers.get("upgrade") !== "websocket") {
-      return new Response("Expected WebSocket", { status: 426 });
-    }
-
+    console.info("got worker request", req.url);
     const url = new URL(req.url);
 
     if (url.pathname === "/health") return new Response("ok");
@@ -53,11 +50,18 @@ export default {
       const hub = env.Hub.get(env.Hub.idFromName("global"), {
         locationHint: env.REGION_HINT,
       });
+
+      console.info("ensuring shard");
       await hub.ensureShard(shardName);
+      console.info("shard is ready");
 
       const shard = env.Shard.get(env.Shard.idFromName(shardName));
-      const clientData = clientDataSchema.from({ userAddress, channels });
+      console.info("shard is ready", shard);
 
+      const clientData = clientDataSchema({ userAddress, channels });
+      console.info("client data", String(clientData));
+
+      console.info("establishing socket with shard");
       return shard.fetch(
         `https://shard/?${new URLSearchParams({ client: JSON.stringify(clientData) })}`,
         { headers: { Upgrade: "websocket" } },

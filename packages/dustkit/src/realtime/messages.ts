@@ -22,7 +22,7 @@ export const parseSignedSessionData = type("string.json.parse").to(
 export const channelsSchema = $.type("'positions' | 'presence'").array();
 
 export const clientDataSchema = $.type({
-  "userAddress?": "hex",
+  "userAddress?": "hex | undefined",
   channels: channelsSchema,
 });
 

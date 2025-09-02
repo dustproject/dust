@@ -2,7 +2,7 @@ import { Actor, type ActorState, handler } from "@cloudflare/actors";
 import type { Env } from "../env";
 
 export class HubActor extends Actor<Env> {
-  private uplinks = new Set<WebSocket>();
+  private shards = new Set<WebSocket>();
 
   constructor(state: ActorState, env: Env) {
     super(state, env);
@@ -10,7 +10,7 @@ export class HubActor extends Actor<Env> {
     for (const ws of state.getWebSockets()) {
       const attachment = ws.deserializeAttachment();
       if (attachment?.shard) {
-        this.uplinks.add(ws);
+        this.shards.add(ws);
       }
     }
     this.ensureTick();
@@ -31,6 +31,7 @@ export class HubActor extends Actor<Env> {
   }
 
   async fetch(req: Request): Promise<Response> {
+    console.info("got hub request", req.url);
     if (req.headers.get("upgrade") !== "websocket") {
       return new Response("Expected WebSocket", { status: 426 });
     }
@@ -43,7 +44,7 @@ export class HubActor extends Actor<Env> {
     server.serializeAttachment({ shard });
     this.ctx.acceptWebSocket(server);
 
-    this.uplinks.add(server);
+    this.shards.add(server);
     this.ensureTick();
 
     return new Response(null, { status: 101, webSocket: client });
@@ -51,19 +52,19 @@ export class HubActor extends Actor<Env> {
 
   private tick?: number;
   private ensureTick(): void {
-    if (!this.uplinks.size && this.tick) {
+    if (!this.shards.size && this.tick) {
       clearInterval(this.tick);
       this.tick = undefined;
       return;
     }
 
-    if (this.uplinks.size && !this.tick) {
+    if (this.shards.size && !this.tick) {
       const delay = Math.floor(
         1000 / Number.parseFloat(this.env.TICK_HZ ?? "20"),
       );
 
       this.tick = setInterval(() => {
-        for (const ws of this.uplinks) {
+        for (const ws of this.shards) {
           try {
             ws.send("tick");
           } catch {}
@@ -73,7 +74,7 @@ export class HubActor extends Actor<Env> {
   }
 
   async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer) {
-    if (!this.uplinks.has(ws)) {
+    if (!this.shards.has(ws)) {
       console.warn(
         "Got a message from an unknown websocket",
         ws.deserializeAttachment(),
@@ -82,22 +83,23 @@ export class HubActor extends Actor<Env> {
       return;
     }
 
-    for (const uplink of this.uplinks) {
+    console.info("fanning out message to", this.shards.size, "shards");
+    for (const shard of this.shards) {
       try {
-        uplink.send(message);
+        shard.send(message);
       } catch {}
     }
   }
 
   async webSocketClose(ws: WebSocket, code: number) {
     ws.close();
-    this.uplinks.delete(ws);
+    this.shards.delete(ws);
     this.ensureTick();
   }
 
   async webSocketError(ws: WebSocket, code: number) {
     ws.close();
-    this.uplinks.delete(ws);
+    this.shards.delete(ws);
     this.ensureTick();
   }
 }
