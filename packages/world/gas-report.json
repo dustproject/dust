@@ -303,7 +303,7 @@
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineMultiSizeWithOrientation",
     "name": "",
-    "gasUsed": 6681398
+    "gasUsed": 6681702
   },
   {
     "file": "test/Mine.t.sol:MineTest",
@@ -315,13 +315,13 @@
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineResource",
     "name": "mine Ore with hand, entirely mined",
-    "gasUsed": 1342708
+    "gasUsed": 792180
   },
   {
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineResourceTypeIsFixedAfterPartialMine",
     "name": "mine Ore with hand, partially mined",
-    "gasUsed": 413577
+    "gasUsed": 413296
   },
   {
     "file": "test/Mine.t.sol:MineTest",
