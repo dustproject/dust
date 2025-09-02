@@ -1,5 +1,5 @@
 {
-  "name": "realtime-position",
+  "name": "realtime",
   "private": true,
   "type": "module",
   "scripts": {

@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
 
-  "name": "dust-realtime-position",
+  "name": "dust-realtime",
   "main": "src/index.ts",
   "compatibility_date": "2025-08-01",
   "compatibility_flags": ["nodejs_compat"],
@@ -11,9 +11,10 @@
   },
 
   "vars": {
-    "REGION_HINT": "wnam",
-    "INGRESS_SHARDS": "8",
-    "TICK_HZ": "1",
+    // nearest to France where other DUST servers are
+    "REGION_HINT": "weur",
+    "SHARDS": "8",
+    "TICK_HZ": "20",
     "CHAIN_ID": "10",
     "WORLD_ADDRESS": "0xYourWorld",
     "RPC_HTTP_URL": "https://your-rpc.example"
@@ -21,8 +22,8 @@
 
   "durable_objects": {
     "bindings": [
-      { "name": "Authority", "class_name": "AuthorityActor" },
-      { "name": "Ingress", "class_name": "IngressActor" }
+      { "name": "Hub", "class_name": "HubActor" },
+      { "name": "Shard", "class_name": "ShardActor" }
     ]
   },
 
@@ -30,7 +31,7 @@
   "migrations": [
     {
       "tag": "v1",
-      "new_sqlite_classes": ["AuthorityActor", "IngressActor"]
+      "new_sqlite_classes": ["HubActor", "ShardActor"]
     }
   ]
 }

@@ -1,7 +1,7 @@
 import { Actor, type ActorState, handler } from "@cloudflare/actors";
 import type { Env } from "../env";
 
-export class AuthorityActor extends Actor<Env> {
+export class HubActor extends Actor<Env> {
   private uplinks = new Set<WebSocket>();
 
   constructor(state: ActorState, env: Env) {
@@ -9,7 +9,7 @@ export class AuthorityActor extends Actor<Env> {
 
     for (const ws of state.getWebSockets()) {
       const attachment = ws.deserializeAttachment();
-      if (attachment?.ingress) {
+      if (attachment?.shard) {
         this.uplinks.add(ws);
       }
     }
@@ -20,12 +20,12 @@ export class AuthorityActor extends Actor<Env> {
     );
   }
 
-  // Create the Ingress from the Authority so they're located relative to
-  // the Authority rather than the client, to reduce latency between
-  // Ingress <> Authority.
-  async ensureIngress(name: string): Promise<void> {
-    const id = this.env.Ingress.idFromName(name);
-    this.env.Ingress.get(id, {
+  // Create the Shard from the Hub so they're located relative to
+  // the Hub rather than the client, to reduce latency between
+  // Shard <> Hub.
+  async ensureShard(name: string): Promise<void> {
+    const id = this.env.Shard.idFromName(name);
+    this.env.Shard.get(id, {
       locationHint: this.env.REGION_HINT,
     });
   }
@@ -36,11 +36,11 @@ export class AuthorityActor extends Actor<Env> {
     }
 
     const url = new URL(req.url);
-    const ingress = url.searchParams.get("ingress");
-    if (!ingress) return new Response("missing ingress", { status: 400 });
+    const shard = url.searchParams.get("shard");
+    if (!shard) return new Response("missing shard", { status: 400 });
 
     const { 0: client, 1: server } = new WebSocketPair();
-    server.serializeAttachment({ ingress });
+    server.serializeAttachment({ shard });
     this.ctx.acceptWebSocket(server);
 
     this.uplinks.add(server);
@@ -102,4 +102,4 @@ export class AuthorityActor extends Actor<Env> {
   }
 }
 
-export default handler(AuthorityActor);
+export default handler(HubActor);

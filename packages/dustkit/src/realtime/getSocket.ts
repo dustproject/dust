@@ -60,7 +60,7 @@ export function getSocket({
   sessionClient,
   onPositions,
   onPresence,
-}: GetSocketOptions = {}) {
+}: GetSocketOptions = {}): Promise<RealtimeSocket> {
   const channels: typeof channelsSchema.infer = [];
   if (onPositions) channels.push("positions");
   if (onPresence) channels.push("presence");

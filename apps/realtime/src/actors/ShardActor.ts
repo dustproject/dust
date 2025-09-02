@@ -11,7 +11,7 @@ import {
 import type { Address } from "viem";
 import type { Env } from "../env";
 
-export class IngressActor extends Actor<Env> {
+export class ShardActor extends Actor<Env> {
   private uplink?: WebSocket;
   private clients = new Map<WebSocket, typeof clientDataSchema.infer>();
   private positionChanges = new Map<Address, typeof positionChange.infer>();
@@ -53,7 +53,7 @@ export class IngressActor extends Actor<Env> {
 
   private async ensureUplink(): Promise<void> {
     if (this.uplink && !this.clients.size) {
-      console.info("no more clients, closing authority uplink for now");
+      console.info("no more clients, closing hub uplink for now");
       try {
         this.uplink.close();
       } catch {}
@@ -62,11 +62,9 @@ export class IngressActor extends Actor<Env> {
     }
 
     if (!this.uplink && this.clients.size) {
-      const authority = this.env.Authority.get(
-        this.env.Authority.idFromName("global"),
-      );
-      const res = await authority.fetch(
-        `https://authority/?${new URLSearchParams({ ingress: this.ctx.id.toString() })}`,
+      const hub = this.env.Hub.get(this.env.Hub.idFromName("global"));
+      const res = await hub.fetch(
+        `https://hub/?${new URLSearchParams({ shard: this.ctx.id.toString() })}`,
         { headers: { Upgrade: "websocket" } },
       );
       const ws = res.webSocket!;
@@ -80,12 +78,12 @@ export class IngressActor extends Actor<Env> {
             : new TextDecoder().decode(event.data as ArrayBuffer);
 
         if (data === "tick") {
-          console.info("ingress got tick from authority");
+          console.info("shard got tick from hub");
           if (this.positionChanges.size) {
             console.info(
               "sending",
               this.positionChanges.size,
-              "position changes to authority",
+              "position changes to hub",
             );
             ws.send(JSON.stringify([...this.positionChanges.values()]));
             this.positionChanges.clear();
@@ -168,4 +166,4 @@ export class IngressActor extends Actor<Env> {
   }
 }
 
-export default handler(IngressActor);
+export default handler(ShardActor);

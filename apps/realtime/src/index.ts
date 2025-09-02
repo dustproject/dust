@@ -6,8 +6,8 @@ import {
 } from "dustkit/realtime";
 import type { Env } from "./env";
 
-export { AuthorityActor } from "./actors/AuthorityActor";
-export { IngressActor } from "./actors/IngressActor";
+export { HubActor } from "./actors/HubActor";
+export { ShardActor } from "./actors/ShardActor";
 
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
@@ -45,21 +45,21 @@ export default {
 
       const shardName = [
         "shard",
-        Math.floor(Math.random() * Number.parseInt(env.INGRESS_SHARDS ?? "8")),
+        Math.floor(Math.random() * Number.parseInt(env.SHARDS ?? "8")),
       ].join(":");
 
-      // create ingress via authority to bind it to a location relative to authority
+      // create shard via hub to bind it to a location relative to hub
       // instead of relative to the client
-      const authority = env.Authority.get(env.Authority.idFromName("global"), {
+      const hub = env.Hub.get(env.Hub.idFromName("global"), {
         locationHint: env.REGION_HINT,
       });
-      await authority.ensureIngress(shardName);
+      await hub.ensureShard(shardName);
 
-      const ingress = env.Ingress.get(env.Ingress.idFromName(shardName));
+      const shard = env.Shard.get(env.Shard.idFromName(shardName));
       const clientData = clientDataSchema.from({ userAddress, channels });
 
-      return ingress.fetch(
-        `https://ingress/?${new URLSearchParams({ client: JSON.stringify(clientData) })}`,
+      return shard.fetch(
+        `https://shard/?${new URLSearchParams({ client: JSON.stringify(clientData) })}`,
         { headers: { Upgrade: "websocket" } },
       );
     }
