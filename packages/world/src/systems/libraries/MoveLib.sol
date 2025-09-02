@@ -3,7 +3,6 @@ pragma solidity >=0.8.24;
 
 import { Energy } from "../../codegen/tables/Energy.sol";
 
-import { MoveUnits } from "../../codegen/tables/MoveUnits.sol";
 import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
 
 import "../../Constants.sol" as Constants;
@@ -15,8 +14,7 @@ import { ObjectTypes } from "../../types/ObjectType.sol";
 import { Vec3, vec3 } from "../../types/Vec3.sol";
 import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../../utils/EnergyUtils.sol";
 import { EntityUtils } from "../../utils/EntityUtils.sol";
-
-error NonPassableBlock(int32 x, int32 y, int32 z, ObjectType objectType);
+import { RateLimitUtils } from "../../utils/RateLimitUtils.sol";
 
 library MoveLib {
   function jump(Vec3 playerCoord) public {
@@ -40,7 +38,7 @@ library MoveLib {
     _updatePlayerDrainRate(player, above);
 
     if (totalCost > 0) {
-      decreasePlayerEnergy(player, above, totalCost);
+      decreasePlayerEnergy(player, totalCost);
       addEnergyToLocalPool(above, totalCost);
     }
   }
@@ -50,12 +48,12 @@ library MoveLib {
     EntityId player = playerEntityIds[0];
 
     uint128 currentEnergy = Energy._getEnergy(player);
-    uint128 currentMoveUnits = _getMoveUnits(player);
 
-    (Vec3 finalCoord, uint128 totalCost, uint128 newMoveUnits) =
-      _computePathResult(playerCoord, newBaseCoords, currentEnergy, currentMoveUnits);
+    (Vec3 finalCoord, uint128 totalCost, uint128 walkSteps, uint128 swimSteps) =
+      _computePathResult(playerCoord, newBaseCoords, currentEnergy);
 
-    _setMoveUnits(player, newMoveUnits);
+    // Update rate limits based on movement counts
+    RateLimitUtils.move(player, walkSteps, swimSteps);
 
     _setPlayerPosition(playerEntityIds, finalCoord);
 
@@ -66,7 +64,7 @@ library MoveLib {
     }
 
     if (totalCost > 0) {
-      decreasePlayerEnergy(player, finalCoord, totalCost);
+      decreasePlayerEnergy(player, totalCost);
       addEnergyToLocalPool(finalCoord, totalCost);
     }
 
@@ -94,7 +92,7 @@ library MoveLib {
     }
 
     if (totalCost > 0) {
-      decreasePlayerEnergy(player, finalCoord, totalCost);
+      decreasePlayerEnergy(player, totalCost);
       addEnergyToLocalPool(finalCoord, totalCost);
     }
 
@@ -110,9 +108,7 @@ library MoveLib {
       Vec3 newCoord = newPlayerCoords[i];
 
       ObjectType newObjectType = EntityUtils.safeGetObjectTypeAt(newCoord);
-      if (!newObjectType.isPassThrough()) {
-        revert NonPassableBlock(newCoord.x(), newCoord.y(), newCoord.z(), newObjectType);
-      }
+      require(newObjectType.isPassThrough(), "Cannot move through solid block");
       require(!EntityUtils.getMovableEntityAt(newCoord)._exists(), "Cannot move through a player");
     }
   }
@@ -147,19 +143,19 @@ library MoveLib {
   }
 
   /**
-   * Calculate total energy cost and final path coordinate
+   * Calculate total energy cost, final path coordinate, and movement counts
+   * Returns: (finalCoord, cost, walkSteps, swimSteps)
    */
-  function _computePathResult(
-    Vec3 current,
-    Vec3[] memory newBaseCoords,
-    uint128 currentEnergy,
-    uint128 currentMoveUnits
-  ) internal view returns (Vec3, uint128, uint128) {
-    uint128 cost = 0;
+  function _computePathResult(Vec3 start, Vec3[] memory newBaseCoords, uint128 currentEnergy)
+    internal
+    view
+    returns (Vec3 current, uint128 cost, uint128 walkSteps, uint128 swimSteps)
+  {
     uint16 jumps = 0;
     uint16 glides = 0;
     uint16 fallHeight = 0;
 
+    current = start;
     bool currentHasGravity = _gravityApplies(current);
 
     for (uint256 i = 0; i < newBaseCoords.length; i++) {
@@ -181,9 +177,15 @@ library MoveLib {
 
         // If landing, apply normal move cost
         if (!nextHasGravity) {
-          (uint128 moveCost, uint128 moveUnits) = _getMoveCost(next);
+          (uint128 moveCost, bool isSwimming) = _getMoveCost(next);
           cost += moveCost;
-          currentMoveUnits += moveUnits;
+
+          // Track movement type for batch update
+          if (isSwimming) {
+            swimSteps++;
+          } else {
+            walkSteps++;
+          }
         }
       } else {
         if (dy > 0) {
@@ -193,12 +195,16 @@ library MoveLib {
           ++glides;
           require(glides <= Constants.MAX_PLAYER_GLIDES, "Cannot glide more than 10 blocks");
         }
-        (uint128 moveCost, uint128 moveUnits) = _getMoveCost(next);
+        (uint128 moveCost, bool isSwimming) = _getMoveCost(next);
         cost += moveCost;
-        currentMoveUnits += moveUnits;
-      }
 
-      require(currentMoveUnits <= Constants.MAX_MOVE_UNITS_PER_BLOCK, "Move limit exceeded");
+        // Track movement type for batch update
+        if (isSwimming) {
+          swimSteps++;
+        } else {
+          walkSteps++;
+        }
+      }
 
       if (!nextHasGravity) {
         // If landing after a long fall, apply fall damage
@@ -221,8 +227,6 @@ library MoveLib {
       (current, fallDamage) = _computeGravityResult(current, fallHeight);
       cost += fallDamage;
     }
-
-    return (current, cost, currentMoveUnits);
   }
 
   function _removePlayerPosition(Vec3 playerCoord) internal returns (EntityId[] memory) {
@@ -272,25 +276,17 @@ library MoveLib {
     return EntityUtils.getFluidLevelAt(coord) > 0;
   }
 
-  function _getMoveCost(Vec3 coord) internal view returns (uint128 energyCost, uint128 moveUnitCost) {
+  function _getMoveCost(Vec3 coord) internal view returns (uint128 energyCost, bool isSwimming) {
     Vec3 belowCoord = coord - vec3(0, 1, 0);
     ObjectType belowType = EntityUtils.getObjectTypeAt(belowCoord);
     if (belowType == ObjectTypes.Lava) {
-      return (Constants.LAVA_MOVE_ENERGY_COST, Constants.MOVING_UNIT_COST);
+      return (Constants.LAVA_MOVE_ENERGY_COST, false);
     }
 
     if (belowType.isPassThrough() && _isFluid(belowCoord)) {
-      return (Constants.WATER_MOVE_ENERGY_COST, Constants.SWIMMING_UNIT_COST);
+      return (Constants.WATER_MOVE_ENERGY_COST, true);
     }
 
-    return (Constants.MOVE_ENERGY_COST, Constants.MOVING_UNIT_COST);
-  }
-
-  function _getMoveUnits(EntityId entity) internal view returns (uint128) {
-    return MoveUnits._get(entity, block.number);
-  }
-
-  function _setMoveUnits(EntityId entity, uint128 moveUnits) internal {
-    MoveUnits._set(entity, block.number, moveUnits);
+    return (Constants.MOVE_ENERGY_COST, false);
   }
 }

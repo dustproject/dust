@@ -8,7 +8,7 @@ export default defineWorld({
     generateSystemLibraries: true,
   },
   enums: {
-    Action: [
+    NotificationType: [
       "None",
       "Build",
       "Mine",
@@ -23,12 +23,14 @@ export default defineWorld({
       "Wakeup",
       "FuelMachine",
       "HitMachine",
+      "HitPlayer",
       "AttachProgram",
       "DetachProgram",
       "AddFragment",
       "RemoveFragment",
       "Death",
     ],
+    RateLimitType: ["Movement", "HitMachine", "HitPlayer", "Work"],
     Direction: [
       // Cardinal directions (6)
       "PositiveX",
@@ -227,13 +229,14 @@ export default defineWorld({
       },
       key: ["x", "y", "z"],
     },
-    MoveUnits: {
+    RateLimitUnits: {
       schema: {
         entityId: "EntityId",
         blockNumber: "uint256",
+        rateLimitType: "RateLimitType",
         units: "uint128",
       },
-      key: ["entityId", "blockNumber"],
+      key: ["entityId", "blockNumber", "rateLimitType"],
     },
     // ------------------------------------------------------------
     // Player
@@ -367,7 +370,7 @@ export default defineWorld({
       schema: {
         playerEntityId: "EntityId",
         timestamp: "uint128",
-        action: "Action",
+        notificationType: "NotificationType",
         data: "bytes",
       },
       key: ["playerEntityId"],
@@ -401,6 +404,16 @@ export default defineWorld({
         baseEntityId: "EntityId",
       },
       key: ["entityId"],
+    },
+
+    // DEPRECATED: replaced by RateLimitUnits
+    MoveUnits: {
+      schema: {
+        entityId: "EntityId",
+        blockNumber: "uint256",
+        units: "uint128",
+      },
+      key: ["entityId", "blockNumber"],
     },
   },
   systems: {

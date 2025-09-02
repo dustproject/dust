@@ -14,10 +14,15 @@ import { DustTest } from "./DustTest.sol";
 
 import { EntityPosition } from "../src/utils/Vec3Storage.sol";
 
-import { BUILD_ENERGY_COST, CHUNK_SIZE, MAX_ENTITY_INFLUENCE_RADIUS, MAX_FLUID_LEVEL } from "../src/Constants.sol";
+import {
+  BUILD_ENERGY_COST,
+  CHUNK_SIZE,
+  MAX_ENTITY_INFLUENCE_RADIUS,
+  MAX_FLUID_LEVEL,
+  MAX_PLAYER_ENERGY
+} from "../src/Constants.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
 
-import { NonPassableBlock } from "../src/systems/libraries/MoveLib.sol";
 import { ObjectTypes } from "../src/types/ObjectType.sol";
 
 import { TerrainLib } from "../src/systems/libraries/TerrainLib.sol";
@@ -247,7 +252,7 @@ contract BuildTest is DustTest {
     setObjectAtCoord(playerCoord + vec3(0, 2, 0), ObjectTypes.Grass);
 
     vm.prank(alice);
-    vm.expectPartialRevert(NonPassableBlock.selector);
+    vm.expectRevert("Cannot move through solid block");
     world.jumpBuild(aliceEntityId, inventorySlot, "");
   }
 
@@ -638,5 +643,81 @@ contract BuildTest is DustTest {
     // Non-waterloggable block should NOT remove fluid
     uint8 fluidLevel = TestEntityUtils.getFluidLevelAt(playerCoord);
     assertEq(fluidLevel, MAX_FLUID_LEVEL, "Stone should have fluid level");
+  }
+
+  function testBuildRateLimit() public {
+    (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupFlatChunkWithPlayer();
+
+    // Set high energy so rate limit is hit before energy depletion
+    Energy.setEnergy(aliceEntityId, MAX_PLAYER_ENERGY);
+
+    // Add many blocks to inventory
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Dirt, 21);
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.Dirt);
+
+    // Player can build up to 20 times per block (10 builds per second with 2 second blocks)
+    // Try to build 20 times, the 21st should revert
+    for (uint256 i = 0; i < 20; i++) {
+      Vec3 buildCoord = vec3(
+        playerCoord.x() + int32(int256(i % 5 + 1)), FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z() + int32(int256(i / 5))
+      );
+      setObjectAtCoord(buildCoord, ObjectTypes.Air);
+
+      vm.prank(alice);
+      world.build(aliceEntityId, buildCoord, inventorySlot, "");
+    }
+
+    // 21st build should fail due to rate limit
+    Vec3 finalBuildCoord = vec3(playerCoord.x() + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z() + 3);
+    setObjectAtCoord(finalBuildCoord, ObjectTypes.Air);
+
+    vm.prank(alice);
+    vm.expectRevert("Rate limit exceeded");
+    world.build(aliceEntityId, finalBuildCoord, inventorySlot, "");
+
+    // Move to next block and verify can build again
+    vm.roll(block.number + 1);
+
+    vm.prank(alice);
+    world.build(aliceEntityId, finalBuildCoord, inventorySlot, "");
+  }
+
+  function testJumpBuildRateLimit() public {
+    (address alice, EntityId aliceEntityId,) = setupFlatChunkWithPlayer();
+
+    // Set high energy so rate limit is hit before energy depletion
+    Energy.setEnergy(aliceEntityId, MAX_PLAYER_ENERGY);
+
+    // Add many blocks to inventory
+    TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.Stone, 21);
+
+    uint16 inventorySlot = TestInventoryUtils.findObjectType(aliceEntityId, ObjectTypes.Stone);
+
+    // JumpBuild should also count against build rate limit
+    for (uint256 i = 0; i < 20; i++) {
+      Vec3 currentPos = EntityPosition.get(aliceEntityId);
+
+      // Make sure terrain allows jump build
+      setObjectAtCoord(currentPos + vec3(0, 1, 0), ObjectTypes.Air);
+      setObjectAtCoord(currentPos + vec3(0, 2, 0), ObjectTypes.Air);
+
+      vm.prank(alice);
+      world.jumpBuild(aliceEntityId, inventorySlot, "");
+    }
+
+    vm.prank(alice);
+    vm.expectRevert("Rate limit exceeded");
+    world.jumpBuild(aliceEntityId, inventorySlot, "");
+
+    // Move to next block and verify can build again
+    vm.roll(block.number + 1);
+
+    // Reset position for final jump build
+    Vec3 finalPos = EntityPosition.get(aliceEntityId);
+    setObjectAtCoord(finalPos + vec3(0, 1, 0), ObjectTypes.Air);
+    setObjectAtCoord(finalPos + vec3(0, 2, 0), ObjectTypes.Air);
+
+    vm.prank(alice);
+    world.jumpBuild(aliceEntityId, inventorySlot, "");
   }
 }

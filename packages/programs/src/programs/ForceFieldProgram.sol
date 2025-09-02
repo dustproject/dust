@@ -10,6 +10,7 @@ import {
   IAddFragment,
   IBuild,
   IEnergize,
+  IHit,
   IMine,
   IProgramValidator,
   IRemoveFragment
@@ -28,6 +29,7 @@ contract ForceFieldProgram is
   IEnergize,
   IBuild,
   IMine,
+  IHit,
   DefaultProgram
 {
   constructor(IBaseWorld _world) DefaultProgram(_world) { }
@@ -54,6 +56,15 @@ contract ForceFieldProgram is
 
   function onMine(HookContext calldata ctx, MineData calldata mine) external view onlyWorld {
     require(hasAccess(ctx.caller, mine.entity), "Only approved callers can mine in the force field");
+  }
+
+  function onHit(HookContext calldata ctx, HitData calldata hit) external view onlyWorld {
+    if (!ctx.revertOnFailure) {
+      return;
+    }
+    bool callerHasAccess = hasAccess(ctx.caller, ctx.target);
+    bool targetHasAccess = hasAccess(hit.target, ctx.target);
+    require(callerHasAccess && !targetHasAccess, "Only approved callers can hit other players");
   }
 
   // Override the default program attachment logic to only allow the owner of the access group to detach forcefield programs
