@@ -73,12 +73,15 @@ library ToolUtils {
 
     // Get caller's current energy and position
     uint128 callerEnergy = getEnergyData(toolData.owner).energy;
+    if (callerEnergy == 0) {
+      return 0;
+    }
 
     // Base energy cost
     uint128 baseEnergyCost = _getActionEnergyCost(toolData, callerEnergy, useMassMax);
 
     // Apply discount
-    uint128 energyCost = uint128(FixedPointMathLib.mulWad(baseEnergyCost, energyMultiplierWad));
+    uint128 energyCost = uint128(FixedPointMathLib.mulWadUp(baseEnergyCost, energyMultiplierWad));
 
     // Drain energy
     if (energyCost > 0) {
@@ -118,7 +121,7 @@ library ToolUtils {
     uint128 toolMass = ObjectPhysics._getMass(toolData.toolType);
     uint128 maxToolMassReduction = Math.min(toolMass / 10, toolData.massLeft);
     uint128 maxActionMassReduction =
-      uint128(uint256(maxToolMassReduction) * multiplier / Constants.ACTION_MODIFIER_DENOMINATOR);
+      uint128(Math.divUp(uint256(maxToolMassReduction) * multiplier, Constants.ACTION_MODIFIER_DENOMINATOR));
 
     if (maxActionMassReduction <= massLeft) {
       // Tool capacity is the limiting factor - use exact tool mass reduction
