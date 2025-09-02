@@ -60,6 +60,7 @@ uint128 constant SPECIALIZATION_MULTIPLIER = 3; // 3x bonus for using the right 
 
 // Action modifiers (fractional values use ACTION_MODIFIER_DENOMINATOR)
 uint128 constant ACTION_MODIFIER_DENOMINATOR = 1e18;
+uint128 constant TILL_ACTION_MODIFIER = ACTION_MODIFIER_DENOMINATOR; // 1x (no change for tilling)
 uint128 constant MINE_ACTION_MODIFIER = ACTION_MODIFIER_DENOMINATOR; // 1x (no change for mining)
 uint128 constant HIT_ACTION_MODIFIER = ACTION_MODIFIER_DENOMINATOR / 100; // ~1/100x
 
@@ -108,3 +109,34 @@ uint128 constant BUILD_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // 10 b
 int128 constant LN2_WAD = 693147180559945309; // ln(2) in 1e18
 uint256 constant PROGRESS_DECAY_HALF_LIFE = 7 days; // every 7 days progress decays by half
 int128 constant PROGRESS_DECAY_LAMBDA_WAD = int128(int256(LN2_WAD) / int256(PROGRESS_DECAY_HALF_LIFE));
+
+// ------------------------------------------------------------
+// Player skills (progress-based energy multipliers)
+// ------------------------------------------------------------
+// Minimum energy multiplier at max benefit (WAD scale). 0.70e18 = 30% discount
+uint128 constant SKILL_ENERGY_MIN_MULTIPLIER_WAD = 7e17; // 70%
+
+// Smooth-then-cap parameterization: "effort to reach max" per activity family.
+// We compute a smooth curve f(x)=x/(x+s), then normalize by f(xCap) and cap at 1.
+// s is set equal to xCap for an intuitive shape; xCap is derived from the below anchors.
+
+// Mining: mined mass to reach max
+uint128 constant SKILL_MINING_MASS_TO_MAX = 9000000000000000000 * 2000; // 2000 obsidian blocks
+
+// Movement: seconds of activity to reach max
+uint128 constant SKILL_WALK_SECONDS_TO_MAX = 360000; // 100 hours
+uint128 constant SKILL_SWIM_SECONDS_TO_MAX = 360000; // 100 hours
+
+// Movement: steps to reach max (direct anchors for skills)
+uint128 constant SKILL_WALK_STEPS_TO_MAX = 5_400_000; // ~15 steps/s * 100h
+uint128 constant SKILL_SWIM_STEPS_TO_MAX = 4_860_000; // ~13.5 steps/s * 100h
+
+// Falling: number of over-safe fall blocks to reach max
+uint128 constant SKILL_FALL_BLOCKS_TO_MAX = 1000;
+uint128 constant SKILL_FALL_ENERGY_TO_MAX = PLAYER_FALL_ENERGY_COST * SKILL_FALL_BLOCKS_TO_MAX;
+
+// Anchors (energy units) to reach max benefit
+uint128 constant SKILL_HIT_PLAYER_ENERGY_TO_MAX = MAX_PLAYER_ENERGY * 100;
+uint128 constant SKILL_HIT_MACHINE_ENERGY_TO_MAX = MAX_PLAYER_ENERGY * 100;
+uint128 constant SKILL_BUILD_ENERGY_TO_MAX = BUILD_ENERGY_COST * 1000;
+uint128 constant SKILL_CRAFT_MASS_ENERGY_TO_MAX = CRAFT_ENERGY_COST * 1500;

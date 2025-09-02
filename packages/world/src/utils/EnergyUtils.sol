@@ -54,6 +54,12 @@ function getLatestEnergyData(EntityId entityId) view returns (EnergyData memory,
   return (energyData, energyDrained, depletedTime);
 }
 
+function getEnergyData(EntityId entity) view returns (EnergyData memory) {
+  EnergyData memory energyData = Energy._get(entity);
+  require(energyData.lastUpdatedTime == uint128(block.timestamp), "Outdated energy data");
+  return energyData;
+}
+
 function updateMachineEnergy(EntityId machine) returns (EnergyData memory) {
   if (!machine._exists()) {
     return EnergyData(0, 0, 0);
@@ -119,7 +125,6 @@ function decreasePlayerEnergy(EntityId player, uint128 amount) returns (uint128)
   require(amount > 0, "Cannot decrease 0 energy");
   uint128 current = Energy._getEnergy(player);
   require(current >= amount, "Not enough energy");
-
   uint128 newEnergy = current - amount;
   Energy._setEnergy(player, newEnergy);
 

@@ -11,7 +11,7 @@ import { HitPlayerNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerProgressUtils } from "../utils/PlayerProgressUtils.sol";
 import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
-import { HIT_ACTION_MODIFIER, MAX_HIT_RADIUS } from "../Constants.sol";
+import { MAX_HIT_RADIUS } from "../Constants.sol";
 
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectTypes } from "../types/ObjectType.sol";
@@ -34,7 +34,7 @@ contract HitPlayerSystem is System {
 
     (, Vec3 targetCoord) = caller.requireInRange(target, MAX_HIT_RADIUS);
 
-    target = target.baseEntityId();
+    target = target._baseEntityId();
 
     require(target != caller, "Cannot hit yourself");
     require(target._exists(), "No entity at target location");
@@ -53,8 +53,8 @@ contract HitPlayerSystem is System {
     // Get tool data for damage calculation
     ToolData memory toolData = ToolUtils.getToolData(caller, toolSlot);
 
-    // Use tool and get total damage (handles energy costs internally)
-    uint128 damage = toolData.use(targetEnergy, HIT_ACTION_MODIFIER, toolData.toolType.isWhacker());
+    // Use tool and get total damage (skill-aware, action-specific)
+    uint128 damage = toolData.hitPlayer(targetEnergy);
 
     // If caller died (damage == 0), return early
     if (damage == 0) {

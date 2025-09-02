@@ -40,8 +40,8 @@ contract HitMachineSystem is System {
 
     ToolData memory toolData = ToolUtils.getToolData(caller, toolSlot);
 
-    // Use tool and get total damage (handles energy costs internally)
-    uint128 damage = toolData.use(energyLeft, HIT_ACTION_MODIFIER, toolData.toolType.isWhacker());
+    // Use tool and get total damage (skill-aware, action-specific)
+    uint128 damage = toolData.hitMachine(energyLeft);
 
     // If caller died (damage == 0), return early
     if (damage == 0) {

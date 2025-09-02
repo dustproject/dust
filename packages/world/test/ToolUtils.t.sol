@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { console } from "forge-std/console.sol";
+import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
+
 import { DustTest } from "./DustTest.sol";
 
 import {
@@ -16,6 +19,7 @@ import { vec3 } from "../src/types/Vec3.sol";
 
 import { Math } from "../src/utils/Math.sol";
 
+import { Energy } from "../src/codegen/tables/Energy.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
@@ -32,20 +36,20 @@ contract ToolUtilsTest is DustTest {
 
     // Add a tool
     TestInventoryUtils.addEntity(alice, ObjectTypes.IronPick);
-    EntityId toolId = InventorySlot.getEntityId(alice, 0);
+    EntityId tool = InventorySlot.getEntityId(alice, 0);
 
     // Get tool data
     ToolData memory toolData = TestToolUtils.getToolData(alice, 0);
     assertEq(toolData.toolType, ObjectTypes.IronPick);
-    assertEq(toolData.tool, toolId);
+    assertEq(toolData.tool, tool);
 
     // Use the tool partially
-    uint128 initialMass = Mass.getMass(toolId);
+    uint128 initialMass = Mass.getMass(tool);
     // Use the tool with a limit larger than energy cost so tool mass is reduced
-    TestToolUtils.use(toolData, TOOL_ACTION_ENERGY_COST + 1);
+    TestToolUtils.use(toolData, TOOL_ACTION_ENERGY_COST + 1, ACTION_MODIFIER_DENOMINATOR, false, FixedPointMathLib.WAD);
 
     // Tool should still exist with reduced mass
-    assertLt(Mass.getMass(toolId), initialMass, "Tool mass should be reduced");
+    assertLt(Mass.getMass(tool), initialMass, "Tool mass should be reduced");
     assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 1, "Tool should still be in inventory");
 
     _verifyInventoryBitmapIntegrity(alice);
@@ -93,7 +97,8 @@ contract ToolUtilsTest is DustTest {
     // Get tool data and use tool
     ToolData memory toolData = TestToolUtils.getToolData(alice, TestInventoryUtils.findEntity(alice, toolEntity));
     uint128 initialToolMass = toolData.massLeft;
-    uint128 actionMassReduction = TestToolUtils.use(toolData, useMassMax, actionModifier, specialized);
+    uint128 actionMassReduction =
+      TestToolUtils.use(toolData, useMassMax, actionModifier, specialized, FixedPointMathLib.WAD);
 
     // Check tool state after use
     uint128 actualToolMassReduction = initialToolMass - Mass.getMass(toolEntity);

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
+
 import { Energy } from "../../codegen/tables/Energy.sol";
 
 import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
@@ -14,10 +16,32 @@ import { ObjectTypes } from "../../types/ObjectType.sol";
 import { Vec3, vec3 } from "../../types/Vec3.sol";
 import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../../utils/EnergyUtils.sol";
 import { EntityUtils } from "../../utils/EntityUtils.sol";
-import { PlayerProgressUtils } from "../../utils/PlayerProgressUtils.sol";
+import { PlayerProgressUtils as PlayerTrackingUtils } from "../../utils/PlayerProgressUtils.sol";
+import { PlayerSkillUtils } from "../../utils/PlayerSkillUtils.sol";
 import { RateLimitUtils } from "../../utils/RateLimitUtils.sol";
 
+struct MoveCounts {
+  uint128 walkSteps;
+  uint128 swimSteps;
+  uint128 lavaSteps;
+  uint128 fallEnergy;
+  uint16 fallHeight;
+}
+
+struct MoveCosts {
+  uint128 walkCost;
+  uint128 swimCost;
+  uint128 lavaCost;
+  uint128 fallPerBlockCost;
+}
+
 library MoveLib {
+  enum MoveStepType {
+    Walk,
+    Swim,
+    Lava
+  }
+
   function jump(Vec3 playerCoord) public {
     EntityId[] memory playerEntityIds = _removePlayerPosition(playerCoord);
     EntityId player = playerEntityIds[0];
@@ -28,7 +52,8 @@ library MoveLib {
 
     Vec3 above = playerCoord + vec3(0, 1, 0);
     _requireValidMove(playerCoord, above);
-    (uint128 totalCost,) = _getMoveCost(above);
+    MoveCosts memory costs = _initMoveCosts(player);
+    uint128 totalCost = _getMoveCost(costs, above);
 
     if (totalCost >= currentEnergy) {
       totalCost = currentEnergy;
@@ -50,13 +75,16 @@ library MoveLib {
 
     uint128 currentEnergy = Energy._getEnergy(player);
 
-    (Vec3 finalCoord, uint128 totalCost, uint128 walkSteps, uint128 swimSteps) =
-      _computePathResult(playerCoord, newBaseCoords, currentEnergy);
+    (Vec3 finalCoord, uint128 totalCost, MoveCounts memory counts) =
+      _computePathResult(player, playerCoord, newBaseCoords, currentEnergy);
 
     // Update rate limits based on movement counts
-    RateLimitUtils.move(player, walkSteps, swimSteps);
+    RateLimitUtils.move(player, counts.walkSteps, counts.swimSteps);
     // Track moves
-    PlayerProgressUtils.trackMoves(player, walkSteps, swimSteps);
+    PlayerTrackingUtils.trackMoves(player, counts.walkSteps, counts.swimSteps);
+    if (counts.fallEnergy > 0) {
+      PlayerTrackingUtils.trackFallEnergy(player, counts.fallEnergy);
+    }
 
     _setPlayerPosition(playerEntityIds, finalCoord);
 
@@ -82,7 +110,7 @@ library MoveLib {
     EntityId[] memory playerEntityIds = _removePlayerPosition(playerCoord);
     EntityId player = playerEntityIds[0];
 
-    (Vec3 finalCoord, uint128 totalCost) = _computeGravityResult(playerCoord, 0);
+    (Vec3 finalCoord, uint128 totalCost) = _computeGravityResult(_initMoveCosts(player), playerCoord, 0);
 
     _setPlayerPosition(playerEntityIds, finalCoord);
 
@@ -122,7 +150,11 @@ library MoveLib {
       && !EntityUtils.getMovableEntityAt(belowCoord)._exists() && !_isFluid(playerCoord);
   }
 
-  function _computeGravityResult(Vec3 coord, uint16 initialFallHeight) private view returns (Vec3, uint128) {
+  function _computeGravityResult(MoveCosts memory costs, Vec3 coord, uint16 initialFallHeight)
+    private
+    view
+    returns (Vec3, uint128)
+  {
     uint16 currentFallHeight = initialFallHeight;
     Vec3 current = coord;
 
@@ -133,30 +165,29 @@ library MoveLib {
       }
     }
 
-    // We don't count move units as we are not moving, just falling
-    (uint128 moveCost,) = _getMoveCost(current);
+    // Move step on landing (discounted)
+    uint128 moveCost = _getMoveCost(costs, current);
+
     // If currently on water or under the safe fall threshold, don't apply fall damage
     if (currentFallHeight <= Constants.PLAYER_SAFE_FALL_DISTANCE || _isFluid(current)) {
       return (current, moveCost);
     }
 
-    return (
-      current, moveCost + Constants.PLAYER_FALL_ENERGY_COST * (currentFallHeight - Constants.PLAYER_SAFE_FALL_DISTANCE)
-    );
+    return (current, moveCost + costs.fallPerBlockCost * (currentFallHeight - Constants.PLAYER_SAFE_FALL_DISTANCE));
   }
 
   /**
    * Calculate total energy cost, final path coordinate, and movement counts
    * Returns: (finalCoord, cost, walkSteps, swimSteps)
    */
-  function _computePathResult(Vec3 start, Vec3[] memory newBaseCoords, uint128 currentEnergy)
+  function _computePathResult(EntityId player, Vec3 start, Vec3[] memory newBaseCoords, uint128 currentEnergy)
     internal
     view
-    returns (Vec3 current, uint128 cost, uint128 walkSteps, uint128 swimSteps)
+    returns (Vec3 current, uint128 cost, MoveCounts memory counts)
   {
+    MoveCosts memory costs = _initMoveCosts(player);
     uint16 jumps = 0;
     uint16 glides = 0;
-    uint16 fallHeight = 0;
 
     current = start;
     bool currentHasGravity = _gravityApplies(current);
@@ -165,29 +196,27 @@ library MoveLib {
       if (cost >= currentEnergy) break;
 
       Vec3 next = newBaseCoords[i];
-
       int32 dy = next.y() - current.y();
-
       _requireValidMove(current, next);
 
       bool nextHasGravity = _gravityApplies(next);
 
       // Only count as fall when gravity doesn't apply in current coord
       if (dy < 0 && currentHasGravity) {
-        // For falls, cost will be computed upon landing
-        ++fallHeight;
+        ++counts.fallHeight;
         glides = 0;
-
-        // If landing, apply normal move cost
         if (!nextHasGravity) {
-          (uint128 moveCost, bool isSwimming) = _getMoveCost(next);
-          cost += moveCost;
-
-          // Track movement type for batch update
-          if (isSwimming) {
-            swimSteps++;
+          MoveStepType stepType = _getMoveType(next);
+          if (stepType == MoveStepType.Swim) {
+            cost += costs.swimCost;
+            counts.swimSteps++;
+          } else if (stepType == MoveStepType.Lava) {
+            cost += costs.lavaCost;
+            counts.walkSteps++;
+            counts.lavaSteps++;
           } else {
-            walkSteps++;
+            cost += costs.walkCost;
+            counts.walkSteps++;
           }
         }
       } else {
@@ -198,23 +227,27 @@ library MoveLib {
           ++glides;
           require(glides <= Constants.MAX_PLAYER_GLIDES, "Cannot glide more than 10 blocks");
         }
-        (uint128 moveCost, bool isSwimming) = _getMoveCost(next);
-        cost += moveCost;
-
-        // Track movement type for batch update
-        if (isSwimming) {
-          swimSteps++;
+        MoveStepType stepType = _getMoveType(next);
+        if (stepType == MoveStepType.Swim) {
+          cost += costs.swimCost;
+          counts.swimSteps++;
+        } else if (stepType == MoveStepType.Lava) {
+          cost += costs.lavaCost;
+          counts.walkSteps++;
+          counts.lavaSteps++;
         } else {
-          walkSteps++;
+          cost += costs.walkCost;
+          counts.walkSteps++;
         }
       }
 
       if (!nextHasGravity) {
-        // If landing after a long fall, apply fall damage
-        if (fallHeight > Constants.PLAYER_SAFE_FALL_DISTANCE && !_isFluid(next)) {
-          cost += Constants.PLAYER_FALL_ENERGY_COST * (fallHeight - Constants.PLAYER_SAFE_FALL_DISTANCE);
+        if (counts.fallHeight > Constants.PLAYER_SAFE_FALL_DISTANCE && !_isFluid(next)) {
+          uint128 fallEnergy = costs.fallPerBlockCost * (counts.fallHeight - Constants.PLAYER_SAFE_FALL_DISTANCE);
+          cost += fallEnergy;
+          counts.fallEnergy += fallEnergy;
         }
-        fallHeight = 0;
+        counts.fallHeight = 0;
         jumps = 0;
         glides = 0;
       }
@@ -223,12 +256,11 @@ library MoveLib {
       current = next;
     }
 
-    // If gravity still applies after last path move, run gravity all the way down,
-    // taking into account the current fallHeight
     if (currentHasGravity) {
       uint128 fallDamage;
-      (current, fallDamage) = _computeGravityResult(current, fallHeight);
+      (current, fallDamage) = _computeGravityResult(costs, current, counts.fallHeight);
       cost += fallDamage;
+      if (fallDamage > 0) counts.fallEnergy += fallDamage;
     }
   }
 
@@ -279,17 +311,33 @@ library MoveLib {
     return EntityUtils.getFluidLevelAt(coord) > 0;
   }
 
-  function _getMoveCost(Vec3 coord) internal view returns (uint128 energyCost, bool isSwimming) {
+  function _getMoveType(Vec3 coord) internal view returns (MoveStepType) {
     Vec3 belowCoord = coord - vec3(0, 1, 0);
     ObjectType belowType = EntityUtils.getObjectTypeAt(belowCoord);
-    if (belowType == ObjectTypes.Lava) {
-      return (Constants.LAVA_MOVE_ENERGY_COST, false);
-    }
+    if (belowType == ObjectTypes.Lava) return MoveStepType.Lava;
+    if (belowType.isPassThrough() && _isFluid(belowCoord)) return MoveStepType.Swim;
+    return MoveStepType.Walk;
+  }
 
-    if (belowType.isPassThrough() && _isFluid(belowCoord)) {
-      return (Constants.WATER_MOVE_ENERGY_COST, true);
+  function _initMoveCosts(EntityId player) internal view returns (MoveCosts memory c) {
+    (uint256 walkMul, uint256 swimMul, uint256 lavaMul, uint256 fallMul) =
+      PlayerSkillUtils.getMoveEnergyMultipliersWad(player);
+    unchecked {
+      c.walkCost = uint128(FixedPointMathLib.mulWad(Constants.MOVE_ENERGY_COST, walkMul));
+      c.swimCost = uint128(FixedPointMathLib.mulWad(Constants.WATER_MOVE_ENERGY_COST, swimMul));
+      c.lavaCost = uint128(FixedPointMathLib.mulWad(Constants.LAVA_MOVE_ENERGY_COST, lavaMul));
+      c.fallPerBlockCost = uint128(FixedPointMathLib.mulWad(Constants.PLAYER_FALL_ENERGY_COST, fallMul));
     }
+  }
 
-    return (Constants.MOVE_ENERGY_COST, false);
+  function _getMoveCost(MoveCosts memory costs, Vec3 coord) internal view returns (uint128) {
+    MoveStepType stepType = _getMoveType(coord);
+    if (stepType == MoveStepType.Walk) {
+      return costs.walkCost;
+    } else if (stepType == MoveStepType.Swim) {
+      return costs.swimCost;
+    } else {
+      return costs.lavaCost;
+    }
   }
 }
