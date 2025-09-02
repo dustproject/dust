@@ -41,3 +41,15 @@ eth_rpc_url = "https://rpc.redstonechain.com"
 
 [profile.pyrope]
 eth_rpc_url = "https://rpc.pyropechain.com"
+
+[profile.nova]
+eth_rpc_url = "https://nova.arbitrum.io/rpc"
+
+[profile.abstract]
+eth_rpc_url = "https://api.mainnet.abs.xyz"
+
+[profile.base]
+eth_rpc_url = "https://mainnet.base.org"
+
+[profile.optimism]
+eth_rpc_url = "https://mainnet.optimism.io"
