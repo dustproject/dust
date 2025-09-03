@@ -1398,7 +1398,7 @@ contract MineTest is DustTest {
 
     for (uint256 i = 0; i < cropTypes.length; i++) {
       Vec3 cropCoord = vec3(playerCoord.x() + int32(int256(i)) + 1, FLAT_CHUNK_GRASS_LEVEL + 1, playerCoord.z());
-      EntityId cropid = setObjectAtCoord(cropCoord, cropTypes[i]);
+      setObjectAtCoord(cropCoord, cropTypes[i]);
 
       // Set up chunk commitment for randomness when mining
       newCommit(alice, aliceEntityId, cropCoord, bytes32(uint256(i)));

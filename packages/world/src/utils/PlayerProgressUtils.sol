@@ -11,6 +11,7 @@ import { Death } from "../codegen/tables/Death.sol";
 import { PlayerProgress, PlayerProgressData } from "../codegen/tables/PlayerProgress.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
+import { Math } from "../utils/Math.sol";
 
 library PlayerProgressUtils {
   function getProgress(EntityId player, ActivityType activityType) internal view returns (uint256) {
@@ -24,8 +25,8 @@ library PlayerProgressUtils {
     uint128 alignedAccumulated = diff > 0 ? data.accumulated >> diff : data.accumulated;
 
     // Floor is just accumulated / 3
-    uint128 floorEffective = alignedAccumulated / 3;
-    uint128 result = decayedEffective > floorEffective ? decayedEffective : floorEffective;
+    uint128 floor = alignedAccumulated / 3;
+    uint128 result = decayedEffective > floor ? decayedEffective : floor;
     return uint256(result);
   }
 
@@ -120,15 +121,11 @@ library PlayerProgressUtils {
       accumulated = accumulated >> diff;
     }
 
-    // Add new value and compute the new floor (minimal clamp semantics)
-    accumulated = accumulated + value;
-    uint128 floorNew = accumulated / 3;
+    // Add new value and compute the new floor
+    accumulated += value;
 
-    // Ensure current reflects the new floor
-    uint128 nextCurrent = current + value;
-    if (nextCurrent < floorNew) {
-      nextCurrent = floorNew;
-    }
+    // Ensure current reflects the floor (acc / 3)
+    uint128 nextCurrent = uint128(Math.max(current + value, accumulated / 3));
 
     PlayerProgress._set(
       player,

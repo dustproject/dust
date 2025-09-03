@@ -20,24 +20,22 @@ import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 import { PlayerProgressUtils as Tracking } from "./PlayerProgressUtils.sol";
 
 library PlayerSkillUtils {
-  function getMoveEnergyMultipliersWad(EntityId player)
-    internal
-    view
-    returns (uint256 walkMul, uint256 swimMul, uint256 lavaMul, uint256 fallMul)
-  {
-    walkMul = getEnergyMultiplierWad({
+  function getWalkEnergyMultiplierWad(EntityId player) internal view returns (uint256) {
+    return getEnergyMultiplierWad({
       progress: Tracking.getProgress(player, ActivityType.MoveWalkSteps),
       progressCap: SKILL_WALK_STEPS_TO_MAX
     });
+  }
 
-    swimMul = getEnergyMultiplierWad({
+  function getSwimEnergyMultiplierWad(EntityId player) internal view returns (uint256) {
+    return getEnergyMultiplierWad({
       progress: Tracking.getProgress(player, ActivityType.MoveSwimSteps),
       progressCap: SKILL_SWIM_STEPS_TO_MAX
     });
+  }
 
-    lavaMul = walkMul; // reuse walk for now
-
-    fallMul = getEnergyMultiplierWad({
+  function getFallEnergyMultiplierWad(EntityId player) internal view returns (uint256) {
+    return getEnergyMultiplierWad({
       progress: Tracking.getProgress(player, ActivityType.MoveFallEnergy),
       progressCap: SKILL_FALL_ENERGY_TO_MAX
     });
