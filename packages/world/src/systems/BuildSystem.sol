@@ -105,10 +105,8 @@ contract BuildSystem is System {
 
     _requireBuildsAllowed(ctx, base, coords, extraData);
 
-    // // Track build energy spent
-    PlayerProgressUtils.trackBuildEnergy(ctx.caller, energyCost);
-    // // Track build mass
-    PlayerProgressUtils.trackBuildMass(ctx.caller, ObjectPhysics._getMass(ctx.buildType));
+    // Track build energy spent
+    PlayerProgressUtils.trackBuild(ctx.caller, energyCost, ObjectPhysics._getMass(ctx.buildType));
 
     notify(
       ctx.caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectType: ctx.buildType })

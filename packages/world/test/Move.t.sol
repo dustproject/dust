@@ -9,9 +9,6 @@ import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 import { ActivityType } from "../src/codegen/common.sol";
 
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
-import { PlayerProgress } from "../src/codegen/tables/PlayerProgress.sol";
-
-import { PlayerProgressUtils } from "../src/utils/PlayerProgressUtils.sol";
 
 import { DustTest } from "./DustTest.sol";
 
@@ -85,12 +82,8 @@ contract MoveTest is DustTest {
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
 
     // Check player activity tracking - all moves should be walk steps
-    uint256 walkSteps = TestPlayerProgressUtils.getProgress(playerEntityId, ActivityType.MoveWalkSteps);
-    assertEq(walkSteps, numBlocksToMove, "Walk steps activity not tracked correctly");
-
-    // Should have no swim steps
-    uint256 swimSteps = TestPlayerProgressUtils.getProgress(playerEntityId, ActivityType.MoveSwimSteps);
-    assertEq(swimSteps, 0, "Swim steps should be zero");
+    uint256 moveEnergy = TestPlayerProgressUtils.getProgress(playerEntityId, ActivityType.MoveEnergy);
+    assertEq(moveEnergy, numBlocksToMove * MOVE_ENERGY_COST, "Walk steps activity not tracked correctly");
   }
 
   function testMoveOneBlockTerrain() public {

@@ -59,13 +59,8 @@ library PlayerProgressUtils {
   }
 
   // Movement tracking
-  function trackMoves(EntityId player, uint128 walkSteps, uint128 swimSteps) internal {
-    if (walkSteps > 0) {
-      _trackProgress(player, ActivityType.MoveWalkSteps, walkSteps);
-    }
-    if (swimSteps > 0) {
-      _trackProgress(player, ActivityType.MoveSwimSteps, swimSteps);
-    }
+  function trackMoveEnergy(EntityId player, uint128 moveEnergy) internal {
+    _trackProgress(player, ActivityType.MoveEnergy, moveEnergy);
   }
 
   function trackFallEnergy(EntityId player, uint128 fallEnergy) internal {
@@ -73,12 +68,9 @@ library PlayerProgressUtils {
   }
 
   // Building tracking
-  function trackBuildEnergy(EntityId player, uint128 energySpent) internal {
-    _trackProgress(player, ActivityType.BuildEnergy, energySpent);
-  }
-
-  function trackBuildMass(EntityId player, uint128 massBuilt) internal {
-    _trackProgress(player, ActivityType.BuildMass, massBuilt);
+  function trackBuild(EntityId player, uint128 energySpent, uint128 massBuilt) internal {
+    // TODO: collapse with build energy
+    _trackProgress(player, ActivityType.BuildMassEnergy, energySpent + massBuilt);
   }
 
   // Crafting tracking - per station type
@@ -105,6 +97,10 @@ library PlayerProgressUtils {
 
   // Internal helper
   function _trackProgress(EntityId player, ActivityType activityType, uint128 value) private {
+    if (value == 0) {
+      return;
+    }
+
     uint256 deaths = Death._getDeaths(player);
     PlayerProgressData memory previous = PlayerProgress._get(player, activityType);
 

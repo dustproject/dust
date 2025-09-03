@@ -123,13 +123,8 @@ uint128 constant SKILL_ENERGY_MIN_MULTIPLIER_WAD = 7e17; // 70%
 // Mining: mined mass to reach max
 uint128 constant SKILL_MINING_MASS_TO_MAX = 9000000000000000000 * 2000; // 2000 obsidian blocks
 
-// Movement: seconds of activity to reach max
-uint128 constant SKILL_WALK_SECONDS_TO_MAX = 360000; // 100 hours
-uint128 constant SKILL_SWIM_SECONDS_TO_MAX = 360000; // 100 hours
-
-// Movement: steps to reach max (direct anchors for skills)
-uint128 constant SKILL_WALK_STEPS_TO_MAX = 5_400_000; // ~15 steps/s * 100h
-uint128 constant SKILL_SWIM_STEPS_TO_MAX = 4_860_000; // ~13.5 steps/s * 100h
+// Movement: energy to reach max (direct anchors for skills)
+uint128 constant SKILL_MOVE_ENERGY_TO_MAX = MOVE_ENERGY_COST * 100 hours / 15; // ~15 steps/s * 100h
 
 // Falling: number of over-safe fall blocks to reach max
 uint128 constant SKILL_FALL_BLOCKS_TO_MAX = 1000;

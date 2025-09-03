@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
+import { MOVE_ENERGY_COST } from "../src/Constants.sol";
 import { ActivityType } from "../src/codegen/common.sol";
 import { Death } from "../src/codegen/tables/Death.sol";
-import { PlayerProgress } from "../src/codegen/tables/PlayerProgress.sol";
 import { EntityId } from "../src/types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../src/types/ObjectType.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
@@ -25,16 +25,16 @@ contract PlayerProgressTest is DustTest {
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
     // Verify activity was tracked
-    uint256 buildMass = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMass);
-    assertTrue(buildMass > 0, "Build mass should be tracked");
+    uint256 buildMassEnergy = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMassEnergy);
+    assertTrue(buildMassEnergy > 0, "Build progress mass should be tracked");
 
     // Simulate death by incrementing death count
     uint256 deathsBefore = Death.getDeaths(aliceEntityId);
     Death.setDeaths(aliceEntityId, deathsBefore + 1);
 
     // Check that activity is halved for the new life
-    uint256 buildMassAfterDeath = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMass);
-    assertEq(buildMassAfterDeath, buildMass / 2, "Build mass should halve after death");
+    uint256 buildMassEnergyAfterDeath = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMassEnergy);
+    assertEq(buildMassEnergyAfterDeath, buildMassEnergy / 2, "Build progress should halve after death");
 
     // Build again and verify it tracks for the new life
     TestInventoryUtils.addObject(aliceEntityId, buildObjectType, 1);
@@ -43,9 +43,13 @@ contract PlayerProgressTest is DustTest {
     vm.prank(alice);
     world.build(aliceEntityId, buildCoord + vec3(1, 0, 0), inventorySlot, "");
 
-    uint256 newBuildMass = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMass);
-    assertTrue(newBuildMass > 0, "Build mass should be tracked for new life");
-    assertEq(newBuildMass, buildMassAfterDeath + buildMass, "Build mass should add on top of halved value");
+    uint256 newBuildMassEnergy = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMassEnergy);
+    assertTrue(newBuildMassEnergy > 0, "Build progress should be tracked for new life");
+    assertEq(
+      newBuildMassEnergy,
+      buildMassEnergyAfterDeath + buildMassEnergy,
+      "Build progress should add on top of halved value"
+    );
   }
 
   function testMultipleActivityTypesTracked() public {
@@ -72,8 +76,8 @@ contract PlayerProgressTest is DustTest {
     world.mine(aliceEntityId, stoneCoord, pickSlot, "");
 
     // Verify multiple activities are tracked
-    uint256 walkSteps = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MoveWalkSteps);
-    assertEq(walkSteps, 3, "Walk steps should be tracked");
+    uint256 moveEnergy = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MoveEnergy);
+    assertEq(moveEnergy, 3 * MOVE_ENERGY_COST, "Walk steps should be tracked");
 
     uint256 pickMass = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.MinePickMass);
     assertTrue(pickMass > 0, "Pick mining should be tracked");

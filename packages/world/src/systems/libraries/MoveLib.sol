@@ -14,7 +14,9 @@ import { ObjectType } from "../../types/ObjectType.sol";
 import { ObjectTypes } from "../../types/ObjectType.sol";
 
 import { Vec3, vec3 } from "../../types/Vec3.sol";
-import { addEnergyToLocalPool, decreasePlayerEnergy, getEnergyData } from "../../utils/EnergyUtils.sol";
+import {
+  addEnergyToLocalPool, decreasePlayerEnergy, getEnergyData, updatePlayerEnergy
+} from "../../utils/EnergyUtils.sol";
 import { EntityUtils } from "../../utils/EntityUtils.sol";
 import { PlayerProgressUtils as PlayerTrackingUtils } from "../../utils/PlayerProgressUtils.sol";
 import { PlayerSkillUtils } from "../../utils/PlayerSkillUtils.sol";
@@ -23,19 +25,20 @@ import { RateLimitUtils } from "../../utils/RateLimitUtils.sol";
 struct PathResult {
   Vec3 coord;
   uint128 totalCost;
+  uint128 moveEnergy;
+  uint128 fallEnergy;
   uint128 walkSteps;
   uint128 swimSteps;
-  uint128 lavaSteps;
-  uint128 fallEnergy;
 }
 
 struct MoveContext {
   EntityId player;
   uint128 initialEnergy;
   // Lazy cached costs
+  uint256 _moveEnergyMul;
   uint128 _walkCost;
   uint128 _swimCost;
-  // uint128 _lavaCost; // currently same as walk (not cached)
+  uint128 _lavaCost;
   uint128 _fallCost;
 }
 
@@ -62,6 +65,7 @@ library MoveLib {
     Vec3 above = playerCoord + vec3(0, 1, 0);
     _requireValidMove(playerCoord, above);
     MoveContext memory ctx = _moveContext(player);
+
     uint128 cost = _stepContext(ctx, above).cost;
 
     _setPlayerPosition(playerEntityIds, above);
@@ -86,10 +90,8 @@ library MoveLib {
     RateLimitUtils.move(player, result.walkSteps, result.swimSteps);
 
     // Track moves
-    PlayerTrackingUtils.trackMoves(player, result.walkSteps, result.swimSteps);
-    if (result.fallEnergy > 0) {
-      PlayerTrackingUtils.trackFallEnergy(player, result.fallEnergy);
-    }
+    PlayerTrackingUtils.trackMoveEnergy(player, result.moveEnergy);
+    PlayerTrackingUtils.trackFallEnergy(player, result.fallEnergy);
 
     _setPlayerPosition(playerEntityIds, result.coord);
 
@@ -113,15 +115,20 @@ library MoveLib {
 
     MoveContext memory ctx = _moveContext(player);
 
-    PathResult memory result = _computeGravityPath(ctx, playerCoord);
+    uint128 fallDamage;
+    (playerCoord, fallDamage) = _computeGravityResult(ctx, playerCoord, 0);
 
-    _setPlayerPosition(playerEntityIds, result.coord);
+    _setPlayerPosition(playerEntityIds, playerCoord);
 
-    _updatePlayerDrainRate(player, result.coord);
+    _updatePlayerDrainRate(player, playerCoord);
 
-    if (result.totalCost > 0) {
-      decreasePlayerEnergy(player, result.totalCost);
-      addEnergyToLocalPool(result.coord, result.totalCost);
+    if (fallDamage > ctx.initialEnergy) {
+      fallDamage = ctx.initialEnergy;
+    }
+
+    if (fallDamage > 0) {
+      decreasePlayerEnergy(player, fallDamage);
+      addEnergyToLocalPool(playerCoord, fallDamage);
     }
 
     _handleAbove(player, playerCoord);
@@ -231,12 +238,13 @@ library MoveLib {
 
       currentHasGravity = nextHasGravity;
       res.coord = next;
+      res.totalCost += stepCtx.cost;
     }
 
     if (currentHasGravity) {
       uint128 fallDamage;
       (res.coord, fallDamage) = _computeGravityResult(ctx, res.coord, falls);
-      res.totalCost = fallDamage;
+      res.totalCost += fallDamage;
       res.fallEnergy += fallDamage;
     }
 
@@ -249,9 +257,6 @@ library MoveLib {
     MoveStepType stepType = stepCtx.stepType;
     if (stepType == MoveStepType.Swim) {
       res.swimSteps++;
-    } else if (stepType == MoveStepType.Lava) {
-      res.walkSteps++;
-      res.lavaSteps++;
     } else {
       res.walkSteps++;
     }
@@ -328,38 +333,28 @@ library MoveLib {
 
     stepCtx.gravityApplies = belowPass && !stepCtx.isFluid && !EntityUtils.getMovableEntityAt(belowCoord)._exists();
   }
-
-  function _computeGravityPath(MoveContext memory ctx, Vec3 start) internal view returns (PathResult memory res) {
-    if (!_gravityApplies(start)) {
-      res.coord = start;
-      res.totalCost = 0;
-      return res;
-    }
-    uint128 fallDamage;
-    (res.coord, fallDamage) = _computeGravityResult(ctx, start, 0);
-    res.totalCost = fallDamage;
-  }
 }
 
 library MoveContextLib {
   function getWalkCost(MoveContext memory ctx) internal view returns (uint128) {
     if (ctx._walkCost == 0) {
-      uint256 walkMul = PlayerSkillUtils.getWalkEnergyMultiplierWad(ctx.player);
-      ctx._walkCost = uint128(FixedPointMathLib.mulWad(Constants.MOVE_ENERGY_COST, walkMul));
+      ctx._walkCost = _getMoveCost(ctx, Constants.MOVE_ENERGY_COST);
     }
     return ctx._walkCost;
   }
 
   function getSwimCost(MoveContext memory ctx) internal view returns (uint128) {
     if (ctx._swimCost == 0) {
-      uint256 swimMul = PlayerSkillUtils.getSwimEnergyMultiplierWad(ctx.player);
-      ctx._swimCost = uint128(FixedPointMathLib.mulWad(Constants.WATER_MOVE_ENERGY_COST, swimMul));
+      ctx._swimCost = _getMoveCost(ctx, Constants.WATER_MOVE_ENERGY_COST);
     }
     return ctx._swimCost;
   }
 
-  function getLavaCost(MoveContext memory) internal pure returns (uint128) {
-    return Constants.LAVA_MOVE_ENERGY_COST;
+  function getLavaCost(MoveContext memory ctx) internal view returns (uint128) {
+    if (ctx._lavaCost == 0) {
+      ctx._lavaCost = _getMoveCost(ctx, Constants.LAVA_MOVE_ENERGY_COST);
+    }
+    return ctx._lavaCost;
   }
 
   function getFallCost(MoveContext memory ctx) internal view returns (uint128) {
@@ -368,6 +363,19 @@ library MoveContextLib {
       ctx._fallCost = uint128(FixedPointMathLib.mulWad(Constants.PLAYER_FALL_ENERGY_COST, fallMul));
     }
     return ctx._fallCost;
+  }
+
+  function _getMoveCost(MoveContext memory ctx, uint128 baseCost) private view returns (uint128) {
+    uint256 mul = _getMoveEnergyMultiplierWad(ctx);
+    return uint128(FixedPointMathLib.mulWad(baseCost, mul));
+  }
+
+  function _getMoveEnergyMultiplierWad(MoveContext memory ctx) private view returns (uint256) {
+    if (ctx._moveEnergyMul == 0) {
+      ctx._moveEnergyMul = PlayerSkillUtils.getMoveEnergyMultiplierWad(ctx.player);
+    }
+
+    return ctx._moveEnergyMul;
   }
 }
 

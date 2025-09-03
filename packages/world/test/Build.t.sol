@@ -66,11 +66,12 @@ contract BuildTest is DustTest {
     assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
 
     // Check player activity tracking
-    uint256 buildEnergy = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildEnergy);
-    assertEq(buildEnergy, BUILD_ENERGY_COST, "Build energy activity not tracked correctly");
-
-    uint256 buildMass = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMass);
-    assertEq(buildMass, ObjectPhysics.getMass(buildObjectType), "Build mass activity not tracked correctly");
+    uint256 buildMassEnergy = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMassEnergy);
+    assertEq(
+      buildMassEnergy,
+      BUILD_ENERGY_COST + ObjectPhysics.getMass(buildObjectType),
+      "Build activity not tracked correctly"
+    );
   }
 
   function testBuildNonTerrain() public {

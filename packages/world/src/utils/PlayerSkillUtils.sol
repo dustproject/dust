@@ -10,8 +10,7 @@ import {
   SKILL_HIT_MACHINE_ENERGY_TO_MAX,
   SKILL_HIT_PLAYER_ENERGY_TO_MAX,
   SKILL_MINING_MASS_TO_MAX,
-  SKILL_SWIM_STEPS_TO_MAX,
-  SKILL_WALK_STEPS_TO_MAX
+  SKILL_MOVE_ENERGY_TO_MAX
 } from "../Constants.sol";
 import { ActivityType } from "../codegen/common.sol";
 
@@ -20,17 +19,10 @@ import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 import { PlayerProgressUtils as Tracking } from "./PlayerProgressUtils.sol";
 
 library PlayerSkillUtils {
-  function getWalkEnergyMultiplierWad(EntityId player) internal view returns (uint256) {
+  function getMoveEnergyMultiplierWad(EntityId player) internal view returns (uint256) {
     return getEnergyMultiplierWad({
-      progress: Tracking.getProgress(player, ActivityType.MoveWalkSteps),
-      progressCap: SKILL_WALK_STEPS_TO_MAX
-    });
-  }
-
-  function getSwimEnergyMultiplierWad(EntityId player) internal view returns (uint256) {
-    return getEnergyMultiplierWad({
-      progress: Tracking.getProgress(player, ActivityType.MoveSwimSteps),
-      progressCap: SKILL_SWIM_STEPS_TO_MAX
+      progress: Tracking.getProgress(player, ActivityType.MoveEnergy),
+      progressCap: SKILL_MOVE_ENERGY_TO_MAX
     });
   }
 
@@ -54,6 +46,7 @@ library PlayerSkillUtils {
     } else if (toolType.isPick()) {
       activityType = ActivityType.MinePickMass;
     } else {
+      // TODO: use wad
       return 1e18; // no applicable mining progress
     }
 
