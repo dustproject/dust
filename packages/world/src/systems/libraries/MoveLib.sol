@@ -18,6 +18,8 @@ import {
   addEnergyToLocalPool, decreasePlayerEnergy, getEnergyData, updatePlayerEnergy
 } from "../../utils/EnergyUtils.sol";
 import { EntityUtils } from "../../utils/EntityUtils.sol";
+
+import { Math } from "../../utils/Math.sol";
 import { PlayerProgressUtils as PlayerTrackingUtils } from "../../utils/PlayerProgressUtils.sol";
 import { PlayerSkillUtils } from "../../utils/PlayerSkillUtils.sol";
 import { RateLimitUtils } from "../../utils/RateLimitUtils.sol";
@@ -115,12 +117,10 @@ library MoveLib {
 
     MoveContext memory ctx = _moveContext(player);
 
-    uint128 fallDamage;
-    (playerCoord, fallDamage) = _computeGravityResult(ctx, playerCoord, 0);
+    (Vec3 finalCoord, uint128 fallDamage) = _computeGravityResult(ctx, playerCoord, 0);
 
-    _setPlayerPosition(playerEntityIds, playerCoord);
-
-    _updatePlayerDrainRate(player, playerCoord);
+    _setPlayerPosition(playerEntityIds, finalCoord);
+    _updatePlayerDrainRate(player, finalCoord);
 
     if (fallDamage > ctx.initialEnergy) {
       fallDamage = ctx.initialEnergy;
@@ -128,7 +128,7 @@ library MoveLib {
 
     if (fallDamage > 0) {
       decreasePlayerEnergy(player, fallDamage);
-      addEnergyToLocalPool(playerCoord, fallDamage);
+      addEnergyToLocalPool(finalCoord, fallDamage);
     }
 
     _handleAbove(player, playerCoord);
@@ -212,6 +212,8 @@ library MoveLib {
         ++falls;
         glides = 0;
         if (!nextHasGravity) {
+          res.moveEnergy += stepCtx.cost;
+          res.totalCost += stepCtx.cost;
           _updateStepCount(res, stepCtx);
         }
       } else {
@@ -222,6 +224,8 @@ library MoveLib {
           ++glides;
           require(glides <= Constants.MAX_PLAYER_GLIDES, "Cannot glide more than 10 blocks");
         }
+        res.moveEnergy += stepCtx.cost;
+        res.totalCost += stepCtx.cost;
         _updateStepCount(res, stepCtx);
       }
 
@@ -238,14 +242,21 @@ library MoveLib {
 
       currentHasGravity = nextHasGravity;
       res.coord = next;
-      res.totalCost += stepCtx.cost;
     }
 
     if (currentHasGravity) {
       uint128 fallDamage;
       (res.coord, fallDamage) = _computeGravityResult(ctx, res.coord, falls);
+
+      // Clamp fallDamage to the amount to reach initialEnergy
+      if (res.totalCost < ctx.initialEnergy) {
+        fallDamage = Math.min(ctx.initialEnergy - res.totalCost, fallDamage);
+      } else {
+        fallDamage = 0;
+      }
+
+      res.fallEnergy += ctx.initialEnergy;
       res.totalCost += fallDamage;
-      res.fallEnergy += fallDamage;
     }
 
     if (res.totalCost > ctx.initialEnergy) {
@@ -318,7 +329,6 @@ library MoveLib {
     Vec3 belowCoord = next - vec3(0, 1, 0);
     ObjectType belowType = EntityUtils.getObjectTypeAt(belowCoord);
     bool belowPass = belowType.isPassThrough();
-    stepCtx.isFluid = _isFluid(next);
 
     if (belowType == ObjectTypes.Lava) {
       stepCtx.stepType = MoveStepType.Lava;
@@ -331,6 +341,7 @@ library MoveLib {
       stepCtx.cost = ctx.getWalkCost();
     }
 
+    stepCtx.isFluid = _isFluid(next);
     stepCtx.gravityApplies = belowPass && !stepCtx.isFluid && !EntityUtils.getMovableEntityAt(belowCoord)._exists();
   }
 }

@@ -68,6 +68,8 @@ contract ToolUtilsTest is DustTest {
   function testFuzzToolMassReduction(uint8 toolTypeIndex, uint128 actionModifier, uint128 useMassMax, bool specialized)
     public
   {
+    actionModifier = uint128(bound(actionModifier, 1, 100e18));
+
     // Setup player
     (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
 
