@@ -1755,7 +1755,7 @@ library ObjectTypeLib {
 
     coords[0] = baseCoord;
 
-    for (uint256 i = 0; i < schemaCoords.length; i++) {
+    for (uint256 i = 0; i < schemaCoords.length; ++i) {
       coords[i + 1] = baseCoord + schemaCoords[i].applyOrientation(orientation);
     }
 

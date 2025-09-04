@@ -67,11 +67,7 @@ contract BuildTest is DustTest {
 
     // Check player activity tracking
     uint256 buildMassEnergy = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMass);
-    assertEq(
-      buildMassEnergy,
-      BUILD_ENERGY_COST + ObjectPhysics.getMass(buildObjectType),
-      "Build activity not tracked correctly"
-    );
+    assertEq(buildMassEnergy, ObjectPhysics.getMass(buildObjectType), "Build activity not tracked correctly");
   }
 
   function testBuildNonTerrain() public {
