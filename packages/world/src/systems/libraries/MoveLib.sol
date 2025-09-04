@@ -20,7 +20,7 @@ import {
 import { EntityUtils } from "../../utils/EntityUtils.sol";
 
 import { Math } from "../../utils/Math.sol";
-import { PlayerProgressUtils as PlayerTrackingUtils } from "../../utils/PlayerProgressUtils.sol";
+import { PlayerProgressUtils } from "../../utils/PlayerProgressUtils.sol";
 import { PlayerSkillUtils } from "../../utils/PlayerSkillUtils.sol";
 import { RateLimitUtils } from "../../utils/RateLimitUtils.sol";
 
@@ -92,8 +92,8 @@ library MoveLib {
     RateLimitUtils.move(player, result.walkSteps, result.swimSteps);
 
     // Track moves
-    PlayerTrackingUtils.trackMoveEnergy(player, result.moveEnergy);
-    PlayerTrackingUtils.trackFallEnergy(player, result.fallEnergy);
+    PlayerProgressUtils.trackMoveEnergy(player, result.moveEnergy);
+    PlayerProgressUtils.trackFallEnergy(player, result.fallEnergy);
 
     _setPlayerPosition(playerEntityIds, result.coord);
 
