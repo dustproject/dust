@@ -25,7 +25,7 @@ contract PlayerProgressTest is DustTest {
     world.build(aliceEntityId, buildCoord, inventorySlot, "");
 
     // Verify activity was tracked
-    uint256 buildMassEnergy = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMassEnergy);
+    uint256 buildMassEnergy = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMass);
     assertTrue(buildMassEnergy > 0, "Build progress mass should be tracked");
 
     // Simulate death by incrementing death count
@@ -33,7 +33,7 @@ contract PlayerProgressTest is DustTest {
     Death.setDeaths(aliceEntityId, deathsBefore + 1);
 
     // Check that activity is halved for the new life
-    uint256 buildMassEnergyAfterDeath = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMassEnergy);
+    uint256 buildMassEnergyAfterDeath = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMass);
     assertEq(buildMassEnergyAfterDeath, buildMassEnergy / 2, "Build progress should halve after death");
 
     // Build again and verify it tracks for the new life
@@ -43,12 +43,10 @@ contract PlayerProgressTest is DustTest {
     vm.prank(alice);
     world.build(aliceEntityId, buildCoord + vec3(1, 0, 0), inventorySlot, "");
 
-    uint256 newBuildMassEnergy = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMassEnergy);
-    assertTrue(newBuildMassEnergy > 0, "Build progress should be tracked for new life");
+    uint256 newBuildMass = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMass);
+    assertTrue(newBuildMass > 0, "Build progress should be tracked for new life");
     assertEq(
-      newBuildMassEnergy,
-      buildMassEnergyAfterDeath + buildMassEnergy,
-      "Build progress should add on top of halved value"
+      newBuildMass, buildMassEnergyAfterDeath + buildMassEnergy, "Build progress should add on top of halved value"
     );
   }
 

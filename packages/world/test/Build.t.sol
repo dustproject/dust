@@ -66,7 +66,7 @@ contract BuildTest is DustTest {
     assertEq(Mass.getMass(buildEntityId), ObjectPhysics.getMass(buildObjectType), "Build entity mass is not correct");
 
     // Check player activity tracking
-    uint256 buildMassEnergy = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMassEnergy);
+    uint256 buildMassEnergy = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.BuildMass);
     assertEq(
       buildMassEnergy,
       BUILD_ENERGY_COST + ObjectPhysics.getMass(buildObjectType),

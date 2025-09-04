@@ -21,13 +21,17 @@ import { EntityUtils } from "../utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { Math } from "../utils/Math.sol";
+
 import { BuildNotification, MoveNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerProgressUtils } from "../utils/PlayerProgressUtils.sol";
+import { PlayerSkillUtils } from "../utils/PlayerSkillUtils.sol";
 import { RateLimitUtils } from "../utils/RateLimitUtils.sol";
+import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
 import { MoveLib } from "./libraries/MoveLib.sol";
 
 import { BUILD_ENERGY_COST } from "../Constants.sol";
+import { Hook } from "../ProgramHooks.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 
@@ -36,12 +40,13 @@ import { Orientation, Vec3, vec3 } from "../types/Vec3.sol";
 
 struct BuildContext {
   EntityId caller;
+  uint128 energyCost;
+  Vec3 coord;
   ObjectType slotType;
   ObjectType buildType;
-  Vec3 coord;
-  uint128 callerEnergy;
-  uint16 slot;
   Orientation orientation;
+  uint16 slot;
+  bytes extraData;
 }
 
 contract BuildSystem is System {
@@ -60,9 +65,9 @@ contract BuildSystem is System {
 
     caller.requireConnected(coord);
 
-    BuildContext memory ctx = _buildContext(caller, coord, slot, orientation, callerEnergy);
+    BuildContext memory ctx = _buildContext(caller, coord, slot, orientation, callerEnergy, extraData);
 
-    return _build(ctx, extraData);
+    return _build(ctx);
   }
 
   function jumpBuild(EntityId caller, uint16 slot, bytes calldata extraData) public returns (EntityId) {
@@ -77,7 +82,7 @@ contract BuildSystem is System {
 
     Vec3 coord = caller._getPosition();
 
-    BuildContext memory ctx = _buildContext(caller, coord, slot, orientation, callerEnergy);
+    BuildContext memory ctx = _buildContext(caller, coord, slot, orientation, callerEnergy, extraData);
 
     require(!ctx.buildType.isPassThrough(), "Cannot jump build on a pass-through block");
 
@@ -88,25 +93,26 @@ contract BuildSystem is System {
     moveCoords[0] = coord + vec3(0, 1, 0);
     notify(caller, MoveNotification({ moveCoords: moveCoords }));
 
-    return _build(ctx, extraData);
+    return _build(ctx);
   }
 
-  function _build(BuildContext memory ctx, bytes calldata extraData) internal returns (EntityId) {
-    // Check rate limit for work actions
-    RateLimitUtils.build(ctx.caller);
+  function _build(BuildContext memory ctx) internal returns (EntityId) {
+    (EntityId base, Vec3[] memory coords) = BuildLib._executeBuild(ctx);
 
-    (EntityId base, Vec3[] memory coords, uint128 energyCost) = BuildLib._executeBuild(ctx);
-
+    // Player died
     if (coords.length == 0) {
       return base;
     }
 
+    // Check rate limit for work actions
+    RateLimitUtils.build(ctx.caller);
+
     _handleSpecialBlockTypes(ctx, base);
 
-    _requireBuildsAllowed(ctx, base, coords, extraData);
+    _requireBuildsAllowed(ctx, base, coords);
 
     // Track build energy spent
-    PlayerProgressUtils.trackBuild(ctx.caller, energyCost, ObjectPhysics._getMass(ctx.buildType));
+    PlayerProgressUtils.trackBuild(ctx.caller, ObjectPhysics._getMass(ctx.buildType));
 
     notify(
       ctx.caller, BuildNotification({ buildEntityId: base, buildCoord: coords[0], buildObjectType: ctx.buildType })
@@ -115,25 +121,35 @@ contract BuildSystem is System {
     return base;
   }
 
-  function _buildContext(EntityId caller, Vec3 coord, uint16 slot, Orientation orientation, uint128 callerEnergy)
-    internal
-    view
-    returns (BuildContext memory)
-  {
+  function _buildContext(
+    EntityId caller,
+    Vec3 coord,
+    uint16 slot,
+    Orientation orientation,
+    uint128 callerEnergy,
+    bytes memory extraData
+  ) internal view returns (BuildContext memory) {
     ObjectType slotType = InventorySlot._getObjectType(caller, slot);
     ObjectType buildType = _getBuildType(slotType);
+
+    // Apply player skill multiplier for build energy pricing
+    uint256 buildMul = PlayerSkillUtils.getBuildEnergyMultiplierWad(caller);
+    uint128 effectiveCost = uint128(FixedPointMathLib.mulWad(BUILD_ENERGY_COST, buildMul));
+    uint128 energyCost = Math.min(callerEnergy, effectiveCost);
 
     return BuildContext({
       caller: caller,
       coord: coord,
       slot: slot,
       orientation: orientation,
-      callerEnergy: callerEnergy,
+      energyCost: energyCost,
       slotType: slotType,
-      buildType: buildType
+      buildType: buildType,
+      extraData: extraData
     });
   }
 
+  /// @dev Validates and returns the type (in the future the build type might be different to the slot)
   function _getBuildType(ObjectType slotType) internal pure returns (ObjectType) {
     require(slotType.isBlock(), "Cannot build non-block object");
     return slotType;
@@ -152,50 +168,53 @@ contract BuildSystem is System {
       SeedGrowth._setFullyGrownAt(base, uint128(block.timestamp) + ctx.buildType.getTimeToGrow());
     } else if (ctx.buildType.hasExtraDrops()) {
       DisabledExtraDrops._set(base, true);
+    } else if (ctx.buildType == ObjectTypes.ForceField) {
+      (EntityId existing,) = ForceFieldUtils.getForceField(ctx.coord);
+      require(!existing._exists(), "Force field overlaps with another force field");
+      ForceFieldUtils.setupForceField(base, ctx.coord);
     }
   }
 
   /**
    * @dev Validates builds against force fields and calls build hooks for programs
    */
-  function _requireBuildsAllowed(BuildContext memory ctx, EntityId base, Vec3[] memory coords, bytes calldata extraData)
-    internal
-  {
+  function _requireBuildsAllowed(BuildContext memory ctx, EntityId base, Vec3[] memory coords) internal {
     for (uint256 i = 0; i < coords.length; i++) {
-      if (ctx.buildType == ObjectTypes.ForceField) {
-        (EntityId existing,) = ForceFieldUtils.getForceField(coords[i]);
-        require(!existing._exists(), "Force field overlaps with another force field");
-        ForceFieldUtils.setupForceField(base, coords[i]);
-        // Return early as it is not possible for a new forcefield to have a program
-        return;
-      }
+      Vec3 coord = coords[i];
 
-      (ProgramId program, EntityId target, EnergyData memory energyData) = ForceFieldUtils.getHookTarget(coords[i]);
-
-      program.hook({ caller: ctx.caller, target: target, revertOnFailure: energyData.energy > 0, extraData: extraData })
-        .onBuild({
+      _hook(ctx, coord).onBuild({
         entity: base,
-        coord: coords[i],
+        coord: coord,
         slotType: ctx.slotType,
         objectType: ctx.buildType,
         orientation: ctx.orientation
       });
     }
   }
+
+  /// @dev Returns the pre-built hook to avoid stack too deep issues
+  function _hook(BuildContext memory ctx, Vec3 coord) internal returns (Hook memory) {
+    (ProgramId program, EntityId target, EnergyData memory energyData) = ForceFieldUtils.getHookTarget(coord);
+    return program.hook({
+      caller: ctx.caller,
+      target: target,
+      revertOnFailure: energyData.energy > 0,
+      extraData: ctx.extraData
+    });
+  }
 }
 
 library BuildLib {
-  function _executeBuild(BuildContext memory ctx) public returns (EntityId, Vec3[] memory, uint128) {
-    uint128 energyCost = Math.min(ctx.callerEnergy, BUILD_ENERGY_COST);
-    if (transferEnergyToPool(ctx.caller, energyCost) == 0) {
-      return (EntityId.wrap(0), new Vec3[](0), energyCost);
+  function _executeBuild(BuildContext memory ctx) public returns (EntityId, Vec3[] memory) {
+    if (transferEnergyToPool(ctx.caller, ctx.energyCost) == 0) {
+      return (EntityId.wrap(0), new Vec3[](0));
     }
 
     _updateInventory(ctx);
 
     (EntityId base, Vec3[] memory coords) = _addBlocks(ctx);
 
-    return (base, coords, energyCost);
+    return (base, coords);
   }
 
   /**
@@ -211,14 +230,14 @@ library BuildLib {
   function _addBlocks(BuildContext memory ctx) internal returns (EntityId, Vec3[] memory) {
     Vec3[] memory coords = ctx.buildType.getRelativeCoords(ctx.coord, ctx.orientation);
 
-    EntityId base = _addBlock(ctx.buildType, ctx.coord);
+    EntityId base = _addBlock(ctx, ctx.coord);
     EntityOrientation._set(base, ctx.orientation);
 
     EntityUtils.setEntityObjectType(base, ctx.buildType);
 
     // Only iterate through relative schema coords
     for (uint256 i = 1; i < coords.length; i++) {
-      EntityId relative = _addBlock(ctx.buildType, coords[i]);
+      EntityId relative = _addBlock(ctx, coords[i]);
       BaseEntity._set(relative, base);
       // We don't use setEntityObjectType as we don't set the mass for relative blocks
       EntityObjectType._set(relative, ctx.buildType);
@@ -227,12 +246,12 @@ library BuildLib {
     return (base, coords);
   }
 
-  function _addBlock(ObjectType buildType, Vec3 coord) internal returns (EntityId) {
+  function _addBlock(BuildContext memory ctx, Vec3 coord) internal returns (EntityId) {
     (EntityId terrain, ObjectType terrainType) = EntityUtils.getOrCreateBlockAt(coord);
 
-    _validateBlockBuild(terrainType, buildType, coord, terrain);
+    _validateBlockBuild(terrainType, ctx.buildType, coord, terrain);
 
-    _applyTerrainModifications(terrain, buildType);
+    _applyTerrainModifications(terrain, ctx.buildType);
 
     return terrain;
   }

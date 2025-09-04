@@ -4,6 +4,7 @@ pragma solidity >=0.8.24;
 import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
 import {
+  SKILL_BUILD_ENERGY_TO_MAX,
   SKILL_CRAFT_MASS_ENERGY_TO_MAX,
   SKILL_ENERGY_MIN_MULTIPLIER_WAD,
   SKILL_FALL_ENERGY_TO_MAX,
@@ -97,14 +98,21 @@ library PlayerSkillUtils {
     });
   }
 
-  function getEnergyMultiplierWad(uint256 progress, uint256 progressCap) internal pure returns (uint256) {
+  function getBuildEnergyMultiplierWad(EntityId player) internal view returns (uint256) {
+    return getEnergyMultiplierWad({
+      progress: Tracking.getProgress(player, ActivityType.BuildMass),
+      progressCap: SKILL_BUILD_ENERGY_TO_MAX
+    });
+  }
+
+  function getEnergyMultiplierWad(uint128 progress, uint128 progressCap) internal pure returns (uint256) {
     uint256 normalized = _normalizedSmooth(progress, progressCap);
     uint256 range = 1e18 - SKILL_ENERGY_MIN_MULTIPLIER_WAD;
     return 1e18 - FixedPointMathLib.mulWad(range, normalized);
   }
 
   /// @dev Smooth-then-cap discount normalized by f(xCap)
-  function _normalizedSmooth(uint256 x, uint256 xCap) private pure returns (uint256) {
+  function _normalizedSmooth(uint128 x, uint128 xCap) private pure returns (uint256) {
     if (x == 0) return 0;
     if (xCap == 0) return 1e18; // degenerate case, treat as max
     uint256 s = xCap;

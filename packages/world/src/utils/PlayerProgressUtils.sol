@@ -14,20 +14,29 @@ import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 import { Math } from "../utils/Math.sol";
 
 library PlayerProgressUtils {
-  function getProgress(EntityId player, ActivityType activityType) internal view returns (uint256) {
+  /// @dev Decay `current` to now and align `current` and `accumulated` by halving for each extra death.
+  function _decayAndAlign(PlayerProgressData memory data, uint256 deaths)
+    private
+    view
+    returns (uint128 current, uint128 accumulated)
+  {
+    current = _decay(data.current, data.lastUpdatedAt);
+    accumulated = data.accumulated;
+
+    uint256 e = uint256(data.exponent);
+    if (deaths > e) {
+      uint256 diff = deaths - e;
+      current = current >> diff;
+      accumulated = accumulated >> diff;
+    }
+  }
+
+  function getProgress(EntityId player, ActivityType activityType) internal view returns (uint128) {
     PlayerProgressData memory data = PlayerProgress._get(player, activityType);
     uint256 deaths = Death._getDeaths(player);
-    uint256 e = uint256(data.exponent);
-    uint256 diff = deaths > e ? (deaths - e) : 0;
+    (uint128 current, uint128 accumulated) = _decayAndAlign(data, deaths);
 
-    uint128 decayed = _decay(data.current, data.lastUpdatedAt);
-    uint128 decayedEffective = diff > 0 ? decayed >> diff : decayed;
-    uint128 alignedAccumulated = diff > 0 ? data.accumulated >> diff : data.accumulated;
-
-    // Floor is just accumulated / 3
-    uint128 floor = alignedAccumulated / 3;
-    uint128 result = decayedEffective > floor ? decayedEffective : floor;
-    return uint256(result);
+    return uint128(Math.max(current, _floor(accumulated)));
   }
 
   // Mining tracking - with tool specialization and crop detection
@@ -68,9 +77,9 @@ library PlayerProgressUtils {
   }
 
   // Building tracking
-  function trackBuild(EntityId player, uint128 energySpent, uint128 massBuilt) internal {
-    // TODO: collapse with build energy
-    _trackProgress(player, ActivityType.BuildMassEnergy, energySpent + massBuilt);
+  function trackBuild(EntityId player, uint128 massBuilt) internal {
+    // TODO: should we include build energy? if so, it will be dependent on the energy discount
+    _trackProgress(player, ActivityType.BuildMass, massBuilt);
   }
 
   // Crafting tracking - per station type
@@ -101,38 +110,30 @@ library PlayerProgressUtils {
       return;
     }
 
-    uint256 deaths = Death._getDeaths(player);
     PlayerProgressData memory previous = PlayerProgress._get(player, activityType);
-
-    // Decay current mantissa to now in its stored scale
-    uint128 current = _decay(previous.current, previous.lastUpdatedAt);
-    uint128 accumulated = previous.accumulated;
-
-    // Align stored mantissas to the current global exponent
-    uint256 e = uint256(previous.exponent);
-    if (deaths > e) {
-      uint256 diff = deaths - e;
-      // Right shift by diff == divide by 2^diff
-      current = current >> diff;
-      accumulated = accumulated >> diff;
-    }
+    uint256 deaths = Death._getDeaths(player);
+    (uint128 current, uint128 accumulated) = _decayAndAlign(previous, deaths);
 
     // Add new value and compute the new floor
     accumulated += value;
 
-    // Ensure current reflects the floor (acc / 3)
-    uint128 nextCurrent = uint128(Math.max(current + value, accumulated / 3));
+    // Ensure current reflects the floor
+    current = uint128(Math.max(current + value, _floor(accumulated)));
 
     PlayerProgress._set(
       player,
       activityType,
       PlayerProgressData({
         accumulated: accumulated,
-        current: nextCurrent,
+        current: current,
         lastUpdatedAt: uint128(block.timestamp),
         exponent: uint128(deaths)
       })
     );
+  }
+
+  function _floor(uint128 accumulated) private pure returns (uint128) {
+    return accumulated / 3;
   }
 
   /// @dev Exponential decay toward zero using half-life, in mantissa units

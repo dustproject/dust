@@ -39,7 +39,7 @@ export default defineWorld({
       "HitMachineDamage",
       "MoveEnergy",
       "MoveFallEnergy",
-      "BuildMassEnergy",
+      "BuildMass",
       "CraftHandMass",
       "CraftWorkbenchMass",
       "CraftPowerstoneMass",
