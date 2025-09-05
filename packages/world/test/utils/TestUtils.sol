@@ -12,6 +12,7 @@ import { Energy, EnergyData } from "../../src/codegen/tables/Energy.sol";
 import { Machine } from "../../src/codegen/tables/Machine.sol";
 import { PlayerProgress } from "../../src/codegen/tables/PlayerProgress.sol";
 import { PlayerProgressUtils } from "../../src/utils/PlayerProgressUtils.sol";
+import { PlayerSkillUtils } from "../../src/utils/PlayerSkillUtils.sol";
 
 import { ObjectType } from "../../src/types/ObjectType.sol";
 
@@ -319,5 +320,51 @@ library TestPlayerProgressUtils {
   function getProgress(EntityId player, ActivityType activityType) public asWorld returns (uint256) {
     // Use effective current which applies decay and halving by deaths
     return PlayerProgressUtils.getProgress(player, activityType);
+  }
+}
+
+library TestPlayerSkillUtils {
+  bytes32 private constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestPlayerSkillUtils");
+
+  modifier asWorld() {
+    TestUtils.asWorld(LIB_ADDRESS_SLOT);
+    _;
+  }
+
+  // Register library address for delegatecall harness
+  function init(address libAddress) public {
+    TestUtils.init(LIB_ADDRESS_SLOT, libAddress);
+  }
+
+  function getMoveEnergyMultiplierWad(EntityId player) public asWorld returns (uint256) {
+    return PlayerSkillUtils.getMoveEnergyMultiplierWad(player);
+  }
+
+  function getFallEnergyMultiplierWad(EntityId player) public asWorld returns (uint256) {
+    return PlayerSkillUtils.getFallEnergyMultiplierWad(player);
+  }
+
+  function getMineEnergyMultiplierWad(EntityId player, ObjectType toolType) public asWorld returns (uint256) {
+    return PlayerSkillUtils.getMineEnergyMultiplierWad(player, toolType);
+  }
+
+  function getHitPlayerEnergyMultiplierWad(EntityId player) public asWorld returns (uint256) {
+    return PlayerSkillUtils.getHitPlayerEnergyMultiplierWad(player);
+  }
+
+  function getHitMachineEnergyMultiplierWad(EntityId player) public asWorld returns (uint256) {
+    return PlayerSkillUtils.getHitMachineEnergyMultiplierWad(player);
+  }
+
+  function getTillEnergyMultiplierWad(EntityId player) public asWorld returns (uint256) {
+    return PlayerSkillUtils.getTillEnergyMultiplierWad(player);
+  }
+
+  function getCraftEnergyMultiplierWad(EntityId player, ObjectType stationType) public asWorld returns (uint256) {
+    return PlayerSkillUtils.getCraftEnergyMultiplierWad(player, stationType);
+  }
+
+  function getBuildEnergyMultiplierWad(EntityId player) public asWorld returns (uint256) {
+    return PlayerSkillUtils.getBuildEnergyMultiplierWad(player);
   }
 }
