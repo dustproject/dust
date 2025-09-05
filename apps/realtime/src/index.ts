@@ -4,7 +4,10 @@ import {
   signedSessionDataSchema,
   type,
 } from "dustkit/realtime";
+import { http, createClient, recoverMessageAddress } from "viem";
+import { getBlock } from "viem/actions";
 import type { Env } from "./env";
+import { validateSigner } from "./mud/validateSigner";
 import { clientDataSchema } from "./schemas";
 
 export { HubActor } from "./actors/HubActor";
@@ -37,7 +40,32 @@ export default {
               const { userAddress, sessionAddress, signedAt } =
                 parseSignedSessionData.assert(signedSessionData);
 
-              // TODO: validate signed session data
+              const client = createClient({
+                transport: http(env.RPC_HTTP_URL),
+              });
+              const block = await getBlock(client);
+              const elapsed = Number(block.timestamp) - signedAt;
+              if (elapsed > 15) {
+                throw new Error("message signature expired");
+              }
+              // don't allow signatures from future timestamps
+              // but allow some slop in case of load balanced RPC
+              if (elapsed < -10) {
+                throw new Error("cannot use future block timestamp");
+              }
+
+              const signerAddress = await recoverMessageAddress({
+                message: signedSessionData,
+                signature: signature,
+              });
+
+              await validateSigner({
+                client,
+                worldAddress: env.WORLD_ADDRESS,
+                userAddress,
+                sessionAddress,
+                signerAddress,
+              });
 
               return userAddress;
             })()

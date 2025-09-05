@@ -1,6 +1,6 @@
 import type { SessionClient } from "@latticexyz/entrykit/internal";
 import { WebSocket } from "isows";
-import { type Address, getAddress } from "viem";
+import { type Address, type Client, getAddress } from "viem";
 import { getBlock } from "viem/actions";
 import { getAction } from "viem/utils";
 import type { channelsSchema } from "./clientSetup";
@@ -20,7 +20,6 @@ export type RealtimeSocket = {
 
 export type GetSocketOptions = {
   url?: string;
-  sessionClient?: SessionClient | undefined;
   // TODO: consider making this `channels` arg and then using eventemitter so we can bind any number of listeners to each event type
   onPositions?: (data: {
     readonly positions: readonly {
@@ -34,7 +33,16 @@ export type GetSocketOptions = {
   onPresence?: (data: {
     readonly players: readonly Address[];
   }) => void;
-};
+} & (
+  | {
+      sessionClient?: undefined;
+      publicClient?: undefined;
+    }
+  | {
+      sessionClient: SessionClient;
+      publicClient: Client;
+    }
+);
 
 const sockets = new Map<string, Promise<RealtimeSocket>>();
 
@@ -56,6 +64,7 @@ function getSocketKey(
 export function getSocket({
   url = "wss://realtime.dust.computer/ws",
   sessionClient,
+  publicClient,
   onPositions,
   onPresence,
 }: GetSocketOptions = {}): Promise<RealtimeSocket> {
@@ -68,26 +77,27 @@ export function getSocket({
   if (socket) return socket;
 
   const socketPromise = (async () => {
-    const session = sessionClient
-      ? await (async () => {
-          console.debug("getting block");
-          const block = await getAction(
-            sessionClient,
-            getBlock,
-            "getBlock",
-          )({});
-          const signedSessionData = JSON.stringify({
-            userAddress: sessionClient.userAddress,
-            sessionAddress: sessionClient.account.address,
-            signedAt: Number(block.timestamp),
-          });
-          console.debug("signing session", signedSessionData);
-          const signature = await sessionClient.internal_signer.signMessage({
-            message: signedSessionData,
-          });
-          return JSON.stringify({ signedSessionData, signature });
-        })()
-      : null;
+    const session =
+      sessionClient && publicClient
+        ? await (async () => {
+            console.debug("getting block");
+            const block = await getAction(
+              publicClient,
+              getBlock,
+              "getBlock",
+            )({});
+            const signedSessionData = JSON.stringify({
+              userAddress: sessionClient.userAddress,
+              sessionAddress: sessionClient.account.address,
+              signedAt: Number(block.timestamp),
+            });
+            console.debug("signing session", signedSessionData);
+            const signature = await sessionClient.internal_signer.signMessage({
+              message: signedSessionData,
+            });
+            return JSON.stringify({ signedSessionData, signature });
+          })()
+        : null;
 
     return new Promise<RealtimeSocket>((resolve, reject) => {
       console.debug("opening realtime socket");
