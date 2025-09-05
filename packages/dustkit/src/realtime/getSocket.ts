@@ -54,8 +54,7 @@ function getSocketKey(
 }
 
 export function getSocket({
-  // TODO: fill this in with a real URL
-  url = "ws://localhost:8787/ws",
+  url = "wss://realtime.dust.computer/ws",
   sessionClient,
   onPositions,
   onPresence,
