@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-uint256 constant PRECISION_MULTIPLIER = 1e18;
+import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
+
+uint256 constant WAD = FixedPointMathLib.WAD;
 
 uint32 constant MAX_ENTITY_INFLUENCE_RADIUS = 10;
 uint32 constant MAX_PICKUP_RADIUS = 6;
@@ -110,10 +112,9 @@ int256 constant LN2_WAD = 693147180559945309; // ln(2) in 1e18
 int256 constant PROGRESS_DECAY_HALF_LIFE = 14 days; // every 14 days progress decays by half
 int256 constant PROGRESS_DECAY_LAMBDA_WAD = LN2_WAD / PROGRESS_DECAY_HALF_LIFE;
 
-// Player skills (progress-based energy multipliers)
-
+// Player skills (progress-based energy discounts)
 // Maximum energy discount (WAD scale). 0.30e18 = 30% discount
-uint128 constant SKILL_ENERGY_MAX_DISCOUNT_WAD = 3e17; // 70%
+uint128 constant SKILL_ENERGY_MAX_DISCOUNT_WAD = 3e17; // 30%
 
 // Smooth-then-cap parameterization: "effort to reach max" per activity type.
 // We compute a smooth curve f(x)=x/(x+s), then normalize by f(xCap) and cap at 1.

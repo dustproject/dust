@@ -14,7 +14,6 @@ import { InventoryUtils } from "./InventoryUtils.sol";
 import { Math } from "./Math.sol";
 import { OreLib } from "./OreLib.sol";
 import { PlayerSkillUtils } from "./PlayerSkillUtils.sol";
-import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
 import "../Constants.sol" as Constants;
 
@@ -81,7 +80,7 @@ library ToolUtils {
     uint128 baseEnergyCost = _getActionEnergyCost(toolData, callerEnergy, useMassMax);
 
     // Apply discount
-    uint128 energyCost = uint128(FixedPointMathLib.mulWadUp(baseEnergyCost, energyMultiplierWad));
+    uint128 energyCost = uint128(Math.mulWadUp(baseEnergyCost, energyMultiplierWad));
 
     // Drain energy
     if (energyCost > 0) {

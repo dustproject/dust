@@ -6,7 +6,7 @@ import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 
 import { TerrainLib } from "../systems/libraries/TerrainLib.sol";
 
-import { PRECISION_MULTIPLIER } from "../Constants.sol";
+import { WAD } from "../Constants.sol";
 import { ObjectAmount, ObjectType, ObjectTypeLib, ObjectTypes } from "../types/ObjectType.sol";
 
 import { BiomesLib } from "./BiomesLib.sol";
@@ -29,7 +29,7 @@ library OreLib {
 
     for (uint256 i = 0; i < oreTypes.length; i++) {
       (uint256 cap, uint256 remaining) = NatureLib.getCapAndRemaining(oreTypes[i]);
-      weights[i] = biomeMultipliers[i] * remaining * PRECISION_MULTIPLIER / cap;
+      weights[i] = biomeMultipliers[i] * remaining * WAD / cap;
     }
 
     // Select ore based on availability

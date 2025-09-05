@@ -34,4 +34,20 @@ library Math {
       return int8(((0 < x) ? 1 : 0) - ((x < 0) ? 1 : 0));
     }
   }
+
+  function mulWad(uint256 x, uint256 y) internal pure returns (uint256) {
+    return FixedPointMathLib.mulWad(x, y);
+  }
+
+  function mulWadUp(uint256 x, uint256 y) internal pure returns (uint256) {
+    return FixedPointMathLib.mulWadUp(x, y);
+  }
+
+  function divWad(uint256 x, uint256 y) internal pure returns (uint256) {
+    return FixedPointMathLib.divWad(x, y);
+  }
+
+  function expWad(int256 x) internal pure returns (int256) {
+    return FixedPointMathLib.expWad(x);
+  }
 }

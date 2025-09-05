@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
+import { Math } from "../utils/Math.sol";
 
 import { ActivityType } from "../codegen/common.sol";
 
@@ -148,8 +148,8 @@ library PlayerProgressUtils {
 
     unchecked {
       int256 x = -PROGRESS_DECAY_LAMBDA_WAD * int256(uint256(block.timestamp - lastUpdatedAt)); // wad * seconds
-      uint256 factorWad = uint256(FixedPointMathLib.expWad(x)); // in [0..1e18]
-      return uint128(FixedPointMathLib.mulWad(current, factorWad));
+      uint256 factorWad = uint256(Math.expWad(x)); // in [0..1e18]
+      return uint128(Math.mulWad(current, factorWad));
     }
   }
 

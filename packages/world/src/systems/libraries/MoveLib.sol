@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
+import { Math } from "../../utils/Math.sol";
 
 import { Energy } from "../../codegen/tables/Energy.sol";
 
@@ -390,13 +390,13 @@ library MoveContextLib {
   function getFallCost(MoveContext memory ctx) internal view returns (uint128) {
     if (ctx._fallCost == 0) {
       uint256 fallMul = PlayerSkillUtils.getFallEnergyMultiplierWad(ctx.player);
-      ctx._fallCost = uint128(FixedPointMathLib.mulWad(Constants.PLAYER_FALL_ENERGY_COST, fallMul));
+      ctx._fallCost = uint128(Math.mulWad(Constants.PLAYER_FALL_ENERGY_COST, fallMul));
     }
     return ctx._fallCost;
   }
 
   function _getMoveCost(MoveContext memory ctx, uint128 baseCost) private pure returns (uint128) {
-    return uint128(FixedPointMathLib.mulWad(baseCost, ctx._moveEnergyMul));
+    return uint128(Math.mulWad(baseCost, ctx._moveEnergyMul));
   }
 }
 

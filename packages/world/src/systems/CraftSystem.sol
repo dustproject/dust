@@ -18,7 +18,7 @@ import { PlayerSkillUtils } from "../utils/PlayerSkillUtils.sol";
 import { CRAFT_ENERGY_COST } from "../Constants.sol";
 
 import { EntityId } from "../types/EntityId.sol";
-import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
+import { Math } from "../utils/Math.sol";
 
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 
@@ -37,7 +37,7 @@ contract CraftSystem is System {
     }
 
     uint256 craftMul = PlayerSkillUtils.getCraftEnergyMultiplierWad(caller, recipe.stationTypeId);
-    uint128 effectiveCost = uint128(FixedPointMathLib.mulWad(CRAFT_ENERGY_COST, craftMul));
+    uint128 effectiveCost = uint128(Math.mulWad(CRAFT_ENERGY_COST, craftMul));
     uint128 callerEnergy = transferEnergyToPool(caller, effectiveCost);
     require(callerEnergy > 0, "Not enough energy to craft");
 

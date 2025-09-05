@@ -44,7 +44,7 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { RateLimitUtils } from "../utils/RateLimitUtils.sol";
 import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
-import { MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE, PRECISION_MULTIPLIER } from "../Constants.sol";
+import { MACHINE_ENERGY_DRAIN_RATE, PLAYER_ENERGY_DRAIN_RATE, WAD } from "../Constants.sol";
 
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectAmount, ObjectType } from "../types/ObjectType.sol";
@@ -538,8 +538,8 @@ library MineRandomLib {
 
     if (objectType == ObjectTypes.FescueGrass || objectType == ObjectTypes.SwitchGrass) {
       uint256[] memory distribution = new uint256[](2);
-      distribution[0] = 43 * PRECISION_MULTIPLIER; // 0 seeds: 43%
-      distribution[1] = 57 * PRECISION_MULTIPLIER; // 1 seed:  57%
+      distribution[0] = 43 * WAD; // 0 seeds: 43%
+      distribution[1] = 57 * WAD; // 1 seed:  57%
 
       drops = new DropDistribution[](1);
       drops[0] = DropDistribution(ObjectTypes.WheatSeed, distribution);
@@ -548,10 +548,10 @@ library MineRandomLib {
 
     if (objectType == ObjectTypes.Wheat) {
       uint256[] memory distribution = new uint256[](4);
-      distribution[0] = 40 * PRECISION_MULTIPLIER; // 0 seeds: 40%
-      distribution[1] = 30 * PRECISION_MULTIPLIER; // 1 seed:  30%
-      distribution[2] = 20 * PRECISION_MULTIPLIER; // 2 seeds: 20%
-      distribution[3] = 10 * PRECISION_MULTIPLIER; // 3 seeds: 10%
+      distribution[0] = 40 * WAD; // 0 seeds: 40%
+      distribution[1] = 30 * WAD; // 1 seed:  30%
+      distribution[2] = 20 * WAD; // 2 seeds: 20%
+      distribution[3] = 10 * WAD; // 3 seeds: 10%
 
       drops = new DropDistribution[](1);
       drops[0] = DropDistribution(ObjectTypes.WheatSeed, distribution);
@@ -561,10 +561,10 @@ library MineRandomLib {
     if (objectType == ObjectTypes.Melon) {
       // Expected return 1.53
       uint256[] memory distribution = new uint256[](4);
-      distribution[0] = 20 * PRECISION_MULTIPLIER; // 0 seeds: 20%
-      distribution[1] = 30 * PRECISION_MULTIPLIER; // 1 seed:  30%
-      distribution[2] = 27 * PRECISION_MULTIPLIER; // 2 seeds: 27%
-      distribution[3] = 23 * PRECISION_MULTIPLIER; // 3 seeds: 23%
+      distribution[0] = 20 * WAD; // 0 seeds: 20%
+      distribution[1] = 30 * WAD; // 1 seed:  30%
+      distribution[2] = 27 * WAD; // 2 seeds: 27%
+      distribution[3] = 23 * WAD; // 3 seeds: 23%
 
       drops = new DropDistribution[](1);
       drops[0] = DropDistribution(ObjectTypes.MelonSeed, distribution);
@@ -574,10 +574,10 @@ library MineRandomLib {
     if (objectType == ObjectTypes.Pumpkin) {
       // Expected return 1.53
       uint256[] memory distribution = new uint256[](4);
-      distribution[0] = 20 * PRECISION_MULTIPLIER; // 0 seeds: 20%
-      distribution[1] = 30 * PRECISION_MULTIPLIER; // 1 seed:  30%
-      distribution[2] = 27 * PRECISION_MULTIPLIER; // 2 seeds: 27%
-      distribution[3] = 23 * PRECISION_MULTIPLIER; // 3 seeds: 23%
+      distribution[0] = 20 * WAD; // 0 seeds: 20%
+      distribution[1] = 30 * WAD; // 1 seed:  30%
+      distribution[2] = 27 * WAD; // 2 seeds: 27%
+      distribution[3] = 23 * WAD; // 3 seeds: 23%
 
       drops = new DropDistribution[](1);
       drops[0] = DropDistribution(ObjectTypes.PumpkinSeed, distribution);
@@ -587,10 +587,10 @@ library MineRandomLib {
     // if (objectType == ObjectTypes.CottonBush) {
     //   // Similar to wheat distribution
     //   uint256[] memory distribution = new uint256[](4);
-    //   distribution[0] = 40 * PRECISION_MULTIPLIER; // 0 seeds: 40%
-    //   distribution[1] = 30 * PRECISION_MULTIPLIER; // 1 seed:  30%
-    //   distribution[2] = 20 * PRECISION_MULTIPLIER; // 2 seeds: 20%
-    //   distribution[3] = 10 * PRECISION_MULTIPLIER; // 3 seeds: 10%
+    //   distribution[0] = 40 * WAD; // 0 seeds: 40%
+    //   distribution[1] = 30 * WAD; // 1 seed:  30%
+    //   distribution[2] = 20 * WAD; // 2 seeds: 20%
+    //   distribution[3] = 10 * WAD; // 3 seeds: 10%
     //
     //   drops = new DropDistribution[](1);
     //   drops[0] = DropDistribution(ObjectTypes.CottonSeed, distribution);
@@ -600,7 +600,7 @@ library MineRandomLib {
     if (objectType.isLeaf()) {
       uint256 chance = TreeLib.getLeafDropChance(objectType);
       uint256[] memory distribution = new uint256[](2);
-      distribution[0] = PRECISION_MULTIPLIER - chance; // No sapling
+      distribution[0] = WAD - chance; // No sapling
       distribution[1] = chance; // 1 sapling
 
       drops = new DropDistribution[](1);

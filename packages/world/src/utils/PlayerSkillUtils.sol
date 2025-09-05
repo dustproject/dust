@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
+import { Math } from "./Math.sol";
 
 import {
   SKILL_BUILD_ENERGY_TO_MAX,
@@ -11,7 +11,8 @@ import {
   SKILL_HIT_MACHINE_ENERGY_TO_MAX,
   SKILL_HIT_PLAYER_ENERGY_TO_MAX,
   SKILL_MINING_MASS_TO_MAX,
-  SKILL_MOVE_ENERGY_TO_MAX
+  SKILL_MOVE_ENERGY_TO_MAX,
+  WAD
 } from "../Constants.sol";
 import { ActivityType } from "../codegen/common.sol";
 
@@ -47,8 +48,7 @@ library PlayerSkillUtils {
     } else if (toolType.isPick()) {
       activityType = ActivityType.MinePickMass;
     } else {
-      // TODO: use wad
-      return 1e18; // no applicable mining progress
+      return WAD; // no applicable mining progress
     }
 
     return getEnergyMultiplierWad({
@@ -73,7 +73,7 @@ library PlayerSkillUtils {
 
   function getTillEnergyMultiplierWad(EntityId /*player*/ ) internal pure returns (uint256) {
     // No skill benefit for tilling (for now); keep encapsulated for easy future tuning
-    return FixedPointMathLib.WAD;
+    return WAD;
   }
 
   function getCraftEnergyMultiplierWad(EntityId player, ObjectType stationType) internal view returns (uint256) {
@@ -132,7 +132,7 @@ library PlayerSkillUtils {
    */
   function getEnergyMultiplierWad(uint128 progress, uint128 progressCap) internal pure returns (uint256) {
     // No progress => no discount
-    if (progress == 0) return FixedPointMathLib.WAD;
+    if (progress == 0) return WAD;
 
     /**
      * Smoothing curve:
@@ -150,7 +150,7 @@ library PlayerSkillUtils {
 
     // Degenerate / at-or-over cap => max discount
     if (progressCap == 0 || progress >= progressCap) {
-      return FixedPointMathLib.WAD - SKILL_ENERGY_MAX_DISCOUNT_WAD;
+      return WAD - SKILL_ENERGY_MAX_DISCOUNT_WAD;
     }
 
     uint256 sum = uint256(progress) + uint256(progressCap); // x + xCap
@@ -158,7 +158,7 @@ library PlayerSkillUtils {
     uint256 discount = numerator / sum; // WAD-scaled (domain units cancel)
 
     unchecked {
-      return FixedPointMathLib.WAD - discount;
+      return WAD - discount;
     }
   }
 }

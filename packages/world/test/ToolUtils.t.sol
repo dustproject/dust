@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { console } from "forge-std/console.sol";
-import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
-
 import { DustTest } from "./DustTest.sol";
 
 import {
@@ -11,6 +8,7 @@ import {
   ORE_TOOL_BASE_MULTIPLIER,
   SPECIALIZATION_MULTIPLIER,
   TOOL_ACTION_ENERGY_COST,
+  WAD,
   WOODEN_TOOL_BASE_MULTIPLIER
 } from "../src/Constants.sol";
 import { EntityId } from "../src/types/EntityId.sol";
@@ -19,7 +17,6 @@ import { vec3 } from "../src/types/Vec3.sol";
 
 import { Math } from "../src/utils/Math.sol";
 
-import { Energy } from "../src/codegen/tables/Energy.sol";
 import { InventorySlot } from "../src/codegen/tables/InventorySlot.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
@@ -46,7 +43,7 @@ contract ToolUtilsTest is DustTest {
     // Use the tool partially
     uint128 initialMass = Mass.getMass(tool);
     // Use the tool with a limit larger than energy cost so tool mass is reduced
-    TestToolUtils.use(toolData, TOOL_ACTION_ENERGY_COST + 1, ACTION_MODIFIER_DENOMINATOR, false, FixedPointMathLib.WAD);
+    TestToolUtils.use(toolData, TOOL_ACTION_ENERGY_COST + 1, ACTION_MODIFIER_DENOMINATOR, false, WAD);
 
     // Tool should still exist with reduced mass
     assertLt(Mass.getMass(tool), initialMass, "Tool mass should be reduced");
@@ -99,8 +96,7 @@ contract ToolUtilsTest is DustTest {
     // Get tool data and use tool
     ToolData memory toolData = TestToolUtils.getToolData(alice, TestInventoryUtils.findEntity(alice, toolEntity));
     uint128 initialToolMass = toolData.massLeft;
-    uint128 actionMassReduction =
-      TestToolUtils.use(toolData, useMassMax, actionModifier, specialized, FixedPointMathLib.WAD);
+    uint128 actionMassReduction = TestToolUtils.use(toolData, useMassMax, actionModifier, specialized, WAD);
 
     // Check tool state after use
     uint128 actualToolMassReduction = initialToolMass - Mass.getMass(toolEntity);

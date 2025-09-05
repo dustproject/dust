@@ -26,7 +26,6 @@ import { BuildNotification, MoveNotification, notify } from "../utils/NotifUtils
 import { PlayerProgressUtils } from "../utils/PlayerProgressUtils.sol";
 import { PlayerSkillUtils } from "../utils/PlayerSkillUtils.sol";
 import { RateLimitUtils } from "../utils/RateLimitUtils.sol";
-import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
 import { MoveLib } from "./libraries/MoveLib.sol";
 
@@ -134,7 +133,7 @@ contract BuildSystem is System {
 
     // Apply player skill multiplier for build energy pricing
     uint256 buildMul = PlayerSkillUtils.getBuildEnergyMultiplierWad(caller);
-    uint128 effectiveCost = uint128(FixedPointMathLib.mulWad(BUILD_ENERGY_COST, buildMul));
+    uint128 effectiveCost = uint128(Math.mulWad(BUILD_ENERGY_COST, buildMul));
     uint128 energyCost = Math.min(callerEnergy, effectiveCost);
 
     return BuildContext({
@@ -212,9 +211,7 @@ library BuildLib {
 
     _updateInventory(ctx);
 
-    (EntityId base, Vec3[] memory coords) = _addBlocks(ctx);
-
-    return (base, coords);
+    return _addBlocks(ctx);
   }
 
   /**
