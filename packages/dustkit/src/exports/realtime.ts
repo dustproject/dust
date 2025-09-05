@@ -1,16 +1,20 @@
 export { getSocket, RealtimeSocket } from "../realtime/getSocket";
 
+export { $ } from "../realtime/common";
+
 export {
   channelsSchema,
-  clientDataSchema,
-  parseClientMessage,
-  parseConnectionData,
-  parseServerMessage,
-  parseSession,
-  parseSignedSessionData,
+  sessionSchema,
+  signedSessionDataSchema,
+} from "../realtime/clientSetup";
+
+export {
+  position,
   positionChange,
-  serverMessageSchema,
-} from "../realtime/messages";
+  clientSocket,
+} from "../realtime/clientSocket";
+
+export { createSocketSchema } from "../realtime/createSocketSchema";
 
 /** Re-export Arktype for ergonomics */
 export { type } from "arktype";

@@ -1,22 +1,21 @@
 import type { SessionClient } from "@latticexyz/entrykit/internal";
-import { type } from "arktype";
 import { WebSocket } from "isows";
 import { type Address, getAddress } from "viem";
 import { getBlock } from "viem/actions";
 import { getAction } from "viem/utils";
-import {
-  type channelsSchema,
-  clientMessageSchema,
-  parseServerMessage,
-} from "./messages";
+import type { channelsSchema } from "./clientSetup";
+import { clientSocket } from "./clientSocket";
 import { toSearchParams } from "./toSearchParams";
 
 // TODO: abstract over WebSocket so we can auto reconnect like Viem's `getWebSocketRpcClient`
 
 export type RealtimeSocket = {
   socket: WebSocket;
-  // TODO: make data more user friendly rather than the raw protocol message
-  send: (data: typeof clientMessageSchema.infer) => void;
+  send: (data: {
+    position: [number, number, number];
+    orientation: [number, number];
+    velocity: [number, number, number];
+  }) => void;
 };
 
 export type GetSocketOptions = {
@@ -97,18 +96,16 @@ export function getSocket({
         `${url}?${toSearchParams({ session, channels })}`,
       );
 
-      function send(data: unknown) {
-        if (!sessionClient) {
-          throw new Error("Can't send without providing a sessionClient");
-        }
-        socket.send(JSON.stringify(clientMessageSchema.assert(data)));
-      }
-
       socket.addEventListener(
         "open",
         (event) => {
           console.debug("realtime socket open");
-          resolve({ socket, send });
+          resolve({
+            socket,
+            send({ position, orientation, velocity }) {
+              clientSocket.out.send(socket, [position, orientation, velocity]);
+            },
+          });
         },
         { once: true },
       );
@@ -135,8 +132,7 @@ export function getSocket({
       );
 
       socket.addEventListener("message", (event) => {
-        const data = parseServerMessage(event.data);
-        if (data instanceof type.errors) return;
+        const data = clientSocket.in.receive(event.data);
 
         if (data.t === "positions" && onPositions) {
           onPositions({
