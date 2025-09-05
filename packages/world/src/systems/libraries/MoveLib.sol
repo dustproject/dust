@@ -1,28 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { Math } from "../../utils/Math.sol";
-
 import { Energy } from "../../codegen/tables/Energy.sol";
 
-import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
-
 import "../../Constants.sol" as Constants;
-import { EntityId } from "../../types/EntityId.sol";
-import { ObjectType } from "../../types/ObjectType.sol";
 
-import { ObjectTypes } from "../../types/ObjectType.sol";
-
-import { Vec3, vec3 } from "../../types/Vec3.sol";
-import {
-  addEnergyToLocalPool, decreasePlayerEnergy, getEnergyData, updatePlayerEnergy
-} from "../../utils/EnergyUtils.sol";
+import { addEnergyToLocalPool, decreasePlayerEnergy, getEnergyData } from "../../utils/EnergyUtils.sol";
 import { EntityUtils } from "../../utils/EntityUtils.sol";
-
 import { Math } from "../../utils/Math.sol";
 import { PlayerProgressUtils } from "../../utils/PlayerProgressUtils.sol";
 import { PlayerSkillUtils } from "../../utils/PlayerSkillUtils.sol";
 import { RateLimitUtils } from "../../utils/RateLimitUtils.sol";
+import { ReverseMovablePosition } from "../../utils/Vec3Storage.sol";
+
+import { EntityId } from "../../types/EntityId.sol";
+import { ObjectType } from "../../types/ObjectType.sol";
+import { ObjectTypes } from "../../types/ObjectType.sol";
+import { Vec3, vec3 } from "../../types/Vec3.sol";
 
 struct PathResult {
   Vec3 coord;
@@ -205,8 +199,7 @@ library MoveLib {
   }
 
   /**
-   * Calculate total energy cost, final path coordinate, and movement counts
-   * Returns: (finalCoord, cost, walkSteps, swimSteps)
+   * Calculate path result from start
    */
   function _computePathResult(MoveContext memory ctx, Vec3 start, Vec3[] memory newBaseCoords)
     internal
@@ -237,6 +230,8 @@ library MoveLib {
       if (dy < 0 && currentHasGravity) {
         ++falls;
         glides = 0;
+
+        // Landing
         if (!nextHasGravity) {
           uint128 fallDamage = _computeFallDamage(ctx, stepCtx, falls);
           _updatePathResult(ctx, stepCtx, fallDamage, res);
@@ -245,13 +240,20 @@ library MoveLib {
         if (dy > 0) {
           ++jumps;
           require(jumps <= Constants.MAX_PLAYER_JUMPS, "Cannot jump more than 3 blocks");
+          require(falls == 0, "Cannot jump while falling");
         } else if (nextHasGravity) {
           ++glides;
           require(glides <= Constants.MAX_PLAYER_GLIDES, "Cannot glide more than 10 blocks");
         }
-        _updatePathResult(ctx, stepCtx, 0, res);
+
+        // Apply fall damage if landing
+        uint128 fallDamage = currentHasGravity && !nextHasGravity ? _computeFallDamage(ctx, stepCtx, falls) : 0;
+
+        // Apply regular move cost too
+        _updatePathResult(ctx, stepCtx, fallDamage, res);
       }
 
+      // Reset counters
       if (!nextHasGravity) {
         falls = 0;
         jumps = 0;

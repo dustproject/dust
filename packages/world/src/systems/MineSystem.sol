@@ -29,6 +29,7 @@ import {
   addEnergyToLocalPool,
   decreaseFragmentDrainRate,
   updateMachineEnergy,
+  updatePlayerEnergy,
   updateSleepingPlayerEnergy
 } from "../utils/EnergyUtils.sol";
 
@@ -230,7 +231,7 @@ contract MineSystem is System {
         BaseEntity._deleteRecord(entity);
       }
 
-      _removeBlock(entity, objectType, coord);
+      MineLib._removeBlock(entity, objectType, coord);
     }
 
     // Handle drops from the mined object itself
@@ -239,25 +240,6 @@ contract MineSystem is System {
     // It is fine to destroy the entity before requiring mines allowed,
     // as machines can't be destroyed if they have energy
     _cleanupEntity(ctx.caller, ctx.mined, ctx.objectType, baseCoord);
-  }
-
-  function _removeBlock(EntityId entityId, ObjectType objectType, Vec3 coord) internal {
-    // If object being mined is seed, no need to check above entities
-    if (objectType.isGrowable()) {
-      _removeGrowable(entityId, objectType, coord);
-      return;
-    }
-
-    ObjectType replacementType = EntityFluidLevel._get(entityId) > 0 ? ObjectTypes.Water : ObjectTypes.Air;
-    EntityUtils.setEntityObjectType(entityId, replacementType);
-
-    Vec3 aboveCoord = coord + vec3(0, 1, 0);
-    EntityId above = EntityUtils.getMovableEntityAt(aboveCoord);
-    // Note: currently it is not possible for the above player to not be the base entity,
-    // but if we add other types of movable entities we should check that it is a base entity
-    if (above._exists()) {
-      MoveLib.runGravity(aboveCoord);
-    }
   }
 
   function _handleAbove(EntityId caller, Vec3 coord) internal {
@@ -283,14 +265,9 @@ contract MineSystem is System {
     }
 
     if (isLandbound) {
-      _removeBlock(above, aboveType, aboveCoord);
+      MineLib._removeBlock(above, aboveType, aboveCoord);
       MineDropLib._handleDrop(caller, above, aboveType, aboveCoord);
     }
-  }
-
-  function _removeGrowable(EntityId entityId, ObjectType objectType, Vec3 coord) internal {
-    EntityUtils.setEntityObjectType(entityId, ObjectTypes.Air);
-    addEnergyToLocalPool(coord, objectType.getGrowableEnergy());
   }
 
   function _cleanupEntity(EntityId caller, EntityId mined, ObjectType minedType, Vec3 baseCoord) internal {
@@ -344,6 +321,31 @@ contract MineSystem is System {
 }
 
 library MineLib {
+  function _removeBlock(EntityId entityId, ObjectType objectType, Vec3 coord) public {
+    // If object being mined is seed, no need to check above entities
+    if (objectType.isGrowable()) {
+      _removeGrowable(entityId, objectType, coord);
+      return;
+    }
+
+    ObjectType replacementType = EntityFluidLevel._get(entityId) > 0 ? ObjectTypes.Water : ObjectTypes.Air;
+    EntityUtils.setEntityObjectType(entityId, replacementType);
+
+    Vec3 aboveCoord = coord + vec3(0, 1, 0);
+    EntityId above = EntityUtils.getMovableEntityAt(aboveCoord);
+    // Note: currently it is not possible for the above player to not be the base entity,
+    // but if we add other types of movable entities we should check that it is a base entity
+    if (above._exists()) {
+      updatePlayerEnergy(above);
+      MoveLib.runGravity(aboveCoord);
+    }
+  }
+
+  function _removeGrowable(EntityId entityId, ObjectType objectType, Vec3 coord) internal {
+    EntityUtils.setEntityObjectType(entityId, ObjectTypes.Air);
+    addEnergyToLocalPool(coord, objectType.getGrowableEnergy());
+  }
+
   function _requireReachable(Vec3 coord) public view {
     Vec3[6] memory neighbors = coord.neighbors6();
     for (uint256 i = 0; i < neighbors.length; i++) {
@@ -362,30 +364,6 @@ library MineLib {
 
     program.hook({ caller: ctx.caller, target: target, revertOnFailure: energyData.energy > 0, extraData: ctx.extraData })
       .onMine({ entity: ctx.mined, tool: ctx.toolData.tool, objectType: ctx.objectType, coord: ctx.coord });
-  }
-}
-
-library MinePhysicsLib {
-  function _applyMassReduction(MineContext calldata ctx) public returns (uint128, bool) {
-    uint128 massLeft = ctx.massLeft;
-    if (massLeft == 0) {
-      return (0, true);
-    }
-
-    // Use action-specific tool usage that consults PlayerSkillUtils for energy pricing
-    uint128 totalMassReduction = ctx.toolData.mine(ctx.objectType, massLeft);
-
-    // If caller died (totalMassReduction == 0), return early
-    if (totalMassReduction == 0) {
-      return (massLeft, false);
-    }
-
-    massLeft -= totalMassReduction;
-
-    // Track the mass reduction for player activity
-    PlayerProgressUtils.trackMine(ctx.caller, totalMassReduction, ctx.toolData.toolType, ctx.objectType);
-
-    return (massLeft, true);
   }
 }
 
@@ -425,6 +403,30 @@ library MineBedLib {
     bed._getProgram().hook({ caller: sleepingPlayer, target: bed, revertOnFailure: false, extraData: "" }).onWakeup();
 
     notify(sleepingPlayer, WakeupNotification({ bed: bed, bedCoord: bedCoord }));
+  }
+}
+
+library MinePhysicsLib {
+  function _applyMassReduction(MineContext calldata ctx) public returns (uint128, bool) {
+    uint128 massLeft = ctx.massLeft;
+    if (massLeft == 0) {
+      return (0, true);
+    }
+
+    // Use action-specific tool usage that consults PlayerSkillUtils for energy pricing
+    uint128 totalMassReduction = ctx.toolData.mine(ctx.objectType, massLeft);
+
+    // If caller died (totalMassReduction == 0), return early
+    if (totalMassReduction == 0) {
+      return (massLeft, false);
+    }
+
+    massLeft -= totalMassReduction;
+
+    // Track the mass reduction for player activity
+    PlayerProgressUtils.trackMine(ctx.caller, totalMassReduction, ctx.toolData.toolType, ctx.objectType);
+
+    return (massLeft, true);
   }
 }
 
