@@ -5,7 +5,7 @@ import { Energy } from "../../codegen/tables/Energy.sol";
 
 import "../../Constants.sol" as Constants;
 
-import { addEnergyToLocalPool, decreasePlayerEnergy, getEnergyData } from "../../utils/EnergyUtils.sol";
+import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../../utils/EnergyUtils.sol";
 import { EntityUtils } from "../../utils/EntityUtils.sol";
 import { Math } from "../../utils/Math.sol";
 import { PlayerProgressUtils } from "../../utils/PlayerProgressUtils.sol";
@@ -340,9 +340,9 @@ library MoveLib {
     return EntityUtils.getFluidLevelAt(coord) > 0;
   }
 
-  function _moveContext(EntityId player) internal view returns (MoveContext memory c) {
+  function _moveContext(EntityId player) internal returns (MoveContext memory c) {
     c.player = player;
-    c.initialEnergy = getEnergyData(player).energy;
+    c.initialEnergy = updatePlayerEnergy(player).energy;
     c._moveEnergyMul = PlayerSkillUtils.getMoveEnergyMultiplierWad(c.player);
   }
 
