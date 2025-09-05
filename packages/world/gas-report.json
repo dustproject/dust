@@ -15,79 +15,79 @@
     "file": "test/Build.t.sol:BuildTest",
     "test": "testBuildMultiSize",
     "name": "build multi-size",
-    "gasUsed": 334273
+    "gasUsed": 334029
   },
   {
     "file": "test/Build.t.sol:BuildTest",
     "test": "testBuildMultiSizeWithOrientation",
     "name": "build multi-size",
-    "gasUsed": 354459
+    "gasUsed": 354215
   },
   {
     "file": "test/Build.t.sol:BuildTest",
     "test": "testBuildNonTerrain",
     "name": "build non-terrain",
-    "gasUsed": 282311
+    "gasUsed": 282067
   },
   {
     "file": "test/Build.t.sol:BuildTest",
     "test": "testBuildNonWaterloggableBlockOnWaterNonTerrain",
     "name": "build non-waterloggable block on water non-terrain",
-    "gasUsed": 282383
+    "gasUsed": 282139
   },
   {
     "file": "test/Build.t.sol:BuildTest",
     "test": "testBuildTerrain",
     "name": "build terrain",
-    "gasUsed": 363859
+    "gasUsed": 363615
   },
   {
     "file": "test/Build.t.sol:BuildTest",
     "test": "testBuildWaterloggableBlockOnWaterNonTerrain",
     "name": "build waterloggable block on water non-terrain",
-    "gasUsed": 275799
+    "gasUsed": 275555
   },
   {
     "file": "test/Build.t.sol:BuildTest",
     "test": "testBuildWaterloggableBlockOnWaterTerrain",
     "name": "build waterloggable block on water terrain",
-    "gasUsed": 388096
+    "gasUsed": 387852
   },
   {
     "file": "test/Build.t.sol:BuildTest",
     "test": "testJumpBuild",
     "name": "jump build",
-    "gasUsed": 583349
+    "gasUsed": 582861
   },
   {
     "file": "test/Craft.t.sol:CraftTest",
     "test": "testCraftAnyInput",
     "name": "craft with any input",
-    "gasUsed": 295862
+    "gasUsed": 295618
   },
   {
     "file": "test/Craft.t.sol:CraftTest",
     "test": "testCraftMultipleInputsSingleOutput",
     "name": "handcraft multiple inputs",
-    "gasUsed": 293273
+    "gasUsed": 293029
   },
   {
     "file": "test/Craft.t.sol:CraftTest",
     "test": "testCraftSingleInputSingleOutput",
     "name": "handcraft single input",
-    "gasUsed": 286567
+    "gasUsed": 286323
   },
   {
     "file": "test/Craft.t.sol:CraftTest",
     "test": "testCraftTool",
     "name": "craft tool",
-    "gasUsed": 374281
+    "gasUsed": 374037
   },
   {
     "file": "test/Craft.t.sol:CraftTest",
     "test": "testCraftWithStation",
     "name": "craft with station",
-    "gasUsed": 300597
+    "gasUsed": 300353
   },
   {
     "file": "test/Farming.t.sol:FarmingTest",
@@ -129,103 +129,103 @@
     "file": "test/Gravity.t.sol:GravityTest",
     "test": "testMineFallMultipleBlocks",
     "name": "mine with three block fall",
-    "gasUsed": 747241
+    "gasUsed": 746753
   },
   {
     "file": "test/Gravity.t.sol:GravityTest",
     "test": "testMineFallSingleBlock",
     "name": "mine with single block fall",
-    "gasUsed": 661090
+    "gasUsed": 660846
   },
   {
     "file": "test/Gravity.t.sol:GravityTest",
     "test": "testMineStackedPlayers",
     "name": "mine with three block fall with a stacked player",
-    "gasUsed": 1041080
+    "gasUsed": 1040104
   },
   {
     "file": "test/Gravity.t.sol:GravityTest",
     "test": "testMoveFallMultipleBlocks",
     "name": "move with three block fall",
-    "gasUsed": 479937
+    "gasUsed": 479449
   },
   {
     "file": "test/Gravity.t.sol:GravityTest",
     "test": "testMoveFallSingleBlock",
     "name": "move with single block fall",
-    "gasUsed": 390939
+    "gasUsed": 390695
   },
   {
     "file": "test/Gravity.t.sol:GravityTest",
     "test": "testMoveStackedPlayers",
     "name": "move with three block fall with a stacked player",
-    "gasUsed": 807425
+    "gasUsed": 806693
   },
   {
     "file": "test/HitMachine.t.sol:HitMachineTest",
     "test": "testHitForceFieldWithInsufficientEnergy",
     "name": "hit force field with insufficient energy",
-    "gasUsed": 360828
+    "gasUsed": 360584
   },
   {
     "file": "test/HitMachine.t.sol:HitMachineTest",
     "test": "testHitForceFieldWithWhacker",
     "name": "hit force field with whacker",
-    "gasUsed": 246284
+    "gasUsed": 246040
   },
   {
     "file": "test/HitMachine.t.sol:HitMachineTest",
     "test": "testHitForceFieldWithoutTool",
     "name": "hit force field without tool",
-    "gasUsed": 238031
+    "gasUsed": 237787
   },
   {
     "file": "test/HitMachine.t.sol:HitMachineTest",
     "test": "testHitForceFieldWithoutToolFatal",
     "name": "hit force field without tool",
-    "gasUsed": 360828
+    "gasUsed": 360584
   },
   {
     "file": "test/HitPlayer.t.sol:HitPlayerTest",
     "test": "testHitPlayerWithNonWhackerTool",
     "name": "hit player with non-whacker tool",
-    "gasUsed": 252125
+    "gasUsed": 251881
   },
   {
     "file": "test/HitPlayer.t.sol:HitPlayerTest",
     "test": "testHitPlayerWithToolAttackerDies",
     "name": "hit player with tool, attacker dies",
-    "gasUsed": 512739
+    "gasUsed": 512495
   },
   {
     "file": "test/HitPlayer.t.sol:HitPlayerTest",
     "test": "testHitPlayerWithToolKillsTarget",
     "name": "hit player with copper whacker, kills target",
-    "gasUsed": 674169
+    "gasUsed": 673925
   },
   {
     "file": "test/HitPlayer.t.sol:HitPlayerTest",
     "test": "testHitPlayerWithToolPartialDamage",
     "name": "hit player with copper whacker, partial damage",
-    "gasUsed": 252125
+    "gasUsed": 251881
   },
   {
     "file": "test/HitPlayer.t.sol:HitPlayerTest",
     "test": "testHitPlayerWithoutToolAttackerDies",
     "name": "hit player without tool, attacker dies",
-    "gasUsed": 362969
+    "gasUsed": 362725
   },
   {
     "file": "test/HitPlayer.t.sol:HitPlayerTest",
     "test": "testHitPlayerWithoutToolKillsTarget",
     "name": "hit player without tool, kills target",
-    "gasUsed": 665666
+    "gasUsed": 665422
   },
   {
     "file": "test/HitPlayer.t.sol:HitPlayerTest",
     "test": "testHitPlayerWithoutToolPartialDamage",
     "name": "hit player without tool, partial damage",
-    "gasUsed": 243890
+    "gasUsed": 243646
   },
   {
     "file": "test/Inventory.t.sol:InventoryTest",
@@ -303,7 +303,7 @@
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineMultiSizeWithOrientation",
     "name": "",
-    "gasUsed": 6680854
+    "gasUsed": 6680866
   },
   {
     "file": "test/Mine.t.sol:MineTest",
@@ -327,7 +327,7 @@
     "file": "test/Mine.t.sol:MineTest",
     "test": "testMineSmartEntity",
     "name": "mine smart entity with tool, entirely mined",
-    "gasUsed": 429280
+    "gasUsed": 428627
   },
   {
     "file": "test/Mine.t.sol:MineTest",
@@ -345,73 +345,73 @@
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveDirectionsPackedGasComparison",
     "name": "moveDirections 10 moves",
-    "gasUsed": 874474
+    "gasUsed": 874230
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveDirectionsPackedGasComparison",
     "name": "moveDirectionsPacked 10 moves",
-    "gasUsed": 847875
+    "gasUsed": 847631
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveFiveBlocksNonTerrain",
     "name": "move 5 blocks non-terrain",
-    "gasUsed": 429504
+    "gasUsed": 429260
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveFiveBlocksTerrain",
     "name": "move 5 blocks terrain",
-    "gasUsed": 592395
+    "gasUsed": 592151
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveJump",
     "name": "move single jump",
-    "gasUsed": 392997
+    "gasUsed": 392753
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveMaxBlocksNonTerrain",
     "name": "move 24 blocks non-terrain",
-    "gasUsed": 876890
+    "gasUsed": 876646
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveMaxBlocksTerrain",
     "name": "move 24 blocks terrain",
-    "gasUsed": 1613997
+    "gasUsed": 1613753
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveOneBlockNonTerrain",
     "name": "move 1 blocks non-terrain",
-    "gasUsed": 335734
+    "gasUsed": 335490
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveOneBlockTerrain",
     "name": "move 1 blocks terrain",
-    "gasUsed": 378039
+    "gasUsed": 377795
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveOverLava",
     "name": "move over lava",
-    "gasUsed": 398529
+    "gasUsed": 398285
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveTenBlocksNonTerrain",
     "name": "move 10 blocks non-terrain",
-    "gasUsed": 547173
+    "gasUsed": 546929
   },
   {
     "file": "test/Move.t.sol:MoveTest",
     "test": "testMoveTenBlocksTerrain",
     "name": "move 10 blocks terrain",
-    "gasUsed": 860691
+    "gasUsed": 860447
   },
   {
     "file": "test/Spawn.t.sol:SpawnTest",
@@ -555,7 +555,7 @@
     "file": "test/Tree.t.sol:TreeTest",
     "test": "testPlantTree",
     "name": "plant tree seed",
-    "gasUsed": 331174
+    "gasUsed": 330930
   },
   {
     "file": "test/Tree.t.sol:TreeTest",

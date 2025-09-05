@@ -118,7 +118,7 @@ library PlayerSkillUtils {
    *
    * Properties
    * - Monotonic: More progress → equal or smaller multiplier (never increases cost).
-   * - Bounded: multiplier ≥ SKILL_ENERGY_MAX_DISCOUNT_WAD and ≤ 1e18.
+   * - Bounded: 1e18 - SKILL_ENERGY_MAX_DISCOUNT_WAD <= multiplier ≤ 1e18.
    * - Smooth: No cliffs; small progress changes yield small multiplier changes.
    *
    * Example
@@ -131,41 +131,34 @@ library PlayerSkillUtils {
    * @return multiplier Energy multiplier in WAD to apply to base costs.
    */
   function getEnergyMultiplierWad(uint128 progress, uint128 progressCap) internal pure returns (uint256) {
-    uint256 normalized = _normalizedSmooth(progress, progressCap);
-    uint256 discount = FixedPointMathLib.mulWad(SKILL_ENERGY_MAX_DISCOUNT_WAD, normalized);
-    return FixedPointMathLib.WAD - discount;
-  }
+    // No progress => no discount
+    if (progress == 0) return FixedPointMathLib.WAD;
 
-  /**
-   * @dev Smooth, capped normalization of progress into [0, 1] (WAD).
-   *
-   * Uses an intuitive saturating curve with diminishing returns:
-   *
-   * Curve
-   * - Let s = xCap and define f(x) = x / (x + s).
-   *   - f(0) = 0 (no progress → no benefit)
-   *   - f(s) = 1/2 (reaching the cap marks a midpoint on the curve)
-   *   - f(∞) → 1 (diminishing returns as progress grows large)
-   * - We normalize by f(xCap) so that reaching the cap maps to 1.0 (WAD = 1e18).
-   * - Finally, clamp to [0, 1e18] for stability.
-   *
-   * Why this form
-   * - Easy tuning: choose xCap as the intuitive "effort to reach max"; the shape follows naturally.
-   * - Smooth and monotonic: avoids abrupt changes in player experience.
-   *
-   * @param x     Current progress in domain units.
-   * @param xCap  Soft cap for the activity (domain units). If 0, treated as already maxed.
-   * @return normalized Value in [0, 1e18] representing relative progress.
-   */
-  function _normalizedSmooth(uint128 x, uint128 xCap) private pure returns (uint256) {
-    if (x == 0) return 0;
-    if (xCap == 0) return 1e18; // degenerate case, treat as max
-    uint256 s = xCap;
-    // f(x) = x / (x + s)
-    uint256 fx = FixedPointMathLib.divWad(x, x + s);
-    uint256 fcap = FixedPointMathLib.divWad(xCap, xCap + s); // = 0.5 when S = xCap
-    // normalized = min(1, fx / fcap)
-    uint256 ratio = FixedPointMathLib.divWad(fx, fcap);
-    return ratio > 1e18 ? 1e18 : ratio;
+    /**
+     * Smoothing curve:
+     *
+     *   Let x = progress, c = progressCap.
+     *
+     *   Smoothing function: f(x) = x/(x+c)
+     *
+     *   Normalized: f'(x) = min(1, 2x / (x + c))
+     *     - This is f(x) re-scaled so that f(c) = 1/2  =>  f'(c) = 1.
+     *     - Monotone increasing, concave (diminishing returns), saturates at 1.
+     *
+     *   multiplier = 1 - maxDiscount * f'(x)
+     */
+
+    // Degenerate / at-or-over cap => max discount
+    if (progressCap == 0 || progress >= progressCap) {
+      return FixedPointMathLib.WAD - SKILL_ENERGY_MAX_DISCOUNT_WAD;
+    }
+
+    uint256 sum = uint256(progress) + uint256(progressCap); // x + xCap
+    uint256 numerator = uint256(SKILL_ENERGY_MAX_DISCOUNT_WAD) * (uint256(progress) << 1); // maxDiscount * 2x
+    uint256 discount = numerator / sum; // WAD-scaled (domain units cancel)
+
+    unchecked {
+      return FixedPointMathLib.WAD - discount;
+    }
   }
 }
