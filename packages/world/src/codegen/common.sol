@@ -34,20 +34,19 @@ enum RateLimitType {
 }
 
 enum ActivityType {
-  MinePickMass,
-  MineAxeMass,
-  MineCropMass,
   HitPlayerDamage,
   HitMachineDamage,
   MoveEnergy,
   MoveFallEnergy,
-  BuildMass,
   CraftHandMass,
   CraftWorkbenchMass,
   CraftPowerstoneMass,
   CraftFurnaceMass,
   CraftStonecutterMass,
-  CraftAnvilMass
+  CraftAnvilMass,
+  MinePickMass,
+  MineAxeMass,
+  BuildMass
 }
 
 enum Direction {

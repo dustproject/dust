@@ -38,10 +38,10 @@ library ToolUtils {
   }
 
   function mine(ToolData memory toolData, ObjectType minedType, uint128 useMassMax) public returns (uint128) {
-    uint256 mul = PlayerSkillUtils.getMineEnergyMultiplierWad(toolData.owner, toolData.toolType, minedType);
-
     bool specialized = (toolData.toolType.isAxe() && minedType.hasAxeMultiplier())
       || (toolData.toolType.isPick() && minedType.hasPickMultiplier());
+
+    uint256 mul = PlayerSkillUtils.getMineEnergyMultiplierWad(toolData.owner, toolData.toolType);
 
     return use(toolData, useMassMax, Constants.MINE_ACTION_MODIFIER, specialized, mul);
   }

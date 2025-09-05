@@ -32,20 +32,19 @@ export default defineWorld({
     ],
     RateLimitType: ["Movement", "HitMachine", "HitPlayer", "Work"],
     ActivityType: [
-      "MinePickMass",
-      "MineAxeMass",
-      "MineCropMass",
       "HitPlayerDamage",
       "HitMachineDamage",
       "MoveEnergy",
       "MoveFallEnergy",
-      "BuildMass",
       "CraftHandMass",
       "CraftWorkbenchMass",
       "CraftPowerstoneMass",
       "CraftFurnaceMass",
       "CraftStonecutterMass",
       "CraftAnvilMass",
+      "MinePickMass",
+      "MineAxeMass",
+      "BuildMass",
     ],
     Direction: [
       // Cardinal directions (6)

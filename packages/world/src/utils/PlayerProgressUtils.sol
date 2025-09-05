@@ -23,14 +23,11 @@ library PlayerProgressUtils {
   }
 
   // Mining tracking - with tool specialization and crop detection
-  function trackMine(EntityId player, uint128 massReduced, ObjectType toolType, ObjectType minedType) internal {
+  function trackMine(EntityId player, uint128 massReduced, ObjectType toolType) internal {
     ActivityType activityType;
 
     // Check if we're mining a crop
-    if (minedType.isCrop()) {
-      // TODO: should we still track axe/pick mining independently?
-      activityType = ActivityType.MineCropMass;
-    } else if (toolType.isAxe()) {
+    if (toolType.isAxe()) {
       activityType = ActivityType.MineAxeMass;
     } else if (toolType.isPick()) {
       activityType = ActivityType.MinePickMass;

@@ -35,15 +35,9 @@ library PlayerSkillUtils {
     });
   }
 
-  function getMineEnergyMultiplierWad(EntityId player, ObjectType toolType, ObjectType minedType)
-    internal
-    view
-    returns (uint256)
-  {
+  function getMineEnergyMultiplierWad(EntityId player, ObjectType toolType) internal view returns (uint256) {
     ActivityType activityType;
-    if (minedType.isCrop()) {
-      activityType = ActivityType.MineCropMass;
-    } else if (toolType.isAxe()) {
+    if (toolType.isAxe()) {
       activityType = ActivityType.MineAxeMass;
     } else if (toolType.isPick()) {
       activityType = ActivityType.MinePickMass;
