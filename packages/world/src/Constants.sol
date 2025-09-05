@@ -106,17 +106,16 @@ uint128 constant MINE_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // 10 mi
 uint128 constant BUILD_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // 10 builds per second (20 per block)
 
 // Progress decay constants
-int128 constant LN2_WAD = 693147180559945309; // ln(2) in 1e18
-uint256 constant PROGRESS_DECAY_HALF_LIFE = 7 days; // every 7 days progress decays by half
-int128 constant PROGRESS_DECAY_LAMBDA_WAD = int128(int256(LN2_WAD) / int256(PROGRESS_DECAY_HALF_LIFE));
+int256 constant LN2_WAD = 693147180559945309; // ln(2) in 1e18
+int256 constant PROGRESS_DECAY_HALF_LIFE = 14 days; // every 14 days progress decays by half
+int256 constant PROGRESS_DECAY_LAMBDA_WAD = LN2_WAD / PROGRESS_DECAY_HALF_LIFE;
 
-// ------------------------------------------------------------
 // Player skills (progress-based energy multipliers)
-// ------------------------------------------------------------
-// Minimum energy multiplier at max benefit (WAD scale). 0.70e18 = 30% discount
-uint128 constant SKILL_ENERGY_MIN_MULTIPLIER_WAD = 7e17; // 70%
 
-// Smooth-then-cap parameterization: "effort to reach max" per activity family.
+// Maximum energy discount (WAD scale). 0.30e18 = 30% discount
+uint128 constant SKILL_ENERGY_MAX_DISCOUNT_WAD = 3e17; // 70%
+
+// Smooth-then-cap parameterization: "effort to reach max" per activity type.
 // We compute a smooth curve f(x)=x/(x+s), then normalize by f(xCap) and cap at 1.
 // s is set equal to xCap for an intuitive shape; xCap is derived from the below anchors.
 

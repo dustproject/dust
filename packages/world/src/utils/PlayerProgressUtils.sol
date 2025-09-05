@@ -14,23 +14,6 @@ import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 import { Math } from "../utils/Math.sol";
 
 library PlayerProgressUtils {
-  /// @dev Decay `current` to now and align `current` and `accumulated` by halving for each extra death.
-  function _decayAndAlign(PlayerProgressData memory data, uint256 deaths)
-    private
-    view
-    returns (uint128 current, uint128 accumulated)
-  {
-    current = _decay(data.current, data.lastUpdatedAt);
-    accumulated = data.accumulated;
-
-    uint256 e = uint256(data.exponent);
-    if (deaths > e) {
-      uint256 diff = deaths - e;
-      current = current >> diff;
-      accumulated = accumulated >> diff;
-    }
-  }
-
   function getProgress(EntityId player, ActivityType activityType) internal view returns (uint128) {
     PlayerProgressData memory data = PlayerProgress._get(player, activityType);
     uint256 deaths = Death._getDeaths(player);
@@ -132,18 +115,51 @@ library PlayerProgressUtils {
     );
   }
 
-  function _floor(uint128 accumulated) private pure returns (uint128) {
-    return accumulated / 3;
+  /// @dev Decay `current` to now and align `current` and `accumulated` by halving for each extra death.
+  function _decayAndAlign(PlayerProgressData memory data, uint256 deaths)
+    private
+    view
+    returns (uint128 current, uint128 accumulated)
+  {
+    current = _decay(data);
+    accumulated = data.accumulated;
+
+    uint256 e = uint256(data.exponent);
+    if (deaths > e) {
+      uint256 diff = deaths - e;
+      current = current >> diff;
+      accumulated = accumulated >> diff;
+    }
   }
 
-  /// @dev Exponential decay toward zero using half-life, in mantissa units
-  function _decay(uint128 current, uint128 lastUpdatedAt) private view returns (uint128) {
+  /**
+   * @dev Exponential decay toward zero using half-life, in mantissa units
+   *
+   * - factor = exp(-λ * Δt) where λ = LN2_WAD / PROGRESS_DECAY_HALF_LIFE.
+   * - Constants:
+   *   - `LN2_WAD`: 0.693... in 1e18 (WAD) for precise exp.
+   *   - `PROGRESS_DECAY_HALF_LIFE`: progress halves every X seconds without activity.
+   */
+  function _decay(PlayerProgressData memory data) private view returns (uint128) {
+    uint128 current = data.current;
+    uint128 lastUpdatedAt = data.lastUpdatedAt;
+
     if (current == 0 || block.timestamp <= lastUpdatedAt) return current;
 
     unchecked {
-      int256 x = -int256(PROGRESS_DECAY_LAMBDA_WAD) * int256(uint256(block.timestamp - lastUpdatedAt)); // wad * seconds
+      int256 x = -PROGRESS_DECAY_LAMBDA_WAD * int256(uint256(block.timestamp - lastUpdatedAt)); // wad * seconds
       uint256 factorWad = uint256(FixedPointMathLib.expWad(x)); // in [0..1e18]
       return uint128(FixedPointMathLib.mulWad(current, factorWad));
     }
+  }
+
+  /**
+   * @dev Lower soft cap for progress.
+   *
+   * Guarantees long‑term activity leaves a baseline that cannot decay below
+   * one‑third of lifetime contribution (subject to death halving)
+   */
+  function _floor(uint128 accumulated) private pure returns (uint128) {
+    return accumulated / 3;
   }
 }

@@ -3,6 +3,7 @@ pragma solidity >=0.8.24;
 
 import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
+// FixedPointMathLib wrapper
 library Math {
   function max(uint256 a, uint256 b) internal pure returns (uint256) {
     return FixedPointMathLib.max(a, b);
