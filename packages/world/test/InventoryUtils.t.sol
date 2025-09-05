@@ -304,16 +304,18 @@ contract InventoryUtilsTest is DustTest {
   // Fuzz test for transferring objects between slots
   function testFuzzTransferBetweenSlots(uint16 amount1, uint16 amount2, uint16 transferAmount) public {
     // Bound inputs to reasonable values
-    amount1 = uint16(bound(amount1, 1, 98)); // Max stack is 99
+    amount1 = uint16(bound(amount1, 1, 99)); // Max stack is 99
     transferAmount = uint16(bound(transferAmount, 1, amount1));
-    amount2 = uint16(bound(amount2, 1, 99 - transferAmount)); // Ensure we don't exceed stack limit
+    amount2 = uint16(bound(amount2, 0, 99 - transferAmount)); // Ensure we don't exceed stack limit
 
     // Setup player
     (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
 
     // Add objects to two separate slots
     TestInventoryUtils.addObjectToSlot(alice, ObjectTypes.OakLog, amount1, 0);
-    TestInventoryUtils.addObjectToSlot(alice, ObjectTypes.OakLog, amount2, 1);
+    if (amount2 > 0) {
+      TestInventoryUtils.addObjectToSlot(alice, ObjectTypes.OakLog, amount2, 1);
+    }
 
     // Transfer between slots
     SlotTransfer[] memory transfers = new SlotTransfer[](1);

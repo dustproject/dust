@@ -61,7 +61,6 @@ library PlayerProgressUtils {
 
   // Building tracking
   function trackBuild(EntityId player, uint128 massBuilt) internal {
-    // TODO: should we include build energy? if so, it will be dependent on the energy discount
     _trackProgress(player, ActivityType.BuildMass, massBuilt);
   }
 
