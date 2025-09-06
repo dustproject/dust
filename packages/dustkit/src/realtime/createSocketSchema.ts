@@ -9,12 +9,18 @@ export function createSocketSchema<const outDef, const inDef>({
 }): {
   in: {
     schema: type.instantiate<inDef>;
-    send: (socket: WebSocket, data: type.infer.In<inDef>) => void;
+    send: (
+      socket: { send: (message: string | ArrayBuffer) => void },
+      data: type.infer.In<inDef>,
+    ) => void;
     receive: (message: string | ArrayBuffer) => type.infer.Out<inDef>;
   };
   out: {
     schema: type.instantiate<outDef>;
-    send: (socket: WebSocket, data: type.infer.In<outDef>) => void;
+    send: (
+      socket: { send: (message: string | ArrayBuffer) => void },
+      data: type.infer.In<outDef>,
+    ) => void;
     receive: (message: string | ArrayBuffer) => type.infer.Out<outDef>;
   };
 } {

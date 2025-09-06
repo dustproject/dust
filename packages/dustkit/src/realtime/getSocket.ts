@@ -5,12 +5,13 @@ import { getBlock } from "viem/actions";
 import { getAction } from "viem/utils";
 import type { channelsSchema } from "./clientSetup";
 import { clientSocket } from "./clientSocket";
+import { type Socket, createSocket } from "./createSocket";
 import { toSearchParams } from "./toSearchParams";
 
 // TODO: abstract over WebSocket so we can auto reconnect like Viem's `getWebSocketRpcClient`
 
 export type RealtimeSocket = {
-  socket: WebSocket;
+  socket: Socket;
   send: (data: {
     position: [number, number, number];
     orientation: [number, number];
@@ -99,69 +100,41 @@ export function getSocket({
           })()
         : null;
 
-    return new Promise<RealtimeSocket>((resolve, reject) => {
-      console.debug("opening realtime socket");
-      const socket = new WebSocket(
-        `${url}?${toSearchParams({ session, channels })}`,
-      );
+    console.debug("opening realtime socket");
 
-      socket.addEventListener(
-        "open",
-        (event) => {
-          console.debug("realtime socket open");
-          resolve({
-            socket,
-            send({ position, orientation, velocity }) {
-              clientSocket.out.send(socket, [position, orientation, velocity]);
-            },
-          });
-        },
-        { once: true },
-      );
-
-      socket.addEventListener(
-        "close",
-        (event) => {
-          console.debug("realtime socket close", event.code, event.reason);
-          reject(new Error("Socket closed before it could be opened."));
-        },
-        { once: true },
-      );
-
-      socket.addEventListener(
-        "error",
-        (event) => {
-          console.error("realtime socket error");
-          reject(new Error("Socket errored before it could be opened."));
-          try {
-            socket?.close();
-          } catch {}
-        },
-        { once: true },
-      );
-
-      socket.addEventListener("message", (event) => {
-        const data = clientSocket.in.receive(event.data);
-
-        if (data.t === "positions" && onPositions) {
-          onPositions({
-            positions: data.d.map((pos) => ({
-              player: pos.u,
-              timestamp: pos.t,
-              position: pos.d[0],
-              orientation: pos.d[1],
-              velocity: pos.d[2],
-            })),
-          });
-        }
-
-        if (data.t === "presence" && onPresence) {
-          onPresence({
-            players: data.d,
-          });
-        }
-      });
+    const socket = createSocket({
+      connect: () =>
+        new WebSocket(`${url}?${toSearchParams({ session, channels })}`),
     });
+
+    socket.on("message", (event) => {
+      const data = clientSocket.in.receive(event.data);
+
+      if (data.t === "positions" && onPositions) {
+        onPositions({
+          positions: data.d.map((pos) => ({
+            player: pos.u,
+            timestamp: pos.t,
+            position: pos.d[0],
+            orientation: pos.d[1],
+            velocity: pos.d[2],
+          })),
+        });
+      }
+
+      if (data.t === "presence" && onPresence) {
+        onPresence({
+          players: data.d,
+        });
+      }
+    });
+
+    return {
+      socket,
+      send({ position, orientation, velocity }) {
+        clientSocket.out.send(socket, [position, orientation, velocity]);
+      },
+    } satisfies RealtimeSocket;
   })();
 
   sockets.set(socketKey, socketPromise);
