@@ -884,7 +884,7 @@ contract CraftTest is DustTest {
     (address alice, EntityId aliceEntityId, Vec3 playerCoord) = setupAirChunkWithPlayer();
 
     // Test that different stations are tracked separately
-    // First craft with Anvil
+    // First craft with workbench
     {
       ObjectType[] memory inputTypes = new ObjectType[](2);
       inputTypes[0] = ObjectTypes.AnyPlank; // Use OakPlanks
@@ -896,13 +896,13 @@ contract CraftTest is DustTest {
       outputTypes[0] = ObjectTypes.NeptuniumPick;
       uint16[] memory outputAmounts = new uint16[](1);
       outputAmounts[0] = 1;
-      bytes32 recipeId = hashRecipe(ObjectTypes.Anvil, inputTypes, inputAmounts, outputTypes, outputAmounts);
+      bytes32 recipeId = hashRecipe(ObjectTypes.Workbench, inputTypes, inputAmounts, outputTypes, outputAmounts);
 
       TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.OakPlanks, inputAmounts[0]);
       TestInventoryUtils.addObject(aliceEntityId, ObjectTypes.NeptuniumBar, inputAmounts[1]);
 
       Vec3 stationCoord = playerCoord + vec3(1, 0, 0);
-      EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Anvil);
+      EntityId stationEntityId = setObjectAtCoord(stationCoord, ObjectTypes.Workbench);
 
       SlotAmount[] memory inputs = new SlotAmount[](2);
       inputs[0] = SlotAmount({ slot: 0, amount: inputAmounts[0] });
@@ -945,19 +945,19 @@ contract CraftTest is DustTest {
     }
 
     // Check that each station was tracked separately
-    uint256 anvilActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftAnvilMass);
+    uint256 workbenchActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftWorkbenchMass);
     uint256 furnaceActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftFurnaceMass);
 
     uint128 neptuniumPickMass = ObjectPhysics.getMass(ObjectTypes.NeptuniumPick);
     uint128 ironBarMass = ObjectPhysics.getMass(ObjectTypes.IronBar) * 1; // Recipe outputs 1 IronBar
 
-    assertEq(anvilActivity, neptuniumPickMass, "Anvil crafting activity not tracked correctly");
+    assertEq(workbenchActivity, neptuniumPickMass, "Workbench crafting activity not tracked correctly");
     assertEq(furnaceActivity, ironBarMass, "Furnace crafting activity not tracked correctly");
 
     // Other stations should be zero
-    uint256 workbenchActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftWorkbenchMass);
+    uint256 handActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftHandMass);
     uint256 stonecutterActivity = TestPlayerProgressUtils.getProgress(aliceEntityId, ActivityType.CraftStonecutterMass);
-    assertEq(workbenchActivity, 0, "Workbench activity should be zero");
+    assertEq(handActivity, 0, "Hand craft activity should be zero");
     assertEq(stonecutterActivity, 0, "Stonecutter activity should be zero");
   }
 }

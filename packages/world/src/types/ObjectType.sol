@@ -267,7 +267,6 @@ library ObjectTypes {
   ObjectType constant Paper = ObjectType.wrap(387);
   ObjectType constant Stick = ObjectType.wrap(388);
   ObjectType constant Lodestone = ObjectType.wrap(389);
-  ObjectType constant Anvil = ObjectType.wrap(510);
   ObjectType constant WoodenPick = ObjectType.wrap(32768);
   ObjectType constant CopperPick = ObjectType.wrap(32769);
   ObjectType constant IronPick = ObjectType.wrap(32770);
@@ -350,7 +349,7 @@ library ObjectTypeLib {
       // IDs in [256..511]
       {
         let off := sub(self, 256)
-        let bit := and(shr(off, 0x40000000000000000000000000000026ffffffff00007629c00000000ffdffff), 1)
+        let bit := and(shr(off, 0x26ffffffff00007629c00000000ffdffff), 1)
         ok := or(ok, bit)
       }
     }
@@ -454,17 +453,11 @@ library ObjectTypeLib {
   function isStation(ObjectType self) internal pure returns (bool ok) {
     /// @solidity memory-safe-assembly
     assembly {
-      // IDs in [0..255]
+      // IDs in [149..404]
       {
-        let bit := and(shr(self, 0xe0000000000000000000000000000000000000), 1)
+        let off := sub(self, 149)
+        let bit := and(shr(off, 0x800000000000000000000000007), 1)
         ok := bit
-      }
-
-      // IDs in [256..511]
-      {
-        let off := sub(self, 256)
-        let bit := and(shr(off, 0x4000000000000000000000000000000000000000000000000000000000000001), 1)
-        ok := or(ok, bit)
       }
     }
   }
@@ -773,7 +766,7 @@ library ObjectTypeLib {
     return [ObjectTypes.AnyPlank, ObjectTypes.AnyLog, ObjectTypes.AnyLeaf, ObjectTypes.AnyTerracotta];
   }
 
-  function getBlockTypes() internal pure returns (ObjectType[225] memory) {
+  function getBlockTypes() internal pure returns (ObjectType[224] memory) {
     return [
       ObjectTypes.Stone,
       ObjectTypes.Deepslate,
@@ -998,8 +991,7 @@ library ObjectTypeLib {
       ObjectTypes.BrownConcrete,
       ObjectTypes.GreenConcrete,
       ObjectTypes.RedConcrete,
-      ObjectTypes.BlackConcrete,
-      ObjectTypes.Anvil
+      ObjectTypes.BlackConcrete
     ];
   }
 
@@ -1105,9 +1097,8 @@ library ObjectTypeLib {
     ];
   }
 
-  function getStationTypes() internal pure returns (ObjectType[5] memory) {
-    return
-      [ObjectTypes.Workbench, ObjectTypes.Powerstone, ObjectTypes.Furnace, ObjectTypes.Stonecutter, ObjectTypes.Anvil];
+  function getStationTypes() internal pure returns (ObjectType[4] memory) {
+    return [ObjectTypes.Workbench, ObjectTypes.Powerstone, ObjectTypes.Furnace, ObjectTypes.Stonecutter];
   }
 
   function getPickTypes() internal pure returns (ObjectType[6] memory) {
@@ -1795,10 +1786,6 @@ library ObjectTypeLib {
         || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
     }
     if (self == ObjectTypes.Stonecutter) {
-      return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
-        || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
-    }
-    if (self == ObjectTypes.Anvil) {
       return orientation == Orientation.wrap(0) || orientation == Orientation.wrap(1)
         || orientation == Orientation.wrap(40) || orientation == Orientation.wrap(44);
     }

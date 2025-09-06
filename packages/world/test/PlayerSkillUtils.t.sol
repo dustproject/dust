@@ -99,14 +99,8 @@ contract PlayerSkillUtilsTest is DustTest {
   }
 
   function testCraftMultiplierFuzz(uint128 progress, uint8 stationIdx) public {
-    ObjectType[6] memory stations = [
-      ObjectTypes.Workbench,
-      ObjectTypes.Powerstone,
-      ObjectTypes.Furnace,
-      ObjectTypes.Stonecutter,
-      ObjectTypes.Anvil,
-      ObjectTypes.Null
-    ];
+    ObjectType[5] memory stations =
+      [ObjectTypes.Workbench, ObjectTypes.Powerstone, ObjectTypes.Furnace, ObjectTypes.Stonecutter, ObjectTypes.Null];
 
     stationIdx = uint8(bound(stationIdx, 0, stations.length - 1));
     ObjectType station = stations[stationIdx];
@@ -118,7 +112,6 @@ contract PlayerSkillUtilsTest is DustTest {
     else if (station == ObjectTypes.Powerstone) activity = ActivityType.CraftPowerstoneMass;
     else if (station == ObjectTypes.Furnace) activity = ActivityType.CraftFurnaceMass;
     else if (station == ObjectTypes.Stonecutter) activity = ActivityType.CraftStonecutterMass;
-    else if (station == ObjectTypes.Anvil) activity = ActivityType.CraftAnvilMass;
     else activity = ActivityType.CraftHandMass;
 
     _setProgress(aliceEntityId, activity, progress);

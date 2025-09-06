@@ -483,9 +483,6 @@ export const objectNames = [
   "DarkOakFenceGate",
   "MangroveFenceGate",
 
-  // Anvil station
-  "Anvil",
-
   // Non-blocks
   "WoodenPick",
   "CopperPick",
@@ -1277,17 +1274,17 @@ export const objects: readonly ObjectDefinition[] = validateUniqueIds([
   // { name: "MangroveFenceGate", id: 509, mass: 18000000000000000n },
 
   // Anvil crafting station
-  {
-    name: "Anvil",
-    id: 510,
-    mass: 2037000000000000000n,
-    supportedOrientations: [
-      getOrientation("PositiveX"),
-      getOrientation("NegativeX"),
-      getOrientation("PositiveZ"),
-      getOrientation("NegativeZ"),
-    ],
-  },
+  // {
+  //   name: "Anvil",
+  //   id: 510,
+  //   mass: 2037000000000000000n,
+  //   supportedOrientations: [
+  //     getOrientation("PositiveX"),
+  //     getOrientation("NegativeX"),
+  //     getOrientation("PositiveZ"),
+  //     getOrientation("NegativeZ"),
+  //   ],
+  // },
 
   // Non blocks
   { name: "WoodenPick", id: 32768, mass: 22500000000000000n, plankAmount: 5 },
@@ -1691,7 +1688,7 @@ export const categories = {
       "RedConcrete",
       "BlackConcrete",
 
-      "Anvil",
+      // "Anvil",
     ],
   },
 
@@ -1816,7 +1813,7 @@ export const categories = {
   },
 
   Station: {
-    objects: ["Workbench", "Powerstone", "Furnace", "Stonecutter", "Anvil"],
+    objects: ["Workbench", "Powerstone", "Furnace", "Stonecutter"],
   },
 
   Pick: {

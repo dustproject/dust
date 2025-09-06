@@ -41,7 +41,6 @@ export default defineWorld({
       "CraftPowerstoneMass",
       "CraftFurnaceMass",
       "CraftStonecutterMass",
-      "CraftAnvilMass",
       "MinePickMass",
       "MineAxeMass",
       "BuildMass",

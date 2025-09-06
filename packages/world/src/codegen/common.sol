@@ -43,7 +43,6 @@ enum ActivityType {
   CraftPowerstoneMass,
   CraftFurnaceMass,
   CraftStonecutterMass,
-  CraftAnvilMass,
   MinePickMass,
   MineAxeMass,
   BuildMass
