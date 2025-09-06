@@ -6,6 +6,8 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { BaseEntity } from "../src/codegen/tables/BaseEntity.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
+import { ActivityType } from "../src/codegen/common.sol";
+
 import { PlayerBed } from "../src/codegen/tables/PlayerBed.sol";
 
 import { DustTest } from "./DustTest.sol";
@@ -32,7 +34,7 @@ import { ObjectTypes } from "../src/types/ObjectType.sol";
 import { Orientation } from "../src/types/Orientation.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
-import { TestEntityUtils, TestInventoryUtils } from "./utils/TestUtils.sol";
+import { TestEntityUtils, TestInventoryUtils, TestPlayerProgressUtils } from "./utils/TestUtils.sol";
 
 import { Direction } from "../src/codegen/common.sol";
 
@@ -78,6 +80,10 @@ contract MoveTest is DustTest {
     );
 
     assertEnergyFlowedFromPlayerToLocalPool(snapshot);
+
+    // Check player activity tracking - all moves should be walk steps
+    uint256 moveEnergy = TestPlayerProgressUtils.getProgress(playerEntityId, ActivityType.MoveEnergy);
+    assertEq(moveEnergy, numBlocksToMove * MOVE_ENERGY_COST, "Walk steps activity not tracked correctly");
   }
 
   function testMoveOneBlockTerrain() public {

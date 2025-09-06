@@ -3,6 +3,7 @@ pragma solidity >=0.8.24;
 
 import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
 
+// FixedPointMathLib wrapper
 library Math {
   function max(uint256 a, uint256 b) internal pure returns (uint256) {
     return FixedPointMathLib.max(a, b);
@@ -32,5 +33,21 @@ library Math {
     unchecked {
       return int8(((0 < x) ? 1 : 0) - ((x < 0) ? 1 : 0));
     }
+  }
+
+  function mulWad(uint256 x, uint256 y) internal pure returns (uint256) {
+    return FixedPointMathLib.mulWad(x, y);
+  }
+
+  function mulWadUp(uint256 x, uint256 y) internal pure returns (uint256) {
+    return FixedPointMathLib.mulWadUp(x, y);
+  }
+
+  function divWad(uint256 x, uint256 y) internal pure returns (uint256) {
+    return FixedPointMathLib.divWad(x, y);
+  }
+
+  function expWad(int256 x) internal pure returns (int256) {
+    return FixedPointMathLib.expWad(x);
   }
 }

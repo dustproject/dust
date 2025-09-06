@@ -8,12 +8,12 @@ import { InventorySlot } from "../codegen/tables/InventorySlot.sol";
 
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
-import { Vec3 } from "../types/Vec3.sol";
 
-import { addEnergyToLocalPool, burnToolEnergy, decreasePlayerEnergy, updatePlayerEnergy } from "./EnergyUtils.sol";
+import { addEnergyToLocalPool, burnToolEnergy, decreasePlayerEnergy, getEnergyData } from "./EnergyUtils.sol";
 import { InventoryUtils } from "./InventoryUtils.sol";
 import { Math } from "./Math.sol";
 import { OreLib } from "./OreLib.sol";
+import { PlayerSkillUtils } from "./PlayerSkillUtils.sol";
 
 import "../Constants.sol" as Constants;
 
@@ -28,85 +28,109 @@ struct ToolData {
 library ToolUtils {
   function getToolData(EntityId owner, uint16 slot) internal view returns (ToolData memory) {
     EntityId tool = InventorySlot._getEntityId(owner, slot);
-    if (!tool._exists()) {
-      return ToolData(owner, tool, ObjectTypes.Null, slot, 0);
-    }
-
     ObjectType toolType = tool._getObjectType();
-    require(toolType.isTool(), "Inventory item is not a tool");
+
+    if (!toolType.isTool()) {
+      return ToolData(owner, EntityId.wrap(0), ObjectTypes.Null, slot, 0);
+    }
 
     return ToolData(owner, tool, toolType, slot, Mass._getMass(tool));
   }
 
-  function use(ToolData memory toolData, uint128 useMassMax) public returns (uint128) {
-    return use(toolData, useMassMax, Constants.ACTION_MODIFIER_DENOMINATOR, false);
+  function mine(ToolData memory toolData, ObjectType minedType, uint128 useMassMax) public returns (uint128) {
+    bool specialized = (toolData.toolType.isAxe() && minedType.hasAxeMultiplier())
+      || (toolData.toolType.isPick() && minedType.hasPickMultiplier());
+
+    uint256 mul = PlayerSkillUtils.getMineEnergyMultiplierWad(toolData.owner, toolData.toolType);
+
+    return use(toolData, useMassMax, Constants.MINE_ACTION_MODIFIER, specialized, mul);
   }
 
-  function use(ToolData memory toolData, uint128 useMassMax, uint128 actionModifier, bool specialized)
-    public
-    returns (uint128)
-  {
+  function hitPlayer(ToolData memory toolData, uint128 targetEnergyLeft) public returns (uint128) {
+    uint256 mul = PlayerSkillUtils.getHitPlayerEnergyMultiplierWad(toolData.owner);
+    return use(toolData, targetEnergyLeft, Constants.HIT_ACTION_MODIFIER, toolData.toolType.isWhacker(), mul);
+  }
+
+  function hitMachine(ToolData memory toolData, uint128 targetEnergyLeft) public returns (uint128) {
+    uint256 mul = PlayerSkillUtils.getHitMachineEnergyMultiplierWad(toolData.owner);
+    return use(toolData, targetEnergyLeft, Constants.HIT_ACTION_MODIFIER, toolData.toolType.isWhacker(), mul);
+  }
+
+  function till(ToolData memory toolData) public returns (uint128) {
+    uint256 mul = PlayerSkillUtils.getTillEnergyMultiplierWad(toolData.owner);
+    return use(toolData, type(uint128).max, Constants.TILL_ACTION_MODIFIER, false, mul);
+  }
+
+  function use(
+    ToolData memory toolData,
+    uint128 useMassMax,
+    uint128 actionModifier,
+    bool specialized,
+    uint256 energyMultiplierWad
+  ) internal returns (uint128) {
     require(useMassMax != 0, "Cannot perform action with zero mass limit");
 
     // Get caller's current energy and position
-    uint128 callerEnergy = updatePlayerEnergy(toolData.owner).energy;
-    Vec3 callerCoord = toolData.owner._getPosition();
+    uint128 callerEnergy = getEnergyData(toolData.owner).energy;
+    if (callerEnergy == 0) {
+      return 0;
+    }
 
-    // Calculate energy cost for this action
-    uint128 energyCost = getActionEnergyCost(toolData, callerEnergy, useMassMax);
+    // Base energy cost
+    uint128 baseEnergyCost = _getActionEnergyCost(toolData, callerEnergy, useMassMax);
 
-    // If there's an energy cost, apply it
+    // Apply discount
+    uint128 energyCost = uint128(Math.mulWadUp(baseEnergyCost, energyMultiplierWad));
+
+    // Drain energy
     if (energyCost > 0) {
-      // Transfer the player's energy to the local pool
-      uint128 remainingEnergy = decreasePlayerEnergy(toolData.owner, energyCost);
-      addEnergyToLocalPool(callerCoord, energyCost);
+      // Use player specific util to decrease bytecode size
+      decreasePlayerEnergy(toolData.owner, energyCost);
+      addEnergyToLocalPool(toolData.owner._getPosition(), energyCost);
 
-      // If player died, return early
-      if (remainingEnergy == 0) {
+      if (energyCost == callerEnergy) {
+        // Return early if dead
         return 0;
       }
     }
 
-    // Player survived, calculate tool damage
+    // Player survived, calculate tool damage based on remaining budget
     (uint128 actionMassReduction, uint128 toolMassReduction) =
-      getMassReduction(toolData, useMassMax - energyCost, actionModifier, specialized);
-    reduceMass(toolData, toolMassReduction);
+      _getMassReduction(toolData, useMassMax - energyCost, actionModifier, specialized);
 
-    // Return total damage (energy cost + tool damage)
+    _reduceMass(toolData, toolMassReduction);
+
     return energyCost + actionMassReduction;
   }
 
-  function getMassReduction(ToolData memory toolData, uint128 massLeft, uint128 actionModifier, bool specialized)
+  function _getMassReduction(ToolData memory toolData, uint128 massLeft, uint128 actionModifier, bool specialized)
     internal
     view
     returns (uint128, uint128)
   {
-    if (toolData.toolType.isNull() || massLeft == 0) {
+    if (!toolData.tool._exists() || massLeft == 0) {
       return (0, 0);
     }
 
-    uint128 toolMass = ObjectPhysics._getMass(toolData.toolType);
-    uint128 maxToolMassReduction = Math.min(toolMass / 10, toolData.massLeft);
-
     uint128 baseMultiplier =
       toolData.toolType.isWoodenTool() ? Constants.WOODEN_TOOL_BASE_MULTIPLIER : Constants.ORE_TOOL_BASE_MULTIPLIER;
-
     uint128 specializationMultiplier = specialized ? Constants.SPECIALIZATION_MULTIPLIER : 1;
-
     uint256 multiplier = uint256(baseMultiplier) * specializationMultiplier * actionModifier;
 
-    uint256 maxReductionScaled = uint256(maxToolMassReduction) * multiplier;
-    uint256 massLeftScaled = uint256(massLeft) * Constants.ACTION_MODIFIER_DENOMINATOR;
+    uint128 toolMass = ObjectPhysics._getMass(toolData.toolType);
+    uint128 maxToolMassReduction = Math.min(toolMass / 10, toolData.massLeft);
+    uint128 maxActionMassReduction =
+      uint128(Math.divUp(uint256(maxToolMassReduction) * multiplier, Constants.ACTION_MODIFIER_DENOMINATOR));
 
-    if (maxReductionScaled <= massLeftScaled) {
+    if (maxActionMassReduction <= massLeft) {
       // Tool capacity is the limiting factor - use exact tool mass reduction
-      return (uint128(maxReductionScaled / Constants.ACTION_MODIFIER_DENOMINATOR), maxToolMassReduction);
+      return (maxActionMassReduction, maxToolMassReduction);
     }
 
-    return (massLeft, uint128(Math.divUp(massLeftScaled, multiplier)));
+    return (massLeft, uint128(Math.divUp(massLeft * Constants.ACTION_MODIFIER_DENOMINATOR, multiplier)));
   }
 
-  function reduceMass(ToolData memory toolData, uint128 massReduction) internal {
+  function _reduceMass(ToolData memory toolData, uint128 massReduction) private {
     if (!toolData.tool._exists()) {
       return;
     }
@@ -122,8 +146,8 @@ library ToolUtils {
     }
   }
 
-  function getActionEnergyCost(ToolData memory toolData, uint128 callerEnergy, uint128 targetCapacity)
-    internal
+  function _getActionEnergyCost(ToolData memory toolData, uint128 callerEnergy, uint128 targetCapacity)
+    private
     pure
     returns (uint128)
   {

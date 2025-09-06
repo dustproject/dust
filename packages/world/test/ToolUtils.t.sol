@@ -8,6 +8,7 @@ import {
   ORE_TOOL_BASE_MULTIPLIER,
   SPECIALIZATION_MULTIPLIER,
   TOOL_ACTION_ENERGY_COST,
+  WAD,
   WOODEN_TOOL_BASE_MULTIPLIER
 } from "../src/Constants.sol";
 import { EntityId } from "../src/types/EntityId.sol";
@@ -32,20 +33,20 @@ contract ToolUtilsTest is DustTest {
 
     // Add a tool
     TestInventoryUtils.addEntity(alice, ObjectTypes.IronPick);
-    EntityId toolId = InventorySlot.getEntityId(alice, 0);
+    EntityId tool = InventorySlot.getEntityId(alice, 0);
 
     // Get tool data
     ToolData memory toolData = TestToolUtils.getToolData(alice, 0);
     assertEq(toolData.toolType, ObjectTypes.IronPick);
-    assertEq(toolData.tool, toolId);
+    assertEq(toolData.tool, tool);
 
     // Use the tool partially
-    uint128 initialMass = Mass.getMass(toolId);
+    uint128 initialMass = Mass.getMass(tool);
     // Use the tool with a limit larger than energy cost so tool mass is reduced
-    TestToolUtils.use(toolData, TOOL_ACTION_ENERGY_COST + 1);
+    TestToolUtils.use(toolData, TOOL_ACTION_ENERGY_COST + 1, ACTION_MODIFIER_DENOMINATOR, false, WAD);
 
     // Tool should still exist with reduced mass
-    assertLt(Mass.getMass(toolId), initialMass, "Tool mass should be reduced");
+    assertLt(Mass.getMass(tool), initialMass, "Tool mass should be reduced");
     assertEq(TestInventoryUtils.getOccupiedSlotCount(alice), 1, "Tool should still be in inventory");
 
     _verifyInventoryBitmapIntegrity(alice);
@@ -64,6 +65,8 @@ contract ToolUtilsTest is DustTest {
   function testFuzzToolMassReduction(uint8 toolTypeIndex, uint128 actionModifier, uint128 useMassMax, bool specialized)
     public
   {
+    actionModifier = uint128(bound(actionModifier, 1, 100e18));
+
     // Setup player
     (, EntityId alice) = createTestPlayer(vec3(0, 0, 0));
 
@@ -93,7 +96,7 @@ contract ToolUtilsTest is DustTest {
     // Get tool data and use tool
     ToolData memory toolData = TestToolUtils.getToolData(alice, TestInventoryUtils.findEntity(alice, toolEntity));
     uint128 initialToolMass = toolData.massLeft;
-    uint128 actionMassReduction = TestToolUtils.use(toolData, useMassMax, actionModifier, specialized);
+    uint128 actionMassReduction = TestToolUtils.use(toolData, useMassMax, actionModifier, specialized, WAD);
 
     // Check tool state after use
     uint128 actualToolMassReduction = initialToolMass - Mass.getMass(toolEntity);

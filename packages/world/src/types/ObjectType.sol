@@ -746,6 +746,17 @@ library ObjectTypeLib {
     }
   }
 
+  function isCrop(ObjectType self) internal pure returns (bool ok) {
+    /// @solidity memory-safe-assembly
+    assembly {
+      // IDs in [0..255]
+      {
+        let bit := and(shr(self, 0xd00000000000000000000000), 1)
+        ok := bit
+      }
+    }
+  }
+
   // Category getters
   function getNonSolidTypes() internal pure returns (ObjectType[2] memory) {
     return [ObjectTypes.Air, ObjectTypes.Water];
@@ -1693,6 +1704,10 @@ library ObjectTypeLib {
     ];
   }
 
+  function getCropTypes() internal pure returns (ObjectType[3] memory) {
+    return [ObjectTypes.Wheat, ObjectTypes.Melon, ObjectTypes.Pumpkin];
+  }
+
   // Specialized getters
 
   // TODO: these are currently part of the codegen, but we should define them in Solidity and import them here
@@ -1731,7 +1746,7 @@ library ObjectTypeLib {
 
     coords[0] = baseCoord;
 
-    for (uint256 i = 0; i < schemaCoords.length; i++) {
+    for (uint256 i = 0; i < schemaCoords.length; ++i) {
       coords[i + 1] = baseCoord + schemaCoords[i].applyOrientation(orientation);
     }
 

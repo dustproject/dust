@@ -7,6 +7,7 @@ import { addEnergyToLocalPool, decreaseMachineEnergy, updateMachineEnergy } from
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 
 import { HitMachineNotification, notify } from "../utils/NotifUtils.sol";
+import { PlayerProgressUtils } from "../utils/PlayerProgressUtils.sol";
 
 import { RateLimitUtils } from "../utils/RateLimitUtils.sol";
 import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
@@ -29,36 +30,39 @@ contract HitMachineSystem is System {
     caller.activate();
     caller.requireInRange(coord, MAX_HIT_RADIUS);
 
-    (EntityId forceField,) = ForceFieldUtils.getForceField(coord);
-    require(forceField._exists(), "No force field at this location");
+    (EntityId target,) = ForceFieldUtils.getForceField(coord);
+    require(target._exists(), "No force field at this location");
 
-    uint128 energyLeft = updateMachineEnergy(forceField).energy;
+    uint128 energyLeft = updateMachineEnergy(target).energy;
     require(energyLeft > 0, "Cannot hit depleted forcefield");
 
     RateLimitUtils.hitMachine(caller);
 
     ToolData memory toolData = ToolUtils.getToolData(caller, toolSlot);
 
-    // Use tool and get total damage (handles energy costs internally)
-    uint128 damage = toolData.use(energyLeft, HIT_ACTION_MODIFIER, toolData.toolType.isWhacker());
+    // Use tool and get total damage (skill-aware, action-specific)
+    uint128 damage = toolData.hitMachine(energyLeft);
 
     // If caller died (damage == 0), return early
     if (damage == 0) {
       return;
     }
 
-    decreaseMachineEnergy(forceField, damage);
+    decreaseMachineEnergy(target, damage);
 
-    Vec3 forceFieldCoord = forceField._getPosition();
+    Vec3 forceFieldCoord = target._getPosition();
 
     // Add total machine damage to force field's local pool
     addEnergyToLocalPool(forceFieldCoord, damage);
 
+    // Track damage dealt for player activity
+    PlayerProgressUtils.trackHitMachine(caller, damage);
+
     // Don't revert so the program can't prevent hitting
-    forceField._getProgram().hook({ caller: caller, target: forceField, revertOnFailure: false, extraData: "" }).onHit(
-      forceField, toolData.tool, damage
+    target._getProgram().hook({ caller: caller, target: target, revertOnFailure: false, extraData: "" }).onHit(
+      target, toolData.tool, damage
     );
 
-    notify(caller, HitMachineNotification({ machine: forceField, machineCoord: forceFieldCoord }));
+    notify(caller, HitMachineNotification({ machine: target, machineCoord: forceFieldCoord }));
   }
 }
