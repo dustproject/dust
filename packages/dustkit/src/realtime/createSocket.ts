@@ -39,22 +39,6 @@ export function createSocket({
     return socket;
   }
 
-  async function retryOpen(attempt = 0) {
-    // TODO: make retry configurable
-    const minDelay = 50;
-    const maxDelay = 1000 * 30;
-    const maxAttempts = 10;
-    try {
-      return await open();
-    } catch (error) {
-      if (attempt < maxAttempts) {
-        await wait(Math.min(maxDelay, minDelay * 2 ** attempt));
-        return retryOpen(attempt + 1);
-      }
-      throw error;
-    }
-  }
-
   let currentSocket: Promise<WebSocket> | null = null;
   let closed = false;
 
@@ -73,7 +57,7 @@ export function createSocket({
     }
 
     if (!currentSocket) {
-      currentSocket = retryOpen();
+      currentSocket = retry(open);
       const socket = await currentSocket;
       socket.addEventListener("error", () => {
         try {
@@ -133,4 +117,21 @@ async function waitForOpen(socket: WebSocket): Promise<WebSocket> {
 
 function wait(ms: number): Promise<void> {
   return new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
+}
+
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+async function retry(fn: (...args: any[]) => any, attempt = 0) {
+  // TODO: make retry configurable
+  const minDelay = 50;
+  const maxDelay = 1000 * 30;
+  const maxAttempts = 10;
+  try {
+    return await fn();
+  } catch (error) {
+    if (attempt < maxAttempts) {
+      await wait(Math.min(maxDelay, minDelay * 2 ** attempt));
+      return retry(fn, attempt + 1);
+    }
+    throw error;
+  }
 }
