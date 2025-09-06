@@ -16,3 +16,6 @@ out
 .mud
 
 mprocs.log
+
+.env*
+.wrangler
