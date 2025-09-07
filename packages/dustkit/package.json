@@ -25,7 +25,7 @@
     "build:json-schema": "tsx scripts/generate-json-schemas.ts && biome check --write --config-path ../../biome.json json-schemas",
     "build:mud": "mud build && abi-ts --extension .ts",
     "dev": "pnpm run build && tsc --watch",
-    "test": "tsc --noEmit"
+    "test": "tsc --noEmit && vitest"
   },
   "dependencies": {
     "@dust/world": "workspace:*",
@@ -48,7 +48,9 @@
     "@types/debug": "^4.1.12",
     "@types/react": "^19.0.8",
     "react": "^19.0.0",
-    "viem": "2.30.6"
+    "viem": "2.30.6",
+    "vitest": "^3.1.3",
+    "vitest-websocket-mock": "^0.5.0"
   },
   "peerDependencies": {
     "viem": "2.x"
