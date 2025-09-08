@@ -1,5 +1,4 @@
 import type { SessionClient } from "@latticexyz/entrykit/internal";
-import { WebSocket } from "isows";
 import { type Address, type Client, getAddress } from "viem";
 import { getBlock } from "viem/actions";
 import { getAction } from "viem/utils";
@@ -78,6 +77,8 @@ export function getSocket({
   if (socket) return socket;
 
   const socketPromise = (async () => {
+    const WebSocket = await import("isows").then((module) => module.WebSocket);
+
     const session =
       sessionClient && publicClient
         ? await (async () => {
