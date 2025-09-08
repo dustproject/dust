@@ -107,7 +107,6 @@ export function createSocket({
       return () => listeners[type].delete(listener);
     },
     async send(message: string | ArrayBuffer) {
-      console.info("send called, getting socket");
       const socket = await getSocket();
       if (socket.readyState !== socket.OPEN) {
         throw new Error("Socket not open");
