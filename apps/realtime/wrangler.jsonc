@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
 
-  "account_id": "b648025301371dd8f959e9795bd55c5c",
+  "account_id": "1be46f68cdd939e20259ceed1eeb3b34",
   "name": "dust-realtime",
   "main": "src/index.ts",
   "compatibility_date": "2025-08-01",
@@ -22,7 +22,7 @@
 
   "routes": [
     {
-      "pattern": "realtime.dust.computer",
+      "pattern": "realtime.dustproject.org",
       "custom_domain": true
     }
   ],

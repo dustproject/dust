@@ -63,7 +63,7 @@ function getSocketKey(
 }
 
 export function getSocket({
-  url = "wss://realtime.dust.computer/ws",
+  url = "wss://realtime.dustproject.org/ws",
   sessionClient,
   publicClient,
   onPositions,
