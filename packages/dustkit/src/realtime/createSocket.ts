@@ -81,14 +81,18 @@ export function createSocket({
       console.debug("getSocket(): binding listeners");
       socket.addEventListener("error", (event) => {
         console.debug("socket error, closing and getting new one...");
-        try {
-          socket.close();
-        } catch {}
-        getSocket();
+        // try {
+        //   socket.close();
+        // } catch {}
+        if (currentSocket === socketPromise) {
+          getSocket();
+        }
       });
       socket.addEventListener("close", (event) => {
         console.debug("socket close, getting new one...");
-        getSocket();
+        if (currentSocket === socketPromise) {
+          getSocket();
+        }
       });
     }
 

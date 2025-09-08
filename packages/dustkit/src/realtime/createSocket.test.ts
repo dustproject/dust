@@ -105,6 +105,58 @@ describe("createSocket", () => {
     expect(onClose).toHaveBeenCalledTimes(2);
   });
 
+  it("reconnects after server error", async () => {
+    const server = new WS(WS_URL);
+
+    const connect = createConnectSpy();
+    const socket = createSocket({ connect });
+
+    const onOpen = vi.fn();
+    socket.on("open", onOpen);
+
+    const onClose = vi.fn();
+    socket.on("close", onClose);
+
+    const onError = vi.fn();
+    socket.on("error", onError);
+
+    expect(connect).toHaveBeenCalledTimes(1);
+    expect(onOpen).toHaveBeenCalledTimes(0);
+    expect(onClose).toHaveBeenCalledTimes(0);
+    expect(onError).toHaveBeenCalledTimes(0);
+
+    await server.connected;
+
+    expect(connect).toHaveBeenCalledTimes(1);
+    expect(onOpen).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledTimes(0);
+    expect(onError).toHaveBeenCalledTimes(0);
+
+    console.info("test: closing with server error");
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    server.error({ code: 1006, reason: "abrupt", wasClean: false });
+
+    expect(onOpen).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onError).toHaveBeenCalledTimes(1);
+
+    const server2 = new WS(WS_URL);
+    await server2.connected;
+
+    expect(connect).toHaveBeenCalledTimes(2);
+    expect(onOpen).toHaveBeenCalledTimes(2);
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onError).toHaveBeenCalledTimes(1);
+
+    // Comms continue over the reconnected socket
+    await socket.send("after-reconnect");
+    await expect(server2).toReceiveMessage("after-reconnect");
+
+    server2.close();
+    expect(onClose).toHaveBeenCalledTimes(2);
+  });
+
   it("close() shuts down and does NOT reconnect", async () => {
     const server = new WS(WS_URL);
 
