@@ -18,7 +18,7 @@ export type RealtimeSocket = {
   }) => void;
 };
 
-export type GetSocketOptions = {
+export type GetRealtimeSocketOptions = {
   chainId?: number;
   url?: string;
   // TODO: consider making this `channels` arg and then using eventemitter so we can bind any number of listeners to each event type
@@ -62,14 +62,14 @@ function getSocketKey(
   return `${userName}:${channelNames.join(",")}`;
 }
 
-export function getSocket({
+export function getRealtimeSocket({
   chainId,
   url: initialUrl,
   sessionClient,
   publicClient,
   onPositions,
   onPresence,
-}: GetSocketOptions = {}): Promise<RealtimeSocket> {
+}: GetRealtimeSocketOptions = {}): Promise<RealtimeSocket> {
   const url =
     (initialUrl ?? chainId === 690)
       ? "wss://realtime.dustproject.org/ws"

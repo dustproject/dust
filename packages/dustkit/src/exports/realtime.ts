@@ -1,4 +1,7 @@
-export { getSocket, RealtimeSocket } from "../realtime/getSocket";
+export {
+  getRealtimeSocket,
+  RealtimeSocket,
+} from "../realtime/getRealtimeSocket";
 
 export { $ } from "../realtime/common";
 
