@@ -1,5 +1,5 @@
 import type { SessionClient } from "@latticexyz/entrykit/internal";
-import { type Address, type Client, getAddress } from "viem";
+import { type Address, type Client, type OneOf, getAddress } from "viem";
 import { getBlock } from "viem/actions";
 import { getAction } from "viem/utils";
 import type { channelsSchema } from "./clientSetup";
@@ -19,6 +19,7 @@ export type RealtimeSocket = {
 };
 
 export type GetSocketOptions = {
+  chainId?: number;
   url?: string;
   // TODO: consider making this `channels` arg and then using eventemitter so we can bind any number of listeners to each event type
   onPositions?: (data: {
@@ -62,12 +63,18 @@ function getSocketKey(
 }
 
 export function getSocket({
-  url = "wss://realtime.dustproject.org/ws",
+  chainId,
+  url: initialUrl,
   sessionClient,
   publicClient,
   onPositions,
   onPresence,
 }: GetSocketOptions = {}): Promise<RealtimeSocket> {
+  const url =
+    (initialUrl ?? chainId === 690)
+      ? "wss://realtime.dustproject.org/ws"
+      : "ws://localhost:8787/ws";
+
   const channels: typeof channelsSchema.infer = [];
   if (onPositions) channels.push("positions");
   if (onPresence) channels.push("presence");
