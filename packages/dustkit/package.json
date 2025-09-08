@@ -18,7 +18,7 @@
       "realtime": ["./dist/src/exports/realtime.d.ts"]
     }
   },
-  "files": ["dist", "json-schemas", "contracts", "out"],
+  "files": ["dist", "json-schemas", "contracts", "out", "!**/*.test.*"],
   "scripts": {
     "build": "pnpm run build:json-schema && pnpm run build:mud && pnpm run build:js",
     "build:js": "tsc",
