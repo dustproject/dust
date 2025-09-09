@@ -12,7 +12,7 @@ import { Migration } from "../Migration.sol";
 
 contract MigrateRecipes is Migration {
   function getOutputPath() internal pure override returns (string memory) {
-    return getMigrationOutputPath("3-migrate-recipes");
+    return getMigrationOutputPath("4-migrate-recipes");
   }
 
   function runMigration() internal override {
