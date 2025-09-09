@@ -33,6 +33,21 @@ enum RateLimitType {
   Work
 }
 
+enum ActivityType {
+  HitPlayerDamage,
+  HitMachineDamage,
+  MoveEnergy,
+  MoveFallEnergy,
+  CraftHandMass,
+  CraftWorkbenchMass,
+  CraftPowerstoneMass,
+  CraftFurnaceMass,
+  CraftStonecutterMass,
+  MinePickMass,
+  MineAxeMass,
+  BuildMass
+}
+
 enum Direction {
   PositiveX,
   NegativeX,

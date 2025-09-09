@@ -5,18 +5,8 @@ import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 
 import { TerrainLib } from "../systems/libraries/TerrainLib.sol";
-import { ChunkCommitment } from "./Vec3Storage.sol";
 
-import {
-  CHUNK_COMMIT_EXPIRY_BLOCKS,
-  MAX_COAL,
-  MAX_COPPER,
-  MAX_DIAMOND,
-  MAX_GOLD,
-  MAX_IRON,
-  MAX_NEPTUNIUM,
-  PRECISION_MULTIPLIER
-} from "../Constants.sol";
+import { WAD } from "../Constants.sol";
 import { ObjectAmount, ObjectType, ObjectTypeLib, ObjectTypes } from "../types/ObjectType.sol";
 
 import { BiomesLib } from "./BiomesLib.sol";
@@ -39,7 +29,7 @@ library OreLib {
 
     for (uint256 i = 0; i < oreTypes.length; i++) {
       (uint256 cap, uint256 remaining) = NatureLib.getCapAndRemaining(oreTypes[i]);
-      weights[i] = biomeMultipliers[i] * remaining * PRECISION_MULTIPLIER / cap;
+      weights[i] = biomeMultipliers[i] * remaining * WAD / cap;
     }
 
     // Select ore based on availability
@@ -47,8 +37,12 @@ library OreLib {
   }
 
   function burnOre(ObjectType self, uint256 amount) internal {
+    uint256 resourceCount = ResourceCount._get(self);
+
+    require(resourceCount >= amount, "Not enough resources to burn");
     // This increases the availability of the ores being burned
-    ResourceCount._set(self, ResourceCount._get(self) - amount);
+    ResourceCount._set(self, resourceCount - amount);
+
     // This allows the same amount of ores to respawn
     BurnedResourceCount._set(ObjectTypes.UnrevealedOre, BurnedResourceCount._get(ObjectTypes.UnrevealedOre) + amount);
   }

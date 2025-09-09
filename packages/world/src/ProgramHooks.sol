@@ -6,7 +6,7 @@ import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 
 import { SAFE_PROGRAM_GAS } from "./Constants.sol";
 import { EntityId } from "./types/EntityId.sol";
-import { ObjectAmount, ObjectType } from "./types/ObjectType.sol";
+import { ObjectType } from "./types/ObjectType.sol";
 import { Orientation } from "./types/Orientation.sol";
 import { ProgramId } from "./types/ProgramId.sol";
 import { Vec3 } from "./types/Vec3.sol";

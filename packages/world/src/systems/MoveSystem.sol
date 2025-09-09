@@ -26,7 +26,7 @@ contract MoveSystem is System {
     Vec3 coord = caller._getPosition();
 
     Vec3[] memory newCoords = new Vec3[](directions.length);
-    for (uint256 i = 0; i < directions.length; i++) {
+    for (uint256 i = 0; i < directions.length; ++i) {
       newCoords[i] = (i == 0 ? coord : newCoords[i - 1]).transform(directions[i]);
     }
 
