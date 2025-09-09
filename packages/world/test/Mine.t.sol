@@ -879,7 +879,7 @@ contract MineTest is DustTest {
       world.mine(aliceEntityId, stoneCoord, slot, "");
 
       (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(stoneCoord);
-      // Calculate expected multiplier: wooden base (3) * mine modifier (1) * specialization (3) = 9
+      // Calculate expected multiplier: wooden base (10) * mine modifier (1) * specialization (3) = 9
       uint128 expectedMultiplier = WOODEN_TOOL_BASE_MULTIPLIER * MINE_ACTION_MODIFIER * SPECIALIZATION_MULTIPLIER;
       uint128 massReduction = TOOL_ACTION_ENERGY_COST + pickMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
       uint128 expectedMass = stoneMass - massReduction;
@@ -907,7 +907,7 @@ contract MineTest is DustTest {
       world.mine(aliceEntityId, logCoord, slot, "");
 
       (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(logCoord);
-      // Calculate expected multiplier: wooden base (3) * mine modifier (1) * specialization (3) = 9
+      // Calculate expected multiplier: wooden base (10) * mine modifier (1) * specialization (3) = 9
       uint128 expectedMultiplier = WOODEN_TOOL_BASE_MULTIPLIER * MINE_ACTION_MODIFIER * SPECIALIZATION_MULTIPLIER;
       uint128 massReduction = TOOL_ACTION_ENERGY_COST + axeMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
       uint128 expectedMass = logMass - massReduction;
@@ -936,7 +936,7 @@ contract MineTest is DustTest {
       world.mine(aliceEntityId, stoneCoord, slot, "");
 
       (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(stoneCoord);
-      // Calculate expected multiplier: wooden base (3) * mine modifier (1) * no specialization = 3
+      // Calculate expected multiplier: wooden base (10) * mine modifier (1) * no specialization = 3
       uint128 expectedMultiplier = WOODEN_TOOL_BASE_MULTIPLIER * MINE_ACTION_MODIFIER;
       uint128 maxToolMassReduction = axeMass / 10;
       uint128 massReduction = uint128(
