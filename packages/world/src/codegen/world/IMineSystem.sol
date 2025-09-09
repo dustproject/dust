@@ -22,6 +22,4 @@ interface IMineSystem {
   function mineUntilDestroyed(EntityId caller, Vec3 coord, uint16 toolSlot, bytes calldata extraData) external;
 
   function mineUntilDestroyed(EntityId caller, Vec3 coord, bytes calldata extraData) external;
-
-  function _removeBlock(EntityId entityId, ObjectType objectType, Vec3 coord) external;
 }

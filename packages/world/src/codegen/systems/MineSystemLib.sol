@@ -77,10 +77,6 @@ library MineSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).mineUntilDestroyed(caller, coord, extraData);
   }
 
-  function _removeBlock(MineSystemType self, EntityId entityId, ObjectType objectType, Vec3 coord) internal {
-    return CallWrapper(self.toResourceId(), address(0))._removeBlock(entityId, objectType, coord);
-  }
-
   function getRandomOreType(CallWrapper memory self, Vec3 coord) internal view returns (ObjectType __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert MineSystemLib_CallingFromRootSystem();
@@ -175,19 +171,6 @@ library MineSystemLib {
       : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
-  function _removeBlock(CallWrapper memory self, EntityId entityId, ObjectType objectType, Vec3 coord) internal {
-    // if the contract calling this function is a root system, it should use `callAsRoot`
-    if (address(_world()) == address(this)) revert MineSystemLib_CallingFromRootSystem();
-
-    bytes memory systemCall = abi.encodeCall(
-      __removeBlock_EntityId_ObjectType_Vec3._removeBlock,
-      (entityId, objectType, coord)
-    );
-    self.from == address(0)
-      ? _world().call(self.systemId, systemCall)
-      : _world().callFrom(self.from, self.systemId, systemCall);
-  }
-
   function mine(
     RootCallWrapper memory self,
     EntityId caller,
@@ -249,14 +232,6 @@ library MineSystemLib {
     SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
-  function _removeBlock(RootCallWrapper memory self, EntityId entityId, ObjectType objectType, Vec3 coord) internal {
-    bytes memory systemCall = abi.encodeCall(
-      __removeBlock_EntityId_ObjectType_Vec3._removeBlock,
-      (entityId, objectType, coord)
-    );
-    SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
-  }
-
   function callFrom(MineSystemType self, address from) internal pure returns (CallWrapper memory) {
     return CallWrapper(self.toResourceId(), from);
   }
@@ -313,10 +288,6 @@ interface _mineUntilDestroyed_EntityId_Vec3_uint16_bytes {
 
 interface _mineUntilDestroyed_EntityId_Vec3_bytes {
   function mineUntilDestroyed(EntityId caller, Vec3 coord, bytes memory extraData) external;
-}
-
-interface __removeBlock_EntityId_ObjectType_Vec3 {
-  function _removeBlock(EntityId entityId, ObjectType objectType, Vec3 coord) external;
 }
 
 using MineSystemLib for MineSystemType global;

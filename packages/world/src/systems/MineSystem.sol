@@ -241,7 +241,7 @@ contract MineSystem is System {
     _cleanupEntity(ctx.caller, ctx.mined, ctx.objectType, baseCoord);
   }
 
-  function _removeBlock(EntityId entityId, ObjectType objectType, Vec3 coord) public {
+  function _removeBlock(EntityId entityId, ObjectType objectType, Vec3 coord) internal {
     // If object being mined is seed, no need to check above entities
     if (objectType.isGrowable()) {
       _removeGrowable(entityId, objectType, coord);
