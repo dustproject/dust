@@ -1,0 +1,44 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+
+  "account_id": "1be46f68cdd939e20259ceed1eeb3b34",
+  "name": "dust-realtime",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-08-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "observability": {
+    "enabled": true
+  },
+
+  "vars": {
+    // nearest to France where other DUST servers are
+    "REGION_HINT": "weur",
+    "SHARDS": "8",
+    "CHAIN_ID": "690",
+    "WORLD_ADDRESS": "0x253eb85B3C953bFE3827CC14a151262482E7189C",
+    "RPC_HTTP_URL": "https://rpc.redstonechain.com"
+  },
+
+  "routes": [
+    {
+      "pattern": "realtime.dustproject.org",
+      "custom_domain": true
+    }
+  ],
+
+  "durable_objects": {
+    "bindings": [
+      { "name": "Hub", "class_name": "HubActor" },
+      { "name": "Shard", "class_name": "ShardActor" }
+    ]
+  },
+
+  // Initial migration is required on first deploy to create the DO classes
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["HubActor", "ShardActor"]
+    }
+  ]
+}
