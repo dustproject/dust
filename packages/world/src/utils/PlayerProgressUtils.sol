@@ -22,17 +22,16 @@ library PlayerProgressUtils {
     return uint128(Math.max(current, _floor(accumulated)));
   }
 
-  // Mining tracking - with tool specialization and crop detection
+  // Mining tracking
   function trackMine(EntityId player, uint128 massReduced, ObjectType toolType) internal {
     ActivityType activityType;
 
-    // Check if we're mining a crop
     if (toolType.isAxe()) {
       activityType = ActivityType.MineAxeMass;
     } else if (toolType.isPick()) {
       activityType = ActivityType.MinePickMass;
     } else {
-      // Bare hands / whacker mining of non-crops - not tracked for now
+      // Bare hands / whacker not tracked for now
       return;
     }
     _trackProgress(player, activityType, massReduced);

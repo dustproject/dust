@@ -1,5 +1,14 @@
 # Changelog
 
+## 2025-09-09
+
+- Body progression
+    - Progress tracking for crafting, mining, building and moving
+    - Progress decays with inactivity up to 1/3 of the accumulated progress
+    - Both current progress and accumulated progress are halved on death
+    - Energy discount of up to 30% is applied depending on progress
+- Wooden tools now require a station to craft
+
 ## 2025-09-01
 
 - Added ability to hit players
