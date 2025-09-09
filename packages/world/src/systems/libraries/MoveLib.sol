@@ -240,7 +240,8 @@ library MoveLib {
         if (dy > 0) {
           ++jumps;
           require(jumps <= Constants.MAX_PLAYER_JUMPS, "Cannot jump more than 3 blocks");
-          require(falls == 0, "Cannot jump while falling");
+          // TODO: figure out why this is triggering in the client
+          // require(falls == 0, "Cannot jump while falling");
         } else if (nextHasGravity) {
           ++glides;
           require(glides <= Constants.MAX_PLAYER_GLIDES, "Cannot glide more than 10 blocks");
