@@ -4,7 +4,7 @@ pragma solidity >=0.8.24;
 import { Math } from "./Math.sol";
 
 import {
-  SKILL_BUILD_ENERGY_TO_MAX,
+  SKILL_BUILD_MASS_TO_MAX,
   SKILL_CRAFT_MASS_ENERGY_TO_MAX,
   SKILL_ENERGY_MAX_DISCOUNT_WAD,
   SKILL_FALL_ENERGY_TO_MAX,
@@ -93,7 +93,7 @@ library PlayerSkillUtils {
   function getBuildEnergyMultiplierWad(EntityId player) internal view returns (uint256) {
     return getEnergyMultiplierWad({
       progress: Tracking.getProgress(player, ActivityType.BuildMass),
-      progressCap: SKILL_BUILD_ENERGY_TO_MAX
+      progressCap: SKILL_BUILD_MASS_TO_MAX
     });
   }
 
