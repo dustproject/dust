@@ -18,6 +18,8 @@ interface ISpawnSystem {
 
   function isValidSpawn(Vec3 spawnCoord) external view returns (bool);
 
+  function testSpawn() external pure;
+
   function randomSpawn(uint256 blockNumber, Vec3 spawnCoord) external returns (EntityId);
 
   function spawn(

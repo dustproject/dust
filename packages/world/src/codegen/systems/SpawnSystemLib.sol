@@ -59,6 +59,10 @@ library SpawnSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).isValidSpawn(spawnCoord);
   }
 
+  function testSpawn(SpawnSystemType self) internal view {
+    return CallWrapper(self.toResourceId(), address(0)).testSpawn();
+  }
+
   function randomSpawn(
     SpawnSystemType self,
     uint256 blockNumber,
@@ -143,6 +147,19 @@ library SpawnSystemLib {
     if (result.length != 0) {
       return abi.decode(result, (bool));
     }
+  }
+
+  function testSpawn(CallWrapper memory self) internal view {
+    // if the contract calling this function is a root system, it should use `callAsRoot`
+    if (address(_world()) == address(this)) revert SpawnSystemLib_CallingFromRootSystem();
+
+    bytes memory systemCall = abi.encodeCall(_testSpawn.testSpawn, ());
+    bytes memory worldCall = self.from == address(0)
+      ? abi.encodeCall(IWorldCall.call, (self.systemId, systemCall))
+      : abi.encodeCall(IWorldCall.callFrom, (self.from, self.systemId, systemCall));
+    (bool success, bytes memory returnData) = address(_world()).staticcall(worldCall);
+    if (!success) revertWithBytes(returnData);
+    abi.decode(returnData, (bytes));
   }
 
   function randomSpawn(
@@ -269,6 +286,10 @@ interface _getRandomSpawnChunk_uint256_address {
 
 interface _isValidSpawn_Vec3 {
   function isValidSpawn(Vec3 spawnCoord) external;
+}
+
+interface _testSpawn {
+  function testSpawn() external;
 }
 
 interface _randomSpawn_uint256_Vec3 {
