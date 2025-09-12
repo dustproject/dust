@@ -41,7 +41,7 @@ function _getChainConfig() view returns (Config memory) {
   // Set indexer URL based on chain
   string memory indexerUrl;
   if (block.chainid == 690) {
-    indexerUrl = "https://indexer.mud.redstonechain.com/q";
+    indexerUrl = "https://indexer.alpha.dustproject.org/q";
   } else {
     revert("Chain ID not supported for indexer URL");
   }
