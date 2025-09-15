@@ -46,7 +46,7 @@ library RateLimitUtils {
     uint128 currentUnits = RateLimitUnits._get(entity, block.number, limitType);
     uint128 newUnits = currentUnits + unitCost;
 
-    require(newUnits <= MAX_RATE_LIMIT_UNITS_PER_BLOCK, "Rate limit exceeded");
+    // require(newUnits <= MAX_RATE_LIMIT_UNITS_PER_BLOCK, "Rate limit exceeded");
 
     RateLimitUnits._set(entity, block.number, limitType, newUnits);
   }
