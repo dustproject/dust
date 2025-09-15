@@ -9,10 +9,12 @@ import { IWorld } from "../src/codegen/world/IWorld.sol";
 
 import { DustScript } from "./DustScript.sol";
 
+import { Vec3, vec3 } from "../src/types/Vec3.sol";
 import { RegisterSelectorHook } from "./RegisterSelectorHook.sol";
 import { initObjects } from "./initObjects.sol";
 import { initRecipes } from "./initRecipes.sol";
 import { initTerrain } from "./initTerrain.sol";
+import { console } from "forge-std/console.sol";
 
 contract PostDeploy is DustScript {
   function run(address worldAddress) external {
@@ -28,6 +30,10 @@ contract PostDeploy is DustScript {
     initTerrain();
     initObjects();
     initRecipes();
+
+    // uint256 blockNumber = block.number - 5;
+    // Vec3 spawnCoord = IWorld(worldAddress).getRandomSpawnCoord(blockNumber, msg.sender);
+    // IWorld(worldAddress).randomSpawn(blockNumber, spawnCoord);
 
     vm.stopBroadcast();
   }
