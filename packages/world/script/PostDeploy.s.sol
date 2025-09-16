@@ -10,6 +10,7 @@ import { console } from "forge-std/console.sol";
 
 import { DustScript } from "./DustScript.sol";
 
+import { DrandBeacon as DrandBeaconTable } from "../src/codegen/tables/DrandBeacon.sol";
 import { RegisterSelectorHook } from "./RegisterSelectorHook.sol";
 import { initObjects } from "./initObjects.sol";
 import { initRecipes } from "./initRecipes.sol";
@@ -43,6 +44,7 @@ contract PostDeploy is DustScript {
 
     DrandBeacon beacon = new DrandBeacon(publicKey_, genesisTimestamp_, period_);
     console.log("DrandBeacon deployed at:", address(beacon));
+    DrandBeaconTable.setBeacon(address(beacon));
 
     vm.stopBroadcast();
   }

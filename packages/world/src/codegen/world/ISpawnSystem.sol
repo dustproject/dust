@@ -12,13 +12,13 @@ import { EntityId } from "../../types/EntityId.sol";
  * @dev This interface is automatically generated from the corresponding system contract. Do not edit manually.
  */
 interface ISpawnSystem {
-  function getRandomSpawnCoord(uint256 blockNumber, address sender) external view returns (Vec3 spawnCoord);
+  function getRandomSpawnCoord(uint256 randomness, address sender) external view returns (Vec3 spawnCoord);
 
-  function getRandomSpawnChunk(uint256 blockNumber, address sender) external view returns (Vec3 chunk);
+  function getRandomSpawnChunk(uint256 randomness, address sender) external view returns (Vec3 chunk);
 
   function isValidSpawn(Vec3 spawnCoord) external view returns (bool);
 
-  function randomSpawn(uint256 blockNumber, Vec3 spawnCoord) external returns (EntityId);
+  function randomSpawn(uint256[2] calldata signature, uint256 roundNumber, Vec3 spawnCoord) external returns (EntityId);
 
   function spawn(
     EntityId spawnTile,
