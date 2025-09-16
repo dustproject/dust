@@ -20,6 +20,8 @@ interface ISpawnSystem {
 
   function randomSpawn(uint256[2] calldata signature, uint256 roundNumber, Vec3 spawnCoord) external returns (EntityId);
 
+  function randomSpawn(uint256 blockNumber, Vec3 spawnCoord) external returns (EntityId);
+
   function spawn(
     EntityId spawnTile,
     Vec3 spawnCoord,

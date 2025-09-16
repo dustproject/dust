@@ -149,6 +149,11 @@ contract SpawnSystem is System {
     return _spawnPlayer(spawnCoord, spawnEnergy);
   }
 
+  /// @notice deprecated
+  function randomSpawn(uint256 blockNumber, Vec3 spawnCoord) public returns (EntityId) {
+    revert("Deprecated, use randomSpawn with drand signature");
+  }
+
   function spawn(EntityId spawnTile, Vec3 spawnCoord, uint128 spawnEnergy, bytes memory extraData)
     public
     returns (EntityId)

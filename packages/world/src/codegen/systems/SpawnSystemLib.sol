@@ -68,6 +68,14 @@ library SpawnSystemLib {
     return CallWrapper(self.toResourceId(), address(0)).randomSpawn(signature, roundNumber, spawnCoord);
   }
 
+  function randomSpawn(
+    SpawnSystemType self,
+    uint256 blockNumber,
+    Vec3 spawnCoord
+  ) internal returns (EntityId __auxRet0) {
+    return CallWrapper(self.toResourceId(), address(0)).randomSpawn(blockNumber, spawnCoord);
+  }
+
   function spawn(
     SpawnSystemType self,
     EntityId spawnTile,
@@ -169,6 +177,25 @@ library SpawnSystemLib {
     }
   }
 
+  function randomSpawn(
+    CallWrapper memory self,
+    uint256 blockNumber,
+    Vec3 spawnCoord
+  ) internal returns (EntityId __auxRet0) {
+    // if the contract calling this function is a root system, it should use `callAsRoot`
+    if (address(_world()) == address(this)) revert SpawnSystemLib_CallingFromRootSystem();
+
+    bytes memory systemCall = abi.encodeCall(_randomSpawn_uint256_Vec3.randomSpawn, (blockNumber, spawnCoord));
+
+    bytes memory result = self.from == address(0)
+      ? _world().call(self.systemId, systemCall)
+      : _world().callFrom(self.from, self.systemId, systemCall);
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
+  }
+
   function spawn(
     CallWrapper memory self,
     EntityId spawnTile,
@@ -203,6 +230,20 @@ library SpawnSystemLib {
       _randomSpawn_uint2560x5b325d_uint256_Vec3.randomSpawn,
       (signature, roundNumber, spawnCoord)
     );
+
+    bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
+    // skip decoding an empty result, which can happen after expectRevert
+    if (result.length != 0) {
+      return abi.decode(result, (EntityId));
+    }
+  }
+
+  function randomSpawn(
+    RootCallWrapper memory self,
+    uint256 blockNumber,
+    Vec3 spawnCoord
+  ) internal returns (EntityId __auxRet0) {
+    bytes memory systemCall = abi.encodeCall(_randomSpawn_uint256_Vec3.randomSpawn, (blockNumber, spawnCoord));
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
     // skip decoding an empty result, which can happen after expectRevert
@@ -282,6 +323,10 @@ interface _isValidSpawn_Vec3 {
 
 interface _randomSpawn_uint2560x5b325d_uint256_Vec3 {
   function randomSpawn(uint256[2] memory signature, uint256 roundNumber, Vec3 spawnCoord) external;
+}
+
+interface _randomSpawn_uint256_Vec3 {
+  function randomSpawn(uint256 blockNumber, Vec3 spawnCoord) external;
 }
 
 interface _spawn_EntityId_Vec3_uint128_bytes {
