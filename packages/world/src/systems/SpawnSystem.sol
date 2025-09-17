@@ -6,7 +6,6 @@ import { LibPRNG } from "solady/utils/LibPRNG.sol";
 
 import { Energy, EnergyData } from "../codegen/tables/Energy.sol";
 
-import { DrandBeacon } from "../codegen/tables/DrandBeacon.sol";
 import { SurfaceChunkCount } from "../codegen/tables/SurfaceChunkCount.sol";
 
 import { SurfaceChunkByIndex } from "../utils/Vec3Storage.sol";
@@ -33,8 +32,8 @@ import { SpawnNotification, notify } from "../utils/NotifUtils.sol";
 import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { MoveLib } from "./libraries/MoveLib.sol";
 
-import { IDrandBeacon } from "../IDrandBeacon.sol";
 import { EntityId } from "../types/EntityId.sol";
+import { DrandData } from "../utils/DrandUtils.sol";
 
 contract SpawnSystem is System {
   using LibPRNG for LibPRNG.PRNG;
@@ -112,30 +111,11 @@ contract SpawnSystem is System {
     return true;
   }
 
-  function randomSpawn(uint256[2] calldata signature, uint256 roundNumber, Vec3 spawnCoord) public returns (EntityId) {
+  function randomSpawn(DrandData calldata drand, Vec3 spawnCoord) public returns (EntityId) {
     checkWorldStatus();
-    address beacon = DrandBeacon._getBeacon();
-    require(beacon != address(0), "Drand beacon not set");
-    uint256 roundTimestamp = IDrandBeacon(beacon).genesisTimestamp() + IDrandBeacon(beacon).period() * roundNumber;
-    require(
-      block.timestamp > roundTimestamp && block.timestamp - roundTimestamp <= SPAWN_TIME_RANGE,
-      "Can only choose past 1 minute"
-    );
+    drand.verifyWithinTimeRange(SPAWN_TIME_RANGE);
 
-    IDrandBeacon(beacon).verifyBeaconRound(roundNumber, signature);
-
-    // Derive randomness from the signature
-    uint256 randomness = uint256(
-      keccak256(
-        abi.encode(
-          signature[0], // entropy
-          signature[1], // entropy
-          block.chainid, // domain separator
-          _msgSender() // salt
-        )
-      )
-    );
-    spawnCoord = getRandomSpawnCoord(randomness, _msgSender());
+    spawnCoord = getRandomSpawnCoord(drand.getRandomness(), _msgSender());
 
     (EntityId forceField,) = ForceFieldUtils.getForceField(spawnCoord);
     require(!forceField._exists(), "Cannot spawn in force field");

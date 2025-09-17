@@ -5,6 +5,7 @@ pragma solidity >=0.8.24;
 
 import { SpawnSystem } from "../../systems/SpawnSystem.sol";
 import { Vec3 } from "../../types/Vec3.sol";
+import { DrandData } from "../../utils/DrandUtils.sol";
 import { EntityId } from "../../types/EntityId.sol";
 import { revertWithBytes } from "@latticexyz/world/src/revertWithBytes.sol";
 import { IWorldCall } from "@latticexyz/world/src/IWorldKernel.sol";
@@ -61,11 +62,10 @@ library SpawnSystemLib {
 
   function randomSpawn(
     SpawnSystemType self,
-    uint256[2] memory signature,
-    uint256 roundNumber,
+    DrandData memory drand,
     Vec3 spawnCoord
   ) internal returns (EntityId __auxRet0) {
-    return CallWrapper(self.toResourceId(), address(0)).randomSpawn(signature, roundNumber, spawnCoord);
+    return CallWrapper(self.toResourceId(), address(0)).randomSpawn(drand, spawnCoord);
   }
 
   function randomSpawn(
@@ -156,17 +156,13 @@ library SpawnSystemLib {
 
   function randomSpawn(
     CallWrapper memory self,
-    uint256[2] memory signature,
-    uint256 roundNumber,
+    DrandData memory drand,
     Vec3 spawnCoord
   ) internal returns (EntityId __auxRet0) {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert SpawnSystemLib_CallingFromRootSystem();
 
-    bytes memory systemCall = abi.encodeCall(
-      _randomSpawn_uint2560x5b325d_uint256_Vec3.randomSpawn,
-      (signature, roundNumber, spawnCoord)
-    );
+    bytes memory systemCall = abi.encodeCall(_randomSpawn_DrandData_Vec3.randomSpawn, (drand, spawnCoord));
 
     bytes memory result = self.from == address(0)
       ? _world().call(self.systemId, systemCall)
@@ -222,14 +218,10 @@ library SpawnSystemLib {
 
   function randomSpawn(
     RootCallWrapper memory self,
-    uint256[2] memory signature,
-    uint256 roundNumber,
+    DrandData memory drand,
     Vec3 spawnCoord
   ) internal returns (EntityId __auxRet0) {
-    bytes memory systemCall = abi.encodeCall(
-      _randomSpawn_uint2560x5b325d_uint256_Vec3.randomSpawn,
-      (signature, roundNumber, spawnCoord)
-    );
+    bytes memory systemCall = abi.encodeCall(_randomSpawn_DrandData_Vec3.randomSpawn, (drand, spawnCoord));
 
     bytes memory result = SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
     // skip decoding an empty result, which can happen after expectRevert
@@ -321,8 +313,8 @@ interface _isValidSpawn_Vec3 {
   function isValidSpawn(Vec3 spawnCoord) external;
 }
 
-interface _randomSpawn_uint2560x5b325d_uint256_Vec3 {
-  function randomSpawn(uint256[2] memory signature, uint256 roundNumber, Vec3 spawnCoord) external;
+interface _randomSpawn_DrandData_Vec3 {
+  function randomSpawn(DrandData memory drand, Vec3 spawnCoord) external;
 }
 
 interface _randomSpawn_uint256_Vec3 {

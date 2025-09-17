@@ -24,7 +24,7 @@ uint256 constant SAFE_PROGRAM_GAS = 1_000_000;
 
 uint256 constant CHUNK_COMMIT_EXPIRY_BLOCKS = 256;
 uint256 constant CHUNK_COMMIT_HALF_WIDTH = 2;
-uint256 constant RESPAWN_ORE_BLOCK_RANGE = 10;
+uint256 constant RESPAWN_RESOURCE_TIME_RANGE = 30 seconds;
 uint8 constant MAX_FLUID_LEVEL = 15; // Maximum fluid level for water and lava
 
 uint128 constant BLOCK_TIME = 2 seconds;

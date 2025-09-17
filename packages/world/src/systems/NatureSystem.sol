@@ -14,7 +14,7 @@ import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { ChunkCommitment, ResourcePosition } from "../utils/Vec3Storage.sol";
 
-import { CHUNK_COMMIT_EXPIRY_BLOCKS, CHUNK_COMMIT_HALF_WIDTH, RESPAWN_ORE_BLOCK_RANGE } from "../Constants.sol";
+import { CHUNK_COMMIT_EXPIRY_BLOCKS, CHUNK_COMMIT_HALF_WIDTH, RESPAWN_RESOURCE_TIME_RANGE } from "../Constants.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType } from "../types/ObjectType.sol";
 import { ObjectTypes } from "../types/ObjectType.sol";
@@ -22,6 +22,7 @@ import { ObjectTypes } from "../types/ObjectType.sol";
 import { NatureLib } from "../utils/NatureLib.sol";
 
 import { Vec3 } from "../types/Vec3.sol";
+import { DrandData } from "../utils/DrandUtils.sol";
 
 contract NatureSystem is System {
   function chunkCommit(EntityId caller, Vec3 chunkCoord) public {
@@ -38,17 +39,14 @@ contract NatureSystem is System {
     ChunkCommitment._set(chunkCoord, block.number + 1);
   }
 
-  function respawnResource(uint256 blockNumber, ObjectType resourceType) public {
-    require(
-      blockNumber < block.number && blockNumber >= block.number - RESPAWN_ORE_BLOCK_RANGE,
-      "Can only choose past 10 blocks"
-    );
+  function respawnResource(DrandData calldata drand, ObjectType resourceType) public {
+    drand.verifyWithinTimeRange(RESPAWN_RESOURCE_TIME_RANGE);
 
     uint256 burned = BurnedResourceCount._get(resourceType);
     require(burned > 0, "No resources available for respawn");
 
     uint256 collected = ResourceCount._get(resourceType);
-    uint256 resourceIdx = uint256(blockhash(blockNumber)) % collected;
+    uint256 resourceIdx = drand.getRandomness() % collected;
 
     Vec3 resourceCoord = ResourcePosition._get(resourceType, resourceIdx);
 
@@ -70,6 +68,11 @@ contract NatureSystem is System {
 
     // This is enough to respawn the resource block, as it will be read from the original terrain next time
     EntityObjectType._deleteRecord(entityId);
+  }
+
+  /// @notice deprecated
+  function respawnResource(uint256 blockNumber, ObjectType resourceType) public {
+    revert("Deprecated, use respawnResource with drand signature");
   }
 
   function growSeed(EntityId caller, Vec3 coord) external {

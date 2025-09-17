@@ -5,6 +5,7 @@ pragma solidity >=0.8.24;
 
 import { EntityId } from "../../types/EntityId.sol";
 import { Vec3 } from "../../types/Vec3.sol";
+import { DrandData } from "../../utils/DrandUtils.sol";
 import { ObjectType } from "../../types/ObjectType.sol";
 
 /**
@@ -14,6 +15,8 @@ import { ObjectType } from "../../types/ObjectType.sol";
  */
 interface INatureSystem {
   function chunkCommit(EntityId caller, Vec3 chunkCoord) external;
+
+  function respawnResource(DrandData calldata drand, ObjectType resourceType) external;
 
   function respawnResource(uint256 blockNumber, ObjectType resourceType) external;
 

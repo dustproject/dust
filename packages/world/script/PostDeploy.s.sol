@@ -16,7 +16,7 @@ import { initObjects } from "./initObjects.sol";
 import { initRecipes } from "./initRecipes.sol";
 import { initTerrain } from "./initTerrain.sol";
 
-import { DrandBeacon } from "../src/DrandBeacon.sol";
+import { DrandBeacon } from "../src/utils/DrandBeacon.sol";
 
 contract PostDeploy is DustScript {
   function run(address worldAddress) external {
