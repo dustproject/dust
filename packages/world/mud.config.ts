@@ -322,11 +322,13 @@ export default defineWorld({
     // Resources
     // ------------------------------------------------------------
     ChunkCommitment: {
+      name: "V2ChunkCommitmen",
       schema: {
         x: "int32",
         y: "int32",
         z: "int32",
-        blockNumber: "uint256",
+        blockTimestamp: "uint256",
+        randomness: "uint256",
       },
       key: ["x", "y", "z"],
     },

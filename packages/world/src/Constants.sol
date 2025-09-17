@@ -22,7 +22,8 @@ int32 constant REGION_SIZE = 512; // 512x512 (2D)
 
 uint256 constant SAFE_PROGRAM_GAS = 1_000_000;
 
-uint256 constant CHUNK_COMMIT_EXPIRY_BLOCKS = 256;
+uint256 constant CHUNK_COMMIT_EXPIRY_TIME = 10 minutes;
+uint256 constant CHUNK_COMMIT_SUBMIT_TIME = 2 minutes;
 uint256 constant CHUNK_COMMIT_HALF_WIDTH = 2;
 uint256 constant RESPAWN_RESOURCE_TIME_RANGE = 30 seconds;
 uint8 constant MAX_FLUID_LEVEL = 15; // Maximum fluid level for water and lava

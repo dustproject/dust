@@ -11,10 +11,10 @@ import { TerrainLib } from "../systems/libraries/TerrainLib.sol";
 
 import { addEnergyToLocalPool } from "./EnergyUtils.sol";
 import { EntityUtils } from "./EntityUtils.sol";
-import { ChunkCommitment } from "./Vec3Storage.sol";
+import { ChunkCommitment, ChunkCommitmentData } from "./Vec3Storage.sol";
 
 import {
-  CHUNK_COMMIT_EXPIRY_BLOCKS,
+  CHUNK_COMMIT_EXPIRY_TIME,
   MAX_ACACIA_SAPLING,
   MAX_BIRCH_SAPLING,
   MAX_COAL,
@@ -44,11 +44,10 @@ import { TreeData, TreeLib } from "./TreeLib.sol";
 library NatureLib {
   function getRandomSeed(Vec3 coord) internal view returns (uint256) {
     Vec3 chunkCoord = coord.toChunkCoord();
-    uint256 commitment = ChunkCommitment._get(chunkCoord);
-    // We can't get blockhash of current block
-    require(block.number > commitment, "Not within commitment blocks");
-    require(block.number <= commitment + CHUNK_COMMIT_EXPIRY_BLOCKS, "Chunk commitment expired");
-    return uint256(keccak256(abi.encodePacked(blockhash(commitment), coord)));
+    ChunkCommitmentData commitment = ChunkCommitment._get(chunkCoord);
+    require(commitment.randomness != 0, "No chunk commitment");
+    require(block.timestamp <= commitment.blockTimestamp + CHUNK_COMMIT_EXPIRY_TIME, "Chunk commitment expired");
+    return uint256(keccak256(abi.encodePacked(commitment.randomness, coord)));
   }
 
   // Get resource cap for a specific resource type

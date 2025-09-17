@@ -14,7 +14,12 @@ import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
 import { ChunkCommitment, ResourcePosition } from "../utils/Vec3Storage.sol";
 
-import { CHUNK_COMMIT_EXPIRY_BLOCKS, CHUNK_COMMIT_HALF_WIDTH, RESPAWN_RESOURCE_TIME_RANGE } from "../Constants.sol";
+import {
+  CHUNK_COMMIT_EXPIRY_TIME,
+  CHUNK_COMMIT_HALF_WIDTH,
+  CHUNK_COMMIT_SUBMIT_TIME,
+  RESPAWN_RESOURCE_TIME_RANGE
+} from "../Constants.sol";
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectType } from "../types/ObjectType.sol";
 import { ObjectTypes } from "../types/ObjectType.sol";
@@ -33,10 +38,15 @@ contract NatureSystem is System {
 
     // Check existing commitment
     uint256 commitment = ChunkCommitment._get(chunkCoord);
-    require(block.number > commitment + CHUNK_COMMIT_EXPIRY_BLOCKS, "Existing chunk commitment");
+    require(block.timestamp > commitment + CHUNK_COMMIT_EXPIRY_TIME, "Existing chunk commitment");
 
-    // Commit starting from next block
-    ChunkCommitment._set(chunkCoord, block.number + 1);
+    // Commit starting from next timestamp
+    ChunkCommitment._set(chunkCoord, block.timestamp + CHUNK_COMMIT_SUBMIT_TIME);
+  }
+
+  function chunkCommitRandomness(Vec3 chunkCoord, DrandData calldata drand) public {
+    drand.verifyWithinTimeRange(CHUNK_COMMIT_SUBMIT_TIME);
+    ChunkCommitment._setRandomness(chunkCoord, drand.getRandomness());
   }
 
   function respawnResource(DrandData calldata drand, ObjectType resourceType) public {
