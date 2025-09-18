@@ -5,8 +5,9 @@ import {
   BUILD_UNIT_COST,
   HIT_MACHINE_UNIT_COST,
   HIT_PLAYER_UNIT_COST,
-  MAX_RATE_LIMIT_UNITS_PER_BLOCK,
+  MAX_RATE_LIMIT_UNITS_PER_INTERVAL,
   MINE_UNIT_COST,
+  RATE_LIMIT_TIME_INTERVAL,
   SWIM_UNIT_COST,
   WALK_UNIT_COST
 } from "../Constants.sol";
@@ -43,16 +44,19 @@ library RateLimitUtils {
       return; // No cost, no rate limit update needed
     }
 
-    uint128 currentUnits = RateLimitUnits._get(entity, block.number, limitType);
+    uint256 timebucket = block.timestamp - (block.timestamp % RATE_LIMIT_TIME_INTERVAL);
+
+    uint128 currentUnits = RateLimitUnits._get(entity, timebucket, limitType);
     uint128 newUnits = currentUnits + unitCost;
 
-    require(newUnits <= MAX_RATE_LIMIT_UNITS_PER_BLOCK, "Rate limit exceeded");
+    require(newUnits <= MAX_RATE_LIMIT_UNITS_PER_INTERVAL, "Rate limit exceeded");
 
-    RateLimitUnits._set(entity, block.number, limitType, newUnits);
+    RateLimitUnits._set(entity, timebucket, limitType, newUnits);
   }
 
   // Utility function to check current units
   function getRateLimitUnits(EntityId entity, RateLimitType limitType) internal view returns (uint128) {
-    return RateLimitUnits._get(entity, block.number, limitType);
+    uint256 timebucket = block.timestamp - (block.timestamp % RATE_LIMIT_TIME_INTERVAL);
+    return RateLimitUnits._get(entity, timebucket, limitType);
   }
 }

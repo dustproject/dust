@@ -244,13 +244,14 @@ export default defineWorld({
       key: ["x", "y", "z"],
     },
     RateLimitUnits: {
+      name: "V2RateLimitUn",
       schema: {
         entityId: "EntityId",
-        blockNumber: "uint256",
+        timestamp: "uint256",
         rateLimitType: "RateLimitType",
         units: "uint128",
       },
-      key: ["entityId", "blockNumber", "rateLimitType"],
+      key: ["entityId", "timestamp", "rateLimitType"],
     },
     // ------------------------------------------------------------
     // Player
