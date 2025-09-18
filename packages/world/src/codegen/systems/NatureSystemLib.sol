@@ -41,6 +41,14 @@ struct RootCallWrapper {
 library NatureSystemLib {
   error NatureSystemLib_CallingFromRootSystem();
 
+  function initChunkCommit(NatureSystemType self, EntityId caller, Vec3 chunkCoord) internal {
+    return CallWrapper(self.toResourceId(), address(0)).initChunkCommit(caller, chunkCoord);
+  }
+
+  function fulfillChunkCommit(NatureSystemType self, Vec3 chunkCoord, DrandData memory drand) internal {
+    return CallWrapper(self.toResourceId(), address(0)).fulfillChunkCommit(chunkCoord, drand);
+  }
+
   function chunkCommit(NatureSystemType self, EntityId caller, Vec3 chunkCoord) internal {
     return CallWrapper(self.toResourceId(), address(0)).chunkCommit(caller, chunkCoord);
   }
@@ -55,6 +63,29 @@ library NatureSystemLib {
 
   function growSeed(NatureSystemType self, EntityId caller, Vec3 coord) internal {
     return CallWrapper(self.toResourceId(), address(0)).growSeed(caller, coord);
+  }
+
+  function initChunkCommit(CallWrapper memory self, EntityId caller, Vec3 chunkCoord) internal {
+    // if the contract calling this function is a root system, it should use `callAsRoot`
+    if (address(_world()) == address(this)) revert NatureSystemLib_CallingFromRootSystem();
+
+    bytes memory systemCall = abi.encodeCall(_initChunkCommit_EntityId_Vec3.initChunkCommit, (caller, chunkCoord));
+    self.from == address(0)
+      ? _world().call(self.systemId, systemCall)
+      : _world().callFrom(self.from, self.systemId, systemCall);
+  }
+
+  function fulfillChunkCommit(CallWrapper memory self, Vec3 chunkCoord, DrandData memory drand) internal {
+    // if the contract calling this function is a root system, it should use `callAsRoot`
+    if (address(_world()) == address(this)) revert NatureSystemLib_CallingFromRootSystem();
+
+    bytes memory systemCall = abi.encodeCall(
+      _fulfillChunkCommit_Vec3_DrandData.fulfillChunkCommit,
+      (chunkCoord, drand)
+    );
+    self.from == address(0)
+      ? _world().call(self.systemId, systemCall)
+      : _world().callFrom(self.from, self.systemId, systemCall);
   }
 
   function chunkCommit(CallWrapper memory self, EntityId caller, Vec3 chunkCoord) internal {
@@ -101,6 +132,19 @@ library NatureSystemLib {
     self.from == address(0)
       ? _world().call(self.systemId, systemCall)
       : _world().callFrom(self.from, self.systemId, systemCall);
+  }
+
+  function initChunkCommit(RootCallWrapper memory self, EntityId caller, Vec3 chunkCoord) internal {
+    bytes memory systemCall = abi.encodeCall(_initChunkCommit_EntityId_Vec3.initChunkCommit, (caller, chunkCoord));
+    SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
+  }
+
+  function fulfillChunkCommit(RootCallWrapper memory self, Vec3 chunkCoord, DrandData memory drand) internal {
+    bytes memory systemCall = abi.encodeCall(
+      _fulfillChunkCommit_Vec3_DrandData.fulfillChunkCommit,
+      (chunkCoord, drand)
+    );
+    SystemCall.callWithHooksOrRevert(self.from, self.systemId, systemCall, msg.value);
   }
 
   function chunkCommit(RootCallWrapper memory self, EntityId caller, Vec3 chunkCoord) internal {
@@ -166,6 +210,14 @@ library NatureSystemLib {
  *
  * Each interface is uniquely named based on the function name and parameters to prevent collisions.
  */
+
+interface _initChunkCommit_EntityId_Vec3 {
+  function initChunkCommit(EntityId caller, Vec3 chunkCoord) external;
+}
+
+interface _fulfillChunkCommit_Vec3_DrandData {
+  function fulfillChunkCommit(Vec3 chunkCoord, DrandData memory drand) external;
+}
 
 interface _chunkCommit_EntityId_Vec3 {
   function chunkCommit(EntityId caller, Vec3 chunkCoord) external;

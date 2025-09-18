@@ -327,7 +327,7 @@ export default defineWorld({
         x: "int32",
         y: "int32",
         z: "int32",
-        blockTimestamp: "uint256",
+        timestamp: "uint256",
         randomness: "uint256",
       },
       key: ["x", "y", "z"],

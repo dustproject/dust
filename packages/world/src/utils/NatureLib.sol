@@ -3,6 +3,7 @@ pragma solidity >=0.8.24;
 
 import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
 
+import { ChunkCommitment, ChunkCommitmentData } from "../codegen/tables/ChunkCommitment.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 import { ObjectPhysics } from "../codegen/tables/ObjectPhysics.sol";
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
@@ -11,7 +12,6 @@ import { TerrainLib } from "../systems/libraries/TerrainLib.sol";
 
 import { addEnergyToLocalPool } from "./EnergyUtils.sol";
 import { EntityUtils } from "./EntityUtils.sol";
-import { ChunkCommitment, ChunkCommitmentData } from "./Vec3Storage.sol";
 
 import {
   CHUNK_COMMIT_EXPIRY_TIME,
@@ -44,9 +44,9 @@ import { TreeData, TreeLib } from "./TreeLib.sol";
 library NatureLib {
   function getRandomSeed(Vec3 coord) internal view returns (uint256) {
     Vec3 chunkCoord = coord.toChunkCoord();
-    ChunkCommitmentData commitment = ChunkCommitment._get(chunkCoord);
+    ChunkCommitmentData memory commitment = ChunkCommitment._get(chunkCoord.x(), chunkCoord.y(), chunkCoord.z());
     require(commitment.randomness != 0, "No chunk commitment");
-    require(block.timestamp <= commitment.blockTimestamp + CHUNK_COMMIT_EXPIRY_TIME, "Chunk commitment expired");
+    require(block.timestamp <= commitment.timestamp + CHUNK_COMMIT_EXPIRY_TIME, "Chunk commitment expired");
     return uint256(keccak256(abi.encodePacked(commitment.randomness, coord)));
   }
 

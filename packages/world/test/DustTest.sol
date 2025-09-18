@@ -9,7 +9,7 @@ import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 
 import {
   BARE_HANDS_ACTION_ENERGY_COST,
-  CHUNK_COMMIT_EXPIRY_BLOCKS,
+  CHUNK_COMMIT_EXPIRY_TIME,
   CHUNK_SIZE,
   MAX_FLUID_LEVEL,
   MAX_PLAYER_ENERGY,
@@ -26,6 +26,7 @@ import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
 import { Orientation } from "../src/types/Orientation.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
+import { ChunkCommitment } from "../src/codegen/tables/ChunkCommitment.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
 import { EntityOrientation } from "../src/codegen/tables/EntityOrientation.sol";
@@ -299,16 +300,16 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     return forceFieldEntityId;
   }
 
-  function newCommit(address commiterAddress, EntityId commiter, Vec3 coord, bytes32 blockHash) internal {
+  function newCommit(address commiterAddress, EntityId commiter, Vec3 coord, uint256 randomness) internal {
     // Set up chunk commitment for randomness when mining grass
     Vec3 chunkCoord = coord.toChunkCoord();
 
-    vm.roll(vm.getBlockNumber() + CHUNK_COMMIT_EXPIRY_BLOCKS);
+    vm.warp(vm.getBlockTimestamp() + CHUNK_COMMIT_EXPIRY_TIME);
     vm.prank(commiterAddress);
     world.chunkCommit(commiter, chunkCoord);
-    // Move forward 2 blocks to make the commitment valid
-    vm.roll(vm.getBlockNumber() + 2);
+    // Move forward 5 seconds to make the commitment valid
+    vm.warp(vm.getBlockTimestamp() + 5 seconds);
 
-    vm.setBlockhash(vm.getBlockNumber() - 1, blockHash);
+    ChunkCommitment.setRandomness(chunkCoord.x(), chunkCoord.y(), chunkCoord.z(), randomness);
   }
 }

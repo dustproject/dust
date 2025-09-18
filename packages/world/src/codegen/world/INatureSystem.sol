@@ -14,6 +14,10 @@ import { ObjectType } from "../../types/ObjectType.sol";
  * @dev This interface is automatically generated from the corresponding system contract. Do not edit manually.
  */
 interface INatureSystem {
+  function initChunkCommit(EntityId caller, Vec3 chunkCoord) external;
+
+  function fulfillChunkCommit(Vec3 chunkCoord, DrandData calldata drand) external;
+
   function chunkCommit(EntityId caller, Vec3 chunkCoord) external;
 
   function respawnResource(DrandData calldata drand, ObjectType resourceType) external;

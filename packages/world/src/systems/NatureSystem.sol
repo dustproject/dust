@@ -6,13 +6,14 @@ import { System } from "@latticexyz/world/src/System.sol";
 import { EntityObjectType } from "../codegen/tables/EntityObjectType.sol";
 
 import { BurnedResourceCount } from "../codegen/tables/BurnedResourceCount.sol";
+import { ChunkCommitment, ChunkCommitmentData } from "../codegen/tables/ChunkCommitment.sol";
 
 import { ResourceCount } from "../codegen/tables/ResourceCount.sol";
 import { SeedGrowth } from "../codegen/tables/SeedGrowth.sol";
 
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils } from "../utils/InventoryUtils.sol";
-import { ChunkCommitment, ResourcePosition } from "../utils/Vec3Storage.sol";
+import { ResourcePosition } from "../utils/Vec3Storage.sol";
 
 import {
   CHUNK_COMMIT_EXPIRY_TIME,
@@ -30,23 +31,32 @@ import { Vec3 } from "../types/Vec3.sol";
 import { DrandData } from "../utils/DrandUtils.sol";
 
 contract NatureSystem is System {
-  function chunkCommit(EntityId caller, Vec3 chunkCoord) public {
+  function initChunkCommit(EntityId caller, Vec3 chunkCoord) public {
     caller.activate();
 
     Vec3 callerChunkCoord = caller._getPosition().toChunkCoord();
     require(callerChunkCoord.inSurroundingCube(chunkCoord, CHUNK_COMMIT_HALF_WIDTH), "Entity is too far to commit");
 
     // Check existing commitment
-    uint256 commitment = ChunkCommitment._get(chunkCoord);
-    require(block.timestamp > commitment + CHUNK_COMMIT_EXPIRY_TIME, "Existing chunk commitment");
+    ChunkCommitmentData memory commitment = ChunkCommitment._get(chunkCoord.x(), chunkCoord.y(), chunkCoord.z());
+    require(block.timestamp > commitment.timestamp + CHUNK_COMMIT_EXPIRY_TIME, "Existing chunk commitment");
 
     // Commit starting from next timestamp
-    ChunkCommitment._set(chunkCoord, block.timestamp + CHUNK_COMMIT_SUBMIT_TIME);
+    ChunkCommitment._setTimestamp(chunkCoord.x(), chunkCoord.y(), chunkCoord.z(), block.timestamp + 5 seconds);
   }
 
-  function chunkCommitRandomness(Vec3 chunkCoord, DrandData calldata drand) public {
+  function fulfillChunkCommit(Vec3 chunkCoord, DrandData calldata drand) public {
+    ChunkCommitmentData memory commitment = ChunkCommitment._get(chunkCoord.x(), chunkCoord.y(), chunkCoord.z());
+    require(block.timestamp > commitment.timestamp, "Not yet fulfillable");
+    require(block.timestamp <= commitment.timestamp + CHUNK_COMMIT_SUBMIT_TIME, "Chunk commitment expired");
+    require(commitment.randomness == 0, "Chunk already fulfilled");
     drand.verifyWithinTimeRange(CHUNK_COMMIT_SUBMIT_TIME);
-    ChunkCommitment._setRandomness(chunkCoord, drand.getRandomness());
+    ChunkCommitment._setRandomness(chunkCoord.x(), chunkCoord.y(), chunkCoord.z(), drand.getRandomness());
+  }
+
+  // @notice deprecated
+  function chunkCommit(EntityId caller, Vec3 chunkCoord) public {
+    revert("Deprecated, use initChunkCommit");
   }
 
   function respawnResource(DrandData calldata drand, ObjectType resourceType) public {

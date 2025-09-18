@@ -232,7 +232,7 @@ contract MineTest is DustTest {
     vm.warp(fullyGrownAt);
 
     // Set up chunk commitment for randomness when mining
-    newCommit(alice, aliceEntityId, cropCoord, bytes32(0));
+    newCommit(alice, aliceEntityId, cropCoord, uint256(0));
 
     // Check local energy pool before harvesting
     uint128 initialLocalEnergy = LocalEnergyPool.get(farmlandCoord.toLocalEnergyPoolShardCoord());
@@ -287,7 +287,7 @@ contract MineTest is DustTest {
     vm.warp(fullyGrownAt);
 
     // Set up chunk commitment for randomness when mining
-    newCommit(alice, aliceEntityId, cropCoord, bytes32(0));
+    newCommit(alice, aliceEntityId, cropCoord, uint256(0));
 
     // Harvest the crop
     vm.prank(alice);

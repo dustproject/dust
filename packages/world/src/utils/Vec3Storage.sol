@@ -12,7 +12,6 @@ import { ExploredChunk as _ExploredChunk } from "../codegen/tables/ExploredChunk
 import { InitialEnergyPool as _InitialEnergyPool } from "../codegen/tables/InitialEnergyPool.sol";
 import { LocalEnergyPool as _LocalEnergyPool } from "../codegen/tables/LocalEnergyPool.sol";
 
-import { ChunkCommitment as _ChunkCommitment } from "../codegen/tables/ChunkCommitment.sol";
 import { EntityPosition as _EntityPosition } from "../codegen/tables/EntityPosition.sol";
 import { ResourcePosition as _ResourcePosition } from "../codegen/tables/ResourcePosition.sol";
 
@@ -290,32 +289,6 @@ library SurfaceChunkByIndex {
 
   function _deleteRecord(uint256 key) internal {
     Vec3Storage._deleteRecord(_SurfaceChunkByIndex._tableId, bytes32(key));
-  }
-}
-
-library ChunkCommitment {
-  function get(Vec3 position) internal view returns (uint256 value) {
-    return uint256(Vec3Storage.get(_ChunkCommitment._tableId, _ChunkCommitment._fieldLayout, position));
-  }
-
-  function _get(Vec3 position) internal view returns (uint256 value) {
-    return uint256(Vec3Storage._get(_ChunkCommitment._tableId, _ChunkCommitment._fieldLayout, position));
-  }
-
-  function set(Vec3 position, uint256 value) internal {
-    Vec3Storage.set(_ChunkCommitment._tableId, _ChunkCommitment._fieldLayout, position, abi.encodePacked(value));
-  }
-
-  function _set(Vec3 position, uint256 value) internal {
-    Vec3Storage._set(_ChunkCommitment._tableId, _ChunkCommitment._fieldLayout, position, abi.encodePacked(value));
-  }
-
-  function deleteRecord(Vec3 position) internal {
-    Vec3Storage.deleteRecord(_ChunkCommitment._tableId, position);
-  }
-
-  function _deleteRecord(Vec3 position) internal {
-    Vec3Storage._deleteRecord(_ChunkCommitment._tableId, position);
   }
 }
 

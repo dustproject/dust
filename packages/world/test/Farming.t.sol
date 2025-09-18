@@ -13,7 +13,7 @@ import { LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import {
   BUILD_ENERGY_COST,
-  CHUNK_COMMIT_EXPIRY_BLOCKS,
+  CHUNK_COMMIT_EXPIRY_TIME,
   MAX_ENTITY_INFLUENCE_RADIUS,
   TOOL_ACTION_ENERGY_COST
 } from "../src/Constants.sol";
@@ -264,7 +264,7 @@ contract FarmingTest is DustTest {
     assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 0, "Wheat seeds should be added to circulation after growing");
 
     // Set up chunk commitment for randomness when mining
-    newCommit(alice, aliceEntityId, cropCoord, bytes32(0));
+    newCommit(alice, aliceEntityId, cropCoord, uint256(0));
 
     // Check local energy pool before harvesting
     uint128 initialLocalEnergy = LocalEnergyPool.get(farmlandCoord.toLocalEnergyPoolShardCoord());
@@ -362,7 +362,7 @@ contract FarmingTest is DustTest {
       // Create FescueGrass
       setObjectAtCoord(grassCoord, ObjectTypes.FescueGrass);
 
-      newCommit(alice, aliceEntityId, grassCoord, keccak256(abi.encode(i)));
+      newCommit(alice, aliceEntityId, grassCoord, uint256(keccak256(abi.encode(i))));
 
       // Harvest the FescueGrass
       vm.prank(alice);
@@ -424,7 +424,7 @@ contract FarmingTest is DustTest {
     fullyGrownAt = SeedGrowth.getFullyGrownAt(cropEntityId);
 
     // Full growth - Warp past the full growth time
-    vm.roll(vm.getBlockNumber() + CHUNK_COMMIT_EXPIRY_BLOCKS + 1);
+    vm.roll(vm.getBlockNumber() + CHUNK_COMMIT_EXPIRY_TIME + 1);
     vm.warp(fullyGrownAt + 1);
     vm.prank(alice);
     world.growSeed(aliceEntityId, cropCoord);
@@ -432,7 +432,7 @@ contract FarmingTest is DustTest {
     assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 0, "Seeds should be added to circulation after growing");
 
     // Set up chunk commitment for randomness when mining
-    newCommit(alice, aliceEntityId, cropCoord, bytes32(0));
+    newCommit(alice, aliceEntityId, cropCoord, uint256(0));
 
     // Mine the crop
     vm.prank(alice);
