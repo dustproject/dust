@@ -113,7 +113,7 @@ contract SpawnSystem is System {
 
   function randomSpawn(DrandData calldata drand, Vec3 spawnCoord) public returns (EntityId) {
     checkWorldStatus();
-    drand.verifyWithinTimeRange(SPAWN_TIME_RANGE);
+    drand.verifyWithinTimeRange(block.timestamp, SPAWN_TIME_RANGE);
 
     spawnCoord = getRandomSpawnCoord(drand.getRandomness(), _msgSender());
 

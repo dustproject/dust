@@ -50,7 +50,7 @@ contract NatureSystem is System {
     require(block.timestamp > commitment.timestamp, "Not yet fulfillable");
     require(block.timestamp <= commitment.timestamp + CHUNK_COMMIT_SUBMIT_TIME, "Chunk commitment expired");
     require(commitment.randomness == 0, "Chunk already fulfilled");
-    drand.verifyWithinTimeRange(CHUNK_COMMIT_SUBMIT_TIME);
+    drand.verifyWithinTimeRange(commitment.timestamp + CHUNK_COMMIT_SUBMIT_TIME, CHUNK_COMMIT_SUBMIT_TIME);
     ChunkCommitment._setRandomness(chunkCoord.x(), chunkCoord.y(), chunkCoord.z(), drand.getRandomness());
   }
 
@@ -60,7 +60,7 @@ contract NatureSystem is System {
   }
 
   function respawnResource(DrandData calldata drand, ObjectType resourceType) public {
-    drand.verifyWithinTimeRange(RESPAWN_RESOURCE_TIME_RANGE);
+    drand.verifyWithinTimeRange(block.timestamp, RESPAWN_RESOURCE_TIME_RANGE);
 
     uint256 burned = BurnedResourceCount._get(resourceType);
     require(burned > 0, "No resources available for respawn");

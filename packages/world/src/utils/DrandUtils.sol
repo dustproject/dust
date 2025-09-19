@@ -12,13 +12,11 @@ struct DrandData {
 }
 
 library DrandUtils {
-  function verifyWithinTimeRange(DrandData calldata drand, uint256 timeRange) internal {
+  function verifyWithinTimeRange(DrandData calldata drand, uint256 startTime, uint256 timeRange) internal {
     address beacon = DrandBeacon._getBeacon();
     require(beacon != address(0), "Drand beacon not set");
     uint256 roundTimestamp = IDrandBeacon(beacon).genesisTimestamp() + IDrandBeacon(beacon).period() * drand.roundNumber;
-    require(
-      block.timestamp > roundTimestamp && block.timestamp - roundTimestamp <= timeRange, "Can only choose past 1 minute"
-    );
+    require(startTime > roundTimestamp && startTime - roundTimestamp <= timeRange, "Drand round not within time range");
 
     IDrandBeacon(beacon).verifyBeaconRound(drand.roundNumber, drand.signature);
   }
