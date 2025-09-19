@@ -42,7 +42,7 @@ contract NatureSystem is System {
     require(block.timestamp > commitment.timestamp + CHUNK_COMMIT_EXPIRY_TIME, "Existing chunk commitment");
 
     // Commit starting from next timestamp
-    ChunkCommitment._setTimestamp(chunkCoord.x(), chunkCoord.y(), chunkCoord.z(), block.timestamp + 5 seconds);
+    ChunkCommitment._setTimestamp(chunkCoord.x(), chunkCoord.y(), chunkCoord.z(), block.timestamp + 2 seconds);
   }
 
   function fulfillChunkCommit(Vec3 chunkCoord, DrandData calldata drand) public {
