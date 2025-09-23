@@ -862,8 +862,9 @@ contract MoveTest is DustTest {
     Vec3 finalCoord = EntityPosition.get(aliceEntityId);
     assertEq(finalCoord, playerCoord + vec3(0, 0, 30), "Player should have moved 30 blocks");
 
-    // Move to next block and verify can move again
+    // Move to next time bucket and verify can move again
     vm.roll(block.number + 1);
+    vm.warp(block.timestamp + 2 seconds);
 
     Vec3[] memory nextMove = new Vec3[](1);
     nextMove[0] = finalCoord + vec3(0, 0, 1);
@@ -911,8 +912,9 @@ contract MoveTest is DustTest {
     // Should have moved 27 blocks
     assertEq(finalCoord, playerCoord + vec3(0, 0, 27), "Player should have moved exactly 27 blocks in water");
 
-    // Move to next block and verify can move again
+    // Move to next time bucket and verify can move again
     vm.roll(block.number + 1);
+    vm.warp(block.timestamp + 2 seconds);
 
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);

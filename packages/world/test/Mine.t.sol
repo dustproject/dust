@@ -1312,8 +1312,9 @@ contract MineTest is DustTest {
     vm.expectRevert("Rate limit exceeded");
     world.mine(aliceEntityId, finalMineCoord, "");
 
-    // Move to next block and verify can mine again
+    // Move to next time bucket and verify can mine again
     vm.roll(block.number + 1);
+    vm.warp(block.timestamp + 2 seconds);
 
     vm.prank(alice);
     world.mine(aliceEntityId, finalMineCoord, "");
@@ -1348,8 +1349,9 @@ contract MineTest is DustTest {
     vm.expectRevert("Rate limit exceeded");
     world.mine(aliceEntityId, finalMineCoord, slot, "");
 
-    // Move to next block and verify can mine again
+    // Move to next time bucket and verify can mine again
     vm.roll(block.number + 1);
+    vm.warp(block.timestamp + 2 seconds);
 
     vm.prank(alice);
     world.mine(aliceEntityId, finalMineCoord, slot, "");

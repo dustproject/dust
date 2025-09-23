@@ -507,8 +507,9 @@ contract HitPlayerTest is DustTest {
     vm.expectRevert("Rate limit exceeded");
     world.hitPlayer(aliceEntityId, bobEntityId, bytes(""));
 
-    // Move to next block and verify can hit again
+    // Move to next time bucket and verify can hit again
     vm.roll(block.number + 1);
+    vm.warp(block.timestamp + 2 seconds);
 
     vm.prank(alice);
     world.hitPlayer(aliceEntityId, bobEntityId, bytes(""));
@@ -537,8 +538,9 @@ contract HitPlayerTest is DustTest {
     vm.expectRevert("Rate limit exceeded");
     world.hitPlayer(aliceEntityId, bobEntityId, slot, bytes(""));
 
-    // Move to next block and verify can hit again
+    // Move to next time bucket and verify can hit again
     vm.roll(block.number + 1);
+    vm.warp(block.timestamp + 2 seconds);
 
     vm.prank(alice);
     world.hitPlayer(aliceEntityId, bobEntityId, slot, bytes(""));

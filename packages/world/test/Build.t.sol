@@ -684,8 +684,9 @@ contract BuildTest is DustTest {
     vm.expectRevert("Rate limit exceeded");
     world.build(aliceEntityId, finalBuildCoord, inventorySlot, "");
 
-    // Move to next block and verify can build again
+    // Move to next time bucket and verify can build again
     vm.roll(block.number + 1);
+    vm.warp(block.timestamp + 2 seconds);
 
     vm.prank(alice);
     world.build(aliceEntityId, finalBuildCoord, inventorySlot, "");
@@ -718,8 +719,9 @@ contract BuildTest is DustTest {
     vm.expectRevert("Rate limit exceeded");
     world.jumpBuild(aliceEntityId, inventorySlot, "");
 
-    // Move to next block and verify can build again
+    // Move to next time bucket and verify can jump build again
     vm.roll(block.number + 1);
+    vm.warp(block.timestamp + 2 seconds);
 
     // Reset position for final jump build
     Vec3 finalPos = EntityPosition.get(aliceEntityId);
