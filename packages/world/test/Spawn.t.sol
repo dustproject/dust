@@ -56,7 +56,7 @@ contract SpawnTest is DustTest {
     assertTrue(playerEntityId.exists());
 
     assertEq(
-      Energy.getEnergy(playerEntityId), MAX_PLAYER_ENERGY * 3 / 10, "Player energy is not correct after random spawn"
+      Energy.getEnergy(playerEntityId), (MAX_PLAYER_ENERGY * 3) / 10, "Player energy is not correct after random spawn"
     );
   }
 
@@ -128,10 +128,10 @@ contract SpawnTest is DustTest {
 
     setupAirChunk(vec3(0, 0, 0));
 
-    vm.prank(alice);
-    vm.expectRevert("No valid spawn coord found in chunk");
     DrandData memory drand =
       DrandData({ signature: [uint256(0), uint256(0)], roundNumber: block.timestamp - 5 seconds });
+    vm.prank(alice);
+    vm.expectRevert("No valid spawn coord found in chunk");
     world.getRandomSpawnCoord(TestDrandUtils.getRandomness(drand), alice);
   }
 

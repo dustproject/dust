@@ -264,7 +264,7 @@ contract FarmingTest is DustTest {
     assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 0, "Wheat seeds should be added to circulation after growing");
 
     // Set up chunk commitment for randomness when mining
-    newCommit(alice, aliceEntityId, cropCoord, uint256(0));
+    newCommit(alice, aliceEntityId, cropCoord, uint256(7));
 
     // Check local energy pool before harvesting
     uint128 initialLocalEnergy = LocalEnergyPool.get(farmlandCoord.toLocalEnergyPoolShardCoord());
@@ -322,9 +322,7 @@ contract FarmingTest is DustTest {
     // Set up chunk commitment for randomness when mining
     Vec3 chunkCoord = cropCoord.toChunkCoord();
     vm.prank(alice);
-    world.chunkCommit(aliceEntityId, chunkCoord);
-    // Move forward a block to make the commitment valid
-    vm.roll(block.number + 1);
+    world.initChunkCommit(aliceEntityId, chunkCoord);
 
     // Check local energy pool before harvesting
     uint128 beforeHarvestEnergy = LocalEnergyPool.get(farmlandCoord.toLocalEnergyPoolShardCoord());
@@ -432,7 +430,7 @@ contract FarmingTest is DustTest {
     assertEq(ResourceCount.get(ObjectTypes.WheatSeed), 0, "Seeds should be added to circulation after growing");
 
     // Set up chunk commitment for randomness when mining
-    newCommit(alice, aliceEntityId, cropCoord, uint256(0));
+    newCommit(alice, aliceEntityId, cropCoord, uint256(7));
 
     // Mine the crop
     vm.prank(alice);

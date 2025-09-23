@@ -141,10 +141,8 @@ contract MineTest is DustTest {
     assertEq(oreAmounts.length, 0, "Existing ores in inventory");
     assertEq(ResourceCount.get(ObjectTypes.UnrevealedOre), 0, "Mined resource count is not 0");
 
-    vm.prank(alice);
-    world.chunkCommit(aliceEntityId, mineCoord.toChunkCoord());
-
-    vm.roll(vm.getBlockNumber() + 2);
+    // Set up chunk commitment for randomness when mining
+    newCommit(alice, aliceEntityId, mineCoord, uint256(1));
 
     vm.prank(alice);
     startGasReport("mine Ore with hand, entirely mined");
@@ -232,7 +230,7 @@ contract MineTest is DustTest {
     vm.warp(fullyGrownAt);
 
     // Set up chunk commitment for randomness when mining
-    newCommit(alice, aliceEntityId, cropCoord, uint256(0));
+    newCommit(alice, aliceEntityId, cropCoord, uint256(7));
 
     // Check local energy pool before harvesting
     uint128 initialLocalEnergy = LocalEnergyPool.get(farmlandCoord.toLocalEnergyPoolShardCoord());
@@ -287,7 +285,7 @@ contract MineTest is DustTest {
     vm.warp(fullyGrownAt);
 
     // Set up chunk commitment for randomness when mining
-    newCommit(alice, aliceEntityId, cropCoord, uint256(0));
+    newCommit(alice, aliceEntityId, cropCoord, uint256(7));
 
     // Harvest the crop
     vm.prank(alice);
@@ -312,10 +310,8 @@ contract MineTest is DustTest {
     ObjectType o = TerrainLib.getBlockType(mineCoord);
     assertEq(o, ObjectTypes.UnrevealedOre, "Didn't work");
 
-    vm.prank(alice);
-    world.chunkCommit(aliceEntityId, mineCoord.toChunkCoord());
-
-    vm.roll(vm.getBlockNumber() + 2);
+    // Set up chunk commitment for randomness when mining
+    newCommit(alice, aliceEntityId, mineCoord, uint256(1));
 
     // First mining attempt - partially mines the ore
     vm.prank(alice);
@@ -881,7 +877,8 @@ contract MineTest is DustTest {
       (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(stoneCoord);
       // Calculate expected multiplier: wooden base (10) * mine modifier (1) * specialization (3) = 9
       uint128 expectedMultiplier = WOODEN_TOOL_BASE_MULTIPLIER * MINE_ACTION_MODIFIER * SPECIALIZATION_MULTIPLIER;
-      uint128 massReduction = TOOL_ACTION_ENERGY_COST + pickMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
+      uint128 massReduction =
+        TOOL_ACTION_ENERGY_COST + ((pickMass / 10) * expectedMultiplier) / ACTION_MODIFIER_DENOMINATOR;
       uint128 expectedMass = stoneMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden pick on stone");
 
@@ -909,7 +906,8 @@ contract MineTest is DustTest {
       (EntityId mineEntityId,) = TestEntityUtils.getBlockAt(logCoord);
       // Calculate expected multiplier: wooden base (10) * mine modifier (1) * specialization (3) = 9
       uint128 expectedMultiplier = WOODEN_TOOL_BASE_MULTIPLIER * MINE_ACTION_MODIFIER * SPECIALIZATION_MULTIPLIER;
-      uint128 massReduction = TOOL_ACTION_ENERGY_COST + axeMass / 10 * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR;
+      uint128 massReduction =
+        TOOL_ACTION_ENERGY_COST + ((axeMass / 10) * expectedMultiplier) / ACTION_MODIFIER_DENOMINATOR;
       uint128 expectedMass = logMass - massReduction;
       assertEq(Mass.getMass(mineEntityId), expectedMass, "Mass reduction incorrect for wooden axe on log");
 
@@ -940,7 +938,7 @@ contract MineTest is DustTest {
       uint128 expectedMultiplier = WOODEN_TOOL_BASE_MULTIPLIER * MINE_ACTION_MODIFIER;
       uint128 maxToolMassReduction = axeMass / 10;
       uint128 massReduction = uint128(
-        TOOL_ACTION_ENERGY_COST + uint256(maxToolMassReduction) * expectedMultiplier / ACTION_MODIFIER_DENOMINATOR
+        TOOL_ACTION_ENERGY_COST + (uint256(maxToolMassReduction) * expectedMultiplier) / ACTION_MODIFIER_DENOMINATOR
       );
 
       uint128 expectedMass = stoneMass - massReduction;
@@ -1295,8 +1293,9 @@ contract MineTest is DustTest {
     // Player can mine up to 20 times per block (10 mines per second with 2 second blocks)
     // Try to mine 20 times, the 21st should revert
     for (uint256 i = 0; i < 20; i++) {
-      Vec3 mineCoord =
-        vec3(playerCoord.x() + int32(int256(i % 5 + 1)), FLAT_CHUNK_GRASS_LEVEL, playerCoord.z() + int32(int256(i / 5)));
+      Vec3 mineCoord = vec3(
+        playerCoord.x() + int32(int256((i % 5) + 1)), FLAT_CHUNK_GRASS_LEVEL, playerCoord.z() + int32(int256(i / 5))
+      );
       setObjectAtCoord(mineCoord, ObjectTypes.Dirt);
       ObjectPhysics.setMass(ObjectTypes.Dirt, 1); // Minimal mass so it mines in one hit
 
@@ -1332,8 +1331,9 @@ contract MineTest is DustTest {
 
     // Same rate limit applies with tool
     for (uint256 i = 0; i < 20; i++) {
-      Vec3 mineCoord =
-        vec3(playerCoord.x() + int32(int256(i % 5 + 1)), FLAT_CHUNK_GRASS_LEVEL, playerCoord.z() + int32(int256(i / 5)));
+      Vec3 mineCoord = vec3(
+        playerCoord.x() + int32(int256((i % 5) + 1)), FLAT_CHUNK_GRASS_LEVEL, playerCoord.z() + int32(int256(i / 5))
+      );
       setObjectAtCoord(mineCoord, ObjectTypes.Stone);
       ObjectPhysics.setMass(ObjectTypes.Stone, 1); // Minimal mass so it mines in one hit
 

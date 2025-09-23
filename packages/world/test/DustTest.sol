@@ -313,11 +313,9 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     // Set up chunk commitment for randomness when mining grass
     Vec3 chunkCoord = coord.toChunkCoord();
 
-    vm.warp(vm.getBlockTimestamp() + CHUNK_COMMIT_EXPIRY_TIME);
+    vm.warp(vm.getBlockTimestamp() + CHUNK_COMMIT_EXPIRY_TIME + 5 seconds);
     vm.prank(commiterAddress);
-    world.chunkCommit(commiter, chunkCoord);
-    // Move forward 5 seconds to make the commitment valid
-    vm.warp(vm.getBlockTimestamp() + 5 seconds);
+    world.initChunkCommit(commiter, chunkCoord);
 
     ChunkCommitment.setRandomness(chunkCoord.x(), chunkCoord.y(), chunkCoord.z(), randomness);
   }
