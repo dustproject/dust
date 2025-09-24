@@ -12,7 +12,7 @@ struct DrandData {
 
 library DrandUtils {
   function verifyWithinTimeRange(DrandData calldata drand, uint256 startTime, uint256 timeRange) internal view {
-    uint256 roundTimestamp = DrandEvmnet.genesisTimestamp() + DrandEvmnet.period() * drand.roundNumber;
+    uint256 roundTimestamp = DrandEvmnet._genesisTimestamp() + DrandEvmnet._period() * drand.roundNumber;
     require(startTime > roundTimestamp && startTime - roundTimestamp <= timeRange, "Drand round not within time range");
 
     DrandEvmnet.verifyBeaconRound(drand.roundNumber, drand.signature);

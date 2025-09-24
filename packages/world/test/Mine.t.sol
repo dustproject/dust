@@ -31,6 +31,7 @@ import {
   MAX_PLAYER_ENERGY,
   MINE_ACTION_MODIFIER,
   PLAYER_ENERGY_DRAIN_RATE,
+  RATE_LIMIT_TIME_INTERVAL,
   SPECIALIZATION_MULTIPLIER,
   TOOL_ACTION_ENERGY_COST,
   WOODEN_TOOL_BASE_MULTIPLIER
@@ -1313,7 +1314,7 @@ contract MineTest is DustTest {
 
     // Move to next time bucket and verify can mine again
     vm.roll(block.number + 1);
-    vm.warp(block.timestamp + 2 seconds);
+    vm.warp(block.timestamp + RATE_LIMIT_TIME_INTERVAL);
 
     vm.prank(alice);
     world.mine(aliceEntityId, finalMineCoord, "");
@@ -1351,7 +1352,7 @@ contract MineTest is DustTest {
 
     // Move to next time bucket and verify can mine again
     vm.roll(block.number + 1);
-    vm.warp(block.timestamp + 2 seconds);
+    vm.warp(block.timestamp + RATE_LIMIT_TIME_INTERVAL);
 
     vm.prank(alice);
     world.mine(aliceEntityId, finalMineCoord, slot, "");

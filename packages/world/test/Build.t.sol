@@ -24,7 +24,8 @@ import {
   CHUNK_SIZE,
   MAX_ENTITY_INFLUENCE_RADIUS,
   MAX_FLUID_LEVEL,
-  MAX_PLAYER_ENERGY
+  MAX_PLAYER_ENERGY,
+  RATE_LIMIT_TIME_INTERVAL
 } from "../src/Constants.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
 
@@ -686,7 +687,7 @@ contract BuildTest is DustTest {
 
     // Move to next time bucket and verify can build again
     vm.roll(block.number + 1);
-    vm.warp(block.timestamp + 2 seconds);
+    vm.warp(block.timestamp + RATE_LIMIT_TIME_INTERVAL);
 
     vm.prank(alice);
     world.build(aliceEntityId, finalBuildCoord, inventorySlot, "");
@@ -721,7 +722,7 @@ contract BuildTest is DustTest {
 
     // Move to next time bucket and verify can jump build again
     vm.roll(block.number + 1);
-    vm.warp(block.timestamp + 2 seconds);
+    vm.warp(block.timestamp + RATE_LIMIT_TIME_INTERVAL);
 
     // Reset position for final jump build
     Vec3 finalPos = EntityPosition.get(aliceEntityId);

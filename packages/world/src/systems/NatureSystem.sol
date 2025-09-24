@@ -28,6 +28,8 @@ import { ObjectTypes } from "../types/ObjectType.sol";
 import { NatureLib } from "../utils/NatureLib.sol";
 
 import { Vec3 } from "../types/Vec3.sol";
+
+import { DrandEvmnet } from "../utils/DrandEvmnet.sol";
 import { DrandData } from "../utils/DrandUtils.sol";
 
 contract NatureSystem is System {
@@ -42,7 +44,9 @@ contract NatureSystem is System {
     require(block.timestamp > commitment.timestamp + CHUNK_COMMIT_EXPIRY_TIME, "Existing chunk commitment");
 
     // Commit starting from next timestamp
-    ChunkCommitment._setTimestamp(chunkCoord.x(), chunkCoord.y(), chunkCoord.z(), block.timestamp + 3 seconds);
+    ChunkCommitment._setTimestamp(
+      chunkCoord.x(), chunkCoord.y(), chunkCoord.z(), block.timestamp + DrandEvmnet._period()
+    );
   }
 
   function fulfillChunkCommit(Vec3 chunkCoord, DrandData calldata drand) public {

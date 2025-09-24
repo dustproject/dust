@@ -8,6 +8,7 @@ import {
   MAX_HIT_RADIUS,
   MAX_PLAYER_ENERGY,
   ORE_TOOL_BASE_MULTIPLIER,
+  RATE_LIMIT_TIME_INTERVAL,
   SPECIALIZATION_MULTIPLIER,
   TOOL_ACTION_ENERGY_COST,
   WOODEN_TOOL_BASE_MULTIPLIER
@@ -509,7 +510,7 @@ contract HitPlayerTest is DustTest {
 
     // Move to next time bucket and verify can hit again
     vm.roll(block.number + 1);
-    vm.warp(block.timestamp + 2 seconds);
+    vm.warp(block.timestamp + RATE_LIMIT_TIME_INTERVAL);
 
     vm.prank(alice);
     world.hitPlayer(aliceEntityId, bobEntityId, bytes(""));
@@ -540,7 +541,7 @@ contract HitPlayerTest is DustTest {
 
     // Move to next time bucket and verify can hit again
     vm.roll(block.number + 1);
-    vm.warp(block.timestamp + 2 seconds);
+    vm.warp(block.timestamp + RATE_LIMIT_TIME_INTERVAL);
 
     vm.prank(alice);
     world.hitPlayer(aliceEntityId, bobEntityId, slot, bytes(""));

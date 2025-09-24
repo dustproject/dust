@@ -33,8 +33,18 @@ library DrandEvmnet {
   }
 
   /// @notice Get the genesis timestamp of the beacon
+  function _genesisTimestamp() internal pure returns (uint256) {
+    return genesisTimestamp_;
+  }
+
+  /// @notice Get the genesis timestamp of the beacon
   function genesisTimestamp() public pure returns (uint256) {
     return genesisTimestamp_;
+  }
+
+  /// @notice Get the period of the beacon
+  function _period() internal pure returns (uint256) {
+    return period_;
   }
 
   /// @notice Get the period of the beacon

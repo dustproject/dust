@@ -25,7 +25,8 @@ import {
   PLAYER_FALL_ENERGY_COST,
   PLAYER_LAVA_ENERGY_DRAIN_RATE,
   PLAYER_SAFE_FALL_DISTANCE,
-  PLAYER_SWIM_ENERGY_DRAIN_RATE
+  PLAYER_SWIM_ENERGY_DRAIN_RATE,
+  RATE_LIMIT_TIME_INTERVAL
 } from "../src/Constants.sol";
 import { ObjectType } from "../src/types/ObjectType.sol";
 
@@ -864,7 +865,7 @@ contract MoveTest is DustTest {
 
     // Move to next time bucket and verify can move again
     vm.roll(block.number + 1);
-    vm.warp(block.timestamp + 2 seconds);
+    vm.warp(block.timestamp + RATE_LIMIT_TIME_INTERVAL);
 
     Vec3[] memory nextMove = new Vec3[](1);
     nextMove[0] = finalCoord + vec3(0, 0, 1);
@@ -914,7 +915,7 @@ contract MoveTest is DustTest {
 
     // Move to next time bucket and verify can move again
     vm.roll(block.number + 1);
-    vm.warp(block.timestamp + 2 seconds);
+    vm.warp(block.timestamp + RATE_LIMIT_TIME_INTERVAL);
 
     vm.prank(alice);
     world.move(aliceEntityId, newCoords);
