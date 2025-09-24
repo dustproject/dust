@@ -10,13 +10,10 @@ import { console } from "forge-std/console.sol";
 
 import { DustScript } from "./DustScript.sol";
 
-import { DrandBeacon as DrandBeaconTable } from "../src/codegen/tables/DrandBeacon.sol";
 import { RegisterSelectorHook } from "./RegisterSelectorHook.sol";
 import { initObjects } from "./initObjects.sol";
 import { initRecipes } from "./initRecipes.sol";
 import { initTerrain } from "./initTerrain.sol";
-
-import { DrandBeacon } from "../src/utils/DrandBeacon.sol";
 
 contract PostDeploy is DustScript {
   function run(address worldAddress) external {
@@ -32,19 +29,6 @@ contract PostDeploy is DustScript {
     initTerrain();
     initObjects();
     initRecipes();
-
-    uint256[4] memory publicKey_ = [
-      2416910118189096557713698606232949750075245832257361418817199221841198809231,
-      3565178688866727608783247307855519961161197286613423629330948765523825963906,
-      18766085122067595057703228467555884757373773082319035490740181099798629248523,
-      263980444642394177375858669180402387903005329333277938776544051059273779190
-    ];
-    uint256 genesisTimestamp_ = 1727521075;
-    uint256 period_ = 3;
-
-    DrandBeacon beacon = new DrandBeacon(publicKey_, genesisTimestamp_, period_);
-    console.log("DrandBeacon deployed at:", address(beacon));
-    DrandBeaconTable.setBeacon(address(beacon));
 
     vm.stopBroadcast();
   }

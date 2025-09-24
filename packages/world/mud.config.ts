@@ -433,12 +433,6 @@ export default defineWorld({
       },
       key: ["entityId"],
     },
-    DrandBeacon: {
-      schema: {
-        beacon: "address",
-      },
-      key: [],
-    },
 
     // DEPRECATED: replaced by RateLimitUnits
     MoveUnits: {

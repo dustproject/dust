@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-import { IDrandBeacon } from "../../src/utils/IDrandBeacon.sol";
-
-contract TestDrandBeacon is IDrandBeacon {
+contract TestDrandBeacon {
   constructor() { }
 
   /// @notice Get the public key of the beacon

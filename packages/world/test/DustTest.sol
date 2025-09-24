@@ -34,7 +34,6 @@ import { EntityOrientation } from "../src/codegen/tables/EntityOrientation.sol";
 import { Machine } from "../src/codegen/tables/Machine.sol";
 import { Mass } from "../src/codegen/tables/Mass.sol";
 
-import { DrandBeacon as DrandBeaconTable } from "../src/codegen/tables/DrandBeacon.sol";
 import { EntityObjectType } from "../src/codegen/tables/EntityObjectType.sol";
 import { ObjectPhysics } from "../src/codegen/tables/ObjectPhysics.sol";
 
@@ -48,7 +47,6 @@ import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import { DustAssertions } from "./DustAssertions.sol";
 
-import { TestDrandBeacon } from "./utils/TestDrandBeacon.sol";
 import {
   TestDrandUtils,
   TestEnergyUtils,
@@ -87,10 +85,6 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     TestPlayerProgressUtils.init(address(TestPlayerProgressUtils));
     TestPlayerSkillUtils.init(address(TestPlayerSkillUtils));
     TestDrandUtils.init(address(TestDrandUtils));
-
-    // Setup Drand Beacon
-    TestDrandBeacon beacon = new TestDrandBeacon();
-    DrandBeaconTable.setBeacon(address(beacon));
   }
 
   function randomEntityId() internal returns (EntityId) {
