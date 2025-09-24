@@ -96,7 +96,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
   function setupTestDrandLibrary() internal {
     // Get the deployed library address (libraries are deployed when they have public functions)
     // TODO: figure out how to not hardcode this
-    address drandLibAddress = address(0xB77d4EE7b3BaaAe5F5B049C6539a22dD47A5C19A);
+    address drandLibAddress = address(0x8D4E08aC604160C557Cd26F0131Fa70e6c5c55bf);
     require(drandLibAddress != address(0), "DrandEvmnet library not deployed");
 
     // Mock all the library functions to return test values
