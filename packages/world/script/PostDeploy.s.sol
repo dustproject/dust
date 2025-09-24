@@ -6,7 +6,6 @@ import { REGISTRATION_SYSTEM_ID } from "@latticexyz/world/src/modules/init/const
 import { BEFORE_CALL_SYSTEM } from "@latticexyz/world/src/systemHookTypes.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
-import { console } from "forge-std/console.sol";
 
 import { DustScript } from "./DustScript.sol";
 
