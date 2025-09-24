@@ -47,6 +47,8 @@ import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import { DustAssertions } from "./DustAssertions.sol";
 
+import { drandEvmnetSystem } from "../src/codegen/systems/DrandEvmnetSystemLib.sol";
+import { TestDrandEvmnet } from "./utils/TestDrandEvmnet.sol";
 import {
   TestDrandUtils,
   TestEnergyUtils,
@@ -85,6 +87,9 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     TestPlayerProgressUtils.init(address(TestPlayerProgressUtils));
     TestPlayerSkillUtils.init(address(TestPlayerSkillUtils));
     TestDrandUtils.init(address(TestDrandUtils));
+
+    TestDrandEvmnet testDrandEvmnetSystem = new TestDrandEvmnet();
+    world.registerSystem(drandEvmnetSystem.toResourceId(), testDrandEvmnetSystem, true);
   }
 
   function randomEntityId() internal returns (EntityId) {

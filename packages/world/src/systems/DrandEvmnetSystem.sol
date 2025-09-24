@@ -3,7 +3,6 @@ pragma solidity >=0.8.24;
 
 import { BLS } from "@kevincharm/bls-bn254/contracts/BLS.sol";
 import { System } from "@latticexyz/world/src/System.sol";
-import { SSTORE2 } from "solady/utils/SSTORE2.sol";
 
 /// @notice System containing immutable information about a drand beacon.
 // Adapted from https://github.com/frogworksio/anyrand/blob/master/contracts/beacon/DrandBeacon.sol
