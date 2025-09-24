@@ -6,6 +6,7 @@ import { GasReporter } from "@latticexyz/gas-report/src/GasReporter.sol";
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { NamespaceOwner } from "@latticexyz/world/src/codegen/tables/NamespaceOwner.sol";
 import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
+import { console } from "forge-std/console.sol";
 
 import {
   BARE_HANDS_ACTION_ENERGY_COST,
@@ -47,6 +48,7 @@ import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import { DustAssertions } from "./DustAssertions.sol";
 
+import { DrandEvmnet } from "../src/utils/DrandEvmnet.sol";
 import { TestDrandEvmnet } from "./utils/TestDrandEvmnet.sol";
 import {
   TestDrandUtils,
@@ -86,6 +88,43 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     TestPlayerProgressUtils.init(address(TestPlayerProgressUtils));
     TestPlayerSkillUtils.init(address(TestPlayerSkillUtils));
     TestDrandUtils.init(address(TestDrandUtils));
+
+    // Override DrandEvmnet library functions with test values
+    setupTestDrandLibrary();
+  }
+
+  function setupTestDrandLibrary() internal {
+    // Get the deployed library address (libraries are deployed when they have public functions)
+    // TODO: figure out how to not hardcode this
+    address drandLibAddress = address(0xB77d4EE7b3BaaAe5F5B049C6539a22dD47A5C19A);
+    require(drandLibAddress != address(0), "DrandEvmnet library not deployed");
+
+    // Mock all the library functions to return test values
+    vm.mockCall(
+      drandLibAddress, abi.encodeWithSelector(DrandEvmnet.publicKey.selector), abi.encode(TestDrandEvmnet.publicKey())
+    );
+
+    vm.mockCall(
+      drandLibAddress,
+      abi.encodeWithSelector(DrandEvmnet.publicKeyHash.selector),
+      abi.encode(TestDrandEvmnet.publicKeyHash())
+    );
+
+    vm.mockCall(
+      drandLibAddress,
+      abi.encodeWithSelector(DrandEvmnet.genesisTimestamp.selector),
+      abi.encode(TestDrandEvmnet.genesisTimestamp())
+    );
+
+    vm.mockCall(
+      drandLibAddress, abi.encodeWithSelector(DrandEvmnet.period.selector), abi.encode(TestDrandEvmnet.period())
+    );
+
+    vm.mockCall(
+      drandLibAddress,
+      abi.encodeWithSelector(DrandEvmnet.verifyBeaconRound.selector),
+      abi.encode() // Just return without reverting
+    );
   }
 
   function randomEntityId() internal returns (EntityId) {
