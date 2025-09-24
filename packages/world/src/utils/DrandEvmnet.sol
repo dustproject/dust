@@ -2,11 +2,10 @@
 pragma solidity >=0.8.24;
 
 import { BLS } from "@kevincharm/bls-bn254/contracts/BLS.sol";
-import { System } from "@latticexyz/world/src/System.sol";
 
-/// @notice System containing immutable information about a drand beacon.
+/// @notice Library containing immutable information about a drand beacon.
 // Adapted from https://github.com/frogworksio/anyrand/blob/master/contracts/beacon/DrandBeacon.sol
-contract DrandEvmnetSystem is System {
+library DrandEvmnet {
   /// @notice Domain separation tag
   bytes public constant DST = bytes("BLS_SIG_BN254G1_XMD:KECCAK-256_SVDW_RO_NUL_");
 
