@@ -26,6 +26,8 @@ import { ObjectTypes } from "../src/types/ObjectType.sol";
 import { ProgramId } from "../src/types/ProgramId.sol";
 
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
+
+import { DrandEvmnet } from "../src/utils/DrandEvmnet.sol";
 import { DrandData, DrandUtils } from "../src/utils/DrandUtils.sol";
 import { TestDrandUtils } from "./utils/TestUtils.sol";
 
@@ -41,8 +43,8 @@ contract SpawnTest is DustTest {
     setupFlatChunk(vec3(0, 0, 0));
 
     vm.prank(alice);
-    DrandData memory drand =
-      DrandData({ signature: [uint256(0), uint256(0)], roundNumber: block.timestamp - 5 seconds });
+    uint256 currentRoundNumber = (block.timestamp - DrandEvmnet.genesisTimestamp()) / DrandEvmnet.period();
+    DrandData memory drand = DrandData({ signature: [uint256(0), uint256(0)], roundNumber: currentRoundNumber - 2 });
     Vec3 spawnCoord = world.getRandomSpawnCoord(TestDrandUtils.getRandomness(drand), alice);
 
     // Give energy for local shard
