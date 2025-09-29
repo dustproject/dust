@@ -43,7 +43,7 @@ jobs:
         working-directory: packages/world
         run: |
           set -o pipefail
-          wait-on -l deploys/31337/latest.json && GAS_REPORTER_ENABLED=true pnpm mud test --worldAddress=$(awk -F'"' '/"31337":/{getline; print $4}' worlds.json) --forgeOptions='-vvv' | pnpm gas-report --stdin
+          pnpm wait-on -l deploys/31337/latest.json && GAS_REPORTER_ENABLED=true pnpm mud test --worldAddress=$(awk -F'"' '/"31337":/{getline; print $4}' worlds.json) --forgeOptions='-vvv' | pnpm gas-report --stdin
 
       - name: Run ts tests in packages/world
         working-directory: packages/world
