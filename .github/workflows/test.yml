@@ -32,11 +32,18 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      - name: Run anvil
+        run: anvil --block-time 2 --base-fee 50 --gas-limit 100000000 &
+
+      - name: Deploy contracts
+        working-directory: packages/world
+        run: pnpm mud dev-contracts --rpc http://127.0.0.1:8545 &
+
       - name: Run tests in packages/world
         working-directory: packages/world
         run: |
           set -o pipefail
-          GAS_REPORTER_ENABLED=true pnpm mud test --forgeOptions='-vvv' | pnpm gas-report --stdin
+          wait-on -l deploys/31337/latest.json && GAS_REPORTER_ENABLED=true pnpm mud test --worldAddress=$(awk -F'"' '/"31337":/{getline; print $4}' worlds.json) --forgeOptions='-vvv' | pnpm gas-report --stdin
 
       - name: Run ts tests in packages/world
         working-directory: packages/world
