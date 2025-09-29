@@ -64,9 +64,9 @@ contract SpawnTest is DustTest {
 
   function testRandomSpawnPaused() public {
     WorldStatus.setIsPaused(true);
+    uint256 currentRoundNumber = (block.timestamp - DrandEvmnet.genesisTimestamp()) / DrandEvmnet.period();
+    DrandData memory drand = DrandData({ signature: [uint256(0), uint256(0)], roundNumber: currentRoundNumber - 2 });
     vm.expectRevert("DUST is paused. Try again later");
-    DrandData memory drand =
-      DrandData({ signature: [uint256(0), uint256(0)], roundNumber: block.timestamp - 5 seconds });
     world.randomSpawn(drand, vec3(0, 0, 0));
   }
 
@@ -76,8 +76,9 @@ contract SpawnTest is DustTest {
     // Explore chunk at (0, 0, 0)
     setupFlatChunk(vec3(0, 0, 0));
 
+    uint256 currentRoundNumber = (block.timestamp - DrandEvmnet.genesisTimestamp()) / DrandEvmnet.period();
     DrandData memory drand =
-      DrandData({ signature: [uint256(0), uint256(0)], roundNumber: block.timestamp - SPAWN_TIME_RANGE - 1 seconds });
+      DrandData({ signature: [uint256(0), uint256(0)], roundNumber: currentRoundNumber - SPAWN_TIME_RANGE - 1 seconds });
 
     vm.prank(alice);
     vm.expectRevert("Drand round not within time range");
@@ -263,8 +264,8 @@ contract SpawnTest is DustTest {
     // Drain energy from player
     vm.warp(vm.getBlockTimestamp() + (MAX_PLAYER_ENERGY / PLAYER_ENERGY_DRAIN_RATE) + 1);
 
-    DrandData memory drand =
-      DrandData({ signature: [uint256(0), uint256(0)], roundNumber: block.timestamp - 5 seconds });
+    uint256 currentRoundNumber = (block.timestamp - DrandEvmnet.genesisTimestamp()) / DrandEvmnet.period();
+    DrandData memory drand = DrandData({ signature: [uint256(0), uint256(0)], roundNumber: currentRoundNumber - 2 });
 
     vm.prank(alice);
     Vec3 spawnCoord = world.getRandomSpawnCoord(TestDrandUtils.getRandomness(drand), alice);
@@ -282,8 +283,8 @@ contract SpawnTest is DustTest {
     // This should setup a player with energy
     (address alice,,) = setupFlatChunkWithPlayer();
 
-    DrandData memory drand =
-      DrandData({ signature: [uint256(0), uint256(0)], roundNumber: block.timestamp - 5 seconds });
+    uint256 currentRoundNumber = (block.timestamp - DrandEvmnet.genesisTimestamp()) / DrandEvmnet.period();
+    DrandData memory drand = DrandData({ signature: [uint256(0), uint256(0)], roundNumber: currentRoundNumber - 2 });
 
     vm.prank(alice);
     Vec3 spawnCoord = world.getRandomSpawnCoord(TestDrandUtils.getRandomness(drand), alice);
