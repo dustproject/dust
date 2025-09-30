@@ -12,9 +12,13 @@ import { addEnergyToLocalPool, transferEnergyToPool } from "../utils/EnergyUtils
 import { EntityUtils } from "../utils/EntityUtils.sol";
 import { InventoryUtils, SlotAmount, SlotData } from "../utils/InventoryUtils.sol";
 import { CraftNotification, notify } from "../utils/NotifUtils.sol";
+import { PlayerProgressUtils } from "../utils/PlayerProgressUtils.sol";
+import { PlayerSkillUtils } from "../utils/PlayerSkillUtils.sol";
 
 import { CRAFT_ENERGY_COST } from "../Constants.sol";
+
 import { EntityId } from "../types/EntityId.sol";
+import { Math } from "../utils/Math.sol";
 
 import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 
@@ -32,12 +36,18 @@ contract CraftSystem is System {
       caller.requireConnected(station);
     }
 
-    uint128 callerEnergy = transferEnergyToPool(caller, CRAFT_ENERGY_COST);
+    uint256 craftMul = PlayerSkillUtils.getCraftEnergyMultiplierWad(caller, recipe.stationTypeId);
+    uint128 effectiveCost = uint128(Math.mulWad(CRAFT_ENERGY_COST, craftMul));
+    uint128 callerEnergy = transferEnergyToPool(caller, effectiveCost);
     require(callerEnergy > 0, "Not enough energy to craft");
 
     CraftLib._consumeRecipeInputs(caller, recipe, inputs);
     CraftLib._createRecipeOutputs(caller, recipe);
-    CraftLib._handleEnergyConservation(caller, recipe);
+    uint128 massEnergy = CraftLib._handleEnergyConservation(caller, recipe);
+
+    // Track crafting activity
+    // TODO: this is the output's mass+energy, should we track input instead?
+    PlayerProgressUtils.trackCraft(caller, recipe.stationTypeId, massEnergy);
 
     notify(caller, CraftNotification({ recipeId: recipeId, station: station }));
   }
@@ -111,7 +121,7 @@ library CraftLib {
     return withdrawals;
   }
 
-  function _handleEnergyConservation(EntityId caller, RecipesData memory recipe) public {
+  function _handleEnergyConservation(EntityId caller, RecipesData memory recipe) public returns (uint128 massEnergy) {
     // Calculate total input mass+energy (excluding coal recipes)
     uint128 totalInputMassEnergy = 0;
     for (uint256 i = 0; i < recipe.inputTypes.length; i++) {
@@ -145,5 +155,7 @@ library CraftLib {
       uint128 excessEnergy = totalInputMassEnergy - totalOutputMassEnergy;
       addEnergyToLocalPool(caller._getPosition(), excessEnergy);
     }
+
+    return totalOutputMassEnergy;
   }
 }

@@ -8,9 +8,10 @@ import { EnergyData } from "../codegen/tables/Energy.sol";
 import { addEnergyToLocalPool, decreasePlayerEnergy, updatePlayerEnergy } from "../utils/EnergyUtils.sol";
 import { ForceFieldUtils } from "../utils/ForceFieldUtils.sol";
 import { HitPlayerNotification, notify } from "../utils/NotifUtils.sol";
+import { PlayerProgressUtils } from "../utils/PlayerProgressUtils.sol";
 import { ToolData, ToolUtils } from "../utils/ToolUtils.sol";
 
-import { HIT_ACTION_MODIFIER, MAX_HIT_RADIUS } from "../Constants.sol";
+import { MAX_HIT_RADIUS } from "../Constants.sol";
 
 import { EntityId } from "../types/EntityId.sol";
 import { ObjectTypes } from "../types/ObjectType.sol";
@@ -33,7 +34,7 @@ contract HitPlayerSystem is System {
 
     (, Vec3 targetCoord) = caller.requireInRange(target, MAX_HIT_RADIUS);
 
-    target = target.baseEntityId();
+    target = target._baseEntityId();
 
     require(target != caller, "Cannot hit yourself");
     require(target._exists(), "No entity at target location");
@@ -52,8 +53,8 @@ contract HitPlayerSystem is System {
     // Get tool data for damage calculation
     ToolData memory toolData = ToolUtils.getToolData(caller, toolSlot);
 
-    // Use tool and get total damage (handles energy costs internally)
-    uint128 damage = toolData.use(targetEnergy, HIT_ACTION_MODIFIER, toolData.toolType.isWhacker());
+    // Use tool and get total damage (skill-aware, action-specific)
+    uint128 damage = toolData.hitPlayer(targetEnergy);
 
     // If caller died (damage == 0), return early
     if (damage == 0) {
@@ -66,11 +67,16 @@ contract HitPlayerSystem is System {
     // Add target's total damage to target's local pool
     addEnergyToLocalPool(targetCoord, damage);
 
-    _requireHitsAllowed(caller, target, targetCoord, toolData.tool, damage, extraData);
+    // Track damage dealt
+    PlayerProgressUtils.trackHitPlayer(caller, damage);
+
+    HitPlayerLib._requireHitsAllowed(caller, target, targetCoord, toolData.tool, damage, extraData);
 
     notify(caller, HitPlayerNotification({ targetPlayer: target, targetCoord: targetCoord, damage: damage }));
   }
+}
 
+library HitPlayerLib {
   function _requireHitsAllowed(
     EntityId caller,
     EntityId target,
@@ -78,13 +84,9 @@ contract HitPlayerSystem is System {
     EntityId tool,
     uint128 totalDamage,
     bytes calldata extraData
-  ) internal {
+  ) public {
     // Check if target is within a force field and call hooks
     (ProgramId program, EntityId hookTarget, EnergyData memory energyData) = ForceFieldUtils.getHookTarget(targetCoord);
-
-    if (!program.exists()) {
-      return;
-    }
 
     program.hook({ caller: caller, target: hookTarget, revertOnFailure: energyData.energy > 0, extraData: extraData })
       .onHit(target, tool, totalDamage);

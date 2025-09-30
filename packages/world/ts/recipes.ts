@@ -123,6 +123,13 @@ export const recipes: Recipe[] = [
     ],
     outputs: [["Powerstone", 1]],
   },
+  // {
+  //   inputs: [
+  //     ["IronBar", 3],
+  //     ["Stone", 1],
+  //   ],
+  //   outputs: [["Anvil", 1]],
+  // },
   {
     station: "Workbench",
     inputs: [
@@ -155,18 +162,22 @@ export const recipes: Recipe[] = [
     outputs: [["Bed", 1]],
   },
   {
+    station: "Workbench",
     inputs: [["AnyPlank", 5]],
     outputs: [["WoodenPick", 1]],
   },
   {
+    station: "Workbench",
     inputs: [["AnyPlank", 5]],
     outputs: [["WoodenAxe", 1]],
   },
   {
+    station: "Workbench",
     inputs: [["AnyPlank", 8]],
     outputs: [["WoodenWhacker", 1]],
   },
   {
+    station: "Workbench",
     inputs: [["AnyPlank", 4]],
     outputs: [["WoodenHoe", 1]],
   },

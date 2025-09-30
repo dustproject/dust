@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.24;
 
-uint256 constant PRECISION_MULTIPLIER = 1e18;
+import { FixedPointMathLib } from "solady/utils/FixedPointMathLib.sol";
+
+uint256 constant WAD = FixedPointMathLib.WAD;
 
 uint32 constant MAX_ENTITY_INFLUENCE_RADIUS = 10;
 uint32 constant MAX_PICKUP_RADIUS = 6;
@@ -60,6 +62,7 @@ uint128 constant SPECIALIZATION_MULTIPLIER = 3; // 3x bonus for using the right 
 
 // Action modifiers (fractional values use ACTION_MODIFIER_DENOMINATOR)
 uint128 constant ACTION_MODIFIER_DENOMINATOR = 1e18;
+uint128 constant TILL_ACTION_MODIFIER = ACTION_MODIFIER_DENOMINATOR; // 1x (no change for tilling)
 uint128 constant MINE_ACTION_MODIFIER = ACTION_MODIFIER_DENOMINATOR; // 1x (no change for mining)
 uint128 constant HIT_ACTION_MODIFIER = ACTION_MODIFIER_DENOMINATOR / 100; // ~1/100x
 
@@ -103,3 +106,32 @@ uint128 constant HIT_MACHINE_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; /
 // Work rate limits
 uint128 constant MINE_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // 10 mines per second (20 per block)
 uint128 constant BUILD_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // 10 builds per second (20 per block)
+
+// Progress decay constants
+int256 constant LN2_WAD = 693147180559945309; // ln(2) in 1e18
+int256 constant PROGRESS_DECAY_HALF_LIFE = 14 days; // every 14 days progress decays by half
+int256 constant PROGRESS_DECAY_LAMBDA_WAD = LN2_WAD / PROGRESS_DECAY_HALF_LIFE;
+
+// Player skills (progress-based energy discounts)
+// Maximum energy discount (WAD scale). 0.30e18 = 30% discount
+uint128 constant SKILL_ENERGY_MAX_DISCOUNT_WAD = 3e17; // 30%
+
+// Smooth-then-cap parameterization: "effort to reach max" per activity type.
+// We compute a smooth curve f(x)=x/(x+s), then normalize by f(xCap) and cap at 1.
+// s is set equal to xCap for an intuitive shape; xCap is derived from the below anchors.
+
+// Mining: mined mass to reach max
+uint128 constant SKILL_MINING_MASS_TO_MAX = 9000000000000000000 * 1000; // 1000 obsidian blocks
+
+// Movement: energy to reach max (direct anchors for skills)
+uint128 constant SKILL_MOVE_ENERGY_TO_MAX = MOVE_ENERGY_COST * 100 hours / 15; // ~15 steps/s * 100h
+
+// Falling: number of over-safe fall blocks to reach max
+uint128 constant SKILL_FALL_BLOCKS_TO_MAX = 1000;
+uint128 constant SKILL_FALL_ENERGY_TO_MAX = PLAYER_FALL_ENERGY_COST * SKILL_FALL_BLOCKS_TO_MAX;
+
+// Anchors (energy units) to reach max benefit
+uint128 constant SKILL_HIT_PLAYER_ENERGY_TO_MAX = MAX_PLAYER_ENERGY * 100; // killing 100 full-energy players
+uint128 constant SKILL_HIT_MACHINE_ENERGY_TO_MAX = 1000000e14; // taking down a 1 million force field
+uint128 constant SKILL_BUILD_MASS_TO_MAX = 9000000000000000000 * 1000; // build 1000 obsidian blocks
+uint128 constant SKILL_CRAFT_MASS_ENERGY_TO_MAX = 15009000000000000000 * 500; // craft 500 diamond picks
