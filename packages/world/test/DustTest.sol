@@ -6,10 +6,11 @@ import { GasReporter } from "@latticexyz/gas-report/src/GasReporter.sol";
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { NamespaceOwner } from "@latticexyz/world/src/codegen/tables/NamespaceOwner.sol";
 import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
+import { console } from "forge-std/console.sol";
 
 import {
   BARE_HANDS_ACTION_ENERGY_COST,
-  CHUNK_COMMIT_EXPIRY_BLOCKS,
+  CHUNK_COMMIT_EXPIRY_TIME,
   CHUNK_SIZE,
   MAX_FLUID_LEVEL,
   MAX_PLAYER_ENERGY,
@@ -26,6 +27,7 @@ import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
 import { Orientation } from "../src/types/Orientation.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
+import { ChunkCommitment } from "../src/codegen/tables/ChunkCommitment.sol";
 import { Energy, EnergyData } from "../src/codegen/tables/Energy.sol";
 
 import { EntityOrientation } from "../src/codegen/tables/EntityOrientation.sol";
@@ -45,7 +47,10 @@ import { encodeChunk } from "./utils/encodeChunk.sol";
 import { EntityPosition, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
 import { DustAssertions } from "./DustAssertions.sol";
+
+import { DrandEvmnet } from "../src/utils/DrandEvmnet.sol";
 import {
+  TestDrandUtils,
   TestEnergyUtils,
   TestEntityUtils,
   TestForceFieldUtils,
@@ -57,6 +62,11 @@ import {
 } from "./utils/TestUtils.sol";
 
 import { IWorld } from "../src/codegen/world/IWorld.sol";
+
+struct DeployedContractInfo {
+  address deployedAddress;
+  string label;
+}
 
 abstract contract DustTest is MudTest, GasReporter, DustAssertions {
   IWorld internal world;
@@ -81,6 +91,35 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     TestEnergyUtils.init(address(TestEnergyUtils));
     TestPlayerProgressUtils.init(address(TestPlayerProgressUtils));
     TestPlayerSkillUtils.init(address(TestPlayerSkillUtils));
+    TestDrandUtils.init(address(TestDrandUtils));
+
+    mockDrandLibrary();
+  }
+
+  function mockDrandLibrary() internal {
+    string memory root = vm.projectRoot();
+    string memory path = string.concat(root, "/deploys/31337/latest.json");
+    string memory json = vm.readFile(path);
+
+    bytes memory data = vm.parseJson(json, ".contracts");
+    DeployedContractInfo[] memory contracts = abi.decode(data, (DeployedContractInfo[]));
+    address drandLibAddress = address(0);
+    for (uint256 i = 0; i < contracts.length; i++) {
+      if (
+        keccak256(abi.encodePacked(contracts[i].label))
+          == keccak256(abi.encodePacked("src/utils/DrandEvmnet.sol:DrandEvmnet library"))
+      ) {
+        drandLibAddress = contracts[i].deployedAddress;
+        break;
+      }
+    }
+    require(drandLibAddress != address(0), "DrandEvmnet library not deployed");
+
+    vm.mockCall(
+      drandLibAddress,
+      abi.encodeWithSelector(DrandEvmnet.verifyBeaconRound.selector),
+      abi.encode() // Just return without reverting
+    );
   }
 
   function randomEntityId() internal returns (EntityId) {
@@ -299,16 +338,14 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     return forceFieldEntityId;
   }
 
-  function newCommit(address commiterAddress, EntityId commiter, Vec3 coord, bytes32 blockHash) internal {
+  function newCommit(address commiterAddress, EntityId commiter, Vec3 coord, uint256 randomness) internal {
     // Set up chunk commitment for randomness when mining grass
     Vec3 chunkCoord = coord.toChunkCoord();
 
-    vm.roll(vm.getBlockNumber() + CHUNK_COMMIT_EXPIRY_BLOCKS);
+    vm.warp(vm.getBlockTimestamp() + CHUNK_COMMIT_EXPIRY_TIME + 5 seconds);
     vm.prank(commiterAddress);
-    world.chunkCommit(commiter, chunkCoord);
-    // Move forward 2 blocks to make the commitment valid
-    vm.roll(vm.getBlockNumber() + 2);
+    world.initChunkCommit(commiter, chunkCoord);
 
-    vm.setBlockhash(vm.getBlockNumber() - 1, blockHash);
+    ChunkCommitment.setRandomness(chunkCoord.x(), chunkCoord.y(), chunkCoord.z(), randomness);
   }
 }

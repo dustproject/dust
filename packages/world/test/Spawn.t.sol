@@ -13,7 +13,12 @@ import { DustTest } from "./DustTest.sol";
 
 import { LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
 
-import { MACHINE_ENERGY_DRAIN_RATE, MAX_PLAYER_ENERGY, PLAYER_ENERGY_DRAIN_RATE } from "../src/Constants.sol";
+import {
+  MACHINE_ENERGY_DRAIN_RATE,
+  MAX_PLAYER_ENERGY,
+  PLAYER_ENERGY_DRAIN_RATE,
+  SPAWN_TIME_RANGE
+} from "../src/Constants.sol";
 import { EntityId } from "../src/types/EntityId.sol";
 
 import { ObjectTypes } from "../src/types/ObjectType.sol";
@@ -22,20 +27,25 @@ import { ProgramId } from "../src/types/ProgramId.sol";
 
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
+import { DrandEvmnet } from "../src/utils/DrandEvmnet.sol";
+import { DrandData, DrandUtils } from "../src/utils/DrandUtils.sol";
+import { TestDrandUtils } from "./utils/TestUtils.sol";
+
 contract TestSpawnProgram is System {
   fallback() external { }
 }
 
 contract SpawnTest is DustTest {
   function testRandomSpawn() public {
-    uint256 blockNumber = vm.getBlockNumber() - 5;
     address alice = vm.randomAddress();
 
     // Explore chunk at (0, 0, 0)
     setupFlatChunk(vec3(0, 0, 0));
 
     vm.prank(alice);
-    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice);
+    uint256 currentRoundNumber = (block.timestamp - DrandEvmnet.genesisTimestamp()) / DrandEvmnet.period();
+    DrandData memory drand = DrandData({ signature: [uint256(0), uint256(0)], roundNumber: currentRoundNumber - 2 });
+    Vec3 spawnCoord = world.getRandomSpawnCoord(TestDrandUtils.getRandomness(drand), alice);
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
@@ -43,25 +53,36 @@ contract SpawnTest is DustTest {
 
     vm.prank(alice);
     startGasReport("randomSpawn");
-    EntityId playerEntityId = world.randomSpawn(blockNumber, spawnCoord);
+    EntityId playerEntityId = world.randomSpawn(drand, spawnCoord);
     endGasReport();
     assertTrue(playerEntityId.exists());
 
     assertEq(
-      Energy.getEnergy(playerEntityId), MAX_PLAYER_ENERGY * 3 / 10, "Player energy is not correct after random spawn"
+      Energy.getEnergy(playerEntityId), (MAX_PLAYER_ENERGY * 3) / 10, "Player energy is not correct after random spawn"
     );
   }
 
   function testRandomSpawnPaused() public {
     WorldStatus.setIsPaused(true);
+    uint256 currentRoundNumber = (block.timestamp - DrandEvmnet.genesisTimestamp()) / DrandEvmnet.period();
+    DrandData memory drand = DrandData({ signature: [uint256(0), uint256(0)], roundNumber: currentRoundNumber - 2 });
     vm.expectRevert("DUST is paused. Try again later");
-    world.randomSpawn(vm.getBlockNumber(), vec3(0, 0, 0));
+    world.randomSpawn(drand, vec3(0, 0, 0));
   }
 
-  function testRandomSpawnFailsDueToOldBlock() public {
-    uint256 pastBlock = vm.getBlockNumber() - 21;
-    vm.expectRevert("Can only choose past 20 blocks");
-    world.randomSpawn(pastBlock, vec3(0, 0, 0));
+  function testRandomSpawnFailsDueToOldDrand() public {
+    address alice = vm.randomAddress();
+
+    // Explore chunk at (0, 0, 0)
+    setupFlatChunk(vec3(0, 0, 0));
+
+    uint256 currentRoundNumber = (block.timestamp - DrandEvmnet.genesisTimestamp()) / DrandEvmnet.period();
+    DrandData memory drand =
+      DrandData({ signature: [uint256(0), uint256(0)], roundNumber: currentRoundNumber - SPAWN_TIME_RANGE - 1 seconds });
+
+    vm.prank(alice);
+    vm.expectRevert("Drand round not within time range");
+    world.randomSpawn(drand, vec3(0, 0, 0));
   }
 
   function testSpawnTile() public {
@@ -106,14 +127,13 @@ contract SpawnTest is DustTest {
   }
 
   function testSpawnFailsIfNoValidSpawnCoord() public {
-    uint256 blockNumber = vm.getBlockNumber() - 5;
     address alice = vm.randomAddress();
 
     setupAirChunk(vec3(0, 0, 0));
 
     vm.prank(alice);
     vm.expectRevert("No valid spawn coord found in chunk");
-    world.getRandomSpawnCoord(blockNumber, alice);
+    world.getRandomSpawnCoord(1, alice);
   }
 
   function testSpawnFailsIfNoSpawnTile() public {
@@ -244,17 +264,18 @@ contract SpawnTest is DustTest {
     // Drain energy from player
     vm.warp(vm.getBlockTimestamp() + (MAX_PLAYER_ENERGY / PLAYER_ENERGY_DRAIN_RATE) + 1);
 
-    uint256 blockNumber = vm.getBlockNumber() - 5;
+    uint256 currentRoundNumber = (block.timestamp - DrandEvmnet.genesisTimestamp()) / DrandEvmnet.period();
+    DrandData memory drand = DrandData({ signature: [uint256(0), uint256(0)], roundNumber: currentRoundNumber - 2 });
 
     vm.prank(alice);
-    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice);
+    Vec3 spawnCoord = world.getRandomSpawnCoord(TestDrandUtils.getRandomness(drand), alice);
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
     LocalEnergyPool.set(shardCoord, MAX_PLAYER_ENERGY);
 
     vm.prank(alice);
-    EntityId playerEntityId = world.randomSpawn(blockNumber, spawnCoord);
+    EntityId playerEntityId = world.randomSpawn(drand, spawnCoord);
     assertEq(playerEntityId, aliceEntityId, "Player entity doesn't match");
   }
 
@@ -262,10 +283,11 @@ contract SpawnTest is DustTest {
     // This should setup a player with energy
     (address alice,,) = setupFlatChunkWithPlayer();
 
-    uint256 blockNumber = vm.getBlockNumber() - 5;
+    uint256 currentRoundNumber = (block.timestamp - DrandEvmnet.genesisTimestamp()) / DrandEvmnet.period();
+    DrandData memory drand = DrandData({ signature: [uint256(0), uint256(0)], roundNumber: currentRoundNumber - 2 });
 
     vm.prank(alice);
-    Vec3 spawnCoord = world.getRandomSpawnCoord(blockNumber, alice);
+    Vec3 spawnCoord = world.getRandomSpawnCoord(TestDrandUtils.getRandomness(drand), alice);
 
     // Give energy for local shard
     Vec3 shardCoord = spawnCoord.toLocalEnergyPoolShardCoord();
@@ -274,7 +296,7 @@ contract SpawnTest is DustTest {
     // Spawn player should fail as the player has energy
     vm.prank(alice);
     vm.expectRevert("Player already spawned");
-    world.randomSpawn(blockNumber, spawnCoord);
+    world.randomSpawn(drand, spawnCoord);
   }
 
   function testSpawnRespawn() public {

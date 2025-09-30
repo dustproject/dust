@@ -28,7 +28,7 @@ import { PlayerBed } from "./tables/PlayerBed.sol";
 import { EntityProgram } from "./tables/EntityProgram.sol";
 import { Fragment, FragmentData } from "./tables/Fragment.sol";
 import { Machine, MachineData } from "./tables/Machine.sol";
-import { ChunkCommitment } from "./tables/ChunkCommitment.sol";
+import { ChunkCommitment, ChunkCommitmentData } from "./tables/ChunkCommitment.sol";
 import { ResourcePosition, ResourcePositionData } from "./tables/ResourcePosition.sol";
 import { ResourceCount } from "./tables/ResourceCount.sol";
 import { BurnedResourceCount } from "./tables/BurnedResourceCount.sol";

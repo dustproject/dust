@@ -22,6 +22,8 @@ import {
 } from "../../src/utils/EnergyUtils.sol";
 
 import { ActivityType } from "../../src/codegen/common.sol";
+
+import { DrandData, DrandUtils } from "../../src/utils/DrandUtils.sol";
 import { EntityUtils } from "../../src/utils/EntityUtils.sol";
 import { ForceFieldUtils } from "../../src/utils/ForceFieldUtils.sol";
 import { InventoryUtils, SlotAmount, SlotTransfer } from "../../src/utils/InventoryUtils.sol";
@@ -366,5 +368,27 @@ library TestPlayerSkillUtils {
 
   function getBuildEnergyMultiplierWad(EntityId player) public asWorld returns (uint256) {
     return PlayerSkillUtils.getBuildEnergyMultiplierWad(player);
+  }
+}
+
+library TestDrandUtils {
+  bytes32 private constant LIB_ADDRESS_SLOT = keccak256("TestUtils.TestDrandUtils");
+
+  modifier asWorld() {
+    TestUtils.asWorld(LIB_ADDRESS_SLOT);
+    _;
+  }
+
+  // Register library address for delegatecall harness
+  function init(address libAddress) public {
+    TestUtils.init(LIB_ADDRESS_SLOT, libAddress);
+  }
+
+  function verifyWithinTimeRange(DrandData calldata drand, uint256 startTime, uint256 timeRange) public asWorld {
+    return DrandUtils.verifyWithinTimeRange(drand, startTime, timeRange);
+  }
+
+  function getRandomness(DrandData calldata drand) public view returns (uint256) {
+    return DrandUtils.getRandomness(drand);
   }
 }

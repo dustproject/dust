@@ -115,7 +115,7 @@ contract TreeTest is DustTest {
     vm.warp(fullyGrownAt + 1);
 
     // Set up chunk commitment for tree growth randomness
-    newCommit(alice, aliceEntityId, seedCoord, bytes32(0));
+    newCommit(alice, aliceEntityId, seedCoord, uint256(1));
 
     // Grow the tree
     vm.prank(alice);
@@ -187,7 +187,7 @@ contract TreeTest is DustTest {
     vm.warp(fullyGrownAt + 1);
 
     // Set up chunk commitment for tree growth randomness
-    newCommit(alice, aliceEntityId, seedCoord, bytes32(0));
+    newCommit(alice, aliceEntityId, seedCoord, uint256(1));
 
     // Grow the tree
     vm.prank(alice);
@@ -230,7 +230,7 @@ contract TreeTest is DustTest {
     vm.warp(fullyGrownAt + 1);
 
     // Set up chunk commitment for tree growth randomness
-    newCommit(alice, aliceEntityId, seedCoord, bytes32(0));
+    newCommit(alice, aliceEntityId, seedCoord, uint256(1));
 
     // Grow the tree
     vm.prank(alice);
@@ -240,7 +240,7 @@ contract TreeTest is DustTest {
     assertEq(EntityObjectType.get(seedEntityId), ObjectTypes.OakLog, "Seed was not converted to log");
 
     // Set up chunk commitment for randomness when mining
-    newCommit(alice, aliceEntityId, seedCoord, bytes32(0));
+    newCommit(alice, aliceEntityId, seedCoord, uint256(1));
 
     // Harvest the mature tree log
     vm.prank(alice);
@@ -281,7 +281,7 @@ contract TreeTest is DustTest {
     // Set up chunk commitment for randomness when mining
     Vec3 chunkCoord = seedCoord.toChunkCoord();
     vm.prank(alice);
-    world.chunkCommit(aliceEntityId, chunkCoord);
+    world.initChunkCommit(aliceEntityId, chunkCoord);
     // Move forward a block to make the commitment valid
     vm.roll(block.number + 1);
 
@@ -319,7 +319,7 @@ contract TreeTest is DustTest {
     assertEq(leafType, ObjectTypes.OakLeaf, "Leaf object type not set");
 
     // Set up chunk commitment for randomness when mining
-    newCommit(alice, aliceEntityId, leafCoord, bytes32(uint256(19)));
+    newCommit(alice, aliceEntityId, leafCoord, uint256(19));
 
     // Harvest the leaf
     vm.prank(alice);
@@ -375,7 +375,7 @@ contract TreeTest is DustTest {
       vm.warp(fullyGrownAt + 1);
 
       // Set up chunk commitment for tree growth randomness
-      newCommit(alice, aliceEntityId, seedCoord, bytes32(uint256(i)));
+      newCommit(alice, aliceEntityId, seedCoord, uint256(i + 1));
 
       // Grow the tree
       vm.prank(alice);
@@ -424,7 +424,7 @@ contract TreeTest is DustTest {
     vm.warp(fullyGrownAt + 1);
 
     // Set up chunk commitment for tree growth randomness
-    newCommit(alice, aliceEntityId, seedCoord, bytes32(0));
+    newCommit(alice, aliceEntityId, seedCoord, uint256(1));
 
     vm.prank(alice);
     world.growSeed(aliceEntityId, seedCoord);
