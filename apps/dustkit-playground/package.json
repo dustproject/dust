@@ -11,14 +11,14 @@
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.0",
     "vite": "^6.3.0",
-    "vite-plugin-mud": "2.2.24-5414ec7e5f7210dec8dad82fc2a5cd2f699c9a82"
+    "vite-plugin-mud": "2.2.24-dc349e170742ab243c779d9a73a6bfbcc394b707"
   },
   "dependencies": {
     "@dust/world": "workspace:*",
     "@dust/programs": "workspace:*",
-    "@latticexyz/common": "2.2.24-5414ec7e5f7210dec8dad82fc2a5cd2f699c9a82",
-    "@latticexyz/entrykit": "2.2.24-5414ec7e5f7210dec8dad82fc2a5cd2f699c9a82",
-    "@latticexyz/world": "2.2.24-5414ec7e5f7210dec8dad82fc2a5cd2f699c9a82",
+    "@latticexyz/common": "2.2.24-dc349e170742ab243c779d9a73a6bfbcc394b707",
+    "@latticexyz/entrykit": "2.2.24-dc349e170742ab243c779d9a73a6bfbcc394b707",
+    "@latticexyz/world": "2.2.24-dc349e170742ab243c779d9a73a6bfbcc394b707",
     "@tanstack/react-query": "^5.74.4",
     "dustkit": "workspace:*",
     "ox": "^0.6.10",
