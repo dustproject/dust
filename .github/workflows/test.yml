@@ -36,7 +36,7 @@ jobs:
         working-directory: packages/world
         run: |
           set -o pipefail
-          GAS_REPORTER_ENABLED=true pnpm mud test --forgeOptions='-vvv' | pnpm gas-report --stdin
+          GAS_REPORTER_ENABLED=true pnpm mud test --forgeOptions='-vvv' --saveDeployment=true | pnpm gas-report --stdin
 
       - name: Run ts tests in packages/world
         working-directory: packages/world
