@@ -43,7 +43,7 @@ contract NatureSystem is System {
     ChunkCommitmentData memory commitment = ChunkCommitment._get(chunkCoord.x(), chunkCoord.y(), chunkCoord.z());
     require(block.timestamp > commitment.timestamp + CHUNK_COMMIT_EXPIRY_TIME, "Existing chunk commitment");
 
-    // Commit starting from next timestamp
+    // Commit starting from next drand timestamp
     ChunkCommitment._set(
       chunkCoord.x(),
       chunkCoord.y(),
