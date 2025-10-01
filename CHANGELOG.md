@@ -1,12 +1,17 @@
 # Changelog
 
+## 2025-09-30
+
+- Switched randomness from using blockhash to [drand](https://www.drand.love/)
+- Changed rate limits to be based on timestamp instead of block number
+
 ## 2025-09-09
 
 - Body progression
-    - Progress tracking for hitting, crafting, mining, building and moving
-    - Progress decays with inactivity up to 1/3 of the accumulated progress
-    - Both current progress and accumulated progress are halved on death
-    - Energy discount of up to 30% is applied depending on progress
+  - Progress tracking for hitting, crafting, mining, building and moving
+  - Progress decays with inactivity up to 1/3 of the accumulated progress
+  - Both current progress and accumulated progress are halved on death
+  - Energy discount of up to 30% is applied depending on progress
 - Wooden tools now require a station to craft
 
 ## 2025-09-01

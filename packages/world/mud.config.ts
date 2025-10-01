@@ -244,13 +244,14 @@ export default defineWorld({
       key: ["x", "y", "z"],
     },
     RateLimitUnits: {
+      name: "V2RateLimitUn",
       schema: {
         entityId: "EntityId",
-        blockNumber: "uint256",
+        timestamp: "uint256",
         rateLimitType: "RateLimitType",
         units: "uint128",
       },
-      key: ["entityId", "blockNumber", "rateLimitType"],
+      key: ["entityId", "timestamp", "rateLimitType"],
     },
     // ------------------------------------------------------------
     // Player
@@ -322,11 +323,13 @@ export default defineWorld({
     // Resources
     // ------------------------------------------------------------
     ChunkCommitment: {
+      name: "V2ChunkCommitmen",
       schema: {
         x: "int32",
         y: "int32",
         z: "int32",
-        blockNumber: "uint256",
+        timestamp: "uint256",
+        randomness: "uint256",
       },
       key: ["x", "y", "z"],
     },

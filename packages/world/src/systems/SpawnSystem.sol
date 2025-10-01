@@ -15,7 +15,7 @@ import {
   MAX_PLAYER_ENERGY,
   MAX_RESPAWN_HALF_WIDTH,
   PLAYER_ENERGY_DRAIN_RATE,
-  SPAWN_BLOCK_RANGE
+  SPAWN_TIME_RANGE
 } from "../Constants.sol";
 import { ObjectType } from "../types/ObjectType.sol";
 import { ProgramId } from "../types/ProgramId.sol";
@@ -33,12 +33,13 @@ import { PlayerUtils } from "../utils/PlayerUtils.sol";
 import { MoveLib } from "./libraries/MoveLib.sol";
 
 import { EntityId } from "../types/EntityId.sol";
+import { DrandData } from "../utils/DrandUtils.sol";
 
 contract SpawnSystem is System {
   using LibPRNG for LibPRNG.PRNG;
 
-  function getRandomSpawnCoord(uint256 blockNumber, address sender) public view returns (Vec3 spawnCoord) {
-    Vec3 spawnChunk = getRandomSpawnChunk(blockNumber, sender);
+  function getRandomSpawnCoord(uint256 randomness, address sender) public view returns (Vec3 spawnCoord) {
+    Vec3 spawnChunk = getRandomSpawnChunk(randomness, sender);
     spawnCoord = spawnChunk.mul(CHUNK_SIZE);
 
     Vec3 backupSpawnCoord = vec3(0, 0, 0);
@@ -70,13 +71,13 @@ contract SpawnSystem is System {
     revert("No valid spawn coord found in chunk");
   }
 
-  function getRandomSpawnChunk(uint256 blockNumber, address sender) public view returns (Vec3 chunk) {
+  function getRandomSpawnChunk(uint256 randomness, address sender) public view returns (Vec3 chunk) {
     uint256 exploredChunkCount = SurfaceChunkCount._get();
     require(exploredChunkCount > 0, "No surface chunks available");
 
     // Randomness used for the chunk index and relative coordinates
     LibPRNG.PRNG memory prng;
-    prng.seed(uint256(keccak256(abi.encodePacked(blockhash(blockNumber), sender))));
+    prng.seed(uint256(keccak256(abi.encodePacked(randomness, sender))));
     uint256 chunkIndex = prng.uniform(exploredChunkCount);
 
     return SurfaceChunkByIndex._get(chunkIndex);
@@ -110,21 +111,17 @@ contract SpawnSystem is System {
     return true;
   }
 
-  function randomSpawn(uint256 blockNumber, Vec3 spawnCoord) public returns (EntityId) {
+  function randomSpawn(DrandData calldata drand, Vec3 spawnCoord) public returns (EntityId) {
     checkWorldStatus();
-    require(
-      blockNumber < block.number && blockNumber >= block.number - SPAWN_BLOCK_RANGE, "Can only choose past 20 blocks"
-    );
+    drand.verifyWithinTimeRange(block.timestamp, SPAWN_TIME_RANGE);
 
-    // Vec3 spawnChunk = getRandomSpawnChunk(blockNumber, _msgSender());
-    // require(spawnChunk == spawnCoord.toChunkCoord(), "Spawn coordinate cannot be in a different chunk");
-    spawnCoord = getRandomSpawnCoord(blockNumber, _msgSender());
+    spawnCoord = getRandomSpawnCoord(drand.getRandomness(), _msgSender());
 
     (EntityId forceField,) = ForceFieldUtils.getForceField(spawnCoord);
     require(!forceField._exists(), "Cannot spawn in force field");
 
     // 30% of max player energy
-    uint128 spawnEnergy = MAX_PLAYER_ENERGY * 3 / 10;
+    uint128 spawnEnergy = (MAX_PLAYER_ENERGY * 3) / 10;
 
     // Extract energy from local pool (half of max player energy)
     removeEnergyFromLocalPool(spawnCoord, spawnEnergy);
@@ -132,12 +129,17 @@ contract SpawnSystem is System {
     return _spawnPlayer(spawnCoord, spawnEnergy);
   }
 
+  /// @notice deprecated
+  function randomSpawn(uint256 blockNumber, Vec3 spawnCoord) public returns (EntityId) {
+    revert("Deprecated, use randomSpawn with drand signature");
+  }
+
   function spawn(EntityId spawnTile, Vec3 spawnCoord, uint128 spawnEnergy, bytes memory extraData)
     public
     returns (EntityId)
   {
     checkWorldStatus();
-    require(spawnEnergy <= MAX_PLAYER_ENERGY * 3 / 10, "Cannot spawn with more than 30% of max player energy");
+    require(spawnEnergy <= (MAX_PLAYER_ENERGY * 3) / 10, "Cannot spawn with more than 30% of max player energy");
     ObjectType objectType = spawnTile._getObjectType();
     require(objectType == ObjectTypes.SpawnTile, "Not a spawn tile");
 

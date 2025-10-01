@@ -21,8 +21,8 @@ import { EntityId } from "../../types/EntityId.sol";
 import { RateLimitType } from "../common.sol";
 
 library RateLimitUnits {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "RateLimitUnits", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x74620000000000000000000000000000526174654c696d6974556e6974730000);
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "", name: "V2RateLimitUn", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x746200000000000000000000000000005632526174654c696d6974556e000000);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0010010010000000000000000000000000000000000000000000000000000000);
@@ -39,7 +39,7 @@ library RateLimitUnits {
   function getKeyNames() internal pure returns (string[] memory keyNames) {
     keyNames = new string[](3);
     keyNames[0] = "entityId";
-    keyNames[1] = "blockNumber";
+    keyNames[1] = "timestamp";
     keyNames[2] = "rateLimitType";
   }
 
@@ -71,12 +71,12 @@ library RateLimitUnits {
    */
   function getUnits(
     EntityId entityId,
-    uint256 blockNumber,
+    uint256 timestamp,
     RateLimitType rateLimitType
   ) internal view returns (uint128 units) {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(entityId);
-    _keyTuple[1] = bytes32(uint256(blockNumber));
+    _keyTuple[1] = bytes32(uint256(timestamp));
     _keyTuple[2] = bytes32(uint256(uint8(rateLimitType)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
@@ -88,12 +88,12 @@ library RateLimitUnits {
    */
   function _getUnits(
     EntityId entityId,
-    uint256 blockNumber,
+    uint256 timestamp,
     RateLimitType rateLimitType
   ) internal view returns (uint128 units) {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(entityId);
-    _keyTuple[1] = bytes32(uint256(blockNumber));
+    _keyTuple[1] = bytes32(uint256(timestamp));
     _keyTuple[2] = bytes32(uint256(uint8(rateLimitType)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
@@ -105,12 +105,12 @@ library RateLimitUnits {
    */
   function get(
     EntityId entityId,
-    uint256 blockNumber,
+    uint256 timestamp,
     RateLimitType rateLimitType
   ) internal view returns (uint128 units) {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(entityId);
-    _keyTuple[1] = bytes32(uint256(blockNumber));
+    _keyTuple[1] = bytes32(uint256(timestamp));
     _keyTuple[2] = bytes32(uint256(uint8(rateLimitType)));
 
     bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
@@ -122,12 +122,12 @@ library RateLimitUnits {
    */
   function _get(
     EntityId entityId,
-    uint256 blockNumber,
+    uint256 timestamp,
     RateLimitType rateLimitType
   ) internal view returns (uint128 units) {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(entityId);
-    _keyTuple[1] = bytes32(uint256(blockNumber));
+    _keyTuple[1] = bytes32(uint256(timestamp));
     _keyTuple[2] = bytes32(uint256(uint8(rateLimitType)));
 
     bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
@@ -137,10 +137,10 @@ library RateLimitUnits {
   /**
    * @notice Set units.
    */
-  function setUnits(EntityId entityId, uint256 blockNumber, RateLimitType rateLimitType, uint128 units) internal {
+  function setUnits(EntityId entityId, uint256 timestamp, RateLimitType rateLimitType, uint128 units) internal {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(entityId);
-    _keyTuple[1] = bytes32(uint256(blockNumber));
+    _keyTuple[1] = bytes32(uint256(timestamp));
     _keyTuple[2] = bytes32(uint256(uint8(rateLimitType)));
 
     StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((units)), _fieldLayout);
@@ -149,10 +149,10 @@ library RateLimitUnits {
   /**
    * @notice Set units.
    */
-  function _setUnits(EntityId entityId, uint256 blockNumber, RateLimitType rateLimitType, uint128 units) internal {
+  function _setUnits(EntityId entityId, uint256 timestamp, RateLimitType rateLimitType, uint128 units) internal {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(entityId);
-    _keyTuple[1] = bytes32(uint256(blockNumber));
+    _keyTuple[1] = bytes32(uint256(timestamp));
     _keyTuple[2] = bytes32(uint256(uint8(rateLimitType)));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((units)), _fieldLayout);
@@ -161,10 +161,10 @@ library RateLimitUnits {
   /**
    * @notice Set units.
    */
-  function set(EntityId entityId, uint256 blockNumber, RateLimitType rateLimitType, uint128 units) internal {
+  function set(EntityId entityId, uint256 timestamp, RateLimitType rateLimitType, uint128 units) internal {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(entityId);
-    _keyTuple[1] = bytes32(uint256(blockNumber));
+    _keyTuple[1] = bytes32(uint256(timestamp));
     _keyTuple[2] = bytes32(uint256(uint8(rateLimitType)));
 
     StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((units)), _fieldLayout);
@@ -173,10 +173,10 @@ library RateLimitUnits {
   /**
    * @notice Set units.
    */
-  function _set(EntityId entityId, uint256 blockNumber, RateLimitType rateLimitType, uint128 units) internal {
+  function _set(EntityId entityId, uint256 timestamp, RateLimitType rateLimitType, uint128 units) internal {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(entityId);
-    _keyTuple[1] = bytes32(uint256(blockNumber));
+    _keyTuple[1] = bytes32(uint256(timestamp));
     _keyTuple[2] = bytes32(uint256(uint8(rateLimitType)));
 
     StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((units)), _fieldLayout);
@@ -185,10 +185,10 @@ library RateLimitUnits {
   /**
    * @notice Delete all data for given keys.
    */
-  function deleteRecord(EntityId entityId, uint256 blockNumber, RateLimitType rateLimitType) internal {
+  function deleteRecord(EntityId entityId, uint256 timestamp, RateLimitType rateLimitType) internal {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(entityId);
-    _keyTuple[1] = bytes32(uint256(blockNumber));
+    _keyTuple[1] = bytes32(uint256(timestamp));
     _keyTuple[2] = bytes32(uint256(uint8(rateLimitType)));
 
     StoreSwitch.deleteRecord(_tableId, _keyTuple);
@@ -197,10 +197,10 @@ library RateLimitUnits {
   /**
    * @notice Delete all data for given keys.
    */
-  function _deleteRecord(EntityId entityId, uint256 blockNumber, RateLimitType rateLimitType) internal {
+  function _deleteRecord(EntityId entityId, uint256 timestamp, RateLimitType rateLimitType) internal {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(entityId);
-    _keyTuple[1] = bytes32(uint256(blockNumber));
+    _keyTuple[1] = bytes32(uint256(timestamp));
     _keyTuple[2] = bytes32(uint256(uint8(rateLimitType)));
 
     StoreCore.deleteRecord(_tableId, _keyTuple, _fieldLayout);
@@ -234,12 +234,12 @@ library RateLimitUnits {
    */
   function encodeKeyTuple(
     EntityId entityId,
-    uint256 blockNumber,
+    uint256 timestamp,
     RateLimitType rateLimitType
   ) internal pure returns (bytes32[] memory) {
     bytes32[] memory _keyTuple = new bytes32[](3);
     _keyTuple[0] = EntityId.unwrap(entityId);
-    _keyTuple[1] = bytes32(uint256(blockNumber));
+    _keyTuple[1] = bytes32(uint256(timestamp));
     _keyTuple[2] = bytes32(uint256(uint8(rateLimitType)));
 
     return _keyTuple;

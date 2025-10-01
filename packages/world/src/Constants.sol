@@ -14,7 +14,7 @@ uint16 constant MAX_PLAYER_JUMPS = 3;
 uint16 constant MAX_PLAYER_GLIDES = 10;
 uint16 constant PLAYER_SAFE_FALL_DISTANCE = 3;
 
-uint256 constant SPAWN_BLOCK_RANGE = 20;
+uint256 constant SPAWN_TIME_RANGE = 1 minutes;
 
 int32 constant FRAGMENT_SIZE = 8; // 8x8x8 (3D)
 int32 constant CHUNK_SIZE = 16; // 16x16x16 (3D)
@@ -22,12 +22,11 @@ int32 constant REGION_SIZE = 512; // 512x512 (2D)
 
 uint256 constant SAFE_PROGRAM_GAS = 1_000_000;
 
-uint256 constant CHUNK_COMMIT_EXPIRY_BLOCKS = 256;
+uint256 constant CHUNK_COMMIT_EXPIRY_TIME = 10 minutes;
+uint256 constant CHUNK_COMMIT_SUBMIT_TIME = 2 minutes;
 uint256 constant CHUNK_COMMIT_HALF_WIDTH = 2;
-uint256 constant RESPAWN_ORE_BLOCK_RANGE = 10;
+uint256 constant RESPAWN_RESOURCE_TIME_RANGE = 30 seconds;
 uint8 constant MAX_FLUID_LEVEL = 15; // Maximum fluid level for water and lava
-
-uint128 constant BLOCK_TIME = 2 seconds;
 
 // ------------------------------------------------------------
 // Values To Tune
@@ -92,20 +91,21 @@ uint128 constant INITIAL_ENERGY_PER_VEGETATION = 10000000000000000;
 uint128 constant INITIAL_LOCAL_ENERGY_BUFFER = 131480700000000000000;
 
 // Rate limit constants
-uint128 constant MAX_RATE_LIMIT_UNITS_PER_BLOCK = 1e18;
-uint128 constant MAX_RATE_LIMIT_UNITS_PER_SECOND = MAX_RATE_LIMIT_UNITS_PER_BLOCK / BLOCK_TIME;
+uint128 constant RATE_LIMIT_TIME_INTERVAL = 2 seconds;
+uint128 constant MAX_RATE_LIMIT_UNITS_PER_INTERVAL = 1e18;
+uint128 constant MAX_RATE_LIMIT_UNITS_PER_SECOND = MAX_RATE_LIMIT_UNITS_PER_INTERVAL / RATE_LIMIT_TIME_INTERVAL;
 
 // Movement rate limits
 uint128 constant WALK_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 15; // 15 blocks per second
 uint128 constant SWIM_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND * 10 / 135; // 13.5 blocks per second (90% of walking speed)
 
 // Combat rate limits
-uint128 constant HIT_PLAYER_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_BLOCK; // player vs player: 1 per block
-uint128 constant HIT_MACHINE_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // player vs machine: 20 per block
+uint128 constant HIT_PLAYER_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_INTERVAL; // player vs player: 1 per interval
+uint128 constant HIT_MACHINE_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // player vs machine: 20 per interval
 
 // Work rate limits
-uint128 constant MINE_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // 10 mines per second (20 per block)
-uint128 constant BUILD_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // 10 builds per second (20 per block)
+uint128 constant MINE_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // 10 mines per second (20 per interval)
+uint128 constant BUILD_UNIT_COST = MAX_RATE_LIMIT_UNITS_PER_SECOND / 10; // 10 builds per second (20 per interval)
 
 // Progress decay constants
 int256 constant LN2_WAD = 693147180559945309; // ln(2) in 1e18
