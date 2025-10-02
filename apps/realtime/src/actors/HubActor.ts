@@ -105,7 +105,7 @@ export class HubActor extends Actor<Env> {
       return;
     }
 
-    this.positionsOff ??= createInterval(1000 / 1, () => {
+    this.positionsOff ??= createInterval(1000 / 20, () => {
       console.info("hub positions tick");
       for (const [ws] of this.shards) {
         try {
