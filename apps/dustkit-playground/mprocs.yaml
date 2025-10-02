@@ -19,3 +19,6 @@ procs:
     shell: pnpm explorer --indexer-port 3008
   anvil:
     shell: anvil --block-time 2 --base-fee 50 --gas-limit 100000000
+  positions:
+    cwd: ../realtime
+    shell: pnpm dev

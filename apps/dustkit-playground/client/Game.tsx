@@ -1,6 +1,7 @@
 import { AccountButton, useSessionClient } from "@latticexyz/entrykit/internal";
 import { useState } from "react";
 import { AppPane } from "./AppPane";
+import { World } from "./World";
 
 export function Game() {
   const { data: sessionClient, status: sessionClientStatus } =
@@ -31,6 +32,10 @@ export function Game() {
           {appOpen ? "Close app" : "Open app"}
         </button>
         {appOpen ? <AppPane /> : null}
+      </div>
+
+      <div>
+        <World />
       </div>
     </div>
   );

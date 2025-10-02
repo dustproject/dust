@@ -6,42 +6,51 @@
     ".": "./dist/src/exports/index.js",
     "./internal": "./dist/src/exports/internal.js",
     "./mud.config": "./dist/mud.config.js",
-    "./out/*": "./dist/out/*.js"
+    "./out/*": "./dist/out/*.js",
+    "./realtime": "./dist/src/exports/realtime.js"
   },
   "typesVersions": {
     "*": {
       "index": ["./dist/src/exports/index.d.ts"],
       "internal": ["./dist/src/exports/internal.d.ts"],
       "mud.config": ["./dist/mud.config.d.ts"],
-      "out/*": ["./dist/out/*.d.ts"]
+      "out/*": ["./dist/out/*.d.ts"],
+      "realtime": ["./dist/src/exports/realtime.d.ts"]
     }
   },
-  "files": ["dist", "json-schemas", "contracts", "out"],
+  "files": ["dist", "json-schemas", "contracts", "out", "!**/*.test.*"],
   "scripts": {
     "build": "pnpm run build:json-schema && pnpm run build:mud && pnpm run build:js",
     "build:js": "tsc",
     "build:json-schema": "tsx scripts/generate-json-schemas.ts && biome check --write --config-path ../../biome.json json-schemas",
     "build:mud": "mud build && abi-ts --extension .ts",
     "dev": "pnpm run build && tsc --watch",
-    "test": "tsc --noEmit"
+    "test": "tsc --noEmit && vitest"
   },
   "dependencies": {
     "@dust/world": "workspace:*",
     "@latticexyz/abi-ts": "2.2.24-0e49b51ba934438e49c7f098e78d6e3ddf7567fb",
     "@latticexyz/cli": "2.2.24-0e49b51ba934438e49c7f098e78d6e3ddf7567fb",
     "@latticexyz/common": "2.2.24-0e49b51ba934438e49c7f098e78d6e3ddf7567fb",
+    "@latticexyz/entrykit": "2.2.24-0e49b51ba934438e49c7f098e78d6e3ddf7567fb",
     "@latticexyz/schema-type": "2.2.24-0e49b51ba934438e49c7f098e78d6e3ddf7567fb",
     "@latticexyz/store": "2.2.24-0e49b51ba934438e49c7f098e78d6e3ddf7567fb",
     "@latticexyz/world": "2.2.24-0e49b51ba934438e49c7f098e78d6e3ddf7567fb",
     "@latticexyz/world-module-metadata": "2.2.24-0e49b51ba934438e49c7f098e78d6e3ddf7567fb",
     "arktype": "^2.1.15",
     "debug": "^4.4.1",
+    "isows": "^1.0.7",
     "ox": "^0.6.10",
-    "p-retry": "^6.2.1"
+    "p-retry": "^6.2.1",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",
-    "viem": "2.30.6"
+    "@types/react": "^19.0.8",
+    "react": "^19.0.0",
+    "viem": "2.30.6",
+    "vitest": "^3.1.3",
+    "vitest-websocket-mock": "^0.5.0"
   },
   "peerDependencies": {
     "viem": "2.x"
