@@ -23,15 +23,13 @@ import { PlayerProgressUtils as Tracking } from "./PlayerProgressUtils.sol";
 library PlayerSkillUtils {
   function getMoveEnergyMultiplierWad(EntityId player) internal view returns (uint256) {
     return getEnergyMultiplierWad({
-      progress: Tracking.getProgress(player, ActivityType.MoveEnergy),
-      progressCap: SKILL_MOVE_ENERGY_TO_MAX
+      progress: Tracking.getProgress(player, ActivityType.MoveEnergy), progressCap: SKILL_MOVE_ENERGY_TO_MAX
     });
   }
 
   function getFallEnergyMultiplierWad(EntityId player) internal view returns (uint256) {
     return getEnergyMultiplierWad({
-      progress: Tracking.getProgress(player, ActivityType.MoveFallEnergy),
-      progressCap: SKILL_FALL_ENERGY_TO_MAX
+      progress: Tracking.getProgress(player, ActivityType.MoveFallEnergy), progressCap: SKILL_FALL_ENERGY_TO_MAX
     });
   }
 
@@ -46,15 +44,13 @@ library PlayerSkillUtils {
     }
 
     return getEnergyMultiplierWad({
-      progress: Tracking.getProgress(player, activityType),
-      progressCap: SKILL_MINING_MASS_TO_MAX
+      progress: Tracking.getProgress(player, activityType), progressCap: SKILL_MINING_MASS_TO_MAX
     });
   }
 
   function getHitPlayerEnergyMultiplierWad(EntityId player) internal view returns (uint256) {
     return getEnergyMultiplierWad({
-      progress: Tracking.getProgress(player, ActivityType.HitPlayerDamage),
-      progressCap: SKILL_HIT_PLAYER_ENERGY_TO_MAX
+      progress: Tracking.getProgress(player, ActivityType.HitPlayerDamage), progressCap: SKILL_HIT_PLAYER_ENERGY_TO_MAX
     });
   }
 
@@ -65,7 +61,13 @@ library PlayerSkillUtils {
     });
   }
 
-  function getTillEnergyMultiplierWad(EntityId /*player*/ ) internal pure returns (uint256) {
+  function getTillEnergyMultiplierWad(
+    EntityId /*player*/
+  )
+    internal
+    pure
+    returns (uint256)
+  {
     // No skill benefit for tilling (for now); keep encapsulated for easy future tuning
     return WAD;
   }
@@ -85,15 +87,13 @@ library PlayerSkillUtils {
     }
 
     return getEnergyMultiplierWad({
-      progress: Tracking.getProgress(player, activityType),
-      progressCap: SKILL_CRAFT_MASS_ENERGY_TO_MAX
+      progress: Tracking.getProgress(player, activityType), progressCap: SKILL_CRAFT_MASS_ENERGY_TO_MAX
     });
   }
 
   function getBuildEnergyMultiplierWad(EntityId player) internal view returns (uint256) {
     return getEnergyMultiplierWad({
-      progress: Tracking.getProgress(player, ActivityType.BuildMass),
-      progressCap: SKILL_BUILD_MASS_TO_MAX
+      progress: Tracking.getProgress(player, ActivityType.BuildMass), progressCap: SKILL_BUILD_MASS_TO_MAX
     });
   }
 

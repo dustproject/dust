@@ -48,9 +48,8 @@ contract MachineSystem is System {
     Energy._setEnergy(machine, newEnergyLevel);
 
     ProgramId program = machine._getProgram();
-    program.hook({ caller: caller, target: machine, revertOnFailure: true, extraData: extraData }).onEnergize(
-      energyProvided
-    );
+    program.hook({ caller: caller, target: machine, revertOnFailure: true, extraData: extraData })
+      .onEnergize(energyProvided);
 
     notify(caller, FuelMachineNotification({ machine: machine, fuelAmount: fuelAmount }));
   }

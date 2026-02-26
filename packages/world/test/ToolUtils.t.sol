@@ -55,7 +55,11 @@ contract ToolUtilsTest is DustTest {
   // Fuzz tests
 
   // Helper to calculate multiplier inline
-  function _getMultiplier(ObjectType toolType, uint128 actionModifier, bool specialized) private pure returns (uint128) {
+  function _getMultiplier(ObjectType toolType, uint128 actionModifier, bool specialized)
+    private
+    pure
+    returns (uint128)
+  {
     uint128 baseMultiplier = toolType.isWoodenTool() ? WOODEN_TOOL_BASE_MULTIPLIER : ORE_TOOL_BASE_MULTIPLIER;
     uint128 specializationMultiplier = specialized ? SPECIALIZATION_MULTIPLIER : 1;
     return baseMultiplier * specializationMultiplier * actionModifier;

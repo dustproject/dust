@@ -256,3 +256,4 @@ function initObjects() {
   ObjectPhysics.set(ObjectTypes.AnyTerracotta, ObjectPhysicsData({ mass: 37500000000000000, energy: 0 }));
   ObjectPhysics.set(ObjectTypes.AnyLeaf, ObjectPhysicsData({ mass: 500000000000000, energy: 500000000000000 }));
 }
+

@@ -100,10 +100,7 @@ library PlayerProgressUtils {
       player,
       activityType,
       PlayerProgressData({
-        accumulated: accumulated,
-        current: current,
-        lastUpdatedAt: uint128(block.timestamp),
-        exponent: uint128(deaths)
+        accumulated: accumulated, current: current, lastUpdatedAt: uint128(block.timestamp), exponent: uint128(deaths)
       })
     );
   }

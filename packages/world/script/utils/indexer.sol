@@ -106,8 +106,9 @@ library IndexerLib {
 
     // First check if the response is valid JSON
     try vm.parseJson(json) {
-      // JSON is valid, continue processing
-    } catch (bytes memory e) {
+    // JSON is valid, continue processing
+    }
+    catch (bytes memory e) {
       revert(string.concat("Invalid JSON response:\n", string(e)));
     }
 

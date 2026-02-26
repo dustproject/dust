@@ -685,9 +685,7 @@ contract MoveTest is DustTest {
     Energy.set(
       aliceEntityId,
       EnergyData({
-        lastUpdatedTime: uint128(block.timestamp),
-        energy: MOVE_ENERGY_COST - 1,
-        drainRate: PLAYER_ENERGY_DRAIN_RATE
+        lastUpdatedTime: uint128(block.timestamp), energy: MOVE_ENERGY_COST - 1, drainRate: PLAYER_ENERGY_DRAIN_RATE
       })
     );
 

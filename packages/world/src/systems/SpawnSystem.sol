@@ -100,10 +100,9 @@ contract SpawnSystem is System {
     ObjectType belowType = EntityUtils.getObjectTypeAt(belowCoord);
     if (
       belowType.isNull()
-        || (
-          belowType.isPassThrough() && !EntityUtils.getMovableEntityAt(belowCoord)._exists()
-            && EntityUtils.getFluidLevelAt(belowCoord) == 0
-        )
+        || (belowType.isPassThrough()
+          && !EntityUtils.getMovableEntityAt(belowCoord)._exists()
+          && EntityUtils.getFluidLevelAt(belowCoord) == 0)
     ) {
       return false;
     }
@@ -156,9 +155,8 @@ contract SpawnSystem is System {
 
     EntityId player = _spawnPlayer(spawnCoord, spawnEnergy);
 
-    program.hook({ caller: player, target: spawnTile, revertOnFailure: true, extraData: extraData }).onSpawn(
-      spawnEnergy, spawnCoord
-    );
+    program.hook({ caller: player, target: spawnTile, revertOnFailure: true, extraData: extraData })
+      .onSpawn(spawnEnergy, spawnCoord);
 
     return player;
   }
@@ -174,7 +172,9 @@ contract SpawnSystem is System {
 
     Energy._set(
       player,
-      EnergyData({ energy: spawnEnergy, lastUpdatedTime: uint128(block.timestamp), drainRate: PLAYER_ENERGY_DRAIN_RATE })
+      EnergyData({
+        energy: spawnEnergy, lastUpdatedTime: uint128(block.timestamp), drainRate: PLAYER_ENERGY_DRAIN_RATE
+      })
     );
 
     notify(player, SpawnNotification({ spawnCoord: spawnCoord }));

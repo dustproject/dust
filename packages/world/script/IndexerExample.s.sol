@@ -11,9 +11,8 @@ import { ObjectType } from "../src/types/ObjectType.sol";
 
 contract IndexerExample is Script {
   function run() public {
-    IndexerResult memory result = indexer(config()).query(
-      "SELECT COUNT(*), \"objectType\" FROM \"EntityObjectType\" GROUP BY \"objectType\";", "(uint256,uint16)"
-    );
+    IndexerResult memory result = indexer(config())
+      .query("SELECT COUNT(*), \"objectType\" FROM \"EntityObjectType\" GROUP BY \"objectType\";", "(uint256,uint16)");
 
     uint256 totalPassThrough = 0;
     for (uint256 i = 0; i < result.rows.length; i++) {

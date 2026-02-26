@@ -118,9 +118,7 @@ function notify(EntityId player, BuildNotification memory buildNotification) {
   Notification._set(
     player,
     NotificationData({
-      timestamp: uint128(block.timestamp),
-      notificationType: NotificationType.Build,
-      data: abi.encode(buildNotification)
+      timestamp: uint128(block.timestamp), notificationType: NotificationType.Build, data: abi.encode(buildNotification)
     })
   );
 }
@@ -129,9 +127,7 @@ function notify(EntityId player, MineNotification memory mineNotification) {
   Notification._set(
     player,
     NotificationData({
-      timestamp: uint128(block.timestamp),
-      notificationType: NotificationType.Mine,
-      data: abi.encode(mineNotification)
+      timestamp: uint128(block.timestamp), notificationType: NotificationType.Mine, data: abi.encode(mineNotification)
     })
   );
 }
@@ -140,9 +136,7 @@ function notify(EntityId player, MoveNotification memory moveNotification) {
   Notification._set(
     player,
     NotificationData({
-      timestamp: uint128(block.timestamp),
-      notificationType: NotificationType.Move,
-      data: abi.encode(moveNotification)
+      timestamp: uint128(block.timestamp), notificationType: NotificationType.Move, data: abi.encode(moveNotification)
     })
   );
 }
@@ -151,9 +145,7 @@ function notify(EntityId player, CraftNotification memory craftNotification) {
   Notification._set(
     player,
     NotificationData({
-      timestamp: uint128(block.timestamp),
-      notificationType: NotificationType.Craft,
-      data: abi.encode(craftNotification)
+      timestamp: uint128(block.timestamp), notificationType: NotificationType.Craft, data: abi.encode(craftNotification)
     })
   );
 }
@@ -173,9 +165,7 @@ function notify(EntityId player, DropNotification memory dropNotification) {
   Notification._set(
     player,
     NotificationData({
-      timestamp: uint128(block.timestamp),
-      notificationType: NotificationType.Drop,
-      data: abi.encode(dropNotification)
+      timestamp: uint128(block.timestamp), notificationType: NotificationType.Drop, data: abi.encode(dropNotification)
     })
   );
 }
@@ -206,9 +196,7 @@ function notify(EntityId player, SpawnNotification memory spawnNotification) {
   Notification._set(
     player,
     NotificationData({
-      timestamp: uint128(block.timestamp),
-      notificationType: NotificationType.Spawn,
-      data: abi.encode(spawnNotification)
+      timestamp: uint128(block.timestamp), notificationType: NotificationType.Spawn, data: abi.encode(spawnNotification)
     })
   );
 }
@@ -272,9 +260,7 @@ function notify(EntityId player, SleepNotification memory sleepNotification) {
   Notification._set(
     player,
     NotificationData({
-      timestamp: uint128(block.timestamp),
-      notificationType: NotificationType.Sleep,
-      data: abi.encode(sleepNotification)
+      timestamp: uint128(block.timestamp), notificationType: NotificationType.Sleep, data: abi.encode(sleepNotification)
     })
   );
 }
@@ -316,9 +302,7 @@ function notify(EntityId player, DeathNotification memory deathNotification) {
   Notification._set(
     player,
     NotificationData({
-      timestamp: uint128(block.timestamp),
-      notificationType: NotificationType.Death,
-      data: abi.encode(deathNotification)
+      timestamp: uint128(block.timestamp), notificationType: NotificationType.Death, data: abi.encode(deathNotification)
     })
   );
 }

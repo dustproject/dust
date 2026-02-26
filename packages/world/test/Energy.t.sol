@@ -104,9 +104,7 @@ contract EnergyTest is DustTest {
     EntityId machineEntityId = setupForceField(
       machineCoord,
       EnergyData({
-        lastUpdatedTime: uint128(block.timestamp),
-        energy: initialEnergy,
-        drainRate: MACHINE_ENERGY_DRAIN_RATE
+        lastUpdatedTime: uint128(block.timestamp), energy: initialEnergy, drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
 

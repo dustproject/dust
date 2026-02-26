@@ -2,7 +2,9 @@
 pragma solidity >=0.8.24;
 
 import { SystemHook } from "@latticexyz/world/src/SystemHook.sol";
-import { WorldRegistrationSystem } from "@latticexyz/world/src/modules/init/implementations/WorldRegistrationSystem.sol";
+import {
+  WorldRegistrationSystem
+} from "@latticexyz/world/src/modules/init/implementations/WorldRegistrationSystem.sol";
 
 import { ResourceId } from "@latticexyz/world/src/WorldResourceId.sol";
 

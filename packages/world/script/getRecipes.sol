@@ -3799,3 +3799,4 @@ function getRecipeId(RecipesData memory recipe) pure returns (bytes32) {
     abi.encode(recipe.stationTypeId, recipe.inputTypes, recipe.inputAmounts, recipe.outputTypes, recipe.outputAmounts)
   );
 }
+

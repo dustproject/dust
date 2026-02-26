@@ -190,9 +190,7 @@ contract BedTest is DustTest {
     EntityId forcefieldEntityId = setupForceField(
       bedCoord,
       EnergyData({
-        energy: initialForcefieldEnergy,
-        lastUpdatedTime: initialTimestamp,
-        drainRate: MACHINE_ENERGY_DRAIN_RATE
+        energy: initialForcefieldEnergy, lastUpdatedTime: initialTimestamp, drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
 
@@ -239,9 +237,7 @@ contract BedTest is DustTest {
     EntityId forcefieldEntityId = setupForceField(
       bedCoord,
       EnergyData({
-        energy: initialForcefieldEnergy,
-        lastUpdatedTime: initialTimestamp,
-        drainRate: MACHINE_ENERGY_DRAIN_RATE
+        energy: initialForcefieldEnergy, lastUpdatedTime: initialTimestamp, drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
 
@@ -292,9 +288,7 @@ contract BedTest is DustTest {
     EntityId forcefieldEntityId = setupForceField(
       bedCoord,
       EnergyData({
-        energy: initialForcefieldEnergy,
-        lastUpdatedTime: initialTimestamp,
-        drainRate: MACHINE_ENERGY_DRAIN_RATE
+        energy: initialForcefieldEnergy, lastUpdatedTime: initialTimestamp, drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
 
@@ -336,9 +330,7 @@ contract BedTest is DustTest {
     EntityId forcefieldEntityId = setupForceField(
       bedCoord,
       EnergyData({
-        energy: initialForcefieldEnergy,
-        lastUpdatedTime: initialTimestamp,
-        drainRate: MACHINE_ENERGY_DRAIN_RATE
+        energy: initialForcefieldEnergy, lastUpdatedTime: initialTimestamp, drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
 
@@ -387,9 +379,7 @@ contract BedTest is DustTest {
     EntityId forcefieldEntityId = setupForceField(
       bedCoord,
       EnergyData({
-        energy: initialForcefieldEnergy,
-        lastUpdatedTime: initialTimestamp,
-        drainRate: MACHINE_ENERGY_DRAIN_RATE
+        energy: initialForcefieldEnergy, lastUpdatedTime: initialTimestamp, drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
 
@@ -445,9 +435,7 @@ contract BedTest is DustTest {
     EntityId forcefieldEntityId = setupForceField(
       bedCoord,
       EnergyData({
-        energy: initialForcefieldEnergy,
-        lastUpdatedTime: initialTimestamp,
-        drainRate: MACHINE_ENERGY_DRAIN_RATE
+        energy: initialForcefieldEnergy, lastUpdatedTime: initialTimestamp, drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
 
@@ -493,9 +481,7 @@ contract BedTest is DustTest {
     EntityId forcefieldEntityId = setupForceField(
       bedCoord + vec3(1, 0, 0),
       EnergyData({
-        energy: initialForcefieldEnergy,
-        lastUpdatedTime: initialTimestamp,
-        drainRate: MACHINE_ENERGY_DRAIN_RATE
+        energy: initialForcefieldEnergy, lastUpdatedTime: initialTimestamp, drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
 

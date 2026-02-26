@@ -10196,3 +10196,4 @@ contract ObjectTypeTest is DustTest {
     }
   }
 }
+

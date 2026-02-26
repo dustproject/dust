@@ -360,8 +360,9 @@ library MineLib {
   function _requireMinesAllowed(MineContext calldata ctx) public {
     (ProgramId program, EntityId target, EnergyData memory energyData) = ForceFieldUtils.getHookTarget(ctx.coord);
 
-    program.hook({ caller: ctx.caller, target: target, revertOnFailure: energyData.energy > 0, extraData: ctx.extraData })
-      .onMine({ entity: ctx.mined, tool: ctx.toolData.tool, objectType: ctx.objectType, coord: ctx.coord });
+    program.hook({
+        caller: ctx.caller, target: target, revertOnFailure: energyData.energy > 0, extraData: ctx.extraData
+      }).onMine({ entity: ctx.mined, tool: ctx.toolData.tool, objectType: ctx.objectType, coord: ctx.coord });
   }
 }
 
@@ -466,8 +467,9 @@ library MineDropLib {
     private
   {
     try InventoryUtils.addObject(caller, objectType, amount) {
-      // added to inventory successfully
-    } catch {
+    // added to inventory successfully
+    }
+    catch {
       // If that fails, drop the object on the ground
       InventoryUtils.addObject(fallbackEntity, objectType, amount);
     }
