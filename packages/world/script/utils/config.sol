@@ -40,7 +40,7 @@ function _getChainConfig() view returns (Config memory) {
 
   // Set indexer URL based on chain
   string memory indexerUrl;
-  if (block.chainid == 690) {
+  if (block.chainid == 55378) {
     indexerUrl = "https://indexer.alpha.dustproject.org/q";
   } else {
     revert("Chain ID not supported for indexer URL");

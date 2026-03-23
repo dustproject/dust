@@ -19,6 +19,12 @@ case "${chainId}" in
   "690")
     rpcUrl="https://rpc.redstonechain.com"
     ;;
+  "55377")
+    rpcUrl="https://rpc.testnet.dustproject.org"
+    ;;
+  "55378")
+    rpcUrl="https://rpc.dustproject.org"
+    ;;
   *)
     # Default to local development
     rpcUrl="http://127.0.0.1:8545"
