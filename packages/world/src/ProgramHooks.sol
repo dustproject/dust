@@ -210,11 +210,7 @@ library HooksLib {
     Orientation orientation
   ) internal {
     IBuild.BuildData memory build = IBuild.BuildData({
-      entity: entity,
-      coord: coord,
-      slotType: slotType,
-      objectType: objectType,
-      orientation: orientation
+      entity: entity, coord: coord, slotType: slotType, objectType: objectType, orientation: orientation
     });
 
     _call(self, abi.encodeCall(IBuild.onBuild, (self.ctx, build)));

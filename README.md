@@ -2,7 +2,7 @@
 
 DUST is our serious attempt at seeding an [autonomous world](https://0xparc.org/blog/autonomous-worlds).
 
-## DUST is live on Redstone mainnet, but still in alpha.
+## DUST is live on DUST mainnet, but still in alpha.
 
 What you create in DUST is real and permanent. The map and your progress won’t be reset.
 

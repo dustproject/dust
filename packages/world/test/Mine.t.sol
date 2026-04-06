@@ -392,9 +392,7 @@ contract MineTest is DustTest {
     setupForceField(
       bedCoord,
       EnergyData({
-        energy: initialForcefieldEnergy,
-        lastUpdatedTime: initialTimestamp,
-        drainRate: MACHINE_ENERGY_DRAIN_RATE
+        energy: initialForcefieldEnergy, lastUpdatedTime: initialTimestamp, drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
 
@@ -446,9 +444,7 @@ contract MineTest is DustTest {
     setupForceField(
       bedCoord,
       EnergyData({
-        energy: initialForcefieldEnergy,
-        lastUpdatedTime: initialTimestamp,
-        drainRate: MACHINE_ENERGY_DRAIN_RATE
+        energy: initialForcefieldEnergy, lastUpdatedTime: initialTimestamp, drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
 
@@ -505,9 +501,7 @@ contract MineTest is DustTest {
     setupForceField(
       bedCoord,
       EnergyData({
-        energy: initialForcefieldEnergy,
-        lastUpdatedTime: initialTimestamp,
-        drainRate: MACHINE_ENERGY_DRAIN_RATE
+        energy: initialForcefieldEnergy, lastUpdatedTime: initialTimestamp, drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
 

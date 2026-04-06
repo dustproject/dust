@@ -110,8 +110,8 @@ library TerrainLib {
     Vec3 relativeCoord = _getRelativeCoord(coord);
     return VERSION_PADDING + BIOME_PADDING + SURFACE_PADDING
       + uint256(
-        int256(relativeCoord.x()) * CHUNK_SIZE ** 2 + int256(relativeCoord.y()) * CHUNK_SIZE + int256(relativeCoord.z())
-      );
+      int256(relativeCoord.x()) * CHUNK_SIZE ** 2 + int256(relativeCoord.y()) * CHUNK_SIZE + int256(relativeCoord.z())
+    );
   }
 
   /// @dev Get the salt for a chunk coordinate

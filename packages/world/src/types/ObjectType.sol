@@ -3,7 +3,6 @@ pragma solidity >=0.8.24;
 
 import { IMachineSystem } from "../codegen/world/IMachineSystem.sol";
 import { ITransferSystem } from "../codegen/world/ITransferSystem.sol";
-
 import { Orientation } from "./Orientation.sol";
 import { Vec3, vec3 } from "./Vec3.sol";
 
@@ -1939,3 +1938,4 @@ function neq(ObjectType self, ObjectType other) pure returns (bool) {
 using { eq as ==, neq as != } for ObjectType global;
 
 using ObjectTypeLib for ObjectType global;
+

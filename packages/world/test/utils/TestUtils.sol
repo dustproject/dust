@@ -160,7 +160,10 @@ library TestInventoryUtils {
     return entityId;
   }
 
-  function removeFromInventory(EntityId ownerEntityId, ObjectType objectType, uint16 numObjectsToRemove) public asWorld {
+  function removeFromInventory(EntityId ownerEntityId, ObjectType objectType, uint16 numObjectsToRemove)
+    public
+    asWorld
+  {
     InventoryUtils.removeObject(ownerEntityId, objectType, numObjectsToRemove);
   }
 

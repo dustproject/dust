@@ -59,9 +59,8 @@ contract HitMachineSystem is System {
     PlayerProgressUtils.trackHitMachine(caller, damage);
 
     // Don't revert so the program can't prevent hitting
-    target._getProgram().hook({ caller: caller, target: target, revertOnFailure: false, extraData: "" }).onHit(
-      target, toolData.tool, damage
-    );
+    target._getProgram().hook({ caller: caller, target: target, revertOnFailure: false, extraData: "" })
+      .onHit(target, toolData.tool, damage);
 
     notify(caller, HitMachineNotification({ machine: target, machineCoord: forceFieldCoord }));
   }

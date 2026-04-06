@@ -15,7 +15,9 @@ import { ObjectType, ObjectTypes } from "../types/ObjectType.sol";
 import { checkWorldStatus } from "../utils/WorldUtils.sol";
 
 import {
-  decreaseFragmentDrainRate, increaseFragmentDrainRate, updateSleepingPlayerEnergy
+  decreaseFragmentDrainRate,
+  increaseFragmentDrainRate,
+  updateSleepingPlayerEnergy
 } from "../utils/EnergyUtils.sol";
 
 import { EntityUtils } from "../utils/EntityUtils.sol";

@@ -104,7 +104,7 @@ abstract contract Migration is DustScript {
         blockHeight: result.blockHeight,
         columns: result.columns,
         rows: new bytes[](0) // Empty array instead of actual results
-       })
+      })
     );
 
     return result;

@@ -181,13 +181,10 @@ contract BuildSystem is System {
     for (uint256 i = 0; i < coords.length; i++) {
       Vec3 coord = coords[i];
 
-      _hook(ctx, coord).onBuild({
-        entity: base,
-        coord: coord,
-        slotType: ctx.slotType,
-        objectType: ctx.buildType,
-        orientation: ctx.orientation
-      });
+      _hook(ctx, coord)
+        .onBuild({
+          entity: base, coord: coord, slotType: ctx.slotType, objectType: ctx.buildType, orientation: ctx.orientation
+        });
     }
   }
 
@@ -195,10 +192,7 @@ contract BuildSystem is System {
   function _hook(BuildContext memory ctx, Vec3 coord) internal returns (Hook memory) {
     (ProgramId program, EntityId target, EnergyData memory energyData) = ForceFieldUtils.getHookTarget(coord);
     return program.hook({
-      caller: ctx.caller,
-      target: target,
-      revertOnFailure: energyData.energy > 0,
-      extraData: ctx.extraData
+      caller: ctx.caller, target: target, revertOnFailure: energyData.energy > 0, extraData: ctx.extraData
     });
   }
 }

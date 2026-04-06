@@ -77,8 +77,9 @@ contract SpawnTest is DustTest {
     setupFlatChunk(vec3(0, 0, 0));
 
     uint256 currentRoundNumber = (block.timestamp - DrandEvmnet.genesisTimestamp()) / DrandEvmnet.period();
-    DrandData memory drand =
-      DrandData({ signature: [uint256(0), uint256(0)], roundNumber: currentRoundNumber - SPAWN_TIME_RANGE - 1 seconds });
+    DrandData memory drand = DrandData({
+      signature: [uint256(0), uint256(0)], roundNumber: currentRoundNumber - SPAWN_TIME_RANGE - 1 seconds
+    });
 
     vm.prank(alice);
     vm.expectRevert("Drand round not within time range");
@@ -96,9 +97,7 @@ contract SpawnTest is DustTest {
     setupForceField(
       spawnTileCoord,
       EnergyData({
-        energy: MAX_PLAYER_ENERGY,
-        lastUpdatedTime: uint128(block.timestamp),
-        drainRate: MACHINE_ENERGY_DRAIN_RATE
+        energy: MAX_PLAYER_ENERGY, lastUpdatedTime: uint128(block.timestamp), drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
 
@@ -214,9 +213,7 @@ contract SpawnTest is DustTest {
     Energy.set(
       forceFieldEntityId,
       EnergyData({
-        energy: MAX_PLAYER_ENERGY,
-        lastUpdatedTime: uint128(block.timestamp),
-        drainRate: MACHINE_ENERGY_DRAIN_RATE
+        energy: MAX_PLAYER_ENERGY, lastUpdatedTime: uint128(block.timestamp), drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
 
@@ -242,9 +239,7 @@ contract SpawnTest is DustTest {
     Energy.set(
       forceFieldEntityId,
       EnergyData({
-        energy: MAX_PLAYER_ENERGY,
-        lastUpdatedTime: uint128(block.timestamp),
-        drainRate: MACHINE_ENERGY_DRAIN_RATE
+        energy: MAX_PLAYER_ENERGY, lastUpdatedTime: uint128(block.timestamp), drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
 
@@ -315,9 +310,7 @@ contract SpawnTest is DustTest {
     Energy.set(
       forceFieldEntityId,
       EnergyData({
-        energy: MAX_PLAYER_ENERGY,
-        lastUpdatedTime: uint128(block.timestamp),
-        drainRate: MACHINE_ENERGY_DRAIN_RATE
+        energy: MAX_PLAYER_ENERGY, lastUpdatedTime: uint128(block.timestamp), drainRate: MACHINE_ENERGY_DRAIN_RATE
       })
     );
 

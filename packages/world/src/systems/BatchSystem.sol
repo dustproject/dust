@@ -37,8 +37,8 @@ contract BatchSystem is System {
     bytes calldata buildExtraData,
     bytes calldata attachExtraData
   ) public returns (EntityId) {
-    EntityId buildEntity =
-      buildSystem.callAsRoot().buildWithOrientation(caller, coord, slot, orientation, buildExtraData);
+    EntityId buildEntity = buildSystem.callAsRoot()
+      .buildWithOrientation(caller, coord, slot, orientation, buildExtraData);
     if (buildEntity._exists()) {
       programSystem.callAsRoot().attachProgram(caller, buildEntity, program, attachExtraData);
     }

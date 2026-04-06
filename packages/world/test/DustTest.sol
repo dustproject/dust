@@ -142,9 +142,7 @@ abstract contract DustTest is MudTest, GasReporter, DustAssertions {
     Energy.set(
       player,
       EnergyData({
-        lastUpdatedTime: uint128(block.timestamp),
-        energy: MAX_PLAYER_ENERGY,
-        drainRate: PLAYER_ENERGY_DRAIN_RATE
+        lastUpdatedTime: uint128(block.timestamp), energy: MAX_PLAYER_ENERGY, drainRate: PLAYER_ENERGY_DRAIN_RATE
       })
     );
 

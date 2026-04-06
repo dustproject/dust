@@ -41,3 +41,9 @@ eth_rpc_url = "https://rpc.redstonechain.com"
 
 [profile.pyrope]
 eth_rpc_url = "https://rpc.pyropechain.com"
+
+[profile.dust-testnet]
+eth_rpc_url = "https://rpc.testnet.dustproject.org"
+
+[profile.dust-mainnet]
+eth_rpc_url = "https://rpc.dustproject.org"

@@ -11,6 +11,7 @@ import { Vec3 } from "../types/Vec3.sol";
 import { SSTORE2 } from "../utils/SSTORE2.sol";
 import { ExploredChunk, InitialEnergyPool, LocalEnergyPool, SurfaceChunkByIndex } from "../utils/Vec3Storage.sol";
 import { System } from "@latticexyz/world/src/System.sol";
+import { WorldContextConsumerLib } from "@latticexyz/world/src/WorldContext.sol";
 
 import { MerkleProof } from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
@@ -23,7 +24,11 @@ contract TerrainSystem is System {
   }
 
   function exploreChunk(Vec3 chunkCoord, bytes memory chunkData, bytes32[] memory merkleProof) public {
-    require(ExploredChunk._get(chunkCoord) == address(0), "Chunk already explored");
+    bool pointerExists = TerrainLib._isChunkExplored(chunkCoord, WorldContextConsumerLib._world());
+    bool tableExists = ExploredChunk._get(chunkCoord) != address(0);
+
+    // No-op when both code and table state are already present.
+    if (pointerExists && tableExists) return;
 
     Vec3 regionCoord = chunkCoord.floorDiv(REGION_SIZE / CHUNK_SIZE);
     bytes32 regionRoot = RegionMerkleRoot._get(regionCoord.x(), regionCoord.z());
@@ -32,9 +37,13 @@ contract TerrainSystem is System {
     bytes32 leaf = TerrainLib._getChunkLeafHash(chunkCoord, chunkData);
     require(MerkleProof.verify(merkleProof, regionRoot, leaf), "Invalid merkle proof");
 
-    SSTORE2.writeDeterministic(chunkData, TerrainLib._getChunkSalt(chunkCoord));
+    if (!pointerExists) {
+      SSTORE2.writeDeterministic(chunkData, TerrainLib._getChunkSalt(chunkCoord));
+    }
 
-    ExploredChunk._set(chunkCoord, _msgSender());
+    if (!tableExists) {
+      ExploredChunk._set(chunkCoord, _msgSender());
+    }
     if (TerrainLib._isSurfaceChunk(chunkCoord)) {
       uint256 surfaceChunkCount = SurfaceChunkCount._get();
       SurfaceChunkByIndex._set(surfaceChunkCount, chunkCoord);

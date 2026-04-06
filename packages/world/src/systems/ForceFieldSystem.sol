@@ -113,8 +113,9 @@ contract ForceFieldSystem is System {
     ProgramId program = forceField._getProgram();
     if (program.exists()) {
       EnergyData memory machineData = updateMachineEnergy(forceField);
-      program.hook({ caller: caller, target: forceField, revertOnFailure: machineData.energy > 0, extraData: extraData })
-        .onAddFragment(fragment);
+      program.hook({
+          caller: caller, target: forceField, revertOnFailure: machineData.energy > 0, extraData: extraData
+        }).onAddFragment(fragment);
     }
 
     notify(caller, AddFragmentNotification({ forceField: forceField }));
@@ -158,8 +159,9 @@ contract ForceFieldSystem is System {
     ProgramId program = forceField._getProgram();
     if (program.exists()) {
       EnergyData memory machineData = updateMachineEnergy(forceField);
-      program.hook({ caller: caller, target: forceField, revertOnFailure: machineData.energy > 0, extraData: extraData })
-        .onRemoveFragment(fragment);
+      program.hook({
+          caller: caller, target: forceField, revertOnFailure: machineData.energy > 0, extraData: extraData
+        }).onRemoveFragment(fragment);
     }
 
     notify(caller, RemoveFragmentNotification({ forceField: forceField }));
