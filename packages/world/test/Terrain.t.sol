@@ -16,7 +16,9 @@ import { ObjectTypes } from "../src/types/ObjectType.sol";
 import { Vec3, vec3 } from "../src/types/Vec3.sol";
 
 import { EntityFluidLevel } from "../src/codegen/tables/EntityFluidLevel.sol";
+import { ExploredChunk } from "../src/codegen/tables/ExploredChunk.sol";
 import { RegionMerkleRoot } from "../src/codegen/tables/RegionMerkleRoot.sol";
+import { SurfaceChunkCount } from "../src/codegen/tables/SurfaceChunkCount.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 import { BIOME_PADDING, SURFACE_PADDING, TerrainLib, VERSION_PADDING } from "../src/systems/libraries/TerrainLib.sol";
 import { InitialEnergyPool, LocalEnergyPool } from "../src/utils/Vec3Storage.sol";
@@ -174,13 +176,18 @@ contract TerrainTest is DustTest {
     }
   }
 
-  function testExploreChunk_Fail_ChunkAlreadyExplored() public {
+  function testExploreChunk_AlreadyExploredIsNoop() public {
     Vec3 chunkCoord = vec3(0, 0, 0);
     (uint8[][][] memory chunk, uint8 biome, bool isSurface) = _getTestChunk();
     _setupTestChunk(chunkCoord);
 
-    vm.expectRevert("Chunk already explored");
+    uint256 surfaceChunkCountBefore = SurfaceChunkCount.get();
+    address explorerBefore = ExploredChunk.get(chunkCoord.x(), chunkCoord.y(), chunkCoord.z());
+
     IWorld(worldAddress).exploreChunk(chunkCoord, encodeChunk(biome, isSurface, chunk), new bytes32[](0));
+
+    assertEq(SurfaceChunkCount.get(), surfaceChunkCountBefore);
+    assertEq(ExploredChunk.get(chunkCoord.x(), chunkCoord.y(), chunkCoord.z()), explorerBefore);
   }
 
   function testGetBlockType() public {
