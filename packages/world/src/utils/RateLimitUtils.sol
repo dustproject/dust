@@ -12,7 +12,7 @@ import {
   WALK_UNIT_COST
 } from "../Constants.sol";
 import { RateLimitType } from "../codegen/common.sol";
-import { RateLimitUnits } from "../codegen/tables/RateLimitUnits.sol";
+import { RateLimitUnits, RateLimitUnitsData } from "../codegen/tables/RateLimitUnits.sol";
 import { EntityId } from "../types/EntityId.sol";
 
 library RateLimitUtils {
@@ -44,19 +44,28 @@ library RateLimitUtils {
       return; // No cost, no rate limit update needed
     }
 
-    uint256 timebucket = block.timestamp - (block.timestamp % RATE_LIMIT_TIME_INTERVAL);
+    uint64 timebucket = _timebucket();
 
-    uint128 currentUnits = RateLimitUnits._get(entity, timebucket, limitType);
-    uint128 newUnits = currentUnits + unitCost;
+    uint128 newUnits = _getUnits(entity, limitType, timebucket) + unitCost;
 
     require(newUnits <= MAX_RATE_LIMIT_UNITS_PER_INTERVAL, "Rate limit exceeded");
 
-    RateLimitUnits._set(entity, timebucket, limitType, newUnits);
+    RateLimitUnits._set(entity, limitType, timebucket, newUnits);
   }
 
   // Utility function to check current units
   function getRateLimitUnits(EntityId entity, RateLimitType limitType) internal view returns (uint128) {
-    uint256 timebucket = block.timestamp - (block.timestamp % RATE_LIMIT_TIME_INTERVAL);
-    return RateLimitUnits._get(entity, timebucket, limitType);
+    return _getUnits(entity, limitType, _timebucket());
+  }
+
+  function _timebucket() private view returns (uint64) {
+    return uint64(block.timestamp - (block.timestamp % RATE_LIMIT_TIME_INTERVAL));
+  }
+
+  /// @dev A bucket stamped with an earlier interval is spent, so it reads as
+  /// empty rather than being cleared — the next write overwrites it in place.
+  function _getUnits(EntityId entity, RateLimitType limitType, uint64 timebucket) private view returns (uint128) {
+    RateLimitUnitsData memory bucket = RateLimitUnits._get(entity, limitType);
+    return bucket.timestamp == timebucket ? bucket.units : 0;
   }
 }
