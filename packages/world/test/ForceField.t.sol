@@ -877,7 +877,7 @@ contract ForceFieldTest is DustTest {
     uint8[] memory parents = new uint8[](boundary.length);
     parents[0] = 0; // Root
 
-    startGasReport("Remove forcefield fragment");
+    startGasReport("Remove forcefield fragment after add");
     world.removeFragment(aliceEntityId, forceFieldEntityId, newFragmentCoord, boundaryIdx, parents, "");
     endGasReport();
 
