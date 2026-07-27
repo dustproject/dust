@@ -24,10 +24,20 @@ import { Vec3 } from "../types/Vec3.sol";
 
 function getLatestEnergyData(EntityId entityId) view returns (EnergyData memory, uint128, uint128) {
   EnergyData memory energyData = Energy._get(entityId);
-  uint128 timeSinceLastUpdate = uint128(block.timestamp) - energyData.lastUpdatedTime;
-
-  if (timeSinceLastUpdate == 0) {
+  // Compare before subtracting: `lastUpdatedTime <= block.timestamp` only holds
+  // for a landed transaction. `eth_call`/`eth_estimateGas` at `pending` can read
+  // state written by an in-flight sub-block while executing against the older
+  // header, where a bare subtraction underflows to panic 0x11 instead of
+  // reverting cleanly. Nothing is drained when no time has passed either way, so
+  // this folds into the existing zero check rather than adding a branch.
+  uint128 currentTime = uint128(block.timestamp);
+  if (currentTime <= energyData.lastUpdatedTime) {
     return (energyData, 0, 0);
+  }
+
+  uint128 timeSinceLastUpdate;
+  unchecked {
+    timeSinceLastUpdate = currentTime - energyData.lastUpdatedTime;
   }
 
   energyData.lastUpdatedTime = uint128(block.timestamp);
