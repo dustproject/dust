@@ -244,14 +244,21 @@ export default defineWorld({
       key: ["x", "y", "z"],
     },
     RateLimitUnits: {
-      name: "V2RateLimitUn",
+      // A registered table's schema is immutable, so re-keying needs a new
+      // name; V2RateLimitUn stays registered below and is simply unused.
+      name: "V3RateLimitUn",
       schema: {
         entityId: "EntityId",
-        timestamp: "uint256",
         rateLimitType: "RateLimitType",
+        // The time bucket is a value, not a key: keying by it mints a fresh
+        // record every RATE_LIMIT_TIME_INTERVAL and leaves the old one behind
+        // forever. As a value, one record per (entity, type) is reused for the
+        // lifetime of the entity — a bucket stamped with an older interval
+        // reads as empty. uint64 so it packs into the same slot as `units`.
+        timestamp: "uint64",
         units: "uint128",
       },
-      key: ["entityId", "timestamp", "rateLimitType"],
+      key: ["entityId", "rateLimitType"],
     },
     // ------------------------------------------------------------
     // Player
@@ -432,16 +439,6 @@ export default defineWorld({
         baseEntityId: "EntityId",
       },
       key: ["entityId"],
-    },
-
-    // DEPRECATED: replaced by RateLimitUnits
-    MoveUnits: {
-      schema: {
-        entityId: "EntityId",
-        blockNumber: "uint256",
-        units: "uint128",
-      },
-      key: ["entityId", "blockNumber"],
     },
   },
   systems: {

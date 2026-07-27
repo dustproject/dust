@@ -87,7 +87,7 @@ contract HitMachineTest is DustTest {
 
     // Hit force field without tool
     vm.prank(alice);
-    startGasReport("hit force field without tool");
+    startGasReport("hit force field without tool, fatal to player");
     world.hitForceField(aliceEntityId, forceFieldCoord);
     endGasReport();
 

@@ -152,7 +152,7 @@ contract BuildTest is DustTest {
     EnergyDataSnapshot memory snapshot = getEnergyDataSnapshot(aliceEntityId);
 
     vm.prank(alice);
-    startGasReport("build multi-size");
+    startGasReport("build multi-size with orientation");
     // Build with NegativeX orientation
     world.buildWithOrientation(aliceEntityId, buildCoord, inventorySlot, Orientation.wrap(1), "");
     endGasReport();
