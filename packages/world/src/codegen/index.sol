@@ -41,4 +41,3 @@ import { WorldStatus } from "./tables/WorldStatus.sol";
 import { Guardians } from "./tables/Guardians.sol";
 import { UniqueEntity } from "./tables/UniqueEntity.sol";
 import { BaseEntity } from "./tables/BaseEntity.sol";
-import { MoveUnits } from "./tables/MoveUnits.sol";
